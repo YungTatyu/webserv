@@ -1,0 +1,52 @@
+; HTTPメッセージの定義
+HTTP-message = start-line *( field-line CRLF ) 
+ [ message-body ]
+
+; スタートラインの定義
+start-line = request-line
+
+; HTTPのリクエストライン
+request-line = method SP request-target SP HTTP-version CRLF
+
+; リクエストターゲットの定義
+request-target = origin-form
+origin-form = absolute-path [ "?" query ]
+
+; 絶対パスとクエリの定義
+absolute-path = 1*("/" segment)
+segment = *pchar
+query = *( pchar / "/" / "?" )
+
+; パーセントエンコーディングされた文字、予約されていない文字、およびサブデリミタの定義
+pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
+pct-encoded = "%" HEXDIG HEXDIG
+unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+sub-delims = "!" / "$" / "&" / "'" / "(" / ")"
+            / "*" / "+" / "," / ";" / "="
+
+; HTTPバージョンの定義
+HTTP-name = %x48.54.54.50 ; "HTTP"
+HTTP-version = HTTP-name "/" DIGIT "." DIGIT
+
+; ヘッダーフィールドの定義
+field-line = field-name ":" OWS field-value OWS
+field-name = token
+field-value = *( field-content )
+field-content = field-vchar [ 1*( SP / HTAB ) field-vchar ]
+field-vchar = VCHAR
+
+; トークンの定義
+token = 1*tchar
+tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+       / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+       / DIGIT / ALPHA
+
+; メソッドの制限
+method = "GET" / "HEAD" / "POST" / "DELETE"
+
+; メッセージ本体の定義
+message-body = *OCTET
+
+; オプショナルな空白
+OWS = *( SP / HTAB )
+
