@@ -31,6 +31,7 @@ all: $(CGI_EXEFILE) $(DEPS_DIR) $(OBJS_DIR) $(NAME)
 
 $(DEPS_DIR):
 	@mkdir -p $@
+	mkdir -p dep/main
 
 $(OBJS_DIR):
 	@mkdir -p $(dir $@)
@@ -38,10 +39,10 @@ $(OBJS_DIR):
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $^
 
-$(DEPS_DIR)/%.d: $(SRCS_DIR)/%.cpp | $(DEPS_DIR)
+$(DEPS_DIR)/%.d: $(SRCS_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 
-$(OBJS_DIR)/%.o : $(SRCS_DIR)/%.cpp
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(DEPFLAGS) $(INCLUDES) -c $< -o $@
 
