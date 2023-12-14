@@ -19,7 +19,7 @@ address-port	= address [ ":" port ] / port ;デフォルトaddress:0.0.0.0 デ�
 address	=  * / localhost / IPv4-address / IPv6-address 
 IPv4-address = dec-octet "." dec-octet "." dec-octet "." dec-octet
 dec-octet = DIGIT / "1"-"9" DIGIT / "1" DIGIT DIGIT / "2" "0"-"4" DIGIT / "25" "0"-"5" ; 0~255
-IPv6address	= 6( h16 ":" ) ls32
+IPv6-address	= 6( h16 ":" ) ls32
 			/ "::" 5( h16 ":" ) ls32
 			/ [               h16 ] "::" 4( h16 ":" ) ls32
 			/ [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
@@ -34,6 +34,9 @@ h16 = 1*4(HEXDIG) ;HEXDIGが1回から4回まで続く
 port	= 1*(DIGIT)  ;少なくとも1回のDIGITが続くシーケンス
 
 server_name	= "server_name" WS alphadigit END_DIRECTIVE
+
+location	= END_DIRECTIVE
+path	= 
 
 error-page-directive	= "error_page" WS error_codes [response] END_DIRECTIVE
 error-codes = error-code *(SP error-code) END_DIRECTIVE
