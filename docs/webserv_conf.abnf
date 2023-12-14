@@ -7,11 +7,12 @@ OWS	= *(WS) ;optional ws
 h16 = 1*4HEXDIG
 NEWLINE	= "\n"
 alphadigit = ALPHA / alpha / DIGIT ;アルファベットまたは数字
+status	= 3(DIGIT)
 END_DIRECTIVE	= ";"
 
 main	= [http] [errorlog]
 http	= 1("http" OWS "{" OWS server-directive OWS "}") ;webサーバ全体の設定
-errorlog	= path WS level OWS END_DIRECTIVE
+errorlog	= "error_log" WS path [WS level] OWS END_DIRECTIVE
 level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
 
 server-directive	= "server" OWS "{" [serverconfig] "}" ;{}の中が空も許容する
@@ -39,18 +40,24 @@ port	= 1*(DIGIT)  ;少なくとも1回のDIGITが続くシーケンス
 server-name	= "server_name" 1*(WS alphadigit) END_DIRECTIVE ; 
 
 location-directive	= "location" WS path "{" *[location-config] "}"END_DIRECTIVE
-location-config	= root-directive / keepalive-timeout / error-page-directive
+location-config	= root-directive / keepalive-timeout / error-page-directive / return-directive
+
 root-directive	= "root" WS path END_DIRECTIVE
 send-timeout	= "send_timeout" WS time-sec ;Default: 60s
 path	= "/" 1*(path-segment)
 path-segment	= 1*(ALPHA / DIGIT / "-" / "_") ["/"]
 keepalive-timeout	= "keepalive_timeout" time-sec ;Default: 75s
 time-sec	= DIGIT ["s"]
+
+return-directive	= "return" WS status WS uri OWS END_DIRECTIVE
+uri	= ("http" / "https") "://" host
+host	= alphadigit
+
 client-max-body-size	= "client_max_body_size" WS size-mb END_DIRECTIVE ;Default:1m, size to 0 disables checking of client request body size-mb	= DIGIT ["m"] ; megabytes
 
 error-page-directive	= "error_page" WS error_codes [response] END_DIRECTIVE
 error-codes = error-code *(SP error-code) END_DIRECTIVE
-error_code	= 3(DIGIT) END_DIRECTIVE
+error_code	= status END_DIRECTIVE
 response	= path-to-file
 path-to-file	= path alphadigit
 
