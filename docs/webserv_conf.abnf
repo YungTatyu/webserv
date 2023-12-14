@@ -3,16 +3,19 @@ alpha = "a" / "b" / "c" / "d" / "e" / "f" / "g" / "h" / "i" / "j" / "k" / "l" / 
 DIGIT	= "0" / "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9"
 hexdig = DIGIT / "A" / "B" / "C" / "D" / "E" / "F" / "a" / "b" / "c" / "d" / "e" / "f"
 WS	= " " / "\t" / NEWLINE ;スペース、水平タブまたは改行
-OWS	= *(WS) optional ws
+OWS	= *(WS) ;optional ws
 h16 = 1*4HEXDIG
 NEWLINE	= "\n"
 alphadigit = ALPHA / alpha / DIGIT ;アルファベットまたは数字
 END_DIRECTIVE	= ";"
 
-http	= "http" OWS "{" OWS server-directive OWS "}" END_DIRECTIVE
+main	= [http] [errorlog]
+http	= 1("http" OWS "{" OWS server-directive OWS "}") ;webサーバ全体の設定
+errorlog	= path WS level OWS END_DIRECTIVE
+level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
 
-server-directive	= "server" OWS "{" serverconfig "}" END_DIRECTIVE
-serverconfig	= listen-directive END_DIRECTIVE
+server-directive	= "server" OWS "{" [serverconfig] "}" ;{}の中が空も許容する
+serverconfig	= [listen-directive] [server-name] [location-directive]
 
 listen-directive	= "listen" WS address-port
 address-port	= address [ ":" port ] / port ;デフォルトaddress:0.0.0.0 デフォルトport:80
@@ -33,14 +36,22 @@ ls32	= ( h16 ":" h16 ) / IPv4address ;()はグループを示すので、右を�
 h16 = 1*4(HEXDIG) ;HEXDIGが1回から4回まで続く
 port	= 1*(DIGIT)  ;少なくとも1回のDIGITが続くシーケンス
 
-server_name	= "server_name" WS alphadigit END_DIRECTIVE
+server-name	= "server_name" 1*(WS alphadigit) END_DIRECTIVE ; 
 
-location	= END_DIRECTIVE
-path	= 
+location-directive	= "location" WS path "{" *[location-config] "}"END_DIRECTIVE
+location-config	= root-directive / keepalive-timeout / error-page-directive
+root-directive	= "root" WS path END_DIRECTIVE
+send-timeout	= "send_timeout" WS time-sec ;Default: 60s
+path	= "/" 1*(path-segment)
+path-segment	= 1*(ALPHA / DIGIT / "-" / "_") ["/"]
+keepalive-timeout	= "keepalive_timeout" time-sec ;Default: 75s
+time-sec	= DIGIT ["s"]
+client-max-body-size	= "client_max_body_size" WS size-mb END_DIRECTIVE ;Default:1m, size to 0 disables checking of client request body size-mb	= DIGIT ["m"] ; megabytes
 
 error-page-directive	= "error_page" WS error_codes [response] END_DIRECTIVE
 error-codes = error-code *(SP error-code) END_DIRECTIVE
 error_code	= 3(DIGIT) END_DIRECTIVE
-response	= "/"  / URL
+response	= path-to-file
+path-to-file	= path alphadigit
 
 client_max_body_size_directive	= "client_body_buffer_size" OWS DIGIT END_DIRECTIVE
