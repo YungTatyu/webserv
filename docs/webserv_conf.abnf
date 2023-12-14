@@ -20,7 +20,8 @@ serverconfig	= [listen-directive] [server-name] [location-directive]
 
 listen-directive	= "listen" WS address-port
 address-port	= address [ ":" port ] / port ;デフォルトaddress:0.0.0.0 デフォルトport:80
-address	=  * / localhost / IPv4-address / IPv6-address 
+address	=  * / localhost / ip-address
+ip-address = IPv4-address / IPv6-address
 IPv4-address = dec-octet "." dec-octet "." dec-octet "." dec-octet
 dec-octet = DIGIT / "1"-"9" DIGIT / "1" DIGIT DIGIT / "2" "0"-"4" DIGIT / "25" "0"-"5" ; 0~255
 IPv6-address	= 6( h16 ":" ) ls32
@@ -39,8 +40,15 @@ port	= 1*(DIGIT)  ;少なくとも1回のDIGITが続くシーケンス
 
 server-name	= "server_name" 1*(WS alphadigit) END_DIRECTIVE ; 
 
-location-directive	= "location" WS path "{" *[location-config] "}"END_DIRECTIVE
-location-config	= root-directive / keepalive-timeout / error-page-directive / return-directive
+location-directive	= "location" WS path "{" OWS *[location-config] OWS "}"END_DIRECTIVE
+location-config	= root-directive
+				/ keepalive-timeout
+				/ error-page-directive 
+				/ return-directive
+				/ limit-except-directive
+				/ permission-directive
+				/ display-dir-list
+				/ index-file
 
 root-directive	= "root" WS path END_DIRECTIVE
 send-timeout	= "send_timeout" WS time-sec ;Default: 60s
@@ -50,7 +58,8 @@ keepalive-timeout	= "keepalive_timeout" time-sec ;Default: 75s
 time-sec	= DIGIT ["s"]
 
 return-directive	= "return" WS status WS uri OWS END_DIRECTIVE
-uri	= ("http" / "https") "://" host
+uri	= scheme "://" host
+scheme	= "http" / "https";
 host	= alphadigit
 
 client-max-body-size	= "client_max_body_size" WS size-mb END_DIRECTIVE ;Default:1m, size to 0 disables checking of client request body size-mb	= DIGIT ["m"] ; megabytes
@@ -60,5 +69,19 @@ error-codes = error-code *(SP error-code) END_DIRECTIVE
 error_code	= status END_DIRECTIVE
 response	= path-to-file
 path-to-file	= path alphadigit
+file	= alphadigit / path-to-file
+
+permission-directive	= permission WS permission-target END_DIRECTIVE
+permission-target	= ip-address / all 
+permission	= "allow" / "deny"
+ip-address	= ip-address "/" "0"-"32"
+
+limit-except-directive	= "limit_except" WS  method OWS "{" OWS *(permission-directive) OWS "}"
+method	= "GET" / "HEAD" / "PUT" / "DELETE" ;Allowing the GET method makes the HEAD method also allowed
+
+display-dir-list	= "autoindex" WS on-off
+on-off	= "ON" / "OFF"
+
+index-file	= "index" WS 1*(file) ;リクエストがディレクトリ(/)に対するもののレスポンスを設定。複数のファイルが存在する場合左から順に探す
 
 client_max_body_size_directive	= "client_body_buffer_size" OWS DIGIT END_DIRECTIVE
