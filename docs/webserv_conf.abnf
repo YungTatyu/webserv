@@ -49,11 +49,11 @@ IPv6-prefix	= 0-128
 
 ; syntax definition
 main	= [http-directive] [errorlog-directive]
-http-directive	= 1("http" OWS "{" OWS server-directive OWS "}") ;webサーバ全体の設定
+http-directive	= 1("http" OWS "{" OWS *(server-directive) OWS "}") ;webサーバ全体の設定
 errorlog-directive	= "error_log" WS file [WS level] OWS END_DIRECTIVE ;Default: logs/error.log error
 level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
 
-server-directive	= "server" OWS "{" OWS [serverconfig] OWS "}" ;{}の中が空も許容する
+server-directive	= "server" OWS "{" OWS *(serverconfig) OWS "}" ;{}の中が空も許容する
 serverconfig	= [listen-directive] [server-name-directive] [location-directive]
 
 listen-directive	= "listen" WS address-port OWS END_DIRECTIVE
