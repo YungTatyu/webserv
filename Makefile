@@ -48,7 +48,6 @@ $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 
 $(CGI_EXEFILE):
 	$(MAKE) -C $(CGI_DIR)
-	export PATH="$${PATH}:$(pwd)/cgi"
 
 clean:
 	$(MAKE) clean -C $(CGI_DIR)
