@@ -12,7 +12,7 @@ END_DIRECTIVE	= ";"
 
 main	= [http-directive] [errorlog-directive]
 http-directive	= 1("http" OWS "{" OWS server-directive OWS "}") ;webサーバ全体の設定
-errorlog-directive	= "error_log" WS path [WS level] OWS END_DIRECTIVE
+errorlog-directive	= "error_log" WS file [WS level] OWS END_DIRECTIVE
 level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
 
 server-directive	= "server" OWS "{" OWS [serverconfig] OWS "}" ;{}の中が空も許容する
@@ -40,9 +40,9 @@ port	= 1*(DIGIT)  ;少なくとも1回のDIGITが続くシーケンス
 
 server-name-directive	= "server_name" 1*(WS alphadigit) OWS END_DIRECTIVE 
 
-location-directive	= "location" WS path "{" OWS *[location-config] OWS "}"
+location-directive	= "location" WS uri "{" OWS *[location-config] OWS "}"
 location-config	= root-directive
-				/ keepalive-timeout
+				/ keepalive-timeout-directive
 				/ error-page-directive 
 				/ return-directive
 				/ limit-except-directive
@@ -51,37 +51,40 @@ location-config	= root-directive
 				/ index-file-directive
 				/ client-max-body-size-directive
 
-root-directive	= "root" WS path END_DIRECTIVE
-send-timeout	= "send_timeout" WS time-sec ;Default: 60s
-path	= "/" 1*(path-segment)
+absolute-path	= "/" *(path-segment)
 path-segment	= 1*(ALPHA / DIGIT / "-" / "_") ["/"]
-keepalive-timeout	= "keepalive_timeout" time-sec ;Default: 75s
-time-sec	= DIGIT ["s"]
+uri	= absolute-path ;表記は同じだが、uriはrootの後に追加される root/uri
+path	= absolute-path / uri 
+file	= path alphadigit
 
-return-directive	= "return" WS status WS uri OWS END_DIRECTIVE
-uri	= scheme "://" host
+time-sec	= DIGIT ["s"]
+url	= scheme "://" host
 scheme	= "http" / "https";
 host	= alphadigit
 
-client-max-body-size-directive	= "client_max_body_size" WS size-mb END_DIRECTIVE ;Default:1m, size to 0 disables checking of client request body size-mb	= DIGIT ["m"] ; megabytes
-
-error-page-directive	= "error_page" WS error_codes [response] END_DIRECTIVE
-error-codes = error-code *(SP error-code)
-error_code	= status
-response	= path-to-file
-path-to-file	= path alphadigit
-file	= alphadigit / path-to-file
-
-permission-directive	= permission WS permission-target END_DIRECTIVE
-permission-target	= ip-address / all 
-permission	= "allow" / "deny"
 ip-address	= ip-address "/" "0"-"32"
-
-limit-except-directive	= "limit_except" WS  method OWS "{" OWS *(permission-directive) OWS "}"
+on-off	= "ON" / "OFF"
 method	= "GET" / "HEAD" / "PUT" / "DELETE" ;Allowing the GET method makes the HEAD method also allowed
 
-display-dir-list-directive	= "autoindex" WS on-off PWS END_DIRECTIVE
-on-off	= "ON" / "OFF"
+root-directive	= "root" WS path OWS END_DIRECTIVE
+send-timeout	= "send_timeout" WS time-sec ;Default: 60s
+keepalive-timeout-directive	= "keepalive_timeout" time-sec OWS END_DIRECTIVE;Default: 75s
+
+return-directive	= "return" WS status WS url OWS END_DIRECTIVE
+
+client-max-body-size-directive	= "client_max_body_size" WS size-mb OWS END_DIRECTIVE ;Default:1m, size to 0 disables checking of client size-mb	= DIGIT ["m"] ; megabytes
+
+error-page-directive	= "error_page" WS error_codes ["=" status] WS uri OWS END_DIRECTIVE
+error-codes = error-code *(SP error-code)
+error_code	= status
+
+permission-directive	= permission WS permission-target OWS END_DIRECTIVE
+permission-target	= ip-address / all 
+permission	= "allow" / "deny"
+
+limit-except-directive	= "limit_except" WS  method OWS "{" OWS *(permission-directive) OWS "}"
+
+display-dir-list-directive	= "autoindex" WS on-off OWS END_DIRECTIVE
 
 index-file-directive	= "index" WS 1*(file) OWS END_DIRECTIVE;リクエストがディレクトリ(/)に対するもののレスポンスを設定。複数のファイルが存在する場合左から順に探す
 
