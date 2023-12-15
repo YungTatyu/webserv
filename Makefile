@@ -12,7 +12,7 @@ DEPS_DIR			= dep
 CGI_DIR				= cgi
 CONF_DIR			= conf
 
-SRCS				= $(SRCS_DIR)/main/main.cpp
+SRCS				= $(SRCS_DIR)/main.cpp
 
 # SERVER_DIR			= server
 # SRCS				+= $(SRCS_DIR)/$(SERVER_DIR)
@@ -37,7 +37,7 @@ $(OBJS_DIR):
 	@mkdir -p $(dir $@)
 
 $(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(NAME) $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(DEPS_DIR)/%.d: $(SRCS_DIR)/%.cpp
 	@mkdir -p $(dir $@)

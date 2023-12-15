@@ -18,7 +18,7 @@ $(OBJS_DIR):
 	@mkdir -p $@
 
 $(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(NAME) $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	@mkdir -p $(dir $@)
