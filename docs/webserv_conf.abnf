@@ -83,9 +83,9 @@ return-directive	= "return" WS status WS uri OWS END_DIRECTIVE ; redirectで使�
 
 client-max-body-size-directive	= "client_max_body_size" WS size-mb OWS END_DIRECTIVE ;Default:1m, size to 0 disables checking of client size-mb	= DIGIT ["m"] ; megabytes
 
-error-page-directive	= "error_page" WS error_codes ["=" status] WS uri OWS END_DIRECTIVE
+error-page-directive	= "error_page" WS error-codes ["=" status] WS uri OWS END_DIRECTIVE
 error-codes = error-code *(SP error-code)
-error_code	= status
+error-code	= status
 
 permission-directive	= permission WS permission-target OWS END_DIRECTIVE
 permission-target	= IPv4-address "/" IPv4-subnetmask / IPv6-address "/" IPv6-prefix / all 
@@ -97,4 +97,4 @@ display-dir-list-directive	= "autoindex" WS on-off OWS END_DIRECTIVE
 
 index-file-directive	= "index" WS 1*(file) OWS END_DIRECTIVE;リクエストがディレクトリ(/)に対するもののレスポンスを設定。複数のファイルが存在する場合左から順に探す
 
-client_max_body_size_directive	= "client_body_buffer_size" OWS DIGIT OWS END_DIRECTIVE
+comment	= "#" NEWLINE ; NEWLINEまでコメントアウト
