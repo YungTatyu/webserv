@@ -31,7 +31,7 @@ all: $(CGI_EXEFILE) $(DEPS_DIR) $(OBJS_DIR) $(NAME)
 
 $(DEPS_DIR):
 	@mkdir -p $@
-	mkdir -p dep/main
+# mkdir -p dep/server dep/config
 
 $(OBJS_DIR):
 	@mkdir -p $(dir $@)
