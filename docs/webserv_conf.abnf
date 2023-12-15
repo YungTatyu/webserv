@@ -10,15 +10,15 @@ alphadigit = ALPHA / alpha / DIGIT ;アルファベットまたは数字
 status	= 3(DIGIT)
 END_DIRECTIVE	= ";"
 
-main	= [http] [errorlog]
-http	= 1("http" OWS "{" OWS server-directive OWS "}") ;webサーバ全体の設定
-errorlog	= "error_log" WS path [WS level] OWS END_DIRECTIVE
+main	= [http-directive] [errorlog-directive]
+http-directive	= 1("http" OWS "{" OWS server-directive OWS "}") ;webサーバ全体の設定
+errorlog-directive	= "error_log" WS path [WS level] OWS END_DIRECTIVE
 level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
 
-server-directive	= "server" OWS "{" [serverconfig] "}" ;{}の中が空も許容する
-serverconfig	= [listen-directive] [server-name] [location-directive]
+server-directive	= "server" OWS "{" OWS [serverconfig] OWS "}" ;{}の中が空も許容する
+serverconfig	= [listen-directive] [server-name-directive] [location-directive]
 
-listen-directive	= "listen" WS address-port
+listen-directive	= "listen" WS address-port OWS END_DIRECTIVE
 address-port	= address [ ":" port ] / port ;デフォルトaddress:0.0.0.0 デフォルトport:80
 address	=  * / localhost / ip-address
 ip-address = IPv4-address / IPv6-address
@@ -38,17 +38,18 @@ ls32	= ( h16 ":" h16 ) / IPv4address ;()はグループを示すので、右を�
 h16 = 1*4(HEXDIG) ;HEXDIGが1回から4回まで続く
 port	= 1*(DIGIT)  ;少なくとも1回のDIGITが続くシーケンス
 
-server-name	= "server_name" 1*(WS alphadigit) END_DIRECTIVE ; 
+server-name-directive	= "server_name" 1*(WS alphadigit) OWS END_DIRECTIVE 
 
-location-directive	= "location" WS path "{" OWS *[location-config] OWS "}"END_DIRECTIVE
+location-directive	= "location" WS path "{" OWS *[location-config] OWS "}"
 location-config	= root-directive
 				/ keepalive-timeout
 				/ error-page-directive 
 				/ return-directive
 				/ limit-except-directive
 				/ permission-directive
-				/ display-dir-list
-				/ index-file
+				/ display-dir-list-directive
+				/ index-file-directive
+				/ client-max-body-size-directive
 
 root-directive	= "root" WS path END_DIRECTIVE
 send-timeout	= "send_timeout" WS time-sec ;Default: 60s
@@ -62,11 +63,11 @@ uri	= scheme "://" host
 scheme	= "http" / "https";
 host	= alphadigit
 
-client-max-body-size	= "client_max_body_size" WS size-mb END_DIRECTIVE ;Default:1m, size to 0 disables checking of client request body size-mb	= DIGIT ["m"] ; megabytes
+client-max-body-size-directive	= "client_max_body_size" WS size-mb END_DIRECTIVE ;Default:1m, size to 0 disables checking of client request body size-mb	= DIGIT ["m"] ; megabytes
 
 error-page-directive	= "error_page" WS error_codes [response] END_DIRECTIVE
-error-codes = error-code *(SP error-code) END_DIRECTIVE
-error_code	= status END_DIRECTIVE
+error-codes = error-code *(SP error-code)
+error_code	= status
 response	= path-to-file
 path-to-file	= path alphadigit
 file	= alphadigit / path-to-file
@@ -79,9 +80,9 @@ ip-address	= ip-address "/" "0"-"32"
 limit-except-directive	= "limit_except" WS  method OWS "{" OWS *(permission-directive) OWS "}"
 method	= "GET" / "HEAD" / "PUT" / "DELETE" ;Allowing the GET method makes the HEAD method also allowed
 
-display-dir-list	= "autoindex" WS on-off
+display-dir-list-directive	= "autoindex" WS on-off PWS END_DIRECTIVE
 on-off	= "ON" / "OFF"
 
-index-file	= "index" WS 1*(file) ;リクエストがディレクトリ(/)に対するもののレスポンスを設定。複数のファイルが存在する場合左から順に探す
+index-file-directive	= "index" WS 1*(file) OWS END_DIRECTIVE;リクエストがディレクトリ(/)に対するもののレスポンスを設定。複数のファイルが存在する場合左から順に探す
 
-client_max_body_size_directive	= "client_body_buffer_size" OWS DIGIT END_DIRECTIVE
+client_max_body_size_directive	= "client_body_buffer_size" OWS DIGIT OWS END_DIRECTIVE
