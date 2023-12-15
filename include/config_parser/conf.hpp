@@ -23,83 +23,94 @@ struct CErrorLog
 		ALERT,
 		EMERG
 	};
-	errorlog_level	level;
+	errorlog_level	level_;
 };
+
+// level: http, server, location
+struct CErrorPage
+{
+	std::vector<unsigned int>	statuses_;
+	std::string	uri_;
+};
+
 
 // level: server
 struct CServerListen
 {
-	std::string	address; // default:0.0.0.0
-	unsigned int	port; // default:80
+	std::string	address_; // default:0.0.0.0
+	unsigned int	port_; // default:80
 };
 
 // serverの要素
 struct CServerLocation
 {
-	std::string	root;
-	std::string	uri;
+	std::string	root_;
+	std::string	uri_;
 	
 };
 
 // level: http, server, location
 struct CErrorPage
 {
-	std::vector<unsigned int>	statuses;
-	int	response; //optional
-	std::string uri;
+	std::vector<unsigned int>	statuses_;
+	int	response_; //optional
+	std::string uri_;
 };
 
 // level: http, server, location
 struct CPermission
 {
-	std::vector<std::string> allow;
-	std::vector<std::string> deny;
+	std::vector<std::string> allow_;
+	std::vector<std::string> deny_;
 };
 
 // level: location
 struct CLocationLimitExpect
 {
-	std::string	method;
-	CPermission	permission;
+	std::string	method_;
+	CPermission	permission_;
 };
 
 // level: server
 struct CServerLocation
 {
-	std::string	root;
-	std::string	uri;
-	unsigned int	send_timeout; // default:60s
-	unsigned int	keepalive_timeout; // default:75s
-	unsigned int	client_max_body_size; // Default:1m, sizeを0にすると制限なし 
-	bool	autoindex;
-	std::string	index;
+	std::string	root_;
+	std::string	uri_;
+	unsigned int	send_timeout_; // default:60s
+	unsigned int	keepalive_timeout_; // default:75s
+	unsigned int	client_max_body_size_; // Default:1m, sizeを0にすると制限なし 
+	bool	autoindex_;
+	std::string	index_;
+	CErrorPage	error_page_;
 };
 
-// 一つのserverの設定、serverの要素を全て持つ
+// serverの設定
 struct CServer
 {
-	std::string	root;
-	std::vector<std::string>	server_names;
-	CServerListen	listen;
-	std::vector<CServerLocation>	locations;
-	bool	autoindex;
-	std::string	index;
+	std::string	root_;
+	std::vector<std::string>	server_names_;
+	CServerListen	listen_;
+	std::vector<CServerLocation>	locations_;
+	bool	autoindex_;
+	CErrorPage	error_page_;
+	std::string	index_;
 };
 
-// level: main
+// httpの設定
 struct CHTTP
 {
-	std::string	root;
-	std::vector<CServer>	servers;
-	bool	autoindex;
-	std::string	index;
+	std::string	root_;
+	std::vector<CServer>	servers_;
+	CErrorPage	error_page_;
+	bool	autoindex_;
+	std::string	index_;
 };
 
 class Conf
 {
 	private: // level: main
-		CErrorLog	errorlog;
-		CHTTP	http;
+		CErrorLog	errorlog_;
+		CHTTP	http_;
 	public:
 		Conf();
 		~Conf();
