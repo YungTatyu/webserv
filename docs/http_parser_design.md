@@ -1,3 +1,4 @@
+案1
 ```
 class HttpRequestParser
 {
@@ -20,7 +21,6 @@ class HttpRequestParser
 		std::string body;
 };
 ```
-案1
 requestParserクラスのメソッドとして、requestLine及び、messageBodyのパーサーを実装する。
 ・readRequestLine():HTTPリクエストメッセージの一行目が構文に沿っているかを確認する。
 method SP request-target SP HTTP-versionに沿っているか。
@@ -31,10 +31,7 @@ field-line = filed-name ":" OWS field-value OWS
 案2
 requestParserクラスの他に、requestLineParserクラス、messageBodyParserクラスを実装して継承する。
 
-悩み中
-・staticクラスにしてしまう？それともインスタンス化したい？
-・HTTPリクエストメッセージをオブジェクトとして管理したかったらインスタンス化するのもいいかも。その場合はnewのオーバーヘッドはどれくらいだろう。
-・HTTPのversionが1.1以外の時は弾いてしまう？
+案3
 ・オブジェクト指向的にいくんだったら、HttpRequestクラスがあってそれに対してparserメソッドがあるのがいいのかもしれない。
 ```
 class HttpRequest
@@ -48,3 +45,9 @@ class HttpRequest
 		[...]
 }
 ```
+その場合だとこのクラスをインターフェースとしてオブジェクトをサーバーに渡せばよくなるからいいかも。
+
+悩み中
+・staticクラスにしてしまう？それともインスタンス化したい？
+・HTTPリクエストメッセージをオブジェクトとして管理したかったらインスタンス化するのもいいかも。その場合はnewのオーバーヘッドはどれくらいだろう。
+・HTTPのversionが1.1以外の時は弾いてしまう？
