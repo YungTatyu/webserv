@@ -48,10 +48,11 @@ IPv4-subnetmask	= 0-32
 IPv6-prefix	= 0-128
 
 ; syntax definition
-main-context	= [ *(OWS) http-context *(OWS)] [*(OWS) errorlog-directive *(OWS)]
+main-context	= [ *(OWS) http-context *(OWS)] [*(OWS) errorlog-directive *(OWS)] [*(OWS) worker-connections-directive *(OWS)]
 http-context	= 1("http" OWS "{" OWS *(server-context) OWS "}") ;webサーバ全体の設定
 errorlog-directive	= "error_log" WS file [WS level] OWS END_DIRECTIVE ;Default: logs/error.log error
 level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
+worker-connections-directive	= "worker_connections" WS 1*(DIGIT) END_DIRECTIVE
 
 server-context	= "server" OWS "{" OWS *(serverconfig) OWS "}" ;{}の中が空も許容する
 serverconfig	= [listen-directive] [server-name-directive] [location-context]
