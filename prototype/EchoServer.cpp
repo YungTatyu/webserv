@@ -3,6 +3,12 @@
 EchoServer::EchoServer()
 {
 //	this->RequestHandler = new RequestHandler;
+	this->connManager = new ConnManager();
+}
+
+EchoServer::~EchoServer()
+{
+	delete this->connManager;
 }
 
 void EchoServer::setUp()
@@ -22,7 +28,7 @@ void EchoServer::setUp()
 	
 }
 
-int EchoServer::acceptRequest()
+void EchoServer::acceptRequest()
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
@@ -30,21 +36,20 @@ int EchoServer::acceptRequest()
 
 	client = sizeof(cliaddr);
 	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
+	this->connManager->addConnection( connfd );
 	printf("%s\n","Received request...");
-	return connfd;
 }
 
-void EchoServer::sendResponse( int connfd )
+void EchoServer::sendResponse()
 {
 	int n;
 	char buf[MAXLINE];
 
-//	this->requestHandler();
-	while ( (n = recv(connfd, buf, MAXLINE,0)) > 0)
+	while ( (n = recv(this->connManager->readConnfd(), buf, MAXLINE,0)) > 0)
 	{
 		printf("%s","String received from and resent to the client:");
 		puts(buf);
-		send(connfd, buf, n, 0);
+		send(this->connManager->readConnfd(), buf, n, 0);
 	}
 
 	if (n < 0)
@@ -54,9 +59,10 @@ void EchoServer::sendResponse( int connfd )
 	}
 }
 
-void EchoServer::closeConnection( int connfd )
+void EchoServer::closeConnection()
 {
-	close(connfd);
+	close(this->connManager->readConnfd());
+	this->connManager->removeConnection();	
 }
 
 void EchoServer::down()
@@ -64,9 +70,17 @@ void EchoServer::down()
 	close(listenfd);
 }
 
-/*
-std::string RequestHandler::readMessage()
+void ConnManager::addConnection( int connfd )
 {
-	return 
+	this->connfd = connfd;
 }
-*/
+
+int ConnManager::readConnfd()
+{
+	return this->connfd;
+}
+
+void ConnManager::removeConnection()
+{
+	this->connfd = 0;
+}

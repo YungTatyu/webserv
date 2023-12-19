@@ -10,20 +10,24 @@
 #define SERV_PORT 3000 /*port*/
 #define LISTENQ 8 /*maximum number of client connections */
 
+class ConnManager;
+
 class EchoServer
 {
 	public:
 		EchoServer();
+		~EchoServer();
 		void setUp();
-		int acceptRequest();
-		void sendResponse( int connfd );
-		void closeConnection(int connfd );
+		void acceptRequest();
+		void sendResponse();
+		void closeConnection();
 		void down();
 	
 	private:
 		int listenfd;
 		struct sockaddr_in servaddr;
 		// RequestHandler *requestHandler;
+		ConnManager *connManager;
 };
 
 /*
@@ -33,3 +37,14 @@ class RequestHandler
 		void readMessage();
 };
 */
+
+class ConnManager
+{
+	public:
+		void addConnection( int connfd );
+		int readConnfd();
+		void removeConnection();
+	
+	private:
+		int connfd;
+};
