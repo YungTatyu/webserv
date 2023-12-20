@@ -51,8 +51,7 @@ class HTTPMessage
 
 class HTTPRequestParser
 {
-	public:
-		HTTPRequest	parse( std::string rawRequest );
+	public: HTTPRequest	parse( std::string rawRequest );
 	
 	private:
 		parseHeader();
