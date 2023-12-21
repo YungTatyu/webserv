@@ -1,23 +1,24 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
-#include <template>>
+#include <vector>
 
-#define MAXLINE 4096 /*max text line length*/
 class ConnectionManager;
+class RequestHandler;
+class NetworkIOHandler;
+class ServerConfig;
 
 class EchoServer
 {
 	public:
 		EchoServer();
-		initializeServer();
-		eventLoop();
+		~EchoServer();
+		void initializeServer();
+		void eventLoop();
 	
 	private:
+		int listenfd; // listenソケットのfd
 		NetworkIOHandler *ioHandler;
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;
@@ -28,44 +29,49 @@ class EchoServer
 class ConnectionManager
 {
 	public:
-		addConnection();
-		getConnectionData();
-		removeConnection();
+		void addConnection( int connfd );
+		int getConnection();
+		void removeConnection();
+		void addContext( const std::vector<char>& context );
+		const std::vector<char>& getContext() const;
 	
 	private:
-		std::map<int connfd, std:;string context> connections;
+		//std::map<int connfd, std:;string context> connections;
+		int connfd;
+		std::vector<char> context;
 };
 
 /* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */
-class ReuqestHandler
+class RequestHandler
 {
 	public:
-		handle();
+		void handle( ConnectionManager &connManager );
 };
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
 {
 	public:
-		setUpSocket();
-		receiveData();
-		sendData();
-		acceptConnection();
+		void setupSocket( ServerConfig *serverConfig );
+		void receiveData( ConnectionManager& connManager );
+		void sendData( ConnectionManager& connManager );
+		void acceptConnection( ConnectionManager& connManager );
+		void closeConnection( ConnectionManager& connManager );
+
+	private:
+		int listenfd;
 };
 
 /* Confファイルの設定を管理する */
 class ServerConfig
 {
 	public:
-		// configParser();
-		loadConfiguration();	
+		void loadConfiguration();	
 
-		getPort();
-		getIPAddress();
+		int getServPort();
+		int getListenQ();
 
 	private:
-		int listenfd; // ソケットのfd
-		struct sockaddr_in servaddr; // ポートとかの情報
-		static int SERV_PORT = 3001; /*port*/
-		static int LISTENQ = 8; /*maximum number of client connections */
+		int serv_port; /*port*/
+		int listen_q; /*maximum number of client connections */
 };
