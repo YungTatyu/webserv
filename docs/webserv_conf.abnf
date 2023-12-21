@@ -19,7 +19,7 @@ uri	= absolute-path ;表記は同じだが、uriはrootの後に追加される 
 path	= absolute-path / uri 
 file	= uri
 
-time-sec	= DIGIT ["s"]
+time	= DIGIT ["ms" / "s" / "m" / "h"]
 url	= scheme "://" host
 scheme	= "http" / "https";
 host	= VCHAR
@@ -80,8 +80,8 @@ location-directive	= root-directive
 
 
 root-directive	= "root" WS absolute-path OWS END_DIRECTIVE
-send-timeout	= "send_timeout" WS time-sec ;Default: 60s
-keepalive-timeout-directive	= "keepalive_timeout" time-sec OWS END_DIRECTIVE;Default: 75s
+send-timeout	= "send_timeout" WS time ;Default: 60s
+keepalive-timeout-directive	= "keepalive_timeout" time OWS END_DIRECTIVE;Default: 75s
 
 return-directive	= "return" WS status WS uri OWS END_DIRECTIVE ; redirectで使用
 
