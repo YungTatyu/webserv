@@ -19,7 +19,8 @@ uri	= absolute-path ;表記は同じだが、uriはrootの後に追加される 
 path	= absolute-path / uri 
 file	= uri
 
-time	= DIGIT ["ms" / "s" / "m" / "h"]
+time	= 1*(DIGIT) ["ms" / "s" / "m" / "h"]
+size	= 1*(DIGIT) ["k" / "K" / "m" / "M"]
 url	= scheme "://" host
 scheme	= "http" / "https";
 host	= VCHAR
@@ -85,7 +86,7 @@ keepalive-timeout-directive	= "keepalive_timeout" time OWS END_DIRECTIVE;Default
 
 return-directive	= "return" WS status WS uri OWS END_DIRECTIVE ; redirectで使用
 
-client-max-body-size-directive	= "client_max_body_size" WS size-mb OWS END_DIRECTIVE ;Default:1m, size to 0 disables checking of client size-mb	= DIGIT ["m"] ; megabytes
+client-max-body-size-directive	= "client_max_body_size" WS size OWS END_DIRECTIVE ;Default:1m, size to 0 disables checking of client 
 
 error-page-directive	= "error_page" WS error-codes ["=" status] WS uri OWS END_DIRECTIVE
 error-codes = error-code *(SP error-code)
