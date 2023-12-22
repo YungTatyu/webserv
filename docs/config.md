@@ -65,9 +65,8 @@ events {
     - fileのpermissionがない場合（write権限さえあればいい？）は、エラーを出力して終了: error02
     - invalid log level: error03
 
-```
-example00
 
+```
 error_log	/Users/tatyu/Documents/nginx/logs/error.log emerg;
 http {
   server {
@@ -94,8 +93,6 @@ http {
     - invalid number エラーを出力して終了: error03
 
 ```
-example00
-
 events {
   worker_connections 1000;
 }
@@ -125,8 +122,6 @@ events {
   - 重複可否: yes ただし同じcontext内には一つのみ
  
 ```
-example00
-
 http {
   server {
      listen 8080;
