@@ -51,8 +51,8 @@ IPv6-prefix	= 0-128
 ; syntax definition
 main-context	= events-directive [ *(WS) http-context *(OWS)] [*(WS) errorlog-directive *(OWS)]
 http-context	= 1("http" OWS "{" OWS *(server-context) OWS "}") ;webサーバ全体の設定
-errorlog-directive	= "error_log" WS file [WS level] OWS END_DIRECTIVE ;Default: logs/error.log error
-level	= "debug" / "info" / "notice" / "warn" / "error" / "crit" / "alert" / "emerg" ;指定したlevel以上を出力する
+errorlog-directive	= "error_log" WS file OWS END_DIRECTIVE ;Default: logs/error.log error
+level	= "warn" / "error" / "emerg" ;指定したlevel以上を出力する
 
 events-context	= 1("events" OWS "{" OWS events-directive OWS "}")
 events-directive	= *1[worker-connections-directive]
