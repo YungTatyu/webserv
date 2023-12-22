@@ -54,9 +54,12 @@ http-context	= 1("http" OWS "{" OWS *(server-context) OWS "}") ;webサーバ全�
 errorlog-directive	= "error_log" WS file OWS END_DIRECTIVE ;Default: logs/error.log error
 level	= "warn" / "error" / "emerg" ;指定したlevel以上を出力する
 
-events-context	= 1("events" OWS "{" OWS events-directive OWS "}")
-events-directive	= *1[worker-connections-directive]
+events-context	= 1("events" OWS "{" OWS *(events-directive) OWS "}")
+events-directive	= *1(worker-connections-directive)
+					/ *1(use-directive)
 worker-connections-directive	= "worker_connections" WS 1*(DIGIT) END_DIRECTIVE
+use-directive	= "use" WS connection-method OWS END_DIRECTIVE
+connection-method	= "select" / "poll" / "kqueue" / "epoll" 
 
 server-context	= "server" OWS "{" OWS *(server-directive) OWS "}" ;{}の中が空も許容する
 server-directive	= [listen-directive] [server-name-directive] [location-context]
