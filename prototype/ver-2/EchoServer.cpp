@@ -20,14 +20,18 @@ void EchoServer::initializeServer()
 
 void EchoServer::eventLoop()
 {
-	this->ioHandler->acceptConnection( *this->connManager );
 	for ( ; ; )
 	{
-		this->ioHandler->receiveData( *this->connManager );
-		this->requestHandler->handle( *this->connManager );
-		this->ioHandler->sendData( *this->connManager );
+		this->ioHandler->acceptConnection( *this->connManager );
+		for ( ; ; )
+		{
+			if ( this->ioHandler->receiveData( *this->connManager ) == -1 )
+				break ;
+			this->requestHandler->handle( *this->connManager );
+			this->ioHandler->sendData( *this->connManager );
+		};	
+		this->ioHandler->closeConnection( *this->connManager );
 	};
-	this->ioHandler->closeConnection( *this->connManager );
 }
 
 EchoServer::~EchoServer()
@@ -52,7 +56,7 @@ int ConnectionManager::getConnection()
 
 void ConnectionManager::removeConnection()
 {
-	this->connfd = 0;
+	this->connfd = -1;
 }
 
 void ConnectionManager::addContext( const std::vector<char>& context )
@@ -88,15 +92,17 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	bind (this->listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
 	listen (this->listenfd, servConfig->getListenQ());
 	
-	printf("%s\n","Server running...waiting for connections.");
+	printf("%s%d\n","Server running...waiting for connections on port ", servConfig->getServPort());
 }
 
-void NetworkIOHandler::receiveData( ConnectionManager& connManager )
+int NetworkIOHandler::receiveData( ConnectionManager& connManager )
 {
 	// char *buf[MAXLINE];
 	std::vector<char> buffer(1024);
-	recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 );
+	if ( recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 ) <= 0 )
+		return -1;
 	connManager.addContext( buffer );
+	return 0;
 }
 
 void NetworkIOHandler::sendData( ConnectionManager &connManager )
@@ -113,13 +119,14 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	client = sizeof(cliaddr);
 	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
 	connManager.addConnection( connfd );
-	printf("%s\n","Received request...");
+	printf("%s\n","New connection created.");
 }
 
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
 {
 	close( connManager.getConnection() );
 	connManager.removeConnection();
+	printf("Client disconnected.\n");
 }
 
 /* ServerConfigクラスの実装 */

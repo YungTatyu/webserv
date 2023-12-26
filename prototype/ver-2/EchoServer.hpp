@@ -53,7 +53,7 @@ class NetworkIOHandler
 {
 	public:
 		void setupSocket( ServerConfig *serverConfig );
-		void receiveData( ConnectionManager& connManager );
+		int receiveData( ConnectionManager& connManager );
 		void sendData( ConnectionManager& connManager );
 		void acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager );
