@@ -20,14 +20,14 @@ void EchoServer::initializeServer()
 
 void EchoServer::eventLoop()
 {
+	this->ioHandler->acceptConnection( *this->connManager );
 	for ( ; ; )
 	{
-		this->ioHandler->acceptConnection( *this->connManager );
 		this->ioHandler->receiveData( *this->connManager );
 		this->requestHandler->handle( *this->connManager );
 		this->ioHandler->sendData( *this->connManager );
-		this->ioHandler->closeConnection( *this->connManager );
 	};
+	this->ioHandler->closeConnection( *this->connManager );
 }
 
 EchoServer::~EchoServer()
