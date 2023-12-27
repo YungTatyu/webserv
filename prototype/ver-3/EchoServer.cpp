@@ -20,18 +20,34 @@ void EchoServer::initializeServer()
 
 void EchoServer::eventLoop()
 {
+	this->connManager->fds.push_back( {this->ioHandler->getListenfd(), POLLIN, 0} );
+
 	for ( ; ; )
 	{
-		this->ioHandler->acceptConnection( *this->connManager );
-		for ( ; ; )
+		poll ( this->connManager->fds.data(), this->connManager->fds.size(), -1 );
+		for ( auto fd_it = this->connManager->fds.begin(); fd_it != this->connManager->fds.end(); )
 		{
-			if ( this->ioHandler->receiveData( *this->connManager ) == -1 )
-				break ;
-			this->requestHandler->handle( *this->connManager );
-			this->ioHandler->sendData( *this->connManager );
-		};	
-		this->ioHandler->closeConnection( *this->connManager );
-	};
+			if ( fd_it->revents & POLLIN )
+			{
+				if ( fd_it->fd == this->ioHandler->getListenfd() )	
+				{
+					this->ioHandler->acceptConnection( *this->connManager );
+				}
+				else
+				{
+					if ( this->ioHandler->receiveData( *this->connManager, fd_it->fd ) == -1 )
+					{
+						this->ioHandler->closeConnection( *this->connManager, fd_it->fd );
+						fd_it = this->connManager->fds.erase( fd_it );
+						continue ;
+					}
+					this->requestHandler->handle( *this->connManager, fd_it->fd );
+					this->ioHandler->sendData( *this->connManager, fd_it->fd  );
+				}
+			}
+			++fd_it;
+		}
+	}
 }
 
 EchoServer::~EchoServer()
@@ -44,35 +60,43 @@ EchoServer::~EchoServer()
 }
 
 /* ConnectionManagerクラスの実装 */
-void ConnectionManager::addConnection( int connfd )
+void ConnectionManager::addConnection( const struct pollfd& pfd )
 {
-	this->connfd = connfd;
+	ConnectionInfo newConnection;
+	newConnection.pfd = pfd;
+	connections[pfd.fd] = newConnection;
 }
 
-int ConnectionManager::getConnection()
+void ConnectionManager::updateEvents( int fd, short revents )
 {
-	return this->connfd;
+	/*
+	if ( events == POLLIN )
+		connections[fd].pollfd.events = POLLOUT;
+	else if ( events == POLLOUT )
+		connections[fd].pollfd.events = POLLIN;
+	*/
+	connections[fd].pfd.revents = revents;
 }
 
-void ConnectionManager::removeConnection()
+void ConnectionManager::removeConnection( int fd )
 {
-	this->connfd = -1;
+	connections.erase( fd );
 }
 
-void ConnectionManager::addContext( const std::vector<char>& context )
+void ConnectionManager::addContext( int fd, const std::vector<char>& context )
 {
-	this->context = context;
+	connections[fd].context = context;
 }
 
-const std::vector<char>& ConnectionManager::getContext() const
+const std::vector<char>& ConnectionManager::getContext( int fd ) const
 {
-	return this->context;
+	return connections.at(fd).context;
 }
 
 /* RequestHandlerクラスの実装 */
-void RequestHandler::handle( ConnectionManager &connManager )
+void RequestHandler::handle( ConnectionManager &connManager, int target )
 {
-	const std::vector<char>& context = connManager.getContext();
+	const std::vector<char>& context = connManager.getContext( target );
 	puts( context.data() );
 }
 
@@ -95,19 +119,19 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	printf("%s%d\n","Server running...waiting for connections on port ", servConfig->getServPort());
 }
 
-int NetworkIOHandler::receiveData( ConnectionManager& connManager )
+int NetworkIOHandler::receiveData( ConnectionManager& connManager, int target )
 {
 	// char *buf[MAXLINE];
 	std::vector<char> buffer(1024);
-	if ( recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 ) <= 0 )
+	if ( recv( target, buffer.data(), buffer.size(), 0 ) <= 0 )
 		return -1;
-	connManager.addContext( buffer );
+	connManager.addContext( target, buffer );
 	return 0;
 }
 
-void NetworkIOHandler::sendData( ConnectionManager &connManager )
+void NetworkIOHandler::sendData( ConnectionManager &connManager, int target )
 {	
-	send(connManager.getConnection(), connManager.getContext().data(), connManager.getContext().size(), 0);
+	send(target, connManager.getContext( target ).data(), connManager.getContext( target ).size(), 0);
 }
 
 void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
@@ -118,15 +142,21 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 
 	client = sizeof(cliaddr);
 	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
-	connManager.addConnection( connfd );
+	connManager.fds.push_back({ connfd, POLLIN, 0 });
+	connManager.addConnection({ connfd, POLLIN, 0 });
 	printf("%s\n","New connection created.");
 }
 
-void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
+void NetworkIOHandler::closeConnection( ConnectionManager& connManager, int target )
 {
-	close( connManager.getConnection() );
-	connManager.removeConnection();
+	close( target );
+	connManager.removeConnection( target );
 	printf("Client disconnected.\n");
+}
+
+int NetworkIOHandler::getListenfd()
+{
+	return this->listenfd;
 }
 
 /* ServerConfigクラスの実装 */
