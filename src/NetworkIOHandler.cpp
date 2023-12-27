@@ -19,12 +19,14 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	printf("%s\n","Server running...waiting for connections.");
 }
 
-void NetworkIOHandler::receiveData( ConnectionManager& connManager )
+int NetworkIOHandler::receiveData( ConnectionManager& connManager )
 {
 	// char *buf[MAXLINE];
 	std::vector<char> buffer(1024);
-	recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 );
+	if ( recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 ) <= 0 )
+		return -1;
 	connManager.addContext( buffer );
+	return 0;
 }
 
 void NetworkIOHandler::sendData( ConnectionManager &connManager )
@@ -48,6 +50,7 @@ void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
 {
 	close( connManager.getConnection() );
 	connManager.removeConnection();
+	printf("%s\n", "Client disconnected.");
 }
 
 
