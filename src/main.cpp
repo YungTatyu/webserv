@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
@@ -15,3 +16,14 @@ int	main(void)
 	execve("cgi/cgi_exe", arg, NULL);
 	return (0);
 }
+*/
+
+#include "EchoServer.hpp"
+
+int main()
+{
+	EchoServer server = EchoServer();
+	server.eventLoop();
+	return 0;
+}
+
