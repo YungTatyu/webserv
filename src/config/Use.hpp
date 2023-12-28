@@ -1,6 +1,8 @@
 #ifndef CONFIG_USE_HPP
 #define CONFIG_USE_HPP
 
+namespace config
+{
 class Use
 {
 	private:
@@ -15,5 +17,7 @@ class Use
 	public:
 		Use();
 		~Use();
-};
+};	
+} // namespace config
+
 #endif
