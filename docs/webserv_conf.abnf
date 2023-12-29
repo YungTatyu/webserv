@@ -22,7 +22,7 @@ file	= uri
 time	= 1*(DIGIT) ["ms" / "s" / "m" / "h"]
 size	= 1*(DIGIT) ["k" / "K" / "m" / "M"]
 url	= scheme "://" host
-scheme	= "http" / "https";
+scheme	= "http";
 host	= VCHAR
 
 ip-address	= ip-address "/" "0"-"32"
