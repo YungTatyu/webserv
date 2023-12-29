@@ -24,8 +24,9 @@ class Lexer
 {
 	private:
 		std::vector<Token>	tokens;
-}
-
+	public:
+		void	tokenize(const std::string &conf_file);
+};
 } // namespace config
 
 
