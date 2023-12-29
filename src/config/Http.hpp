@@ -14,6 +14,10 @@
 #include "Deny.hpp"
 #include "Index.hpp"
 #include "Autoindex.hpp"
+#include "Userid.hpp"
+#include "UseridDomain.hpp"
+#include "UseridExpires.hpp"
+#include "UseridPath.hpp"
 
 namespace config
 {
@@ -28,8 +32,12 @@ struct Http
 	KeepaliveTime	keepalive_time;
 	KeepaliveTimeout	keepalive_timeout;
 	ErrorPage	error_page;
-	std::vector<Allow>	allow_addresses;
-	std::vector<Deny>	deny_addresses;
+	std::vector<Allow>	allow;
+	std::vector<Deny>	deny;
+	Userid	userid;
+	UseridDomain	userid_domain;
+	UseridExpires	userid_expires;
+	UseridPath	userid_path;
 };
 } // namespace config
 
