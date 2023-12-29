@@ -4,13 +4,14 @@
 #include <vector>
 #include "Events.hpp"
 #include "ErrorLog.hpp"
-
+#include "Http.hpp"
 namespace config
 {
 struct Main
 {
-	Events	events;
 	std::vector<ErrorLog>	error_logs;
+	Events	events;
+	Http	http;
 };
 
 } // namespace config 
