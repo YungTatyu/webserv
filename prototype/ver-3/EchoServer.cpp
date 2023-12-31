@@ -18,34 +18,57 @@ void EchoServer::initializeServer()
 	this->connManager = new ConnectionManager();
 }
 
+#include <iostream>
+void printpfdvector( std::vector<struct pollfd> src, int level )
+{
+	std::cout << level << "-----------------" << std::endl;
+	std::cout << "num of vec size: " << src.size() << std::endl;
+	int i = 0;
+	for ( std::vector<struct pollfd>::iterator src_it = src.begin(); src_it != src.end(); ++src_it )
+	{
+		std::cout << "element----" << i << std::endl;
+		std::cout << "fd: " << src_it->fd << std::endl;
+		std::cout << "events: " << src_it->events << std::endl;
+		std::cout << "revents: " << src_it->revents << std::endl;
+		++i;
+	}
+	std::cout << "-----------------" << std::endl;
+}
+
 void EchoServer::eventLoop()
 {
 	this->connManager->fds.push_back( {this->ioHandler->getListenfd(), POLLIN, 0} );
+	// printpfdvector(this->connManager->fds, 0);
 
 	for ( ; ; )
 	{
+		// printpfdvector(this->connManager->fds, 1);
 		poll ( this->connManager->fds.data(), this->connManager->fds.size(), -1 );
-		for ( auto fd_it = this->connManager->fds.begin(); fd_it != this->connManager->fds.end(); )
+
+		//　ここをイテレータで走査したら、要素を追加したときにイテレータが無効になったりしてバグる。
+		size_t tmpsize = this->connManager->fds.size();
+		for ( size_t i = 0; i < tmpsize; ++i )
 		{
-			if ( fd_it->revents & POLLIN )
+			// printpfdvector(this->connManager->fds, 2);
+
+			if ( this->connManager->fds[i].revents & POLLIN )
 			{
-				if ( fd_it->fd == this->ioHandler->getListenfd() )	
+				if ( this->connManager->fds[i].fd == this->ioHandler->getListenfd() )	
 				{
 					this->ioHandler->acceptConnection( *this->connManager );
 				}
 				else
 				{
-					if ( this->ioHandler->receiveData( *this->connManager, fd_it->fd ) == -1 )
+					if ( this->ioHandler->receiveData( *this->connManager, this->connManager->fds[i].fd ) == -1 )
 					{
-						this->ioHandler->closeConnection( *this->connManager, fd_it->fd );
-						fd_it = this->connManager->fds.erase( fd_it );
+						this->ioHandler->closeConnection( *this->connManager, this->connManager->fds[i].fd );
+						// fd_it = this->connManager->fds.erase( fd_it );
 						continue ;
 					}
-					this->requestHandler->handle( *this->connManager, fd_it->fd );
-					this->ioHandler->sendData( *this->connManager, fd_it->fd  );
+					this->requestHandler->handle( *this->connManager, this->connManager->fds[i].fd );
+					this->ioHandler->sendData( *this->connManager, this->connManager->fds[i].fd  );
 				}
 			}
-			++fd_it;
 		}
 	}
 }
@@ -62,9 +85,8 @@ EchoServer::~EchoServer()
 /* ConnectionManagerクラスの実装 */
 void ConnectionManager::addConnection( const struct pollfd& pfd )
 {
-	ConnectionInfo newConnection;
-	newConnection.pfd = pfd;
-	connections[pfd.fd] = newConnection;
+	fds.push_back( pfd );
+	connections[pfd.fd] = std::vector<char>();
 }
 
 void ConnectionManager::updateEvents( int fd, short revents )
@@ -75,7 +97,13 @@ void ConnectionManager::updateEvents( int fd, short revents )
 	else if ( events == POLLOUT )
 		connections[fd].pollfd.events = POLLIN;
 	*/
-	connections[fd].pfd.revents = revents;
+	for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
+	{
+		if ( cur->fd == fd )
+		{
+			cur->events = POLLIN;
+		}
+	}
 }
 
 void ConnectionManager::removeConnection( int fd )
@@ -85,12 +113,12 @@ void ConnectionManager::removeConnection( int fd )
 
 void ConnectionManager::addContext( int fd, const std::vector<char>& context )
 {
-	connections[fd].context = context;
+	connections[fd] = context;
 }
 
 const std::vector<char>& ConnectionManager::getContext( int fd ) const
 {
-	return connections.at(fd).context;
+	return connections.at(fd);
 }
 
 /* RequestHandlerクラスの実装 */
@@ -142,7 +170,6 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 
 	client = sizeof(cliaddr);
 	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
-	connManager.fds.push_back({ connfd, POLLIN, 0 });
 	connManager.addConnection({ connfd, POLLIN, 0 });
 	printf("%s\n","New connection created.");
 }

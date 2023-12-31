@@ -27,14 +27,6 @@ class EchoServer
 		ServerConfig *serverConfig;
 };
 
-class ConnectionInfo
-{
-	public:
-		struct pollfd pfd;
-		std::vector<char> context;
-};
-// entityクラスの値をpublicで保持すべきかどうか？
-
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
 class ConnectionManager
 {
@@ -47,10 +39,7 @@ class ConnectionManager
 		std::vector<struct pollfd> fds;
 	
 	private:
-		std::map<int, ConnectionInfo> connections;
-		//std::map<struct pollfd, std::vector<char> context> connections; //これだとイベントが変わっただけで新しいキーが作成されるので使えない。
-		//int connfd;
-		//std::vector<char> context;
+		std::map<int, std::vector<char>> connections;
 };
 
 /* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */
