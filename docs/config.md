@@ -55,16 +55,11 @@ events {
   - context: **main**, **http**, **server**, **location**
   - 重複可否: yes
     - 重複する場合、より低いレベルのcontextがerror_logの対象となる
-    - 同じcontextレベルで複数ある場合、それら全てにエラーが書き込まれる
+    - 同じcontextレベルで複数ある場合、それら全てにログが書き込まれる
   - 出力レベル: 指定されたレベル以上を出力（以下レベル低い順）
     - warn
     - error
     - emerg 
-  - エラー処理
-    - pathのディレクトリが存在しない場合、エラーを出力して終了: error01<br> ファイルが存在しない場合は作成
-    - fileのpermissionがない場合（write権限さえあればいい？）は、エラーを出力して終了: error02
-    - invalid log level: error03
-
 
 ```
 error_log	/Users/tatyu/Documents/nginx/logs/error.log emerg;
@@ -87,10 +82,6 @@ http {
   - default: 512
   - context: **events**
   - 重複可否: no
-  - エラー処理
-    - 0 エラーを出力して終了: error01
-    - negative number エラーを出力して終了: error02
-    - invalid number エラーを出力して終了: error03
 
 ```
 events {
@@ -152,8 +143,6 @@ http {
   - 重複可否: no
 
 ```
-exapmle00
-
 http {
   send_timeout 1000s;
 }
