@@ -38,18 +38,18 @@ void printpfdvector( std::vector<struct pollfd> src, int level )
 void EchoServer::eventLoop()
 {
 	this->connManager->fds.push_back( {this->ioHandler->getListenfd(), POLLIN, 0} );
-	// printpfdvector(this->connManager->fds, 0);
+	printpfdvector(this->connManager->fds, 0);
 
 	for ( ; ; )
 	{
-		// printpfdvector(this->connManager->fds, 1);
+		printpfdvector(this->connManager->fds, 1);
 		poll ( this->connManager->fds.data(), this->connManager->fds.size(), -1 );
 
 		//　ここをイテレータで走査したら、要素を追加したときにイテレータが無効になったりしてバグる。
 		size_t tmpsize = this->connManager->fds.size();
 		for ( size_t i = 0; i < tmpsize; ++i )
 		{
-			// printpfdvector(this->connManager->fds, 2);
+			printpfdvector(this->connManager->fds, 2);
 
 			if ( this->connManager->fds[i].revents & POLLIN )
 			{
@@ -62,13 +62,20 @@ void EchoServer::eventLoop()
 					if ( this->ioHandler->receiveData( *this->connManager, this->connManager->fds[i].fd ) == -1 )
 					{
 						this->ioHandler->closeConnection( *this->connManager, this->connManager->fds[i].fd );
-						// fd_it = this->connManager->fds.erase( fd_it );
+						this->connManager->fds[i].fd = -1;
 						continue ;
 					}
 					this->requestHandler->handle( *this->connManager, this->connManager->fds[i].fd );
 					this->ioHandler->sendData( *this->connManager, this->connManager->fds[i].fd  );
 				}
 			}
+		}
+		for ( std::vector<struct pollfd>::iterator it = this->connManager->fds.begin(); it != this->connManager->fds.end(); )
+		{
+			if ( it->fd == -1 )
+				it = this->connManager->fds.erase( it );
+			else
+				++it;
 		}
 	}
 }
