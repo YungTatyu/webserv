@@ -70,13 +70,9 @@ void EchoServer::eventLoop()
 				}
 			}
 		}
-		for ( std::vector<struct pollfd>::iterator it = this->connManager->fds.begin(); it != this->connManager->fds.end(); )
-		{
-			if ( it->fd == -1 )
-				it = this->connManager->fds.erase( it );
-			else
-				++it;
-		}
+		this->connManager->fds.erase( std::remove_if(this->connManager->fds.begin(), this->connManager->fds.end(), [](const struct pollfd& pfd) {
+			return pfd.fd == -1;
+		}), this->connManager->fds.end());
 	}
 }
 
