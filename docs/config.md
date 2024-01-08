@@ -273,7 +273,7 @@ http {
 - return
   - syntax: code | code URL | URL
   - default: -
-  - context: **server**, **location**
+  - context: **location**
   - 重複可否: yes
     - 重複している場合、先に指定されたものが優先される
 
