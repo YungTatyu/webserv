@@ -2,7 +2,7 @@
 ALPHA	= "A" / "B" / "C" / "D" / "E" / "F" / "G" / "H" / "I" / "J" / "K" / "L" / "M" / "N" / "O" / "P" / "Q" / "R" / "S" / "T" / "U" / "V" / "W" / "X" / "Y" / "Z"
 alpha = "a" / "b" / "c" / "d" / "e" / "f" / "g" / "h" / "i" / "j" / "k" / "l" / "m" / "n" / "o" / "p" / "q" / "r" / "s" / "t" / "u" / "v" / "w" / "x" / "y" / "z"
 VCHAR	= %x21-7E ; visible (printing) characters
-VCHAR-IN-PATH	= (VCHAR - "/") ; VCHARから"/"を除く
+PATH-CHAR = (VCHAR - "/") ; VCHARから"/"を除く
 DIGIT	= "0" / "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9"
 hexdig = DIGIT / "A" / "B" / "C" / "D" / "E" / "F" / "a" / "b" / "c" / "d" / "e" / "f"
 WS	= " " / "\t" / NEWLINE ;スペース、水平タブまたは改行
@@ -14,7 +14,7 @@ status	= 3(DIGIT)
 END_DIRECTIVE	= ";"
 
 absolute-path	= "/" *(path-segment)
-path-segment	= 1*( VCHAR-IN-PATH ) ["/"]
+path-segment	= 1*( PATH-CHAR ) ["/"]
 uri	= absolute-path ;表記は同じだが、uriはrootの後に追加される root/uri
 path	= absolute-path / uri 
 file	= uri
@@ -102,6 +102,7 @@ server-directive	= location-context
 					/ permission-directive
 					/ display-dir-list-directive
 					/ index-file-directive
+					/ return-directive
 
 listen-directive	= "listen" *1(WS) address-port OWS END_DIRECTIVE
 address-port	= address [ ":" port ] / port ;デフォルトaddress:0.0.0.0 デフォルトport:80
