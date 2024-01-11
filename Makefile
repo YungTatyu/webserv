@@ -12,7 +12,9 @@ DEPS_DIR			= dep
 CGI_DIR				= cgi
 CONF_DIR			= conf
 
-SRCS				= $(SRCS_DIR)/main.cpp
+# SRCS				= $(SRCS_DIR)/main.cpp $(SRCS_DIR)/ConnectionManager.cpp $(SRCS_DIR)/EchoServer.cpp $(SRCS_DIR)/NetworkIOHandler.cpp $(SRCS_DIR)/RequestHandler.cpp $(SRCS_DIR)/ServerConfig.cpp
+
+SRCS = $(wildcard $(SRCS_DIR)/*.cpp)
 
 # SERVER_DIR			= server
 # SRCS				+= $(SRCS_DIR)/$(SERVER_DIR)
