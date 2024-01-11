@@ -12,11 +12,14 @@ class ConnectionManager
 		void removeConnection();
 		void addContext( const std::vector<char>& context );
 		const std::vector<char>& getContext() const;
+		void addResponse( const std::vector<char>& context );
+		const std::vector<char>& getResponse() const;
 	
 	private:
 		//std::map<int connfd, std:;string context> connections;
 		int connfd;
 		std::vector<char> context;
+		std::vector<char> response;
 };
 
 #endif

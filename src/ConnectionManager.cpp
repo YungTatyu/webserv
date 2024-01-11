@@ -26,4 +26,13 @@ const std::vector<char>& ConnectionManager::getContext() const
 	return this->context;
 }
 
+void ConnectionManager::addResponse( const std::vector<char>& context )
+{
+	this->response = context;
+}
+
+const std::vector<char>& ConnectionManager::getResponse() const
+{
+	return this->response;
+}
 
