@@ -1,16 +1,16 @@
-#ifndef ECHO_SERVER_HPP
-# define ECHO_SERVER_HPP
+#ifndef Web_SERVER_HPP
+# define Web_SERVER_HPP
 
 # include "ConnectionManager.hpp"
 # include "RequestHandler.hpp"
 # include "NetworkIOHandler.hpp"
 # include "ServerConfig.hpp"
 
-class EchoServer
+class WebServer
 {
 	public:
-		EchoServer();
-		~EchoServer();
+		WebServer();
+		~WebServer();
 		void initializeServer();
 		void eventLoop();
 	
