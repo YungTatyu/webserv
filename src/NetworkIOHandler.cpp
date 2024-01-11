@@ -19,7 +19,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	printf("%s\n","Server running...waiting for connections.");
 }
 
-int NetworkIOHandler::receiveData( ConnectionManager& connManager )
+int NetworkIOHandler::receiveRequest( ConnectionManager& connManager )
 {
 	// char *buf[MAXLINE];
 	std::vector<char> buffer(1024);
@@ -29,7 +29,7 @@ int NetworkIOHandler::receiveData( ConnectionManager& connManager )
 	return 0;
 }
 
-void NetworkIOHandler::sendData( ConnectionManager &connManager )
+void NetworkIOHandler::sendResponse( ConnectionManager &connManager )
 {	
 	send(connManager.getConnection(), connManager.getResponse().data(), connManager.getResponse().size(), 0);
 }

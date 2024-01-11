@@ -13,8 +13,8 @@ class NetworkIOHandler
 {
 	public:
 		void setupSocket( ServerConfig *serverConfig );
-		int receiveData( ConnectionManager& connManager );
-		void sendData( ConnectionManager& connManager );
+		int receiveRequest( ConnectionManager& connManager );
+		void sendResponse( ConnectionManager& connManager );
 		void acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager );
 
