@@ -18,11 +18,11 @@ int	main(void)
 }
 */
 
-#include "EchoServer.hpp"
+#include "WebServer.hpp"
 
 int main()
 {
-	EchoServer server = EchoServer();
+	WebServer server = WebServer();
 	server.eventLoop();
 	return 0;
 }

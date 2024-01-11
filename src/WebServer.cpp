@@ -1,7 +1,7 @@
-#include "EchoServer.hpp"
+#include "WebServer.hpp"
 
-/* EchoServerクラスの実装 */
-EchoServer::EchoServer()
+/* WebServerクラスの実装 */
+WebServer::WebServer()
 {
 	this->serverConfig = new ServerConfig();
 	
@@ -9,7 +9,7 @@ EchoServer::EchoServer()
 	this->initializeServer();
 }
 
-void EchoServer::initializeServer()
+void WebServer::initializeServer()
 {
 	this->ioHandler = new NetworkIOHandler();
 	this->ioHandler->setupSocket( this->serverConfig );
@@ -18,7 +18,7 @@ void EchoServer::initializeServer()
 	this->connManager = new ConnectionManager();
 }
 
-void EchoServer::eventLoop()
+void WebServer::eventLoop()
 {
 	for ( ; ; )
 	{
@@ -34,7 +34,7 @@ void EchoServer::eventLoop()
 	};
 }
 
-EchoServer::~EchoServer()
+WebServer::~WebServer()
 {
 	close( this->listenfd ); // リスニングソケットのクローズ 
 	delete this->ioHandler;
