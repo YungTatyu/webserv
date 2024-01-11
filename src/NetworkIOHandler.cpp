@@ -31,7 +31,7 @@ int NetworkIOHandler::receiveData( ConnectionManager& connManager )
 
 void NetworkIOHandler::sendData( ConnectionManager &connManager )
 {	
-	send(connManager.getConnection(), connManager.getContext().data(), connManager.getContext().size(), 0);
+	send(connManager.getConnection(), connManager.getResponse().data(), connManager.getResponse().size(), 0);
 }
 
 void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
