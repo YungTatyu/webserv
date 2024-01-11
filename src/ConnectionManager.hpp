@@ -18,7 +18,7 @@ class ConnectionManager
 	private:
 		//std::map<int connfd, std:;string context> connections;
 		int connfd;
-		std::vector<char> context;
+		std::vector<char> context; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<char> response;
 };
 

@@ -25,10 +25,10 @@ void WebServer::eventLoop()
 		this->ioHandler->acceptConnection( *this->connManager );
 		for ( ; ; )
 		{
-			if ( this->ioHandler->receiveData( *this->connManager ) == -1 )
+			if ( this->ioHandler->receiveRequest( *this->connManager ) == -1 )
 				break ;
 			this->requestHandler->handle( *this->connManager );
-			this->ioHandler->sendData( *this->connManager );
+			this->ioHandler->sendResponse( *this->connManager );
 		};	
 		this->ioHandler->closeConnection( *this->connManager );
 	};
