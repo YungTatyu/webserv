@@ -15,31 +15,30 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	std::cout << "uri=" << "\"" << requestline.uri << "\"" << std::endl;
 	std::cout << "version=" << "\"" << requestline.version << "\"" << std::endl;
 
-	// std::cout << system("cat index.html") << std::endl;
+	return requestline;
+}
 
+std::string HttpMessage::responseGenerater( std::string request )
+{	
 	std::ifstream file("index.html");
 	std::stringstream buffer;
+	std::string responseBody;
 
 	if (file.is_open())
 	{
 		buffer << file.rdbuf();
 		file.close();
-		std::string fileContent = buffer.str();  
+		responseBody = buffer.str();  
 	}
 	else
 	{
 		std::cout << "could not open file" << std::endl;
-	}
-
-	return requestline;
-}
-
-std::string HttpMessage::responseGenerater( std::string request )
-{
+	}	
+	
     (void)request;
     std::string response;
 
-    std::string responseBody = "<html><body><h1>Hello, World!</h1></body></html>\n";
+    // std::string responseBody = "<html><body><h1>Hello, World!</h1></body></html>\n";
 
     // ステータスライン
     response += "HTTP/1.1 200 OK\r\n";
