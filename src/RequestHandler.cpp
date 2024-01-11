@@ -1,6 +1,5 @@
 #include "RequestHandler.hpp"
 #include "HttpMessage.hpp"
-#include <fstream>
 
 /* RequestHandlerクラスの実装 */
 void RequestHandler::handle( ConnectionManager &connManager )
@@ -9,9 +8,8 @@ void RequestHandler::handle( ConnectionManager &connManager )
     puts( context.data() );
 
     std::string requestData = context.data();
-    HttpMessage::requestParser( requestData );
-
-    std::string response = HttpMessage::responseGenerater( requestData );
+    HttpRequest request = HttpMessage::requestParser( requestData );
+    std::string response = HttpMessage::responseGenerater( request );
 
     std::vector<char> vec(response.begin(), response.end());
     connManager.addResponse( vec );

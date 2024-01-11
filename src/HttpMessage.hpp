@@ -26,7 +26,7 @@ class HttpMessage
 		// HttpRequest static requestParser( std::string rawRequest );
 		// HttpResponse static responseGenerater( HttpRequest requeset );
 		HttpRequest static requestParser( std::string &rawRequest );
-		std::string static responseGenerater( std::string request );
+		std::string static responseGenerater( HttpRequest &request );
 };
 
 #endif
