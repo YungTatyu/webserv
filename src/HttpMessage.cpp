@@ -102,7 +102,7 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		}
 		else
 		{
-			return createResponse( "404 Not Found", "404 Not Found" );
+			return createResponse( readFile("404.html"), "404 Not Found" );
 		}
 	}
 }
