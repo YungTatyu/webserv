@@ -7,7 +7,14 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 
 	//creation of the socket
 	this->listenfd = socket (AF_INET, SOCK_STREAM, 0);
-	
+
+	// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
+	int yes = 1;
+	if (setsockopt(this->listenfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1)
+	{
+		perror("setsockopt");
+	}
+
 	//preparation of the socket address
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
