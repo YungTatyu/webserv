@@ -19,7 +19,7 @@ uri	= absolute-path ;表記は同じだが、uriはrootの後に追加される 
 path	= absolute-path / uri 
 file	= uri
 
-time	= 1*(DIGIT) ["ms" / "s" / "m" / "h"]
+time	= 1*(DIGIT) ["ms" / "s" / "m" / "h" / "d"]
 size	= 1*(DIGIT) ["k" / "K" / "m" / "M"]
 url	= scheme "://" host
 scheme	= "http";
@@ -62,7 +62,7 @@ keepalive-timeout-directive	= "keepalive_timeout" *1(WS) time OWS END_DIRECTIVE;
 display-dir-list-directive	= "autoindex" *1(WS) on-off OWS END_DIRECTIVE
 client-max-body-size-directive	= "client_max_body_size" *1(WS) size OWS END_DIRECTIVE ;Default:1m, size to 0 disables checking of client 
 ;リクエストがディレクトリ(/)に対するもののレスポンスを設定。複数のファイルが存在する場合左から順に探す
-index-file-directive	= "index" *1(WS) 1*(file) OWS END_DIRECTIVE
+index-directive	= "index" *1(WS) 1*(file) OWS END_DIRECTIVE
 
 error-page-directive	= "error_page" *1(WS) error-codes ["=" status] WS uri OWS END_DIRECTIVE
 error-codes = error-code *(SP error-code)
@@ -72,6 +72,18 @@ permission-directive	= permission *1(WS) permission-target OWS END_DIRECTIVE
 permission-target	= IPv4-address "/" IPv4-subnetmask / IPv6-address "/" IPv6-prefix / all 
 permission	= "allow" / "deny"
 
+access-log-directive	= "access_log" *1(WS) access-log-value OWS END_DIRECTIVE
+access-log-value = absolute-path / "off"
+
+userid-directive	= on-off OWS END_DIRECTIVE
+userid-domain-directive	= "userid_domain" *1(WS) *1(alphadigit) OWS END_DIRECTIVE
+
+userid-expires-directive	= "userid_expires" *1(WS) OWS userid-expires-value END_DIRECTIVE
+userid-expires-value	= time / "off"
+
+userid-path-directive	= "userid_path" *1(WS) absolute-path OWS END_DIRECTIVE
+userid-service-directive	= "userid_service" *1(WS) 1*(DIGIT) OWS END_DIRECTIVE
+
 http-directive	= errorlog-directive
 				/ send-timeout-directive
 				/ keepalive-time-directive
@@ -80,7 +92,7 @@ http-directive	= errorlog-directive
 				/ client-max-body-size-directive
 				/ permission-directive
 				/ display-dir-list-directive
-				/ index-file-directive
+				/ index-directive
 
 events-context	= 1("events" OWS "{" OWS *(events-directive) OWS "}")
 events-directive	= *1(worker-connections-directive)
@@ -88,6 +100,9 @@ events-directive	= *1(worker-connections-directive)
 worker-connections-directive	= "worker_connections" *1(WS) 1*(DIGIT) END_DIRECTIVE
 use-directive	= "use" *1(WS) connection-method OWS END_DIRECTIVE
 connection-method	= "select" / "poll" / "kqueue" / "epoll" 
+
+try-files-directive	= "try_files" *1(WS) try-files-value OWS END_DIRECTIVE
+try-files-value	= *2(uri 1*(WS)) ["=" status] OWS END_DIRECTIVE
 
 server-context	= "server" OWS "{" OWS *(server-directive) OWS "}" ;{}の中が空も許容する
 server-directive	= location-context
@@ -101,7 +116,7 @@ server-directive	= location-context
 					/ client-max-body-size-directive
 					/ permission-directive
 					/ display-dir-list-directive
-					/ index-file-directive
+					/ index-directive
 					/ return-directive
 
 listen-directive	= "listen" *1(WS) address-port OWS END_DIRECTIVE
@@ -118,7 +133,7 @@ location-directive	= root-directive
 				/ limit-except-context
 				/ permission-directive
 				/ display-dir-list-directive
-				/ index-file-directive
+				/ index-directive
 				/ client-max-body-size-directive
 				/ errorlog-directive
 				/ send-timeout-directive
@@ -127,5 +142,6 @@ location-directive	= root-directive
 
 
 return-directive	= "return" *1(WS) status *1(WS) uri OWS END_DIRECTIVE ; redirectで使用
+alias-directive	= "alias" *1(WS) absolute-path OWS END_DIRECTIVE
 
 limit-except-context	= "limit_except" *1(WS)  method OWS "{" OWS *(permission-directive) OWS "}"
