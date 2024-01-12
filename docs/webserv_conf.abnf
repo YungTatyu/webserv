@@ -123,6 +123,7 @@ server-directive	= location-context
 					/ error-page-directive
 					/ root-directive
 					/ client-max-body-size-directive
+					/ errorlog-directive
 					/ permission-directive
 					/ autoindex-directive
 					/ index-directive
