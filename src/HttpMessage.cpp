@@ -53,8 +53,8 @@ std::string listDirectory(const std::string& directoryPath)
 {
 	std::stringstream buffer;
 	buffer << "<html><body><h1>Directory listing for " << directoryPath << "</h1>";
-	buffer << "<ul>";
 	buffer << "<hr>";
+	buffer << "<ul>";
 
 	DIR* dir = opendir(directoryPath.c_str());
 	if (dir != NULL)
