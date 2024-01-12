@@ -28,4 +28,5 @@ telnet localhost 3001
 > GET path/to/resource HTTP/1.1
 ```
 3001番ポートでクライアントからの接続を待つので、それにtelnetとかでアクセスしてください。\
-ブラウザ（Chromeでは確認しました。）からも動きます!!
+ブラウザ（Chromeでは確認しました。）からも動きます!!\
+autoindexがあるのでリクエストURIがディレクトリでかつその配下にindex.htmlがあればindex.htmlを表示し、なければディレクトリ配下のファイル一覧が表示されます。

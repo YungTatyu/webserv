@@ -63,9 +63,13 @@ std::string listDirectory(const std::string& directoryPath)
 		while ((entry = readdir(dir)) != NULL)
 		{
 			std::string filename = entry->d_name;
-			// std::cout << directoryPath << std::endl;
-			// std::cout << filename << std::endl;
-			buffer << "<li><a href='" << directoryPath << "/" << filename << "'>" << filename << "</a></li>";
+			buffer << "<li><a href='" << directoryPath;
+			if ( !directoryPath.empty() && directoryPath[directoryPath.size() - 1] != '/' )
+				buffer << "/";
+			buffer << filename << "'>" << filename << "</a>";
+			if ( isDirectory(directoryPath + "/" + filename) )
+				buffer << "/";
+			buffer << "</li>";
 		}
 		closedir(dir);
 	}
