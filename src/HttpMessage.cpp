@@ -2,6 +2,8 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <dirent.h>
+#include <sys/stat.h>
 
 HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 {
@@ -18,21 +20,6 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	return requestline;
 }
 
-#include <sys/types.h>
-#include <dirent.h>
-std::string createHtmlLink(const std::string& path, bool isDir)
-{
-	std::string absolutePath = "./" + path;
-	std::cout << absolutePath << std::endl;
-	std::string link = "<a href=\"" + path + "\">" + path + "</a>";
-	if (isDir)
-	{
-		link += "/";
-	}
-	return link;
-}
-
-#include <sys/stat.h>
 bool isDirectory(const std::string& path)
 {
 	struct stat statbuf;
@@ -43,66 +30,80 @@ bool isDirectory(const std::string& path)
 	return S_ISDIR(statbuf.st_mode);
 }
 
+std::string createResponse(const std::string& body, const std::string& statusCode = "200 OK", const std::string& contentType = "text/html")
+{
+	std::stringstream response;
+	response << "HTTP/1.1 " << statusCode << "\r\n";
+	response << "Content-Type: " << contentType << "\r\n";
+	response << "Content-Length: " << body.length() << "\r\n";
+	response << "\r\n";
+	response << body;
+	return response.str();
+}
+
+std::string readFile(const std::string& filePath)
+{
+	std::ifstream file(filePath.c_str());
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	return buffer.str();
+}
+
+std::string listDirectory(const std::string& directoryPath)
+{
+	std::stringstream buffer;
+	buffer << "<html><body><h1>Directory listing for " << directoryPath << "</h1>";
+	buffer << "<ul>";
+	buffer << "<hr>";
+
+	DIR* dir = opendir(directoryPath.c_str());
+	if (dir != NULL)
+	{
+		struct dirent* entry;
+		while ((entry = readdir(dir)) != NULL)
+		{
+			std::string filename = entry->d_name;
+			// std::cout << directoryPath << std::endl;
+			// std::cout << filename << std::endl;
+			buffer << "<li><a href='" << directoryPath << "/" << filename << "'>" << filename << "</a></li>";
+		}
+		closedir(dir);
+	}
+
+	buffer << "</ul>";
+	buffer << "<hr>";
+	buffer << "</body></html>";
+	return buffer.str();
+}
+
 std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
-	// if (request.uri == "/") // デフォルトアクセスは/
-	// 	request.uri = "/index.html";
 	request.uri = std::string(".") + request.uri;
-	std::ifstream file( request.uri );
-	std::stringstream buffer;
-	std::string responseBody;
-	DIR *dir;
-	struct dirent *ent;
 
-	if (file.is_open())
+	if ( isDirectory(request.uri) )
 	{
-		if ( isDirectory( request.uri ) )
+		std::string indexPath = request.uri + "/index.html";
+		std::ifstream ifile( indexPath.c_str() );
+		if ( ifile )
 		{
-			const char *directoryPath = request.uri.c_str();	
-			if ((dir = opendir(directoryPath)) != NULL)
-			{
-				responseBody = "<html><body><h1>Directory listing for / </h1>";
-				responseBody += "<hr>";
-				responseBody += "<ul>\n";
-				while ((ent = readdir(dir)) != NULL)
-				{
-					std::string path = ent->d_name;
-					bool isDir = (ent->d_type == DT_DIR);
-					responseBody += "<li>";
-					responseBody += createHtmlLink(path, isDir);
-					responseBody += "</li>\n";
-				}
-				responseBody += "</ul>\n";
-				responseBody += "<hr>\n";
-				responseBody += "</body></html>\n";
-				closedir(dir);
-			}
-			else
-			{
-				std::cerr << "Error opening directory." << std::endl;
-				responseBody = "Error opening directory.";
-			}	
+			return createResponse( readFile(indexPath) );
 		}
 		else
 		{
-			buffer << file.rdbuf();
-			responseBody = buffer.str();  
+			return createResponse( listDirectory(request.uri) );
 		}
-		file.close();
 	}
 	else
 	{
-		responseBody = "<html><body><h1>File not found.</h1></body></html>\n";
-	}	
-	
-    std::string response;
-
-    response += "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: text/html; charset=UTF-8\r\n";
-    response += "Content-Length: " + std::to_string(responseBody.length()) + "\r\n";
-    response += "\r\n";
-    response += responseBody;
-
-    return response;
+		std::ifstream ifile( request.uri.c_str() );
+		if ( ifile )
+		{
+			return createResponse( readFile(request.uri) );
+		}
+		else
+		{
+			return createResponse( "404 Not Found", "404 Not Found" );
+		}
+	}
 }
 
