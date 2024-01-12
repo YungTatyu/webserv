@@ -20,7 +20,10 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 
 std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
-	std::ifstream file( request.uri );
+	if (request.uri == "/") // デフォルトアクセスは/
+		request.uri = "/index.html";
+	std::ifstream file( std::string(".") + request.uri );
+	std::cout << request.uri << std::endl;
 	std::stringstream buffer;
 	std::string responseBody;
 
