@@ -18,20 +18,77 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	return requestline;
 }
 
+#include <sys/types.h>
+#include <dirent.h>
+std::string createHtmlLink(const std::string& path, bool isDir)
+{
+	std::string absolutePath = "./" + path;
+	std::cout << absolutePath << std::endl;
+	std::string link = "<a href=\"" + path + "\">" + path + "</a>";
+	if (isDir)
+	{
+		link += "/";
+	}
+	return link;
+}
+
+#include <sys/stat.h>
+bool isDirectory(const std::string& path)
+{
+	struct stat statbuf;
+	if ( stat(path.c_str(), &statbuf) != 0 )
+	{
+		return false;
+	}
+	return S_ISDIR(statbuf.st_mode);
+}
+
 std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
-	if (request.uri == "/") // デフォルトアクセスは/
-		request.uri = "/index.html";
-	std::ifstream file( std::string(".") + request.uri );
-	std::cout << request.uri << std::endl;
+	// if (request.uri == "/") // デフォルトアクセスは/
+	// 	request.uri = "/index.html";
+	request.uri = std::string(".") + request.uri;
+	std::ifstream file( request.uri );
 	std::stringstream buffer;
 	std::string responseBody;
+	DIR *dir;
+	struct dirent *ent;
 
 	if (file.is_open())
 	{
-		buffer << file.rdbuf();
+		if ( isDirectory( request.uri ) )
+		{
+			const char *directoryPath = request.uri.c_str();	
+			if ((dir = opendir(directoryPath)) != NULL)
+			{
+				responseBody = "<html><body><h1>Directory listing for / </h1>";
+				responseBody += "<hr>";
+				responseBody += "<ul>\n";
+				while ((ent = readdir(dir)) != NULL)
+				{
+					std::string path = ent->d_name;
+					bool isDir = (ent->d_type == DT_DIR);
+					responseBody += "<li>";
+					responseBody += createHtmlLink(path, isDir);
+					responseBody += "</li>\n";
+				}
+				responseBody += "</ul>\n";
+				responseBody += "<hr>\n";
+				responseBody += "</body></html>\n";
+				closedir(dir);
+			}
+			else
+			{
+				std::cerr << "Error opening directory." << std::endl;
+				responseBody = "Error opening directory.";
+			}	
+		}
+		else
+		{
+			buffer << file.rdbuf();
+			responseBody = buffer.str();  
+		}
 		file.close();
-		responseBody = buffer.str();  
 	}
 	else
 	{
