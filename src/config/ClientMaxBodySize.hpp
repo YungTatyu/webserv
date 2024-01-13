@@ -8,7 +8,7 @@ namespace config
 class ClientMaxBodySize
 {
 	private:
-		Size	size;
+		Size	size_;
 	public:
 		ClientMaxBodySize();
 		~ClientMaxBodySize();
