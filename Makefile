@@ -54,12 +54,18 @@ $(CGI_EXEFILE):
 clean:
 	$(MAKE) clean -C $(CGI_DIR)
 	$(RM) $(OBJS_DIR) $(DEPS_DIR)
+	rm -rf build
 
 fclean: clean
 	$(MAKE) fclean -C $(CGI_DIR)
 	$(RM) $(NAME)
 
 re: fclean all
+
+test : 
+	cmake -S . -B build -Wno-dev
+	cmake --build build
+	./build/webserv-googletest
 
 -include $(DEPS)
 
@@ -71,4 +77,4 @@ re: fclean all
 # valgrind:
 # 	valgrind --leak-check=full ./$(NAME)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test
