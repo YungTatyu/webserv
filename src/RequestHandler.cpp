@@ -5,7 +5,9 @@
 void RequestHandler::handle( ConnectionManager &connManager )
 {
     const std::vector<char>& context = connManager.getContext();
-    puts( context.data() );
+	// std::cout << "----- request -----" << std::endl;
+	std::cout << context.data() << std::endl;
+	// std::cout << "------- end -------" << std::endl;
 
     std::string requestData = context.data();
     HttpRequest request = HttpMessage::requestParser( requestData );
