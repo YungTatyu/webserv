@@ -8,7 +8,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	//creation of the socket
 	this->listenfd = socket (AF_INET, SOCK_STREAM, 0);
 
-	// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
+	// socketがtimeout中でもbindできるよう開発中はにして、すぐにサーバを再起動できるようにする。
 	int yes = 1;
 	if (setsockopt(this->listenfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1)
 	{
@@ -23,7 +23,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	bind (this->listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
 	listen (this->listenfd, servConfig->getListenQ());
 	
-	printf("%s\n","Server running...waiting for connections.");
+	std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
 }
 
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager )
@@ -50,7 +50,11 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	client = sizeof(cliaddr);
 	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
 	connManager.addConnection( connfd );
-	printf("%s\n","Received request...");
+
+	// show ip address of newly connected client.
+	char clientIp[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &cliaddr.sin_addr, clientIp, INET_ADDRSTRLEN);
+	std::cout << "New client connected from IP: " << clientIp << std::endl;
 }
 
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager )

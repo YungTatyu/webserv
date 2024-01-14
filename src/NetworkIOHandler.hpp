@@ -5,6 +5,8 @@
 # include <stdio.h>
 # include <vector>
 # include <netinet/in.h>
+# include <arpa/inet.h>
+# include <iostream>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 
