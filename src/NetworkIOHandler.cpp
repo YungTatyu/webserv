@@ -54,14 +54,14 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];
 	inet_ntop(AF_INET, &cliaddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-	std::cout << "New client connected from IP: " << clientIp << std::endl;
+	std::cout << "> New client connected from IP: " << clientIp << std::endl;
 }
 
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
 {
 	close( connManager.getConnection() );
 	connManager.removeConnection();
-	printf("%s\n", "Client disconnected.");
+	printf("%s\n", "< Client disconnected.");
 }
 
 

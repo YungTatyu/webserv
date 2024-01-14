@@ -2,8 +2,8 @@
 # define REQUEST_HANDLER_HPP
 
 # include <vector>
-# include <stdio.h>
 # include <string>
+# include <iostream>
 # include "ConnectionManager.hpp"
 
 /* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */

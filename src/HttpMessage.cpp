@@ -13,9 +13,9 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	iss.str( rawRequest );
 	iss >> requestline.method >> requestline.uri >> requestline.version;
 
-	std::cout << "method=" << "\"" << requestline.method << "\"" << std::endl;
-	std::cout << "uri=" << "\"" << requestline.uri << "\"" << std::endl;
-	std::cout << "version=" << "\"" << requestline.version << "\"" << std::endl;
+	// std::cout << "method=" << "\"" << requestline.method << "\"" << std::endl;
+	// std::cout << "uri=" << "\"" << requestline.uri << "\"" << std::endl;
+	// std::cout << "version=" << "\"" << requestline.version << "\"" << std::endl;
 
 	return requestline;
 }
