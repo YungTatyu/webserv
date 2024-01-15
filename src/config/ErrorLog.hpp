@@ -8,10 +8,11 @@ namespace config
 class ErrorLog
 {
 	private:
-		std::string	file;
+		std::string	file_;
 	public:
 		ErrorLog();
 		~ErrorLog();
+		const static char	*kDefaultFile_ = "logs/error.log";
 	};
 } // namespace config
 

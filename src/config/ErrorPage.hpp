@@ -1,6 +1,7 @@
 #ifndef CONFIG_ERROR_PAGE_HPP
 #define CONFIG_ERROR_PAGE_HPP
 
+#include <vector>
 #include <string>
 
 namespace config
@@ -8,8 +9,8 @@ namespace config
 class ErrorPage
 {
 	private:
-		unsigned int	code;
-		std::string	uri;
+		std::vector<unsigned int>	code_list_;
+		std::string	uri_;
 	public:
 		ErrorPage();
 		~ErrorPage();

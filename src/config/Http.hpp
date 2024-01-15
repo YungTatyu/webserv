@@ -8,6 +8,7 @@
 #include "KeepaliveTime.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "ErrorPage.hpp"
+#include "ErrorLog.hpp"
 #include "Root.hpp"
 #include "ClientMaxBodySize.hpp"
 #include "Allow.hpp"
@@ -29,6 +30,7 @@ struct Http
 	Autoindex	autoindex;
 	ClientMaxBodySize	client_max_body_size;
 	std::vector<AccessLog>	access_log_list;
+	std::vector<ErrorLog>	error_log_list;
 	SendTimeout	send_timeout;
 	KeepaliveTime	keepalive_time;
 	KeepaliveTimeout	keepalive_timeout;
