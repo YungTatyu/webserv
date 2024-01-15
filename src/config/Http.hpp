@@ -26,11 +26,12 @@ namespace config
 struct Http
 {
 	Root	root;
-	Index	index;
+	std::vector<Index>	index_list;
 	Autoindex	autoindex;
 	ClientMaxBodySize	client_max_body_size;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
+	std::vector<ErrorPage>	error_page_list;
 	SendTimeout	send_timeout;
 	KeepaliveTime	keepalive_time;
 	KeepaliveTimeout	keepalive_timeout;

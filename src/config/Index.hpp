@@ -8,11 +8,11 @@ namespace config
 class Index
 {
 	private:
-		std::string	file;
+		std::string	file_;
 	public:
 		Index();
 		~Index();
-		const static char	*kDefaultFile = "index.html";
+		const static char	*kDefaultFile_ = "index.html";
 };
 } // namespace config
 
