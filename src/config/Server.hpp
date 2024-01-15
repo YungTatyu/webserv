@@ -9,6 +9,8 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
+#include "KeepaliveTimeout.hpp"
+#include "Listen.hpp"
 
 namespace config
 {
@@ -20,7 +22,8 @@ struct Server
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	std::vector<Index>	index_list;
-
+	std::vector<Listen>	listen_list;
+	KeepaliveTimeout	keepalive_timeout;
 };
 
 } // namespace config

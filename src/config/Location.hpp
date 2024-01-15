@@ -10,6 +10,8 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
+#include "KeepAliveTimeout.hpp"
+#include "Return.hpp"
 
 namespace config
 {
@@ -22,6 +24,8 @@ struct Location
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	std::vector<Index>	index_list;
+	KeepaliveTimeout	keepalive_timeout;
+	std::vector<Return>	return_list;
 };
 } // namespace config
 

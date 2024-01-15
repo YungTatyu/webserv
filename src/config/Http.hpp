@@ -20,6 +20,7 @@
 #include "UseridDomain.hpp"
 #include "UseridExpires.hpp"
 #include "UseridPath.hpp"
+#include "KeepaliveTimeout.hpp"
 
 namespace config
 {
@@ -32,6 +33,7 @@ struct Http
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
+	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
 	KeepaliveTime	keepalive_time;
 	KeepaliveTimeout	keepalive_timeout;
