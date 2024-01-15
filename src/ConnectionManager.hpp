@@ -7,19 +7,19 @@
 class ConnectionManager
 {
 	public:
-		void addConnection( int connfd );
+		void setConnection( int connfd );
 		int getConnection();
 		void removeConnection();
-		void addContext( const std::vector<char>& context );
+		void setContext( const std::vector<char>& context );
 		const std::vector<char>& getContext() const;
-		void addResponse( const std::vector<char>& context );
+		void setResponse( const std::vector<char>& context );
 		const std::vector<char>& getResponse() const;
 	
 	private:
 		//std::map<int connfd, std:;string context> connections;
-		int connfd;
-		std::vector<char> context; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
-		std::vector<char> response;
+		int connfd_;
+		std::vector<char> context_; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
+		std::vector<char> response_;
 };
 
 #endif

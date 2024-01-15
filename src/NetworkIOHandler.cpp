@@ -32,7 +32,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager )
 	std::vector<char> buffer(1024);
 	if ( recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 ) <= 0 )
 		return -1;
-	connManager.addContext( buffer );
+	connManager.setContext( buffer );
 	return 0;
 }
 
@@ -49,7 +49,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 
 	client = sizeof(cliaddr);
 	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
-	connManager.addConnection( connfd );
+	connManager.setConnection( connfd );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

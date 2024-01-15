@@ -3,30 +3,38 @@
 
 #include <string>
 
-class HttpRequest
+namespace httpUtils
 {
-	public:
-		std::string method;
-		std::string uri;
-		std::string version;
-		// header, body
+	bool isDirectory(const std::string& path);
+	std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
+	std::string readFile(const std::string& filePath);
+	std::string listDirectory(const std::string& directoryPath);
+}
+
+struct HttpRequest
+{
+	std::string method;
+	std::string uri;
+	std::string version;
+	// header, body
 };
 
-class HttpResponse
+struct HttpResponse
 {
-	public:
-		std::string status;
-		std::string body;
-		// header
+	std::string status;
+	std::string body;
+	// header
 };
 
 class HttpMessage
 {
 	public:
-		// HttpRequest static requestParser( std::string rawRequest );
 		// HttpResponse static responseGenerater( HttpRequest requeset );
 		HttpRequest static requestParser( std::string &rawRequest );
 		std::string static responseGenerater( HttpRequest &request );
+
+	private:
+		HttpMessage();
 };
 
 #endif

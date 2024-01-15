@@ -20,7 +20,7 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	return requestline;
 }
 
-bool isDirectory(const std::string& path)
+bool httpUtils::isDirectory(const std::string& path)
 {
 	struct stat statbuf;
 	if ( stat(path.c_str(), &statbuf) != 0 )
@@ -30,7 +30,7 @@ bool isDirectory(const std::string& path)
 	return S_ISDIR(statbuf.st_mode);
 }
 
-std::string createResponse(const std::string& body, const std::string& statusCode = "200 OK", const std::string& contentType = "text/html")
+std::string httpUtils::createResponse(const std::string& body, const std::string& statusCode = "200 OK", const std::string& contentType = "text/html")
 {
 	std::stringstream response;
 	response << "HTTP/1.1 " << statusCode << "\r\n";
@@ -41,7 +41,7 @@ std::string createResponse(const std::string& body, const std::string& statusCod
 	return response.str();
 }
 
-std::string readFile(const std::string& filePath)
+std::string httpUtils::readFile(const std::string& filePath)
 {
 	std::ifstream file(filePath.c_str());
 	std::stringstream buffer;
@@ -49,10 +49,11 @@ std::string readFile(const std::string& filePath)
 	return buffer.str();
 }
 
-std::string listDirectory(const std::string& directoryPath)
+std::string httpUtils::listDirectory(const std::string& directoryPath)
 {
 	std::stringstream buffer;
-	buffer << "<html><body><h1>Directory listing for " << directoryPath << "</h1>";
+	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
+	buffer << "<body><h1>Directory listing for " << directoryPath << "</h1>";
 	buffer << "<hr>";
 	buffer << "<ul>";
 
@@ -84,17 +85,17 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
 	request.uri = std::string(".") + request.uri;
 
-	if ( isDirectory(request.uri) )
+	if ( httpUtils::isDirectory(request.uri) )
 	{
 		std::string indexPath = request.uri + "/index.html";
 		std::ifstream ifile( indexPath.c_str() );
 		if ( ifile )
 		{
-			return createResponse( readFile(indexPath) );
+			return httpUtils::createResponse( httpUtils::readFile(indexPath) );
 		}
 		else
 		{
-			return createResponse( listDirectory(request.uri) );
+			return httpUtils::createResponse( httpUtils::listDirectory(request.uri) );
 		}
 	}
 	else
@@ -102,11 +103,11 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		std::ifstream ifile( request.uri.c_str() );
 		if ( ifile )
 		{
-			return createResponse( readFile(request.uri) );
+			return httpUtils::createResponse( httpUtils::readFile(request.uri) );
 		}
 		else
 		{
-			return createResponse( readFile("data/404.html"), "404 Not Found" );
+			return httpUtils::createResponse( httpUtils::readFile("data/404.html"), "404 Not Found" );
 		}
 	}
 }
