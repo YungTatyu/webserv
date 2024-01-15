@@ -1,38 +1,54 @@
 #include "ConnectionManager.hpp"
+#include <poll.h>
 
 /* ConnectionManagerクラスの実装 */
-void ConnectionManager::addConnection( int connfd )
+void ConnectionManager::addConnection( const struct pollfd& pfd )
 {
-	this->connfd = connfd;
+	fds.push_back( pfd );
+	connections[pfd.fd] = ConnectionData();
 }
 
-int ConnectionManager::getConnection()
+void ConnectionManager::updateEvents( int fd, short revents )
 {
-	return this->connfd;
+	(void)revents;
+	/*
+	if ( events == POLLIN )
+		connections[fd].pollfd.events = POLLOUT;
+	else if ( events == POLLOUT )
+		connections[fd].pollfd.events = POLLIN;
+	*/
+	for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
+	{
+		if ( cur->fd == fd )
+		{
+			cur->events = POLLIN;
+		}
+	}
 }
 
-void ConnectionManager::removeConnection()
+void ConnectionManager::removeConnection( int fd )
 {
-	this->connfd = 0;
+	connections.erase( fd );
 }
 
-void ConnectionManager::addContext( const std::vector<char>& context )
+void ConnectionManager::addContext( int fd, const std::vector<char>& context )
 {
-	this->context = context;
+	connections[fd].context = context;
 }
 
-const std::vector<char>& ConnectionManager::getContext() const
+
+const std::vector<char>& ConnectionManager::getContext( int fd ) const
 {
-	return this->context;
+	return connections.at(fd).context;
 }
 
-void ConnectionManager::addResponse( const std::vector<char>& context )
+void ConnectionManager::addResponse( int fd, const std::vector<char>& response )
 {
-	this->response = context;
+	connections.at(fd).response = response;
 }
 
-const std::vector<char>& ConnectionManager::getResponse() const
+const std::vector<char>& ConnectionManager::getResponse( int fd ) const
 {
-	return this->response;
+	return connections.at(fd).response;
 }
 

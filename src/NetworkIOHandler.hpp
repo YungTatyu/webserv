@@ -7,6 +7,7 @@
 # include <netinet/in.h>
 # include <arpa/inet.h>
 # include <iostream>
+# include <poll.h>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 
@@ -15,10 +16,11 @@ class NetworkIOHandler
 {
 	public:
 		void setupSocket( ServerConfig *serverConfig );
-		int receiveRequest( ConnectionManager& connManager );
-		void sendResponse( ConnectionManager& connManager );
+		int receiveRequest( ConnectionManager& connManager, int target );
+		void sendResponse( ConnectionManager& connManager, int target );
 		void acceptConnection( ConnectionManager& connManager );
-		void closeConnection( ConnectionManager& connManager );
+		void closeConnection( ConnectionManager& connManager, int target );
+		int getListenfd();
 
 	private:
 		int listenfd;
