@@ -11,6 +11,9 @@
 #include "Index.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "Listen.hpp"
+#include "Root.hpp"
+#include "ServerName.hpp"
+#include "TryFiles.hpp"
 
 namespace config
 {
@@ -24,6 +27,9 @@ struct Server
 	std::vector<Index>	index_list;
 	std::vector<Listen>	listen_list;
 	KeepaliveTimeout	keepalive_timeout;
+	Root	root;
+	std::vector<ServerName>	server_name_list;
+	TryFiles	try_files;
 };
 
 } // namespace config

@@ -12,6 +12,8 @@
 #include "Index.hpp"
 #include "KeepAliveTimeout.hpp"
 #include "Return.hpp"
+#include "Root.hpp"
+#include "TryFiles.hpp"
 
 namespace config
 {
@@ -26,6 +28,8 @@ struct Location
 	std::vector<Index>	index_list;
 	KeepaliveTimeout	keepalive_timeout;
 	std::vector<Return>	return_list;
+	Root	root;
+	TryFiles	try_files;
 };
 } // namespace config
 

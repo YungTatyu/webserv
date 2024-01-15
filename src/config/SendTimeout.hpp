@@ -7,11 +7,11 @@ namespace config
 {
 class SendTimeout
 {
-private:
-	Time	time;
-public:
-	SendTimeout(); // default time: 60s
-	~SendTimeout();
+	private:
+		Time	time_;
+	public:
+		SendTimeout(); // default time: 60s
+		~SendTimeout();
 };
 } // namespace config
 
