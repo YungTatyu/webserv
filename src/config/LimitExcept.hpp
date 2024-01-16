@@ -13,8 +13,6 @@ struct LimitExcept
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 };
-
 } // namespace config
-
 
 #endif

@@ -13,8 +13,9 @@ class Index
 		Index();
 		~Index();
 		const static char	*kDefaultFile_ = "index.html";
+		const std::string	&getFile() const;
+		void	setFile(const std::string &file);
 };
 } // namespace config
-
 
 #endif

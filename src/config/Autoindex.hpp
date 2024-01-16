@@ -10,9 +10,9 @@ class Autoindex
 	public:
 		Autoindex();
 		~Autoindex();
-		bool	getIsAutoindexOn() const;
-		void	setIsAutoindexOn(const bool is_autoindex_on);
 		const static bool	kDefaultIsAutoindexOn_ = false;
+		const bool	getIsAutoindexOn() const;
+		void	setIsAutoindexOn(const bool is_autoindex_on);
 };
 } // namespace config
 

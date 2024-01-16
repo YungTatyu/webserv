@@ -7,11 +7,11 @@ namespace config
 {
 class KeepaliveTime
 {
-private:
-	Time	time;
-public:
-	KeepaliveTime();
-	~KeepaliveTime();
+	private:
+		Time	time_;
+	public:
+		KeepaliveTime();
+		~KeepaliveTime();
 };
 } // namespace config
 
