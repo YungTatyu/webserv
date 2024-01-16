@@ -5,7 +5,6 @@
 
 #include "AccessLog.hpp"
 #include "SendTimeout.hpp"
-#include "KeepaliveTime.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "ErrorPage.hpp"
 #include "ErrorLog.hpp"
@@ -36,13 +35,12 @@ struct Http
 	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
-	KeepaliveTime	keepalive_time;
 	KeepaliveTimeout	keepalive_timeout;
 	ErrorPage	error_page;
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	Userid	userid;
-	UseridDomain	userid_domain;
+	UseridDomain	*userid_domain; // defaultがnoneなので、configで設定されない限り値を持ちたくない：初期値NULL
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
 	UseridService	user_service;

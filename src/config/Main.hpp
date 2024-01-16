@@ -7,11 +7,14 @@
 #include "Http.hpp"
 namespace config
 {
-struct Main
+class Main
 {
-	std::vector<ErrorLog>	error_log_list;
-	Events	events;
-	Http	http;
+	public:
+		Main() {}
+		~Main() {}
+		std::vector<ErrorLog>	error_log_list;
+		Events	events;
+		Http	http;
 };
 
 } // namespace config 
