@@ -15,12 +15,12 @@ class TryFiles
 	public:
 		TryFiles() {}
 		~TryFiles() {}
-		std::vector<std::string>	&get_file_list() const;
-		std::string	&get_uri() const;
-		unsigned int	&get_code() const;
-		void	add_file(std::string &file);
-		void	set_uri(std::string &uri);
-		void	set_code(unsigned int &code);
+		std::vector<std::string>	&getFileList() const;
+		std::string	&getUri() const;
+		unsigned int	&getCode() const;
+		void	addFile(std::string &file);
+		void	setUri(std::string &uri);
+		void	setCode(unsigned int &code);
 };
 } // namespace config
 

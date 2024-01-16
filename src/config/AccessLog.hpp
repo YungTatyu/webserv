@@ -12,8 +12,8 @@ class AccessLog
 	public:
 		AccessLog();
 		~AccessLog();
-		const std::string	&get_file() const;
-		void	set_file(const std::string	&file);
+		const std::string	&getFile() const;
+		void	setFile(const std::string	&file);
 		const static char	*kDefaultFile_ = "logs/access.log";
 };
 } // namespace config

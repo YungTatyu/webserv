@@ -12,8 +12,8 @@ class Allow
 	public:
 		Allow();
 		~Allow();
-		const std::string	&get_address() const;
-		void	set_address(const std::string &address);
+		const std::string	&getAddress() const;
+		void	setAddress(const std::string &address);
 };
 } // namespace config
 

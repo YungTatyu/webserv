@@ -13,10 +13,10 @@ class Return
 	public:
 		Return() {}
 		~Return() {}
-		const unsigned int	&get_code() const;
-		const std::string	&get_url() const;
-		void	set_code(const unsigned int &code);
-		void	set_url(const std::string &url);
+		const unsigned int	&getCode() const;
+		const std::string	&getUrl() const;
+		void	setCode(const unsigned int &code);
+		void	setUrl(const std::string &url);
 };
 } // namespace config
 

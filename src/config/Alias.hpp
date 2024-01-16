@@ -12,8 +12,8 @@ class Alias
 	public:
 		Alias() {}
 		~Alias() {}
-		const std::string	&get_path() const;
-		void	set_path(const std::string &path);
+		const std::string	&getPath() const;
+		void	setPath(const std::string &path);
 };	
 } // namespace config
 

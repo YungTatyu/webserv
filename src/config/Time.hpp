@@ -14,14 +14,14 @@ class Time
 	public:
 		Time();
 		~Time();
-		void	set_time(
+		void	setTime(
 			const unsigned int &d,
 			const unsigned int &h,
 			const unsigned int &m,
 			const unsigned int &s,
 			const unsigned int &ms
 		);
-		const unsigned int	&get_time_in_seconds() const;
+		const unsigned int	&getTimeInSeconds() const;
 
 };
 } // namespace config

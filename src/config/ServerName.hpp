@@ -13,8 +13,8 @@ class ServerName
 		ServerName() {}
 		~ServerName() {}
 		const static char	*kDefaultNmae_ = "";
-		const std::string	&get_name() const;
-		void	set_name(const std::string &name);
+		const std::string	&getName() const;
+		void	setName(const std::string &name);
 };
 } // namespace config
 

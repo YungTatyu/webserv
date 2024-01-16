@@ -15,12 +15,12 @@ class ErrorPage
 	public:
 		ErrorPage();
 		~ErrorPage();
-		const std::vector<unsigned int>	&get_code_list() const;
-		const unsigned int	&get_response() const;
-		const std::string	&get_uri() const;
-		void	add_code(const unsigned int &code);
-		void	set_response(const unsigned int &response);
-		void	set_uri(const std::string &uri);
+		const std::vector<unsigned int>	&getCodeList() const;
+		const unsigned int	&getResponse() const;
+		const std::string	&getUri() const;
+		void	addCode(const unsigned int &code);
+		void	setResponse(const unsigned int &response);
+		void	setUri(const std::string &uri);
 };
 } // namespace config
 
