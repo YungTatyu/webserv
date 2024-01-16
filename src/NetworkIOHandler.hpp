@@ -3,12 +3,14 @@
 
 # include <unistd.h>
 # include <stdio.h>
-# include <vector>
 # include <netinet/in.h>
 # include <arpa/inet.h>
+# include <vector>
 # include <iostream>
+# include <cstdlib>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
+# include "SysCallWrapper.hpp"
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
