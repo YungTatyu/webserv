@@ -20,6 +20,7 @@
 #include "UseridDomain.hpp"
 #include "UseridExpires.hpp"
 #include "UseridPath.hpp"
+#include "UseridService.hpp"
 #include "KeepaliveTimeout.hpp"
 
 namespace config
@@ -44,6 +45,7 @@ struct Http
 	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
+	UseridService	user_service;
 };
 } // namespace config
 

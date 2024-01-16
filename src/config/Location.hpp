@@ -14,6 +14,11 @@
 #include "Return.hpp"
 #include "Root.hpp"
 #include "TryFiles.hpp"
+#include "Userid.hpp"
+#include "UseridDomain.hpp"
+#include "UseridExpires.hpp"
+#include "UseridPath.hpp"
+#include "UseridService.hpp"
 
 namespace config
 {
@@ -30,6 +35,11 @@ struct Location
 	std::vector<Return>	return_list;
 	Root	root;
 	TryFiles	try_files;
+	Userid	userid;
+	UseridDomain	userid_domain;
+	UseridExpires	userid_expires;
+	UseridPath	userid_path;
+	UseridService	user_service;
 };
 } // namespace config
 

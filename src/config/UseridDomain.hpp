@@ -8,11 +8,13 @@ namespace config
 class UseridDomain
 {
 	private:
-		std::string	name;
+		std::string	name_;
 	public:
 		UseridDomain();
 		~UseridDomain();
 		const static char	*kDefaultName = "none";
+		const std::string	&getName() const;
+		void	setName(const std::string &name);
 };
 } // namespace config
 
