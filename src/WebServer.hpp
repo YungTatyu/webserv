@@ -15,7 +15,6 @@ class WebServer
 		void eventLoop();
 	
 	private:
-		int listenfd; // listenソケットのfd
 		NetworkIOHandler *ioHandler;
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;

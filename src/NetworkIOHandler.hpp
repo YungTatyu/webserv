@@ -19,9 +19,10 @@ class NetworkIOHandler
 		void sendResponse( ConnectionManager& connManager );
 		void acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager );
+		int getListenfd();
 
 	private:
-		int listenfd;
+		int listenfd_; // リスニングソケットを管理
 };
 
 #endif

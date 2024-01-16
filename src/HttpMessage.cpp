@@ -107,7 +107,7 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		}
 		else
 		{
-			return httpUtils::createResponse( httpUtils::readFile("data/404.html"), "404 Not Found" );
+			return httpUtils::createResponse( httpUtils::readFile("html/404.html"), "404 Not Found" );
 		}
 	}
 }

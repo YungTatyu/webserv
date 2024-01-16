@@ -36,7 +36,7 @@ void WebServer::eventLoop()
 
 WebServer::~WebServer()
 {
-	close( this->listenfd ); // リスニングソケットのクローズ 
+	close( this->ioHandler->getListenfd() ); // リスニングソケットのクローズ 
 	close( this->connManager->getConnection() ); // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
 	delete this->ioHandler;
 	delete this->requestHandler;

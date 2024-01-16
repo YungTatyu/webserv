@@ -6,11 +6,11 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	struct sockaddr_in servaddr;
 
 	//creation of the socket
-	this->listenfd = socket (AF_INET, SOCK_STREAM, 0);
+	this->listenfd_ = socket (AF_INET, SOCK_STREAM, 0);
 
-	// socketがtimeout中でもbindできるよう開発中はにして、すぐにサーバを再起動できるようにする。
+	// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
 	int yes = 1;
-	if (setsockopt(this->listenfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1)
+	if (setsockopt(this->listenfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1)
 	{
 		perror("setsockopt");
 	}
@@ -20,8 +20,8 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons( servConfig->getServPort() );
 	
-	bind (this->listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
-	listen (this->listenfd, servConfig->getListenQ());
+	bind (this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr));
+	listen (this->listenfd_, servConfig->getListenQ());
 	
 	std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
 }
@@ -48,7 +48,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	socklen_t client;
 
 	client = sizeof(cliaddr);
-	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
+	connfd = accept (listenfd_, (struct sockaddr *) &cliaddr, &client);
 	connManager.setConnection( connfd );
 
 	// show ip address of newly connected client.
@@ -64,4 +64,8 @@ void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
 	printf("%s\n", "< Client disconnected.");
 }
 
+int NetworkIOHandler::getListenfd()
+{
+	return this->listenfd_;
+}
 
