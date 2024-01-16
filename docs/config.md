@@ -147,18 +147,6 @@ http {
   send_timeout 1000s;
 }
 ```
-- keepalive_time
-  - syntax: positive-number[ ms / s / m / h ]
-  - default: 1h
-  - context: **http**, **server**, **location**
-  - 重複可否: yes 同context内での重複はno
-
-```
-http {
-  keepalive_time 2h;
-}
-```
-
 
 - keepalive_timeout
   - syntax: positive-number[ ms / s / m / h ]

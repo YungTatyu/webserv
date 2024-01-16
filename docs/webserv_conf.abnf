@@ -57,7 +57,6 @@ errorlog-directive	= "error_log" *1(WS) file OWS END_DIRECTIVE ;Default: logs/er
 level	= "warn" / "error" / "emerg" ;指定したlevel以上を出力する
 
 send-timeout-directive	= "send_timeout" *1(WS) time END_DIRECTIVE;Default: 60s
-keepalive-time-directive	= "keepalive_time" *1(WS) time END_DIRECTIVE
 root-directive	= "root" *1(WS) absolute-path OWS END_DIRECTIVE
 keepalive-timeout-directive	= "keepalive_timeout" *1(WS) time OWS END_DIRECTIVE;Default: 75s
 autoindex-directive	= "autoindex" *1(WS) on-off OWS END_DIRECTIVE
@@ -88,7 +87,6 @@ userid-service-directive	= "userid_service" *1(WS) 1*(DIGIT) OWS END_DIRECTIVE
 
 http-directive	= errorlog-directive
 				/ send-timeout-directive
-				/ keepalive-time-directive
 				/ keepalive-timeout-directive
 				/ root-directive
 				/ client-max-body-size-directive
@@ -118,7 +116,6 @@ server-directive	= location-context
 					/ listen-directive
 					/ server-name-directive
 					/ send-timeout-directive
-					/ keepalive-time-directive
 					/ keepalive-timeout-directive
 					/ error-page-directive
 					/ root-directive
@@ -154,7 +151,6 @@ location-directive	= root-directive
 				/ client-max-body-size-directive
 				/ errorlog-directive
 				/ send-timeout-directive
-				/ keepalive-time-directive
 				/ keepalive-timeout-directive
 				/ access-log-directive
 				/ alias-directive
