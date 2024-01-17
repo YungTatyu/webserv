@@ -13,14 +13,13 @@ class ConnectionData
 
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
 class ConnectionManager
-{
-	public:
-		void addConnection( const struct pollfd& pfd );
+{ public:
+		void setConnection( const struct pollfd& pfd );
 		void updateEvents( int fd, short revents );
 		void removeConnection( int fd );
-		void addContext( int fd, const std::vector<char>& context );
+		void setContext( int fd, const std::vector<char>& context );
 		const std::vector<char>& getContext( int fd ) const;
-		void addResponse( int fd, const std::vector<char>& response );
+		void setResponse( int fd, const std::vector<char>& response );
 		const std::vector<char>& getResponse( int fd ) const;
 		std::vector<struct pollfd> fds;
 	

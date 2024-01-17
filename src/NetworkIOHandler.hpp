@@ -3,13 +3,15 @@
 
 # include <unistd.h>
 # include <stdio.h>
-# include <vector>
 # include <netinet/in.h>
 # include <arpa/inet.h>
+# include <vector>
 # include <iostream>
+# include <cstdlib>
 # include <poll.h>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
+# include "SysCallWrapper.hpp"
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
@@ -23,7 +25,7 @@ class NetworkIOHandler
 		int getListenfd();
 
 	private:
-		int listenfd;
+		int listenfd_; // リスニングソケットを管理
 };
 
 #endif

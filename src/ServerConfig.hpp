@@ -11,8 +11,8 @@ class ServerConfig
 		int getListenQ();
 
 	private:
-		int serv_port; /*port*/
-		int listen_q; /*maximum number of client connections */
+		int servPort_; /*port*/
+		int listenQ_; /*maximum number of client connections */
 };
 
 #endif

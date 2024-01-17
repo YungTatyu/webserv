@@ -14,6 +14,6 @@ void RequestHandler::handle( ConnectionManager &connManager, int target )
     std::string response = HttpMessage::responseGenerater( request );
 
     std::vector<char> vec(response.begin(), response.end());
-    connManager.addResponse( target, vec );
+    connManager.setResponse( target, vec );
 }
 

@@ -19,6 +19,9 @@ autoindexとエラーページを追加しました。
 ### HttpMessageクラス
 * HTTPリクエストとレスポンスのエンティティクラスを保持し、リクエストのパース、レスポンス生成を行う。
 
+### SysCallWrapper名前空間
+* socket(), bind(), listen()などのシステムコールの実行とエラーをハンドルするラッパー関数Socket(), Bind(), Listen()などを定義。
+
 ### 使い方
 ```
 make && ./webserv

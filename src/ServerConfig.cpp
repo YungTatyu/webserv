@@ -4,17 +4,17 @@
 void ServerConfig::loadConfiguration()
 {
 	/* ConfファイルをパースしてデータをServConfigクラスにセットする */
-	this->serv_port = 3001;
-	this->listen_q = 8;
+	this->servPort_ = 3001;
+	this->listenQ_ = 8;
 }
 
 int ServerConfig::getServPort()
 {
-	return this->serv_port;
+	return this->servPort_;
 }
 
 int ServerConfig::getListenQ()
 {
-	return this->listen_q;
-
+	return this->listenQ_;
 }
+

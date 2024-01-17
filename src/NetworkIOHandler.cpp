@@ -3,27 +3,34 @@
 /* NetworkIOHandlerクラスの実装 */
 void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 {
-	struct sockaddr_in servaddr;
-
-	//creation of the socket
-	this->listenfd = socket (AF_INET, SOCK_STREAM, 0);
-
-	// socketがtimeout中でもbindできるよう開発中はにして、すぐにサーバを再起動できるようにする。
-	int yes = 1;
-	if (setsockopt(this->listenfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1)
+	try
 	{
-		perror("setsockopt");
-	}
+		//creation of the socket
+		this->listenfd_ = SysCallWrapper::Socket( AF_INET, SOCK_STREAM, 0 );
 
-	//preparation of the socket address
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons( servConfig->getServPort() );
-	
-	bind (this->listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
-	listen (this->listenfd, servConfig->getListenQ());
-	
-	std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
+		// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
+		int yes = 1;
+		SysCallWrapper::Setsockopt( this->listenfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes) );
+
+		//preparation of the socket address
+		struct sockaddr_in servaddr;
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		servaddr.sin_port = htons( servConfig->getServPort() );
+		
+		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
+		SysCallWrapper::Listen( this->listenfd_, servConfig->getListenQ() );
+		
+		std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
+
+	}
+	catch ( const std::runtime_error& e )
+	{
+		// std::cout << e.what() << std::endl;
+		if ( this->listenfd_ != -1 )
+			close( this->listenfd_ );
+		exit( EXIT_FAILURE );
+	}
 }
 
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target )
@@ -32,7 +39,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target
 	std::vector<char> buffer(1024);
 	if ( recv( target, buffer.data(), buffer.size(), 0 ) <= 0 )
 		return -1;
-	connManager.addContext( target, buffer );
+	connManager.setContext( target, buffer );
 	return 0;
 }
 
@@ -48,13 +55,13 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	socklen_t client;
 
 	client = sizeof(cliaddr);
-	connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &client);
+	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
 
 	struct pollfd setting;
 	setting.fd = connfd;
 	setting.events = POLLIN;
 	setting.revents = 0;
-	connManager.addConnection( setting );
+	connManager.setConnection( setting );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];
@@ -71,6 +78,6 @@ void NetworkIOHandler::closeConnection( ConnectionManager& connManager, int targ
 
 int NetworkIOHandler::getListenfd()
 {
-	return this->listenfd;
+	return this->listenfd_;
 }
 

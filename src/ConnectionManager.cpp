@@ -2,7 +2,7 @@
 #include <poll.h>
 
 /* ConnectionManagerクラスの実装 */
-void ConnectionManager::addConnection( const struct pollfd& pfd )
+void ConnectionManager::setConnection( const struct pollfd& pfd )
 {
 	fds.push_back( pfd );
 	connections[pfd.fd] = ConnectionData();
@@ -31,7 +31,7 @@ void ConnectionManager::removeConnection( int fd )
 	connections.erase( fd );
 }
 
-void ConnectionManager::addContext( int fd, const std::vector<char>& context )
+void ConnectionManager::setContext( int fd, const std::vector<char>& context )
 {
 	connections[fd].context = context;
 }
@@ -42,7 +42,7 @@ const std::vector<char>& ConnectionManager::getContext( int fd ) const
 	return connections.at(fd).context;
 }
 
-void ConnectionManager::addResponse( int fd, const std::vector<char>& response )
+void ConnectionManager::setResponse( int fd, const std::vector<char>& response )
 {
 	connections.at(fd).response = response;
 }
