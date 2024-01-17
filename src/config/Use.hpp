@@ -5,7 +5,7 @@ namespace config
 {
 class Use
 {
-	private:
+	public:
 		enum CONNECTION_METHOD
 		{
 			SELECT,
@@ -13,12 +13,12 @@ class Use
 			KQUEUE,
 			EPOLL,
 		};
-		CONNECTION_METHOD	connection_method_;
-	public:
 		Use();
 		~Use();
 		const CONNECTION_METHOD	getConnectionMethod() const;
 		void	setConnectionMethod();
+	private:
+		CONNECTION_METHOD	connection_method_;
 };	
 } // namespace config
 

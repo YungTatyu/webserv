@@ -13,5 +13,4 @@ struct Events
 };
 } // namespace config
 
-
 #endif

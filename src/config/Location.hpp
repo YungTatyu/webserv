@@ -27,6 +27,7 @@ class Location
 	public:
 		Location() {}
 		~Location() {}
+		std::string	uri_;
 		std::vector<AccessLog>	access_log_list;
 		std::vector<ErrorLog>	error_log_list;
 		std::vector<ErrorPage>	error_page_list;
