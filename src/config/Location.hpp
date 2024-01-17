@@ -25,7 +25,12 @@ namespace config
 class Location
 {
 	public:
-		Location() {}
+		Location(const std::string &uri) :
+			uri_(uri),
+			alias(NULL),
+			try_files(NULL),
+			userid_domain(NULL)
+			{}
 		~Location() {}
 		std::string	uri_;
 		std::vector<AccessLog>	access_log_list;
