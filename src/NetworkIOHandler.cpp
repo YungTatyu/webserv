@@ -1,4 +1,5 @@
 #include "NetworkIOHandler.hpp"
+#include "EventManager.hpp"
 
 /* NetworkIOHandlerクラスの実装 */
 void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
@@ -48,7 +49,7 @@ void NetworkIOHandler::sendResponse( ConnectionManager &connManager, int target 
 	send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0);
 }
 
-void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
+void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
@@ -62,6 +63,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	setting.events = POLLIN;
 	setting.revents = 0;
 	connManager.setConnection( setting );
+	eventManager.fds.push_back( setting );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

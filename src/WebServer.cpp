@@ -1,4 +1,5 @@
 #include "WebServer.hpp"
+#include "EventManager.hpp"
 
 /* WebServerクラスの実装 */
 WebServer::WebServer()
@@ -16,6 +17,7 @@ void WebServer::initializeServer()
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
+	this->eventManager = new EventManager();
 }
 //
 // #include <iostream>
@@ -46,44 +48,44 @@ void WebServer::eventLoop()
 	tmppollfd.fd = this->ioHandler->getListenfd();
 	tmppollfd.events = POLLIN;
 	tmppollfd.revents = 0;
-	this->connManager->fds.push_back( tmppollfd );
+	this->eventManager->fds.push_back( tmppollfd );
 
 	for ( ; ; )
 	{
-		poll ( this->connManager->fds.data(), this->connManager->fds.size(), -1 );
+		poll ( this->eventManager->fds.data(), this->eventManager->fds.size(), -1 );
 
 		//　ここをイテレータで走査したら、要素を追加したときにイテレータが無効になったりしてバグる。
-		size_t tmpsize = this->connManager->fds.size();
+		size_t tmpsize = this->eventManager->fds.size();
 		for ( size_t i = 0; i < tmpsize; ++i )
 		{
-			if ( this->connManager->fds[i].revents & POLLIN )
+			if ( this->eventManager->fds[i].revents & POLLIN )
 			{
-				if ( this->connManager->fds[i].fd == this->ioHandler->getListenfd() )	
+				if ( this->eventManager->fds[i].fd == this->ioHandler->getListenfd() )	
 				{
-					this->ioHandler->acceptConnection( *this->connManager );
+					this->ioHandler->acceptConnection( *this->connManager, *this->eventManager );
 				}
 				else
 				{
-					if ( this->ioHandler->receiveRequest( *this->connManager, this->connManager->fds[i].fd ) == -1 )
+					if ( this->ioHandler->receiveRequest( *this->connManager, this->eventManager->fds[i].fd ) == -1 )
 					{
-						this->ioHandler->closeConnection( *this->connManager, this->connManager->fds[i].fd );
-						this->connManager->fds[i].fd = -1;
+						this->ioHandler->closeConnection( *this->connManager, this->eventManager->fds[i].fd );
+						this->eventManager->fds[i].fd = -1;
 						continue ;
 					}
-					this->requestHandler->handle( *this->connManager, this->connManager->fds[i].fd );
-					this->connManager->updateEvents( this->connManager->fds[i].fd , POLLOUT );
+					this->requestHandler->handle( *this->connManager, this->eventManager->fds[i].fd );
+					this->eventManager->updateEvents( this->eventManager->fds[i].fd , POLLOUT );
 				}
 			}
-			else if ( this->connManager->fds[i].revents & POLLOUT )
+			else if ( this->eventManager->fds[i].revents & POLLOUT )
 			{
-				this->ioHandler->sendResponse( *this->connManager, this->connManager->fds[i].fd  );
-				this->connManager->updateEvents( this->connManager->fds[i].fd , POLLIN );
+				this->ioHandler->sendResponse( *this->connManager, this->eventManager->fds[i].fd  );
+				this->eventManager->updateEvents( this->eventManager->fds[i].fd , POLLIN );
 			}
 		}
 
-		this->connManager->fds.erase(
-			std::remove_if( this->connManager->fds.begin(), this->connManager->fds.end(), isFdNegative ),
-			this->connManager->fds.end()
+		this->eventManager->fds.erase(
+			std::remove_if( this->eventManager->fds.begin(), this->eventManager->fds.end(), isFdNegative ),
+			this->eventManager->fds.end()
 		);
 	}
 }

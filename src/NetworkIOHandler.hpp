@@ -9,18 +9,19 @@
 # include <iostream>
 # include <cstdlib>
 # include <poll.h>
+# include <fcntl.h>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
+# include "EventManager.hpp"
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
-{
-	public:
+{ public:
 		void setupSocket( ServerConfig *serverConfig );
 		int receiveRequest( ConnectionManager& connManager, int target );
 		void sendResponse( ConnectionManager& connManager, int target );
-		void acceptConnection( ConnectionManager& connManager );
+		void acceptConnection( ConnectionManager& connManager, EventManager& eventManager );
 		void closeConnection( ConnectionManager& connManager, int target );
 		int getListenfd();
 
