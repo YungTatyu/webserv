@@ -13,7 +13,8 @@ class ConnectionData
 
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
 class ConnectionManager
-{ public:
+{
+	public:
 		void setConnection( const struct pollfd& pfd );
 		void updateEvents( int fd, short revents );
 		void removeConnection( int fd );

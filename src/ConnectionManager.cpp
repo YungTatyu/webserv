@@ -10,18 +10,14 @@ void ConnectionManager::setConnection( const struct pollfd& pfd )
 
 void ConnectionManager::updateEvents( int fd, short revents )
 {
-	(void)revents;
-	/*
-	if ( events == POLLIN )
-		connections[fd].pollfd.events = POLLOUT;
-	else if ( events == POLLOUT )
-		connections[fd].pollfd.events = POLLIN;
-	*/
 	for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
 	{
-		if ( cur->fd == fd )
+		if ( cur->fd == fd)
 		{
-			cur->events = POLLIN;
+			if ( revents == POLLIN )
+				cur->events = POLLIN;
+			else if ( revents == POLLOUT )
+				cur->events = POLLOUT;
 		}
 	}
 }
