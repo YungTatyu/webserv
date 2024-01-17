@@ -8,16 +8,13 @@ void ConnectionManager::setConnection( const struct pollfd& pfd )
 	connections[pfd.fd] = ConnectionData();
 }
 
-void ConnectionManager::updateEvents( int fd, short revents )
+void ConnectionManager::updateEvents( int fd, short events )
 {
 	for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
 	{
 		if ( cur->fd == fd)
 		{
-			if ( revents == POLLIN )
-				cur->events = POLLIN;
-			else if ( revents == POLLOUT )
-				cur->events = POLLOUT;
+			cur->events = events;
 		}
 	}
 }

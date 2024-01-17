@@ -16,7 +16,7 @@ class ConnectionManager
 {
 	public:
 		void setConnection( const struct pollfd& pfd );
-		void updateEvents( int fd, short revents );
+		void updateEvents( int fd, short events );
 		void removeConnection( int fd );
 		void setContext( int fd, const std::vector<char>& context );
 		const std::vector<char>& getContext( int fd ) const;
@@ -26,9 +26,6 @@ class ConnectionManager
 	
 	private:
 		std::map<int, class ConnectionData> connections;
-		// int connfd;
-		// std::vector<char> context; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
-		// std::vector<char> response;
 };
 
 #endif
