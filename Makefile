@@ -12,7 +12,9 @@ DEPS_DIR			= dep
 CGI_DIR				= cgi
 CONF_DIR			= conf
 
-SRCS				= $(SRCS_DIR)/main.cpp
+# SRCS				= $(SRCS_DIR)/main.cpp $(SRCS_DIR)/ConnectionManager.cpp $(SRCS_DIR)/EchoServer.cpp $(SRCS_DIR)/NetworkIOHandler.cpp $(SRCS_DIR)/RequestHandler.cpp $(SRCS_DIR)/ServerConfig.cpp
+
+SRCS = $(wildcard $(SRCS_DIR)/*.cpp)
 
 # SERVER_DIR			= server
 # SRCS				+= $(SRCS_DIR)/$(SERVER_DIR)
@@ -52,12 +54,18 @@ $(CGI_EXEFILE):
 clean:
 	$(MAKE) clean -C $(CGI_DIR)
 	$(RM) $(OBJS_DIR) $(DEPS_DIR)
+	rm -rf build
 
 fclean: clean
 	$(MAKE) fclean -C $(CGI_DIR)
 	$(RM) $(NAME)
 
 re: fclean all
+
+test : 
+	cmake -S . -B build -Wno-dev
+	cmake --build build
+	./build/webserv-googletest
 
 -include $(DEPS)
 
@@ -69,4 +77,4 @@ re: fclean all
 # valgrind:
 # 	valgrind --leak-check=full ./$(NAME)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test
