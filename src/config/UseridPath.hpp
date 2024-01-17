@@ -10,12 +10,14 @@ class UseridPath
 	private:
 		std::string	path_;
 	public:
-		UseridPath();
-		~UseridPath();
-		const static char	*kDefaultPath_ = "/";
-		const std::string	&getPath() const;
-		void	setPath(const std::string &path);
+		UseridPath() : path_(kDefaultPath_) {}
+		~UseridPath() {}
+		const static char	*kDefaultPath_;
+		const std::string	&getPath() const { return this->path_; }
+		void	setPath(const std::string &path) { this->path_ = path; }
 };
+
+const char	*kDefaultPath_ = "/";
 } // namespace config
 
 #endif

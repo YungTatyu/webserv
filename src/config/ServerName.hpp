@@ -12,10 +12,12 @@ class ServerName
 	public:
 		ServerName() {}
 		~ServerName() {}
-		const static char	*kDefaultNmae_ = "";
-		const std::string	&getName() const;
-		void	setName(const std::string &name);
+		const static char	*kDefaultNmae_;
+		const std::string	&getName() const { return this->name_; }
+		void	setName(const std::string &name) { this->name_ = name; }
 };
+
+const char	*ServerName::kDefaultNmae_ = "";
 } // namespace config
 
 #endif

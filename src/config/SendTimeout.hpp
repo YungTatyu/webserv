@@ -10,8 +10,8 @@ class SendTimeout
 	private:
 		Time	time_;
 	public:
-		SendTimeout(); // default time: 60s
-		~SendTimeout();
+		SendTimeout() {} // default time: 60s
+		~SendTimeout() {}
 };
 } // namespace config
 

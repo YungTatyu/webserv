@@ -12,10 +12,12 @@ class UseridDomain
 	public:
 		UseridDomain();
 		~UseridDomain();
-		const static char	*kDefaultName = "none";
-		const std::string	&getName() const;
-		void	setName(const std::string &name);
+		const static char	*kDefaultName;
+		const std::string	&getName() const { return this->name_; }
+		void	setName(const std::string &name) { this->name_ = name; }
 };
+
+const char	*UseridDomain::kDefaultName = "none";
 } // namespace config
 
 #endif
