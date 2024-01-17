@@ -10,7 +10,7 @@
 class RequestHandler
 {
 	public:
-		void handle( ConnectionManager &connManager );
+		void handle( ConnectionManager &connManager, int target );
 };
 
 #endif

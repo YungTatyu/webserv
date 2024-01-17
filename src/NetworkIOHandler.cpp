@@ -33,19 +33,19 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	}
 }
 
-int NetworkIOHandler::receiveRequest( ConnectionManager& connManager )
+int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target )
 {
 	// char *buf[MAXLINE];
 	std::vector<char> buffer(1024);
-	if ( recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 ) <= 0 )
+	if ( recv( target, buffer.data(), buffer.size(), 0 ) <= 0 )
 		return -1;
-	connManager.setContext( buffer );
+	connManager.setContext( target, buffer );
 	return 0;
 }
 
-void NetworkIOHandler::sendResponse( ConnectionManager &connManager )
+void NetworkIOHandler::sendResponse( ConnectionManager &connManager, int target )
 {	
-	send(connManager.getConnection(), connManager.getResponse().data(), connManager.getResponse().size(), 0);
+	send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0);
 }
 
 void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
@@ -56,7 +56,12 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 
 	client = sizeof(cliaddr);
 	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
-	connManager.setConnection( connfd );
+
+	struct pollfd setting;
+	setting.fd = connfd;
+	setting.events = POLLIN;
+	setting.revents = 0;
+	connManager.setConnection( setting );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];
@@ -64,10 +69,10 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	std::cout << "> New client connected from IP: " << clientIp << std::endl;
 }
 
-void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
+void NetworkIOHandler::closeConnection( ConnectionManager& connManager, int target )
 {
-	close( connManager.getConnection() );
-	connManager.removeConnection();
+	close( target );
+	connManager.removeConnection( target );
 	printf("%s\n", "< Client disconnected.");
 }
 
