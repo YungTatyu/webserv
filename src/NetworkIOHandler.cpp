@@ -8,6 +8,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	{
 		//creation of the socket
 		this->listenfd_ = SysCallWrapper::Socket( AF_INET, SOCK_STREAM, 0 );
+		fcntl( this->listenfd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 		// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
 		int yes = 1;
@@ -38,15 +39,18 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target
 {
 	// char *buf[MAXLINE];
 	std::vector<char> buffer(1024);
-	if ( recv( target, buffer.data(), buffer.size(), 0 ) <= 0 )
+	int re = recv( target, buffer.data(), buffer.size(), 0 ); 
+	if ( re == 0 )
+		return 0;
+	else if ( re == -1 )
 		return -1;
 	connManager.setContext( target, buffer );
-	return 0;
+	return 1;
 }
 
-void NetworkIOHandler::sendResponse( ConnectionManager &connManager, int target )
+int NetworkIOHandler::sendResponse( ConnectionManager &connManager, int target )
 {	
-	send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0);
+	return ( send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0) );
 }
 
 void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
@@ -57,6 +61,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 
 	client = sizeof(cliaddr);
 	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
+	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 	struct pollfd setting;
 	setting.fd = connfd;

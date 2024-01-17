@@ -1,5 +1,6 @@
 #include "WebServer.hpp"
 #include "EventManager.hpp"
+#include <cerrno>
 
 /* WebServerクラスの実装 */
 WebServer::WebServer()
@@ -66,19 +67,25 @@ void WebServer::eventLoop()
 				}
 				else
 				{
-					if ( this->ioHandler->receiveRequest( *this->connManager, this->eventManager->fds[i].fd ) == -1 )
+					int re = this->ioHandler->receiveRequest( *this->connManager, this->eventManager->fds[i].fd );
+					if ( re == 0 )
 					{
 						this->ioHandler->closeConnection( *this->connManager, this->eventManager->fds[i].fd );
 						this->eventManager->fds[i].fd = -1;
 						continue ;
 					}
+					else if ( re == -1 && errno == EAGAIN )
+					{
+						continue ;
+					}	
 					this->requestHandler->handle( *this->connManager, this->eventManager->fds[i].fd );
 					this->eventManager->updateEvents( this->eventManager->fds[i].fd , POLLOUT );
 				}
 			}
 			else if ( this->eventManager->fds[i].revents & POLLOUT )
 			{
-				this->ioHandler->sendResponse( *this->connManager, this->eventManager->fds[i].fd  );
+				if ( this->ioHandler->sendResponse( *this->connManager, this->eventManager->fds[i].fd ) == -1 && errno == EAGAIN )
+					continue ;
 				this->eventManager->updateEvents( this->eventManager->fds[i].fd , POLLIN );
 			}
 		}
