@@ -2,12 +2,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <cstdlib>
-#include "Time.hpp"
+#include "AccessLog.hpp"
 
 int	main(void)
 {
 	std::cout << "Hello webserv" << std::endl;
-	std::cout << sizeof(config::Time) << std::endl;
+	config::AccessLog	access_log;
+
+	std::cout << access_log.getFile() << "\n";
+	access_log.setFile("test");
+	std::cout << access_log.getFile() << "\n";
 
 	char **arg;
 

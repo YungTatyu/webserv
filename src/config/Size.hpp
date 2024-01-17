@@ -12,6 +12,8 @@ class Size
 	public:
 		Size();
 		~Size();
+		const unsigned int	kilobytes = 1000;
+		const unsigned int	megabytes = 1000000;
 		// 設定できる最大値 nginxを参照
 		const static unsigned long	kMaxSizeInBytes = std::numeric_limits<long>::max();
 		const unsigned long	&getSizeInBytes() const;
