@@ -13,6 +13,8 @@ autoindexとエラーページを追加しました。
 	> HttpMessageクラスを用いて、リクエストのパースとレスポンスの生成を行う。
 * ConnectionManagerクラス
 	> コネクションが疎通したソケットととその直前のデータの管理をする。NetworkIOHandlerクラスとRequestHandlerクラスのデータ受け渡しのインターフェースとなる。
+* EventManagerクラス
+	> struct pollfdを管理する。
 * ServerConfigクラス
 	> 設定ファイルをパースして管理する
 
