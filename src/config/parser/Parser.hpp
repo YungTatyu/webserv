@@ -7,10 +7,17 @@
 
 namespace config
 {
+
+class ParseState
+{
+}
+
 class Parser
 {
 	private:
-		std::stack<CONTEXT>	contexts_stack_; // current contexts
+		std::string	file_content_;
+		CONTEXT	current_context_;
+		// std::stack<CONTEXT>	contexts_stack_; // current contexts
 		unsigned int	current_line_; // current line in file
 	public:
 		Parser();
