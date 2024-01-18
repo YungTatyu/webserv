@@ -1,28 +1,21 @@
 #ifndef CONFIG_TIME_HPP
 #define CONFIG_TIME_HPP
 
+#include <limits>
+
 namespace config
 {
 class Time
 {
-	private:
-		unsigned int	d_; // days
-		unsigned int	h_; // hours
-		unsigned int	m_; // minutes
-		unsigned int	s_; // seconds
-		unsigned int	ms_; // milliseconds
 	public:
 		Time();
 		~Time();
-		void	setTime(
-			const unsigned int &d,
-			const unsigned int &h,
-			const unsigned int &m,
-			const unsigned int &s,
-			const unsigned int &ms
-		);
-		const unsigned int	&getTimeInSeconds() const;
-
+		unsigned long	time_in_ms_; // milliseconds
+		const static unsigned int	seconds = 1000;
+		const static unsigned int	minutes = seconds * 60;
+		const static unsigned int	hours = minutes * 60;
+		const static unsigned int	days = hours * 60;
+		const static unsigned long	kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();;
 };
 } // namespace config
 
