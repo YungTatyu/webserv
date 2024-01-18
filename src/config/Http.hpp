@@ -35,8 +35,6 @@ struct Http
 	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
-	KeepaliveTimeout	keepalive_timeout;
-	ErrorPage	error_page;
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	Userid	userid;
