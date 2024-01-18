@@ -12,8 +12,9 @@ class ClientMaxBodySize
 	public:
 		ClientMaxBodySize();
 		~ClientMaxBodySize();
+		const static unsigned long	kDefaultSize_ = Size::megabytes; // 1m
 		const Size	&getSize() const { return this->size_; }
-		void	setSize(unsigned long &size_in_bytes) { this->size_.setSizeInBytes(size_in_bytes); }
+		void	setSize(unsigned long &size_in_bytes) { this->size_.size_in_bytes_ = size_in_bytes; }
 };
 } // namespace config
 

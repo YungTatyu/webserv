@@ -8,8 +8,9 @@ namespace config
 class Time
 {
 	public:
-		Time();
-		~Time();
+		Time() {}
+		Time(const unsigned long &time_in_ms) : time_in_ms_(time_in_ms) {}
+		~Time() {}
 		unsigned long	time_in_ms_; // milliseconds
 		const static unsigned int	seconds = 1000;
 		const static unsigned int	minutes = seconds * 60;

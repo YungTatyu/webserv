@@ -10,19 +10,12 @@ class KeepaliveTimeout
 	private:
 		Time	time_;
 	public:
-		KeepaliveTimeout();
-		~KeepaliveTimeout();
+		KeepaliveTimeout() : time_(this->kDefaultTime_) {}
+		~KeepaliveTimeout() {}
+		const static unsigned long	kDefaultTime_ = 60 * Time::seconds;
 		const Time	&getTime() const { return this->time_; }
-		void	setTime(
-			const unsigned int &d,
-			const unsigned int &h,
-			const unsigned int &m,
-			const unsigned int &s,
-			const unsigned int &ms
-		)
-		{ this->time_.setTime(d, h, m, s, ms); }
+		void	setTime(const unsigned long &time_in_ms) { this->time_.time_in_ms_; }
 };
 } // namespace config
-
 
 #endif
