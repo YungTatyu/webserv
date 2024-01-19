@@ -1,3 +1,7 @@
+# 課題の概要
+Wikiに課題の概要が書いてあります。
+[link](https://github.com/YungTatyu/webserv/wiki/%E5%9F%BA%E6%9C%AC%E8%A8%AD%E8%A8%88%E6%9B%B8)
+
 # Webserveeeee OOP design
 ### 基本的な方針
 大元のサーバークラスは、イベントを検知して、適切なハンドラーを呼び出すだけ。なるべくクラスの責任が分散するようにした。今はeventLoopでクライアントからの接続イベントしか検知しないので、次はselectかepollとか使う。
