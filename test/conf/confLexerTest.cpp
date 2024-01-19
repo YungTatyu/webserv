@@ -79,6 +79,38 @@ TEST(LexerTokenizeTest, http_context)
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 16, lexer.getToken(27));
 }
 
+TEST(LexerTokenizeTest, comment_skip)
+{
+	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/comment.conf";
+	config::Lexer	lexer(filePath);
+
+	lexer.tokenize();
+
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "events", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "worker_connections", 2, lexer.getToken(2));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "1024", 2, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 2, lexer.getToken(4));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 4, lexer.getToken(5));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "http", 6, lexer.getToken(6));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 6, lexer.getToken(7));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "error_log", 7, lexer.getToken(8));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "/home/students/webserv/logs/error.log", 7, lexer.getToken(9));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 7, lexer.getToken(10));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "server", 9, lexer.getToken(11));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 9, lexer.getToken(12));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "listen", 11, lexer.getToken(13));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "0.0.0.0:3001", 11, lexer.getToken(14));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 11, lexer.getToken(15));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "root", 12, lexer.getToken(16));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "/home/student/webserv/html", 12, lexer.getToken(17));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 12, lexer.getToken(18));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index", 13, lexer.getToken(19));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index.html", 13, lexer.getToken(20));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 13, lexer.getToken(21));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 14, lexer.getToken(22));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 15, lexer.getToken(23));
+}
 // main function
 int	main(int argc, char **argv)
 {
