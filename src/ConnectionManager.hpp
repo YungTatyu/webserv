@@ -23,7 +23,7 @@ class ConnectionManager
 		const std::vector<char>& getResponse( int fd ) const;
 	
 	private:
-		std::map<int, class ConnectionData> connections;
+		std::map<int, class ConnectionData> connections_;
 };
 
 #endif

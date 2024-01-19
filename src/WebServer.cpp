@@ -52,37 +52,38 @@ void WebServer::eventLoop()
 		poll ( this->eventManager->fds.data(), this->eventManager->fds.size(), -1 );
 
 		//　ここをイテレータで走査したら、要素を追加したときにイテレータが無効になったりしてバグる。
-		size_t tmpsize = this->eventManager->fds.size();
-		for ( size_t i = 0; i < tmpsize; ++i )
+		size_t iniSize = this->eventManager->fds.size();
+		for ( size_t i = 0; i < iniSize; ++i )
 		{
-			if ( this->eventManager->fds[i].revents & POLLIN )
+			struct pollfd curPfd = this->eventManager->fds[i];	
+			if ( curPfd.revents & POLLIN )
 			{
-				if ( this->eventManager->fds[i].fd == this->ioHandler->getListenfd() )	
+				if ( curPfd.fd == this->ioHandler->getListenfd() )	
 				{
 					this->ioHandler->acceptConnection( *this->connManager, *this->eventManager );
 				}
 				else
 				{
-					int re = this->ioHandler->receiveRequest( *this->connManager, this->eventManager->fds[i].fd );
+					int re = this->ioHandler->receiveRequest( *this->connManager, curPfd.fd );
 					if ( re == 0 )
 					{
-						this->ioHandler->closeConnection( *this->connManager, this->eventManager->fds[i].fd );
-						this->eventManager->fds[i].fd = -1;
+						this->ioHandler->closeConnection( *this->connManager, curPfd.fd );
+						curPfd.fd = -1;
 						continue ;
 					}
 					else if ( re == -1 && errno == EAGAIN )
 					{
 						continue ;
 					}	
-					this->requestHandler->handle( *this->connManager, this->eventManager->fds[i].fd );
-					this->eventManager->updateEvents( this->eventManager->fds[i].fd , POLLOUT );
+					this->requestHandler->handle( *this->connManager, curPfd.fd );
+					this->eventManager->updateEvents( curPfd.fd , POLLOUT );
 				}
 			}
-			else if ( this->eventManager->fds[i].revents & POLLOUT )
+			else if ( curPfd.revents & POLLOUT )
 			{
-				if ( this->ioHandler->sendResponse( *this->connManager, this->eventManager->fds[i].fd ) == -1 && errno == EAGAIN )
+				if ( this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) == -1 && errno == EAGAIN )
 					continue ;
-				this->eventManager->updateEvents( this->eventManager->fds[i].fd , POLLIN );
+				this->eventManager->updateEvents( curPfd.fd , POLLIN );
 			}
 		}
 
