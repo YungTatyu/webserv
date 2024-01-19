@@ -8,9 +8,9 @@ class WorkerConnections
 	private:
 		unsigned long	worker_connections_;
 	public:
-		WorkerConnections();
-		~WorkerConnections();
-		const static unsigned long	kDefaultWorkerConnections = 512;
+		WorkerConnections() : worker_connections_(this->kDefaultWorkerConnections_) {}
+		~WorkerConnections() {}
+		const static unsigned long	kDefaultWorkerConnections_ = 512;
 		const unsigned long	&getWorkerConnections() const { return this->worker_connections_; }
 		void	setWorkerConnections(const unsigned long &worker_connections) { this->worker_connections_ = worker_connections; }
 };	

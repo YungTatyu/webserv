@@ -10,7 +10,7 @@ class ServerName
 	private:
 		std::string	name_;
 	public:
-		ServerName() {}
+		ServerName() : name_(this->kDefaultNmae_) {}
 		~ServerName() {}
 		const static char	*kDefaultNmae_;
 		const std::string	&getName() const { return this->name_; }

@@ -13,8 +13,8 @@ class ErrorPage
 		unsigned int	response_;
 		std::string	uri_;
 	public:
-		ErrorPage();
-		~ErrorPage();
+		ErrorPage() {}
+		~ErrorPage() {}
 		const std::vector<unsigned int>	&getCodeList() const { return this->code_list_; }
 		const unsigned int	&getResponse() const { return this->response_; }
 		const std::string	&getUri() const { return this->uri_; }

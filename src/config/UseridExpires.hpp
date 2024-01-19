@@ -11,7 +11,7 @@ class UseridExpires
 		Time	time_;
 		bool	is_userid_expires_on_;
 	public:
-		UseridExpires() : is_userid_expires_on_(kDefaultIsUseridExpiresOn) {}
+		UseridExpires() : is_userid_expires_on_(this->kDefaultIsUseridExpiresOn) {}
 		~UseridExpires() {}
 		const static bool	kDefaultIsUseridExpiresOn = false;
 		const Time	&getTime() const { return this->time_; }

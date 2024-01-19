@@ -8,7 +8,7 @@ class Autoindex
 	private:
 		bool	is_autoindex_on_;
 	public:
-		Autoindex() : is_autoindex_on_(kDefaultIsAutoindexOn_) {}
+		Autoindex() : is_autoindex_on_(this->kDefaultIsAutoindexOn_) {}
 		~Autoindex() {}
 		const static bool	kDefaultIsAutoindexOn_ = false;
 		const bool	getIsAutoindexOn() const { return is_autoindex_on_; }
