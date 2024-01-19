@@ -4,87 +4,80 @@
 #include <iostream>
 #include <fstream>
 
-void	SAME_TOKEN(const TK_TYPE type, const std::string value, struct Token token)
+void	SAME_TOKEN(const config::TK_TYPE type, const std::string value, const unsigned int line, struct config::Token token)
 {
-	EXPECT_EQ(type, token.type_);
 	EXPECT_EQ(value, token.value_);
-}
-
-TEST(LexerPrivateFuncTest, skipSpaces)
-{
-	Lexer lexer_space();
-	Lexer lexer_tab();
-	lexer_space.file_iterator_ = 0;
-	lexer_tab.file_iterator_ = 0;
-	lexer_space.file_content_ = "    abc";
-	lexer_tab_.file_content_ = "		abc";
-
-	lexer_space.skipSpaces();
-	lexer_tab.skipSpaces();
-
-	EXPECT_EQ("abc", lexer_space.file_content_.substr(file_iterator_);
-	EXPECT_EQ("abc", lexer_tab.file_content_.substr(file_iterator_);
-}
-
-
-TEST(LexerPrivateFuncTest, getToken)
-{
-	Lexer	lexer();
-	lexer.file_content_ = "error_log logs/;";
-	lexer.file_iterator_ = 0;
-
-	lexer.getToken();
-
-	SAME_TOKEN(TK_STR, "error_log", lexer.tokens_[0]);
+	EXPECT_EQ(type, token.type_);
+	EXPECT_EQ(line, token.line_);
 }
 
 TEST(LexerTokenizeTest, one_directive)
 {
-	std::string filePath= "confFIle/lexer1.conf";
-	Lexer	lexer(filePath);
+	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/lexer1.conf";
+	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
 
-	SAME_TOKEN(TK_STR, "error_log", lexer.tokens_[0]);
-	SAME_TOKEN(TK_STR, "webserv/logs", lexer.tokens_[1]);
-	SAME_TOKEN(TK_SEMICOLON, ";", lexer.tokens_[2]);
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "error_log", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "webserv/logs", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 1, lexer.getToken(2));
 }
 
 
 TEST(LexerTokenizeTest, events_context)
 {
-	std::string filePath= "confFIle/lexer2.conf";
-	Lexer	lexer(filePath);
+	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/lexer2.conf";
+	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
 
-	SAME_TOKEN(TK_STR, "events", lexer.tokens_[0]);
-	SAME_TOKEN(TK_OPEN_CURLY_BRACE, "{", lexer.tokens_[1]);
-	SAME_TOKEN(TK_STR, "worker_connections", lexer.tokens_[2]);
-	SAME_TOKEN(TK_STR, "1024", lexer.tokens_[3]);
-	SAME_TOKEN(TK_SEMICOLON, ";", lexer.tokens_[4]);
-	SAME_TOKEN(TK_STR, "use", lexer.tokens_[5]);
-	SAME_TOKEN(TK_STR, "poll", lexer.tokens_[6]);
-	SAME_TOKEN(TK_SEMICOLON, ";", lexer.tokens_[7]);
-	SAME_TOKEN(TK_CLOSE_CURLY_BRACE, "}", lexer.tokens_[8]);
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "events", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "worker_connections", 2, lexer.getToken(2));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "1024", 2, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 2, lexer.getToken(4));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "use", 3, lexer.getToken(5));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "poll", 3, lexer.getToken(6));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 3, lexer.getToken(7));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 4, lexer.getToken(8));
 }
 
-/*
-TEST(LexerTokenizeTest, server_context)
+TEST(LexerTokenizeTest, http_context)
 {
-	std::string filePath= "confFIle/lexer3.conf";
-	Lexer	lexer(filePath);
+	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/lexer3.conf";
+	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
 
- 	EXPECT_EQ(TK_STR, lexer.tokens_[0].type_);
- 	EXPECT_EQ("error_log", lexer.tokens_[0].value_);
- 	EXPECT_EQ(TK_STR, lexer.tokens_[1].type_);
- 	EXPECT_EQ("webserv/logs", lexer.tokens_[1].value_);
- 	EXPECT_EQ(TK_SEMICOLON, lexer.tokens_[2].type_);
- 	EXPECT_EQ(";", lexer.tokens_[2].value_);
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "events", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 2, lexer.getToken(2));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "http", 4, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 4, lexer.getToken(4));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "access_log", 5, lexer.getToken(5));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "logs/access.log", 5, lexer.getToken(6));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 5, lexer.getToken(7));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "server", 7, lexer.getToken(8));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 7, lexer.getToken(9));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "root", 8, lexer.getToken(10));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "/home/student/webserv/html", 8, lexer.getToken(11));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 8, lexer.getToken(12));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "listen", 9, lexer.getToken(13));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "7000", 9, lexer.getToken(14));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 9, lexer.getToken(15));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "location", 11, lexer.getToken(16));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "/", 11, lexer.getToken(17));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 11, lexer.getToken(18));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index", 12, lexer.getToken(19));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index.html", 12, lexer.getToken(20));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 12, lexer.getToken(21));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "allow", 13, lexer.getToken(22));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "192.0.0.1/24", 13, lexer.getToken(23));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 13, lexer.getToken(24));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 14, lexer.getToken(25));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 15, lexer.getToken(26));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 16, lexer.getToken(27));
 }
-*/
 
 // main function
 int	main(int argc, char **argv)
@@ -92,3 +85,4 @@ int	main(int argc, char **argv)
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
