@@ -9,6 +9,7 @@ SRCS_DIR			= src
 INCS_DIR			= include
 OBJS_DIR			= obj
 DEPS_DIR			= dep
+BUILD_DIR			= build
 CGI_DIR				= cgi
 CONF_DIR			= conf
 
@@ -51,7 +52,7 @@ $(CGI_EXEFILE):
 
 clean:
 	$(MAKE) clean -C $(CGI_DIR)
-	$(RM) $(OBJS_DIR) $(DEPS_DIR)
+	$(RM) $(OBJS_DIR) $(DEPS_DIR) $(BUILD_DIR)
 
 fclean: clean
 	$(MAKE) fclean -C $(CGI_DIR)
@@ -61,6 +62,12 @@ re: fclean all
 
 -include $(DEPS)
 
+TEST_FILTER ?= '*'
+
+test:
+	cmake -S . -B $(BUILD_DIR)
+	cmake --build $(BUILD_DIR)
+	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 # run:
 # 	./$(NAME) $(CONFIG)
 
@@ -69,4 +76,4 @@ re: fclean all
 # valgrind:
 # 	valgrind --leak-check=full ./$(NAME)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test
