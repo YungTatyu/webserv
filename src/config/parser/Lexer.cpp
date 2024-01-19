@@ -23,6 +23,7 @@ void	config::Lexer::tokenize()
 
 	while (!isEndOfFile()) {
 		skipSpaces();
+		skipComment();
 		addToken();
 	}
 }
@@ -57,7 +58,9 @@ std::string	config::Lexer::getFileContent(const std::string file_path)
     file.close();
 
     // ファイルから読み取った内容を出力
-    std::cout << "File Content:\n" << content << std::endl;
+	#ifdef TEST
+    std::cout << "File Content:" << std::endl << content << std::endl;
+	#endif
 
     return content;
 }
@@ -71,6 +74,22 @@ void	config::Lexer::skipSpaces()
 		if (getChar() == '\n')
 			current_line_++;
 		file_iterator_++;
+	}
+}
+
+void	config::Lexer::skipComment()
+{
+	if (isEndOfFile())
+		return ;
+
+	if (getChar() == '#')
+	{
+		file_iterator_++;
+		while (getChar() != '\n')
+			file_iterator_++;
+		file_iterator_++;
+		current_line_++;
+		skipSpaces();
 	}
 }
 
@@ -91,54 +110,48 @@ bool	config::Lexer::isMetaChar()
 
 void	config::Lexer::addToken()
 {
-	//struct config::Token	new_token;
-
 	if (isEndOfFile())
 		return ;
 
+	std::string		tmp_value;
+	TK_TYPE			tmp_type;
+	unsigned int	tmp_line = this->current_line_;
+
 	if (getChar() == '{')
 	{
-		struct config::Token	new_token(std::string(1, getChar()), config::TK_TYPE::TK_OPEN_CURLY_BRACE, this->current_line_);
-		tokens_.push_back(new_token);
-		/*new_token.value_ += getChar();
-		new_token.type_ = TK_OPEN_CURLY_BRACE;*/
+		tmp_value += getChar();
+		tmp_type = config::TK_TYPE::TK_OPEN_CURLY_BRACE;
 		file_iterator_++;
-	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
 	else if (getChar() == '}')
 	{
-		struct config::Token	new_token(std::string(1, getChar()), config::TK_TYPE::TK_CLOSE_CURLY_BRACE, this->current_line_);
-		tokens_.push_back(new_token);
-		/*
-		new_token.value_ += getChar();
-		new_token.type_ = TK_CLOSE_CURLY_BRACE;*/
+		tmp_value += getChar();
+		tmp_type = config::TK_TYPE::TK_CLOSE_CURLY_BRACE;
 		file_iterator_++;
-	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
 	else if (getChar() == ';')
 	{
-		struct config::Token	new_token(std::string(1, getChar()), config::TK_TYPE::TK_SEMICOLON, this->current_line_);
-		tokens_.push_back(new_token);
-		/*
-		new_token.value_ += getChar();
-		new_token.type_ = TK_SEMICOLON;*/
+		tmp_value += getChar();
+		tmp_type = config::TK_TYPE::TK_SEMICOLON;
 		file_iterator_++;
-	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
 	else
 	{
-		std::string	tmp_value;
-		while (!isEndOfFile() && !isMetaChar())
+		while (!isEndOfFile() && !isMetaChar() && !getChar() != '#')
 		{
 			tmp_value += getChar();
 			file_iterator_++;
 		}
-		struct config::Token	new_token(tmp_value, config::TK_TYPE::TK_STR, this->current_line_);
-		tokens_.push_back(new_token);
-	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
+		tmp_type = config::TK_TYPE::TK_STR;
+		tmp_line = this->current_line_; // くぉーとで囲まれてて行数またがることありそう。
 	}
 
-	//tokens_.push_back(new_token);
+	#ifdef TEST
+	std::cout << "Token.value_: " << tmp_value << ", Token.type_: " << tmp_type << ", Token.line_: " << tmp_line << std::endl;
+	#endif
+
+	config::Token	new_token(tmp_value, tmp_type, tmp_line);
+	tokens_.push_back(new_token);
 }
 
 bool	config::Lexer::isEndOfFile()

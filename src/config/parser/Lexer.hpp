@@ -9,7 +9,6 @@ namespace config
 	enum TK_TYPE
 	{
 		TK_STR,
-		TK_NUM,
 		TK_OPEN_CURLY_BRACE,
 		TK_CLOSE_CURLY_BRACE,
 		TK_SEMICOLON,
@@ -41,6 +40,7 @@ namespace config
 			Lexer();
 			std::string	getFileContent(const std::string file_path);
 			void	skipSpaces();
+			void	skipComment();
 			const char&	getChar();
 			bool	isMetaChar();
 			void	addToken();
