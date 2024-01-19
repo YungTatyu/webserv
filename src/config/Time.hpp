@@ -6,15 +6,24 @@ namespace config
 class Time
 {
 	private:
-		unsigned int	d; // days
-		unsigned char	h; // hours
-		unsigned char	m; // minutes
-		unsigned char	s; // seconds
-		unsigned int	ms; // milliseconds
+		unsigned int	d_; // days
+		unsigned int	h_; // hours
+		unsigned int	m_; // minutes
+		unsigned int	s_; // seconds
+		unsigned int	ms_; // milliseconds
 	public:
 		Time();
 		~Time();
-};	
+		void	setTime(
+			const unsigned int &d,
+			const unsigned int &h,
+			const unsigned int &m,
+			const unsigned int &s,
+			const unsigned int &ms
+		);
+		const unsigned int	&getTimeInSeconds() const;
+
+};
 } // namespace config
 
 #endif

@@ -8,10 +8,12 @@ namespace config
 class ClientMaxBodySize
 {
 	private:
-		Size	size;
+		Size	size_;
 	public:
 		ClientMaxBodySize();
 		~ClientMaxBodySize();
+		const Size	&getSize() const;
+		void	setSize(unsigned long &size_in_bytes) const;
 };
 } // namespace config
 

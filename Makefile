@@ -6,7 +6,7 @@ DEPFLAGS			= -MMD -MP -MF $(DEPS_DIR)/$*.d
 RM					= rm -rf
 
 SRCS_DIR			= src
-INCS_DIR			= include
+INCS_DIR			= $(SRCS_DIR)/config
 OBJS_DIR			= obj
 DEPS_DIR			= dep
 CGI_DIR				= cgi

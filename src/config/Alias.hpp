@@ -1,21 +1,20 @@
-#ifndef CONFIG_USERID_PATH_HPP
-#define CONFIG_USERID_PATH_HPP
+#ifndef CONFIG_ALIAS_HPP
+#define CONFIG_ALIAS_HPP
 
 #include <string>
 
 namespace config
 {
-class UseridPath
+class Alias
 {
 	private:
 		std::string	path_;
 	public:
-		UseridPath();
-		~UseridPath();
-		const static char	*kDefaultPath_ = "/";
+		Alias() {}
+		~Alias() {}
 		const std::string	&getPath() const;
 		void	setPath(const std::string &path);
-};
+};	
 } // namespace config
 
 #endif

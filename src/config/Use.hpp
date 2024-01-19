@@ -8,15 +8,17 @@ class Use
 	private:
 		enum CONNECTION_METHOD
 		{
-			EPOLL,
-			KQUEUE,
-			POLL,
 			SELECT,
+			POLL,
+			KQUEUE,
+			EPOLL,
 		};
-		CONNECTION_METHOD	connection_method;
+		CONNECTION_METHOD	connection_method_;
 	public:
 		Use();
 		~Use();
+		const CONNECTION_METHOD	getConnectionMethod() const;
+		void	setConnectionMethod();
 };	
 } // namespace config
 

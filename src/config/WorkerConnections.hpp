@@ -6,14 +6,14 @@ namespace config
 class WorkerConnections
 {
 	private:
-		unsigned int	connections;
+		unsigned long	worker_connections_;
 	public:
 		WorkerConnections();
 		~WorkerConnections();
-		const static unsigned int	kDefaultConnections = 512;
+		const static unsigned long	kDefaultWorkerConnections = 512;
+		const unsigned long	&getWorkerConnections() const;
+		void	setWorkerConnections(const unsigned long &worker_connections);
 };	
 } // namespace config
-
-
 
 #endif

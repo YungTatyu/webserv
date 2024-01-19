@@ -12,6 +12,8 @@ class Deny
 	public:
 		Deny();
 		~Deny();
+		const std::string	&getAddress() const;
+		void	setAddress(const std::string &address);
 };
 } // namespace config
 

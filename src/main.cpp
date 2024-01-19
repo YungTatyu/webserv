@@ -3,10 +3,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <cstdlib>
+#include "Time.hpp"
 
 int	main(void)
 {
 	std::cout << "Hello webserv" << std::endl;
+	std::cout << sizeof(config::Time) << std::endl;
 
 	char **arg;
 

@@ -8,12 +8,14 @@ namespace config
 class Size
 {
 	private:
-		long	size_in_bytes_;
+		unsigned long	size_in_bytes_;
 	public:
 		Size();
 		~Size();
 		// 設定できる最大値 nginxを参照
-		const static long	kMaxSizeInBytes = std::numeric_limits<long>::max();
+		const static unsigned long	kMaxSizeInBytes = std::numeric_limits<long>::max();
+		const unsigned long	&getSizeInBytes() const;
+		void	setSizeInBytes(const unsigned long &size_in_bytes);
 };
 } // namespace config
 

@@ -5,39 +5,43 @@
 
 #include "AccessLog.hpp"
 #include "SendTimeout.hpp"
-#include "KeepaliveTime.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "ErrorPage.hpp"
+#include "ErrorLog.hpp"
 #include "Root.hpp"
 #include "ClientMaxBodySize.hpp"
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
 #include "Autoindex.hpp"
+#include "Allow.hpp"
 #include "Userid.hpp"
 #include "UseridDomain.hpp"
 #include "UseridExpires.hpp"
 #include "UseridPath.hpp"
+#include "UseridService.hpp"
+#include "KeepaliveTimeout.hpp"
 
 namespace config
 {
 struct Http
 {
 	Root	root;
-	Index	index;
+	std::vector<Index>	index_list;
 	Autoindex	autoindex;
 	ClientMaxBodySize	client_max_body_size;
-	std::vector<AccessLog>	access_logs;
-	SendTimeout	send_timeout;
-	KeepaliveTime	keepalive_time;
+	std::vector<AccessLog>	access_log_list;
+	std::vector<ErrorLog>	error_log_list;
+	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
-	ErrorPage	error_page;
-	std::vector<Allow>	allow;
-	std::vector<Deny>	deny;
+	SendTimeout	send_timeout;
+	std::vector<Allow>	allow_list;
+	std::vector<Deny>	deny_list;
 	Userid	userid;
-	UseridDomain	userid_domain;
+	UseridDomain	*userid_domain; // defaultがnoneなので、configで設定されない限り値を持ちたくない：初期値NULL
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
+	UseridService	user_service;
 };
 } // namespace config
 
