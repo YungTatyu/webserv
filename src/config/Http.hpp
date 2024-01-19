@@ -2,6 +2,8 @@
 #define CONFIG_HTTP_HPP
 
 #include <vector>
+#include <set>
+#include <string>
 
 #include "AccessLog.hpp"
 #include "SendTimeout.hpp"
@@ -26,6 +28,7 @@ namespace config
 {
 struct Http
 {
+	std::set<std::string>	set_directives;
 	Root	root;
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;
