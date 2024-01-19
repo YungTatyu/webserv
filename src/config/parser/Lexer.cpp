@@ -1,42 +1,46 @@
 #include "Lexer.hpp"
 #include <iostream>
+#include <fstream>
 
-Lexer::Lexer(const std::string file_path)
-	: content_(readFile(file_path)), file_iterator_(0), current_line_(0)
+config::Lexer::Lexer(const std::string file_path)
+	: file_content_(getFileContent(file_path)), file_iterator_(0), current_line_(1)
 {
 	#ifdef Debug
 	std::cout << "Lexer Constructor" << std::endl;
 	#endif
 }
 
-Lexer::~Lexer()
+config::Lexer::~Lexer()
 {
 	#ifdef Debug
 	std::cout << "Lexer Destructor" << std::endl;
 	#endif
 }
 
-void	Lexer::tokenize(const std::string &conf_file)
+void	config::Lexer::tokenize()
 {
 	unsigned int	current_line = 1;
 
 	while (!isEndOfFile()) {
-		std::cout << *it << " ";
 		skipSpaces();
 		addToken();
 	}
 }
 
+const config::Token&	config::Lexer::getToken(int key)
+{
+	return this->tokens_[key];
+}
 
-std::string	Lexer::readFile(const std::string file_path)
+std::string	config::Lexer::getFileContent(const std::string file_path)
 {
     // ファイルを開く
-    std::ifstream file(filePath);
+    std::ifstream file(file_path);
 
     // ファイルが開けたか確認
     if (!file.is_open()) {
-        std::cerr << "Failed to open the file: " << filePath << std::endl;
-        return 1;
+        std::cerr << "Failed to open the file: " << file_path << std::endl;
+        return ""; // 後で例外投げる
     }
 
     // ファイルから読み取ったデータを格納するための変数
@@ -58,11 +62,11 @@ std::string	Lexer::readFile(const std::string file_path)
     return content;
 }
 
-void	Lexer::skipSpaces()
+void	config::Lexer::skipSpaces()
 {
 	if (isEndOfFile())
 		return ;
-	while (std::isspace(getChar())
+	while (std::isspace(getChar()))
 	{
 		if (getChar() == '\n')
 			current_line_++;
@@ -70,12 +74,12 @@ void	Lexer::skipSpaces()
 	}
 }
 
-const char&	Lexer::getChar()
+const char&	config::Lexer::getChar()
 {
 	return file_content_[file_iterator_];
 }
 
-bool	Lexer::isMetaChar()
+bool	config::Lexer::isMetaChar()
 {
 	if (std::isspace(getChar()) \
 		|| getChar() == '{' \
@@ -85,50 +89,62 @@ bool	Lexer::isMetaChar()
 	return false;
 }
 
-void	Lexer::addToken()
+void	config::Lexer::addToken()
 {
-	std::vector<Token>	new_token;
+	//struct config::Token	new_token;
 
-	if (isEndOfFIle())
+	if (isEndOfFile())
 		return ;
 
-	if (getChar() == '{' || getChar() == '}' || getChar() == ';')
+	if (getChar() == '{')
 	{
-		new_token.value_ += getChar();
-		new_token.type_ = TK_OPEN_CURLY_BRACE;
+		struct config::Token	new_token(std::string(1, getChar()), config::TK_TYPE::TK_OPEN_CURLY_BRACE, this->current_line_);
+		tokens_.push_back(new_token);
+		/*new_token.value_ += getChar();
+		new_token.type_ = TK_OPEN_CURLY_BRACE;*/
 		file_iterator_++;
+	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
 	else if (getChar() == '}')
 	{
+		struct config::Token	new_token(std::string(1, getChar()), config::TK_TYPE::TK_CLOSE_CURLY_BRACE, this->current_line_);
+		tokens_.push_back(new_token);
+		/*
 		new_token.value_ += getChar();
-		new_token.type_ = TK_CLOSE_CURLY_BRACE;
+		new_token.type_ = TK_CLOSE_CURLY_BRACE;*/
 		file_iterator_++;
+	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
 	else if (getChar() == ';')
 	{
+		struct config::Token	new_token(std::string(1, getChar()), config::TK_TYPE::TK_SEMICOLON, this->current_line_);
+		tokens_.push_back(new_token);
+		/*
 		new_token.value_ += getChar();
-		new_token.type_ = TK_SEMICOLON;
+		new_token.type_ = TK_SEMICOLON;*/
 		file_iterator_++;
+	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
 	else
 	{
+		std::string	tmp_value;
 		while (!isEndOfFile() && !isMetaChar())
 		{
-			new_token.value_ += getChar();
+			tmp_value += getChar();
 			file_iterator_++;
 		}
-		new_token.type_ = TK_STR;
+		struct config::Token	new_token(tmp_value, config::TK_TYPE::TK_STR, this->current_line_);
+		tokens_.push_back(new_token);
+	std::cout << new_token.value_ << new_token.type_ << new_token.line_ << std::endl;
 	}
-	new_token.line_ = current_line_;
-	tokens_.push_back(new_token);
+
+	//tokens_.push_back(new_token);
 }
 
-bool	Lexer::isEndOfFile()
+bool	config::Lexer::isEndOfFile()
 {
 	if (file_iterator_ == file_content_.size())
 		return true;
 	return false;
 }
-
-
 
