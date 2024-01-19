@@ -63,10 +63,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
-	struct pollfd setting;
-	setting.fd = connfd;
-	setting.events = POLLIN;
-	setting.revents = 0;
+	struct pollfd setting = EventManager::genPollFd( connfd, POLLIN, 0 );
 	connManager.setConnection( setting );
 	eventManager.fds.push_back( setting );
 

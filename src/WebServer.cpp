@@ -45,11 +45,7 @@ bool isFdNegative(const struct pollfd& pfd)
 
 void WebServer::eventLoop()
 {
-	struct pollfd tmppollfd;
-	tmppollfd.fd = this->ioHandler->getListenfd();
-	tmppollfd.events = POLLIN;
-	tmppollfd.revents = 0;
-	this->eventManager->fds.push_back( tmppollfd );
+	this->eventManager->fds.push_back( EventManager::genPollFd( this->ioHandler->getListenfd(), POLLIN, 0 ) );
 
 	for ( ; ; )
 	{
@@ -105,5 +101,6 @@ WebServer::~WebServer()
 	delete this->requestHandler;
 	delete this->connManager;
 	delete this->serverConfig;
+	delete this->eventManager;
 }
 
