@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "conf.hpp"
+
 namespace config
 {
 class Listen
@@ -27,6 +29,7 @@ class Listen
 		void	setAddress(const std::string &address) { this->address_ = address; }
 		void	setport(const unsigned int &port) { this->port_ = port; }
 		void	setIsDefaultServer(const bool is_default_server) { this->is_default_server_ = is_default_server; }
+		const static unsigned int	type_ = CONF_HTTP_SERVER|CONF_TAKE12;
 };
 
 const char	*Listen::kDefaultAddress_ = "127.0.0.1";
