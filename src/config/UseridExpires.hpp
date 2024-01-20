@@ -1,6 +1,7 @@
 #ifndef CONFIG_USERID_EXPIRES_HPP
 #define CONFIG_USERID_EXPIRES_HPP
 
+#include "conf.hpp"
 #include "Time.hpp"
 
 namespace config
@@ -18,6 +19,7 @@ class UseridExpires
 		const bool	getIsUseridExpiresOn() const { return this->is_userid_expires_on_; }
 		void	setTime(const unsigned long &time_in_ms) { this->time_.time_in_ms_ = time_in_ms; }
 		void	setIsUseridExpiresOn(const bool is_userid_expires_on) { this->is_userid_expires_on_ = is_userid_expires_on; }
+		const static unsigned int	type_ = CONF_HTTP|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_TAKE1;
 };
 } // namespace config
 
