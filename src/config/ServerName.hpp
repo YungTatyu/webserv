@@ -17,7 +17,7 @@ class ServerName
 		const static char	*kDefaultNmae_;
 		const std::string	&getName() const { return this->name_; }
 		void	setName(const std::string &name) { this->name_ = name; }
-		const static unsigned int	type_ = CONF_HTTP_SERVER|CONF_1MORE;
+		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_1MORE;
 };
 
 const char	*ServerName::kDefaultNmae_ = "";

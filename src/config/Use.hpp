@@ -22,7 +22,7 @@ class Use
 		~Use() {}
 		const CONNECTION_METHOD	getConnectionMethod() const { return this->connection_method_; }
 		void	setConnectionMethod(const CONNECTION_METHOD connection_method) { this->connection_method_ = connection_method; }
-		const static unsigned int	type_ = CONF_EVENTS|CONF_TAKE1;
+		const static unsigned int	kType_ = CONF_EVENTS|CONF_TAKE1;
 };
 } // namespace config
 

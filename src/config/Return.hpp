@@ -19,7 +19,7 @@ class Return
 		const std::string	&getUrl() const { return this->url_; }
 		void	setCode(const unsigned int &code) { this->code_ = code; }
 		void	setUrl(const std::string &url) { this->url_ = url; }
-		const static unsigned int	type_ = CONF_HTTP_LOCATION|CONF_TAKE12;
+		const static unsigned int	kType_ = CONF_HTTP_LOCATION|CONF_TAKE12;
 };
 } // namespace config
 
