@@ -1,5 +1,4 @@
 #include "NetworkIOHandler.hpp"
-#include "EventManager.hpp"
 
 /* NetworkIOHandlerクラスの実装 */
 void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
@@ -37,13 +36,21 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target )
 {
-	// char *buf[MAXLINE];
-	std::vector<char> buffer(1024);
-	int re = recv( target, buffer.data(), buffer.size(), 0 ); 
-	if ( re == 0 )
-		return 0;
-	else if ( re == -1 )
-		return -1;
+	std::vector<char> buffer( bufferSize_ );
+	ssize_t totalBytesRead = 0;
+
+	while ( 1 )
+	{
+	   ssize_t re = recv( target, buffer.data() + totalBytesRead, bufferSize_, 0 );
+	   if ( re == 0 && totalBytesRead == 0 )
+		   return 0;
+	   else if ( re == -1 && totalBytesRead == 0 )
+		   return -1;
+	   else if ( static_cast<unsigned long>( re ) != bufferSize_ )
+		   break ;
+	   totalBytesRead += re;
+	   buffer.resize( buffer.size() + bufferSize_ );
+	}
 	connManager.setContext( target, buffer );
 	return 1;
 }
