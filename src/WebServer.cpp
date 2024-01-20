@@ -55,7 +55,7 @@ void WebServer::eventLoop()
 		size_t iniSize = this->eventManager->fds.size();
 		for ( size_t i = 0; i < iniSize; ++i )
 		{
-			struct pollfd curPfd = this->eventManager->fds[i];	
+			struct pollfd &curPfd = this->eventManager->fds[i];	
 			if ( curPfd.revents & POLLIN )
 			{
 				if ( curPfd.fd == this->ioHandler->getListenfd() )	
