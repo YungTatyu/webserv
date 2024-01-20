@@ -17,8 +17,8 @@ SRCS				= $(SRCS_DIR)/main.cpp
 # SERVER_DIR			= server
 # SRCS				+= $(SRCS_DIR)/$(SERVER_DIR)
 
-# CONFIG_DIR			= config
-# SRCS				+= $(SRCS_DIR)/$(CONFIG_DIR)
+CONFIG_DIR			= config
+SRCS				+= $(SRCS_DIR)/$(CONFIG_DIR)/Parser.cpp
 
 DEPS = $(patsubst $(SRCS_DIR)/%.cpp,$(DEPS_DIR)/%.d,$(SRCS))
 OBJS = $(patsubst $(SRCS_DIR)/%.cpp,$(OBJS_DIR)/%.o,$(SRCS))

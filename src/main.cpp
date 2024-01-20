@@ -2,16 +2,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <cstdlib>
-#include "AccessLog.hpp"
+#include "Parser.hpp"
 
 int	main(void)
 {
 	std::cout << "Hello webserv" << std::endl;
-	config::AccessLog	access_log;
 
-	std::cout << access_log.getFile() << "\n";
-	access_log.setFile("test");
-	std::cout << access_log.getFile() << "\n";
+	std::vector<config::Token>	tokens_;
+	config::Parser	parser(tokens_);
 
 	char **arg;
 

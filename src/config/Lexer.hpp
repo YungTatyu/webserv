@@ -6,16 +6,17 @@
 
 namespace config
 {
+enum TK_TYPE
+{
+	TK_STR,
+	TK_NUM,
+	TK_OPEN_CURLY_BRACE,
+	TK_CLOSE_CURLY_BRACE,
+	TK_SEMICOLON,
+};
+
 struct Token
 {
-	enum TK_TYPE
-	{
-		TK_STR,
-		TK_NUM,
-		TK_OPEN_CURLY_BRACE,
-		TK_CLOSE_CURLY_BRACE,
-		TK_SEMICOLON,
-	};
 	const std::string	value_;
 	const TK_TYPE	type_;
 };
