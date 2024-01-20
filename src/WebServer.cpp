@@ -20,23 +20,6 @@ void WebServer::initializeServer()
 	this->connManager = new ConnectionManager();
 	this->eventManager = new EventManager();
 }
-//
-// #include <iostream>
-// void printpfdvector( std::vector<struct pollfd> src, int level )
-// {
-// 	std::cout << level << "-----------------" << std::endl;
-// 	std::cout << "num of vec size: " << src.size() << std::endl;
-// 	int i = 0;
-// 	for ( std::vector<struct pollfd>::iterator src_it = src.begin(); src_it != src.end(); ++src_it )
-// 	{
-// 		std::cout << "element----" << i << std::endl;
-// 		std::cout << "fd: " << src_it->fd << std::endl;
-// 		std::cout << "events: " << src_it->events << std::endl;
-// 		std::cout << "revents: " << src_it->revents << std::endl;
-// 		++i;
-// 	}
-// 	std::cout << "-----------------" << std::endl;
-// }
 
 bool isFdNegative(const struct pollfd& pfd)
 {
@@ -55,7 +38,7 @@ void WebServer::eventLoop()
 		size_t iniSize = this->eventManager->fds.size();
 		for ( size_t i = 0; i < iniSize; ++i )
 		{
-			struct pollfd &curPfd = this->eventManager->fds[i];	
+			struct pollfd& curPfd = this->eventManager->fds[i];	
 			if ( curPfd.revents & POLLIN )
 			{
 				if ( curPfd.fd == this->ioHandler->getListenfd() )	
