@@ -3,10 +3,12 @@
 
 #include <vector>
 #include <set>
+#include <map>
 #include <string>
 
 #include "conf.hpp"
 #include "Lexer.hpp"
+#include "Main.hpp"
 
 namespace config
 {
@@ -18,11 +20,15 @@ class Parser
 		const std::string	filepath_;
 		size_t	ti; // token index
 		CONTEXT	current_context_;
-		bool	parseType();
+		static std::map<std::string, unsigned int>	directive_type_;
+		Main	config_;
+		bool	parseType(const std::string &directive);
 		bool	expect(const config::TK_TYPE type);
 		bool	isContext(const Token &token);
 		bool	isDirective(const Token &token);
-		void	printError(const Token &token, const std::string &err_msg) const;
+		void	printError(const std::string &err_msg) const;
+		bool	parseAccessLog();
+		std::map<std::string, bool (config::Parser::*)()>	directives_parser_map_;
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);

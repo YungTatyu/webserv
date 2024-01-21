@@ -4,19 +4,6 @@
 std::set<std::string>	config::Parser::all_contexts_;
 std::set<std::string>	config::Parser::all_directives_;
 
-// const std::set<std::string>	config::Parser::all_contexts_ = {
-// 	"main",
-// 	"http",
-// 	"server",
-// 	"location",
-// 	"limit_except",
-// };
-
-// const std::set<std::string>	config::Parser::all_directives_ = {
-// 	"",
-// };
-
-
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
 {
@@ -49,30 +36,47 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert("userid_path");
 	this->all_directives_.insert("userid_service");
 	this->all_directives_.insert("worker_connections");
+
+	this->directives_parser_map_["access_log"] = &config::Parser::parseAccessLog;
 }
 
 config::Parser::~Parser() {}
 
+/**
+ * parseの流れ
+ * 1. 存在するdirectiveか
+ * 2. contextが正しいか
+ * 3. argsの数が正しいか
+ * 4. 重複を確認
+ * 5. argsの値
+*/
 bool	config::Parser::parse()
 {
 	if (!expect(TK_STR))
 	{
-		printError(tokens_[0], "unexpected ");
+		printError("unexpected ");
 		return false;
 	}
 	while (ti < this->tokens_.size())
 	{
 		const Token &token = this->tokens_[ti];
 		if (token.type_ != TK_STR)
-			printError(tokens_[ti], "unexpected ");
+			printError("");
 	}
+	return true;
+}
+
+bool	config::Parser::parseType(const std::string &directive)
+{
+
+	return true;
 }
 
 bool	config::Parser::expect(const config::TK_TYPE type)
 {
 	if (this->tokens_[ti].type_ != type)
 	{
-		printError(tokens_[ti], "");
+		printError("");
 		return false;
 	}
 	return true;
@@ -88,7 +92,7 @@ bool	config::Parser::isDirective(const config::Token &token)
 	return this->all_directives_.find(token.value_) != this->all_directives_.end();
 }
 
-void	config::Parser::printError(const Token &token, const std::string &err_msg) const
+void	config::Parser::printError(const std::string &err_msg) const
 {
-	std::cerr << "webserv: [emerg] " << err_msg << "in " + this->filepath_ << ':' << token.line_  << '\n';
+	std::cerr << "webserv: [emerg] " << err_msg << "in " + this->filepath_ << ':' << this->tokens_[ti].line_  << '\n';
 }

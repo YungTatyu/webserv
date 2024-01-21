@@ -9,7 +9,7 @@ int	main(void)
 	std::cout << "Hello webserv" << std::endl;
 
 	std::vector<config::Token>	tokens_;
-	config::Parser	parser(tokens_);
+	config::Parser	parser(tokens_, "filepath");
 
 	char **arg;
 
