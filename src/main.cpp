@@ -1,11 +1,18 @@
+/*
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
 #include <cstdlib>
+#include "AccessLog.hpp"
 
 int	main(void)
 {
 	std::cout << "Hello webserv" << std::endl;
+	config::AccessLog	access_log;
+
+	std::cout << access_log.getFile() << "\n";
+	access_log.setFile("test");
+	std::cout << access_log.getFile() << "\n";
 
 	char **arg;
 
@@ -15,3 +22,14 @@ int	main(void)
 	execve("cgi/cgi_exe", arg, NULL);
 	return (0);
 }
+*/
+
+#include "WebServer.hpp"
+
+int main()
+{
+	WebServer server = WebServer();
+	server.eventLoop();
+	return 0;
+}
+

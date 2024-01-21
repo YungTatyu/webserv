@@ -6,14 +6,16 @@ DEPFLAGS			= -MMD -MP -MF $(DEPS_DIR)/$*.d
 RM					= rm -rf
 
 SRCS_DIR			= src
-INCS_DIR			= include
+INCS_DIR			= $(SRCS_DIR)/config
 OBJS_DIR			= obj
 DEPS_DIR			= dep
 BUILD_DIR			= build
 CGI_DIR				= cgi
 CONF_DIR			= conf
 
-SRCS				= $(SRCS_DIR)/main.cpp
+# SRCS				= $(SRCS_DIR)/main.cpp $(SRCS_DIR)/ConnectionManager.cpp $(SRCS_DIR)/EchoServer.cpp $(SRCS_DIR)/NetworkIOHandler.cpp $(SRCS_DIR)/RequestHandler.cpp $(SRCS_DIR)/ServerConfig.cpp
+
+SRCS = $(wildcard $(SRCS_DIR)/*.cpp)
 
 # SERVER_DIR			= server
 # SRCS				+= $(SRCS_DIR)/$(SERVER_DIR)
@@ -60,14 +62,15 @@ fclean: clean
 
 re: fclean all
 
--include $(DEPS)
-
 TEST_FILTER ?= '*'
 
 test:
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
+
+-include $(DEPS)
+
 # run:
 # 	./$(NAME) $(CONFIG)
 
