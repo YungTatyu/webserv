@@ -10,12 +10,14 @@ class Index
 	private:
 		std::string	file_;
 	public:
-		Index();
-		~Index();
-		const static char	*kDefaultFile_ = "index.html";
-		const std::string	&getFile() const;
-		void	setFile(const std::string &file);
+		Index() : file_(this->kDefaultFile_) {}
+		~Index() {}
+		const static char	*kDefaultFile_;
+		const std::string	&getFile() const { return this->file_; }
+		void	setFile(const std::string &file) { this->file_ = file; }
 };
+
+const char	*Index::kDefaultFile_ = "index.html";
 } // namespace config
 
 #endif

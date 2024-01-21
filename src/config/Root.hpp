@@ -10,11 +10,14 @@ class Root
 	private:
 		std::string	path_;
 	public:
-		Root();
-		~Root();
-		const static char	*kDefaultPath_ = "html";
+		Root() : path_(this->kDefaultPath_) {}
+		~Root() {}
+		const static char	*kDefaultPath_;
+		const std::string	&getPath() const { return this->path_; }
+		void	setPath(const std::string &path) { this->path_ = path; }
 };
-} // namespace config
 
+const char	*Root::kDefaultPath_ = "html";
+} // namespace config
 
 #endif

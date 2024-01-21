@@ -7,15 +7,15 @@ namespace config
 {
 class Size
 {
-	private:
-		unsigned long	size_in_bytes_;
 	public:
-		Size();
-		~Size();
+		Size() {}
+		Size(const unsigned long &size_in_bytes) : size_in_bytes_(size_in_bytes) {}
+		~Size() {}
+		unsigned long	size_in_bytes_;
+		const static unsigned int	kilobytes = 1000;
+		const static unsigned int	megabytes = kilobytes * 1000;
 		// 設定できる最大値 nginxを参照
-		const static unsigned long	kMaxSizeInBytes = std::numeric_limits<long>::max();
-		const unsigned long	&getSizeInBytes() const;
-		void	setSizeInBytes(const unsigned long &size_in_bytes);
+		const static unsigned long	kMaxSizeInBytes_ = std::numeric_limits<long>::max();
 };
 } // namespace config
 

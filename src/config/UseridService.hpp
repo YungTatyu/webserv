@@ -10,8 +10,8 @@ class UseridService
 	public:
 		UseridService() {}
 		~UseridService() {}
-		const unsigned long	getUseridService() const;
-		void	setUseridService(const unsigned long userid_service);
+		const unsigned long	&getUseridService() const { return this->userid_service_; }
+		void	setUseridService(const unsigned long userid_service) { this->userid_service_ = userid_service; }
 };
 } // namespace config
 
