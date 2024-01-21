@@ -76,7 +76,7 @@ bool	config::Parser::expect(const config::TK_TYPE type)
 {
 	if (this->tokens_[ti].type_ != type)
 	{
-		printError("");
+		printError(std::string("unexpected ") + "\"" + this->tokens_[ti].value_ + "\"");
 		return false;
 	}
 	return true;
