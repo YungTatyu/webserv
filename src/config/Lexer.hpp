@@ -18,7 +18,8 @@ enum TK_TYPE
 struct Token
 {
 	const std::string	value_;
-	const TK_TYPE	type_;
+	const TK_TYPE		type_;
+	const unsigned int	line_;
 };
 
 class Lexer

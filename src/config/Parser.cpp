@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include <iostream>
 
 std::set<std::string>	config::Parser::all_contexts_;
 std::set<std::string>	config::Parser::all_directives_;
@@ -16,7 +17,8 @@ std::set<std::string>	config::Parser::all_directives_;
 // };
 
 
-config::Parser::Parser(const std::vector<Token> &tokens) : tokens_(tokens), ti(0), current_context_(CONF_MAIN)
+config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
+	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
 {
 	this->all_contexts_.insert("main");
     this->all_contexts_.insert("http");
@@ -51,17 +53,42 @@ config::Parser::Parser(const std::vector<Token> &tokens) : tokens_(tokens), ti(0
 
 config::Parser::~Parser() {}
 
-bool	config::Parser::expect(const config::TK_TYPE type)
+bool	config::Parser::parse()
 {
-	return this->tokens_[ti].type_ == type;
+	if (!expect(TK_STR))
+	{
+		printError(tokens_[0], "unexpected ");
+		return false;
+	}
+	while (ti < this->tokens_.size())
+	{
+		const Token &token = this->tokens_[ti];
+		if (token.type_ != TK_STR)
+			printError(tokens_[ti], "unexpected ");
+	}
 }
 
-bool	config::Parser::is_context(const config::Token &token)
+bool	config::Parser::expect(const config::TK_TYPE type)
+{
+	if (this->tokens_[ti].type_ != type)
+	{
+		printError(tokens_[ti], "");
+		return false;
+	}
+	return true;
+}
+
+bool	config::Parser::isContext(const config::Token &token)
 {
 	return this->all_contexts_.find(token.value_) != this->all_contexts_.end();
 }
 
-bool	config::Parser::is_directive(const config::Token &token)
+bool	config::Parser::isDirective(const config::Token &token)
 {
 	return this->all_directives_.find(token.value_) != this->all_directives_.end();
+}
+
+void	config::Parser::printError(const Token &token, const std::string &err_msg) const
+{
+	std::cerr << "webserv: [emerg] " << err_msg << "in " + this->filepath_ << ':' << token.line_  << '\n';
 }
