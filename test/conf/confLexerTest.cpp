@@ -7,7 +7,6 @@
 
 void	SAME_TOKEN(const config::TK_TYPE type, const std::string value, const unsigned int line, struct config::Token token)
 {
-	std::cout << value << type << line << std::endl;
 	EXPECT_EQ(value, token.value_);
 	EXPECT_EQ(type, token.type_);
 	EXPECT_EQ(line, token.line_);
