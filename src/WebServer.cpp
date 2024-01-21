@@ -21,11 +21,6 @@ void WebServer::initializeServer()
 	this->eventManager = new EventManager();
 }
 
-bool isFdNegative(const struct pollfd& pfd)
-{
-	return pfd.fd == -1;
-}
-
 void WebServer::eventLoop()
 {
 	this->eventManager->fds.push_back( EventManager::genPollFd( this->ioHandler->getListenfd(), POLLIN, 0 ) );
@@ -71,7 +66,7 @@ void WebServer::eventLoop()
 		}
 
 		this->eventManager->fds.erase(
-			std::remove_if( this->eventManager->fds.begin(), this->eventManager->fds.end(), isFdNegative ),
+			std::remove_if( this->eventManager->fds.begin(), this->eventManager->fds.end(), EventManager::isFdNegative ),
 			this->eventManager->fds.end()
 		);
 	}

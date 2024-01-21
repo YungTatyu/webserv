@@ -14,6 +14,7 @@ class EventManager
 		struct pollfd getPollfd( int fd );
 
 		static struct pollfd genPollFd( int fd, short events, short revents );
+		static bool isFdNegative(const struct pollfd& pfd);
 };
 
 #endif
