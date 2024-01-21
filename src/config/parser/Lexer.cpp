@@ -111,6 +111,7 @@ void	config::Lexer::addToken()
 	std::string		tmp_value;
 	TK_TYPE			tmp_type;
 	unsigned int	tmp_line = this->current_line_;
+	char tmp_quote;
 
 	switch (getChar()) {
 		case '{':
@@ -128,6 +129,20 @@ void	config::Lexer::addToken()
 			tmp_type = config::TK_TYPE::TK_SEMICOLON;
 			file_iterator_++;
 			break ;
+		case '\'':
+		case '"':
+			tmp_quote = getChar();
+			tmp_line = this->current_line_;
+			tmp_type = config::TK_TYPE::TK_STR; 
+			file_iterator_++;
+			while (!isEndOfFile() && getChar() != tmp_quote)
+			{
+				tmp_value += getChar();
+				file_iterator_++;
+			}
+			if (getChar() == tmp_quote)
+				file_iterator_++;
+			break ;
 		default:
 			while (!isEndOfFile() && !isMetaChar() && !getChar() != '#')
 			{
@@ -135,7 +150,7 @@ void	config::Lexer::addToken()
 				file_iterator_++;
 			}
 			tmp_type = config::TK_TYPE::TK_STR;
-			tmp_line = this->current_line_; // くぉーとで囲まれてて行数またがることありそう。
+			tmp_line = this->current_line_; 
 			break ;
 	}
 
