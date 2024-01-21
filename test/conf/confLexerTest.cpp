@@ -3,6 +3,7 @@
 #include "Lexer.hpp"
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 void	SAME_TOKEN(const config::TK_TYPE type, const std::string value, const unsigned int line, struct config::Token token)
 {
@@ -13,7 +14,7 @@ void	SAME_TOKEN(const config::TK_TYPE type, const std::string value, const unsig
 
 TEST(LexerTokenizeTest, one_directive)
 {
-	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/lexer1.conf";
+	std::string filePath= "test/conf/confFile/lexer1.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -26,7 +27,7 @@ TEST(LexerTokenizeTest, one_directive)
 
 TEST(LexerTokenizeTest, events_context)
 {
-	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/lexer2.conf";
+	std::string filePath= "test/conf/confFile/lexer2.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -44,7 +45,7 @@ TEST(LexerTokenizeTest, events_context)
 
 TEST(LexerTokenizeTest, http_context)
 {
-	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/lexer3.conf";
+	std::string filePath= "test/conf/confFile/lexer3.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -81,7 +82,7 @@ TEST(LexerTokenizeTest, http_context)
 
 TEST(LexerTokenizeTest, comment_skip)
 {
-	std::string filePath= "/home/hagewahi/42tokyo/webserv/test/conf/confFile/comment.conf";
+	std::string filePath= "test/conf/confFile/comment.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -111,6 +112,13 @@ TEST(LexerTokenizeTest, comment_skip)
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 14, lexer.getToken(22));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 15, lexer.getToken(23));
 }
+
+TEST(LexerTest, no_file)
+{
+	std::string filePath= "";
+	EXPECT_THROW ({config::Lexer	lexer(filePath);}, std::runtime_error);
+}
+
 // main function
 int	main(int argc, char **argv)
 {

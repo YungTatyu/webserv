@@ -1,20 +1,17 @@
 #include "Lexer.hpp"
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
-config::Lexer::Lexer(const std::string file_path)
-	: file_content_(getFileContent(file_path)), file_iterator_(0), current_line_(1)
+config::Lexer::Lexer(const std::string& file_path) try
+    : file_content_(getFileContent(file_path)), file_iterator_(0), current_line_(1)
 {
-	#ifdef Debug
-	std::cout << "Lexer Constructor" << std::endl;
-	#endif
+    // コンストラクタの残りの初期化など
 }
-
-config::Lexer::~Lexer()
+catch (const std::runtime_error& e)
 {
-	#ifdef Debug
-	std::cout << "Lexer Destructor" << std::endl;
-	#endif
+    // 例外を再throwして呼び出し元でキャッチする
+    throw; 
 }
 
 void	config::Lexer::tokenize()
@@ -33,15 +30,14 @@ const config::Token&	config::Lexer::getToken(int key)
 	return this->tokens_[key];
 }
 
-std::string	config::Lexer::getFileContent(const std::string file_path)
+const std::string	config::Lexer::getFileContent(const std::string file_path) const
 {
     // ファイルを開く
     std::ifstream file(file_path);
 
     // ファイルが開けたか確認
     if (!file.is_open()) {
-        std::cerr << "Failed to open the file: " << file_path << std::endl;
-        return ""; // 後で例外投げる
+		throw std::runtime_error("Failed to open the file: " + file_path);
     }
 
     // ファイルから読み取ったデータを格納するための変数
@@ -51,7 +47,6 @@ std::string	config::Lexer::getFileContent(const std::string file_path)
     // ファイルから1行ずつ読み取り、contentに追加
     while (std::getline(file, line)) {
         content += line + "\n"; // 改行を保持する場合
-        // または content += line; で改行を保持せずに追加することも可能
     }
 
     // ファイルを閉じる
@@ -93,16 +88,16 @@ void	config::Lexer::skipComment()
 	}
 }
 
-const char&	config::Lexer::getChar()
+const char&	config::Lexer::getChar() const
 {
 	return file_content_[file_iterator_];
 }
 
-bool	config::Lexer::isMetaChar()
+bool	config::Lexer::isMetaChar() const
 {
-	if (std::isspace(getChar()) \
-		|| getChar() == '{' \
-		|| getChar() == '}' \
+	if (std::isspace(getChar()) 
+		|| getChar() == '{' 
+		|| getChar() == '}' 
 		|| getChar() == ';')
 		return true;
 	return false;
@@ -117,33 +112,31 @@ void	config::Lexer::addToken()
 	TK_TYPE			tmp_type;
 	unsigned int	tmp_line = this->current_line_;
 
-	if (getChar() == '{')
-	{
-		tmp_value += getChar();
-		tmp_type = config::TK_TYPE::TK_OPEN_CURLY_BRACE;
-		file_iterator_++;
-	}
-	else if (getChar() == '}')
-	{
-		tmp_value += getChar();
-		tmp_type = config::TK_TYPE::TK_CLOSE_CURLY_BRACE;
-		file_iterator_++;
-	}
-	else if (getChar() == ';')
-	{
-		tmp_value += getChar();
-		tmp_type = config::TK_TYPE::TK_SEMICOLON;
-		file_iterator_++;
-	}
-	else
-	{
-		while (!isEndOfFile() && !isMetaChar() && !getChar() != '#')
-		{
+	switch (getChar()) {
+		case '{':
 			tmp_value += getChar();
+			tmp_type = config::TK_TYPE::TK_OPEN_CURLY_BRACE;
 			file_iterator_++;
-		}
-		tmp_type = config::TK_TYPE::TK_STR;
-		tmp_line = this->current_line_; // くぉーとで囲まれてて行数またがることありそう。
+			break ;
+		case '}':
+			tmp_value += getChar();
+			tmp_type = config::TK_TYPE::TK_CLOSE_CURLY_BRACE;
+			file_iterator_++;
+			break ;
+		case ';':
+			tmp_value += getChar();
+			tmp_type = config::TK_TYPE::TK_SEMICOLON;
+			file_iterator_++;
+			break ;
+		default:
+			while (!isEndOfFile() && !isMetaChar() && !getChar() != '#')
+			{
+				tmp_value += getChar();
+				file_iterator_++;
+			}
+			tmp_type = config::TK_TYPE::TK_STR;
+			tmp_line = this->current_line_; // くぉーとで囲まれてて行数またがることありそう。
+			break ;
 	}
 
 	#ifdef TEST
@@ -154,7 +147,7 @@ void	config::Lexer::addToken()
 	tokens_.push_back(new_token);
 }
 
-bool	config::Lexer::isEndOfFile()
+bool	config::Lexer::isEndOfFile() const
 {
 	if (file_iterator_ == file_content_.size())
 		return true;
