@@ -52,22 +52,29 @@ config::Parser::~Parser() {}
 */
 bool	config::Parser::parse()
 {
-	if (!expect(TK_STR))
-	{
-		printError("unexpected ");
-		return false;
-	}
 	while (ti < this->tokens_.size())
 	{
-		const Token &token = this->tokens_[ti];
-		if (token.type_ != TK_STR)
-			printError("");
+		// TK_STRで絶対にはじまっている
+		if (!expect(TK_STR))
+			return false;
+		const Token &current_token = this->tokens_[ti];
+		// 存在するcontextまたはdirectiveか
+		if (!isContext(current_token) && !isDirective(current_token))
+		{
+			printError(std::string("unknown directive " + '\"' + current_token.value_ + '\"'));
+			return false;
+		}
+		if (!parseType(current_token.value_))
+			return false;
 	}
 	return true;
 }
 
 bool	config::Parser::parseType(const std::string &directive)
 {
+	// contextが正しいか
+
+	// argsの数が正しいか
 
 	return true;
 }
@@ -76,7 +83,7 @@ bool	config::Parser::expect(const config::TK_TYPE type)
 {
 	if (this->tokens_[ti].type_ != type)
 	{
-		printError(std::string("unexpected ") + "\"" + this->tokens_[ti].value_ + "\"");
+		printError(std::string("unexpected ") + '\"' + this->tokens_[ti].value_ + '\"');
 		return false;
 	}
 	return true;
@@ -84,15 +91,15 @@ bool	config::Parser::expect(const config::TK_TYPE type)
 
 bool	config::Parser::isContext(const config::Token &token)
 {
-	return this->all_contexts_.find(token.value_) != this->all_contexts_.end();
+	return token.type_ == config::TK_STR && this->all_contexts_.find(token.value_) != this->all_contexts_.end();
 }
 
 bool	config::Parser::isDirective(const config::Token &token)
 {
-	return this->all_directives_.find(token.value_) != this->all_directives_.end();
+	return token.type_ == config::TK_STR && this->all_directives_.find(token.value_) != this->all_directives_.end();
 }
 
 void	config::Parser::printError(const std::string &err_msg) const
 {
-	std::cerr << "webserv: [emerg] " << err_msg << "in " + this->filepath_ << ':' << this->tokens_[ti].line_  << '\n';
+	std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ':' << this->tokens_[ti].line_  << '\n';
 }
