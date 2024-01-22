@@ -23,6 +23,9 @@ void	config::Lexer::tokenize()
 		skipComment();
 		addToken();
 	}
+
+	config::Token	end_token("", config::TK_TYPE::TK_END, this->current_line_);
+	this->tokens_.push_back(end_token);
 }
 
 const config::Token&	config::Lexer::getToken(int key)
@@ -144,7 +147,7 @@ void	config::Lexer::addToken()
 				file_iterator_++;
 			break ;
 		default:
-			while (!isEndOfFile() && !isMetaChar() && !getChar() != '#')
+			while (!isEndOfFile() && !isMetaChar())
 			{
 				tmp_value += getChar();
 				file_iterator_++;
@@ -153,10 +156,6 @@ void	config::Lexer::addToken()
 			tmp_line = this->current_line_; 
 			break ;
 	}
-
-	#ifdef TEST
-	std::cout << "Token.value_: " << tmp_value << ", Token.type_: " << tmp_type << ", Token.line_: " << tmp_line << std::endl;
-	#endif
 
 	config::Token	new_token(tmp_value, tmp_type, tmp_line);
 	tokens_.push_back(new_token);
