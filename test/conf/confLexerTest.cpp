@@ -32,7 +32,7 @@ TEST(LexerTokenizeTest, one_directive)
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "error_log", 1, lexer.getToken(0));
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "webserv/logs", 1, lexer.getToken(1));
 	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 1, lexer.getToken(2));
-	SAME_TOKEN(config::TK_TYPE::TK_END, "", 2, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 1, lexer.getToken(3));
 }
 
 
@@ -52,7 +52,7 @@ TEST(LexerTokenizeTest, events_context)
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "poll", 3, lexer.getToken(6));
 	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 3, lexer.getToken(7));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 4, lexer.getToken(8));
-	SAME_TOKEN(config::TK_TYPE::TK_END, "", 5, lexer.getToken(9));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 4, lexer.getToken(9));
 }
 
 TEST(LexerTokenizeTest, http_context)
@@ -90,7 +90,7 @@ TEST(LexerTokenizeTest, http_context)
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 14, lexer.getToken(25));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 15, lexer.getToken(26));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 16, lexer.getToken(27));
-	SAME_TOKEN(config::TK_TYPE::TK_END, "", 17, lexer.getToken(28));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 16, lexer.getToken(28));
 }
 
 TEST(LexerTokenizeTest, comment_skip)
@@ -124,7 +124,7 @@ TEST(LexerTokenizeTest, comment_skip)
 	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 13, lexer.getToken(21));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 14, lexer.getToken(22));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 15, lexer.getToken(23));
-	SAME_TOKEN(config::TK_TYPE::TK_END, "", 16, lexer.getToken(24));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 15, lexer.getToken(24));
 }
 
 TEST(LexerTest, no_file)
@@ -133,7 +133,7 @@ TEST(LexerTest, no_file)
 	EXPECT_THROW ({config::Lexer	lexer(filePath);}, std::runtime_error);
 }
 
-TEST(LexerTest, quote_file)
+TEST(LexerTokenizeTest, quote_file)
 {
 	std::string filePath= "test/conf/confFile/quote.conf";
 	config::Lexer	lexer(filePath);
@@ -162,9 +162,59 @@ TEST(LexerTest, quote_file)
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "root", 12, lexer.getToken(19));
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "/home/student/webserv/html", 12, lexer.getToken(20));
 	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 12, lexer.getToken(21));
-	SAME_TOKEN(config::TK_TYPE::TK_STR, "index index.html;\n\t}\n}\n", 13, lexer.getToken(22));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index index.html;\n\t}\n}", 13, lexer.getToken(22));
 	SAME_TOKEN(config::TK_TYPE::TK_END, "", 13, lexer.getToken(23));
 }
+
+TEST(LexerTokenizeTest, continuous_quote)
+{
+	std::string filePath= "test/conf/confFile/continuous_quote.conf";
+	config::Lexer	lexer(filePath);
+
+	lexer.tokenize();
+
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "events", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "worker_connections", 2, lexer.getToken(2));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "", 2, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "1024", 2, lexer.getToken(4));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 2, lexer.getToken(5));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 3, lexer.getToken(6));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 4, lexer.getToken(7));
+}
+
+TEST(LexerTokenizeTest, single_in_double_quote)
+{
+	std::string filePath= "test/conf/confFile/single_in_double_quote.conf";
+	config::Lexer	lexer(filePath);
+
+	lexer.tokenize();
+
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "events", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "''", 2, lexer.getToken(2));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "1024", 2, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 2, lexer.getToken(4));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 3, lexer.getToken(5));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 3, lexer.getToken(6));
+}
+
+TEST(LexerTokenizeTest, double_in_single_quote)
+{
+	std::string filePath= "test/conf/confFile/double_in_single_quote.conf";
+	config::Lexer	lexer(filePath);
+
+	lexer.tokenize();
+
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "events", 1, lexer.getToken(0));
+	SAME_TOKEN(config::TK_TYPE::TK_OPEN_CURLY_BRACE, "{", 1, lexer.getToken(1));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "\"\"", 2, lexer.getToken(2));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "1024", 2, lexer.getToken(3));
+	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 2, lexer.getToken(4));
+	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 3, lexer.getToken(5));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 3, lexer.getToken(6));
+}
+
 
 // main function
 /*int	main(int argc, char **argv)
