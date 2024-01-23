@@ -1,5 +1,6 @@
 #include "WebServer.hpp"
 #include "EventManager.hpp"
+#include "SysCallWrapper.hpp"
 #include <cerrno>
 
 /* WebServerクラスの実装 */
@@ -27,7 +28,7 @@ void WebServer::eventLoop()
 
 	for ( ; ; )
 	{
-		poll ( this->eventManager->fds.data(), this->eventManager->fds.size(), -1 );
+		SysCallWrapper::Poll ( this->eventManager->fds.data(), this->eventManager->fds.size(), -1 );
 
 		//　ここをイテレータで走査したら、要素を追加したときにイテレータが無効になったりしてバグる。
 		size_t iniSize = this->eventManager->fds.size();
