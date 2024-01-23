@@ -3,28 +3,20 @@
 #include <fstream>
 #include <stdexcept>
 
-config::Lexer::Lexer(const std::string& file_path) try
+config::Lexer::Lexer(const std::string& file_path)
     : file_content_(getFileContent(file_path)), file_iterator_(0), current_line_(1)
 {
-    // コンストラクタの残りの初期化など
-}
-catch (const std::runtime_error& e)
-{
-    // 例外を再throwして呼び出し元でキャッチする
-    throw; 
 }
 
 void	config::Lexer::tokenize()
 {
-	unsigned int	current_line = 1;
-
 	while (!isEndOfFile()) {
 		skipSpaces();
 		skipComment();
 		addToken();
 	}
 
-	config::Token	end_token("", config::TK_TYPE::TK_END, this->current_line_);
+	config::Token	end_token("", config::TK_END, this->current_line_);
 	this->tokens_.push_back(end_token);
 }
 
@@ -36,13 +28,7 @@ const config::Token&	config::Lexer::getToken(int key)
 const std::string	config::Lexer::getFileContent(const std::string file_path) const
 {
 	// ファイルを開く
-	std::ifstream file(file_path);
-
-	// ファイルが開けたか確認
-	if (!file.is_open())
-	{
-		throw std::runtime_error("Failed to open the file: " + file_path);
-	}
+	std::ifstream file(file_path.c_str());
 
 	// ファイルから読み取ったデータを格納するための変数
 	std::string content;
@@ -125,24 +111,24 @@ void	config::Lexer::addToken()
 	switch (getChar()) {
 		case '{':
 			tmp_value += getChar();
-			tmp_type = config::TK_TYPE::TK_OPEN_CURLY_BRACE;
+			tmp_type = config::TK_OPEN_CURLY_BRACE;
 			file_iterator_++;
 			break ;
 		case '}':
 			tmp_value += getChar();
-			tmp_type = config::TK_TYPE::TK_CLOSE_CURLY_BRACE;
+			tmp_type = config::TK_CLOSE_CURLY_BRACE;
 			file_iterator_++;
 			break ;
 		case ';':
 			tmp_value += getChar();
-			tmp_type = config::TK_TYPE::TK_SEMICOLON;
+			tmp_type = config::TK_SEMICOLON;
 			file_iterator_++;
 			break ;
 		case '\'':
 		case '"':
 			tmp_quote = getChar();
 			tmp_line = this->current_line_;
-			tmp_type = config::TK_TYPE::TK_STR; 
+			tmp_type = config::TK_STR; 
 			file_iterator_++;
 			while (!isEndOfFile() && getChar() != tmp_quote)
 			{
@@ -158,7 +144,7 @@ void	config::Lexer::addToken()
 				tmp_value += getChar();
 				file_iterator_++;
 			}
-			tmp_type = config::TK_TYPE::TK_STR;
+			tmp_type = config::TK_STR;
 			break ;
 	}
 
