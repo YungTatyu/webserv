@@ -2,19 +2,31 @@
 #include "Lexer.hpp"
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
+#include <dirent.h>
 
 bool	config::init_config(const std::string& file_path)
 {
-	// ifstreamはファイルがない場合は.ファイルを開く事に失敗する
-	std::ifstream file(file_path.c_str());
-	if (!file.is_open())
+	// directory かどうか
+	if (opendir(file_path.c_str()))
 	{
-		std::cerr << "can't open" << std::endl;
+		std::cerr << file_path << " is a directory." << std::endl;
 		return false;
 	}
 
-	// 問題なければ、ストリームを閉じる
-	file.close();
+	// file が存在するかどうか
+	if (access(file_path.c_str(), F_OK))
+	{
+		std::cerr << "There isn't " << file_path << "." << std::endl;
+		return false;
+	}
+
+	// file の読み取り権限があるかどうか？ 
+	if (access(file_path.c_str(), R_OK))
+	{
+		std::cerr << "We cannot read " << file_path << "." << std::endl;
+		return false;
+	}
 
 	// 拡張子が正しいかどうか
 	unsigned int dotPosition = file_path.find_last_of('.');

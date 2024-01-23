@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <gtest/gtest-param-test.h>
 #include "Lexer.hpp"
+#include "conf.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -11,6 +12,13 @@ void	SAME_TOKEN(const config::TK_TYPE type, const std::string value, const unsig
 	EXPECT_EQ(type, token.type_);
 	EXPECT_EQ(line, token.line_);
 }
+
+TEST(ConfigTest, no_file)
+{
+	std::string filePath= "";
+	EXPECT_FALSE(config::init_config(filePath));
+}
+
 
 TEST(LexerTokenizeTest, empty_file)
 {
@@ -125,12 +133,6 @@ TEST(LexerTokenizeTest, comment_skip)
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 14, lexer.getToken(22));
 	SAME_TOKEN(config::TK_TYPE::TK_CLOSE_CURLY_BRACE, "}", 15, lexer.getToken(23));
 	SAME_TOKEN(config::TK_TYPE::TK_END, "", 15, lexer.getToken(24));
-}
-
-TEST(LexerTest, no_file)
-{
-	std::string filePath= "";
-	EXPECT_THROW ({config::Lexer	lexer(filePath);}, std::runtime_error);
 }
 
 TEST(LexerTokenizeTest, quote_file)
