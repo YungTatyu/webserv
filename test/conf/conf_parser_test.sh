@@ -1,9 +1,12 @@
+#!/bin/bash
+
 g_test_index=0
 
 function	assert {
 	g_test_index=$(bc <<< "$g_test_index + 1")
-	printf "test$g_test_index $1: "
-	local	actual=$(../../webserv $1 2>&1)
+	local	conf_path=$1
+	printf "test$g_test_index $conf_path: "
+	local	actual=$(../../webserv $conf_path 2>&1)
 	local	expect=$2
 
 	if [ "$actual" = "$expect" ]
@@ -20,8 +23,8 @@ readonly err_start_with="webserv: [emerg]"
 
 conf_path="./conf_files/error/double_quote_not_closed.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected \"\"\" in $(readlink -f $conf_path):1\n"
+assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2\n"
 
 conf_path="./conf_files/error/double_quote_not_closed.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected \"\"\" ${err_path}:1\n"
+assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2\n"
