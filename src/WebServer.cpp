@@ -67,7 +67,7 @@ void WebServer::eventLoop()
 		}
 
 		this->eventManager->fds.erase(
-			std::remove_if( this->eventManager->fds.begin(), this->eventManager->fds.end(), EventManager::isFdNegative ),
+			std::remove_if( this->eventManager->fds.begin(), this->eventManager->fds.end(), EventManager::isInvalidFd ),
 			this->eventManager->fds.end()
 		);
 	}

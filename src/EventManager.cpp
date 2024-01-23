@@ -44,7 +44,7 @@ struct pollfd EventManager::genPollFd( const int fd, const short events, const s
        return tmp;
 }
 
-bool EventManager::isFdNegative(const struct pollfd& pfd)
+bool EventManager::isInvalidFd( const struct pollfd& pfd )
 {
 	return pfd.fd == -1;
 }
