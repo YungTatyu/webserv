@@ -3,26 +3,13 @@
 #include <unistd.h>
 #include <cstdlib>
 
+#include "Http.hpp"
+
 int	main(int argc, char *argv[])
 {
 	(void) argc;
 	std::cerr << "Hello webserv " << argv[1] << std::endl;
 
-	init_config();
-	server.server();
-	try
-	{
-		Lexer lexir("filename");
-		lexier.tokenize();
-		Parser parser();
-		if (!parser.parse())
-			return 1;
-	
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
 	
 
 	// std::vector<config::Token>	tokens_;

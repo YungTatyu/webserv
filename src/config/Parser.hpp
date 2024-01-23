@@ -33,8 +33,10 @@ class Parser
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
 		~Parser();
-		static std::set<std::string>	all_contexts_;
-		static std::set<std::string>	all_directives_;
+		static std::map<std::string, unsigned int>	all_contexts_;
+		static std::map<std::string, unsigned int>	all_directives_;
+		// static std::set<std::string>	all_contexts_;
+		// static std::set<std::string>	all_directives_;
 		bool	parse();
 };
 } // namespace config

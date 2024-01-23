@@ -16,8 +16,10 @@ class Time
 		const static unsigned int	minutes = seconds * 60;
 		const static unsigned int	hours = minutes * 60;
 		const static unsigned int	days = hours * 60;
-		const static unsigned long	kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();;
+		const static unsigned long	kMaxTimeInMilliseconds_;
 };
+const unsigned long	kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();
+
 } // namespace config
 
 #endif
