@@ -6,6 +6,7 @@
 #include <string>
 
 #include "conf.hpp"
+#include "Location.hpp"
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
@@ -29,6 +30,7 @@ struct Server
 {
 	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_NOARGS;
 	std::set<std::string>	set_directives;
+	std::vector<Location>	location_list;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;

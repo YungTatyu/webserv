@@ -6,6 +6,7 @@
 #include <string>
 
 #include "conf.hpp"
+#include "Server.hpp"
 #include "AccessLog.hpp"
 #include "SendTimeout.hpp"
 #include "KeepaliveTimeout.hpp"
@@ -31,6 +32,7 @@ struct Http
 {
 	const static unsigned int	type = CONF_MAIN|CONF_NOARGS;
 	std::set<std::string>	set_directives;
+	std::vector<Server>	server_list;
 	Root	root;
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;

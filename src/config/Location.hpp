@@ -6,6 +6,7 @@
 #include <string>
 
 #include "conf.hpp"
+#include "LimitExcept.hpp"
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
@@ -29,9 +30,10 @@ struct Location
 {
 	Location(const std::string &uri) : uri_(uri) {}
 	~Location() {}
-	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_TAKE1;
+	const static unsigned int	type = CONF_HTTP|CONF_TAKE1;
 	std::set<std::string>	set_directives;
 	const std::string	uri_;
+	std::vector<LimitExcept>	limit_except_list;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;

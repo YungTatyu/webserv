@@ -2,12 +2,6 @@
 #include <iostream>
 #include <utility>
 
-#include "Http.hpp"
-#include "Events.hpp"
-#include "Server.hpp"
-#include "Location.hpp"
-#include "LimitExcept.hpp"
-
 // std::set<std::string>	config::Parser::all_contexts_;
 // std::set<std::string>	config::Parser::all_directives_;
 std::map<std::string, unsigned int>	config::Parser::all_contexts_;
