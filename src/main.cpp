@@ -15,6 +15,7 @@ int main(int ac, char *av[])
 		return 1;
 
 	WebServer server = WebServer();
+	server.eventLoop();
 	return 0;
 }
 
