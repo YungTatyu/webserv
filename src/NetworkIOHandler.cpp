@@ -34,7 +34,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	}
 }
 
-int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target )
+int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int target )
 {
 	std::vector<char> buffer( bufferSize_ );
 	ssize_t totalBytesRead = 0;
@@ -55,7 +55,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, int target
 	return 1;
 }
 
-int NetworkIOHandler::sendResponse( ConnectionManager &connManager, int target )
+int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int target )
 {	
 	return ( send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0) );
 }
@@ -80,7 +80,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 	std::cout << "> New client connected from IP: " << clientIp << std::endl;
 }
 
-void NetworkIOHandler::closeConnection( ConnectionManager& connManager, int target )
+void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int target )
 {
 	close( target );
 	connManager.removeConnection( target );

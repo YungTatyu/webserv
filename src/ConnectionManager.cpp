@@ -7,12 +7,12 @@ void ConnectionManager::setConnection( const struct pollfd& pfd )
 	connections_[pfd.fd] = ConnectionData();
 }
 
-void ConnectionManager::removeConnection( int fd )
+void ConnectionManager::removeConnection( const int fd )
 {
 	connections_.erase( fd );
 }
 
-void ConnectionManager::setContext( int fd, const std::vector<char>& context )
+void ConnectionManager::setContext( const int fd, const std::vector<char>& context )
 {
 	connections_[fd].context = context;
 }

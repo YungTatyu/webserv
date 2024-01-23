@@ -2,7 +2,7 @@
 #include "HttpMessage.hpp"
 
 /* RequestHandlerクラスの実装 */
-void RequestHandler::handle( ConnectionManager &connManager, int target )
+void RequestHandler::handle( ConnectionManager &connManager, const int target )
 {
     const std::vector<char>& context = connManager.getContext( target );
 	// std::cout << "----- request -----" << std::endl;

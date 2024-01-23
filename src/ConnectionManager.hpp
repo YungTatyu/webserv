@@ -16,8 +16,8 @@ class ConnectionManager
 {
 	public:
 		void setConnection( const struct pollfd& pfd );
-		void removeConnection( int fd );
-		void setContext( int fd, const std::vector<char>& context );
+		void removeConnection( const int fd );
+		void setContext( const int fd, const std::vector<char>& context );
 		const std::vector<char>& getContext( int fd ) const;
 		void setResponse( int fd, const std::vector<char>& response );
 		const std::vector<char>& getResponse( int fd ) const;

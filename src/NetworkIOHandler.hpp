@@ -19,10 +19,10 @@
 class NetworkIOHandler
 { public:
 		void setupSocket( ServerConfig *serverConfig );
-		int receiveRequest( ConnectionManager& connManager, int target );
-		int sendResponse( ConnectionManager& connManager, int target );
+		int receiveRequest( ConnectionManager& connManager, const int target );
+		int sendResponse( ConnectionManager& connManager, const int target );
 		void acceptConnection( ConnectionManager& connManager, EventManager& eventManager );
-		void closeConnection( ConnectionManager& connManager, int target );
+		void closeConnection( ConnectionManager& connManager, const int target );
 		int getListenfd();
 
 	private:
