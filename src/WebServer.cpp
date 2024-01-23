@@ -35,22 +35,22 @@ void WebServer::eventLoop()
 		for ( size_t i = 0; i < iniSize; ++i )
 		{
 			struct pollfd& curPfd = this->eventManager->fds[i];	
-			if ( curPfd.revents & POLLIN )
+			if ( curPfd.revents & POLLIN ) //リクエスト受信
 			{
-				if ( curPfd.fd == this->ioHandler->getListenfd() )	
+				if ( curPfd.fd == this->ioHandler->getListenfd() ) // リスニングソケットへの新規リクエスト。(新規コネクション)
 				{
 					this->ioHandler->acceptConnection( *this->connManager, *this->eventManager );
 				}
-				else
+				else // クライアントソケットへのリクエスト。(既存コネクション）
 				{
 					int re = this->ioHandler->receiveRequest( *this->connManager, curPfd.fd );
-					if ( re == 0 )
+					if ( re == 0 ) //クライアントが接続を閉じる時。
 					{
 						this->ioHandler->closeConnection( *this->connManager, curPfd.fd );
 						curPfd.fd = -1;
 						continue ;
 					}
-					else if ( re == -1 && errno == EAGAIN )
+					else if ( re == -1 && errno == EAGAIN ) //ソケット使用不可。
 					{
 						continue ;
 					}	
@@ -58,7 +58,7 @@ void WebServer::eventLoop()
 					this->eventManager->updateEvents( curPfd.fd , POLLOUT );
 				}
 			}
-			else if ( curPfd.revents & POLLOUT )
+			else if ( curPfd.revents & POLLOUT ) //レスポンス送信
 			{
 				if ( this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) == -1 && errno == EAGAIN )
 					continue ;

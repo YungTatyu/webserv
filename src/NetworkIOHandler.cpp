@@ -41,15 +41,15 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 
 	while ( 1 )
 	{
-	   ssize_t re = recv( target, buffer.data() + totalBytesRead, bufferSize_, 0 );
-	   if ( re == 0 && totalBytesRead == 0 )
+		ssize_t re = recv( target, buffer.data() + totalBytesRead, bufferSize_, 0 );
+		if ( re == 0 && totalBytesRead == 0 ) //クライアントとのコネクションが閉じた時。
 		   return 0;
-	   else if ( re == -1 && totalBytesRead == 0 )
+		else if ( re == -1 && totalBytesRead == 0 ) //ソケットが使用不可、またはエラー。
 		   return -1;
-	   else if ( static_cast<unsigned long>( re ) != bufferSize_ )
+		else if ( static_cast<unsigned long>( re ) != bufferSize_ ) //クライアントからのリクエストを読み終えた時。
 		   break ;
-	   totalBytesRead += re;
-	   buffer.resize( buffer.size() + bufferSize_ );
+		totalBytesRead += re;
+		buffer.resize( buffer.size() + bufferSize_ );
 	}
 	connManager.setRawRequest( target, buffer );
 	return 1;
