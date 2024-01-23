@@ -20,7 +20,7 @@ class Use
 	public:
 		Use() {}
 		~Use() {}
-		const CONNECTION_METHOD	getConnectionMethod() const { return this->connection_method_; }
+		CONNECTION_METHOD	getConnectionMethod() const { return this->connection_method_; }
 		void	setConnectionMethod(const CONNECTION_METHOD connection_method) { this->connection_method_ = connection_method; }
 		const static unsigned int	kType_ = CONF_EVENTS|CONF_TAKE1;
 };

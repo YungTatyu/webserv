@@ -3,6 +3,10 @@
 #include <utility>
 
 #include "Http.hpp"
+#include "Events.hpp"
+#include "Server.hpp"
+#include "Location.hpp"
+#include "LimitExcept.hpp"
 
 // std::set<std::string>	config::Parser::all_contexts_;
 // std::set<std::string>	config::Parser::all_directives_;
@@ -13,7 +17,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
 {
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
-	this->all_directives_.insert(std::make_pair("http", Http::kType));
+	this->all_directives_.insert(std::make_pair("http", config::Http::type));
+	this->all_directives_.insert(std::make_pair("server", config::Server::type));
 	// this->all_contexts_.insert("main");
     // this->all_contexts_.insert("http");
     // this->all_contexts_.insert("server");
@@ -62,15 +67,15 @@ bool	config::Parser::parse()
 	while (ti < this->tokens_.size())
 	{
 		const Token &current_token = this->tokens_[ti];
-		if (current_token.type_ == TK_END)
-			break;
+		// if (current_token.type_ == TK_END)
+		// 	break;
 		// TK_STRで絶対にはじまっている
 		if (!expect(TK_STR))
 			return false;
 		// 存在するcontextまたはdirectiveか
 		if (!isContext(current_token) && !isDirective(current_token))
 		{
-			printError(std::string("unknown directive " + '\"' + current_token.value_ + '\"'));
+			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"");
 			return false;
 		}
 		if (!parseType(current_token.value_))
@@ -87,7 +92,8 @@ bool	config::Parser::parse()
 bool	config::Parser::parseType(const std::string &directive)
 {
 	// contextが正しいか
-	if (confg::Listen::ktype_ & this->current_context_)
+	if (this->all_contexts_[directive] & this->current_context_)
+		return false;
 
 	// argsの数が正しいか
 
@@ -98,7 +104,7 @@ bool	config::Parser::expect(const config::TK_TYPE type)
 {
 	if (this->tokens_[ti].type_ != type)
 	{
-		printError(std::string("unexpected ") + '\"' + this->tokens_[ti].value_ + '\"');
+		printError(std::string("unexpected ") + "\"" + this->tokens_[ti].value_ + "\"");
 		return false;
 	}
 	return true;
@@ -116,5 +122,10 @@ bool	config::Parser::isDirective(const config::Token &token)
 
 void	config::Parser::printError(const std::string &err_msg) const
 {
-	std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ':' << this->tokens_[ti].line_  << '\n';
+	std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ":" << this->tokens_[ti].line_  << '\n';
+}
+
+bool	config::Parser::parseAccessLog()
+{
+	return true;
 }

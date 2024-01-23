@@ -13,7 +13,7 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
-#include "KeepAliveTimeout.hpp"
+#include "KeepaliveTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
 #include "TryFiles.hpp"

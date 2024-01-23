@@ -29,7 +29,7 @@ namespace config
 {
 struct Http
 {
-	const static unsigned int	kType = CONF_MAIN|CONF_NOARGS;
+	const static unsigned int	type = CONF_MAIN|CONF_NOARGS;
 	std::set<std::string>	set_directives;
 	Root	root;
 	std::vector<Index>	index_list;

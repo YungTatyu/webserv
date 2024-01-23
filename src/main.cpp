@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <cstdlib>
 
-#include "Http.hpp"
-
 int	main(int argc, char *argv[])
 {
 	(void) argc;
