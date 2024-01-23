@@ -8,12 +8,12 @@ class EventManager
 {
 	public:
 		std::vector<struct pollfd> fds;
-		void updateEvents( int fd, short events );
-		void addPollfd( struct pollfd pfd );
-		std::vector<struct pollfd> getAllPollfd();
-		struct pollfd getPollfd( int fd );
+		void updateEvents( const int fd, const short events );
+		void addPollfd( const struct pollfd pfd );
+		std::vector<struct pollfd> getAllPollfd() const;
+		struct pollfd getPollfd( const int fd ) const;
 
-		static struct pollfd genPollFd( int fd, short events, short revents );
+		static struct pollfd genPollFd( const int fd, const short events, const short revents );
 		static bool isFdNegative(const struct pollfd& pfd);
 };
 

@@ -1,6 +1,6 @@
 #include "EventManager.hpp"
 
-void EventManager::updateEvents( int fd, short events )
+void EventManager::updateEvents( const int fd, const short events )
 {
 	for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
 	{
@@ -11,19 +11,19 @@ void EventManager::updateEvents( int fd, short events )
 	}
 }
 
-void EventManager::addPollfd( struct pollfd pfd )
+void EventManager::addPollfd( const struct pollfd pfd )
 {
        this->fds.push_back( pfd );
 }
 
-std::vector<struct pollfd> EventManager::getAllPollfd()
+std::vector<struct pollfd> EventManager::getAllPollfd() const
 {
        return this->fds;
 }
 
-struct pollfd EventManager::getPollfd( int fd )
+struct pollfd EventManager::getPollfd( const int fd ) const
 {
-       for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
+       for ( std::vector<struct pollfd>::const_iterator cur = fds.begin(); cur != fds.end(); ++cur )
        {
                if ( cur->fd == fd )
                {
@@ -31,11 +31,11 @@ struct pollfd EventManager::getPollfd( int fd )
                }
        }
 
-       // if not matching fd is found, return invalid fd.
+       // if no matching fd is found, return invalid fd.
        return ( genPollFd( -1, 0, 0 ) );
 }
 
-struct pollfd EventManager::genPollFd( int fd, short events, short revents )
+struct pollfd EventManager::genPollFd( const int fd, const short events, const short revents )
 {
        struct pollfd tmp;
        tmp.fd = fd;
