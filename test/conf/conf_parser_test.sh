@@ -8,7 +8,7 @@ function	assert {
 
 	if [ "$actual" = "$expect" ]
 	then
-		printf "\033[32msuccess\033[0m"
+		printf "\033[32mpassed\033[0m\n\n"
 	else
 		printf "\033[31mfailed\n\033[0m"
 		printf "expected:${expect}---\n"
