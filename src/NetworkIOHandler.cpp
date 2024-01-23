@@ -51,7 +51,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 	   totalBytesRead += re;
 	   buffer.resize( buffer.size() + bufferSize_ );
 	}
-	connManager.setContext( target, buffer );
+	connManager.setRawRequest( target, buffer );
 	return 1;
 }
 
@@ -72,7 +72,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 
 	struct pollfd setting = EventManager::genPollFd( connfd, POLLIN, 0 );
 	connManager.setConnection( setting );
-	eventManager.fds.push_back( setting );
+	eventManager.addEvent( setting );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

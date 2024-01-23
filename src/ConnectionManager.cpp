@@ -12,15 +12,15 @@ void ConnectionManager::removeConnection( const int fd )
 	connections_.erase( fd );
 }
 
-void ConnectionManager::setContext( const int fd, const std::vector<char>& context )
+void ConnectionManager::setRawRequest( const int fd, const std::vector<char>& rawRequest )
 {
-	connections_[fd].context = context;
+	connections_[fd].rawRequest = rawRequest;
 }
 
 
-const std::vector<char>& ConnectionManager::getContext( int fd ) const
+const std::vector<char>& ConnectionManager::getRawRequest( const int fd ) const
 {
-	return connections_.at(fd).context;
+	return connections_.at(fd).rawRequest;
 }
 
 void ConnectionManager::setResponse( int fd, const std::vector<char>& response )

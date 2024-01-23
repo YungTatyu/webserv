@@ -4,10 +4,9 @@
 /* RequestHandlerクラスの実装 */
 void RequestHandler::handle( ConnectionManager &connManager, const int target )
 {
-    const std::vector<char>& context = connManager.getContext( target );
+    const std::vector<char>& context = connManager.getRawRequest( target );
 	// std::cout << "----- request -----" << std::endl;
-	std::cout << context.data() << std::endl;
-	// std::cout << "------- end -------" << std::endl;
+	std::cout << context.data() << std::endl; // std::cout << "------- end -------" << std::endl;
 
     std::string requestData = context.data();
     HttpRequest request = HttpMessage::requestParser( requestData );

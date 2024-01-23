@@ -11,7 +11,7 @@ void EventManager::updateEvents( const int fd, const short events )
 	}
 }
 
-void EventManager::addPollfd( const struct pollfd pfd )
+void EventManager::addEvent( const struct pollfd pfd )
 {
        this->fds.push_back( pfd );
 }

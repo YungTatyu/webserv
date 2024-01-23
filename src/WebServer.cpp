@@ -23,7 +23,7 @@ void WebServer::initializeServer()
 
 void WebServer::eventLoop()
 {
-	this->eventManager->fds.push_back( EventManager::genPollFd( this->ioHandler->getListenfd(), POLLIN, 0 ) );
+	this->eventManager->addEvent( EventManager::genPollFd( this->ioHandler->getListenfd(), POLLIN, 0 ) );
 
 	for ( ; ; )
 	{
