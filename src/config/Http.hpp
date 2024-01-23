@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 
+#include "conf.hpp"
 #include "AccessLog.hpp"
 #include "SendTimeout.hpp"
 #include "KeepaliveTimeout.hpp"
@@ -28,6 +29,7 @@ namespace config
 {
 struct Http
 {
+	const static unsigned int	type = CONF_MAIN|CONF_NOARGS;
 	std::set<std::string>	set_directives;
 	Root	root;
 	std::vector<Index>	index_list;

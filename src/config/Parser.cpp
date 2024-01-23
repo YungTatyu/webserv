@@ -54,10 +54,12 @@ bool	config::Parser::parse()
 {
 	while (ti < this->tokens_.size())
 	{
+		const Token &current_token = this->tokens_[ti];
+		if (current_token.type_ == TK_END)
+			break;
 		// TK_STRで絶対にはじまっている
 		if (!expect(TK_STR))
 			return false;
-		const Token &current_token = this->tokens_[ti];
 		// 存在するcontextまたはdirectiveか
 		if (!isContext(current_token) && !isDirective(current_token))
 		{
@@ -66,6 +68,11 @@ bool	config::Parser::parse()
 		}
 		if (!parseType(current_token.value_))
 			return false;
+	}
+	if (this->set_contexts_.find("events") == this->set_contexts_.end())
+	{
+		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
+		return false;
 	}
 	return true;
 }
