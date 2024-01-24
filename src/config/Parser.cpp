@@ -14,38 +14,40 @@ const unsigned int	config::AccessLog::kType_;
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
 {
+	// context
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
 	this->all_directives_.insert(std::make_pair("http", config::Http::type));
 	this->all_directives_.insert(std::make_pair("server", config::Server::type));
 	this->all_directives_.insert(std::make_pair("location", config::Location::type));
 	this->all_directives_.insert(std::make_pair("limit_except", config::LimitExcept::type));
+
+	// directive
 	this->all_directives_.insert(std::make_pair("access_log", config::AccessLog::kType_));
+	this->all_directives_.insert(std::make_pair("alias", config::Alias::kType_));
+	this->all_directives_.insert(std::make_pair("allow", config::Allow::kType_));
+	this->all_directives_.insert(std::make_pair("autoindex", config::Autoindex::kType_));
+	this->all_directives_.insert(std::make_pair("client_max_body_size", config::ClientMaxBodySize::kType_));
+	this->all_directives_.insert(std::make_pair("deny", config::Deny::kType_));
+	this->all_directives_.insert(std::make_pair("error_log", config::ErrorLog::kType_));
+	this->all_directives_.insert(std::make_pair("error_page", config::ErrorPage::kType_));
+	this->all_directives_.insert(std::make_pair("index", config::Index::kType_));
+	this->all_directives_.insert(std::make_pair("keepalive_timeout", config::KeepaliveTimeout::kType_));
+	this->all_directives_.insert(std::make_pair("listen", config::Listen::kType_));
+	this->all_directives_.insert(std::make_pair("return", config::Return::kType_));
+	this->all_directives_.insert(std::make_pair("root", config::Root::kType_));
+	this->all_directives_.insert(std::make_pair("send_timeout", config::SendTimeout::kType_));
+	this->all_directives_.insert(std::make_pair("server_name", config::ServerName::kType_));
+	this->all_directives_.insert(std::make_pair("try_files", config::TryFiles::kType_));
+	this->all_directives_.insert(std::make_pair("use", config::Use::kType_));
+	this->all_directives_.insert(std::make_pair("userid", config::Userid::kType_));
+	this->all_directives_.insert(std::make_pair("userid_domain", config::UseridDomain::kType_));
+	this->all_directives_.insert(std::make_pair("userid_expires", config::UseridExpires::kType_));
+	this->all_directives_.insert(std::make_pair("userid_path", config::UseridPath::kType_));
+	this->all_directives_.insert(std::make_pair("userid_service", config::UseridService::kType_));
+	this->all_directives_.insert(std::make_pair("worker_connections", config::WorkerConnections::kType_));
 
-	// this->all_directives_.insert("access_log");
-	// this->all_directives_.insert("alias");
-	// this->all_directives_.insert("allow");
-	// this->all_directives_.insert("autoindex");
-	// this->all_directives_.insert("client_max_body_size");
-	// this->all_directives_.insert("deny");
-	// this->all_directives_.insert("error_log");
-	// this->all_directives_.insert("error_page");
-	// this->all_directives_.insert("index");
-	// this->all_directives_.insert("keepalive_timeout");
-	// this->all_directives_.insert("listen");
-	// this->all_directives_.insert("return");
-	// this->all_directives_.insert("root");
-	// this->all_directives_.insert("send_timeout");
-	// this->all_directives_.insert("server_name");
-	// this->all_directives_.insert("try_files");
-	// this->all_directives_.insert("use");
-	// this->all_directives_.insert("userid");
-	// this->all_directives_.insert("userid_domain");
-	// this->all_directives_.insert("userid_expires");
-	// this->all_directives_.insert("userid_path");
-	// this->all_directives_.insert("userid_service");
-	// this->all_directives_.insert("worker_connections");
-
-	this->directives_parser_map_["access_log"] = &config::Parser::parseAccessLog;
+	// parser
+	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
 }
 
 config::Parser::~Parser() {}
@@ -69,7 +71,7 @@ bool	config::Parser::parse()
 		if (!expect(TK_STR))
 			return false;
 		// 存在するcontextまたはdirectiveか
-		if (!isContext(current_token) && !isDirective(current_token))
+		if (!isDirective(current_token))
 		{
 			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"");
 			return false;
@@ -111,6 +113,9 @@ bool	config::Parser::isContext(const config::Token &token)
 	return token.type_ == config::TK_STR && this->all_contexts_.find(token.value_) != this->all_contexts_.end();
 }
 
+/**
+ * 存在するcontextかdirectiveか
+*/
 bool	config::Parser::isDirective(const config::Token &token)
 {
 	return token.type_ == config::TK_STR && this->all_directives_.find(token.value_) != this->all_directives_.end();

@@ -28,7 +28,7 @@ class Parser
 		bool	isDirective(const Token &token);
 		void	printError(const std::string &err_msg) const;
 		bool	parseAccessLog();
-		std::map<std::string, bool (config::Parser::*)()>	directives_parser_map_;
+		std::map<std::string, bool (config::Parser::*)()>	parser_map_;
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
