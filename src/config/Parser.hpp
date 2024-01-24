@@ -22,13 +22,14 @@ class Parser
 		CONTEXT	current_context_;
 		static std::map<std::string, unsigned int>	directive_type_;
 		Main	config_;
-		bool	parseType(const std::string &directive);
-		bool	expect(const config::TK_TYPE type);
-		bool	isContext(const Token &token);
-		bool	isDirective(const Token &token);
-		void	printError(const std::string &err_msg) const;
+		bool	parseType(const Token &token);
+		bool	expect(const config::TK_TYPE type, const Token &token) const;
+		bool	isContext(const Token &token) const;
+		bool	isDirective(const Token &token) const;
+		void	printError(const std::string &err_msg, const Token &token) const;
 		bool	parseAccessLog();
 		std::map<std::string, bool (config::Parser::*)()>	parser_map_;
+		ssize_t	countArgs() const;
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);

@@ -10,6 +10,28 @@ const unsigned int	config::Server::type;
 const unsigned int	config::Location::type;
 const unsigned int	config::LimitExcept::type;
 const unsigned int	config::AccessLog::kType_;
+const unsigned int	config::Alias::kType_;
+const unsigned int	config::Allow::kType_;
+const unsigned int	config::Autoindex::kType_;
+const unsigned int	config::ClientMaxBodySize::kType_;
+const unsigned int	config::Deny::kType_;
+const unsigned int	config::ErrorLog::kType_;
+const unsigned int	config::ErrorPage::kType_;
+const unsigned int	config::Index::kType_;
+const unsigned int	config::KeepaliveTimeout::kType_;
+const unsigned int	config::Listen::kType_;
+const unsigned int	config::Return::kType_;
+const unsigned int	config::Root::kType_;
+const unsigned int	config::SendTimeout::kType_;
+const unsigned int	config::ServerName::kType_;
+const unsigned int	config::TryFiles::kType_;
+const unsigned int	config::Use::kType_;
+const unsigned int	config::Userid::kType_;
+const unsigned int	config::UseridDomain::kType_;
+const unsigned int	config::UseridExpires::kType_;
+const unsigned int	config::UseridPath::kType_;
+const unsigned int	config::UseridService::kType_;
+const unsigned int	config::WorkerConnections::kType_;
 
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
@@ -55,10 +77,11 @@ config::Parser::~Parser() {}
 /**
  * parseの流れ
  * 1. 存在するdirectiveか
- * 2. contextが正しいか
- * 3. argsの数が正しいか
- * 4. 重複を確認
- * 5. argsの値
+ * 2. 想定されていないtokenではないか："{", "}"
+ * 3. contextが正しいか
+ * 4. argsの数が正しいか
+ * 5. 重複を確認
+ * 6. argsの値
 */
 bool	config::Parser::parse()
 {
@@ -68,15 +91,15 @@ bool	config::Parser::parse()
 		// if (current_token.type_ == TK_END)
 		// 	break;
 		// TK_STRで絶対にはじまっている
-		if (!expect(TK_STR))
+		if (!expect(TK_STR, current_token))
 			return false;
 		// 存在するcontextまたはdirectiveか
 		if (!isDirective(current_token))
 		{
-			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"");
+			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
 			return false;
 		}
-		if (!parseType(current_token.value_))
+		if (!parseType(current_token))
 			return false;
 	}
 	if (this->set_contexts_.find("events") == this->set_contexts_.end())
@@ -87,45 +110,72 @@ bool	config::Parser::parse()
 	return true;
 }
 
-bool	config::Parser::parseType(const std::string &directive)
+bool	config::Parser::parseType(const Token &token)
 {
+	const std::string directive_name = token.value_;
 	// contextが正しいか
-	if (!(this->all_contexts_[directive] & this->current_context_))
+	if (!(this->all_directives_[directive_name] & this->current_context_))
 	{
-		printError(std::string("\"") + directive + "\" directive is not allowed here");
+		printError(std::string("\"") + directive_name + "\" directive is not allowed here", token);
 		return false;
 	}
 	// argsの数が正しいか
+	const unsigned int	args_num = countArgs();
+	
 
 	return true;
 }
 
-bool	config::Parser::expect(const config::TK_TYPE type)
+bool	config::Parser::expect(const config::TK_TYPE type, const Token &token) const
 {
-	if (this->tokens_[ti].type_ != type)
+	if (type != token.type_)
 	{
-		printError(std::string("unexpected ") + "\"" + this->tokens_[ti].value_ + "\"");
+		printError(std::string("unexpected ") + "\"" + token.value_ + "\"", token);
 		return false;
 	}
 	return true;
 }
 
-bool	config::Parser::isContext(const config::Token &token)
+bool	config::Parser::isContext(const config::Token &token) const
 {
 	return token.type_ == config::TK_STR && this->all_contexts_.find(token.value_) != this->all_contexts_.end();
 }
 
 /**
- * 存在するcontextかdirectiveか
+ * 存在するcontextまたはdirectiveか
 */
-bool	config::Parser::isDirective(const config::Token &token)
+bool	config::Parser::isDirective(const config::Token &token) const
 {
 	return token.type_ == config::TK_STR && this->all_directives_.find(token.value_) != this->all_directives_.end();
 }
 
-void	config::Parser::printError(const std::string &err_msg) const
+/**
+ * tokenを進める必要があるため、引数でtokenを渡さない
+*/
+ssize_t	config::Parser::countArgs() const
 {
-	std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ":" << this->tokens_[ti].line_  << '\n';
+	ssize_t	i = this->ti;
+
+	while (this->tokens_[i].type_ != TK_SEMICOLON)
+	{
+		// if (this->tokens_[i].type_ == TK_END)
+		// {
+		// 	printError("unexpected end of file, expecting \";\" or \"}\"");
+		// 	return -1;
+		// }
+		if (expect(TK_STR, this->tokens_[i]))
+		{
+			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[ti]);
+			return -1;
+		}
+		++i;
+	}
+	return i;
+}
+
+void	config::Parser::printError(const std::string &err_msg, const Token &token) const
+{
+	std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ":" << token.line_  << '\n';
 }
 
 bool	config::Parser::parseAccessLog()
