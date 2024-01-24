@@ -56,6 +56,7 @@ enum ARGS
 	CONF_TAKE12 = CONF_TAKE1|CONF_TAKE2, // takes one or two arguments
 	CONF_TAKE123 = CONF_TAKE1|CONF_TAKE2|CONF_TAKE3, // takes one, two or three arguments
 	CONF_TAKE1234 = CONF_TAKE1|CONF_TAKE2|CONF_TAKE3|CONF_TAKE4, // takes one, two, three or four arguments
+	NGX_CONF_MAX_ARGS = 8
 };
 
 } // namespace config

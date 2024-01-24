@@ -6,6 +6,7 @@ std::map<std::string, unsigned int>	config::Parser::all_contexts_;
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
 
 const unsigned int	config::Http::type;
+const unsigned int	config::Events::type;
 const unsigned int	config::Server::type;
 const unsigned int	config::Location::type;
 const unsigned int	config::LimitExcept::type;
@@ -38,6 +39,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 {
 	// context
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
+	this->all_directives_.insert(std::make_pair("events", config::Events::type));
 	this->all_directives_.insert(std::make_pair("http", config::Http::type));
 	this->all_directives_.insert(std::make_pair("server", config::Server::type));
 	this->all_directives_.insert(std::make_pair("location", config::Location::type));
@@ -77,7 +79,7 @@ config::Parser::~Parser() {}
 /**
  * parseの流れ
  * 1. 存在するdirectiveか
- * 2. 想定されていないtokenではないか："{", "}"
+ * 2. argsが想定されていないtokenではないか："{", "}"
  * 3. contextが正しいか
  * 4. argsの数が正しいか
  * 5. 重複を確認
@@ -91,17 +93,24 @@ bool	config::Parser::parse()
 		// if (current_token.type_ == TK_END)
 		// 	break;
 		// TK_STRで絶対にはじまっている
-		if (!expect(TK_STR, current_token))
+		if (!expectTokenType(TK_STR, current_token))
 			return false;
 		// 存在するcontextまたはdirectiveか
-		if (!isDirective(current_token))
+		if (!isDirective(current_token) && !isContext(current_token))
 		{
 			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
 			return false;
 		}
+		// contextとargsの数が正しいか
 		if (!parseType(current_token))
 			return false;
+		// 重複の確認
+		
+		// directiveのargsの値を確認
+		if (!this->parser_map_[current_token.value_])
+			return false;
 	}
+	// events contextが設定されていないとparse error
 	if (this->set_contexts_.find("events") == this->set_contexts_.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
@@ -120,13 +129,51 @@ bool	config::Parser::parseType(const Token &token)
 		return false;
 	}
 	// argsの数が正しいか
-	const unsigned int	args_num = countArgs();
-	
-
+	const TK_TYPE terminating_token = isContext(token) ? TK_OPEN_CURLY_BRACE : TK_SEMICOLON;
+	const unsigned int	args_num = static_cast<unsigned int>(countArgs(terminating_token));
+	bool	ret;
+	switch (args_num)
+	{
+	case 0:
+		ret = expectArgsNum(CONF_NOARGS, this->all_directives_[directive_name]);
+		break;
+	case 1:
+		ret = expectArgsNum(CONF_TAKE1|CONF_1MORE, this->all_directives_[directive_name]);
+		break;
+	case 2:
+		ret = expectArgsNum(CONF_TAKE2|CONF_2MORE, this->all_directives_[directive_name]);
+		break;
+	case 3:
+		ret = expectArgsNum(CONF_TAKE3, this->all_directives_[directive_name]);
+		break;
+	case 4:
+		ret = expectArgsNum(CONF_TAKE4, this->all_directives_[directive_name]);
+		break;
+	case 5:
+		ret = expectArgsNum(CONF_TAKE5, this->all_directives_[directive_name]);
+		break;
+	case 6:
+		ret = expectArgsNum(CONF_TAKE6, this->all_directives_[directive_name]);
+		break;
+	case 7:
+		ret = expectArgsNum(CONF_TAKE7, this->all_directives_[directive_name]);
+		break;
+	case 8:
+		ret = expectArgsNum(CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
+		break;
+	default:
+		ret = false;
+		break;
+	}
+	if (!ret)
+	{
+		printError(std::string("invalid number of arguments in \"") + directive_name + "\" directive", token);
+		return false;
+	}
 	return true;
 }
 
-bool	config::Parser::expect(const config::TK_TYPE type, const Token &token) const
+bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const
 {
 	if (type != token.type_)
 	{
@@ -136,34 +183,50 @@ bool	config::Parser::expect(const config::TK_TYPE type, const Token &token) cons
 	return true;
 }
 
+bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int actual) const
+{
+	return expect & actual;
+}
+
 bool	config::Parser::isContext(const config::Token &token) const
 {
-	return token.type_ == config::TK_STR && this->all_contexts_.find(token.value_) != this->all_contexts_.end();
+	return token.type_ == config::TK_STR &&
+	(
+		token.value_ == "main"
+		|| token.value_ == "events"
+		|| token.value_ == "http"
+		|| token.value_ == "server"
+		|| token.value_ == "location"
+		|| token.value_ == "limit_except"
+	);
 }
 
-/**
- * 存在するcontextまたはdirectiveか
-*/
 bool	config::Parser::isDirective(const config::Token &token) const
 {
-	return token.type_ == config::TK_STR && this->all_directives_.find(token.value_) != this->all_directives_.end();
+	return token.type_ == config::TK_STR
+		&& !isContext(token)
+		&& this->all_directives_.find(token.value_) != this->all_directives_.end();
 }
 
 /**
- * tokenを進める必要があるため、引数でtokenを渡さない
+ * tokenを一時的に進める必要があるため、引数でtokenを渡さない
+ * @date terminating_token: directive、contextの終了条件
+ * directive ;
+ * context   {
+ * 
 */
-ssize_t	config::Parser::countArgs() const
+ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 {
 	ssize_t	i = this->ti;
 
-	while (this->tokens_[i].type_ != TK_SEMICOLON)
+	while (this->tokens_[i].type_ != terminating_token)
 	{
 		// if (this->tokens_[i].type_ == TK_END)
 		// {
 		// 	printError("unexpected end of file, expecting \";\" or \"}\"");
 		// 	return -1;
 		// }
-		if (expect(TK_STR, this->tokens_[i]))
+		if (expectTokenType(TK_STR, this->tokens_[i]))
 		{
 			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[ti]);
 			return -1;

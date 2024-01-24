@@ -8,6 +8,7 @@
 #include "Events.hpp"
 #include "ErrorLog.hpp"
 #include "Http.hpp"
+
 namespace config
 {
 struct Main
