@@ -90,9 +90,11 @@ bool	config::Parser::parse()
 bool	config::Parser::parseType(const std::string &directive)
 {
 	// contextが正しいか
-	if (this->all_contexts_[directive] & this->current_context_)
+	if (!(this->all_contexts_[directive] & this->current_context_))
+	{
+		printError(std::string("\"") + directive + "\" directive is not allowed here");
 		return false;
-
+	}
 	// argsの数が正しいか
 
 	return true;
