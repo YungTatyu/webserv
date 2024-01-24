@@ -1,7 +1,12 @@
 #ifndef HTTP_MESSAGE_HPP
 # define HTTP_MESSAGE_HPP
 
-#include <string>
+# include <string>
+# include <sstream>
+# include <iostream>
+# include <fstream>
+# include <dirent.h>
+# include <sys/stat.h>
 
 namespace httpUtils
 {

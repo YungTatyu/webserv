@@ -80,12 +80,16 @@ std::string httpUtils::listDirectory(const std::string& directoryPath)
 	buffer << "</body></html>";
 	return buffer.str();
 }
-
+#include "CGIHandler.hpp"
 std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
 	request.uri = std::string(".") + request.uri;
 
-	if ( httpUtils::isDirectory(request.uri) )
+	if ( CGIHandler::isCGI( request.uri ) )
+	{
+		return httpUtils::createResponse( CGIHandler::executeCGI() );
+	}
+	else if ( httpUtils::isDirectory(request.uri) )
 	{
 		std::string indexPath = request.uri + "/index.html";
 		std::ifstream ifile( indexPath.c_str() );
