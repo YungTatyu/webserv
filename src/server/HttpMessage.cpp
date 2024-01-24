@@ -1,9 +1,5 @@
 #include "HttpMessage.hpp"
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <dirent.h>
-#include <sys/stat.h>
+#include "CGIHandler.hpp"
 
 HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 {
@@ -80,7 +76,7 @@ std::string httpUtils::listDirectory(const std::string& directoryPath)
 	buffer << "</body></html>";
 	return buffer.str();
 }
-#include "CGIHandler.hpp"
+
 std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
 	request.uri = std::string(".") + request.uri;
