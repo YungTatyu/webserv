@@ -2,10 +2,14 @@
 #include <iostream>
 #include <utility>
 
-// std::set<std::string>	config::Parser::all_contexts_;
-// std::set<std::string>	config::Parser::all_directives_;
 std::map<std::string, unsigned int>	config::Parser::all_contexts_;
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
+
+const unsigned int	config::Http::type;
+const unsigned int	config::Server::type;
+const unsigned int	config::Location::type;
+const unsigned int	config::LimitExcept::type;
+const unsigned int	config::AccessLog::kType_;
 
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
@@ -13,11 +17,9 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
 	this->all_directives_.insert(std::make_pair("http", config::Http::type));
 	this->all_directives_.insert(std::make_pair("server", config::Server::type));
-	// this->all_contexts_.insert("main");
-    // this->all_contexts_.insert("http");
-    // this->all_contexts_.insert("server");
-    // this->all_contexts_.insert("location");
-    // this->all_contexts_.insert("limit_except");
+	this->all_directives_.insert(std::make_pair("location", config::Location::type));
+	this->all_directives_.insert(std::make_pair("limit_except", config::LimitExcept::type));
+	this->all_directives_.insert(std::make_pair("access_log", config::AccessLog::kType_));
 
 	// this->all_directives_.insert("access_log");
 	// this->all_directives_.insert("alias");
