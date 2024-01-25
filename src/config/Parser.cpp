@@ -2,7 +2,7 @@
 #include <iostream>
 #include <utility>
 
-std::map<std::string, unsigned int>	config::Parser::all_contexts_;
+// std::map<std::string, unsigned int>	config::Parser::all_contexts_;
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
 
 const unsigned int	config::Http::type;
@@ -105,7 +105,7 @@ bool	config::Parser::parse()
 		if (!parseType(current_token))
 			return false;
 		// 重複の確認
-		
+
 		// directiveのargsの値を確認
 		if (!this->parser_map_[current_token.value_])
 			return false;
@@ -128,9 +128,13 @@ bool	config::Parser::parseType(const Token &token)
 		printError(std::string("\"") + directive_name + "\" directive is not allowed here", token);
 		return false;
 	}
+
 	// argsの数が正しいか
 	const TK_TYPE terminating_token = isContext(token) ? TK_OPEN_CURLY_BRACE : TK_SEMICOLON;
-	const unsigned int	args_num = static_cast<unsigned int>(countArgs(terminating_token));
+	const ssize_t	args_num = countArgs(terminating_token);
+	if (args_num == -1)
+		return false;
+
 	bool	ret;
 	switch (args_num)
 	{
@@ -203,9 +207,12 @@ bool	config::Parser::isContext(const config::Token &token) const
 
 bool	config::Parser::isDirective(const config::Token &token) const
 {
-	return token.type_ == config::TK_STR
+	return 
+	(
+		token.type_ == config::TK_STR
 		&& !isContext(token)
-		&& this->all_directives_.find(token.value_) != this->all_directives_.end();
+		&& this->all_directives_.find(token.value_) != this->all_directives_.end()
+	);
 }
 
 /**

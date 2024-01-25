@@ -20,7 +20,6 @@ class Parser
 		const std::string	filepath_;
 		size_t	ti; // token index
 		CONTEXT	current_context_;
-		static std::map<std::string, unsigned int>	directive_type_;
 		Main	config_;
 		bool	parseType(const Token &token);
 		bool	expectTokenType(const config::TK_TYPE type, const Token &token) const;
@@ -35,11 +34,8 @@ class Parser
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
 		~Parser();
-		static std::map<std::string, unsigned int>	all_contexts_;
 		static std::map<std::string, unsigned int>	all_directives_;
-		// static std::set<std::string>	all_contexts_;
-		// static std::set<std::string>	all_directives_;
-		bool	parse();
+ 		bool	parse();
 };
 } // namespace config
 
