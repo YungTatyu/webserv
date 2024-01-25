@@ -27,7 +27,7 @@ class NetworkIOHandler
 
 	private:
 		int listenfd_; // リスニングソケットを管理
-		static const size_t bufferSize_ = 5;
+		static const size_t bufferSize_ = 1024;
 };
 
 #endif
