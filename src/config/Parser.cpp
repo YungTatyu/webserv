@@ -101,11 +101,9 @@ bool	config::Parser::parse()
 			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
 			return false;
 		}
-		// contextとargsの数が正しいか
+		// directiveのtypeを確認
 		if (!parseType(current_token))
 			return false;
-		// 重複の確認
-
 		// directiveのargsの値を確認
 		if (!this->parser_map_[current_token.value_])
 			return false;
@@ -119,6 +117,11 @@ bool	config::Parser::parse()
 	return true;
 }
 
+/**
+ * 1. contextが正しいか確認
+ * 2. argsの数が正しいか確認
+ * 3. 重複を確認
+*/
 bool	config::Parser::parseType(const Token &token)
 {
 	const std::string directive_name = token.value_;
@@ -174,7 +177,70 @@ bool	config::Parser::parseType(const Token &token)
 		printError(std::string("invalid number of arguments in \"") + directive_name + "\" directive", token);
 		return false;
 	}
+
+	// 重複を確認
+	const std::set<std::string>	*directives_set = searchDirectivesSet(current_context_);
+	// directiveが重複不可かつ重複していたらエラー
+	if (
+		directives_set != NULL && 
+		(this->all_directives_[directive_name] & CONF_UNIQUE) &&
+		directives_set->find(directive_name) != directives_set->end()
+	)
+	{
+		printError(std::string("\"" + token.value_ + "\" directive is duplicate"), token);
+		return false;
+	}
 	return true;
+}
+
+const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT context) const
+{
+	const std::set<std::string>	*ret = NULL;
+	switch (context)
+	{
+	case CONF_MAIN:
+		ret = &(this->config_.set_directives);
+		break;
+
+	case CONF_HTTP:
+		ret = &(this->config_.http.set_directives);
+		break;
+
+	case CONF_EVENTS:
+		ret = &(this->config_.events.set_directives);
+		break;
+
+	case CONF_HTTP_SERVER:
+		{
+			const std::vector<Server>	&server_list = this->config_.http.server_list;
+			// serverがすでに存在している場合は、一番最後にparseしたserverのset_directiveを取得
+			ret = server_list.size() != 0 ? &(server_list.back().set_directives) : NULL;
+		}
+		break;
+
+	case CONF_HTTP_LOCATION:
+		{
+			const Server	&current_server = this->config_.http.server_list.back();
+			const std::vector<Location>	&location_list = current_server.location_list;
+			// locationがすでに存在している場合は、一番最後にparseしたlocationのset_directiveを取得
+			ret = location_list.size() != 0 ? &(location_list.back().set_directives) : NULL;
+		}
+		break;
+
+	case CONF_HTTP_LIMIT_EXCEPT:
+		{
+			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
+			const std::vector<LimitExcept>	&limit_except_list = current_location.limit_except_list;
+			// limit_exceptがすでに存在している場合は、一番最後にparseしたlimit_exceptのset_directiveを取得
+			ret = limit_except_list.size() != 0 ? &(limit_except_list.back().set_directives) : NULL;
+		}
+		break;
+	
+	default:
+		ret = NULL;
+		break;
+	}
+	return ret;
 }
 
 bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const
