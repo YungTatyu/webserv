@@ -28,7 +28,7 @@ namespace config
 {
 struct Server
 {
-	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_NOARGS;
+	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_NOARGS|CONF_NOT_UNIQUE;
 	std::set<std::string>	set_directives;
 	std::vector<Location>	location_list;
 	std::vector<AccessLog>	access_log_list;

@@ -23,7 +23,7 @@ class TryFiles
 		void	addFile(const std::string &file) { this->file_list_.push_back(file); }
 		void	setUri(const std::string &uri) { this->uri_ = uri; }
 		void	setCode(const unsigned int &code) { this->code_ = code; }
-		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_2MORE;
+		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_2MORE|CONF_UNIQUE;
 };
 } // namespace config
 

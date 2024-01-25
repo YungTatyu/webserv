@@ -30,7 +30,7 @@ struct Location
 {
 	Location(const std::string &uri) : uri_(uri) {}
 	~Location() {}
-	const static unsigned int	type = CONF_HTTP|CONF_TAKE1;
+	const static unsigned int	type = CONF_HTTP|CONF_TAKE1|CONF_NOT_UNIQUE;
 	std::set<std::string>	set_directives;
 	const std::string	uri_;
 	std::vector<LimitExcept>	limit_except_list;

@@ -12,7 +12,7 @@ namespace config
 {
 struct Events
 {
-	const static unsigned int	type = CONF_MAIN|CONF_NOARGS;
+	const static unsigned int	type = CONF_MAIN|CONF_NOARGS|CONF_UNIQUE;
 	std::set<std::string>	set_directives;
 	WorkerConnections	worker_connections;
 	Use	use;

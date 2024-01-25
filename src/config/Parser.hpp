@@ -37,9 +37,6 @@ class Parser
 		void	printError(const std::string &err_msg, const Token &token) const;
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseAccessLog();
-		Server &findSever();
-		Location &findLocation();
-		LimitExcept &findLimitExcept();
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
