@@ -6,23 +6,23 @@ DEPFLAGS			= -MMD -MP -MF $(DEPS_DIR)/$*.d
 RM					= rm -rf
 
 SRCS_DIR			= src
-INCS_DIR			= $(SRCS_DIR)/config
 OBJS_DIR			= obj
 DEPS_DIR			= dep
+BUILD_DIR			= build
 CGI_DIR				= cgi
 CONF_DIR			= conf
 
-SRCS				= $(SRCS_DIR)/main.cpp
+# ソースファイルの拡張子
+SRC_EXT = cpp
+# ソースファイルの検索パス
+VPATH = $(SRCS_DIR) $(SRCS_DIR)/config $(SRCS_DIR)/config/parser
 
-# SERVER_DIR			= server
-# SRCS				+= $(SRCS_DIR)/$(SERVER_DIR)
-
-CONFIG_DIR			= config
-SRCS				+= $(SRCS_DIR)/$(CONFIG_DIR)/Parser.cpp
+# ソースファイルの取得
+SRCS = $(wildcard $(addsuffix /*.$(SRC_EXT), $(VPATH)))
 
 DEPS = $(patsubst $(SRCS_DIR)/%.cpp,$(DEPS_DIR)/%.d,$(SRCS))
 OBJS = $(patsubst $(SRCS_DIR)/%.cpp,$(OBJS_DIR)/%.o,$(SRCS))
-INCLUDES			= -I$(INCS_DIR)
+INCLUDES			= -I$(SRCS_DIR) -I$(SRCS_DIR)/config/ -I$(SRCS_DIR)/config/parser/
 CGI_EXEFILE			= $(CGI_DIR)/cgi_exe
 # CONFIG				= $(CONF_DIR)/test.conf
 
@@ -31,7 +31,7 @@ all: $(CGI_EXEFILE) $(DEPS_DIR) $(OBJS_DIR) $(NAME)
 
 $(DEPS_DIR):
 	@mkdir -p $@
-# mkdir -p dep/server dep/config
+	@mkdir -p dep/config dep/config/parser
 
 $(OBJS_DIR):
 	@mkdir -p $(dir $@)
@@ -51,13 +51,20 @@ $(CGI_EXEFILE):
 
 clean:
 	$(MAKE) clean -C $(CGI_DIR)
-	$(RM) $(OBJS_DIR) $(DEPS_DIR)
+	$(RM) $(OBJS_DIR) $(DEPS_DIR) $(BUILD_DIR)
 
 fclean: clean
 	$(MAKE) fclean -C $(CGI_DIR)
 	$(RM) $(NAME)
 
 re: fclean all
+
+TEST_FILTER ?= '*'
+
+test:
+	cmake -S . -B $(BUILD_DIR)
+	cmake --build $(BUILD_DIR)
+	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
 -include $(DEPS)
 
@@ -69,4 +76,4 @@ re: fclean all
 # valgrind:
 # 	valgrind --leak-check=full ./$(NAME)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test

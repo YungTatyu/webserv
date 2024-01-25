@@ -1,6 +1,8 @@
 #ifndef CONF_HPP
 #define CONF_HPP
 
+# include <string>
+
 namespace config
 {
 
@@ -58,6 +60,8 @@ enum ARGS
 	CONF_TAKE1234 = CONF_TAKE1|CONF_TAKE2|CONF_TAKE3|CONF_TAKE4, // takes one, two, three or four arguments
 	NGX_CONF_MAX_ARGS = 8
 };
+
+bool	init_config(const std::string& file_path);
 
 } // namespace config
 
