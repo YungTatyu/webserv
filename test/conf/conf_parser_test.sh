@@ -8,7 +8,7 @@ then
 	printf "|------------------ webserv test start ------------------|\n\n"
 else
 	echo "${webserb_path}: command not found"
-	echo "run make first to test"
+	echo "run \"make\" first to test"
 	exit 1
 fi
 
@@ -33,6 +33,7 @@ function	assert {
 
 readonly err_start_with="webserv: [emerg]"
 
+# test unexpect token
 conf_path="test/conf/conf_files/error/double_quote_not_closed.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2\n"
@@ -40,3 +41,26 @@ assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or 
 conf_path="test/conf/conf_files/error/double_quote_not_closed.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2\n"
+
+conf_path="test/conf/conf_files/error/unexpect_open_curly_brace1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} unexpected \"{\" ${err_path}:3\n"
+
+conf_path="test/conf/conf_files/error/unexpect_open_curly_brace2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} unexpected \"{\" ${err_path}:6\n"
+
+conf_path="test/conf/conf_files/error/unexpect_close_curly_brace2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} unexpected \"}\" ${err_path}:6\n"
+
+conf_path="test/conf/conf_files/error/unecpect_semicolon1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} unexpected \";\" ${err_path}:3\n"
+
+
+
+# test unknown directive
+conf_path="test/conf/conf_files/error/unknown_directive1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} unknown directive \";\" ${err_path}:3\n"
