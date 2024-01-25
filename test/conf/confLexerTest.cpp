@@ -27,11 +27,9 @@ TEST(ConfigTest, is_dir)
 	EXPECT_FALSE(config::init_config(filePath));
 }
 
-/*
 TEST(ConfigTest, inaccessible_file)
 {
 	std::string filePath = "test/conf/confFile/inaccessible.conf";
-*/
 
 	EXPECT_FALSE(config::init_config(filePath));
 }
@@ -233,11 +231,3 @@ TEST(LexerTokenizeTest, double_in_single_quote)
 	SAME_TOKEN(config::TK_TYPE::TK_END, "", 3, lexer.getToken(6));
 }
 
-
-// main function
-/*int	main(int argc, char **argv)
-{
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
-*/
