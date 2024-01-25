@@ -111,7 +111,7 @@ bool	config::Parser::parse()
 			return false;
 	}
 	// events contextが設定されていないとparse error
-	if (this->set_contexts_.find("events") == this->set_contexts_.end())
+	if (this->set_directives_.find("events") == this->set_directives_.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
 		return false;

@@ -37,9 +37,9 @@ function	assert {
 
 function	printLog {
 	printf "|------------------ webserv test results ------------------|\n"
-	printf "[========] ${g_test_index} tests ran\n"
-	printf "[ \033[32mPASSED\033[0m ] ${g_test_passed} tests\n"
-	printf "[ \033[31mFAILED\033[0m ] ${g_test_failed} tests\n"
+	printf "[========]    ${g_test_index} tests ran\n"
+	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
+	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
 }
 
 readonly err_start_with="webserv: [emerg]"
