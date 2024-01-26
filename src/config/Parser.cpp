@@ -127,6 +127,12 @@ bool	config::Parser::parse()
 		// parseされたdirectiveを管理
 		this->set_directives_.insert(current_token.value_);
 	}
+	// current contextがmainでないとerror
+	if (this->current_context_ != CONF_MAIN)
+	{
+		printError("unexpected end of file, expecting \"}\"", this->tokens_[ti]);
+		return false;
+	}
 	// events contextが設定されていないとerror
 	if (this->set_directives_.find("events") == this->set_directives_.end())
 	{
@@ -347,17 +353,45 @@ bool	config::Parser::parseHttpServerEvents()
 	return true;
 }
 
-/**
- * location, limit_exceptをparse
-*/
-bool	config::Parser::parseLocationLimitExcept()
+bool	config::Parser::parseLocation()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
 	++ti; // tokenをcontextの引数に進める
 	if (!expectTokenType(TK_STR, tokens[ti]))
 		return false;
 	++ti;
+	if (!expectTokenType(TK_OPEN_CURLY_BRACE, tokens[ti]))
+		return false;
+	++ti;
 	return true;
+}
+
+bool	config::Parser::parseLimitExcept()
+{
+	const std::vector<Token>	&tokens = this->tokens_;
+	++ti; // tokenをcontextの引数に進める
+	if (!expectTokenType(TK_STR, tokens[ti]))
+		return false;
+	const std::string method = toUpper(tokens[ti].value_);
+	if (method != "GET" && method != "HEAD" && method != "POST" && method != "DELETE")
+	{
+		printError(std::string("invalid method \"" + tokens[ti].value_ + "\""), tokens[ti]);
+		return false;
+	}
+	++ti;
+	if (!expectTokenType(TK_OPEN_CURLY_BRACE, tokens[ti]))
+		return false;
+	++ti;
+	return true;
+}
+
+std::string	config::Parser::toUpper(std::string str) const
+{
+	for (std::string::iterator it = str.begin(); it != str.end(); ++it)
+	{
+		std::toupper(*it);
+	}
+	return str;
 }
 
 bool	config::Parser::parseAccessLog()

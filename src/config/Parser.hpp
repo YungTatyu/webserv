@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <sys/types.h>
 
 #include "conf.hpp"
 #include "Lexer.hpp"
@@ -31,8 +32,10 @@ class Parser
 		void	printError(const std::string &err_msg, const Token &token) const;
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();
-		bool	parseLocationLimitExcept();
+		bool	parseLocation();
+		bool	parseLimitExcept();
 		bool	parseAccessLog();
+		std::string	toUpper(std::string) const;
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
