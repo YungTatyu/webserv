@@ -44,19 +44,23 @@ void WebServer::eventLoop()
 				else // クライアントソケットへのリクエスト。(既存コネクション）
 				{
 					int re = this->ioHandler->receiveRequest( *this->connManager, curPfd.fd );
-					if ( re <= 0 ) //クライアントが接続を閉じる時。とエラーの時。元々は-1の時を分けて再度試行するようにしていたが、pollfd.reventsに値がpollによって設定された時点で使用不可なことはなく、recv()の返り値が-1になったときはネットワークエラーだと考えてコネクションをクローズするように変更した。
+					if ( re == 0 ) //クライアントが接続を閉じる時。
 					{
 						this->ioHandler->closeConnection( *this->connManager, curPfd.fd );
 						curPfd.fd = -1;
 						continue ;
 					}
+					else if ( re == -1 ) //ソケット使用不可。
+					{
+						continue ;
+					}	
 					this->requestHandler->handle( *this->connManager, curPfd.fd );
 					this->eventManager->updateEvents( curPfd.fd , POLLOUT );
 				}
 			}
 			else if ( curPfd.revents & POLLOUT ) //レスポンス送信
 			{
-				if ( this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) == -1 && errno == EAGAIN )
+				if ( this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) == -1 )
 					continue ;
 				this->eventManager->updateEvents( curPfd.fd , POLLIN );
 			}
