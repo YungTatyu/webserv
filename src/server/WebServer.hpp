@@ -5,6 +5,9 @@
 # include "RequestHandler.hpp"
 # include "NetworkIOHandler.hpp"
 # include "ServerConfig.hpp"
+# include "EventManager.hpp"
+# include "SysCallWrapper.hpp"
+# include <algorithm>
 
 class WebServer
 {
@@ -18,6 +21,7 @@ class WebServer
 		NetworkIOHandler *ioHandler;
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;
+		EventManager *eventManager;
 		ServerConfig *serverConfig;
 };
 

@@ -7,6 +7,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	{
 		//creation of the socket
 		this->listenfd_ = SysCallWrapper::Socket( AF_INET, SOCK_STREAM, 0 );
+		fcntl( this->listenfd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 		// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
 		int yes = 1;
@@ -29,26 +30,37 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 		// std::cout << e.what() << std::endl;
 		if ( this->listenfd_ != -1 )
 			close( this->listenfd_ );
-		exit( EXIT_FAILURE );
+		std::exit( EXIT_FAILURE );
 	}
 }
 
-int NetworkIOHandler::receiveRequest( ConnectionManager& connManager )
+int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int target )
 {
-	// char *buf[MAXLINE];
-	std::vector<char> buffer(1024);
-	if ( recv( connManager.getConnection(), buffer.data(), buffer.size(), 0 ) <= 0 )
-		return -1;
-	connManager.setContext( buffer );
-	return 0;
+	std::vector<char> buffer( bufferSize_ );
+	ssize_t totalBytesRead = 0;
+
+	while ( 1 )
+	{
+		ssize_t re = recv( target, buffer.data() + totalBytesRead, bufferSize_, 0 );
+		if ( re == 0 && totalBytesRead == 0 ) //クライアントとのコネクションが閉じた時。
+		   return 0;
+		else if ( re == -1 && totalBytesRead == 0 ) //ソケットが使用不可、またはエラー。
+		   return -1;
+		else if ( re != bufferSize_ ) //クライアントからのリクエストを読み終えた時。
+		   break ;
+		totalBytesRead += re;
+		buffer.resize( buffer.size() + bufferSize_ );
+	}
+	connManager.setRawRequest( target, buffer );
+	return 1;
 }
 
-void NetworkIOHandler::sendResponse( ConnectionManager &connManager )
+int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int target )
 {	
-	send(connManager.getConnection(), connManager.getResponse().data(), connManager.getResponse().size(), 0);
+	return ( send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0) );
 }
 
-void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
+void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
@@ -56,7 +68,11 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 
 	client = sizeof(cliaddr);
 	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
-	connManager.setConnection( connfd );
+	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
+
+	struct pollfd setting = EventManager::genPollFd( connfd, POLLIN, 0 );
+	connManager.setConnection( setting );
+	eventManager.addEvent( setting );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];
@@ -64,10 +80,10 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	std::cout << "> New client connected from IP: " << clientIp << std::endl;
 }
 
-void NetworkIOHandler::closeConnection( ConnectionManager& connManager )
+void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int target )
 {
-	close( connManager.getConnection() );
-	connManager.removeConnection();
+	close( target );
+	connManager.removeConnection( target );
 	printf("%s\n", "< Client disconnected.");
 }
 
