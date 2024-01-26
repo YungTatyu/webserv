@@ -1,27 +1,19 @@
-/*
 #include <iostream>
 #include <string.h>
-#include <unistd.h>
-#include <cstdlib>
-
-int	main(void)
-{
-	std::cout << "Hello webserv" << std::endl;
-
-	char **arg;
-
-	arg = (char **)malloc(sizeof(char *) * 2);
-	arg[0] = strdup("cgi_exe");
-	arg[1] = NULL;
-	execve("cgi/cgi_exe", arg, NULL);
-	return (0);
-}
-*/
-
 #include "WebServer.hpp"
+#include "conf.hpp"
 
-int main()
+int main(int ac, char *av[])
 {
+	if (ac != 2)
+	{
+		std::cerr << "Usage: " << av[0] << " [config_file_name]" << std::endl;
+		return 1;
+	}
+
+	if (!config::init_config(av[1]))
+		return 1;
+
 	WebServer server = WebServer();
 	server.eventLoop();
 	return 0;
