@@ -30,7 +30,7 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 		// std::cout << e.what() << std::endl;
 		if ( this->listenfd_ != -1 )
 			close( this->listenfd_ );
-		exit( EXIT_FAILURE );
+		std::exit( EXIT_FAILURE );
 	}
 }
 
@@ -46,7 +46,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 		   return 0;
 		else if ( re == -1 && totalBytesRead == 0 ) //ソケットが使用不可、またはエラー。
 		   return -1;
-		else if ( static_cast<unsigned long>( re ) != bufferSize_ ) //クライアントからのリクエストを読み終えた時。
+		else if ( re != bufferSize_ ) //クライアントからのリクエストを読み終えた時。
 		   break ;
 		totalBytesRead += re;
 		buffer.resize( buffer.size() + bufferSize_ );

@@ -17,7 +17,8 @@
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
-{ public:
+{
+	public:
 		void setupSocket( ServerConfig *serverConfig );
 		int receiveRequest( ConnectionManager& connManager, const int target );
 		int sendResponse( ConnectionManager& connManager, const int target );
@@ -27,7 +28,7 @@ class NetworkIOHandler
 
 	private:
 		int listenfd_; // リスニングソケットを管理
-		static const size_t bufferSize_ = 5;
+		static const size_t bufferSize_ = 1024;
 };
 
 #endif
