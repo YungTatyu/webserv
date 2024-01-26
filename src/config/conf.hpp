@@ -61,6 +61,12 @@ enum ARGS
 	NGX_CONF_MAX_ARGS = 8
 };
 
+enum UNIQUE
+{
+	CONF_UNIQUE = 0x00010000,
+	CONF_NOT_UNIQUE = 0x00020000
+};
+
 bool	init_config(const std::string& file_path);
 
 } // namespace config

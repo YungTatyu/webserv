@@ -2,7 +2,6 @@
 #include <iostream>
 #include <utility>
 
-// std::map<std::string, unsigned int>	config::Parser::all_contexts_;
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
 
 const unsigned int	config::Http::type;
@@ -87,12 +86,24 @@ config::Parser::~Parser() {}
 */
 bool	config::Parser::parse()
 {
-	while (ti < this->tokens_.size())
+	while (1)
 	{
 		const Token &current_token = this->tokens_[ti];
-		// if (current_token.type_ == TK_END)
-		// 	break;
-		// TK_STRで絶対にはじまっている
+		if (current_token.type_ == TK_END)
+			break;
+		// "}" tokenの場合、tokenを進める
+		if (current_token.type_ == TK_CLOSE_CURLY_BRACE)
+		{
+			// main contextでは "}" はエラー
+			if (this->current_context_ & CONF_MAIN)
+			{
+				printError(std::string("unexpected \"") + current_token.value_ + "\"", current_token);
+				return false;
+			}
+			++ti;
+			continue;
+		}
+		// TK_STRでなければエラー
 		if (!expectTokenType(TK_STR, current_token))
 			return false;
 		// 存在するcontextまたはdirectiveか
@@ -101,16 +112,16 @@ bool	config::Parser::parse()
 			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
 			return false;
 		}
-		// contextとargsの数が正しいか
+		// directiveのtypeを確認
 		if (!parseType(current_token))
 			return false;
-		// 重複の確認
-
 		// directiveのargsの値を確認
 		if (!this->parser_map_[current_token.value_])
 			return false;
+		// parseされたdirectiveを管理
+		this->set_directives_.insert(current_token.value_);
 	}
-	// events contextが設定されていないとparse error
+	// events contextが設定されていないとerror
 	if (this->set_directives_.find("events") == this->set_directives_.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
@@ -119,6 +130,11 @@ bool	config::Parser::parse()
 	return true;
 }
 
+/**
+ * 1. contextが正しいか確認
+ * 2. argsの数が正しいか確認
+ * 3. 重複を確認
+*/
 bool	config::Parser::parseType(const Token &token)
 {
 	const std::string directive_name = token.value_;
@@ -174,7 +190,69 @@ bool	config::Parser::parseType(const Token &token)
 		printError(std::string("invalid number of arguments in \"") + directive_name + "\" directive", token);
 		return false;
 	}
+
+	// 重複を確認
+	const std::set<std::string>	*directives_set = searchDirectivesSet(current_context_);
+	// directiveが重複不可かつ重複していたらエラー
+	if (directives_set != NULL && 
+		(this->all_directives_[directive_name] & CONF_UNIQUE) &&
+		directives_set->find(directive_name) != directives_set->end()
+	)
+	{
+		printError(std::string("\"" + token.value_ + "\" directive is duplicate"), token);
+		return false;
+	}
 	return true;
+}
+
+const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT context) const
+{
+	const std::set<std::string>	*ret = NULL;
+	switch (context)
+	{
+	case CONF_MAIN:
+		ret = &(this->config_.set_directives);
+		break;
+
+	case CONF_HTTP:
+		ret = &(this->config_.http.set_directives);
+		break;
+
+	case CONF_EVENTS:
+		ret = &(this->config_.events.set_directives);
+		break;
+
+	case CONF_HTTP_SERVER:
+		{
+			const std::vector<Server>	&server_list = this->config_.http.server_list;
+			// serverがすでに存在している場合は、一番最後にparseしたserverのset_directiveを取得
+			ret = server_list.size() != 0 ? &(server_list.back().set_directives) : NULL;
+		}
+		break;
+
+	case CONF_HTTP_LOCATION:
+		{
+			const Server	&current_server = this->config_.http.server_list.back();
+			const std::vector<Location>	&location_list = current_server.location_list;
+			// locationがすでに存在している場合は、一番最後にparseしたlocationのset_directiveを取得
+			ret = location_list.size() != 0 ? &(location_list.back().set_directives) : NULL;
+		}
+		break;
+
+	case CONF_HTTP_LIMIT_EXCEPT:
+		{
+			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
+			const std::vector<LimitExcept>	&limit_except_list = current_location.limit_except_list;
+			// limit_exceptがすでに存在している場合は、一番最後にparseしたlimit_exceptのset_directiveを取得
+			ret = limit_except_list.size() != 0 ? &(limit_except_list.back().set_directives) : NULL;
+		}
+		break;
+	
+	default:
+		ret = NULL;
+		break;
+	}
+	return ret;
 }
 
 bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const
@@ -228,12 +306,12 @@ ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 
 	while (this->tokens_[i].type_ != terminating_token)
 	{
-		// if (this->tokens_[i].type_ == TK_END)
-		// {
-		// 	printError("unexpected end of file, expecting \";\" or \"}\"");
-		// 	return -1;
-		// }
-		if (expectTokenType(TK_STR, this->tokens_[i]))
+		if (this->tokens_[i].type_ == TK_END)
+		{
+			printError("unexpected end of file, expecting \";\" or \"}\"", this->tokens_[i]);
+			return -1;
+		}
+		if (!expectTokenType(TK_STR, this->tokens_[i]))
 		{
 			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[ti]);
 			return -1;

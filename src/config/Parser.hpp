@@ -12,13 +12,6 @@
 
 namespace config
 {
-struct directive
-{
-	directive(const unsigned int type, const bool is_unique) : type_(type), is_unique_(is_unique) {}
-	const unsigned int	type_;
-	const  bool	is_unique_;
-};
-
 class Parser
 {
 	private:
@@ -34,12 +27,10 @@ class Parser
 		bool	expectArgsNum(const unsigned int expect, const unsigned int actual) const;
 		bool	isContext(const Token &token) const;
 		bool	isDirective(const Token &token) const;
+		const std::set<std::string>	*searchDirectivesSet(const CONTEXT context) const;
 		void	printError(const std::string &err_msg, const Token &token) const;
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseAccessLog();
-		Server &findSever();
-		Location &findLocation();
-		LimitExcept &findLimitExcept();
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);

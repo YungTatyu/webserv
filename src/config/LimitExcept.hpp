@@ -16,7 +16,7 @@ struct LimitExcept
 {
 	LimitExcept(const config::CONNECTION_METHOD method) : excepted_method_(method) {}
 	~LimitExcept() {}
-	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_TAKE1;
+	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_TAKE1|CONF_NOT_UNIQUE;
 	std::set<std::string>	set_directives;
 	const config::CONNECTION_METHOD	excepted_method_; // limit_exceptの制限から除外されるmethod
 	std::vector<Allow>	allow_list;

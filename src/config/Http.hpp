@@ -30,7 +30,7 @@ namespace config
 {
 struct Http
 {
-	const static unsigned int	type = CONF_MAIN|CONF_NOARGS;
+	const static unsigned int	type = CONF_MAIN|CONF_NOARGS|CONF_UNIQUE;
 	std::set<std::string>	set_directives;
 	std::vector<Server>	server_list;
 	Root	root;
