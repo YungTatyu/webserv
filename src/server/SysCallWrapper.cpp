@@ -57,3 +57,13 @@ int SysCallWrapper::Accept( int socket, struct sockaddr *address, socklen_t *add
 	return connfd;
 }
 
+int SysCallWrapper::Poll(struct pollfd fds[], nfds_t nfds, int timeout)
+{
+	int re = poll( fds, nfds, timeout );
+	if ( re == -1 )
+	{
+		perror( "poll" );
+	}
+	return re;
+}
+
