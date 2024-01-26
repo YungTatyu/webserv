@@ -56,8 +56,21 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 }
 
 int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int target )
-{	
-	return ( send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0) );
+{
+	std::vector<char> response = connManager.getResponse( target );
+	size_t totalSent = 0;
+	size_t resSize = response.size();
+	const size_t chunkSize = 1024;
+
+	while ( totalSent < resSize )
+	{
+		size_t currentChunkSize = std::min(chunkSize, resSize - totalSent);
+		int sent = send(target, response.data() + totalSent, currentChunkSize, 0);
+		if (sent == -1)
+			return -1;
+		totalSent += sent;
+	}
+	return totalSent;
 }
 
 void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
