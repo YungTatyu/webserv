@@ -2,7 +2,6 @@
 #include <iostream>
 #include <utility>
 
-// std::map<std::string, unsigned int>	config::Parser::all_contexts_;
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
 
 const unsigned int	config::Http::type;
@@ -87,12 +86,24 @@ config::Parser::~Parser() {}
 */
 bool	config::Parser::parse()
 {
-	while (ti < this->tokens_.size())
+	while (1)
 	{
 		const Token &current_token = this->tokens_[ti];
-		// if (current_token.type_ == TK_END)
-		// 	break;
-		// TK_STRで絶対にはじまっている
+		if (current_token.type_ == TK_END)
+			break;
+		// "}" tokenの場合、tokenを進める
+		if (current_token.type_ == TK_CLOSE_CURLY_BRACE)
+		{
+			// main contextでは "}" はエラー
+			if (this->current_context_ & CONF_MAIN)
+			{
+				printError(std::string("unexpected \"") + current_token.value_ + "\"", current_token);
+				return false;
+			}
+			++ti;
+			continue;
+		}
+		// TK_STRでなければエラー
 		if (!expectTokenType(TK_STR, current_token))
 			return false;
 		// 存在するcontextまたはdirectiveか
@@ -107,8 +118,10 @@ bool	config::Parser::parse()
 		// directiveのargsの値を確認
 		if (!this->parser_map_[current_token.value_])
 			return false;
+		// parseされたdirectiveを管理
+		this->set_directives_.insert(current_token.value_);
 	}
-	// events contextが設定されていないとparse error
+	// events contextが設定されていないとerror
 	if (this->set_directives_.find("events") == this->set_directives_.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
@@ -181,8 +194,7 @@ bool	config::Parser::parseType(const Token &token)
 	// 重複を確認
 	const std::set<std::string>	*directives_set = searchDirectivesSet(current_context_);
 	// directiveが重複不可かつ重複していたらエラー
-	if (
-		directives_set != NULL && 
+	if (directives_set != NULL && 
 		(this->all_directives_[directive_name] & CONF_UNIQUE) &&
 		directives_set->find(directive_name) != directives_set->end()
 	)
@@ -294,12 +306,12 @@ ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 
 	while (this->tokens_[i].type_ != terminating_token)
 	{
-		// if (this->tokens_[i].type_ == TK_END)
-		// {
-		// 	printError("unexpected end of file, expecting \";\" or \"}\"");
-		// 	return -1;
-		// }
-		if (expectTokenType(TK_STR, this->tokens_[i]))
+		if (this->tokens_[i].type_ == TK_END)
+		{
+			printError("unexpected end of file, expecting \";\" or \"}\"", this->tokens_[i]);
+			return -1;
+		}
+		if (!expectTokenType(TK_STR, this->tokens_[i]))
 		{
 			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[ti]);
 			return -1;
