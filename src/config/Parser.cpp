@@ -70,6 +70,12 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert(std::make_pair("worker_connections", config::WorkerConnections::kType_));
 
 	// parser
+	this->parser_map_["events"] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_["http"] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_["server"] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_["location"] = &config::Parser::parseLocationLimitExcept;
+	this->parser_map_["limit_except"] = &config::Parser::parseLocationLimitExcept;
+
 	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
 }
 
@@ -194,7 +200,7 @@ bool	config::Parser::parseType(const Token &token)
 	// 重複を確認
 	const std::set<std::string>	*directives_set = searchDirectivesSet(current_context_);
 	// directiveが重複不可かつ重複していたらエラー
-	if (directives_set != NULL && 
+	if (directives_set != NULL &&
 		(this->all_directives_[directive_name] & CONF_UNIQUE) &&
 		directives_set->find(directive_name) != directives_set->end()
 	)
@@ -302,7 +308,8 @@ bool	config::Parser::isDirective(const config::Token &token) const
 */
 ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 {
-	ssize_t	i = this->ti;
+	size_t	i = this->ti + 1;
+	ssize_t	args_num = 0;
 
 	while (this->tokens_[i].type_ != terminating_token)
 	{
@@ -313,17 +320,44 @@ ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 		}
 		if (!expectTokenType(TK_STR, this->tokens_[i]))
 		{
-			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[ti]);
+			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[i]);
 			return -1;
 		}
 		++i;
+		++args_num;
 	}
-	return i;
+	return args_num;
 }
 
 void	config::Parser::printError(const std::string &err_msg, const Token &token) const
 {
 	std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ":" << token.line_  << '\n';
+}
+
+/**
+ * http, server, eventsをparse
+*/
+bool	config::Parser::parseHttpServerEvents()
+{
+	const std::vector<Token>	&tokens = this->tokens_;
+	++ti; // tokenをcontextの引数に進める
+	if (!expectTokenType(TK_OPEN_CURLY_BRACE, tokens[ti]))
+		return false;
+	++ti; // 次のtokenに進める
+	return true;
+}
+
+/**
+ * location, limit_exceptをparse
+*/
+bool	config::Parser::parseLocationLimitExcept()
+{
+	const std::vector<Token>	&tokens = this->tokens_;
+	++ti; // tokenをcontextの引数に進める
+	if (!expectTokenType(TK_STR, tokens[ti]))
+		return false;
+	++ti;
+	return true;
 }
 
 bool	config::Parser::parseAccessLog()
