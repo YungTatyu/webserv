@@ -30,6 +30,8 @@ class Parser
 		const std::set<std::string>	*searchDirectivesSet(const CONTEXT context) const;
 		void	printError(const std::string &err_msg, const Token &token) const;
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
+		bool	parseHttpServerEvents();
+		bool	parseLocationLimitExcept();
 		bool	parseAccessLog();
 		Parser();
 	public:
