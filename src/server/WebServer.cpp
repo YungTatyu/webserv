@@ -50,7 +50,7 @@ void WebServer::eventLoop()
 						curPfd.fd = -1;
 						continue ;
 					}
-					else if ( re == -1 && errno == EAGAIN ) //ソケット使用不可。
+					else if ( re == -1 ) //ソケット使用不可。
 					{
 						continue ;
 					}	
