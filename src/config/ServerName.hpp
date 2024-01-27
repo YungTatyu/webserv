@@ -1,23 +1,23 @@
-#ifndef CONFIG_USERID_DOMAIN_HPP
-#define CONFIG_USERID_DOMAIN_HPP
+#ifndef CONFIG_SERVER_NAME_HPP
+#define CONFIG_SERVER_NAME_HPP
 
 #include <string>
 
 namespace config
 {
-class UseridDomain
+class ServerName
 {
 	private:
 		std::string	name_;
 	public:
-		UseridDomain() {}
-		~UseridDomain() {}
-		const static char	*kDefaultName_;
+		ServerName() : name_(this->kDefaultNmae_) {}
+		~ServerName() {}
+		const static char	*kDefaultNmae_;
 		const std::string	&getName() const { return this->name_; }
 		void	setName(const std::string &name) { this->name_ = name; }
 };
 
-const char	*UseridDomain::kDefaultName_ = "none";
+const char	*ServerName::kDefaultNmae_ = "";
 } // namespace config
 
 #endif
