@@ -19,8 +19,6 @@ class Index
 		void	setFile(const std::string &file) { this->file_ = file; }
 		const static unsigned int	kType_ = CONF_HTTP|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_1MORE|CONF_NOT_UNIQUE;
 };
-
-const char	*Index::kDefaultFile_ = "index.html";
 } // namespace config
 
 #endif

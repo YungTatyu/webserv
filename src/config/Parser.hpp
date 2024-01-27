@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <stack>
 #include <string>
 #include <cstddef>
 #include <sys/types.h>
@@ -29,7 +30,7 @@ class Parser
 		std::set<std::string>	set_directives_; // setされたcontextとdirectiveを管理
 		const std::string	filepath_;
 		size_t	ti; // token index
-		CONTEXT	current_context_;
+		std::stack<CONTEXT>	current_context_;
 		std::map<std::string, bool (config::Parser::*)()>	parser_map_;
 		bool	parseType(const Token &token);
 		bool	expectTokenType(const config::TK_TYPE type, const Token &token) const;
@@ -40,18 +41,25 @@ class Parser
 		void	printError(const std::string &err_msg, const Token &token) const;
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();
-		bool	parseLocationLimitExcept();
+<<<<<<< HEAD
+		bool	parseLocation();
+		bool	parseLimitExcept();
 		bool	parseNoRestrict();
 		bool	parseUse();
 		bool	parseWorkerConnections();
 		bool	parseTime();
 		bool	parseSize();
+		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
+		std::string	toUpper(std::string) const;
+>>>>>>> issue45-config-main_parser
 		Parser();
+		void	operator=(const Parser &other);
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
 		~Parser();
 		static std::map<std::string, unsigned int>	all_directives_; // すべてのcontextとdirectiveの情報を管理
  		bool	parse();
+		const Main	&getConfig() const;
 };
 } // namespace config
 

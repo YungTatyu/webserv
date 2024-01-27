@@ -12,15 +12,13 @@ class ServerName
 	private:
 		std::string	name_;
 	public:
-		ServerName() : name_(this->kDefaultNmae_) {}
+		ServerName() : name_(this->kDefaultName_) {}
 		~ServerName() {}
-		const static char	*kDefaultNmae_;
+		const static char	*kDefaultName_;
 		const std::string	&getName() const { return this->name_; }
 		void	setName(const std::string &name) { this->name_ = name; }
 		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_1MORE|CONF_NOT_UNIQUE;
 };
-
-const char	*ServerName::kDefaultNmae_ = "";
 } // namespace config
 
 #endif

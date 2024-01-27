@@ -20,8 +20,6 @@ class Root
 		const static unsigned int	kType_ = CONF_HTTP_LOCATION|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|
 											CONF_TAKE1|CONF_UNIQUE;
 };
-
-const char	*Root::kDefaultPath_ = "html";
 } // namespace config
 
 #endif

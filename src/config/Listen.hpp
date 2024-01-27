@@ -31,8 +31,6 @@ class Listen
 		void	setIsDefaultServer(const bool is_default_server) { this->is_default_server_ = is_default_server; }
 		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_TAKE12|CONF_NOT_UNIQUE;
 };
-
-const char	*Listen::kDefaultAddress_ = "127.0.0.1";
 } // namespace config
 
 #endif

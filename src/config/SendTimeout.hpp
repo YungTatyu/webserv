@@ -18,8 +18,6 @@ class SendTimeout
 		void	setTime(const unsigned long &time_in_ms) { this->time_.time_in_ms_ = time_in_ms;}
 		const static unsigned int	kType_ = CONF_HTTP_LOCATION|CONF_TAKE1|CONF_UNIQUE;
 };
-
-const unsigned long	SendTimeout::kDefaultTime_ = Time::seconds * 60; // 60s
 } // namespace config
 
 

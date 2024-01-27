@@ -19,8 +19,6 @@ class UseridPath
 		void	setPath(const std::string &path) { this->path_ = path; }
 		const static unsigned int	kType_ = CONF_HTTP|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_TAKE1|CONF_UNIQUE;
 };
-
-const char	*UseridPath::kDefaultPath_ = "/";
 } // namespace config
 
 #endif

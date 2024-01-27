@@ -18,8 +18,6 @@ class AccessLog
 		const static char	*kDefaultFile_;
 		const static unsigned int	kType_ = CONF_HTTP|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_TAKE1|CONF_NOT_UNIQUE;
 };
-
-const char	*AccessLog::kDefaultFile_ = "logs/access.log";
 } // namespace config
 
 #endif

@@ -1,8 +1,6 @@
 #ifndef CONFIG_SIZE_HPP
 #define CONFIG_SIZE_HPP
 
-#include <limits>
-
 namespace config
 {
 class Size
@@ -17,7 +15,6 @@ class Size
 		// 設定できる最大値 nginxを参照
 		const static unsigned long	kMaxSizeInBytes_;
 };
-const unsigned long	Size::kMaxSizeInBytes_ = std::numeric_limits<long>::max();
 } // namespace config
 
 #endif

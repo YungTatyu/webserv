@@ -18,8 +18,6 @@ class KeepaliveTimeout
 		void	setTime(const unsigned long &time_in_ms) { this->time_.time_in_ms_ = time_in_ms; }
 		const static unsigned int	kType_ = CONF_HTTP|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_TAKE12|CONF_NOT_UNIQUE;
 };
-
-const unsigned long	KeepaliveTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
 } // namespace config
 
 #endif

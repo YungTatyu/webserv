@@ -33,7 +33,7 @@ struct Location
 	const static unsigned int	type = CONF_HTTP|CONF_TAKE1|CONF_NOT_UNIQUE;
 	std::set<std::string>	set_directives;
 	const std::string	uri_;
-	std::vector<LimitExcept>	limit_except_list;
+	LimitExcept	limit_except;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;

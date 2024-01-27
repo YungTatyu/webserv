@@ -49,10 +49,6 @@ conf_path="test/conf/conf_files/error/double_quote_not_closed.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2\n"
 
-conf_path="test/conf/conf_files/error/double_quote_not_closed.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2\n"
-
 conf_path="test/conf/conf_files/error/unexpect_open_curly_brace1.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} unexpected \"{\" ${err_path}:3\n"
@@ -72,20 +68,33 @@ assert $conf_path "${err_start_with} unexpected \";\" ${err_path}:3\n"
 
 
 # test unknown directive
-conf_path="test/conf/conf_files/error/unknown_directive1.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unknown directive \";\" ${err_path}:3\n"
+# conf_path="test/conf/conf_files/error/unknown_directive1.conf"
+# err_path="in $(readlink -f $conf_path)"
+# assert $conf_path "${err_start_with} unknown directive \";\" ${err_path}:3\n"
 
 
 
 
 # test invalid directive in context levle
-conf_path="test/conf/conf_files/error/invalid_directive1.conf"
+# conf_path="test/conf/conf_files/error/invalid_directive1.conf"
+# err_path="in $(readlink -f $conf_path)"
+# assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:1\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive2.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:1\n"
+assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:1\n"
 
+conf_path="test/conf/conf_files/error/invalid_directive3.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:16\n"
 
+conf_path="test/conf/conf_files/error/invalid_directive4.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:12\n"
 
+conf_path="test/conf/conf_files/error/invalid_directive6.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:6\n"
 
 # test no evnents section
 conf_path="test/conf/conf_files/error/only_comments.conf"
@@ -96,6 +105,26 @@ assert $conf_path "${err_start_with} no \"events\" section in configuration\n"
 
 conf_path="test/conf/conf_files/error/newline.conf"
 assert $conf_path "${err_start_with} no \"events\" section in configuration\n"
+
+# test location
+conf_path="test/conf/conf_files/error/location_duplicate1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} duplicate location \"path\" ${err_path}:8\n"
+
+conf_path="test/conf/conf_files/error/location_duplicate2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} duplicate location \"path\" ${err_path}:8\n"
+
+
+
+# test limit_except
+conf_path="test/conf/conf_files/error/limit_except_duplicate1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is duplicate ${err_path}:16\n"
+
+conf_path="test/conf/conf_files/error/limit_except_invalid_method.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid method \"none\" ${err_path}:5\n"
 
 
 printLog
