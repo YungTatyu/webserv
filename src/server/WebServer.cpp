@@ -60,7 +60,7 @@ void WebServer::eventLoop()
 			}
 			else if ( curPfd.revents & POLLOUT ) //レスポンス送信
 			{
-				if ( this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) == -1 && errno == EAGAIN )
+				if ( this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) == -1 )
 					continue ;
 				this->eventManager->updateEvents( curPfd.fd , POLLIN );
 			}

@@ -10,7 +10,7 @@ class EventManager
 		std::vector<struct pollfd> fds;
 		void updateEvents( const int fd, const short events );
 		void addEvent( const struct pollfd pfd );
-		std::vector<struct pollfd> getAllPollfd() const;
+		const std::vector<struct pollfd>& getAllPollfd() const;
 		struct pollfd getPollfd( const int fd ) const;
 
 		static struct pollfd genPollFd( const int fd, const short events, const short revents );
