@@ -1,6 +1,8 @@
 #include "Parser.hpp"
 #include <iostream>
 #include <utility>
+#include <sstream>
+#include <climits>
 
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
 
@@ -76,7 +78,10 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["location"] = &config::Parser::parseLocationLimitExcept;
 	this->parser_map_["limit_except"] = &config::Parser::parseLocationLimitExcept;
 
-	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
+	this->parser_map_["access_log"] = &config::Parser::parseNoRestrict;
+	this->parser_map_["error_log"] = &config::Parser::parseNoRestrict;
+	this->parser_map_["use"] = &config::Parser::parseUse;
+	this->parser_map_["woker_connections"] = &config::Parser::parseWorkerConnections;
 }
 
 config::Parser::~Parser() {}
@@ -360,7 +365,85 @@ bool	config::Parser::parseLocationLimitExcept()
 	return true;
 }
 
-bool	config::Parser::parseAccessLog()
+bool	config::Parser::parseNoRestrict()
 {
 	return true;
 }
+
+
+#if defined(__APPLE__)
+const config::OS  currentOS = config::Mac;
+#elif defined(__linux__)
+const config::OS  currentOS = config::Linux;
+#else
+const config::OS  currentOS = config::Unknown;
+#endif
+
+bool	config::Parser::parseUse()
+{
+	std::string token_value = this->tokens_[ti].value_;
+
+	std::cout << currentOS << std::endl;
+	switch (currentOS) {
+		case config::Mac:
+			if (!(token_value == "select" ||
+				token_value == "poll" ||
+				token_value == "kqueue"))
+			{
+				std::cerr << "webserv: [emerg] invalid event type \"" <<  token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+			break;
+		case config::Linux:
+			if (!(token_value == "select" ||
+				token_value == "poll" ||
+				token_value == "epoll"))
+			{
+				std::cerr << "webserv: [emerg] invalid event type \"" <<  token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+			break;
+		case config::Unknown:
+			if (!(token_value == "select" ||
+				token_value == "poll"))
+			{
+				std::cerr << "webserv: [emerg] invalid event type \"" <<  token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+			break;
+		default:
+			return false;
+			break;
+	}
+	return true;
+}
+
+bool	config::Parser::parseWorkerConnections()
+{
+	long long	value;
+	char		char_remaining;
+
+	ti++;
+	std::istringstream	iss(this->tokens_[ti].value_.c_str());
+
+	if (iss >> value)
+	{
+		if (iss >> char_remaining)
+		{
+			std::cerr << "webserv: [emerg] invalid number \"" <<  value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+		else if (0 <= value && value <= 1) // 本当はserver側で弾く
+		{
+			std::cerr << "webserv: [emerg] \"" <<  value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
+			return false;
+		}
+		else if (2 <= value && value <= LONG_LONG_MAX)
+		{
+			return true;
+		}
+	}
+	std::cerr << "webserv: [emerg] invalid number \"" <<  value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+	return (false);
+}
+

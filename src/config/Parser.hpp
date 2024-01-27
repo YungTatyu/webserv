@@ -5,6 +5,8 @@
 #include <set>
 #include <map>
 #include <string>
+#include <cstddef>
+#include <sys/types.h>
 
 #include "conf.hpp"
 #include "Lexer.hpp"
@@ -12,6 +14,13 @@
 
 namespace config
 {
+enum OS
+{
+	Mac,
+	Linux,
+	Unknown
+};
+
 class Parser
 {
 	private:
@@ -32,7 +41,9 @@ class Parser
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();
 		bool	parseLocationLimitExcept();
-		bool	parseAccessLog();
+		bool	parseNoRestrict();
+		bool	parseUse();
+		bool	parseWorkerConnections();
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);

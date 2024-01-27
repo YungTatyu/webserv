@@ -1,5 +1,6 @@
 #include "conf.hpp"
 #include "Lexer.hpp"
+#include "Parser.hpp"
 #include <fstream>
 #include <iostream>
 #include <unistd.h>
@@ -36,6 +37,15 @@ bool	config::init_config(const std::string& file_path)
 	config::Lexer lexer(file_path);
 	lexer.tokenize();
 	std::cout << "websev: [debug] tokenize() succeeded" << std::endl;
+
+	// Tokenize
+	config::Token token = lexer.getToken(4);
+	std::string token_value = token.value_;
+
+	// Parse
+	config::Parser parser(lexer.getTokens(), file_path);
+	parser.parse();
+	std::cout << "websev: [debug] parse() succeeded" << std::endl;
 
 	return true;
 }
