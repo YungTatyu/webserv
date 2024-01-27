@@ -18,8 +18,8 @@ std::string CGIHandler::executeCGI()
 		close( pipefd[READ] );
 		dup2( pipefd[WRITE], STDOUT_FILENO );
 		close( pipefd[WRITE] );
-		char *cmd[] = {const_cast<char *>("date"), NULL};
-		execve("/bin/date", cmd, NULL);
+		char *cmd[] = {const_cast<char *>("php"), const_cast<char *>("cgi/script.php"), NULL};
+		execve("/opt/homebrew/bin/php", cmd, NULL);
 	}
 	else
 	{
