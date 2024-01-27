@@ -449,6 +449,8 @@ const config::OS  currentOS = config::Unknown;
 
 bool	config::Parser::parseUse()
 {
+	ti++;
+
 	std::string token_value = this->tokens_[ti].value_;
 
 	std::cout << currentOS << std::endl;
@@ -483,6 +485,27 @@ bool	config::Parser::parseUse()
 			return false;
 			break;
 	}
+
+
+	config::CONNECTION_METHOD	method;
+
+	if (token_value == "select")
+		method = config::SELECT;
+	else if (token_value == "poll")
+		method = config::POLL;
+	else if (token_value == "kqueue")
+		method = config::KQUEUE;
+	else if (token_value == "epoll")
+		method = config::EPOLL;
+	else
+	{
+		std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	this->config_.events.use.setConnectionMethod(method);
+
+	ti += 2;
 	return true;
 }
 
@@ -501,13 +524,16 @@ bool	config::Parser::parseWorkerConnections()
 			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
-		else if (0 <= value && value <= 1) // 本当はserver側で弾く
+
+		if (0 <= value && value <= 1) // 本当はserver側で弾く
 		{
 			std::cerr << "webserv: [emerg] \"" << value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
 			return false;
 		}
 		else if (2 <= value && value <= LONG_LONG_MAX)
 		{
+			this->config_.events.worker_connections.setWorkerConnections(value);
+			ti += 2;
 			return true;
 		}
 	}
@@ -515,42 +541,68 @@ bool	config::Parser::parseWorkerConnections()
 	return (false);
 }
 
-bool	isValidTimeUnit()
+bool	config::Parser::canConvertMinTime(long long &value, const std::string& unit)
 {
+	if (unit == "" || unit == "s")
+	{
+		if (1000 > std::numeric_limits<long long>::max() / value)
+			return false;
+		value *= 1000;
+	}
+	else if (unit == "h")
+	{
+		if ((1000 * 3600) > std::numeric_limits<long long>::max() / value)
+			return false;
+		value *= (1000 * 3600);
+	}
+	else if (unit == "d")
+	{
+		if ((1000 * 3600 * 24) < std::numeric_limits<long long>::max() / value)
+			return false;
+		value *= (1000 * 3600 * 24);
+	}
 	return true;
 }
 
-bool	isValidSizeUnit()
+bool	config::Parser::canConvertMinSize(long long &value, const std::string& unit)
 {
-	return true;
-}
-
-bool	canConvertMinimumTime()
-{
-	return true;
-}
-
-bool	canConvertMinimumSize()
-{
+	if (unit == "k" || unit == "K")
+	{
+		if (1024 > std::numeric_limits<long long>::max() / value)
+			return false;
+		value *= 1024;
+	}
+	else if (unit == "m" || unit == "M")
+	{
+		if (1024 > std::numeric_limits<long long>::max() / value)
+			return false;
+		value *= (1024 * 1024);
+	}
 	return true;
 }
 
 bool	config::Parser::parseTime()
 {
-	ti++;
-
 	long long			num;
-	char				unit; //単位
+	std::string			unit; //単位
 	std::istringstream	iss(this->tokens_[ti].value_.c_str());
 
 	if (iss >> num)
 	{
 		if (iss >> unit)
 		{
-			if (!isValidTimeUnit())
+			if (unit != "m" &&
+				unit != "s" &&
+				unit != "h" &&
+				unit != "d")
 				return false;
 		}
-		if (!canConvertMinimumTime()) // ms 変更できればOK
+		else
+			unit = "";
+
+		if (num == 0)
+			return true;
+		if (num < 0 || !canConvertMinTime(num, unit)) // ms 変更できればOK
 			return false;
 	}
 	else
@@ -563,17 +615,25 @@ bool	config::Parser::parseSize()
 	ti++;
 
 	long long			num;
-	char				unit;
+	std::string			unit;
 	std::istringstream	iss(this->tokens_[ti].value_.c_str());
 
 	if (iss >> num)
 	{
 		if (iss >> unit)
 		{
-			if (!isValidSizeUnit())
+			if (unit != "k" &&
+				unit != "K" &&
+				unit != "m" &&
+				unit != "M")
 				return false;
 		}
-		if (!canConvertMinimumSize()) // ms 変更できればOK
+		else
+			unit = "";
+
+		if (num == 0)
+			return true;
+		if (num < 0 || !canConvertMinSize(num, unit)) // ms 変更できればOK
 			return false;
 	}
 	else
@@ -585,3 +645,4 @@ const config::Main	&config::Parser::getConfig() const
 {
 	return this->config_;
 }
+

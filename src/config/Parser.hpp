@@ -41,17 +41,17 @@ class Parser
 		void	printError(const std::string &err_msg, const Token &token) const;
 		ssize_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();
-<<<<<<< HEAD
 		bool	parseLocation();
 		bool	parseLimitExcept();
 		bool	parseNoRestrict();
 		bool	parseUse();
 		bool	parseWorkerConnections();
+		bool	canConvertMinTime(long long &value, const std::string& unit);
+		bool	canConvertMinSize(long long &value, const std::string& unit);
 		bool	parseTime();
 		bool	parseSize();
 		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
 		std::string	toUpper(std::string) const;
->>>>>>> issue45-config-main_parser
 		Parser();
 		void	operator=(const Parser &other);
 	public:
