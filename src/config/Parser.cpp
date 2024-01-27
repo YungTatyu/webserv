@@ -370,7 +370,6 @@ bool	config::Parser::parseNoRestrict()
 	return true;
 }
 
-
 #if defined(__APPLE__)
 const config::OS  currentOS = config::Mac;
 #elif defined(__linux__)
@@ -390,7 +389,7 @@ bool	config::Parser::parseUse()
 				token_value == "poll" ||
 				token_value == "kqueue"))
 			{
-				std::cerr << "webserv: [emerg] invalid event type \"" <<  token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 			break;
@@ -399,7 +398,7 @@ bool	config::Parser::parseUse()
 				token_value == "poll" ||
 				token_value == "epoll"))
 			{
-				std::cerr << "webserv: [emerg] invalid event type \"" <<  token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 			break;
@@ -407,7 +406,7 @@ bool	config::Parser::parseUse()
 			if (!(token_value == "select" ||
 				token_value == "poll"))
 			{
-				std::cerr << "webserv: [emerg] invalid event type \"" <<  token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 			break;
@@ -430,12 +429,12 @@ bool	config::Parser::parseWorkerConnections()
 	{
 		if (iss >> char_remaining)
 		{
-			std::cerr << "webserv: [emerg] invalid number \"" <<  value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 		else if (0 <= value && value <= 1) // 本当はserver側で弾く
 		{
-			std::cerr << "webserv: [emerg] \"" <<  value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
+			std::cerr << "webserv: [emerg] \"" << value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
 			return false;
 		}
 		else if (2 <= value && value <= LONG_LONG_MAX)
@@ -443,7 +442,73 @@ bool	config::Parser::parseWorkerConnections()
 			return true;
 		}
 	}
-	std::cerr << "webserv: [emerg] invalid number \"" <<  value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+	std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 	return (false);
+}
+
+bool	isValidTimeUnit()
+{
+	return true;
+}
+
+bool	isValidSizeUnit()
+{
+	return true;
+}
+
+bool	canConvertMinimumTime()
+{
+	return true;
+}
+
+bool	canConvertMinimumSize()
+{
+	return true;
+}
+
+bool	config::Parser::parseTime()
+{
+	ti++;
+
+	long long			num;
+	char				unit; //単位
+	std::istringstream	iss(this->tokens_[ti].value_.c_str());
+
+	if (iss >> num)
+	{
+		if (iss >> unit)
+		{
+			if (!isValidTimeUnit())
+				return false;
+		}
+		if (!canConvertMinimumTime()) // ms 変更できればOK
+			return false;
+	}
+	else
+		return false;
+	return true;
+}
+
+bool	config::Parser::parseSize()
+{
+	ti++;
+
+	long long			num;
+	char				unit;
+	std::istringstream	iss(this->tokens_[ti].value_.c_str());
+
+	if (iss >> num)
+	{
+		if (iss >> unit)
+		{
+			if (!isValidSizeUnit())
+				return false;
+		}
+		if (!canConvertMinimumSize()) // ms 変更できればOK
+			return false;
+	}
+	else
+		return false;
+	return true;
 }
 

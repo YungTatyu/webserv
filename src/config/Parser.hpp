@@ -44,6 +44,8 @@ class Parser
 		bool	parseNoRestrict();
 		bool	parseUse();
 		bool	parseWorkerConnections();
+		bool	parseTime();
+		bool	parseSize();
 		Parser();
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
