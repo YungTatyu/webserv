@@ -34,14 +34,14 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 	}
 }
 
-int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int target )
+int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int cli_sock )
 {
 	std::vector<char> buffer( bufferSize_ );
 	ssize_t totalBytesRead = 0;
 
 	while ( 1 )
 	{
-		ssize_t re = recv( target, buffer.data() + totalBytesRead, bufferSize_, 0 );
+		ssize_t re = recv( cli_sock, buffer.data() + totalBytesRead, bufferSize_, 0 );
 		if ( re == 0 && totalBytesRead == 0 ) //クライアントとのコネクションが閉じた時。
 		   return 0;
 		else if ( re == -1 && totalBytesRead == 0 ) //ソケットが使用不可、またはエラー。
@@ -51,13 +51,26 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 		totalBytesRead += re;
 		buffer.resize( buffer.size() + bufferSize_ );
 	}
-	connManager.setRawRequest( target, buffer );
+	connManager.setRawRequest( cli_sock, buffer );
 	return 1;
 }
 
-int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int target )
-{	
-	return ( send( target, connManager.getResponse( target ).data(), connManager.getResponse( target ).size(), 0) );
+int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
+{
+	std::vector<char> response = connManager.getResponse( cli_sock );
+	size_t totalSent = 0;
+	size_t resSize = response.size();
+	const size_t chunkSize = 1024;
+
+	while ( totalSent < resSize )
+	{
+		size_t currentChunkSize = std::min(chunkSize, resSize - totalSent);
+		int sent = send(cli_sock, response.data() + totalSent, currentChunkSize, 0);
+		if (sent == -1)
+			return -1;
+		totalSent += sent;
+	}
+	return totalSent;
 }
 
 void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
@@ -80,10 +93,10 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 	std::cout << "> New client connected from IP: " << clientIp << std::endl;
 }
 
-void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int target )
+void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int cli_sock )
 {
-	close( target );
-	connManager.removeConnection( target );
+	close( cli_sock );
+	connManager.removeConnection( cli_sock );
 	printf("%s\n", "< Client disconnected.");
 }
 
