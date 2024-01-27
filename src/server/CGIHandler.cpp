@@ -11,6 +11,7 @@ std::string CGIHandler::executeCGI()
 	std::string buffer;
 	std::string result;
 	int status;
+	extern char **environ;
 
 	pipe( pipefd );
 	if ( fork() == 0 )
@@ -18,8 +19,9 @@ std::string CGIHandler::executeCGI()
 		close( pipefd[READ] );
 		dup2( pipefd[WRITE], STDOUT_FILENO );
 		close( pipefd[WRITE] );
+		setenv("QUERY_STRING", "kohshi", 1);
 		char *cmd[] = {const_cast<char *>("php"), const_cast<char *>("cgi/script.php"), NULL};
-		execve("/opt/homebrew/bin/php", cmd, NULL);
+		execve("/opt/homebrew/bin/php", cmd, environ);
 	}
 	else
 	{
