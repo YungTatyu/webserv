@@ -38,6 +38,7 @@ class Parser
 		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
 		std::string	toUpper(std::string) const;
 		Parser();
+		void	operator=(const Parser &other);
 	public:
 		Parser(const std::vector<Token> &tokens, const std::string &filepath);
 		~Parser();

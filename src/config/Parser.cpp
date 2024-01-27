@@ -1,6 +1,7 @@
 #include "Parser.hpp"
 #include <iostream>
 #include <utility>
+#include <algorithm>
 
 std::map<std::string, unsigned int>	config::Parser::all_directives_;
 
@@ -254,9 +255,7 @@ const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT c
 	case CONF_HTTP_LIMIT_EXCEPT:
 		{
 			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
-			const std::vector<LimitExcept>	&limit_except_list = current_location.limit_except_list;
-			// limit_exceptがすでに存在している場合は、一番最後にparseしたlimit_exceptのset_directiveを取得
-			ret = limit_except_list.size() != 0 ? &(limit_except_list.back().set_directives) : NULL;
+			ret = &(current_location.limit_except.set_directives);
 		}
 		break;
 	
@@ -349,8 +348,9 @@ bool	config::Parser::parseHttpServerEvents()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
 	++ti; // tokenをcontextの引数に進める
-	if (!expectTokenType(TK_OPEN_CURLY_BRACE, tokens[ti]))
-		return false;
+	// 新たなserver contextを追加
+	if (tokens[ti].value_ == "server")
+		this->config_.http.server_list.push_back(Server());
 	++ti; // 次のtokenに進める
 	return true;
 }
@@ -359,28 +359,41 @@ bool	config::Parser::parseLocation()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
 	++ti; // tokenをcontextの引数に進める
-	if (!expectTokenType(TK_STR, tokens[ti]))
-		return false;
-	++ti;
-	if (!expectTokenType(TK_OPEN_CURLY_BRACE, tokens[ti]))
-		return false;
-	++ti;
+
+	// locationのuriが重複していないか確認
+	const std::string &uri = tokens[ti].value_;
+	std::vector<Location>	&list = this->config_.http.server_list.back().location_list;
+	for (std::vector<Location>::iterator it = list.begin(); it != list.end(); ++it)
+	{
+		if (it->uri_ == uri)
+		{
+			printError(std::string("duplicate location \"") + tokens[ti].value_ + "\"", tokens[ti]);
+			return false;
+		}
+	}
+	list.push_back(Location(uri));
+	ti += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
 }
 
 bool	config::Parser::parseLimitExcept()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
+	std::vector<REQUEST_METHOD>	&list = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
 	++ti; // tokenをcontextの引数に進める
 	do
 	{
-		if (!expectTokenType(TK_STR, tokens[ti]))
-			return false;			
-		const std::string method = toUpper(tokens[ti].value_);
-		if (method != "GET" && method != "HEAD" && method != "POST" && method != "DELETE")
+		const std::string upper_case_method = toUpper(tokens[ti].value_);
+		if (upper_case_method != "GET" && upper_case_method != "HEAD" && upper_case_method != "POST" && upper_case_method != "DELETE")
 		{
 			printError(std::string("invalid method \"" + tokens[ti].value_ + "\""), tokens[ti]);
 			return false;
+		}
+		const REQUEST_METHOD	method = convertToRequestMethod(upper_case_method);
+		// すでに追加されているmethodならば、新たに追加しない
+		if (std::find(list.begin(), list.end(), method) == list.end())
+		{
+			list.push_back(REQUEST_METHOD(method));
 		}
 		++ti;
 	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
