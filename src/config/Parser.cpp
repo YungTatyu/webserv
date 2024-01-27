@@ -176,19 +176,19 @@ bool	config::Parser::parseType(const Token &token)
 		ret = expectArgsNum(CONF_TAKE2|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 3:
-		ret = expectArgsNum(CONF_TAKE3, this->all_directives_[directive_name]);
+		ret = expectArgsNum(CONF_TAKE3|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 4:
-		ret = expectArgsNum(CONF_TAKE4, this->all_directives_[directive_name]);
+		ret = expectArgsNum(CONF_TAKE4|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 5:
-		ret = expectArgsNum(CONF_TAKE5, this->all_directives_[directive_name]);
+		ret = expectArgsNum(CONF_TAKE5|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 6:
-		ret = expectArgsNum(CONF_TAKE6, this->all_directives_[directive_name]);
+		ret = expectArgsNum(CONF_TAKE6|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 7:
-		ret = expectArgsNum(CONF_TAKE7, this->all_directives_[directive_name]);
+		ret = expectArgsNum(CONF_TAKE7|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 8:
 		ret = expectArgsNum(CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
@@ -372,19 +372,35 @@ bool	config::Parser::parseLimitExcept()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
 	++ti; // tokenをcontextの引数に進める
-	if (!expectTokenType(TK_STR, tokens[ti]))
-		return false;
-	const std::string method = toUpper(tokens[ti].value_);
-	if (method != "GET" && method != "HEAD" && method != "POST" && method != "DELETE")
+	do
 	{
-		printError(std::string("invalid method \"" + tokens[ti].value_ + "\""), tokens[ti]);
-		return false;
-	}
-	++ti;
-	if (!expectTokenType(TK_OPEN_CURLY_BRACE, tokens[ti]))
-		return false;
+		if (!expectTokenType(TK_STR, tokens[ti]))
+			return false;			
+		const std::string method = toUpper(tokens[ti].value_);
+		if (method != "GET" && method != "HEAD" && method != "POST" && method != "DELETE")
+		{
+			printError(std::string("invalid method \"" + tokens[ti].value_ + "\""), tokens[ti]);
+			return false;
+		}
+		++ti;
+	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
 	++ti;
 	return true;
+}
+
+config::REQUEST_METHOD	config::Parser::convertToRequestMethod(const std::string &method) const
+{
+	REQUEST_METHOD ret = GET;
+
+	if (method == "GET")
+		ret = GET;
+	else if (method == "HEAD")
+		ret = HEAD;
+	else if (method == "POST")
+		ret = POST;
+	else if (method == "DELETE")
+		ret = DELETE;
+	return ret;
 }
 
 std::string	config::Parser::toUpper(std::string str) const

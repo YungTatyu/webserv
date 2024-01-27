@@ -35,6 +35,7 @@ class Parser
 		bool	parseLocation();
 		bool	parseLimitExcept();
 		bool	parseAccessLog();
+		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
 		std::string	toUpper(std::string) const;
 		Parser();
 	public:
