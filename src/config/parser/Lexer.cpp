@@ -25,6 +25,11 @@ const config::Token&	config::Lexer::getToken(int key)
 	return this->tokens_[key];
 }
 
+const std::vector<config::Token>&	config::Lexer::getTokens()
+{
+	return this->tokens_;
+}
+
 const std::string	config::Lexer::getFileContent(const std::string file_path) const
 {
 	// ファイルを開く
