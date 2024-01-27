@@ -73,8 +73,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["events"] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_["http"] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_["server"] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["location"] = &config::Parser::parseLocationLimitExcept;
-	this->parser_map_["limit_except"] = &config::Parser::parseLocationLimitExcept;
+	this->parser_map_["location"] = &config::Parser::parseLocation;
+	this->parser_map_["limit_except"] = &config::Parser::parseLimitExcept;
 
 	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
 }
@@ -282,12 +282,14 @@ bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int
 	return expect & actual;
 }
 
+/**
+ * main contextはconfで設定されないため、含めない
+*/
 bool	config::Parser::isContext(const config::Token &token) const
 {
 	return token.type_ == config::TK_STR &&
 	(
-		token.value_ == "main"
-		|| token.value_ == "events"
+		token.value_ == "events"
 		|| token.value_ == "http"
 		|| token.value_ == "server"
 		|| token.value_ == "location"
