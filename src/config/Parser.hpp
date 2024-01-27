@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <stack>
 #include <string>
 #include <sys/types.h>
 
@@ -21,7 +22,7 @@ class Parser
 		std::set<std::string>	set_directives_; // setされたcontextとdirectiveを管理
 		const std::string	filepath_;
 		size_t	ti; // token index
-		CONTEXT	current_context_;
+		std::stack<CONTEXT>	current_context_;
 		std::map<std::string, bool (config::Parser::*)()>	parser_map_;
 		bool	parseType(const Token &token);
 		bool	expectTokenType(const config::TK_TYPE type, const Token &token) const;

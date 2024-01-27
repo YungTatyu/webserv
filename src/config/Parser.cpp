@@ -35,8 +35,11 @@ const unsigned int	config::UseridService::kType_;
 const unsigned int	config::WorkerConnections::kType_;
 
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
-	tokens_(tokens), filepath_(filepath), ti(0), current_context_(CONF_MAIN)
+	tokens_(tokens), filepath_(filepath), ti(0)
 {
+	// 現在のcontextをセット
+	this->current_context_.push(CONF_MAIN);
+
 	// context
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
 	this->all_directives_.insert(std::make_pair("events", config::Events::type));
@@ -102,11 +105,12 @@ bool	config::Parser::parse()
 		if (current_token.type_ == TK_CLOSE_CURLY_BRACE)
 		{
 			// main contextでは "}" はエラー
-			if (this->current_context_ & CONF_MAIN)
+			if (this->current_context_.top() & CONF_MAIN)
 			{
 				printError(std::string("unexpected \"") + current_token.value_ + "\"", current_token);
 				return false;
 			}
+			this->current_context_.pop();
 			++ti;
 			continue;
 		}
@@ -129,7 +133,7 @@ bool	config::Parser::parse()
 		this->set_directives_.insert(current_token.value_);
 	}
 	// current contextがmainでないとerror
-	if (this->current_context_ != CONF_MAIN)
+	if (this->current_context_.top() != CONF_MAIN)
 	{
 		printError("unexpected end of file, expecting \"}\"", this->tokens_[ti]);
 		return false;
@@ -152,7 +156,7 @@ bool	config::Parser::parseType(const Token &token)
 {
 	const std::string directive_name = token.value_;
 	// contextが正しいか
-	if (!(this->all_directives_[directive_name] & this->current_context_))
+	if (!(this->all_directives_[directive_name] & this->current_context_.top()))
 	{
 		printError(std::string("\"") + directive_name + "\" directive is not allowed here", token);
 		return false;
@@ -205,7 +209,7 @@ bool	config::Parser::parseType(const Token &token)
 	}
 
 	// 重複を確認
-	const std::set<std::string>	*directives_set = searchDirectivesSet(current_context_);
+	const std::set<std::string>	*directives_set = searchDirectivesSet(this->current_context_.top());
 	// directiveが重複不可かつ重複していたらエラー
 	if (directives_set != NULL &&
 		(this->all_directives_[directive_name] & CONF_UNIQUE) &&

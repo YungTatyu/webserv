@@ -97,5 +97,8 @@ assert $conf_path "${err_start_with} no \"events\" section in configuration\n"
 conf_path="test/conf/conf_files/error/newline.conf"
 assert $conf_path "${err_start_with} no \"events\" section in configuration\n"
 
+# test location
+
+# test limit_excepted
 
 printLog
