@@ -83,7 +83,7 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 
 	if ( CGIHandler::isCGI( request.uri ) )
 	{
-		return httpUtils::createResponse( CGIHandler::executeCGI() );
+		return httpUtils::createResponse( CGIHandler::executeCGI( request.uri ) );
 	}
 	else if ( httpUtils::isDirectory(request.uri) )
 	{
