@@ -196,11 +196,6 @@ err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid number of arguments in \"limit_except\" directive ${err_path}:5\n"
 
 
-# test invalid args value
-conf_path="test/conf/conf_files/error/invalid_args_limit_except2.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} invalid method \"test\" in ${err_path}:5\n"
-
 
 # test no evnents section
 conf_path="test/conf/conf_files/error/only_comments.conf"
@@ -228,9 +223,13 @@ conf_path="test/conf/conf_files/error/limit_except_duplicate1.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"limit_except\" directive is duplicate ${err_path}:16\n"
 
-conf_path="test/conf/conf_files/error/limit_except_invalid_method.conf"
+conf_path="test/conf/conf_files/error/limit_except_invalid_method1.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid method \"none\" ${err_path}:5\n"
+
+conf_path="test/conf/conf_files/error/limit_except_invalid_method2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid method \"test\" in ${err_path}:5\n"
 
 
 printLog
