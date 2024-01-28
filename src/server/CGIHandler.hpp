@@ -12,6 +12,7 @@ class CGIHandler
 		static std::string getQueryString( std::string& uri );
 
 	private:
+		CGIHandler();
 		enum PipeEnds
 		{
 			READ = 0,
