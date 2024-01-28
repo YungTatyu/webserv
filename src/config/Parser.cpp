@@ -106,7 +106,7 @@ bool	config::Parser::parse()
 		if (current_token.type_ == TK_CLOSE_CURLY_BRACE)
 		{
 			// main contextでは "}" はエラー
-			if (this->current_context_.top() & CONF_MAIN)
+			if (this->current_context_.top() == CONF_MAIN)
 			{
 				printError(std::string("unexpected \"") + current_token.value_ + "\"", current_token);
 				return false;
@@ -223,6 +223,7 @@ bool	config::Parser::parseType(const Token &token)
 		printError(std::string("\"" + token.value_ + "\" directive is duplicate"), token);
 		return false;
 	}
+	std::cout << token.value_ << ": parse type done\n";
 	return true;
 }
 
