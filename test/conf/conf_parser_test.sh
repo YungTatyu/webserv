@@ -116,6 +116,28 @@ conf_path="test/conf/conf_files/error/invalid_directive_http4.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"http\" directive is not allowed here ${err_path}:15\n"
 
+conf_path="test/conf/conf_files/error/invalid_directive_location1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"location\" directive is not allowed here ${err_path}:2\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_location2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"location\" directive is not allowed here ${err_path}:4\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_location3.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"location\" directive is not allowed here ${err_path}:6\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_location4.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"location\" directive is not allowed here ${err_path}:7\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_location5.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"location\" directive is not allowed here ${err_path}:17\n"
+
+
+
 
 # test no evnents section
 conf_path="test/conf/conf_files/error/only_comments.conf"
