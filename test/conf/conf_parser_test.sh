@@ -136,6 +136,26 @@ conf_path="test/conf/conf_files/error/invalid_directive_location5.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"location\" directive is not allowed here ${err_path}:17\n"
 
+conf_path="test/conf/conf_files/error/invalid_directive_limit_except1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:2\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_limit_except2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:3\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_limit_except3.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:7\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_limit_except3.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:7\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_limit_except4.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:16\n"
+
 
 
 
