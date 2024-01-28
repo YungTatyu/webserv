@@ -139,6 +139,7 @@ bool	config::Parser::parse()
 		// parseされたdirectiveを管理
 		this->set_directives_.insert(current_token.value_);
 	}
+
 	// current contextがmainでないとerror
 	if (this->current_context_.top() != CONF_MAIN)
 	{
@@ -223,7 +224,6 @@ bool	config::Parser::parseType(const Token &token)
 		printError(std::string("\"" + token.value_ + "\" directive is duplicate"), token);
 		return false;
 	}
-	std::cout << token.value_ << ": parse type done\n";
 	return true;
 }
 
@@ -367,13 +367,14 @@ void	config::Parser::printError(const std::string &err_msg, const Token &token) 
 bool	config::Parser::parseHttpServerEvents()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
-	++ti; // tokenをcontextの引数に進める
 	const std::string	&context = tokens[ti].value_;
 
+	++ti; // tokenをcontextの引数に進める
 	// 新たなserver contextを追加
 	if (context == "server")
 		this->config_.http.server_list.push_back(Server());
 
+	std::cout << context << "\n";
 	// current contextをupdate
 	if (context == "http")
 		this->current_context_.push(CONF_HTTP);
