@@ -86,6 +86,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["error_log"] = &config::Parser::parseNoRestrict;
 	this->parser_map_["use"] = &config::Parser::parseUse;
 	this->parser_map_["woker_connections"] = &config::Parser::parseWorkerConnections;
+	this->parser_map_["send_timeout"] = &config::Parser::parseSendTimeout;
+	this->parser_map_["keepalive_timeout"] = &config::Parser::parseKeepaliveTimeout;
 }
 
 config::Parser::~Parser() {}
@@ -511,7 +513,7 @@ bool	config::Parser::parseUse()
 
 bool	config::Parser::parseWorkerConnections()
 {
-	long long	value;
+	long	value;
 	char		char_remaining;
 
 	ti++;
@@ -541,49 +543,55 @@ bool	config::Parser::parseWorkerConnections()
 	return (false);
 }
 
-bool	config::Parser::canConvertMinTime(long long &value, const std::string& unit)
+bool	config::Parser::canConvertMinTime(long &value, const std::string& unit)
 {
 	if (unit == "" || unit == "s")
 	{
-		if (1000 > std::numeric_limits<long long>::max() / value)
+		if (config::Time::seconds > std::numeric_limits<long>::max() / value)
 			return false;
-		value *= 1000;
+		value *= config::Time::seconds;
+	}
+	else if (unit == "m")
+	{
+		if (config::Time::minutes > std::numeric_limits<long>::max() / value)
+			return false;
+		value *= config::Time::minutes;
 	}
 	else if (unit == "h")
 	{
-		if ((1000 * 3600) > std::numeric_limits<long long>::max() / value)
+		if (config::Time::hours > std::numeric_limits<long>::max() / value)
 			return false;
-		value *= (1000 * 3600);
+		value *= config::Time::hours;
 	}
 	else if (unit == "d")
 	{
-		if ((1000 * 3600 * 24) < std::numeric_limits<long long>::max() / value)
+		if (config::Time::days < std::numeric_limits<long>::max() / value)
 			return false;
-		value *= (1000 * 3600 * 24);
+		value *= config::Time::days;
 	}
 	return true;
 }
 
-bool	config::Parser::canConvertMinSize(long long &value, const std::string& unit)
+bool	config::Parser::canConvertMinSize(long &value, const std::string& unit)
 {
 	if (unit == "k" || unit == "K")
 	{
-		if (1024 > std::numeric_limits<long long>::max() / value)
+		if (config::Size::kilobytes > std::numeric_limits<long>::max() / value)
 			return false;
-		value *= 1024;
+		value *= config::Size::kilobytes;
 	}
 	else if (unit == "m" || unit == "M")
 	{
-		if (1024 > std::numeric_limits<long long>::max() / value)
+		if (config::Size::megabytes > std::numeric_limits<long>::max() / value)
 			return false;
-		value *= (1024 * 1024);
+		value *= config::Size::megabytes;
 	}
 	return true;
 }
 
-bool	config::Parser::parseTime()
+long	config::Parser::parseTime()
 {
-	long long			num;
+	long			num;
 	std::string			unit; //単位
 	std::istringstream	iss(this->tokens_[ti].value_.c_str());
 
@@ -595,26 +603,28 @@ bool	config::Parser::parseTime()
 				unit != "s" &&
 				unit != "h" &&
 				unit != "d")
-				return false;
+			{
+				return -1;
+			}
 		}
 		else
 			unit = "";
 
 		if (num == 0)
-			return true;
+			return 0;
 		if (num < 0 || !canConvertMinTime(num, unit)) // ms 変更できればOK
-			return false;
+		{
+			return -1;
+		}
 	}
 	else
-		return false;
-	return true;
+		return -1;
+	return num;
 }
 
-bool	config::Parser::parseSize()
+long	config::Parser::parseSize()
 {
-	ti++;
-
-	long long			num;
+	long			num;
 	std::string			unit;
 	std::istringstream	iss(this->tokens_[ti].value_.c_str());
 
@@ -626,18 +636,50 @@ bool	config::Parser::parseSize()
 				unit != "K" &&
 				unit != "m" &&
 				unit != "M")
-				return false;
+				return -1;
 		}
 		else
 			unit = "";
 
 		if (num == 0)
-			return true;
+			return 0;
 		if (num < 0 || !canConvertMinSize(num, unit)) // ms 変更できればOK
-			return false;
+			return -1;
 	}
 	else
+		return -1;
+	return num;
+}
+
+bool	config::Parser::parseSendTimeout()
+{
+	ti++;
+
+	long ret = parseTime();
+	if (ret == -1)
+	{
+		std::cerr << "webserv: [emerg] \"send_timeout\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
+	}
+
+	this->config_.http.send_timeout.setTime(ret);
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseKeepaliveTimeout()
+{
+	ti++;
+
+	long ret = parseTime();
+	if (ret == -1)
+	{
+		std::cerr << "webserv: [emerg] \"keepalive_timeout\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	this->config_.http.keepalive_timeout.setTime(ret);
+	ti += 2;
 	return true;
 }
 

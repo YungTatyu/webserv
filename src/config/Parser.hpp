@@ -46,10 +46,12 @@ class Parser
 		bool	parseNoRestrict();
 		bool	parseUse();
 		bool	parseWorkerConnections();
-		bool	canConvertMinTime(long long &value, const std::string& unit);
-		bool	canConvertMinSize(long long &value, const std::string& unit);
-		bool	parseTime();
-		bool	parseSize();
+		bool	parseSendTimeout();
+		bool	parseKeepaliveTimeout();
+		bool	canConvertMinTime(long &value, const std::string& unit);
+		bool	canConvertMinSize(long &value, const std::string& unit);
+		long	parseTime();
+		long	parseSize();
 		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
 		std::string	toUpper(std::string) const;
 		Parser();
