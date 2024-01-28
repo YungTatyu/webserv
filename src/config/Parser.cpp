@@ -374,7 +374,6 @@ bool	config::Parser::parseHttpServerEvents()
 	if (context == "server")
 		this->config_.http.server_list.push_back(Server());
 
-	std::cout << context << "\n";
 	// current contextをupdate
 	if (context == "http")
 		this->current_context_.push(CONF_HTTP);
