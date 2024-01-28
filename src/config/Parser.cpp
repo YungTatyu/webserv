@@ -374,7 +374,7 @@ bool	config::Parser::parseHttpServerEvents()
 		this->config_.http.server_list.push_back(Server());
 
 	// current contextをupdate
-	if (context == "html")
+	if (context == "http")
 		this->current_context_.push(CONF_HTTP);
 	else if (context == "server")
 		this->current_context_.push(CONF_HTTP_SERVER);
@@ -402,6 +402,10 @@ bool	config::Parser::parseLocation()
 		}
 	}
 	list.push_back(Location(uri));
+
+	// current contextをupdate
+	this->current_context_.push(CONF_HTTP_LOCATION);
+
 	ti += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
 }
@@ -427,6 +431,10 @@ bool	config::Parser::parseLimitExcept()
 		}
 		++ti;
 	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
+
+	// current contextをupdate
+	this->current_context_.push(CONF_EVENTS);	
+
 	++ti;
 	return true;
 }
