@@ -101,6 +101,7 @@ bool	config::Parser::parse()
 		const Token &current_token = this->tokens_[ti];
 		if (current_token.type_ == TK_END)
 			break;
+
 		// "}" tokenの場合、tokenを進める
 		if (current_token.type_ == TK_CLOSE_CURLY_BRACE)
 		{
@@ -114,21 +115,27 @@ bool	config::Parser::parse()
 			++ti;
 			continue;
 		}
+
 		// directiveが終了しているか
 		if (!expectTerminatingToken())
 			return false;
+		
 		// 存在するcontextまたはdirectiveか
 		if (!isDirective(current_token) && !isContext(current_token))
 		{
 			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
 			return false;
 		}
+
 		// directiveのtypeを確認
 		if (!parseType(current_token))
 			return false;
+
 		// directiveのargsの値を確認
-		if (!this->parser_map_[current_token.value_])
+		bool (config::Parser::*directive_parser)() = this->parser_map_[current_token.value_];
+		if (!(this->*directive_parser)())
 			return false;
+
 		// parseされたdirectiveを管理
 		this->set_directives_.insert(current_token.value_);
 	}
@@ -267,7 +274,6 @@ const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT c
 	return ret;
 }
 
-
 bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const
 {
 	if (type != token.type_)
@@ -361,9 +367,20 @@ bool	config::Parser::parseHttpServerEvents()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
 	++ti; // tokenをcontextの引数に進める
+	const std::string	&context = tokens[ti].value_;
+
 	// 新たなserver contextを追加
-	if (tokens[ti].value_ == "server")
+	if (context == "server")
 		this->config_.http.server_list.push_back(Server());
+
+	// current contextをupdate
+	if (context == "html")
+		this->current_context_.push(CONF_HTTP);
+	else if (context == "server")
+		this->current_context_.push(CONF_HTTP_SERVER);
+	else if (context == "events")
+		this->current_context_.push(CONF_EVENTS);
+	
 	++ti; // 次のtokenに進める
 	return true;
 }

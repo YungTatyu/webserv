@@ -13,7 +13,7 @@ int main(int ac, char *av[])
 
 	if (!config::init_config(av[1]))
 		return 1;
-
+	std::cout << "parse done\n";
 	WebServer server = WebServer();
 	server.eventLoop();
 	return 0;
