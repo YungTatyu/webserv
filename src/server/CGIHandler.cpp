@@ -2,11 +2,16 @@
 
 bool CGIHandler::isCGI( std::string& requestURI)
 {
-	std::size_t pos = requestURI.find("?");
+	return ( requestURI.substr( 0, 5 ) == "./cgi" );
+	// or cgi/script.hpp or cgi/scirpt.hpp?aaa cgi/script.hpp?
+}
+std::string CGIHandler::getQueryString( std::string& uri )
+{
+	std::size_t pos = uri.find("?");
 	if ( pos != std::string::npos )
-		return ( requestURI.substr( 0, pos ) == "./cgi" );
+		return uri.substr( pos + 1 );
 	else
-		return ( requestURI == "./cgi" );
+		return "";
 }
 
 std::string CGIHandler::executeCGI( std::string& uri )
@@ -23,11 +28,7 @@ std::string CGIHandler::executeCGI( std::string& uri )
 		close( pipefd[READ] );
 		dup2( pipefd[WRITE], STDOUT_FILENO );
 		close( pipefd[WRITE] );
-		std::size_t pos = uri.find("?");
-		if ( pos != std::string::npos )
-			setenv("QUERY_STRING", uri.substr( pos + 1 ).c_str(), 1);
-		else
-			setenv("QUERY_STRING", "", 1);
+		setenv("QUERY_STRING", CGIHandler::getQueryString(uri).c_str(), 1);
 		char *cmd[] = {const_cast<char *>("php"), const_cast<char *>("cgi/script.php"), NULL};
 		execve("/opt/homebrew/bin/php", cmd, environ);
 	}

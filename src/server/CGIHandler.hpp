@@ -9,6 +9,7 @@ class CGIHandler
 	public:
 		static bool isCGI( std::string& requestURI);
 		static std::string executeCGI( std::string& uri);
+		static std::string getQueryString( std::string& uri );
 
 	private:
 		enum PipeEnds
