@@ -80,21 +80,42 @@ assert $conf_path "${err_start_with} unexpected \";\" ${err_path}:3\n"
 # err_path="in $(readlink -f $conf_path)"
 # assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:1\n"
 
-conf_path="test/conf/conf_files/error/invalid_directive2.conf"
+conf_path="test/conf/conf_files/error/invalid_directive_server1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:2\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_server2.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:1\n"
 
-conf_path="test/conf/conf_files/error/invalid_directive3.conf"
+conf_path="test/conf/conf_files/error/invalid_directive_server3.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:16\n"
 
-conf_path="test/conf/conf_files/error/invalid_directive4.conf"
+conf_path="test/conf/conf_files/error/invalid_directive_server4.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:12\n"
 
-conf_path="test/conf/conf_files/error/invalid_directive6.conf"
+conf_path="test/conf/conf_files/error/invalid_directive_server6.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"server\" directive is not allowed here ${err_path}:6\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_http1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"http\" directive is not allowed here ${err_path}:12\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_http2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"http\" directive is not allowed here ${err_path}:5\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_http3.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"http\" directive is not allowed here ${err_path}:6\n"
+
+conf_path="test/conf/conf_files/error/invalid_directive_http4.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"http\" directive is not allowed here ${err_path}:15\n"
+
 
 # test no evnents section
 conf_path="test/conf/conf_files/error/only_comments.conf"
