@@ -156,7 +156,50 @@ conf_path="test/conf/conf_files/error/invalid_directive_limit_except4.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:16\n"
 
+conf_path="test/conf/conf_files/error/invalid_directive_limit_except4.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:16\n"
 
+
+
+# test invalid args num
+conf_path="test/conf/conf_files/error/invalid_args_http1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"http\" directive ${err_path}:2\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_http2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"http\" directive ${err_path}:2\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_events1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"events\" directive ${err_path}:14\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_events2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"events\" directive ${err_path}:14\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_server1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"server\" directive ${err_path}:3\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_server2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"server\" directive ${err_path}:3\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_location1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"location\" directive ${err_path}:16\n"
+
+conf_path="test/conf/conf_files/error/invalid_args_limit_except1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number of arguments in \"limit_except\" directive ${err_path}:5\n"
+
+
+# test invalid args value
+conf_path="test/conf/conf_files/error/invalid_args_limit_except2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid method \"test\" in ${err_path}:5\n"
 
 
 # test no evnents section
