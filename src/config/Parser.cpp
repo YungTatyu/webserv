@@ -87,8 +87,8 @@ config::Parser::~Parser() {}
 
 /**
  * parseの流れ
- * 1. 存在するdirectiveか
- * 2. argsが想定されていないtokenではないか："{", "}"
+ * 1. directiveが終了しているか: ";", "{"
+ * 2. 存在するdirectiveか
  * 3. contextが正しいか
  * 4. argsの数が正しいか
  * 5. 重複を確認
@@ -114,8 +114,8 @@ bool	config::Parser::parse()
 			++ti;
 			continue;
 		}
-		// TK_STRでなければエラー
-		if (!expectTokenType(TK_STR, current_token))
+		// directiveが終了しているか
+		if (!expectTerminatingToken())
 			return false;
 		// 存在するcontextまたはdirectiveか
 		if (!isDirective(current_token) && !isContext(current_token))
@@ -164,10 +164,7 @@ bool	config::Parser::parseType(const Token &token)
 
 	// argsの数が正しいか
 	const TK_TYPE terminating_token = isContext(token) ? TK_OPEN_CURLY_BRACE : TK_SEMICOLON;
-	const ssize_t	args_num = countArgs(terminating_token);
-	if (args_num == -1)
-		return false;
-
+	const size_t	args_num = countArgs(terminating_token);
 	bool	ret;
 	switch (args_num)
 	{
@@ -270,6 +267,7 @@ const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT c
 	return ret;
 }
 
+
 bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const
 {
 	if (type != token.type_)
@@ -283,6 +281,27 @@ bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &to
 bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int actual) const
 {
 	return expect & actual;
+}
+
+/**
+ * directiveが ";"もしくは"{"で区切られているか確認
+*/
+bool	config::Parser::expectTerminatingToken() const
+{
+	size_t	i = this->ti + 1;
+
+	while (this->tokens_[i].type_ != TK_SEMICOLON && this->tokens_[i].type_ != TK_OPEN_CURLY_BRACE)
+	{
+		if (this->tokens_[i].type_ == TK_END)
+		{
+			printError("unexpected end of file, expecting \";\" or \"}\"", this->tokens_[i]);
+			return false;
+		}
+		if (!expectTokenType(TK_STR, this->tokens_[i]))
+			return false;
+		++i;
+	}
+	return true;
 }
 
 /**
@@ -317,23 +336,13 @@ bool	config::Parser::isDirective(const config::Token &token) const
  * context   {
  * 
 */
-ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
+size_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 {
 	size_t	i = this->ti + 1;
-	ssize_t	args_num = 0;
+	size_t	args_num = 0;
 
 	while (this->tokens_[i].type_ != terminating_token)
 	{
-		if (this->tokens_[i].type_ == TK_END)
-		{
-			printError("unexpected end of file, expecting \";\" or \"}\"", this->tokens_[i]);
-			return -1;
-		}
-		if (!expectTokenType(TK_STR, this->tokens_[i]))
-		{
-			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[i]);
-			return -1;
-		}
 		++i;
 		++args_num;
 	}

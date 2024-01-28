@@ -6,7 +6,6 @@
 #include <map>
 #include <stack>
 #include <string>
-#include <sys/types.h>
 
 #include "conf.hpp"
 #include "Lexer.hpp"
@@ -27,11 +26,12 @@ class Parser
 		bool	parseType(const Token &token);
 		bool	expectTokenType(const config::TK_TYPE type, const Token &token) const;
 		bool	expectArgsNum(const unsigned int expect, const unsigned int actual) const;
+		bool	expectTerminatingToken() const;
 		bool	isContext(const Token &token) const;
 		bool	isDirective(const Token &token) const;
 		const std::set<std::string>	*searchDirectivesSet(const CONTEXT context) const;
 		void	printError(const std::string &err_msg, const Token &token) const;
-		ssize_t	countArgs(const TK_TYPE terminating_token) const;
+		size_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();
 		bool	parseLocation();
 		bool	parseLimitExcept();
