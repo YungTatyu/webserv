@@ -96,6 +96,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["root"] = &config::Parser::parseRoot;
 	this->parser_map_["index"] = &config::Parser::parseIndex;
 	this->parser_map_["autoindex"] = &config::Parser::parseAutoindex;
+	this->parser_map_["error_page"] = &config::Parser::parseErrorPage;
 }
 
 config::Parser::~Parser() {}
@@ -854,6 +855,100 @@ bool	config::Parser::parseAutoindex()
 	}
 
 	ti += 2;
+	return true;
+}
+
+long	config::Parser::retCodeIfValid()
+{
+	std::istringstream	iss(this->tokens_[ti].value_.c_str());
+	long	code;
+	char	remaining_char;
+
+	if (iss >> code)
+	{
+		if (iss >> remaining_char)
+		{
+			std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return -1;
+		}
+		if (300 <= code && code <= 599)
+			return code;
+		else
+		{
+			std::cerr << "webserv: [emerg] value \"" << code << "\" must be between 300 and 599 in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return -1;
+		}
+	}
+	else // LONG_MAX/MINを超えたり、数値ではなければエラー
+	{
+		std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return -1;
+	}
+}
+
+long	config::Parser::retErrorPageOptNumIfValid()
+{
+	std::istringstream	iss(this->tokens_[ti].value_.substr(1));
+	long	tmp_code;
+	char	remaining_char;
+
+	// responseの値の確認
+	if (iss >> tmp_code)
+	{
+		if (iss >> remaining_char || tmp_code < 0)
+		{
+			std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return -1;
+		}
+		return tmp_code;
+	}
+	else // LONG_MAX/MIN を超えたり、数値ではなければエラー
+	{
+		std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return -1;
+	}
+}
+
+bool	config::Parser::parseErrorPage()
+{
+	ti++;
+	config::ErrorPage	tmp_err_pg;
+	long	code;
+	unsigned int	tmp_ti = ti;
+
+	// uriまではcodeとしてみていく
+	while (this->tokens_[ti + 2].type_ == config::TK_SEMICOLON)
+	{
+		// 最後から二番目の引数が=responseオプションの場合
+		if (ti != tmp_ti 
+			&& this->tokens_[ti + 1].type_ == config::TK_SEMICOLON 
+			&& tokens_[ti].value_[0] == '=')
+		{
+			long	ret = retErrorPageOptNumIfValid();
+			if (ret == -1)
+				return false;
+			tmp_err_pg.setResponse(ret);
+			break ;
+		}
+
+		code = retCodeIfValid();
+		if (code == -1)
+			return false;
+
+		tmp_err_pg.addCode(code);
+
+		ti++;
+	}
+
+	tmp_err_pg.setUri(this->tokens_[ti].value_);
+
+	if (this->current_context_.top() == config::CONF_HTTP)
+		this->config_.http.error_page_list.push_back(tmp_err_pg);
+	else if (this->current_context_.top() == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().error_page_list.push_back(tmp_err_pg);
+	else if (this->current_context_.top() == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().error_page_list.push_back(tmp_err_pg);
+
 	return true;
 }
 

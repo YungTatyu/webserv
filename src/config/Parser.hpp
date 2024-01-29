@@ -54,6 +54,9 @@ class Parser
 		bool	parseRoot();
 		bool	parseIndex();
 		bool	parseAutoindex();
+		bool	parseErrorPage();
+		long	retErrorPageOptNumIfValid();
+		long	retCodeIfValid();
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
 		long	parseTime();
