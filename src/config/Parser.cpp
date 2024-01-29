@@ -34,7 +34,7 @@ const unsigned int	config::UseridPath::kType_;
 const unsigned int	config::UseridService::kType_;
 const unsigned int	config::WorkerConnections::kType_;
 
-const static	std::string kHTTP= "http";
+const static	std::string kHTTP = "http";
 const static	std::string kSERVER = "server";
 const static	std::string kEVENTS = "events";
 

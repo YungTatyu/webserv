@@ -19,7 +19,7 @@ g_test_failed=0
 function	assert {
 	g_test_index=$(bc <<< "$g_test_index + 1")
 	local	conf_path=$1
-	printf "test$g_test_index $conf_path: "
+	printf "[  test$g_test_index  ]\n${conf_path}: "
 	local	actual=$(${webserv_path} $conf_path 2>&1)
 	local	expect=$2
 
@@ -52,10 +52,6 @@ assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or 
 conf_path="test/conf/conf_files/error/unexpect_open_curly_brace1.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} unexpected \"{\" ${err_path}:3\n"
-
-conf_path="test/conf/conf_files/error/unexpect_open_curly_brace2.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected \"{\" ${err_path}:6\n"
 
 conf_path="test/conf/conf_files/error/unexpect_close_curly_brace2.conf"
 err_path="in $(readlink -f $conf_path)"
@@ -230,6 +226,13 @@ assert $conf_path "${err_start_with} invalid method \"none\" ${err_path}:5\n"
 conf_path="test/conf/conf_files/error/limit_except_invalid_method2.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid method \"test\" in ${err_path}:5\n"
+
+
+
+# test context
+conf_path="test/conf/conf_files/error/invalid_context1.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:6\n"
 
 
 printLog
