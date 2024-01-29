@@ -82,12 +82,15 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["location"] = &config::Parser::parseLocation;
 	this->parser_map_["limit_except"] = &config::Parser::parseLimitExcept;
 
-	this->parser_map_["access_log"] = &config::Parser::parseNoRestrict;
-	this->parser_map_["error_log"] = &config::Parser::parseNoRestrict;
+	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
+	this->parser_map_["error_log"] = &config::Parser::parseErrorLog;
 	this->parser_map_["use"] = &config::Parser::parseUse;
 	this->parser_map_["woker_connections"] = &config::Parser::parseWorkerConnections;
 	this->parser_map_["send_timeout"] = &config::Parser::parseSendTimeout;
 	this->parser_map_["keepalive_timeout"] = &config::Parser::parseKeepaliveTimeout;
+	this->parser_map_["root"] = &config::Parser::parseRoot;
+	this->parser_map_["index"] = &config::Parser::parseIndex;
+	this->parser_map_["autoindex"] = &config::Parser::parseAutoindex;
 }
 
 config::Parser::~Parser() {}
@@ -436,8 +439,55 @@ std::string	config::Parser::toUpper(std::string str) const
 	return str;
 }
 
-bool	config::Parser::parseNoRestrict()
+bool	config::Parser::parseAccessLog()
 {
+	ti++;
+	std::string	path;
+	config::CONTEXT context = this->current_context_.top();
+	config::AccessLog	tmp_acs_log;
+
+	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	{
+		path = this->tokens_[ti].value_;
+		tmp_acs_log.setFile(path);
+
+		if (context == config::CONF_HTTP)
+			this->config_.http.access_log_list.push_back(tmp_acs_log);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
+
+		ti++;
+	}
+
+	ti++;
+	return true;
+}
+
+bool	config::Parser::parseErrorLog()
+{
+	ti++;
+	std::string	path;
+	config::CONTEXT context = this->current_context_.top();
+	config::ErrorLog	tmp_err_log;
+
+	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	{
+		path = this->tokens_[ti].value_;
+		tmp_err_log.setFile(path);
+
+		if (context == config::CONF_MAIN)
+			this->config_.error_log_list.push_back(tmp_err_log);
+		else if (context == config::CONF_HTTP)
+			this->config_.http.error_log_list.push_back(tmp_err_log);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
+	
+		ti++;
+	}
 	return true;
 }
 
@@ -487,7 +537,6 @@ bool	config::Parser::parseUse()
 			return false;
 			break;
 	}
-
 
 	config::CONNECTION_METHOD	method;
 
@@ -679,6 +728,75 @@ bool	config::Parser::parseKeepaliveTimeout()
 	}
 
 	this->config_.http.keepalive_timeout.setTime(ret);
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseRoot()
+{
+	ti++;
+	std::string	path = this->tokens_[ti].value_;
+	config::CONTEXT context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.root.setPath(path);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().root.setPath(path);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().root.setPath(path);
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseIndex()
+{
+	ti++;
+	std::string	file;
+	config::CONTEXT context = this->current_context_.top();
+	config::Index	tmp_index;
+
+	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	{
+		file = this->tokens_[ti].value_;
+		tmp_index.setFile(file);
+
+		if (context == config::CONF_HTTP)
+			this->config_.http.index_list.push_back(tmp_index);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().index_list.push_back(tmp_index);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
+
+		ti++;
+	}
+
+	ti++;
+	return true;
+}
+
+bool	config::Parser::parseAutoindex()
+{
+	ti++;
+	std::string	tmp_switch = this->tokens_[ti].value_;
+
+	if (tmp_switch != "on" && tmp_switch != "off")
+	{
+		std::cerr << "webserv: [emerg] invalid value " << tmp_switch << " in \"autoindex\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	config::CONTEXT context = this->current_context_.top();
+	if (tmp_switch == "on")
+	{
+		if (context == config::CONF_HTTP)
+			this->config_.http.autoindex.setIsAutoindexOn(true);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().autoindex.setIsAutoindexOn(true);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().autoindex.setIsAutoindexOn(true);
+	}
+
 	ti += 2;
 	return true;
 }

@@ -43,11 +43,15 @@ class Parser
 		bool	parseHttpServerEvents();
 		bool	parseLocation();
 		bool	parseLimitExcept();
-		bool	parseNoRestrict();
+		bool	parseAccessLog();
+		bool	parseErrorLog();
 		bool	parseUse();
 		bool	parseWorkerConnections();
 		bool	parseSendTimeout();
 		bool	parseKeepaliveTimeout();
+		bool	parseRoot();
+		bool	parseIndex();
+		bool	parseAutoindex();
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
 		long	parseTime();
