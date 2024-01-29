@@ -243,6 +243,15 @@ assert $conf_path "${err_start_with} no \"events\" section in configuration"
 conf_path="test/conf/conf_files/error/newline.conf"
 assert $conf_path "${err_start_with} no \"events\" section in configuration"
 
+
+# test http
+conf_path="test/conf/conf_files/error/http_duplicate.conf"
+# err_path="in $(readlink -f $conf_path)"
+err_path="in $conf_path"
+assert $conf_path "${err_start_with} \"http\" directive is duplicate ${err_path}:13"
+
+
+
 # test location
 conf_path="test/conf/conf_files/error/location_duplicate1.conf"
 # err_path="in $(readlink -f $conf_path)"
