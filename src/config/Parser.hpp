@@ -18,7 +18,6 @@ class Parser
 	private:
 		Main	config_;
 		const std::vector<Token>	&tokens_;
-		std::set<std::string>	set_directives_; // setされたcontextとdirectiveを管理
 		const std::string	filepath_;
 		size_t	ti; // token index
 		std::stack<CONTEXT>	current_context_;

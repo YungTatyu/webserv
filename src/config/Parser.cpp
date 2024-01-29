@@ -141,9 +141,6 @@ bool	config::Parser::parse()
 		bool (config::Parser::*directive_parser)() = this->parser_map_[current_token.value_];
 		if (!(this->*directive_parser)())
 			return false;
-
-		// parseされたdirectiveを管理
-		this->set_directives_.insert(current_token.value_);
 	}
 
 	// current contextがmainでないとerror
@@ -153,7 +150,7 @@ bool	config::Parser::parse()
 		return false;
 	}
 	// events contextが設定されていないとerror
-	if (this->set_directives_.find(kEVENTS) == this->set_directives_.end())
+	if (this->config_.set_directives.find(kEVENTS) == this->config_.set_directives.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
 		return false;
