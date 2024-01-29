@@ -13,6 +13,7 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
+#include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "Listen.hpp"
 #include "Root.hpp"
@@ -38,6 +39,7 @@ struct Server
 	std::vector<Deny>	deny_list;
 	std::vector<Index>	index_list;
 	std::vector<Listen>	listen_list;
+	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
 	Root	root;
 	std::vector<ServerName>	server_name_list;

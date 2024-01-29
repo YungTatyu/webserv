@@ -14,6 +14,7 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
+#include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
@@ -41,6 +42,7 @@ struct Location
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	std::vector<Index>	index_list;
+	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
 	std::vector<Return>	return_list;
 	Root	root;
