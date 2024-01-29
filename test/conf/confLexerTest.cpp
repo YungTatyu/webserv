@@ -188,8 +188,8 @@ TEST(LexerTokenizeTest, quote_file)
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "root", 12, lexer.getToken(19));
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "/home/student/webserv/html", 12, lexer.getToken(20));
 	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 12, lexer.getToken(21));
-	SAME_TOKEN(config::TK_TYPE::TK_STR, "index index.html;\n\t}\n}", 13, lexer.getToken(22));
-	SAME_TOKEN(config::TK_TYPE::TK_END, "", 13, lexer.getToken(23));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index index.html;\n\t}\n}", 15, lexer.getToken(22));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 15, lexer.getToken(23));
 }
 
 TEST(LexerTokenizeTest, continuous_quote)
