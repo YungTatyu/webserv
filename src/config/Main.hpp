@@ -13,7 +13,7 @@ namespace config
 {
 struct Main
 {
-	std::set<std::string>	set_directives;
+	std::set<std::string>	directives_set;
 	std::vector<ErrorLog>	error_log_list;
 	Events	events;
 	Http	http;

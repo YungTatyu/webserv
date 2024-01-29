@@ -150,7 +150,7 @@ bool	config::Parser::parse()
 		return false;
 	}
 	// events contextが設定されていないとerror
-	if (this->config_.set_directives.find(kEVENTS) == this->config_.set_directives.end())
+	if (this->config_.directives_set.find(kEVENTS) == this->config_.directives_set.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
 		return false;
@@ -236,22 +236,22 @@ const std::set<std::string>	*config::Parser::findDirectivesSet(const CONTEXT con
 	switch (context)
 	{
 	case CONF_MAIN:
-		ret = &(this->config_.set_directives);
+		ret = &(this->config_.directives_set);
 		break;
 
 	case CONF_HTTP:
-		ret = &(this->config_.http.set_directives);
+		ret = &(this->config_.http.directives_set);
 		break;
 
 	case CONF_EVENTS:
-		ret = &(this->config_.events.set_directives);
+		ret = &(this->config_.events.directives_set);
 		break;
 
 	case CONF_HTTP_SERVER:
 		{
 			const std::vector<Server>	&server_list = this->config_.http.server_list;
 			// serverがすでに存在している場合は、一番最後にparseしたserverのset_directiveを取得
-			ret = server_list.size() != 0 ? &(server_list.back().set_directives) : NULL;
+			ret = server_list.size() != 0 ? &(server_list.back().directives_set) : NULL;
 		}
 		break;
 
@@ -260,14 +260,14 @@ const std::set<std::string>	*config::Parser::findDirectivesSet(const CONTEXT con
 			const Server	&current_server = this->config_.http.server_list.back();
 			const std::vector<Location>	&location_list = current_server.location_list;
 			// locationがすでに存在している場合は、一番最後にparseしたlocationのset_directiveを取得
-			ret = location_list.size() != 0 ? &(location_list.back().set_directives) : NULL;
+			ret = location_list.size() != 0 ? &(location_list.back().directives_set) : NULL;
 		}
 		break;
 
 	case CONF_HTTP_LIMIT_EXCEPT:
 		{
 			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
-			ret = &(current_location.set_directives);
+			ret = &(current_location.directives_set);
 		}
 		break;
 	
@@ -378,19 +378,19 @@ bool	config::Parser::parseHttpServerEvents()
 	if (context == kHTTP)
 	{
 		this->current_context_.push(CONF_HTTP);
-		this->config_.set_directives.insert(kHTTP);
+		this->config_.directives_set.insert(kHTTP);
 	}
 	else if (context == kSERVER)
 	{
 		// 新たなserver contextを追加
 		this->config_.http.server_list.push_back(Server());
 		this->current_context_.push(CONF_HTTP_SERVER);
-		this->config_.http.set_directives.insert(kSERVER);
+		this->config_.http.directives_set.insert(kSERVER);
 	}
 	else if (context == kEVENTS)
 	{
 		this->current_context_.push(CONF_EVENTS);
-		this->config_.set_directives.insert(kEVENTS);
+		this->config_.directives_set.insert(kEVENTS);
 	}
 	
 	++ti; // 次のtokenに進める
@@ -419,7 +419,7 @@ bool	config::Parser::parseLocation()
 	this->current_context_.push(CONF_HTTP_LOCATION);
 
 	// serverにlocationをset
-	this->config_.http.server_list.back().set_directives.insert(kLOCATION);
+	this->config_.http.server_list.back().directives_set.insert(kLOCATION);
 
 	ti += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
@@ -447,7 +447,7 @@ bool	config::Parser::parseLimitExcept()
 	this->current_context_.push(CONF_HTTP_LIMIT_EXCEPT);
 
 	// locationにlimit_exceptをset
-	this->config_.http.server_list.back().location_list.back().set_directives.insert(kLIMIT_EXCEPT);
+	this->config_.http.server_list.back().location_list.back().directives_set.insert(kLIMIT_EXCEPT);
 
 	++ti;
 	return true;
