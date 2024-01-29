@@ -69,17 +69,21 @@ assert $conf_path "${err_start_with} unexpected \";\" ${err_path}:3"
 
 # test unknown directive
 conf_path="test/conf/conf_files/error/unknown_directive1.conf"
-err_path="in $(readlink -f $conf_path)"
-# err_path="in $conf_path"
+# err_path="in $(readlink -f $conf_path)"
+err_path="in $conf_path"
 assert $conf_path "${err_start_with} unknown directive \";\" ${err_path}:3"
 
+conf_path="test/conf/conf_files/error/unknown_directive2.conf"
+# err_path="in $(readlink -f $conf_path)"
+err_path="in $conf_path"
+assert $conf_path "${err_start_with} unknown directive \"\n\n\nindex\" ${err_path}:4"
 
 
 
 # test invalid directive in context levle
 conf_path="test/conf/conf_files/error/invalid_directive1.conf"
-err_path="in $(readlink -f $conf_path)"
-# err_path="in $conf_path"
+# err_path="in $(readlink -f $conf_path)"
+err_path="in $conf_path"
 assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:1"
 
 
@@ -162,7 +166,7 @@ assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed h
 conf_path="test/conf/conf_files/error/invalid_directive_limit_except2.conf"
 # err_path="in $(readlink -f $conf_path)"
 err_path="in $conf_path"
-assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:3"
+assert $conf_path "${err_start_with} \"limit_except\" directive is not allowed here ${err_path}:9"
 
 conf_path="test/conf/conf_files/error/invalid_directive_limit_except3.conf"
 # err_path="in $(readlink -f $conf_path)"
@@ -220,7 +224,7 @@ assert $conf_path "${err_start_with} invalid number of arguments in \"server\" d
 conf_path="test/conf/conf_files/error/invalid_args_location1.conf"
 # err_path="in $(readlink -f $conf_path)"
 err_path="in $conf_path"
-assert $conf_path "${err_start_with} invalid number of arguments in \"location\" directive ${err_path}:16"
+assert $conf_path "${err_start_with} invalid number of arguments in \"location\" directive ${err_path}:4"
 
 conf_path="test/conf/conf_files/error/invalid_args_limit_except1.conf"
 # err_path="in $(readlink -f $conf_path)"
@@ -256,7 +260,7 @@ assert $conf_path "${err_start_with} duplicate location \"path\" ${err_path}:8"
 conf_path="test/conf/conf_files/error/limit_except_duplicate1.conf"
 # err_path="in $(readlink -f $conf_path)"
 err_path="in $conf_path"
-assert $conf_path "${err_start_with} \"limit_except\" directive is duplicate ${err_path}:16"
+assert $conf_path "${err_start_with} \"limit_except\" directive is duplicate ${err_path}:10"
 
 conf_path="test/conf/conf_files/error/limit_except_invalid_method1.conf"
 # err_path="in $(readlink -f $conf_path)"
