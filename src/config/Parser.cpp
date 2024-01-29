@@ -34,6 +34,10 @@ const unsigned int	config::UseridPath::kType_;
 const unsigned int	config::UseridService::kType_;
 const unsigned int	config::WorkerConnections::kType_;
 
+const static	std::string kHTTP= "http";
+const static	std::string kSERVER = "server";
+const static	std::string kEVENTS = "events";
+
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0)
 {
@@ -42,9 +46,9 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 
 	// context
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
-	this->all_directives_.insert(std::make_pair("events", config::Events::type));
-	this->all_directives_.insert(std::make_pair("http", config::Http::type));
-	this->all_directives_.insert(std::make_pair("server", config::Server::type));
+	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
+	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
+	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
 	this->all_directives_.insert(std::make_pair("location", config::Location::type));
 	this->all_directives_.insert(std::make_pair("limit_except", config::LimitExcept::type));
 
@@ -74,9 +78,9 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert(std::make_pair("worker_connections", config::WorkerConnections::kType_));
 
 	// parser
-	this->parser_map_["events"] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["http"] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["server"] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_["location"] = &config::Parser::parseLocation;
 	this->parser_map_["limit_except"] = &config::Parser::parseLimitExcept;
 
@@ -147,7 +151,7 @@ bool	config::Parser::parse()
 		return false;
 	}
 	// events contextが設定されていないとerror
-	if (this->set_directives_.find("events") == this->set_directives_.end())
+	if (this->set_directives_.find(kEVENTS) == this->set_directives_.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
 		return false;
@@ -318,9 +322,9 @@ bool	config::Parser::isContext(const config::Token &token) const
 {
 	return token.type_ == config::TK_STR &&
 	(
-		token.value_ == "events"
-		|| token.value_ == "http"
-		|| token.value_ == "server"
+		token.value_ == kEVENTS
+		|| token.value_ == kHTTP
+		|| token.value_ == kSERVER
 		|| token.value_ == "location"
 		|| token.value_ == "limit_except"
 	);
@@ -371,15 +375,15 @@ bool	config::Parser::parseHttpServerEvents()
 
 	++ti; // tokenをcontextの引数に進める
 	// 新たなserver contextを追加
-	if (context == "server")
+	if (context == kSERVER)
 		this->config_.http.server_list.push_back(Server());
 
 	// current contextをupdate
-	if (context == "http")
+	if (context == kHTTP)
 		this->current_context_.push(CONF_HTTP);
-	else if (context == "server")
+	else if (context == kSERVER)
 		this->current_context_.push(CONF_HTTP_SERVER);
-	else if (context == "events")
+	else if (context == kEVENTS)
 		this->current_context_.push(CONF_EVENTS);
 	
 	++ti; // 次のtokenに進める
