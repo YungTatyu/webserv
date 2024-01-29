@@ -50,6 +50,7 @@ class Parser
 		bool	parseWorkerConnections();
 		bool	parseSendTimeout();
 		bool	parseKeepaliveTimeout();
+		bool	parseClientMaxBodySize();
 		bool	parseRoot();
 		bool	parseIndex();
 		bool	parseAutoindex();

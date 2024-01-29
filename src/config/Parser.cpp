@@ -92,6 +92,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["woker_connections"] = &config::Parser::parseWorkerConnections;
 	this->parser_map_["send_timeout"] = &config::Parser::parseSendTimeout;
 	this->parser_map_["keepalive_timeout"] = &config::Parser::parseKeepaliveTimeout;
+	this->parser_map_["client_max_body_size"] = &config::Parser::parseClientMaxBodySize;
 	this->parser_map_["root"] = &config::Parser::parseRoot;
 	this->parser_map_["index"] = &config::Parser::parseIndex;
 	this->parser_map_["autoindex"] = &config::Parser::parseAutoindex;
@@ -785,6 +786,22 @@ bool	config::Parser::parseRoot()
 		this->config_.http.server_list.back().location_list.back().root.setPath(path);
 
 	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseClientMaxBodySize()
+{
+	ti++;
+
+	long ret = parseTime();
+	if (ret == -1)
+	{
+		std::cerr << "webserv: [emerg] \"client_max_body_size\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	this->config_.http.client_max_body_size.setSize(ret);
+
 	return true;
 }
 
