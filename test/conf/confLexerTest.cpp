@@ -149,6 +149,16 @@ TEST(LexerTokenizeTest, comment_skip)
 	SAME_TOKEN(config::TK_TYPE::TK_END, "", 15, lexer.getToken(24));
 }
 
+TEST(LexerTokenizeTest, only_comment)
+{
+	std::string filePath= "test/conf/confFile/only_comment.conf";
+	config::Lexer	lexer(filePath);
+
+	lexer.tokenize();
+
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 82, lexer.getToken(0));
+}
+
 TEST(LexerTokenizeTest, quote_file)
 {
 	std::string filePath= "test/conf/confFile/quote.conf";
