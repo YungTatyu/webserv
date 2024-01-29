@@ -36,6 +36,10 @@ const unsigned int	config::UseridPath::kType_;
 const unsigned int	config::UseridService::kType_;
 const unsigned int	config::WorkerConnections::kType_;
 
+const static	std::string kHTTP = "http";
+const static	std::string kSERVER = "server";
+const static	std::string kEVENTS = "events";
+
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0)
 {
@@ -44,9 +48,9 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 
 	// context
 	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
-	this->all_directives_.insert(std::make_pair("events", config::Events::type));
-	this->all_directives_.insert(std::make_pair("http", config::Http::type));
-	this->all_directives_.insert(std::make_pair("server", config::Server::type));
+	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
+	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
+	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
 	this->all_directives_.insert(std::make_pair("location", config::Location::type));
 	this->all_directives_.insert(std::make_pair("limit_except", config::LimitExcept::type));
 
@@ -76,9 +80,9 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert(std::make_pair("worker_connections", config::WorkerConnections::kType_));
 
 	// parser
-	this->parser_map_["events"] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["http"] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["server"] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
+	this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_["location"] = &config::Parser::parseLocation;
 	this->parser_map_["limit_except"] = &config::Parser::parseLimitExcept;
 
@@ -97,8 +101,8 @@ config::Parser::~Parser() {}
 
 /**
  * parseの流れ
- * 1. 存在するdirectiveか
- * 2. argsが想定されていないtokenではないか："{", "}"
+ * 1. directiveが終了しているか: ";", "{"
+ * 2. 存在するdirectiveか
  * 3. contextが正しいか
  * 4. argsの数が正しいか
  * 5. 重複を確認
@@ -111,11 +115,12 @@ bool	config::Parser::parse()
 		const Token &current_token = this->tokens_[ti];
 		if (current_token.type_ == TK_END)
 			break;
+
 		// "}" tokenの場合、tokenを進める
 		if (current_token.type_ == TK_CLOSE_CURLY_BRACE)
 		{
 			// main contextでは "}" はエラー
-			if (this->current_context_.top() & CONF_MAIN)
+			if (this->current_context_.top() == CONF_MAIN)
 			{
 				printError(std::string("unexpected \"") + current_token.value_ + "\"", current_token);
 				return false;
@@ -124,24 +129,31 @@ bool	config::Parser::parse()
 			++ti;
 			continue;
 		}
-		// TK_STRでなければエラー
-		if (!expectTokenType(TK_STR, current_token))
+
+		// directiveが終了しているか
+		if (!expectTerminatingToken())
 			return false;
+		
 		// 存在するcontextまたはdirectiveか
 		if (!isDirective(current_token) && !isContext(current_token))
 		{
 			printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
 			return false;
 		}
+
 		// directiveのtypeを確認
 		if (!parseType(current_token))
 			return false;
+
 		// directiveのargsの値を確認
-		if (!this->parser_map_[current_token.value_])
+		bool (config::Parser::*directive_parser)() = this->parser_map_[current_token.value_];
+		if (!(this->*directive_parser)())
 			return false;
+
 		// parseされたdirectiveを管理
 		this->set_directives_.insert(current_token.value_);
 	}
+
 	// current contextがmainでないとerror
 	if (this->current_context_.top() != CONF_MAIN)
 	{
@@ -149,7 +161,7 @@ bool	config::Parser::parse()
 		return false;
 	}
 	// events contextが設定されていないとerror
-	if (this->set_directives_.find("events") == this->set_directives_.end())
+	if (this->set_directives_.find(kEVENTS) == this->set_directives_.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
 		return false;
@@ -174,10 +186,7 @@ bool	config::Parser::parseType(const Token &token)
 
 	// argsの数が正しいか
 	const TK_TYPE terminating_token = isContext(token) ? TK_OPEN_CURLY_BRACE : TK_SEMICOLON;
-	const ssize_t	args_num = countArgs(terminating_token);
-	if (args_num == -1)
-		return false;
-
+	const size_t	args_num = countArgs(terminating_token);
 	bool	ret;
 	switch (args_num)
 	{
@@ -188,7 +197,7 @@ bool	config::Parser::parseType(const Token &token)
 		ret = expectArgsNum(CONF_TAKE1|CONF_1MORE, this->all_directives_[directive_name]);
 		break;
 	case 2:
-		ret = expectArgsNum(CONF_TAKE2|CONF_2MORE, this->all_directives_[directive_name]);
+		ret = expectArgsNum(CONF_TAKE2|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
 		break;
 	case 3:
 		ret = expectArgsNum(CONF_TAKE3|CONF_1MORE|CONF_2MORE, this->all_directives_[directive_name]);
@@ -296,15 +305,36 @@ bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int
 }
 
 /**
+ * directiveが ";"もしくは"{"で区切られているか確認
+*/
+bool	config::Parser::expectTerminatingToken() const
+{
+	size_t	i = this->ti + 1;
+
+	while (this->tokens_[i].type_ != TK_SEMICOLON && this->tokens_[i].type_ != TK_OPEN_CURLY_BRACE)
+	{
+		if (this->tokens_[i].type_ == TK_END)
+		{
+			printError("unexpected end of file, expecting \";\" or \"}\"", this->tokens_[i]);
+			return false;
+		}
+		if (!expectTokenType(TK_STR, this->tokens_[i]))
+			return false;
+		++i;
+	}
+	return true;
+}
+
+/**
  * main contextはconfで設定されないため、含めない
 */
 bool	config::Parser::isContext(const config::Token &token) const
 {
 	return token.type_ == config::TK_STR &&
 	(
-		token.value_ == "events"
-		|| token.value_ == "http"
-		|| token.value_ == "server"
+		token.value_ == kEVENTS
+		|| token.value_ == kHTTP
+		|| token.value_ == kSERVER
 		|| token.value_ == "location"
 		|| token.value_ == "limit_except"
 	);
@@ -327,23 +357,13 @@ bool	config::Parser::isDirective(const config::Token &token) const
  * context   {
  * 
 */
-ssize_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
+size_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 {
 	size_t	i = this->ti + 1;
-	ssize_t	args_num = 0;
+	size_t	args_num = 0;
 
 	while (this->tokens_[i].type_ != terminating_token)
 	{
-		if (this->tokens_[i].type_ == TK_END)
-		{
-			printError("unexpected end of file, expecting \";\" or \"}\"", this->tokens_[i]);
-			return -1;
-		}
-		if (!expectTokenType(TK_STR, this->tokens_[i]))
-		{
-			printError(std::string("unexpected \"") + this->tokens_[i].value_ + "\"", this->tokens_[i]);
-			return -1;
-		}
 		++i;
 		++args_num;
 	}
@@ -361,10 +381,21 @@ void	config::Parser::printError(const std::string &err_msg, const Token &token) 
 bool	config::Parser::parseHttpServerEvents()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
+	const std::string	&context = tokens[ti].value_;
+
 	++ti; // tokenをcontextの引数に進める
 	// 新たなserver contextを追加
-	if (tokens[ti].value_ == "server")
+	if (context == kSERVER)
 		this->config_.http.server_list.push_back(Server());
+
+	// current contextをupdate
+	if (context == kHTTP)
+		this->current_context_.push(CONF_HTTP);
+	else if (context == kSERVER)
+		this->current_context_.push(CONF_HTTP_SERVER);
+	else if (context == kEVENTS)
+		this->current_context_.push(CONF_EVENTS);
+	
 	++ti; // 次のtokenに進める
 	return true;
 }
@@ -386,6 +417,10 @@ bool	config::Parser::parseLocation()
 		}
 	}
 	list.push_back(Location(uri));
+
+	// current contextをupdate
+	this->current_context_.push(CONF_HTTP_LOCATION);
+
 	ti += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
 }
@@ -411,6 +446,10 @@ bool	config::Parser::parseLimitExcept()
 		}
 		++ti;
 	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
+
+	// current contextをupdate
+	this->current_context_.push(CONF_EVENTS);	
+
 	++ti;
 	return true;
 }
@@ -434,7 +473,7 @@ std::string	config::Parser::toUpper(std::string str) const
 {
 	for (std::string::iterator it = str.begin(); it != str.end(); ++it)
 	{
-		std::toupper(*it);
+		*it = std::toupper(*it);
 	}
 	return str;
 }
