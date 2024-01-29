@@ -2,7 +2,8 @@
 
 /* ServerConfigクラスの実装 */
 void ServerConfig::loadConfiguration()
-{ /* ConfファイルをパースしてデータをServConfigクラスにセットする */
+{
+	/* ConfファイルをパースしてデータをServConfigクラスにセットする */
 	this->servPort_ = 3001;
 	this->listenQ_ = 8;
 }

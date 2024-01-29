@@ -15,7 +15,7 @@ CONF_DIR			= conf
 # ソースファイルの拡張子
 SRC_EXT = cpp
 # ソースファイルの検索パス
-VPATH = $(SRCS_DIR) $(SRCS_DIR)/config $(SRCS_DIR)/config/parser
+VPATH = $(SRCS_DIR) $(SRCS_DIR)/config $(SRCS_DIR)/config/parser $(SRCS_DIR)/server
 
 # ソースファイルの取得
 SRCS = $(wildcard $(addsuffix /*.$(SRC_EXT), $(VPATH)))

@@ -8,23 +8,27 @@
 # include <vector>
 # include <iostream>
 # include <cstdlib>
+# include <poll.h>
+# include <fcntl.h>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
+# include "EventManager.hpp"
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
 {
 	public:
 		void setupSocket( ServerConfig *serverConfig );
-		int receiveRequest( ConnectionManager& connManager );
-		void sendResponse( ConnectionManager& connManager );
-		void acceptConnection( ConnectionManager& connManager );
-		void closeConnection( ConnectionManager& connManager );
+		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
+		int sendResponse( ConnectionManager& connManager, const int cli_sock );
+		void acceptConnection( ConnectionManager& connManager, EventManager& eventManager );
+		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		int getListenfd();
 
 	private:
 		int listenfd_; // リスニングソケットを管理
+		static const size_t bufferSize_ = 1024;
 };
 
 #endif
