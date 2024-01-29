@@ -9,6 +9,8 @@
 #include <sys/stat.h>
 #include "Parser.hpp"
 #include <limits>
+#include <sys/param.h>
+#include <stdlib.h>
 
 const char	*config::Root::kDefaultPath_ = "html";
 const char	*config::UseridPath::kDefaultPath_ = "/";
@@ -24,34 +26,43 @@ const char	*config::Index::kDefaultFile_ = "index.html";
 
 bool	config::init_config(const std::string& file_path)
 {
-	// file_path が存在するかどうか
-	if (access(file_path.c_str(), F_OK))
+	char	absolute_path[MAXPATHLEN];
+
+	// 絶対pathを取得
+	if (realpath(file_path.c_str(), absolute_path) == NULL)
 	{
-		std::cerr << "webserv: [emerg] access() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		return false;
+	}
+
+	// file_path が存在するかどうか
+	if (access(absolute_path, F_OK))
+	{
+		std::cerr << "webserv: [emerg] access() \"" << absolute_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		return false;
 	}
 
 	// file_path の読み取り権限があるかどうか？ 
-	if (access(file_path.c_str(), R_OK))
+	if (access(absolute_path, R_OK))
 	{
-		std::cerr << "webserv: [emerg] access() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")"<< std::endl;
+		std::cerr << "webserv: [emerg] access() \"" << absolute_path << "\" failed (" << errno << ": " << strerror(errno) << ")"<< std::endl;
 		return false;
 	}
 
 	// file_path がファイルかどうか確認する。
 	struct stat fileInfo;
 
-	if (stat(file_path.c_str(), &fileInfo) == 0 && !S_ISREG(fileInfo.st_mode))
+	if (stat(absolute_path, &fileInfo) == 0 && !S_ISREG(fileInfo.st_mode))
 	{
-		std::cerr << "webserv: [crit] \"" << file_path << "\" is a directory" << std::endl;
+		std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
 		return false;
 	}
 
-	config::Lexer lexer(file_path);
+	config::Lexer lexer(absolute_path);
 	lexer.tokenize();
 	// std::cout << "websev: [debug] tokenize() succeeded" << std::endl;
 	const std::vector<Token>	&tokens = lexer.getTokens();
-	config::Parser	parser(tokens, file_path);
+	config::Parser	parser(tokens, absolute_path);
 	if (!parser.parse())
 		return false;
 
