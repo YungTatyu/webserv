@@ -60,7 +60,7 @@ conf_path="test/conf/conf_files/error/unexpect_close_curly_brace2.conf"
 err_path="in $conf_path"
 assert $conf_path "${err_start_with} unexpected \"}\" ${err_path}:6"
 
-conf_path="test/conf/conf_files/error/unecpect_semicolon1.conf"
+conf_path="test/conf/conf_files/error/unexpect_semicolon1.conf"
 # err_path="in $(readlink -f $conf_path)"
 err_path="in $conf_path"
 assert $conf_path "${err_start_with} unexpected \";\" ${err_path}:3"
@@ -68,19 +68,21 @@ assert $conf_path "${err_start_with} unexpected \";\" ${err_path}:3"
 
 
 # test unknown directive
-# conf_path="test/conf/conf_files/error/unknown_directive1.conf"
+conf_path="test/conf/conf_files/error/unknown_directive1.conf"
 err_path="in $(readlink -f $conf_path)"
 # err_path="in $conf_path"
-# assert $conf_path "${err_start_with} unknown directive \";\" ${err_path}:3"
+assert $conf_path "${err_start_with} unknown directive \";\" ${err_path}:3"
 
 
 
 
 # test invalid directive in context levle
-# conf_path="test/conf/conf_files/error/invalid_directive1.conf"
+conf_path="test/conf/conf_files/error/invalid_directive1.conf"
 err_path="in $(readlink -f $conf_path)"
 # err_path="in $conf_path"
-# assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:1"
+assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:1"
+
+
 
 conf_path="test/conf/conf_files/error/invalid_directive_server1.conf"
 # err_path="in $(readlink -f $conf_path)"

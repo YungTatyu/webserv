@@ -51,7 +51,6 @@ bool	config::init_config(const std::string& file_path)
 	lexer.tokenize();
 	// std::cout << "websev: [debug] tokenize() succeeded" << std::endl;
 	const std::vector<Token>	&tokens = lexer.getTokens();
-
 	config::Parser	parser(tokens, file_path);
 	if (!parser.parse())
 		return false;
