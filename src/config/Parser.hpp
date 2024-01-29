@@ -28,7 +28,7 @@ class Parser
 		bool	expectTerminatingToken() const;
 		bool	isContext(const Token &token) const;
 		bool	isDirective(const Token &token) const;
-		const std::set<std::string>	*searchDirectivesSet(const CONTEXT context) const;
+		const std::set<std::string>	*findDirectivesSet(const CONTEXT context) const;
 		void	printError(const std::string &err_msg, const Token &token) const;
 		size_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();

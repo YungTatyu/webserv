@@ -217,7 +217,7 @@ bool	config::Parser::parseType(const Token &token)
 	}
 
 	// 重複を確認
-	const std::set<std::string>	*directives_set = searchDirectivesSet(this->current_context_.top());
+	const std::set<std::string>	*directives_set = findDirectivesSet(this->current_context_.top());
 	// directiveが重複不可かつ重複していたらエラー
 	if (directives_set != NULL &&
 		(this->all_directives_[directive_name] & CONF_UNIQUE) &&
@@ -230,7 +230,7 @@ bool	config::Parser::parseType(const Token &token)
 	return true;
 }
 
-const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT context) const
+const std::set<std::string>	*config::Parser::findDirectivesSet(const CONTEXT context) const
 {
 	const std::set<std::string>	*ret = NULL;
 	switch (context)
@@ -373,9 +373,6 @@ bool	config::Parser::parseHttpServerEvents()
 	const std::string	&context = tokens[ti].value_;
 
 	++ti; // tokenをcontextの引数に進める
-	// 新たなserver contextを追加
-	if (context == kSERVER)
-		this->config_.http.server_list.push_back(Server());
 
 	// current contextをupdate
 	if (context == kHTTP)
@@ -385,6 +382,8 @@ bool	config::Parser::parseHttpServerEvents()
 	}
 	else if (context == kSERVER)
 	{
+		// 新たなserver contextを追加
+		this->config_.http.server_list.push_back(Server());
 		this->current_context_.push(CONF_HTTP_SERVER);
 		this->config_.http.set_directives.insert(kSERVER);
 	}
@@ -429,7 +428,7 @@ bool	config::Parser::parseLocation()
 bool	config::Parser::parseLimitExcept()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
-	std::vector<REQUEST_METHOD>	&list = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
+	std::set<REQUEST_METHOD>	&excepted_methods = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
 	++ti; // tokenをcontextの引数に進める
 	do
 	{
@@ -440,16 +439,12 @@ bool	config::Parser::parseLimitExcept()
 			return false;
 		}
 		const REQUEST_METHOD	method = convertToRequestMethod(upper_case_method);
-		// すでに追加されているmethodならば、新たに追加しない
-		if (std::find(list.begin(), list.end(), method) == list.end())
-		{
-			list.push_back(REQUEST_METHOD(method));
-		}
+		excepted_methods.insert(method);
 		++ti;
 	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
 
 	// current contextをupdate
-	this->current_context_.push(CONF_EVENTS);
+	this->current_context_.push(CONF_HTTP_LIMIT_EXCEPT);
 
 	// locationにlimit_exceptをset
 	this->config_.http.server_list.back().location_list.back().set_directives.insert(kLIMIT_EXCEPT);
