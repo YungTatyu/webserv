@@ -35,8 +35,10 @@ const unsigned int	config::UseridService::kType_;
 const unsigned int	config::WorkerConnections::kType_;
 
 const static	std::string kHTTP = "http";
-const static	std::string kSERVER = "server";
 const static	std::string kEVENTS = "events";
+const static	std::string kSERVER = "server";
+const static	std::string kLOCATION = "location";
+const static	std::string kLIMIT_EXCEPT = "limit_except";
 
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0)
@@ -49,8 +51,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
 	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
 	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
-	this->all_directives_.insert(std::make_pair("location", config::Location::type));
-	this->all_directives_.insert(std::make_pair("limit_except", config::LimitExcept::type));
+	this->all_directives_.insert(std::make_pair(kLOCATION, config::Location::type));
+	this->all_directives_.insert(std::make_pair(kLIMIT_EXCEPT, config::LimitExcept::type));
 
 	// directive
 	this->all_directives_.insert(std::make_pair("access_log", config::AccessLog::kType_));
@@ -81,8 +83,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["location"] = &config::Parser::parseLocation;
-	this->parser_map_["limit_except"] = &config::Parser::parseLimitExcept;
+	this->parser_map_[kLOCATION] = &config::Parser::parseLocation;
+	this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
 
 	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
 }
@@ -268,7 +270,7 @@ const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT c
 	case CONF_HTTP_LIMIT_EXCEPT:
 		{
 			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
-			ret = &(current_location.limit_except.set_directives);
+			ret = &(current_location.set_directives);
 		}
 		break;
 	
@@ -325,8 +327,8 @@ bool	config::Parser::isContext(const config::Token &token) const
 		token.value_ == kEVENTS
 		|| token.value_ == kHTTP
 		|| token.value_ == kSERVER
-		|| token.value_ == "location"
-		|| token.value_ == "limit_except"
+		|| token.value_ == kLOCATION
+		|| token.value_ == kLIMIT_EXCEPT
 	);
 }
 
@@ -380,11 +382,20 @@ bool	config::Parser::parseHttpServerEvents()
 
 	// current contextをupdate
 	if (context == kHTTP)
+	{
 		this->current_context_.push(CONF_HTTP);
+		this->config_.set_directives.insert(kHTTP);
+	}
 	else if (context == kSERVER)
+	{
 		this->current_context_.push(CONF_HTTP_SERVER);
+		this->config_.http.set_directives.insert(kSERVER);
+	}
 	else if (context == kEVENTS)
+	{
 		this->current_context_.push(CONF_EVENTS);
+		this->config_.set_directives.insert(kEVENTS);
+	}
 	
 	++ti; // 次のtokenに進める
 	return true;
@@ -410,6 +421,9 @@ bool	config::Parser::parseLocation()
 
 	// current contextをupdate
 	this->current_context_.push(CONF_HTTP_LOCATION);
+
+	// serverにlocationをset
+	this->config_.http.server_list.back().set_directives.insert(kLOCATION);
 
 	ti += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
@@ -438,7 +452,10 @@ bool	config::Parser::parseLimitExcept()
 	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
 
 	// current contextをupdate
-	this->current_context_.push(CONF_EVENTS);	
+	this->current_context_.push(CONF_EVENTS);
+
+	// locationにlimit_exceptをset
+	this->config_.http.server_list.back().location_list.back().set_directives.insert(kLIMIT_EXCEPT);
 
 	++ti;
 	return true;
