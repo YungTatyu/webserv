@@ -100,6 +100,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["allow"] = &config::Parser::parseAllow;
 	this->parser_map_["deny"] = &config::Parser::parseDeny;
 	this->parser_map_["listen"] = &config::Parser::parseListen;
+	this->parser_map_["alias"] = &config::Parser::parseAlias;
 	this->parser_map_["userid"] = &config::Parser::parseUserid;
 	this->parser_map_["userid_domain"] = &config::Parser::parseUseridDomain;
 	this->parser_map_["userid_expires"] = &config::Parser::parseUseridExpires;
@@ -1253,6 +1254,17 @@ bool	config::Parser::parseListen()
 
 		ti++;
 	}
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseAlias()
+{
+	ti++;
+	std::string	path = this->tokens_[ti].value_;
+
+	this->config_.http.server_list.back().location_list.back().alias.setPath(path);
 
 	ti += 2;
 	return true;

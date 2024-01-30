@@ -59,6 +59,7 @@ class Parser
 		bool	parseAllow();
 		bool	parseDeny();
 		bool	parseListen();
+		bool	parseAlias();
 		bool	parseUserid();
 		bool	parseUseridDomain();
 		bool	parseUseridExpires();
