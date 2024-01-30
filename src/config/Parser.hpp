@@ -58,6 +58,7 @@ class Parser
 		long	retErrorPageOptNumIfValid();
 		bool	parseAllow();
 		bool	parseDeny();
+		bool	parseListen();
 		bool	isIPv4();
 		bool	isIPv6();
 		long	retCodeIfValid();
