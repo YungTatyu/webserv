@@ -100,6 +100,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["allow"] = &config::Parser::parseAllow;
 	this->parser_map_["deny"] = &config::Parser::parseDeny;
 	this->parser_map_["listen"] = &config::Parser::parseListen;
+	this->parser_map_["server_name"] = &config::Parser::parseServerName;
 	this->parser_map_["alias"] = &config::Parser::parseAlias;
 	this->parser_map_["return"] = &config::Parser::parseReturn;
 	this->parser_map_["userid"] = &config::Parser::parseUserid;
@@ -1257,6 +1258,24 @@ bool	config::Parser::parseListen()
 	}
 
 	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseServerName()
+{
+	ti++;
+	std::string	name;
+	config::ServerName	tmp_server_name;
+
+	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	{
+		tmp_server_name.setName(this->tokens_[ti].value_);
+
+		this->config_.http.server_list.back().server_name_list.push_back(tmp_server_name);
+		ti++;
+	}
+
+	ti++;
 	return true;
 }
 
