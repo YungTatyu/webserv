@@ -964,14 +964,11 @@ bool	config::Parser::parseErrorPage()
 	return true;
 }
 
-bool	config::Parser::isIPv4()
+bool	config::Parser::isIPv4(const std::string& ipv4)
 {
-	std::string	ipv4 = this->tokens_[ti].value_;
-
 	// 1.文字列が空でないかを確認
 	if (ipv4.empty())
 	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
 	}
 
@@ -992,7 +989,6 @@ bool	config::Parser::isIPv4()
 		{
 			if (!std::isdigit(field[i]))
 			{
-				std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 		}
@@ -1004,7 +1000,6 @@ bool	config::Parser::isIPv4()
 		// フィールドの数が正しいかを確認
 	if (fields.size() != 4)
 	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
 	}
 
@@ -1016,7 +1011,6 @@ bool	config::Parser::isIPv4()
 		std::istringstream(field) >> std::hex >> value;
 		if (255 < value)
 		{
-			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -1029,7 +1023,6 @@ bool	config::Parser::isIPv4()
 
 		if (subnet_mask < 0 || 32 < subnet_mask)
 		{
-			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -1038,14 +1031,11 @@ bool	config::Parser::isIPv4()
 	return true;
 }
 
-bool	config::Parser::isIPv6()
+bool	config::Parser::isIPv6(const std::string& ipv6)
 {
-	std::string	ipv6 = this->tokens_[ti].value_;
-
 	// 1.文字列が空でないかを確認
 	if (ipv6.empty())
 	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
 	}
 
@@ -1066,7 +1056,6 @@ bool	config::Parser::isIPv6()
 		{
 			if (!std::isxdigit(field[i]))
 			{
-				std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 		}
@@ -1078,7 +1067,6 @@ bool	config::Parser::isIPv6()
 		// フィールドの数が正しいかを確認
 	if (fields.size() != 8)
 	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
 	}
 
@@ -1090,7 +1078,6 @@ bool	config::Parser::isIPv6()
 		std::istringstream(field) >> std::hex >> value;
 		if (value > 0xFFFF)
 		{
-			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -1103,7 +1090,6 @@ bool	config::Parser::isIPv6()
 
 		if (subnet_mask < 0 || 128 < subnet_mask)
 		{
-			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -1115,9 +1101,13 @@ bool	config::Parser::isIPv6()
 bool	config::Parser::parseAllow()
 {
 	ti++;
+	std::string	address = this->tokens_[ti].value_;
 
-	if (!isIPv4() && !isIPv6())
+	if (!isIPv4(address) && !isIPv6(address))
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
+	}
 
 	config::Allow	tmp_allow;
 	tmp_allow.setAddress(this->tokens_[ti].value_);
@@ -1139,9 +1129,13 @@ bool	config::Parser::parseAllow()
 bool	config::Parser::parseDeny()
 {
 	ti++;
+	std::string	address = this->tokens_[ti].value_;
 
-	if (!isIPv4() && !isIPv6())
+	if (!isIPv4(address) && !isIPv6(address))
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
+	}
 
 	config::Deny	tmp_deny;
 	tmp_deny.setAddress(this->tokens_[ti].value_);
@@ -1163,100 +1157,106 @@ bool	config::Parser::parseDeny()
 bool	config::Parser::parseListen()
 {
 	ti++;
-	config::Listen				listen;
+	config::Listen				tmp_listen;
 	std::istringstream			iss;
 	char						remaining_char;
 	long						port;
 	std::string					token;
 	std::vector<std::string>	tokens;
 
-	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	// 1. もし空文字列ならエラー
+	if (this->tokens_[ti].value_.empty())
 	{
-		// 1. ip addressとportに分ける
-		iss.clear();
-		while (getline(iss, token, ':'))
-		{
-			tokens.push_back(token);
-		}
+			std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
 
-		// 2. 2つ以上に分かれてしまっていたらｖエラー
-		if (tokens.size() > 2)
+	// 2. ip addressとportに分ける
+	while (getline(iss, token, ':'))
+	{
+		tokens.push_back(token);
+	}
+
+	// 3. 2つ以上に分かれてしまっていたらエラー
+	if (tokens.size() > 2)
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	// 4. ip address と portがある場合
+	if (tokens.size() == 2)
+	{
+		// ip addressがあれば値を確認する。
+		// なければデフォルト値を入れる。
+		if (tokens[0].empty())
 		{
-			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] no host in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
-
-		// 3. ip address と portがある場合
-		if (tokens.size() == 2)
+		else if (!isIPv4(tokens[0]) && !isIPv6(tokens[0]))
 		{
-			// ip addressがあれば値を確認する。
-			// なければデフォルト値を入れる。
-			if (!isIPv4() && !isIPv6())
-			{
-				std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
-				return false;
-			}
-			else
-				tokens[0] = "127.0.0.1";
-			listen.setAddress(tokens[0]);
+			std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+		tmp_listen.setAddress(tokens[0]);
 
-			// port番号があれば値を確認しする。
-			// なければデフォルト値を入れる。
-			if (!tokens[1].empty())
+		// port番号があれば値を確認しする。
+		// なければデフォルト値を入れる。
+		if (tokens[1].empty())
+		{
+			std::cerr << "webserv: [emerg] invalid port in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+		else
+		{
+			iss.str(tokens[1].c_str());
+			if (iss >> port)
 			{
-				iss.clear();
-				iss.str(tokens[1].c_str());
-				if (iss >> port)
-				{
-					if (iss >> remaining_char)
-					{
-						std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
-						return false;
-					}
-					if (port < 0 || port < 65535)
-					{
-						std::cerr << "webserv: [emerg] invalid port in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
-						return false;
-					}
-				}
-				else
+				if (iss >> remaining_char)
 				{
 					std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 					return false;
 				}
-			}
-			else //デフォルト値
-				port = 80;
-			listen.setPort(port);
-		}
-		else // 4. ip addressかportのどちらかしかない場合
-		{
-			iss.clear();
-			iss.str(tokens[0].c_str());
-			// ip addressかどうか確認する
-			if (isIPv4() || isIPv6())
-			{
-				listen.setAddress(tokens[0]);
-				ti++;
-				continue ;
-			}
-			else if (iss >> port)
-			{
-				if (!(iss >> remaining_char) 
-					&& (0 <= port && port <= 65535))
+				if (port < 0 || port < 65535)
 				{
-					listen.setPort(port);
-					ti++;
-					continue ;
+					std::cerr << "webserv: [emerg] invalid port in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+					return false;
 				}
 			}
+			else
+			{
+				std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+		}
+		tmp_listen.setPort(port);
+	}
+	else
+	{
+		// 5. ip addressかportのどちらかしかない場合
+		iss.str(tokens[0].c_str());
+
+		// ip addressかportであればセット
+		if (isIPv4(tokens[0]) || isIPv6(tokens[0]))
+			tmp_listen.setAddress(tokens[0]);
+		else if (iss >> port)
+		{
+			if (!(iss >> remaining_char) 
+				&& (0 <= port && port <= 65535))
+			{
+				tmp_listen.setPort(port);
+			}
+		}
+		else
+		{
 			// addressでもportでもなければエラー
 			std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
-
-		ti++;
 	}
+
+	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
 
 	ti += 2;
 	return true;

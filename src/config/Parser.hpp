@@ -68,8 +68,8 @@ class Parser
 		bool	parseUseridExpires();
 		bool	parseUseridPath();
 		bool	parseUseridService();
-		bool	isIPv4();
-		bool	isIPv6();
+		bool	isIPv4(const std::string& ipv4);
+		bool	isIPv6(const std::string& ipv6);
 		long	retCodeIfValid();
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
