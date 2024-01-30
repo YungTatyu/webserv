@@ -97,6 +97,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["index"] = &config::Parser::parseIndex;
 	this->parser_map_["autoindex"] = &config::Parser::parseAutoindex;
 	this->parser_map_["error_page"] = &config::Parser::parseErrorPage;
+	this->parser_map_["allow"] = &config::Parser::parseAllow;
+	this->parser_map_["deny"] = &config::Parser::parseDeny;
 }
 
 config::Parser::~Parser() {}
@@ -949,6 +951,202 @@ bool	config::Parser::parseErrorPage()
 	else if (this->current_context_.top() == config::CONF_HTTP_LOCATION)
 		this->config_.http.server_list.back().location_list.back().error_page_list.push_back(tmp_err_pg);
 
+	return true;
+}
+
+bool	config::Parser::isIPv4()
+{
+	std::string	ipv4 = this->tokens_[ti].value_;
+
+	// 1.文字列が空でないかを確認
+	if (ipv4.empty())
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	// 2. IPv6アドレスとサブネットマスクを分割
+	size_t	mask_pos = ipv4.find('/');
+	std::string address_part = (mask_pos != std::string::npos) ? ipv4.substr(0, mask_pos) : ipv4;
+	std::string mask_part = (mask_pos != std::string::npos) ? ipv4.substr(mask_pos + 1) : "";
+
+	// 3. 文字列がIPv4の基本的な構造に従っているかを確認
+	std::istringstream iss(ipv4);
+	std::string field;
+	std::vector<std::string> fields;
+
+	while (std::getline(iss, field, ':'))
+	{
+		// 各フィールドが数字であることを確認
+		for (int i = 0; field[i] != '\0'; i++)
+		{
+			if (!std::isdigit(field[i]))
+			{
+				std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+		}
+
+		// フィールドを保存
+		fields.push_back(field);
+	}
+	
+		// フィールドの数が正しいかを確認
+	if (fields.size() != 4)
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	// 各フィールドが0から255までの値を持っていることを確認
+	for (int i = 0; i < 4; i++)
+	{
+		field = fields[i];
+		unsigned int value;
+		std::istringstream(field) >> std::hex >> value;
+		if (255 < value)
+		{
+			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+	}
+
+	// 4. subnetmaskの値が正しいか確認
+	if (!mask_part.empty())
+	{
+		int	subnet_mask;
+		std::istringstream(mask_part) >> subnet_mask;
+
+		if (subnet_mask < 0 || 32 < subnet_mask)
+		{
+			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+	}
+
+	// 全ての条件を満たす場合、IPv4アドレスと見なす
+	return true;
+}
+
+bool	config::Parser::isIPv6()
+{
+	std::string	ipv6 = this->tokens_[ti].value_;
+
+	// 1.文字列が空でないかを確認
+	if (ipv6.empty())
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	// 2. IPv6アドレスとサブネットマスクを分割
+	size_t	mask_pos = ipv6.find('/');
+	std::string address_part = (mask_pos != std::string::npos) ? ipv6.substr(0, mask_pos) : ipv6;
+	std::string mask_part = (mask_pos != std::string::npos) ? ipv6.substr(mask_pos + 1) : "";
+
+	// 3. 文字列がIPv6の基本的な構造に従っているかを確認
+	std::istringstream iss(ipv6);
+	std::string field;
+	std::vector<std::string> fields;
+
+	while (std::getline(iss, field, ':'))
+	{
+		// 各フィールドが16進数であることを確認
+		for (int i = 0; field[i] != '\0'; i++)
+		{
+			if (!std::isxdigit(field[i]))
+			{
+				std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+		}
+
+		// フィールドを保存
+		fields.push_back(field);
+	}
+	
+		// フィールドの数が正しいかを確認
+	if (fields.size() != 8)
+	{
+		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	// 各フィールドが0からFFFFまでの値を持っていることを確認
+	for (int i = 0; i < 8; i++)
+	{
+		field = fields[i];
+		unsigned int value;
+		std::istringstream(field) >> std::hex >> value;
+		if (value > 0xFFFF)
+		{
+			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+	}
+
+	// 4. subnetmaskの値が正しいか確認
+	if (!mask_part.empty())
+	{
+		int	subnet_mask;
+		std::istringstream(mask_part) >> subnet_mask;
+
+		if (subnet_mask < 0 || 128 < subnet_mask)
+		{
+			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+	}
+
+	// 全ての条件を満たす場合、IPv6アドレスと見なす
+	return true;
+}
+
+bool	config::Parser::parseAllow()
+{
+	ti++;
+
+	if (!isIPv4() && !isIPv6())
+		return false;
+
+	config::Allow	tmp_allow;
+	tmp_allow.setAddress(this->tokens_[ti].value_);
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.allow_list.push_back(tmp_allow);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().allow_list.push_back(tmp_allow);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().allow_list.push_back(tmp_allow);
+	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
+		this->config_.http.server_list.back().location_list.back().limit_except.allow_list.push_back(tmp_allow);
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseDeny()
+{
+	ti++;
+
+	if (!isIPv4() && !isIPv6())
+		return false;
+
+	config::Deny	tmp_deny;
+	tmp_deny.setAddress(this->tokens_[ti].value_);
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.deny_list.push_back(tmp_deny);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().deny_list.push_back(tmp_deny);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().deny_list.push_back(tmp_deny);
+	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
+		this->config_.http.server_list.back().location_list.back().limit_except.deny_list.push_back(tmp_deny);
+
+	ti += 2;
 	return true;
 }
 

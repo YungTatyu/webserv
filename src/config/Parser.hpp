@@ -56,6 +56,10 @@ class Parser
 		bool	parseAutoindex();
 		bool	parseErrorPage();
 		long	retErrorPageOptNumIfValid();
+		bool	parseAllow();
+		bool	parseDeny();
+		bool	isIPv4();
+		bool	isIPv6();
 		long	retCodeIfValid();
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
