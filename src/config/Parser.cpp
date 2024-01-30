@@ -101,6 +101,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["deny"] = &config::Parser::parseDeny;
 	this->parser_map_["listen"] = &config::Parser::parseListen;
 	this->parser_map_["server_name"] = &config::Parser::parseServerName;
+	this->parser_map_["try_files"] = &config::Parser::parseTryFiles;
 	this->parser_map_["alias"] = &config::Parser::parseAlias;
 	this->parser_map_["return"] = &config::Parser::parseReturn;
 	this->parser_map_["userid"] = &config::Parser::parseUserid;
@@ -1276,6 +1277,75 @@ bool	config::Parser::parseServerName()
 	}
 
 	ti++;
+	return true;
+}
+
+bool	config::Parser::parseTryFiles()
+{
+	ti++;
+	config::CONTEXT	context = this->current_context_.top();
+	std::string		file;
+
+	// 最後から2つ目までのトークンはfileとして追加
+	while (this->tokens_[ti + 1].type_ == config::TK_SEMICOLON)
+	{
+		file = this->tokens_[ti].value_;
+
+		if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().try_files.addFile(file);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().try_files.addFile(file);
+
+		ti++;
+	}
+
+	// codeかuriか判定
+	std::string			uri;
+	long				code;
+	std::istringstream	iss;
+	char				remaining_char;
+
+	if (this->tokens_[ti].value_[0] == '=')
+	{
+		// code
+		iss.str(this->tokens_[ti].value_.substr(1));
+
+		// code が正しいか判定
+		if (iss >> code)
+		{
+			if (iss >> remaining_char
+				|| code < 0
+				|| 999 < code)
+			{
+				std::cerr << "webserv: [emerg] invalid code \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+		}
+		else
+		{
+			std::cerr << "webserv: [emerg] invalid code \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+
+		// setCode
+		if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().try_files.setCode(code);
+		else
+			this->config_.http.server_list.back().location_list.back().try_files.setCode(code);
+	}
+	else
+	{
+		// uri
+		uri = this->tokens_[ti].value_;
+
+		// setUri
+		if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().try_files.setUri(uri);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().try_files.setUri(uri);
+	}
+
+	ti += 2;
 	return true;
 }
 

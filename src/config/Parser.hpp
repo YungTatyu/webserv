@@ -60,6 +60,7 @@ class Parser
 		bool	parseDeny();
 		bool	parseListen();
 		bool	parseServerName();
+		bool	parseTryFiles();
 		bool	parseAlias();
 		bool	parseReturn();
 		bool	parseUserid();
