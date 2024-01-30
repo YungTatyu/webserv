@@ -614,11 +614,12 @@ bool	config::Parser::parseUse()
 bool	config::Parser::parseWorkerConnections()
 {
 	long	value;
-	char		char_remaining;
+	char	char_remaining;
 
 	ti++;
 	std::istringstream	iss(this->tokens_[ti].value_.c_str());
 
+	// 値が数値でない、またはLONG_MAXに収まらなければエラー
 	if (iss >> value)
 	{
 		if (iss >> char_remaining)
@@ -632,15 +633,23 @@ bool	config::Parser::parseWorkerConnections()
 			std::cerr << "webserv: [emerg] \"" << value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
 			return false;
 		}
-		else if (2 <= value && value <= LONG_LONG_MAX)
+		else if (value < 0 || LONG_LONG_MAX < value)
 		{
-			this->config_.events.worker_connections.setWorkerConnections(value);
-			ti += 2;
-			return true;
+			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
 		}
 	}
-	std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
-	return (false);
+	else
+	{
+		std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return (false);
+	}
+
+	// エラー判定に引っかからなかったのでセット
+	this->config_.events.worker_connections.setWorkerConnections(value);
+
+	ti += 2;
+	return true;
 }
 
 bool	config::Parser::canConvertMinTime(long &value, const std::string& unit)
@@ -826,6 +835,14 @@ bool	config::Parser::parseIndex()
 	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
 	{
 		file = this->tokens_[ti].value_;
+
+		// 空文字列があればエラー
+		if (file.empty())
+		{
+			std::cerr << "webserv: [emerg] index " << file << "in \"index\" directive is invalid in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+
 		tmp_index.setFile(file);
 
 		if (context == config::CONF_HTTP)
@@ -927,7 +944,7 @@ bool	config::Parser::parseErrorPage()
 	unsigned int	tmp_ti = ti;
 
 	// uriまではcodeとしてみていく
-	while (this->tokens_[ti + 2].type_ == config::TK_SEMICOLON)
+	while (this->tokens_[ti + 1].type_ == config::TK_SEMICOLON)
 	{
 		// 最後から二番目の引数が=responseオプションの場合
 		if (ti != tmp_ti 
@@ -1263,7 +1280,6 @@ bool	config::Parser::parseListen()
 bool	config::Parser::parseServerName()
 {
 	ti++;
-	std::string	name;
 	config::ServerName	tmp_server_name;
 
 	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
@@ -1367,6 +1383,7 @@ bool	config::Parser::parseReturn()
 	char				remaining_char;
 	config::Return		tmp_return;
 
+	// もしトークンが2つあるなら一つ目はcodeなので処理する
 	if (this->tokens_[ti + 2].type_ == config::TK_SEMICOLON)
 	{
 		iss.str(this->tokens_[ti].value_.c_str());
@@ -1395,6 +1412,7 @@ bool	config::Parser::parseReturn()
 		tmp_return.setCode(code);
 	}
 
+	// url をセットする
 	url = this->tokens_[ti].value_;
 	tmp_return.setUrl(url);
 
@@ -1455,7 +1473,7 @@ bool	config::Parser::parseUseridExpires()
 	std::string	tmp_switch = this->tokens_[ti].value_;
 
 	// off であれば、なにもしない
-	if (tmp_switch== "off")
+	if (tmp_switch == "off")
 		return true;
 
 	long time = parseTime();
@@ -1493,12 +1511,16 @@ bool	config::Parser::parseUseridPath()
 	std::string	path = this->tokens_[ti].value_;
 	config::CONTEXT	context = this->current_context_.top();
 
-	if (context == config::CONF_HTTP)
-		this->config_.http.userid_path.setPath(path);
-	else if (context == config::CONF_HTTP_SERVER)
-		this->config_.http.server_list.back().userid_path.setPath(path);
-	else if (context == config::CONF_HTTP_LOCATION)
-		this->config_.http.server_list.back().location_list.back().userid_path.setPath(path);
+	// もし値が空文字列でなければセットする
+	if (!path.empty())
+	{
+		if (context == config::CONF_HTTP)
+			this->config_.http.userid_path.setPath(path);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().userid_path.setPath(path);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().userid_path.setPath(path);
+	}
 
 	ti += 2;
 	return true;
