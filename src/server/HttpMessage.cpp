@@ -5,9 +5,13 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 {
 	std::istringstream iss;
 	HttpRequest requestline;
+	std::string uriAndPath;
 
 	iss.str( rawRequest );
-	iss >> requestline.method >> requestline.uri >> requestline.version;
+	iss >> requestline.method >> uriAndPath >> requestline.version;
+
+	requestline.uri = CGIHandler::getScriptPath2(uriAndPath);
+	requestline.query = CGIHandler::getQueryString(uriAndPath);
 
 	// std::cout << "method=" << "\"" << requestline.method << "\"" << std::endl;
 	// std::cout << "uri=" << "\"" << requestline.uri << "\"" << std::endl;
@@ -81,11 +85,7 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
 	request.uri = std::string(".") + request.uri;
 
-	if ( CGIHandler::isCGI( request.uri ) )
-	{
-		return httpUtils::createResponse( CGIHandler::executeCGI( request.uri ) );
-	}
-	else if ( httpUtils::isDirectory(request.uri) )
+	if ( httpUtils::isDirectory(request.uri) )
 	{
 		std::string indexPath = request.uri + "/index.html";
 		std::ifstream ifile( indexPath.c_str() );
@@ -103,6 +103,8 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		std::ifstream ifile( request.uri.c_str() );
 		if ( ifile )
 		{
+			if ( CGIHandler::isCGI( request.uri ) )
+				return httpUtils::createResponse( CGIHandler::executeCGI( request.uri, request.query ) );
 			return httpUtils::createResponse( httpUtils::readFile(request.uri) );
 		}
 		else

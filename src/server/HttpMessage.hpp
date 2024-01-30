@@ -21,6 +21,7 @@ struct HttpRequest
 	std::string method;
 	std::string uri;
 	std::string version;
+	std::string query;
 	// header, body
 };
 

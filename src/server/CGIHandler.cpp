@@ -1,10 +1,14 @@
 #include "CGIHandler.hpp"
 
-bool CGIHandler::isCGI( std::string& requestURI)
+bool CGIHandler::isCGI( std::string& requestURI )
 {
-	return ( requestURI.substr( 0, 5 ) == "./cgi" );
+	std::string uri = CGIHandler::getScriptPath(requestURI);
+	std::cout << uri << std::endl;
+	return CGIHandler::isPHPExtension( uri );
+	// return ( requestURI.substr( 0, 5 ) == "./cgi" );
 	// or cgi/script.hpp or cgi/scirpt.hpp?aaa cgi/script.hpp?
 }
+
 std::string CGIHandler::getQueryString( std::string& uri )
 {
 	std::size_t pos = uri.find("?");
@@ -13,6 +17,16 @@ std::string CGIHandler::getQueryString( std::string& uri )
 	else
 		return "";
 }
+
+std::string CGIHandler::getScriptPath2( std::string& uri )
+{
+	std::size_t pos = uri.find("?");
+	if ( pos != std::string::npos )
+		return uri.substr( 0, pos );
+	else
+		return uri.substr(0); // /cgi/script.phpなら/を削除
+}
+
 
 std::string CGIHandler::getScriptPath( std::string& uri )
 {
@@ -46,7 +60,7 @@ bool CGIHandler::isPHPExtension(const std::string& filename)
     return ext == ".php";
 }
 
-std::string CGIHandler::executeCGI( std::string& uri )
+std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 {
 	int pipefd[2];
 	std::string buffer;
@@ -60,21 +74,20 @@ std::string CGIHandler::executeCGI( std::string& uri )
 		close( pipefd[READ] );
 		dup2( pipefd[WRITE], STDOUT_FILENO );
 		close( pipefd[WRITE] );
-		setenv("QUERY_STRING", CGIHandler::getQueryString(uri).c_str(), 1);
-		std::string scriptPath = CGIHandler::getScriptPath(uri);
-		if ( CGIHandler::isPHPExtension(scriptPath) )
+		setenv("QUERY_STRING", query.c_str(), 1);
+		if ( CGIHandler::isPHPExtension(uri) )
 		{
-			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(scriptPath.c_str()), NULL};
-			if ( CGIHandler::isFileExistAndExecutable(scriptPath.c_str()) )
+			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
+			if ( CGIHandler::isFileExistAndExecutable(uri.c_str()) )
 				execve("/opt/homebrew/bin/php", cmd, environ);
 			else
 				std::cout << "script not executable" << std::endl;
 		}
 		else
 		{ // c, c++の実行
-			char *cmd[] = {const_cast<char *>(scriptPath.c_str()), NULL};
-			if ( CGIHandler::isFileExistAndExecutable(scriptPath.c_str()) )
-				execve(scriptPath.c_str(), cmd, environ);
+			char *cmd[] = {const_cast<char *>(uri.c_str()), NULL};
+			if ( CGIHandler::isFileExistAndExecutable(uri.c_str()) )
+				execve(uri.c_str(), cmd, environ);
 			else
 				std::cout << "script not executable" << std::endl;
 		}
