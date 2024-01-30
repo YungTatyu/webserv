@@ -14,8 +14,7 @@ class CGIHandler
 		static std::string executeCGI( std::string& uri, std::string& query );
 		static std::string getQueryString( std::string& uri );
 		static std::string getScriptPath( std::string& uri );
-		static std::string getScriptPath2( std::string& uri );
-		static bool isFileExistAndExecutable( const char* filename );
+		static bool isExecutable( const char* filename );
 		static bool isPHPExtension(const std::string& filename);
 
 	private:

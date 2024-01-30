@@ -1,12 +1,10 @@
 #include "CGIHandler.hpp"
 
+// ./cgi/script.hpp or ./cgi/scirpt.hpp?aaa ./cgi/script.hpp?
+// or ./a.out
 bool CGIHandler::isCGI( std::string& requestURI )
 {
-	std::string uri = CGIHandler::getScriptPath(requestURI);
-	std::cout << uri << std::endl;
-	return CGIHandler::isPHPExtension( uri ) || CGIHandler::isFileExistAndExecutable( uri.c_str() );
-	// return ( requestURI.substr( 0, 5 ) == "./cgi" );
-	// or cgi/script.hpp or cgi/scirpt.hpp?aaa cgi/script.hpp?
+	return CGIHandler::isPHPExtension(requestURI) || CGIHandler::isExecutable(requestURI.c_str());
 }
 
 std::string CGIHandler::getQueryString( std::string& uri )
@@ -14,50 +12,29 @@ std::string CGIHandler::getQueryString( std::string& uri )
 	std::size_t pos = uri.find("?");
 	if ( pos != std::string::npos )
 		return uri.substr( pos + 1 );
-	else
-		return "";
+	return "";
 }
-
-std::string CGIHandler::getScriptPath2( std::string& uri )
-{
-	std::size_t pos = uri.find("?");
-	if ( pos != std::string::npos )
-		return uri.substr( 0, pos );
-	else
-		return uri.substr(0); // /cgi/script.phpなら/を削除
-}
-
 
 std::string CGIHandler::getScriptPath( std::string& uri )
 {
-	std::size_t pos = uri.find("?");
-	if ( pos != std::string::npos )
-		return uri.substr( 2, pos - 2 );
-	else
-		return uri.substr(2); // ./cgi/script.phpなら./を削除
+	return uri.substr(0, uri.find("?"));
 }
 
-bool CGIHandler::isFileExistAndExecutable(const char* filename)
+bool CGIHandler::isExecutable(const char* filename)
 {
-	std::ifstream ifile(filename);
-	if (!filename)
-		return false;
-
 	struct stat sbuf;
 	if ( stat(filename, &sbuf) < 0 )
 		return false;
-
 	return S_ISREG(sbuf.st_mode) && (S_IXUSR & sbuf.st_mode);
 }
 
 bool CGIHandler::isPHPExtension(const std::string& filename)
 {
-    const size_t phpExtLength = 4;
+	std::string phpExt = ".php";
+	if ( filename.length() < phpExt.length() )
+		return false;
+	return std::equal( phpExt.begin(), phpExt.end(), filename.end() - phpExt.length() );
 
-    if (filename.length() < phpExtLength)
-        return false;
-    std::string ext = filename.substr(filename.length() - phpExtLength);
-    return ext == ".php";
 }
 
 std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
@@ -78,18 +55,13 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 		if ( CGIHandler::isPHPExtension(uri) )
 		{
 			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
-			if ( CGIHandler::isFileExistAndExecutable(uri.c_str()) )
-				execve("/opt/homebrew/bin/php", cmd, environ);
-			else
-				std::cout << "script not executable" << std::endl;
+			execve("/opt/homebrew/bin/php", cmd, environ);
 		}
 		else
-		{ // c, c++の実行
+		{
+			// c, c++の実行
 			char *cmd[] = {const_cast<char *>(uri.c_str()), NULL};
-			if ( CGIHandler::isFileExistAndExecutable(uri.c_str()) )
-				execve(uri.c_str(), cmd, environ);
-			else
-				std::cout << "script not executable" << std::endl;
+			execve(uri.c_str(), cmd, environ);
 		}
 		std::exit(1);
 	}

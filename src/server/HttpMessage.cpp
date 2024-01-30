@@ -10,12 +10,8 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	iss.str( rawRequest );
 	iss >> requestline.method >> uriAndPath >> requestline.version;
 
-	requestline.uri = CGIHandler::getScriptPath2(uriAndPath);
+	requestline.uri = CGIHandler::getScriptPath(uriAndPath);
 	requestline.query = CGIHandler::getQueryString(uriAndPath);
-
-	// std::cout << "method=" << "\"" << requestline.method << "\"" << std::endl;
-	// std::cout << "uri=" << "\"" << requestline.uri << "\"" << std::endl;
-	// std::cout << "version=" << "\"" << requestline.version << "\"" << std::endl;
 
 	return requestline;
 }
