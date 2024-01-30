@@ -6,6 +6,8 @@
 # include <string>
 # include <iostream>
 # include <fstream>
+# include <cstdlib>
+# include <sstream>
 
 class CGIHandler
 {
@@ -16,6 +18,8 @@ class CGIHandler
 		static std::string getScriptPath( std::string& uri );
 		static bool isExecutable( const char* filename );
 		static bool isPHPExtension(const std::string& filename);
+		static std::string get_command_path(const std::string& command);
+		static std::vector<std::string> split(const std::string& s, char delimiter);
 
 	private:
 		CGIHandler();

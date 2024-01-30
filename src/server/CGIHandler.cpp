@@ -34,7 +34,31 @@ bool CGIHandler::isPHPExtension(const std::string& filename)
 	if ( filename.length() < phpExt.length() )
 		return false;
 	return std::equal( phpExt.begin(), phpExt.end(), filename.end() - phpExt.length() );
+}
 
+std::vector<std::string> CGIHandler::split(const std::string& s, char delimiter)
+{
+	std::vector<std::string> tokens;
+	std::string token;
+	std::istringstream tokenStream(s);
+	while (std::getline(tokenStream, token, delimiter))
+		tokens.push_back(token);
+	return tokens;
+}
+
+std::string CGIHandler::get_command_path(const std::string& command)
+{
+	char* path = std::getenv("PATH");
+	if (path == NULL)
+		return "";
+	std::vector<std::string> directories = split(path, ':');
+	for (size_t i = 0; i < directories.size(); ++i)
+	{
+		std::string command_path = directories[i] + "/" + command;
+		if (access(command_path.c_str(), X_OK) == 0)
+		    return command_path;
+	}
+	return "";
 }
 
 std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
@@ -55,7 +79,7 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 		if ( CGIHandler::isPHPExtension(uri) )
 		{
 			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
-			execve("/opt/homebrew/bin/php", cmd, environ);
+			execve( CGIHandler::get_command_path("php").c_str(), cmd, environ );
 		}
 		else
 		{
