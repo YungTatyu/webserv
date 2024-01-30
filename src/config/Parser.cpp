@@ -1297,6 +1297,7 @@ bool	config::Parser::parseReturn()
 	std::string			url;
 	std::istringstream	iss;
 	char				remaining_char;
+	config::Return		tmp_return;
 
 	if (this->tokens_[ti + 2].type_ == config::TK_SEMICOLON)
 	{
@@ -1323,11 +1324,13 @@ bool	config::Parser::parseReturn()
 		}
 
 		ti++;
-		this->config_.http.server_list.back().location_list.back().return_.setCode(code);
+		tmp_return.setCode(code);
 	}
 
 	url = this->tokens_[ti].value_;
-	this->config_.http.server_list.back().location_list.back().return_.setUrl(url);
+	tmp_return.setUrl(url);
+
+	this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
 
 	ti += 2;
 	return true;
