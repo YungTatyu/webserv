@@ -495,13 +495,13 @@ std::string	config::Parser::toUpper(std::string str) const
 bool	config::Parser::parseAccessLog()
 {
 	ti++;
-	std::string	path;
+	std::string	path = this->tokens_[ti].value_;
 	config::CONTEXT context = this->current_context_.top();
 	config::AccessLog	tmp_acs_log;
 
-	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	// 文字列が空でなければオブジェクトを追加する
+	if (!path.empty())
 	{
-		path = this->tokens_[ti].value_;
 		tmp_acs_log.setFile(path);
 
 		if (context == config::CONF_HTTP)
@@ -510,24 +510,22 @@ bool	config::Parser::parseAccessLog()
 			this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
 		else if (context == config::CONF_HTTP_LOCATION)
 			this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
-
-		ti++;
 	}
 
-	ti++;
+	ti += 2;
 	return true;
 }
 
 bool	config::Parser::parseErrorLog()
 {
 	ti++;
-	std::string	path;
+	std::string	path = this->tokens_[ti].value_;
 	config::CONTEXT context = this->current_context_.top();
 	config::ErrorLog	tmp_err_log;
 
-	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	// 文字列が空でなければオブジェクトを追加する
+	if (!path.empty())
 	{
-		path = this->tokens_[ti].value_;
 		tmp_err_log.setFile(path);
 
 		if (context == config::CONF_MAIN)
@@ -538,9 +536,9 @@ bool	config::Parser::parseErrorLog()
 			this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
 		else if (context == config::CONF_HTTP_LOCATION)
 			this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
-	
-		ti++;
 	}
+
+	ti += 2;
 	return true;
 }
 
