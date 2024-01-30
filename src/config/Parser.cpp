@@ -266,8 +266,8 @@ const std::set<std::string>	*config::Parser::findDirectivesSet(const CONTEXT con
 
 	case CONF_HTTP_LIMIT_EXCEPT:
 		{
-			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
-			ret = &(current_location.directives_set);
+			const LimitExcept	&current_limit_except = this->config_.http.server_list.back().location_list.back().limit_except;
+			ret = &(current_limit_except.directives_set);
 		}
 		break;
 	
@@ -288,6 +288,18 @@ bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &to
 	return true;
 }
 
+/**
+ * expectのbitがactualにも立っているか確認
+ * 
+ * 以下の場合はtrue:
+ * expect: 0100
+ * actual: 0111
+ * 
+ * 以下の場合はfalse
+ * expect: 0100
+ * actual: 1011
+ * 
+*/
 bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int actual) const
 {
 	return expect & actual;
