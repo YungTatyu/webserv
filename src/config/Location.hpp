@@ -28,11 +28,11 @@ namespace config
 {
 struct Location
 {
-	Location(const std::string &uri) : uri_(uri) {}
+	Location(const std::string &_uri) : uri(_uri) {}
 	~Location() {}
 	const static unsigned int	type = CONF_HTTP_SERVER|CONF_TAKE1|CONF_NOT_UNIQUE;
 	std::set<std::string>	directives_set;
-	const std::string	uri_;
+	const std::string	uri;
 	LimitExcept	limit_except;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;

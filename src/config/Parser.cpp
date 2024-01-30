@@ -419,7 +419,7 @@ bool	config::Parser::parseLocation()
 	std::vector<Location>	&list = this->config_.http.server_list.back().location_list;
 	for (std::vector<Location>::iterator it = list.begin(); it != list.end(); ++it)
 	{
-		if (it->uri_ == uri)
+		if (it->uri == uri)
 		{
 			printError(std::string("duplicate location \"") + tokens[ti].value_ + "\"", tokens[ti]);
 			return false;
@@ -440,7 +440,7 @@ bool	config::Parser::parseLocation()
 bool	config::Parser::parseLimitExcept()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
-	std::set<REQUEST_METHOD>	&excepted_methods = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
+	std::set<REQUEST_METHOD>	&excepted_methods = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods;
 	++ti; // tokenをcontextの引数に進める
 	do
 	{
