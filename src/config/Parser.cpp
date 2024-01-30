@@ -101,6 +101,7 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["deny"] = &config::Parser::parseDeny;
 	this->parser_map_["listen"] = &config::Parser::parseListen;
 	this->parser_map_["alias"] = &config::Parser::parseAlias;
+	this->parser_map_["return"] = &config::Parser::parseReturn;
 	this->parser_map_["userid"] = &config::Parser::parseUserid;
 	this->parser_map_["userid_domain"] = &config::Parser::parseUseridDomain;
 	this->parser_map_["userid_expires"] = &config::Parser::parseUseridExpires;
@@ -1265,6 +1266,49 @@ bool	config::Parser::parseAlias()
 	std::string	path = this->tokens_[ti].value_;
 
 	this->config_.http.server_list.back().location_list.back().alias.setPath(path);
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseReturn()
+{
+	ti++;
+	long				code;
+	std::string			url;
+	std::istringstream	iss;
+	char				remaining_char;
+
+	if (this->tokens_[ti + 2].type_ == config::TK_SEMICOLON)
+	{
+		iss.str(this->tokens_[ti].value_.c_str());
+
+		if (iss >> code)
+		{
+			if (iss >> remaining_char)
+			{
+				std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+
+			if (code < 0 || 999 < code)
+			{
+				std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				return false;
+			}
+		}
+		else
+		{
+			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+
+		ti++;
+		this->config_.http.server_list.back().location_list.back().return_.setCode(code);
+	}
+
+	url = this->tokens_[ti].value_;
+	this->config_.http.server_list.back().location_list.back().return_.setUrl(url);
 
 	ti += 2;
 	return true;

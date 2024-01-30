@@ -44,7 +44,7 @@ struct Location
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
-	std::vector<Return>	return_list;
+	Return	return_;
 	Root	root;
 	TryFiles	try_files;
 	Userid	userid;
