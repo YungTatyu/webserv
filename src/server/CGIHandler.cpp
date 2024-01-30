@@ -4,7 +4,7 @@ bool CGIHandler::isCGI( std::string& requestURI )
 {
 	std::string uri = CGIHandler::getScriptPath(requestURI);
 	std::cout << uri << std::endl;
-	return CGIHandler::isPHPExtension( uri );
+	return CGIHandler::isPHPExtension( uri ) || CGIHandler::isFileExistAndExecutable( uri.c_str() );
 	// return ( requestURI.substr( 0, 5 ) == "./cgi" );
 	// or cgi/script.hpp or cgi/scirpt.hpp?aaa cgi/script.hpp?
 }
