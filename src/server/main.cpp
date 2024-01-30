@@ -12,12 +12,13 @@ int main(int ac, char *av[])
 		return 1;
 	}
 
-	const config::Main	*config = config::init_config(av[1]);
+	const config::Main *config = config::init_config(av[1]);
 	if (config == NULL)
 		return 1;
 
 	WebServer server = WebServer();
 	server.eventLoop();
+	delete config;
 	return 0;
 }
 

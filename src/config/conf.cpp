@@ -1,5 +1,5 @@
-
 #include "conf.hpp"
+#include "Main.hpp"
 #include "Lexer.hpp"
 #include <fstream>
 #include <iostream>
@@ -25,7 +25,7 @@ const char	*config::ErrorLog::kDefaultFile_ = "logs/error.log";
 const unsigned long	config::KeepaliveTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
 const char	*config::Index::kDefaultFile_ = "index.html";
 
-const config::Main	*config::init_config(const std::string& file_path)
+config::Main	*config::init_config(const std::string& file_path)
 {
 	char	absolute_path[MAXPATHLEN];
 
@@ -63,10 +63,11 @@ const config::Main	*config::init_config(const std::string& file_path)
 	lexer.tokenize();
 	// std::cout << "websev: [debug] tokenize() succeeded" << std::endl;
 	const std::vector<Token>	&tokens = lexer.getTokens();
-	config::Parser	parser(tokens, absolute_path);
+
+	Main	*config = new Main();
+	config::Parser	parser(*config, tokens, absolute_path);
 	if (!parser.parse())
 		return NULL;
 
-	const Main	&ret = parser.getConfig();
-	return &ret;
+	return config;
 }

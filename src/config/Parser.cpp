@@ -40,8 +40,8 @@ const static	std::string kSERVER = "server";
 const static	std::string kLOCATION = "location";
 const static	std::string kLIMIT_EXCEPT = "limit_except";
 
-config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
-	tokens_(tokens), filepath_(filepath), ti(0)
+config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath) :
+	config_(config), tokens_(tokens), filepath_(filepath), ti(0)
 {
 	// 現在のcontextをセット
 	this->current_context_.push(CONF_MAIN);

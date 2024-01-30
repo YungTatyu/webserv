@@ -16,7 +16,7 @@ namespace config
 class Parser
 {
 	private:
-		Main	config_;
+		Main	&config_;
 		const std::vector<Token>	&tokens_;
 		const std::string	filepath_;
 		size_t	ti; // token index
@@ -40,7 +40,7 @@ class Parser
 		Parser();
 		void	operator=(const Parser &other);
 	public:
-		Parser(const std::vector<Token> &tokens, const std::string &filepath);
+		Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath);
 		~Parser();
 		static std::map<std::string, unsigned int>	all_directives_; // すべてのcontextとdirectiveの情報を管理
  		bool	parse();

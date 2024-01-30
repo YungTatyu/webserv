@@ -70,7 +70,7 @@ enum UNIQUE
 };
 
 
-const Main	*init_config(const std::string& file_path);
+Main	*init_config(const std::string& file_path);
 
 } // namespace config
 
