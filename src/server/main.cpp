@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string.h>
-#include "WebServer.hpp"
 #include "conf.hpp"
+#include "Main.hpp"
+#include "WebServer.hpp"
 
 int main(int ac, char *av[])
 {
@@ -11,8 +12,10 @@ int main(int ac, char *av[])
 		return 1;
 	}
 
-	if (!config::init_config(av[1]))
+	const config::Main	*config = config::init_config(av[1]);
+	if (config == NULL)
 		return 1;
+
 	WebServer server = WebServer();
 	server.eventLoop();
 	return 0;
