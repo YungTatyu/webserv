@@ -45,10 +45,10 @@ struct Http
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	Userid	userid;
-	UseridDomain	*userid_domain; // defaultがnoneなので、configで設定されない限り値を持ちたくない：初期値NULL
+	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
-	UseridService	user_service;
+	UseridService	userid_service;
 };
 } // namespace config
 

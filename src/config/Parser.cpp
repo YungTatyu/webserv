@@ -100,6 +100,11 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_["allow"] = &config::Parser::parseAllow;
 	this->parser_map_["deny"] = &config::Parser::parseDeny;
 	this->parser_map_["listen"] = &config::Parser::parseListen;
+	this->parser_map_["userid"] = &config::Parser::parseUserid;
+	this->parser_map_["userid_domain"] = &config::Parser::parseUseridDomain;
+	this->parser_map_["userid_expires"] = &config::Parser::parseUseridExpires;
+	this->parser_map_["userid_path"] = &config::Parser::parseUseridPath;
+	this->parser_map_["userid_service"] = &config::Parser::parseUseridService;
 }
 
 config::Parser::~Parser() {}
@@ -1248,6 +1253,141 @@ bool	config::Parser::parseListen()
 
 		ti++;
 	}
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseUserid()
+{
+	ti++;
+	std::string	tmp_switch = this->tokens_[ti].value_;
+
+	// もし、on/offではなかったらエラー
+	if (tmp_switch != "on" && tmp_switch != "off")
+	{
+		std::cerr << "webserv: [emerg] invalid value " << tmp_switch << " in \"userid\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	// もし、onであれば、
+	config::CONTEXT context = this->current_context_.top();
+	if (tmp_switch == "on")
+	{
+		if (context == config::CONF_HTTP)
+			this->config_.http.userid.setIsUseridOn(true);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().userid.setIsUseridOn(true);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().userid.setIsUseridOn(true);
+	}
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseUseridDomain()
+{
+	ti++;
+	std::string		name = this->tokens_[ti].value_;
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.userid_domain.setName(name);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().userid_domain.setName(name);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().userid_domain.setName(name);
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseUseridExpires()
+{
+	ti++;
+	std::string	tmp_switch = this->tokens_[ti].value_;
+
+	// off であれば、なにもしない
+	if (tmp_switch== "off")
+		return true;
+
+	long time = parseTime();
+	if (time == -1)
+	{
+		std::cerr << "webserv: [emerg] \"client_max_body_size\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+	{
+		this->config_.http.userid_expires.setTime(time);
+		this->config_.http.userid_expires.setIsUseridExpiresOn(true);
+	}
+	else if (context == config::CONF_HTTP_SERVER)
+	{
+		this->config_.http.server_list.back().userid_expires.setTime(time);
+		this->config_.http.server_list.back().userid_expires.setIsUseridExpiresOn(true);
+	}
+	else if (context == config::CONF_HTTP_LOCATION)
+	{
+		this->config_.http.server_list.back().location_list.back().userid_expires.setTime(time);
+		this->config_.http.server_list.back().location_list.back().userid_expires.setIsUseridExpiresOn(true);
+	}
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseUseridPath()
+{
+	ti++;
+	std::string	path = this->tokens_[ti].value_;
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.userid_path.setPath(path);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().userid_path.setPath(path);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().userid_path.setPath(path);
+
+	ti += 2;
+	return true;
+}
+
+bool	config::Parser::parseUseridService()
+{
+	ti++;
+	long				user_id;
+	std::istringstream	iss(this->tokens_[ti].value_.c_str());
+	char				remaining_char;
+
+	if (iss >> user_id)
+	{
+		if (iss >> remaining_char)
+		{
+			std::cerr << "webserv: [emerg] \"userid_service\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			return false;
+		}
+
+	}
+	else
+	{
+		std::cerr << "webserv: [emerg] \"userid_service\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		return false;
+	}
+
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.userid_service.setUseridService(user_id);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().userid_service.setUseridService(user_id);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().userid_service.setUseridService(user_id);
 
 	ti += 2;
 	return true;

@@ -59,6 +59,11 @@ class Parser
 		bool	parseAllow();
 		bool	parseDeny();
 		bool	parseListen();
+		bool	parseUserid();
+		bool	parseUseridDomain();
+		bool	parseUseridExpires();
+		bool	parseUseridPath();
+		bool	parseUseridService();
 		bool	isIPv4();
 		bool	isIPv6();
 		long	retCodeIfValid();

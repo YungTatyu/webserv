@@ -51,7 +51,7 @@ struct Location
 	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
-	UseridService	user_service;
+	UseridService	userid_service;
 };
 } // namespace config
 
