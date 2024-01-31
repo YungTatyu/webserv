@@ -1018,12 +1018,13 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	std::string mask_part = (mask_pos != std::string::npos) ? ipv4.substr(mask_pos + 1) : "";
 
 	// 3. 文字列がIPv4の基本的な構造に従っているかを確認
-	std::istringstream iss(ipv4);
+	std::istringstream iss(address_part);
 	std::string field;
 	std::vector<std::string> fields;
 
-	while (std::getline(iss, field, ':'))
+	while (std::getline(iss, field, '.'))
 	{
+		std::cout << field << std::endl;
 		// 各フィールドが数字であることを確認
 		for (int i = 0; field[i] != '\0'; i++)
 		{
@@ -1048,7 +1049,7 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	{
 		field = fields[i];
 		unsigned int value;
-		std::istringstream(field) >> std::hex >> value;
+		std::istringstream(field) >> value;
 		if (255 < value)
 		{
 			return false;
@@ -1085,11 +1086,11 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	std::string mask_part = (mask_pos != std::string::npos) ? ipv6.substr(mask_pos + 1) : "";
 
 	// 3. 文字列がIPv6の基本的な構造に従っているかを確認
-	std::istringstream iss(ipv6);
+	std::istringstream iss(address_part);
 	std::string field;
 	std::vector<std::string> fields;
 
-	while (std::getline(iss, field, ':'))
+	while (std::getline(iss, field, '.'))
 	{
 		// 各フィールドが16進数であることを確認
 		for (int i = 0; field[i] != '\0'; i++)
