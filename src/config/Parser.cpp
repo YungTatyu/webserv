@@ -61,8 +61,8 @@ const static	std::string kUSE = "use";
 const static	std::string kUSERID = "userid";
 const static	std::string kUSERID_DOMAIN = "userid_domain";
 const static	std::string kUSERID_EXPIRES = "userid_expires";
-const static	std::string kUSERID_PATH = "useid_path";
-const static	std::string kUSERID_SERVICE = "useid_service";
+const static	std::string kUSERID_PATH = "userid_path";
+const static	std::string kUSERID_SERVICE = "userid_service";
 const static	std::string kWORKER_CONNECTIONS = "worker_connections";
 
 config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath) :
@@ -688,7 +688,7 @@ bool	config::Parser::parseWorkerConnections()
 	{
 		if (!std::isdigit(str[i]))
 		{
-			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -705,13 +705,13 @@ bool	config::Parser::parseWorkerConnections()
 		}
 		else if (value < 0 || LONG_MAX < value)
 		{
-			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
 	else
 	{
-		std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return (false);
 	}
 
