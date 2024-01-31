@@ -34,10 +34,7 @@ class HttpMessage
 		static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 
-		static bool isDirectory(const std::string& path);
 		static std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
-		static std::string readFile(const std::string& filePath);
-		static std::string listDirectory(const std::string& directoryPath);
 
 	private:
 		HttpMessage();

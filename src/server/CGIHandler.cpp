@@ -1,26 +1,11 @@
 #include "CGIHandler.hpp"
+#include "FileUtils.hpp"
 
 // ./cgi/script.hpp or ./cgi/scirpt.hpp?aaa ./cgi/script.hpp?
 // or ./a.out
 bool CGIHandler::isCGI( std::string& requestURI )
 {
-	return CGIHandler::isPHPExtension(requestURI) || CGIHandler::isExecutable(requestURI.c_str());
-}
-
-bool CGIHandler::isExecutable(const char* filename)
-{
-	struct stat sbuf;
-	if ( stat(filename, &sbuf) < 0 )
-		return false;
-	return S_ISREG(sbuf.st_mode) && (S_IXUSR & sbuf.st_mode);
-}
-
-bool CGIHandler::isPHPExtension(const std::string& filename)
-{
-	std::string phpExt = ".php";
-	if ( filename.length() < phpExt.length() )
-		return false;
-	return std::equal( phpExt.begin(), phpExt.end(), filename.end() - phpExt.length() );
+	return FileUtils::isPHPExtension(requestURI) || FileUtils::isExecutable(requestURI.c_str());
 }
 
 std::vector<std::string> CGIHandler::split(const std::string& s, char delimiter)
@@ -63,7 +48,7 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 		dup2( pipefd[WRITE], STDOUT_FILENO );
 		close( pipefd[WRITE] );
 		setenv("QUERY_STRING", query.c_str(), 1);
-		if ( CGIHandler::isPHPExtension(uri) )
+		if ( FileUtils::isPHPExtension(uri) )
 		{
 			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
 			execve( CGIHandler::getCommandPath("php").c_str(), cmd, environ );

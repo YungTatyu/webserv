@@ -14,8 +14,6 @@ class CGIHandler
 	public:
 		static bool isCGI( std::string& requestURI );
 		static std::string executeCGI( std::string& uri, std::string& query );
-		static bool isExecutable( const char* filename );
-		static bool isPHPExtension(const std::string& filename);
 		static std::string getCommandPath(const std::string& command);
 		static std::vector<std::string> split(const std::string& s, char delimiter);
 
