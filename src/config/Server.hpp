@@ -30,7 +30,7 @@ namespace config
 struct Server
 {
 	const static unsigned int	type = CONF_HTTP|CONF_NOARGS|CONF_NOT_UNIQUE;
-	std::set<std::string>	set_directives;
+	std::set<std::string>	directives_set;
 	std::vector<Location>	location_list;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;

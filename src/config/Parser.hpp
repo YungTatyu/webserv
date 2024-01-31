@@ -27,7 +27,6 @@ class Parser
 	private:
 		Main	config_;
 		const std::vector<Token>	&tokens_;
-		std::set<std::string>	set_directives_; // setされたcontextとdirectiveを管理
 		const std::string	filepath_;
 		size_t	ti; // token index
 		std::stack<CONTEXT>	current_context_;
@@ -38,7 +37,7 @@ class Parser
 		bool	expectTerminatingToken() const;
 		bool	isContext(const Token &token) const;
 		bool	isDirective(const Token &token) const;
-		const std::set<std::string>	*searchDirectivesSet(const CONTEXT context) const;
+		const std::set<std::string>	*findDirectivesSet(const CONTEXT context) const;
 		void	printError(const std::string &err_msg, const Token &token) const;
 		size_t	countArgs(const TK_TYPE terminating_token) const;
 		bool	parseHttpServerEvents();

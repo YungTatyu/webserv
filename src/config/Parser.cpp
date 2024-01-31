@@ -37,8 +37,10 @@ const unsigned int	config::UseridService::kType_;
 const unsigned int	config::WorkerConnections::kType_;
 
 const static	std::string kHTTP = "http";
-const static	std::string kSERVER = "server";
 const static	std::string kEVENTS = "events";
+const static	std::string kSERVER = "server";
+const static	std::string kLOCATION = "location";
+const static	std::string kLIMIT_EXCEPT = "limit_except";
 
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
 	tokens_(tokens), filepath_(filepath), ti(0)
@@ -51,8 +53,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
 	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
 	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
-	this->all_directives_.insert(std::make_pair("location", config::Location::type));
-	this->all_directives_.insert(std::make_pair("limit_except", config::LimitExcept::type));
+	this->all_directives_.insert(std::make_pair(kLOCATION, config::Location::type));
+	this->all_directives_.insert(std::make_pair(kLIMIT_EXCEPT, config::LimitExcept::type));
 
 	// directive
 	this->all_directives_.insert(std::make_pair("access_log", config::AccessLog::kType_));
@@ -83,8 +85,8 @@ config::Parser::Parser(const std::vector<Token> &tokens, const std::string &file
 	this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
 	this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_["location"] = &config::Parser::parseLocation;
-	this->parser_map_["limit_except"] = &config::Parser::parseLimitExcept;
+	this->parser_map_[kLOCATION] = &config::Parser::parseLocation;
+	this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
 
 	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
 	this->parser_map_["error_log"] = &config::Parser::parseErrorLog;
@@ -163,9 +165,6 @@ bool	config::Parser::parse()
 		bool (config::Parser::*directive_parser)() = this->parser_map_[current_token.value_];
 		if (!(this->*directive_parser)())
 			return false;
-
-		// parseされたdirectiveを管理
-		this->set_directives_.insert(current_token.value_);
 	}
 
 	// current contextがmainでないとerror
@@ -175,7 +174,7 @@ bool	config::Parser::parse()
 		return false;
 	}
 	// events contextが設定されていないとerror
-	if (this->set_directives_.find(kEVENTS) == this->set_directives_.end())
+	if (this->config_.directives_set.find(kEVENTS) == this->config_.directives_set.end())
 	{
 		std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
 		return false;
@@ -242,7 +241,7 @@ bool	config::Parser::parseType(const Token &token)
 	}
 
 	// 重複を確認
-	const std::set<std::string>	*directives_set = searchDirectivesSet(this->current_context_.top());
+	const std::set<std::string>	*directives_set = findDirectivesSet(this->current_context_.top());
 	// directiveが重複不可かつ重複していたらエラー
 	if (directives_set != NULL &&
 		(this->all_directives_[directive_name] & CONF_UNIQUE) &&
@@ -255,28 +254,28 @@ bool	config::Parser::parseType(const Token &token)
 	return true;
 }
 
-const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT context) const
+const std::set<std::string>	*config::Parser::findDirectivesSet(const CONTEXT context) const
 {
 	const std::set<std::string>	*ret = NULL;
 	switch (context)
 	{
 	case CONF_MAIN:
-		ret = &(this->config_.set_directives);
+		ret = &(this->config_.directives_set);
 		break;
 
 	case CONF_HTTP:
-		ret = &(this->config_.http.set_directives);
+		ret = &(this->config_.http.directives_set);
 		break;
 
 	case CONF_EVENTS:
-		ret = &(this->config_.events.set_directives);
+		ret = &(this->config_.events.directives_set);
 		break;
 
 	case CONF_HTTP_SERVER:
 		{
 			const std::vector<Server>	&server_list = this->config_.http.server_list;
 			// serverがすでに存在している場合は、一番最後にparseしたserverのset_directiveを取得
-			ret = server_list.size() != 0 ? &(server_list.back().set_directives) : NULL;
+			ret = server_list.size() != 0 ? &(server_list.back().directives_set) : NULL;
 		}
 		break;
 
@@ -285,14 +284,14 @@ const std::set<std::string>	*config::Parser::searchDirectivesSet(const CONTEXT c
 			const Server	&current_server = this->config_.http.server_list.back();
 			const std::vector<Location>	&location_list = current_server.location_list;
 			// locationがすでに存在している場合は、一番最後にparseしたlocationのset_directiveを取得
-			ret = location_list.size() != 0 ? &(location_list.back().set_directives) : NULL;
+			ret = location_list.size() != 0 ? &(location_list.back().directives_set) : NULL;
 		}
 		break;
 
 	case CONF_HTTP_LIMIT_EXCEPT:
 		{
-			const Location	&current_location = this->config_.http.server_list.back().location_list.back();
-			ret = &(current_location.limit_except.set_directives);
+			const LimitExcept	&current_limit_except = this->config_.http.server_list.back().location_list.back().limit_except;
+			ret = &(current_limit_except.directives_set);
 		}
 		break;
 	
@@ -313,6 +312,18 @@ bool	config::Parser::expectTokenType(const config::TK_TYPE type, const Token &to
 	return true;
 }
 
+/**
+ * expectのbitがactualにも立っているか確認
+ * 
+ * 以下の場合はtrue:
+ * expect: 0100
+ * actual: 0111
+ * 
+ * 以下の場合はfalse
+ * expect: 0100
+ * actual: 1011
+ * 
+*/
 bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int actual) const
 {
 	return expect & actual;
@@ -349,8 +360,8 @@ bool	config::Parser::isContext(const config::Token &token) const
 		token.value_ == kEVENTS
 		|| token.value_ == kHTTP
 		|| token.value_ == kSERVER
-		|| token.value_ == "location"
-		|| token.value_ == "limit_except"
+		|| token.value_ == kLOCATION
+		|| token.value_ == kLIMIT_EXCEPT
 	);
 }
 
@@ -398,17 +409,25 @@ bool	config::Parser::parseHttpServerEvents()
 	const std::string	&context = tokens[ti].value_;
 
 	++ti; // tokenをcontextの引数に進める
-	// 新たなserver contextを追加
-	if (context == kSERVER)
-		this->config_.http.server_list.push_back(Server());
 
 	// current contextをupdate
 	if (context == kHTTP)
+	{
 		this->current_context_.push(CONF_HTTP);
+		this->config_.directives_set.insert(kHTTP);
+	}
 	else if (context == kSERVER)
+	{
+		// 新たなserver contextを追加
+		this->config_.http.server_list.push_back(Server());
 		this->current_context_.push(CONF_HTTP_SERVER);
+		this->config_.http.directives_set.insert(kSERVER);
+	}
 	else if (context == kEVENTS)
+	{
 		this->current_context_.push(CONF_EVENTS);
+		this->config_.directives_set.insert(kEVENTS);
+	}
 	
 	++ti; // 次のtokenに進める
 	return true;
@@ -435,6 +454,9 @@ bool	config::Parser::parseLocation()
 	// current contextをupdate
 	this->current_context_.push(CONF_HTTP_LOCATION);
 
+	// serverにlocationをset
+	this->config_.http.server_list.back().directives_set.insert(kLOCATION);
+
 	ti += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
 }
@@ -442,7 +464,7 @@ bool	config::Parser::parseLocation()
 bool	config::Parser::parseLimitExcept()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
-	std::vector<REQUEST_METHOD>	&list = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
+	std::set<REQUEST_METHOD>	&excepted_methods = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
 	++ti; // tokenをcontextの引数に進める
 	do
 	{
@@ -453,16 +475,15 @@ bool	config::Parser::parseLimitExcept()
 			return false;
 		}
 		const REQUEST_METHOD	method = convertToRequestMethod(upper_case_method);
-		// すでに追加されているmethodならば、新たに追加しない
-		if (std::find(list.begin(), list.end(), method) == list.end())
-		{
-			list.push_back(REQUEST_METHOD(method));
-		}
+		excepted_methods.insert(method);
 		++ti;
 	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
 
 	// current contextをupdate
-	this->current_context_.push(CONF_EVENTS);	
+	this->current_context_.push(CONF_HTTP_LIMIT_EXCEPT);
+
+	// locationにlimit_exceptをset
+	this->config_.http.server_list.back().location_list.back().directives_set.insert(kLIMIT_EXCEPT);
 
 	++ti;
 	return true;
