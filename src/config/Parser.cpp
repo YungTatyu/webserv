@@ -128,6 +128,7 @@ bool	config::Parser::parse()
 {
 	while (1)
 	{
+		std::cout << "line" << tokens_[ti].line_ << std::endl;
 		const Token &current_token = this->tokens_[ti];
 		if (current_token.type_ == TK_END)
 			break;
@@ -577,7 +578,6 @@ bool	config::Parser::parseUse()
 
 	std::string token_value = this->tokens_[ti].value_;
 
-	std::cout << currentOS << std::endl;
 	switch (currentOS) {
 		case config::Mac:
 			if (!(token_value == "select" ||
@@ -695,7 +695,7 @@ bool	config::Parser::canConvertMinTime(long &value, const std::string& unit)
 	}
 	else if (unit == "d")
 	{
-		if (config::Time::days < std::numeric_limits<long>::max() / value)
+		if (config::Time::days > std::numeric_limits<long>::max() / value)
 			return false;
 		value *= config::Time::days;
 	}
@@ -744,6 +744,7 @@ long	config::Parser::parseTime()
 			return 0;
 		if (num < 0 || !canConvertMinTime(num, unit)) // ms 変更できればOK
 		{
+				std::cerr << "err here" << std::endl;
 			return -1;
 		}
 	}
@@ -793,6 +794,7 @@ bool	config::Parser::parseSendTimeout()
 	}
 
 	this->config_.http.send_timeout.setTime(ret);
+
 	ti += 2;
 	return true;
 }
@@ -853,7 +855,8 @@ bool	config::Parser::parseIndex()
 	config::CONTEXT context = this->current_context_.top();
 	config::Index	tmp_index;
 
-	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+
+	while (this->tokens_[ti].type_ != config::TK_SEMICOLON)
 	{
 		file = this->tokens_[ti].value_;
 
@@ -965,7 +968,7 @@ bool	config::Parser::parseErrorPage()
 	unsigned int	tmp_ti = ti;
 
 	// uriまではcodeとしてみていく
-	while (this->tokens_[ti + 1].type_ == config::TK_SEMICOLON)
+	while (this->tokens_[ti + 1].type_ != config::TK_SEMICOLON)
 	{
 		// 最後から二番目の引数が=responseオプションの場合
 		if (ti != tmp_ti 
@@ -997,6 +1000,7 @@ bool	config::Parser::parseErrorPage()
 	else if (this->current_context_.top() == config::CONF_HTTP_LOCATION)
 		this->config_.http.server_list.back().location_list.back().error_page_list.push_back(tmp_err_pg);
 
+	ti += 2;
 	return true;
 }
 
@@ -1197,8 +1201,8 @@ bool	config::Parser::parseListen()
 	std::istringstream			iss;
 	char						remaining_char;
 	long						port;
-	std::string					token;
-	std::vector<std::string>	tokens;
+	std::string					segment;
+	std::vector<std::string>	segments;
 
 	// 1. もし空文字列ならエラー
 	if (this->tokens_[ti].value_.empty())
@@ -1208,61 +1212,63 @@ bool	config::Parser::parseListen()
 	}
 
 	// 2. ip addressとportに分ける
-	while (getline(iss, token, ':'))
+	iss.str(this->tokens_[ti].value_.c_str());
+	while (getline(iss, segment, ':'))
 	{
-		tokens.push_back(token);
+		segments.push_back(segment);
 	}
 
 	// 3. 2つ以上に分かれてしまっていたらエラー
-	if (tokens.size() > 2)
+	if (segments.size() > 2)
 	{
 		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
 	}
 
 	// 4. ip address と portがある場合
-	if (tokens.size() == 2)
+	if (segments.size() == 2)
 	{
 		// ip addressがあれば値を確認する。
 		// なければデフォルト値を入れる。
-		if (tokens[0].empty())
+		if (segments[0].empty())
 		{
 			std::cerr << "webserv: [emerg] no host in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
-		else if (!isIPv4(tokens[0]) && !isIPv6(tokens[0]))
+		else if (!isIPv4(segments[0]) && !isIPv6(segments[0]))
 		{
 			std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
-		tmp_listen.setAddress(tokens[0]);
+		tmp_listen.setAddress(segments[0]);
 
 		// port番号があれば値を確認しする。
 		// なければデフォルト値を入れる。
-		if (tokens[1].empty())
+		if (segments[1].empty())
 		{
 			std::cerr << "webserv: [emerg] invalid port in \"" << this->tokens_[ti].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 		else
 		{
-			iss.str(tokens[1].c_str());
+			iss.clear();
+			iss.str(segments[1].c_str());
 			if (iss >> port)
 			{
 				if (iss >> remaining_char)
 				{
-					std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+					std::cerr << "webserv: [emerg] host not found in \"" << segments[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 					return false;
 				}
 				if (port < 0 || port < 65535)
 				{
-					std::cerr << "webserv: [emerg] invalid port in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+					std::cerr << "webserv: [emerg] invalid port in \"" << segments[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 					return false;
 				}
 			}
 			else
 			{
-				std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+				std::cerr << "webserv: [emerg] host not found in \"" << segments[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 		}
@@ -1271,11 +1277,12 @@ bool	config::Parser::parseListen()
 	else
 	{
 		// 5. ip addressかportのどちらかしかない場合
-		iss.str(tokens[0].c_str());
+		iss.clear();
+		iss.str(segments[0].c_str());
 
 		// ip addressかportであればセット
-		if (isIPv4(tokens[0]) || isIPv6(tokens[0]))
-			tmp_listen.setAddress(tokens[0]);
+		if (isIPv4(segments[0]) || isIPv6(segments[0]))
+			tmp_listen.setAddress(segments[0]);
 		else if (iss >> port)
 		{
 			if (!(iss >> remaining_char) 
@@ -1287,7 +1294,7 @@ bool	config::Parser::parseListen()
 		else
 		{
 			// addressでもportでもなければエラー
-			std::cerr << "webserv: [emerg] host not found in \"" << tokens[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] host not found in \"" << segments[0] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -1303,7 +1310,7 @@ bool	config::Parser::parseServerName()
 	ti++;
 	config::ServerName	tmp_server_name;
 
-	while (this->tokens_[ti].type_ == config::TK_SEMICOLON)
+	while (this->tokens_[ti].type_ != config::TK_SEMICOLON)
 	{
 		tmp_server_name.setName(this->tokens_[ti].value_);
 
@@ -1322,7 +1329,7 @@ bool	config::Parser::parseTryFiles()
 	std::string		file;
 
 	// 最後から2つ目までのトークンはfileとして追加
-	while (this->tokens_[ti + 1].type_ == config::TK_SEMICOLON)
+	while (this->tokens_[ti + 1].type_ != config::TK_SEMICOLON)
 	{
 		file = this->tokens_[ti].value_;
 

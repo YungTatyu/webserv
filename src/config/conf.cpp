@@ -67,6 +67,7 @@ bool	config::init_config(const std::string& file_path)
 	if (!parser.parse())
 		return false;
 	//std::cout << "websev: [debug] parse() succeeded" << std::endl;
+	std::cout << "after parser" << std::endl;
 
 	return true;
 }
