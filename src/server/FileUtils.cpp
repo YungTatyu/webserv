@@ -18,14 +18,9 @@ std::string FileUtils::readFile(const std::string& filePath)
 	return buffer.str();
 }
 
-std::string FileUtils::listDirectory(const std::string& directoryPath)
+std::vector<std::string> FileUtils::getDirectoryContents(const std::string& directoryPath)
 {
-	std::stringstream buffer;
-	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
-	buffer << "<body><h1>Directory listing for " << directoryPath << "</h1>";
-	buffer << "<hr>";
-	buffer << "<ul>";
-
+	std::vector<std::string> contents;
 	DIR* dir = opendir(directoryPath.c_str());
 	if (dir != NULL)
 	{
@@ -33,21 +28,16 @@ std::string FileUtils::listDirectory(const std::string& directoryPath)
 		while ((entry = readdir(dir)) != NULL)
 		{
 			std::string filename = entry->d_name;
-			buffer << "<li><a href='" << directoryPath;
-			if ( !directoryPath.empty() && directoryPath[directoryPath.size() - 1] != '/' )
-				buffer << "/";
-			buffer << filename << "'>" << filename << "</a>";
-			if ( isDirectory(directoryPath + "/" + filename) )
-				buffer << "/";
-			buffer << "</li>";
+			if (filename != "." && filename != "..")
+			{
+				if (FileUtils::isDirectory(directoryPath + "/" + filename))
+					filename += "/";
+				contents.push_back(filename);
+			}
 		}
 		closedir(dir);
 	}
-
-	buffer << "</ul>";
-	buffer << "<hr>";
-	buffer << "</body></html>";
-	return buffer.str();
+	return contents;
 }
 
 bool FileUtils::isExecutable(const char* filename)

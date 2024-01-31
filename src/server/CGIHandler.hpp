@@ -2,12 +2,8 @@
 # define CGIHANDLER_HPP
 
 # include <unistd.h>
-# include <sys/stat.h>
 # include <string>
 # include <iostream>
-# include <fstream>
-# include <cstdlib>
-# include <sstream>
 
 class CGIHandler
 {

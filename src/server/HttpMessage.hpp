@@ -34,6 +34,7 @@ class HttpMessage
 		static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 
+		static std::string autoIndex(const std::string& directoryPath);
 		static std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
 
 	private:
