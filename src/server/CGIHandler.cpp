@@ -7,19 +7,6 @@ bool CGIHandler::isCGI( std::string& requestURI )
 	return CGIHandler::isPHPExtension(requestURI) || CGIHandler::isExecutable(requestURI.c_str());
 }
 
-std::string CGIHandler::getQueryString( std::string& uri )
-{
-	std::size_t pos = uri.find("?");
-	if ( pos != std::string::npos )
-		return uri.substr( pos + 1 );
-	return "";
-}
-
-std::string CGIHandler::getScriptPath( std::string& uri )
-{
-	return uri.substr(0, uri.find("?"));
-}
-
 bool CGIHandler::isExecutable(const char* filename)
 {
 	struct stat sbuf;
@@ -46,7 +33,7 @@ std::vector<std::string> CGIHandler::split(const std::string& s, char delimiter)
 	return tokens;
 }
 
-std::string CGIHandler::get_command_path(const std::string& command)
+std::string CGIHandler::getCommandPath(const std::string& command)
 {
 	char* path = std::getenv("PATH");
 	if (path == NULL)
@@ -79,7 +66,7 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 		if ( CGIHandler::isPHPExtension(uri) )
 		{
 			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
-			execve( CGIHandler::get_command_path("php").c_str(), cmd, environ );
+			execve( CGIHandler::getCommandPath("php").c_str(), cmd, environ );
 		}
 		else
 		{

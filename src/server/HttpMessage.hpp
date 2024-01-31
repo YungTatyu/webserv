@@ -8,14 +8,6 @@
 # include <dirent.h>
 # include <sys/stat.h>
 
-namespace httpUtils
-{
-	bool isDirectory(const std::string& path);
-	std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
-	std::string readFile(const std::string& filePath);
-	std::string listDirectory(const std::string& directoryPath);
-}
-
 struct HttpRequest
 {
 	std::string method;
@@ -35,9 +27,15 @@ struct HttpResponse
 class HttpMessage
 {
 	public:
-		// HttpResponse static responseGenerater( HttpRequest requeset );
-		HttpRequest static requestParser( std::string &rawRequest );
-		std::string static responseGenerater( HttpRequest &request );
+		static std::string getQueryString( std::string& uri );
+		static std::string getScriptPath( std::string& uri );
+		static HttpRequest requestParser( std::string &rawRequest );
+		static std::string responseGenerater( HttpRequest &request );
+
+		static bool isDirectory(const std::string& path);
+		static std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
+		static std::string readFile(const std::string& filePath);
+		static std::string listDirectory(const std::string& directoryPath);
 
 	private:
 		HttpMessage();
