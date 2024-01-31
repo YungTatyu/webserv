@@ -91,7 +91,7 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
 	this->parser_map_["error_log"] = &config::Parser::parseErrorLog;
 	this->parser_map_["use"] = &config::Parser::parseUse;
-	this->parser_map_["woker_connections"] = &config::Parser::parseWorkerConnections;
+	this->parser_map_["worker_connections"] = &config::Parser::parseWorkerConnections;
 	this->parser_map_["send_timeout"] = &config::Parser::parseSendTimeout;
 	this->parser_map_["keepalive_timeout"] = &config::Parser::parseKeepaliveTimeout;
 	this->parser_map_["client_max_body_size"] = &config::Parser::parseClientMaxBodySize;
