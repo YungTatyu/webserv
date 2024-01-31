@@ -128,7 +128,6 @@ bool	config::Parser::parse()
 {
 	while (1)
 	{
-		std::cout << "line" << tokens_[ti].line_ << std::endl;
 		const Token &current_token = this->tokens_[ti];
 		if (current_token.type_ == TK_END)
 			break;
@@ -634,27 +633,32 @@ bool	config::Parser::parseUse()
 
 bool	config::Parser::parseWorkerConnections()
 {
-	long	value;
-	char	char_remaining;
-
 	ti++;
-	std::istringstream	iss(this->tokens_[ti].value_.c_str());
+	long	value;
+	std::string	str = this->tokens_[ti].value_;
 
-	// 値が数値でない、またはLONG_MAXに収まらなければエラー
-	if (iss >> value)
+
+	// 数値でなければエラー
+	for (int i = 0; str[i] != '\0'; i++)
 	{
-		if (iss >> char_remaining)
+		if (!std::isdigit(str[i]))
 		{
 			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
+	}
 
-		if (0 <= value && value <= 1) // 本当はserver側で弾く
+	std::istringstream	iss(str);
+
+	// 値が範囲外であればエラー
+	if (iss >> value)
+	{
+		if (0 == value || value == 1) // 本当はserver側で弾く
 		{
 			std::cerr << "webserv: [emerg] \"" << value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
 			return false;
 		}
-		else if (value < 0 || LONG_LONG_MAX < value)
+		else if (value < 0 || LONG_MAX < value)
 		{
 			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
@@ -1024,7 +1028,6 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 
 	while (std::getline(iss, field, '.'))
 	{
-		std::cout << field << std::endl;
 		// 各フィールドが数字であることを確認
 		for (int i = 0; field[i] != '\0'; i++)
 		{
@@ -1144,7 +1147,7 @@ bool	config::Parser::parseAllow()
 	ti++;
 	std::string	address = this->tokens_[ti].value_;
 
-	if (!isIPv4(address) && !isIPv6(address))
+	if (address != "all" && !isIPv4(address) && !isIPv6(address))
 	{
 		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
@@ -1172,7 +1175,7 @@ bool	config::Parser::parseDeny()
 	ti++;
 	std::string	address = this->tokens_[ti].value_;
 
-	if (!isIPv4(address) && !isIPv6(address))
+	if (address != "all" && !isIPv4(address) && !isIPv6(address))
 	{
 		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return false;
