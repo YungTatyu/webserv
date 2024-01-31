@@ -1,7 +1,7 @@
 #include "HttpMessage.hpp"
 #include "CGIHandler.hpp"
 
-std::string HttpMessage::getQueryString( std::string& uri )
+std::string HttpRequest::setQueryString( std::string& uri )
 {
 	std::size_t pos = uri.find("?");
 	if ( pos != std::string::npos )
@@ -9,7 +9,7 @@ std::string HttpMessage::getQueryString( std::string& uri )
 	return "";
 }
 
-std::string HttpMessage::getScriptPath( std::string& uri )
+std::string HttpRequest::setScriptPath( std::string& uri )
 {
 	return uri.substr(0, uri.find("?"));
 }
@@ -23,8 +23,8 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	iss.str( rawRequest );
 	iss >> requestline.method >> uriAndPath >> requestline.version;
 
-	requestline.uri = HttpMessage::getScriptPath(uriAndPath);
-	requestline.query = HttpMessage::getQueryString(uriAndPath);
+	requestline.uri = HttpRequest::setScriptPath(uriAndPath);
+	requestline.query = HttpRequest::setQueryString(uriAndPath);
 
 	return requestline;
 }

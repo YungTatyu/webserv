@@ -8,12 +8,16 @@
 # include <dirent.h>
 # include <sys/stat.h>
 
-struct HttpRequest
+class HttpRequest
 {
-	std::string method;
-	std::string uri;
-	std::string version;
-	std::string query;
+	public:
+		static std::string setQueryString( std::string& uri );
+		static std::string setScriptPath( std::string& uri );
+
+		std::string method;
+		std::string uri;
+		std::string version;
+		std::string query;
 	// header, body
 };
 
@@ -27,8 +31,6 @@ struct HttpResponse
 class HttpMessage
 {
 	public:
-		static std::string getQueryString( std::string& uri );
-		static std::string getScriptPath( std::string& uri );
 		static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 
