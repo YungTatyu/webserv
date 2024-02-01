@@ -31,7 +31,6 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	./src
 	./src/server
 	./src/config
-	./src/config/parser
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.

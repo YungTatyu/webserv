@@ -18,7 +18,16 @@ void	test(std::vector<config::Alias> list, std::vector<std::string> expect)
 		++i;
 	});
 }
-} // namespace name
+void	test_directives_set(const std::set<std::string> &directives_set, const std::string &directive_name, bool expect_found)
+{
+	if (!expect_found) {
+		EXPECT_EQ(directives_set.find(directive_name), directives_set.end());
+		return;
+	}
+	EXPECT_NE(directives_set.find(directive_name), directives_set.end());
+}
+
+} // namespace test
 
 TEST(aliasTest, allContext)
 {
@@ -43,4 +52,8 @@ TEST(aliasTest, allContext)
 		"path5",
 	});
 	test::test(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
+}
+
+TEST(aliasTest, notFound) {
+	
 }

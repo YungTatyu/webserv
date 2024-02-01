@@ -60,3 +60,16 @@ TEST(accesslogTest, allContext)
 	test::test_value(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
 	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAccessLog, true);
 }
+
+TEST(accesslogTest, notFound) {
+		
+	const config::Main	*config = config::init_config("test/conf/directives_parser/only_context.conf");
+	const config::Http	&http = config->http;
+	const config::Events	&events = config->events;
+	const std::vector<config::Server>	&server_list = http.server_list;
+
+	test::test_directives_set(http.directives_set, kAccessLog, false);
+	test::test_directives_set(http.server_list[0].directives_set, kAccessLog, false);
+	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAccessLog, false);
+
+}
