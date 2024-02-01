@@ -15,22 +15,26 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
-	test/test.cpp 
 	src/server/HttpMessage.cpp 
-	test/conf/confLexerTest.cpp 
 	src/config/Lexer.cpp
-	test/conf/main_parser_test.cpp 
-	test/conf/directives_parser/access_log/access_log_test.cpp 
 	src/config/Parser.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
 	src/config/Parser.cpp
+
+	test/test.cpp 
+	test/conf/directives_test.cpp 
+	test/conf/confLexerTest.cpp 
+	test/conf/main_parser_test.cpp 
+	test/conf/directives_parser/access_log/access_log_test.cpp 
+	test/conf/directives_parser/alias/alias_test.cpp 
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	./src
 	./src/server
 	./src/config
+	test/conf/
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
