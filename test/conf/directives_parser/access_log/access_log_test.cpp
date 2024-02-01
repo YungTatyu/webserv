@@ -8,11 +8,15 @@
 #include "Main.hpp"
 
 
-namespace name
+namespace test
 {
 void	test(std::vector<config::AccessLog> list, std::vector<std::string> expect)
 {
-	
+	int	i = 0;
+	std::for_each(list.begin(), list.end(), [&i, &expect](config::AccessLog access_log){
+		EXPECT_EQ(access_log.getFile(), expect[i]);
+		++i;
+	});
 }
 } // namespace name
 
@@ -24,66 +28,22 @@ TEST(accesslogTest, allContext)
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
-	int	i;
-
 
 	// http
-	std::vector<std::string>	expect_http = {
-		"/tmp",
-		"/tmp/tmp",
-	};
-
-	i = 0;
-	std::for_each(http.access_log_list.begin(), http.access_log_list.end(), [&i, &expect_http](config::AccessLog access_log){
-		EXPECT_EQ(access_log.getFile(), expect_http[i]);
-		++i;
-	});
-
+	test::test(http.access_log_list, {"/tmp", "/tmp/tmp"});
 
 	// server
-	std::vector<std::string>	expect_server1 = {
-		"path/to/file1",
-		"path/to/file2",
-	};
-	i = 0;
-	std::for_each(http.server_list[0].access_log_list.begin(), http.server_list[0].access_log_list.end(), [&i, &expect_server1](config::AccessLog access_log){
-		EXPECT_EQ(access_log.getFile(), expect_server1[i]);
-		++i;
-	});
+	test::test(http.server_list[0].access_log_list, {"path/to/file1", "path/to/file2"});
+	test::test(http.server_list[1].access_log_list, {"server2path1", "server2path2"});
 
-
-	std::vector<std::string>	expect_server2 = {
-		"server2path1",
-		"server2path2",
-	};
-	i = 0;
-	std::for_each(http.server_list[1].access_log_list.begin(), http.server_list[1].access_log_list.end(), [&i, &expect_server2](config::AccessLog access_log){
-		EXPECT_EQ(access_log.getFile(), expect_server2[i]);
-		++i;
-	});
-
-
-	std::vector<std::string>	expect_location1 = {
+	// location
+	test::test(http.server_list[0].location_list[0].access_log_list, {
 		"path1",
 		"path2",
 		"path3",
 		"path4",
 		"path5",
-	};
-	i = 0;
-	std::for_each(http.server_list[0].location_list[0].access_log_list.begin(), http.server_list[0].location_list[0].access_log_list.end(), [&i, &expect_location1](config::AccessLog access_log){
-		EXPECT_EQ(access_log.getFile(), expect_location1[i]);
-		++i;
 	});
+	test::test(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
 
-	std::vector<std::string>	expect_location2 = {
-		"1",
-		"2",
-		"3",
-	};
-	i = 0;
-	std::for_each(http.server_list[0].location_list[1].access_log_list.begin(), http.server_list[0].location_list[1].access_log_list.end(), [&i, &expect_location2](config::AccessLog access_log){
-		EXPECT_EQ(access_log.getFile(), expect_location2[i]);
-		++i;
-	});
 }
