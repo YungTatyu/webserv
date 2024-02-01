@@ -7,6 +7,7 @@
 # include <fstream>
 # include <dirent.h>
 # include <sys/stat.h>
+# include <vector>
 
 namespace FileUtils
 {

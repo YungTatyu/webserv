@@ -18,7 +18,7 @@ std::vector<std::string> CGIHandler::split(const std::string& s, char delimiter)
 	return tokens;
 }
 
-std::string CGIHandler::getCommandPath(const std::string& command)
+std::string CGIHandler::getCommandPath( const std::string& command )
 {
 	char* path = std::getenv("PATH");
 	if (path == NULL)
