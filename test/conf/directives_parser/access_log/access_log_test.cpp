@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <vector>
+#include <set>
 #include <algorithm>
 #include <string>
 
@@ -10,7 +11,7 @@
 
 namespace test
 {
-void	test(std::vector<config::AccessLog> list, std::vector<std::string> expect)
+void	test_value(const std::vector<config::AccessLog> &list, const std::vector<std::string> &expect)
 {
 	int	i = 0;
 	std::for_each(list.begin(), list.end(), [&i, &expect](config::AccessLog access_log){
@@ -18,9 +19,18 @@ void	test(std::vector<config::AccessLog> list, std::vector<std::string> expect)
 		++i;
 	});
 }
-} // namespace name
 
+void	test_directives_set(const std::set<std::string> &directives_set, const std::string &directive_name, bool expect_found)
+{
+	if (!expect_found) {
+		EXPECT_EQ(directives_set.find(directive_name), directives_set.end());
+		return;
+	}
+	EXPECT_NE(directives_set.find(directive_name), directives_set.end());
+}
+} // namespace test
 
+const std::string	kAccessLog = "access_log";
 
 TEST(accesslogTest, allContext)
 {
@@ -30,20 +40,23 @@ TEST(accesslogTest, allContext)
 	const std::vector<config::Server>	&server_list = http.server_list;
 
 	// http
-	test::test(http.access_log_list, {"/tmp", "/tmp/tmp"});
+	test::test_value(http.access_log_list, {"/tmp", "/tmp/tmp"});
+	test::test_directives_set(http.directives_set, kAccessLog, true);
 
 	// server
-	test::test(http.server_list[0].access_log_list, {"path/to/file1", "path/to/file2"});
-	test::test(http.server_list[1].access_log_list, {"server2path1", "server2path2"});
+	test::test_value(http.server_list[0].access_log_list, {"path/to/file1", "path/to/file2"});
+	test::test_value(http.server_list[1].access_log_list, {"server2path1", "server2path2"});
+	test::test_directives_set(http.server_list[0].directives_set, kAccessLog, true);
+	test::test_directives_set(http.server_list[1].directives_set, kAccessLog, true);
 
 	// location
-	test::test(http.server_list[0].location_list[0].access_log_list, {
+	test::test_value(http.server_list[0].location_list[0].access_log_list, {
 		"path1",
 		"path2",
 		"path3",
 		"path4",
 		"path5",
 	});
-	test::test(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
-
+	test::test_value(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
+	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAccessLog, true);
 }
