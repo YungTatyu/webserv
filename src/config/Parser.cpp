@@ -41,6 +41,29 @@ const static	std::string kEVENTS = "events";
 const static	std::string kSERVER = "server";
 const static	std::string kLOCATION = "location";
 const static	std::string kLIMIT_EXCEPT = "limit_except";
+const static	std::string kACCESS_LOG = "access_log";
+const static	std::string kALIAS = "alias";
+const static	std::string kALLOW = "allow";
+const static	std::string kAUTOINDEX = "autoindex";
+const static	std::string kCLIENT_MAX_BODY_SIZE = "client_max_body_size";
+const static	std::string kDENY = "deny";
+const static	std::string kERROR_LOG = "error_log";
+const static	std::string kERROR_PAGE = "error_page";
+const static	std::string kINDEX = "index";
+const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static	std::string kLISTEN = "listen";
+const static	std::string kRETURN = "return";
+const static	std::string kROOT = "root";
+const static	std::string kSEND_TIMEOUT = "send_timeout";
+const static	std::string kSERVER_NAME = "server_name";
+const static	std::string kTRY_FILES = "try_files";
+const static	std::string kUSE = "use";
+const static	std::string kUSERID = "userid";
+const static	std::string kUSERID_DOMAIN = "userid_domain";
+const static	std::string kUSERID_EXPIRES = "userid_expires";
+const static	std::string kUSERID_PATH = "userid_path";
+const static	std::string kUSERID_SERVICE = "userid_service";
+const static	std::string kWORKER_CONNECTIONS = "worker_connections";
 
 config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath) :
 	config_(config), tokens_(tokens), filepath_(filepath), ti(0)
@@ -57,29 +80,29 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->all_directives_.insert(std::make_pair(kLIMIT_EXCEPT, config::LimitExcept::type));
 
 	// directive
-	this->all_directives_.insert(std::make_pair("access_log", config::AccessLog::kType_));
-	this->all_directives_.insert(std::make_pair("alias", config::Alias::kType_));
-	this->all_directives_.insert(std::make_pair("allow", config::Allow::kType_));
-	this->all_directives_.insert(std::make_pair("autoindex", config::Autoindex::kType_));
-	this->all_directives_.insert(std::make_pair("client_max_body_size", config::ClientMaxBodySize::kType_));
-	this->all_directives_.insert(std::make_pair("deny", config::Deny::kType_));
-	this->all_directives_.insert(std::make_pair("error_log", config::ErrorLog::kType_));
-	this->all_directives_.insert(std::make_pair("error_page", config::ErrorPage::kType_));
-	this->all_directives_.insert(std::make_pair("index", config::Index::kType_));
-	this->all_directives_.insert(std::make_pair("keepalive_timeout", config::KeepaliveTimeout::kType_));
-	this->all_directives_.insert(std::make_pair("listen", config::Listen::kType_));
-	this->all_directives_.insert(std::make_pair("return", config::Return::kType_));
-	this->all_directives_.insert(std::make_pair("root", config::Root::kType_));
-	this->all_directives_.insert(std::make_pair("send_timeout", config::SendTimeout::kType_));
-	this->all_directives_.insert(std::make_pair("server_name", config::ServerName::kType_));
-	this->all_directives_.insert(std::make_pair("try_files", config::TryFiles::kType_));
-	this->all_directives_.insert(std::make_pair("use", config::Use::kType_));
-	this->all_directives_.insert(std::make_pair("userid", config::Userid::kType_));
-	this->all_directives_.insert(std::make_pair("userid_domain", config::UseridDomain::kType_));
-	this->all_directives_.insert(std::make_pair("userid_expires", config::UseridExpires::kType_));
-	this->all_directives_.insert(std::make_pair("userid_path", config::UseridPath::kType_));
-	this->all_directives_.insert(std::make_pair("userid_service", config::UseridService::kType_));
-	this->all_directives_.insert(std::make_pair("worker_connections", config::WorkerConnections::kType_));
+	this->all_directives_.insert(std::make_pair(kACCESS_LOG, config::AccessLog::kType_));
+	this->all_directives_.insert(std::make_pair(kALIAS, config::Alias::kType_));
+	this->all_directives_.insert(std::make_pair(kALLOW, config::Allow::kType_));
+	this->all_directives_.insert(std::make_pair(kAUTOINDEX, config::Autoindex::kType_));
+	this->all_directives_.insert(std::make_pair(kCLIENT_MAX_BODY_SIZE, config::ClientMaxBodySize::kType_));
+	this->all_directives_.insert(std::make_pair(kDENY, config::Deny::kType_));
+	this->all_directives_.insert(std::make_pair(kERROR_LOG, config::ErrorLog::kType_));
+	this->all_directives_.insert(std::make_pair(kERROR_PAGE, config::ErrorPage::kType_));
+	this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
+	this->all_directives_.insert(std::make_pair(kKEEPALIVE_TIMEOUT, config::KeepaliveTimeout::kType_));
+	this->all_directives_.insert(std::make_pair(kLISTEN, config::Listen::kType_));
+	this->all_directives_.insert(std::make_pair(kRETURN, config::Return::kType_));
+	this->all_directives_.insert(std::make_pair(kROOT, config::Root::kType_));
+	this->all_directives_.insert(std::make_pair(kSEND_TIMEOUT, config::SendTimeout::kType_));
+	this->all_directives_.insert(std::make_pair(kSERVER_NAME, config::ServerName::kType_));
+	this->all_directives_.insert(std::make_pair(kTRY_FILES, config::TryFiles::kType_));
+	this->all_directives_.insert(std::make_pair(kUSE, config::Use::kType_));
+	this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
+	this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
+	this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
+	this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
+	this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
+	this->all_directives_.insert(std::make_pair(kWORKER_CONNECTIONS, config::WorkerConnections::kType_));
 
 	// parser
 	this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
@@ -88,29 +111,29 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->parser_map_[kLOCATION] = &config::Parser::parseLocation;
 	this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
 
-	this->parser_map_["access_log"] = &config::Parser::parseAccessLog;
-	this->parser_map_["error_log"] = &config::Parser::parseErrorLog;
-	this->parser_map_["use"] = &config::Parser::parseUse;
-	this->parser_map_["worker_connections"] = &config::Parser::parseWorkerConnections;
-	this->parser_map_["send_timeout"] = &config::Parser::parseSendTimeout;
-	this->parser_map_["keepalive_timeout"] = &config::Parser::parseKeepaliveTimeout;
-	this->parser_map_["client_max_body_size"] = &config::Parser::parseClientMaxBodySize;
-	this->parser_map_["root"] = &config::Parser::parseRoot;
-	this->parser_map_["index"] = &config::Parser::parseIndex;
-	this->parser_map_["autoindex"] = &config::Parser::parseAutoindex;
-	this->parser_map_["error_page"] = &config::Parser::parseErrorPage;
-	this->parser_map_["allow"] = &config::Parser::parseAllow;
-	this->parser_map_["deny"] = &config::Parser::parseDeny;
-	this->parser_map_["listen"] = &config::Parser::parseListen;
-	this->parser_map_["server_name"] = &config::Parser::parseServerName;
-	this->parser_map_["try_files"] = &config::Parser::parseTryFiles;
-	this->parser_map_["alias"] = &config::Parser::parseAlias;
-	this->parser_map_["return"] = &config::Parser::parseReturn;
-	this->parser_map_["userid"] = &config::Parser::parseUserid;
-	this->parser_map_["userid_domain"] = &config::Parser::parseUseridDomain;
-	this->parser_map_["userid_expires"] = &config::Parser::parseUseridExpires;
-	this->parser_map_["userid_path"] = &config::Parser::parseUseridPath;
-	this->parser_map_["userid_service"] = &config::Parser::parseUseridService;
+	this->parser_map_[kACCESS_LOG] = &config::Parser::parseAccessLog;
+	this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
+	this->parser_map_[kUSE] = &config::Parser::parseUse;
+	this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
+	this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
+	this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
+	this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
+	this->parser_map_[kROOT] = &config::Parser::parseRoot;
+	this->parser_map_[kINDEX] = &config::Parser::parseIndex;
+	this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
+	this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
+	this->parser_map_[kALLOW] = &config::Parser::parseAllow;
+	this->parser_map_[kDENY] = &config::Parser::parseDeny;
+	this->parser_map_[kLISTEN] = &config::Parser::parseListen;
+	this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
+	this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
+	this->parser_map_[kALIAS] = &config::Parser::parseAlias;
+	this->parser_map_[kRETURN] = &config::Parser::parseReturn;
+	this->parser_map_[kUSERID] = &config::Parser::parseUserid;
+	this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
+	this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
+	this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
+	this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
 }
 
 config::Parser::~Parser() {}
@@ -526,11 +549,20 @@ bool	config::Parser::parseAccessLog()
 		tmp_acs_log.setFile(path);
 
 		if (context == config::CONF_HTTP)
+		{
 			this->config_.http.access_log_list.push_back(tmp_acs_log);
+			this->config_.http.directives_set.insert(kACCESS_LOG);
+		}
 		else if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
+			this->config_.http.server_list.back().directives_set.insert(kACCESS_LOG);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kACCESS_LOG);
+		}
 	}
 
 	ti += 2;
@@ -550,13 +582,25 @@ bool	config::Parser::parseErrorLog()
 		tmp_err_log.setFile(path);
 
 		if (context == config::CONF_MAIN)
+		{
 			this->config_.error_log_list.push_back(tmp_err_log);
+			this->config_.directives_set.insert(kERROR_LOG);
+		}
 		else if (context == config::CONF_HTTP)
+		{
 			this->config_.http.error_log_list.push_back(tmp_err_log);
+			this->config_.http.directives_set.insert(kERROR_LOG);
+		}
 		else if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
+			this->config_.http.server_list.back().directives_set.insert(kERROR_LOG);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_LOG);
+		}
 	}
 
 	ti += 2;
@@ -626,6 +670,7 @@ bool	config::Parser::parseUse()
 	}
 
 	this->config_.events.use.setConnectionMethod(method);
+	this->config_.events.directives_set.insert(kUSE);
 
 	ti += 2;
 	return true;
@@ -643,7 +688,7 @@ bool	config::Parser::parseWorkerConnections()
 	{
 		if (!std::isdigit(str[i]))
 		{
-			std::cerr << "webserv: [emerg] invalid number \"" << str << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
@@ -660,18 +705,19 @@ bool	config::Parser::parseWorkerConnections()
 		}
 		else if (value < 0 || LONG_MAX < value)
 		{
-			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
 	else
 	{
-		std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+		std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 		return (false);
 	}
 
 	// エラー判定に引っかからなかったのでセット
 	this->config_.events.worker_connections.setWorkerConnections(value);
+	this->config_.events.directives_set.insert(kWORKER_CONNECTIONS);
 
 	ti += 2;
 	return true;
@@ -798,6 +844,7 @@ bool	config::Parser::parseSendTimeout()
 	}
 
 	this->config_.http.send_timeout.setTime(ret);
+	this->config_.http.directives_set.insert(kSEND_TIMEOUT);
 
 	ti += 2;
 	return true;
@@ -815,6 +862,7 @@ bool	config::Parser::parseKeepaliveTimeout()
 	}
 
 	this->config_.http.keepalive_timeout.setTime(ret);
+	this->config_.http.directives_set.insert(kKEEPALIVE_TIMEOUT);
 	ti += 2;
 	return true;
 }
@@ -826,11 +874,20 @@ bool	config::Parser::parseRoot()
 	config::CONTEXT context = this->current_context_.top();
 
 	if (context == config::CONF_HTTP)
+	{
 		this->config_.http.root.setPath(path);
+		this->config_.http.directives_set.insert(kROOT);
+	}
 	else if (context == config::CONF_HTTP_SERVER)
+	{
 		this->config_.http.server_list.back().root.setPath(path);
+		this->config_.http.server_list.back().directives_set.insert(kROOT);
+	}
 	else if (context == config::CONF_HTTP_LOCATION)
+	{
 		this->config_.http.server_list.back().location_list.back().root.setPath(path);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kROOT);
+	}
 
 	ti += 2;
 	return true;
@@ -848,6 +905,7 @@ bool	config::Parser::parseClientMaxBodySize()
 	}
 
 	this->config_.http.client_max_body_size.setSize(ret);
+		this->config_.http.directives_set.insert(kCLIENT_MAX_BODY_SIZE);
 
 	return true;
 }
@@ -874,12 +932,20 @@ bool	config::Parser::parseIndex()
 		tmp_index.setFile(file);
 
 		if (context == config::CONF_HTTP)
+		{
 			this->config_.http.index_list.push_back(tmp_index);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+		}
 		else if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().index_list.push_back(tmp_index);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
-
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+		}
 		ti++;
 	}
 
@@ -902,11 +968,20 @@ bool	config::Parser::parseAutoindex()
 	if (tmp_switch == "on")
 	{
 		if (context == config::CONF_HTTP)
+		{
 			this->config_.http.autoindex.setIsAutoindexOn(true);
+			this->config_.http.directives_set.insert(kAUTOINDEX);
+		}
 		else if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().autoindex.setIsAutoindexOn(true);
+			this->config_.http.server_list.back().directives_set.insert(kAUTOINDEX);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().autoindex.setIsAutoindexOn(true);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kAUTOINDEX);
+		}
 	}
 
 	ti += 2;
@@ -998,11 +1073,20 @@ bool	config::Parser::parseErrorPage()
 	tmp_err_pg.setUri(this->tokens_[ti].value_);
 
 	if (this->current_context_.top() == config::CONF_HTTP)
+	{
 		this->config_.http.error_page_list.push_back(tmp_err_pg);
+		this->config_.http.directives_set.insert(kERROR_PAGE);
+	}
 	else if (this->current_context_.top() == config::CONF_HTTP_SERVER)
+	{
 		this->config_.http.server_list.back().error_page_list.push_back(tmp_err_pg);
+		this->config_.http.server_list.back().directives_set.insert(kERROR_PAGE);
+	}
 	else if (this->current_context_.top() == config::CONF_HTTP_LOCATION)
+	{
 		this->config_.http.server_list.back().location_list.back().error_page_list.push_back(tmp_err_pg);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_PAGE);
+	}
 
 	ti += 2;
 	return true;
@@ -1158,13 +1242,25 @@ bool	config::Parser::parseAllow()
 	config::CONTEXT	context = this->current_context_.top();
 
 	if (context == config::CONF_HTTP)
+	{
 		this->config_.http.allow_list.push_back(tmp_allow);
+		this->config_.http.directives_set.insert(kALLOW);
+	}
 	else if (context == config::CONF_HTTP_SERVER)
+	{
 		this->config_.http.server_list.back().allow_list.push_back(tmp_allow);
+		this->config_.http.server_list.back().directives_set.insert(kALLOW);
+	}
 	else if (context == config::CONF_HTTP_LOCATION)
+	{
 		this->config_.http.server_list.back().location_list.back().allow_list.push_back(tmp_allow);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kALLOW);
+	}
 	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
+	{
 		this->config_.http.server_list.back().location_list.back().limit_except.allow_list.push_back(tmp_allow);
+		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(kALLOW);
+	}
 
 	ti += 2;
 	return true;
@@ -1186,13 +1282,25 @@ bool	config::Parser::parseDeny()
 	config::CONTEXT	context = this->current_context_.top();
 
 	if (context == config::CONF_HTTP)
+	{
 		this->config_.http.deny_list.push_back(tmp_deny);
+		this->config_.http.directives_set.insert(kDENY);
+	}
 	else if (context == config::CONF_HTTP_SERVER)
+	{
 		this->config_.http.server_list.back().deny_list.push_back(tmp_deny);
+		this->config_.http.server_list.back().directives_set.insert(kDENY);
+	}
 	else if (context == config::CONF_HTTP_LOCATION)
+	{
 		this->config_.http.server_list.back().location_list.back().deny_list.push_back(tmp_deny);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kDENY);
+	}
 	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
+	{
 		this->config_.http.server_list.back().location_list.back().limit_except.deny_list.push_back(tmp_deny);
+		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(kDENY);
+	}
 
 	ti += 2;
 	return true;
@@ -1304,6 +1412,7 @@ bool	config::Parser::parseListen()
 	}
 
 	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
+	this->config_.http.server_list.back().directives_set.insert(kLISTEN);
 
 	ti += 2;
 	return true;
@@ -1319,6 +1428,7 @@ bool	config::Parser::parseServerName()
 		tmp_server_name.setName(this->tokens_[ti].value_);
 
 		this->config_.http.server_list.back().server_name_list.push_back(tmp_server_name);
+		this->config_.http.server_list.back().directives_set.insert(kSERVER_NAME);
 		ti++;
 	}
 
@@ -1338,9 +1448,15 @@ bool	config::Parser::parseTryFiles()
 		file = this->tokens_[ti].value_;
 
 		if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().try_files.addFile(file);
+			this->config_.http.server_list.back().directives_set.insert(kTRY_FILES);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().try_files.addFile(file);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kTRY_FILES);
+		}
 
 		ti++;
 	}
@@ -1449,6 +1565,7 @@ bool	config::Parser::parseReturn()
 	tmp_return.setUrl(url);
 
 	this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
+	this->config_.http.server_list.back().location_list.back().directives_set.insert(kRETURN);
 
 	ti += 2;
 	return true;
@@ -1471,11 +1588,20 @@ bool	config::Parser::parseUserid()
 	if (tmp_switch == "on")
 	{
 		if (context == config::CONF_HTTP)
+		{
 			this->config_.http.userid.setIsUseridOn(true);
+			this->config_.http.directives_set.insert(kUSERID);
+		}
 		else if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().userid.setIsUseridOn(true);
+			this->config_.http.server_list.back().directives_set.insert(kUSERID);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().userid.setIsUseridOn(true);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID);
+		}
 	}
 
 	ti += 2;
@@ -1489,11 +1615,20 @@ bool	config::Parser::parseUseridDomain()
 	config::CONTEXT	context = this->current_context_.top();
 
 	if (context == config::CONF_HTTP)
+	{
 		this->config_.http.userid_domain.setName(name);
+		this->config_.http.directives_set.insert(kUSERID_DOMAIN);
+	}
 	else if (context == config::CONF_HTTP_SERVER)
+	{
 		this->config_.http.server_list.back().userid_domain.setName(name);
+		this->config_.http.server_list.back().directives_set.insert(kUSERID_DOMAIN);
+	}
 	else if (context == config::CONF_HTTP_LOCATION)
+	{
 		this->config_.http.server_list.back().location_list.back().userid_domain.setName(name);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_DOMAIN);
+	}
 
 	ti += 2;
 	return true;
@@ -1547,11 +1682,20 @@ bool	config::Parser::parseUseridPath()
 	if (!path.empty())
 	{
 		if (context == config::CONF_HTTP)
+		{
 			this->config_.http.userid_path.setPath(path);
+			this->config_.http.directives_set.insert(kUSERID_PATH);
+		}
 		else if (context == config::CONF_HTTP_SERVER)
+		{
 			this->config_.http.server_list.back().userid_path.setPath(path);
+			this->config_.http.server_list.back().directives_set.insert(kUSERID_PATH);
+		}
 		else if (context == config::CONF_HTTP_LOCATION)
+		{
 			this->config_.http.server_list.back().location_list.back().userid_path.setPath(path);
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_PATH);
+		}
 	}
 
 	ti += 2;
@@ -1583,11 +1727,20 @@ bool	config::Parser::parseUseridService()
 	config::CONTEXT	context = this->current_context_.top();
 
 	if (context == config::CONF_HTTP)
+	{
 		this->config_.http.userid_service.setUseridService(user_id);
+		this->config_.http.directives_set.insert(kUSERID_SERVICE);
+	}
 	else if (context == config::CONF_HTTP_SERVER)
+	{
 		this->config_.http.server_list.back().userid_service.setUseridService(user_id);
+		this->config_.http.server_list.back().directives_set.insert(kUSERID_SERVICE);
+	}
 	else if (context == config::CONF_HTTP_LOCATION)
+	{
 		this->config_.http.server_list.back().location_list.back().userid_service.setUseridService(user_id);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_SERVICE);
+	}
 
 	ti += 2;
 	return true;
