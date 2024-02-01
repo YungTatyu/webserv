@@ -643,7 +643,7 @@ bool	config::Parser::parseWorkerConnections()
 	{
 		if (!std::isdigit(str[i]))
 		{
-			std::cerr << "webserv: [emerg] invalid number \"" << value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
+			std::cerr << "webserv: [emerg] invalid number \"" << str << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
 		}
 	}
