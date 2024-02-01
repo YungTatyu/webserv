@@ -39,7 +39,7 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 	std::string buffer;
 	std::string result;
 	int status;
-	extern char **environ;
+	// extern char **environ;
 
 	pipe( pipefd );
 	if ( fork() == 0 )
@@ -47,7 +47,10 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 		close( pipefd[READ] );
 		dup2( pipefd[WRITE], STDOUT_FILENO );
 		close( pipefd[WRITE] );
-		setenv("QUERY_STRING", query.c_str(), 1);
+		// setenv("QUERY_STRING", query.c_str(), 1);
+		std::string env = "QUERY_STRING=" + query;
+		char *environ[] = {const_cast<char *>(env.c_str()), NULL};
+
 		if ( FileUtils::isPHPExtension(uri) )
 		{
 			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
