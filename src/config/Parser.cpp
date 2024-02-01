@@ -41,7 +41,7 @@ const static	std::string kLOCATION = "location";
 const static	std::string kLIMIT_EXCEPT = "limit_except";
 
 config::Parser::Parser(const std::vector<Token> &tokens, const std::string &filepath) :
-	tokens_(tokens), filepath_(filepath), ti(0)
+	tokens_(tokens), filepath_(filepath), ti_(0)
 {
 	// 現在のcontextをセット
 	this->current_context_.push(CONF_MAIN);
@@ -104,7 +104,7 @@ bool	config::Parser::parse()
 {
 	while (1)
 	{
-		const Token &current_token = this->tokens_[ti];
+		const Token &current_token = this->tokens_[ti_];
 		if (current_token.type_ == TK_END)
 			break;
 
@@ -118,11 +118,11 @@ bool	config::Parser::parse()
 				return false;
 			}
 			this->current_context_.pop();
-			++ti;
+			++ti_;
 			continue;
 		}
 
-		// directiveが終了しているか
+		// ";", "{"が存在するはず
 		if (!expectTerminatingToken())
 			return false;
 		
@@ -146,7 +146,7 @@ bool	config::Parser::parse()
 	// current contextがmainでないとerror
 	if (this->current_context_.top() != CONF_MAIN)
 	{
-		printError("unexpected end of file, expecting \"}\"", this->tokens_[ti]);
+		printError("unexpected end of file, expecting \"}\"", this->tokens_[ti_]);
 		return false;
 	}
 	// events contextが設定されていないとerror
@@ -310,7 +310,7 @@ bool	config::Parser::expectArgsNum(const unsigned int expect, const unsigned int
 */
 bool	config::Parser::expectTerminatingToken() const
 {
-	size_t	i = this->ti + 1;
+	size_t	i = this->ti_ + 1;
 
 	while (this->tokens_[i].type_ != TK_SEMICOLON && this->tokens_[i].type_ != TK_OPEN_CURLY_BRACE)
 	{
@@ -353,14 +353,14 @@ bool	config::Parser::isDirective(const config::Token &token) const
 
 /**
  * tokenを一時的に進める必要があるため、引数でtokenを渡さない
- * @date terminating_token: directive、contextの終了条件
+ * @param terminating_token: directive、contextの終了条件
  * directive ;
  * context   {
  * 
 */
 size_t	config::Parser::countArgs(const TK_TYPE terminating_token) const
 {
-	size_t	i = this->ti + 1;
+	size_t	i = this->ti_ + 1;
 	size_t	args_num = 0;
 
 	while (this->tokens_[i].type_ != terminating_token)
@@ -382,9 +382,9 @@ void	config::Parser::printError(const std::string &err_msg, const Token &token) 
 bool	config::Parser::parseHttpServerEvents()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
-	const std::string	&context = tokens[ti].value_;
+	const std::string	&context = tokens[ti_].value_;
 
-	++ti; // tokenをcontextの引数に進める
+	++ti_; // tokenをcontextの引数に進める
 
 	// current contextをupdate
 	if (context == kHTTP)
@@ -405,23 +405,23 @@ bool	config::Parser::parseHttpServerEvents()
 		this->config_.directives_set.insert(kEVENTS);
 	}
 	
-	++ti; // 次のtokenに進める
+	++ti_; // 次のtokenに進める
 	return true;
 }
 
 bool	config::Parser::parseLocation()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
-	++ti; // tokenをcontextの引数に進める
+	++ti_; // tokenをcontextの引数に進める
 
 	// locationのuriが重複していないか確認
-	const std::string &uri = tokens[ti].value_;
+	const std::string &uri = tokens[ti_].value_;
 	std::vector<Location>	&list = this->config_.http.server_list.back().location_list;
 	for (std::vector<Location>::iterator it = list.begin(); it != list.end(); ++it)
 	{
 		if (it->uri_ == uri)
 		{
-			printError(std::string("duplicate location \"") + tokens[ti].value_ + "\"", tokens[ti]);
+			printError(std::string("duplicate location \"") + tokens[ti_].value_ + "\"", tokens[ti_]);
 			return false;
 		}
 	}
@@ -433,7 +433,7 @@ bool	config::Parser::parseLocation()
 	// serverにlocationをset
 	this->config_.http.server_list.back().directives_set.insert(kLOCATION);
 
-	ti += 2; // "{" を飛ばして、次のtokenへ進む
+	ti_ += 2; // "{" を飛ばして、次のtokenへ進む
 	return true;
 }
 
@@ -441,19 +441,19 @@ bool	config::Parser::parseLimitExcept()
 {
 	const std::vector<Token>	&tokens = this->tokens_;
 	std::set<REQUEST_METHOD>	&excepted_methods = this->config_.http.server_list.back().location_list.back().limit_except.excepted_methods_;
-	++ti; // tokenをcontextの引数に進める
+	++ti_; // tokenをcontextの引数に進める
 	do
 	{
-		const std::string upper_case_method = toUpper(tokens[ti].value_);
+		const std::string upper_case_method = toUpper(tokens[ti_].value_);
 		if (upper_case_method != "GET" && upper_case_method != "HEAD" && upper_case_method != "POST" && upper_case_method != "DELETE")
 		{
-			printError(std::string("invalid method \"" + tokens[ti].value_ + "\""), tokens[ti]);
+			printError(std::string("invalid method \"" + tokens[ti_].value_ + "\""), tokens[ti_]);
 			return false;
 		}
 		const REQUEST_METHOD	method = convertToRequestMethod(upper_case_method);
 		excepted_methods.insert(method);
-		++ti;
-	} while (tokens[ti].type_ != TK_OPEN_CURLY_BRACE);
+		++ti_;
+	} while (tokens[ti_].type_ != TK_OPEN_CURLY_BRACE);
 
 	// current contextをupdate
 	this->current_context_.push(CONF_HTTP_LIMIT_EXCEPT);
@@ -461,7 +461,7 @@ bool	config::Parser::parseLimitExcept()
 	// locationにlimit_exceptをset
 	this->config_.http.server_list.back().location_list.back().directives_set.insert(kLIMIT_EXCEPT);
 
-	++ti;
+	++ti_;
 	return true;
 }
 

@@ -19,7 +19,7 @@ class Parser
 		Main	config_;
 		const std::vector<Token>	&tokens_;
 		const std::string	filepath_;
-		size_t	ti; // token index
+		size_t	ti_; // token index
 		std::stack<CONTEXT>	current_context_;
 		std::map<std::string, bool (config::Parser::*)()>	parser_map_;
 		bool	parseType(const Token &token);
