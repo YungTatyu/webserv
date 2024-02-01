@@ -20,6 +20,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/confLexerTest.cpp 
 	src/config/Lexer.cpp
 	test/conf/main_parser_test.cpp 
+	test/conf/directives_parser/access_log/access_log_test.cpp 
 	src/config/Parser.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
