@@ -5,8 +5,9 @@
 # include <string>
 # include <iostream>
 # include <vector>
-#include <stdlib.h>
-#include <sys/wait.h>
+# include <stdlib.h>
+# include <sys/wait.h>
+# include <fcntl.h>
 
 class CGIHandler
 {

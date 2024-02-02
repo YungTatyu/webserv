@@ -42,6 +42,8 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 	// extern char **environ;
 
 	pipe( pipefd );
+	fcntl(pipefd[READ], F_SETFL, O_NONBLOCK);
+	fcntl(pipefd[WRITE], F_SETFL, O_NONBLOCK);
 	if ( fork() == 0 )
 	{
 		close( pipefd[READ] );
