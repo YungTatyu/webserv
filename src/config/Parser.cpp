@@ -1491,7 +1491,7 @@ bool	config::Parser::parseTryFiles()
 
 	// codeかuriか判定
 	std::string			uri;
-	long				code;
+	int					code;
 	std::istringstream	iss;
 	char				remaining_char;
 
@@ -1607,7 +1607,7 @@ bool	config::Parser::parseUserid()
 	// もし、on/offではなかったらエラー
 	if (tmp_switch != "on" && tmp_switch != "off")
 	{
-		std::cerr << "webserv: [emerg] invalid value " << tmp_switch << " in \"userid\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] invalid value \"" << tmp_switch << "\" in \"userid\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
@@ -1674,7 +1674,7 @@ bool	config::Parser::parseUseridExpires()
 	long time = parseTime();
 	if (time == -1)
 	{
-		std::cerr << "webserv: [emerg] \"client_max_body_size\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] \"userid_expires\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 

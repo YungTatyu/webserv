@@ -281,41 +281,25 @@ fi
 g_test_directive="userid"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
+conf_path="test/conf/conf_files/directive_error/userid_value_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
-
-# userid_domain
-g_test_directive="userid_domain"
-g_test_index=0
-
-conf_path="test/conf/conf_files/directive_error/.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+assert $conf_path "${err_start_with} invalid value \"onf\" in \"userid\" directive, it must be \"on\" or \"off\" ${err_path}:5"
 
 # userid_expires
 g_test_directive="userid_expires"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
+conf_path="test/conf/conf_files/directive_error/useridExpires_time_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
-
-# userid_path
-g_test_directive="userid_path"
-g_test_index=0
-
-conf_path="test/conf/conf_files/directive_error/.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+assert $conf_path "${err_start_with} \"userid_expires\" directive invalid value ${err_path}:5"
 
 # userid_service
 g_test_directive="userid_service"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
+conf_path="test/conf/conf_files/directive_error/useridService_num_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+assert $conf_path "${err_start_with} \"userid_service\" directive invalid value ${err_path}:5"
 
 # worker_connections
 g_test_directive="worker_conections"
