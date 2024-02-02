@@ -8,6 +8,7 @@
 # include <stdlib.h>
 # include <sys/wait.h>
 # include <fcntl.h>
+# include <signal.h>
 
 class CGIHandler
 {

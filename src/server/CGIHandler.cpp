@@ -44,7 +44,8 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 	pipe( pipefd );
 	fcntl(pipefd[READ], F_SETFL, O_NONBLOCK);
 	fcntl(pipefd[WRITE], F_SETFL, O_NONBLOCK);
-	if ( fork() == 0 )
+	pid_t pid = fork();
+	if ( pid == 0 )
 	{
 		close( pipefd[READ] );
 		dup2( pipefd[WRITE], STDOUT_FILENO );
@@ -68,11 +69,26 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 	}
 	else
 	{
-		wait(&status);
+		time_t start_time = time(NULL);
+		int timeout = 10;
+		while ((time(NULL) - start_time) < timeout)
+		{
+			if (waitpid(pid, &status, WNOHANG) > 0)
+			{
+				if (WIFEXITED(status))
+				{
+					std::string buffer(1024, '\0');
+					read(pipefd[READ], &buffer[0], buffer.size());
+					result = buffer;
+					break ;
+				}
+			}
+		}
+
+		kill( pid, SIGKILL );
+		waitpid( pid, NULL, 0 );
+
 		close ( pipefd[WRITE] );
-		std::string buffer(1024, '\0');
-		read(pipefd[READ], &buffer[0], buffer.size());
-		result = buffer;
 		close ( pipefd[READ] );
 	}
 	return result;
