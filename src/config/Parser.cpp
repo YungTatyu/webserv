@@ -1428,6 +1428,20 @@ bool	config::Parser::parseListen()
 		tmp_listen.setPort(port);
 	}
 
+	// 6. defalt_serverがあるばあい
+	if (this->tokens_[ti_ + 1].type_ != config::TK_SEMICOLON)
+	{
+		ti_++;
+
+		if (this->tokens_[ti_].value_ == "default_server")
+			tmp_listen.setIsDefaultServer(true);
+		else
+		{
+			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			return false;
+		}
+	}
+
 	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
 	this->config_.http.server_list.back().directives_set.insert(kLISTEN);
 
