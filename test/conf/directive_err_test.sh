@@ -222,29 +222,60 @@ conf_path="test/conf/conf_files/directive_error/sendTimeout_invalid_unit_err.con
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"send_timeout\" directive invalid value ${err_path}:5"
 
-# server_name
-g_test_directive="server_name"
-g_test_index=0
-
-conf_path="test/conf/conf_files/directive_error/.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
-
 # try_files
 g_test_directive="try_files"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
+conf_path="test/conf/conf_files/directive_error/tryFiles_invalid_code_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+assert $conf_path "${err_start_with} invalid code \"=1000\" ${err_path}:7"
+
+conf_path="test/conf/conf_files/directive_error/tryFiles_invalid_code_err2.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid code \"=a\" ${err_path}:7"
 
 # use
 g_test_directive="use"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+os=$(uname -s)
+
+if [ "$os" = "Linux" ]; then
+	printf "\033[32m====================Runnning on Linux====================\033[0m\n\n"
+
+	conf_path="test/conf/conf_files/directive_error/use_linux_invalid_event.conf"
+	err_path="in $(readlink -f $conf_path)"
+	assert $conf_path "${err_start_with} invalid event type \"kqueue\" ${err_path}:2"
+
+	conf_path="test/conf/conf_files/directive_error/use_linux_invalid_event2.conf"
+	err_path="in $(readlink -f $conf_path)"
+	assert $conf_path "${err_start_with} invalid event type \"EPOLL\" ${err_path}:2"
+
+elif [ "$os" = "Darwin" ]; then
+	printf "\033[32m====================Runnning on macOS====================\033[0m\n\n"
+
+	conf_path="test/conf/conf_files/directive_error/use_mac_invalid_event.conf"
+	err_path="in $(readlink -f $conf_path)"
+	assert $conf_path "${err_start_with} invalid event type \"epoll\" ${err_path}:2"
+
+	conf_path="test/conf/conf_files/directive_error/use_mac_invalid_event2.conf"
+	err_path="in $(readlink -f $conf_path)"
+	assert $conf_path "${err_start_with} invalid event type \"POLL\" ${err_path}:2"
+
+else
+	printf "\033[32m====================Runnning on Unknown OS====================\033[0m\n\n"
+
+	conf_path="test/conf/conf_files/directive_error/use_unknownOS_invalid_event.conf"
+	err_path="in $(readlink -f $conf_path)"
+	assert $conf_path "${err_start_with} invalid event type \"epoll\" ${err_path}:2"
+
+	conf_path="test/conf/conf_files/directive_error/use_unknownOS_invalid_event2.conf"
+	err_path="in $(readlink -f $conf_path)"
+	assert $conf_path "${err_start_with} invalid event type \"kqueue\" ${err_path}:2"
+
+fi
+
+	printf "\033[32m==========================================================\033[0m\n\n"
 
 # userid
 g_test_directive="userid"
