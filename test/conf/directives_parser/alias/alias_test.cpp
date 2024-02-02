@@ -10,7 +10,7 @@
 
 namespace test
 {
-void	test_value(std::vector<config::Location> list, std::vector<std::string> expect)
+void	test_value(const std::vector<config::Location> &list, const std::vector<std::string> &expect)
 {
 	int	i = 0;
 	std::for_each(list.begin(), list.end(), [&i, &expect](config::Location location){
@@ -44,4 +44,5 @@ TEST(aliasTest, notFound) {
 
 	test::test_directives_set(http.server_list[0].directives_set, kAlias, false);
 	test::test_directives_set(http.server_list[1].directives_set, kAlias, false);
+	test::test_directives_set(http.server_list[2].directives_set, kAlias, false);
 }

@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/main_parser_test.cpp 
 	test/conf/directives_parser/access_log/access_log_test.cpp 
 	test/conf/directives_parser/alias/alias_test.cpp 
+	test/conf/directives_parser/allow/allow_test.cpp 
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
