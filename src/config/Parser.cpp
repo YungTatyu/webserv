@@ -1047,13 +1047,14 @@ bool	config::Parser::parseErrorPage()
 	{
 		// 最後から二番目の引数が=responseオプションの場合
 		if (ti_ != tmp_ti 
-			&& this->tokens_[ti_ + 1].type_ == config::TK_SEMICOLON 
+			&& this->tokens_[ti_ + 2].type_ == config::TK_SEMICOLON 
 			&& tokens_[ti_].value_[0] == '=')
 		{
 			long	response = retErrorPageOptNumIfValid();
 			if (!response)
 				return false;
 			tmp_err_pg.setResponse(response);
+			ti_++;
 			break ;
 		}
 
