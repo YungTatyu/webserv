@@ -1329,10 +1329,6 @@ bool	config::Parser::parseListen()
 			std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
-	if (ori_val[0] == ':')
-	{
-		segments.push_back("");
-	}
 
 	iss.str(ori_val.c_str());
 	while (getline(iss, segment, ':'))

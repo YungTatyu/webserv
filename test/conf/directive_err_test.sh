@@ -178,6 +178,10 @@ conf_path="test/conf/conf_files/directive_error/listen_too_many_args_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid parameter \"0.0.0.0:80:8080\" ${err_path}:6"
 
+conf_path="test/conf/conf_files/directive_error/listen_only_commma_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid port in \":\" of the \"listen\" directive ${err_path}:6"
+
 conf_path="test/conf/conf_files/directive_error/listen_address_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} no host in \":80\" of the \"listen\" directive ${err_path}:6"
@@ -192,7 +196,7 @@ assert $conf_path "${err_start_with} invalid port in \"0.0.0.0:65536\" of the \"
 
 conf_path="test/conf/conf_files/directive_error/listen_not_address_and_port_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} host not found in \"-1\" of the \"listen\" directive ${err_path}:6"
+assert $conf_path "${err_start_with} invalid port in \"-1\" of the \"listen\" directiv ${err_path}:6"
 
 # return
 g_test_directive="return"
