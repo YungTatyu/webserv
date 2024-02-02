@@ -1559,38 +1559,38 @@ bool	config::Parser::parseReturn()
 	char				remaining_char;
 	config::Return		tmp_return;
 
-	// もしトークンが2つあるなら一つ目はcodeなので処理する
-	if (this->tokens_[ti_ + 2].type_ == config::TK_SEMICOLON)
+	// 1つ目はcodeなので処理する
+	iss.str(this->tokens_[ti_].value_.c_str());
+
+	if (iss >> code)
 	{
-		iss.str(this->tokens_[ti_].value_.c_str());
-
-		if (iss >> code)
-		{
-			if (iss >> remaining_char)
-			{
-				std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-				return false;
-			}
-
-			if (code < 0 || 999 < code)
-			{
-				std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-				return false;
-			}
-		}
-		else
+		if (iss >> remaining_char)
 		{
 			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
 
-		ti_++;
-		tmp_return.setCode(code);
+		if (code < 0 || 999 < code)
+		{
+			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			return false;
+		}
+	}
+	else
+	{
+		std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		return false;
 	}
 
+	tmp_return.setCode(code);
+
 	// url をセットする
-	url = this->tokens_[ti_].value_;
-	tmp_return.setUrl(url);
+	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
+	{
+		ti_++;
+		url = this->tokens_[ti_].value_;
+		tmp_return.setUrl(url);
+	}
 
 	this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
 	this->config_.http.server_list.back().location_list.back().directives_set.insert(kRETURN);
