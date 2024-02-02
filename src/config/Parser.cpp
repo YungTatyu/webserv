@@ -709,7 +709,7 @@ bool	config::Parser::parseWorkerConnections()
 	else
 	{
 		std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return (false);
+		return false;
 	}
 
 
@@ -724,25 +724,25 @@ bool	config::Parser::canConvertMinTime(long &value, const std::string& unit)
 {
 	if (unit == "" || unit == "s")
 	{
-		if (config::Time::seconds > std::numeric_limits<long>::max() / value)
+		if (config::Time::seconds > config::Time::kMaxTimeInMilliseconds_ / value)
 			return false;
 		value *= config::Time::seconds;
 	}
 	else if (unit == "m")
 	{
-		if (config::Time::minutes > std::numeric_limits<long>::max() / value)
+		if (config::Time::minutes > config::Time::kMaxTimeInMilliseconds_ / value)
 			return false;
 		value *= config::Time::minutes;
 	}
 	else if (unit == "h")
 	{
-		if (config::Time::hours > std::numeric_limits<long>::max() / value)
+		if (config::Time::hours > config::Time::kMaxTimeInMilliseconds_ / value)
 			return false;
 		value *= config::Time::hours;
 	}
 	else if (unit == "d")
 	{
-		if (config::Time::days > std::numeric_limits<long>::max() / value)
+		if (config::Time::days > config::Time::kMaxTimeInMilliseconds_ / value)
 			return false;
 		value *= config::Time::days;
 	}
@@ -753,13 +753,13 @@ bool	config::Parser::canConvertMinSize(long &value, const std::string& unit)
 {
 	if (unit == "k" || unit == "K")
 	{
-		if (config::Size::kilobytes > std::numeric_limits<long>::max() / value)
+		if (config::Size::kilobytes > config::Size::kMaxSizeInBytes_ / value)
 			return false;
 		value *= config::Size::kilobytes;
 	}
 	else if (unit == "m" || unit == "M")
 	{
-		if (config::Size::megabytes > std::numeric_limits<long>::max() / value)
+		if (config::Size::megabytes > config::Size::kMaxSizeInBytes_ / value)
 			return false;
 		value *= config::Size::megabytes;
 	}
@@ -1098,7 +1098,7 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 
 	// 2. IPv6アドレスとサブネットマスクを分割
 	size_t	mask_pos = ipv4.find('/');
-	std::string address_part = (mask_pos != std::string::npos) ? ipv4.substr(0, mask_pos) : ipv4;
+	std::string address_part = ipv4.substr(0, mask_pos);
 	std::string mask_part = (mask_pos != std::string::npos) ? ipv4.substr(mask_pos + 1) : "";
 
 	// 3. 文字列がIPv4の基本的な構造に従っているかを確認
@@ -1579,25 +1579,25 @@ bool	config::Parser::parseUserid()
 		return false;
 	}
 
-	// もし、onであれば、
 	config::CONTEXT context = this->current_context_.top();
+
+	// directives_setにセット
+	if (context == config::CONF_HTTP)
+		this->config_.http.directives_set.insert(kUSERID);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kUSERID);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID);
+
+	// もし、onであれば、trueにする
 	if (tmp_switch == "on")
 	{
 		if (context == config::CONF_HTTP)
-		{
 			this->config_.http.userid.setIsUseridOn(true);
-			this->config_.http.directives_set.insert(kUSERID);
-		}
 		else if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().userid.setIsUseridOn(true);
-			this->config_.http.server_list.back().directives_set.insert(kUSERID);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().userid.setIsUseridOn(true);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID);
-		}
 	}
 
 	ti_ += 2;
