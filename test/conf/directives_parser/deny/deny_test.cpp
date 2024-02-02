@@ -20,11 +20,11 @@ void	test_value(const std::vector<config::Deny> &list, const std::vector<std::st
 }
 } // namespace test
 
-const std::string	kDeny = "Deny";
+const std::string	kDeny = "deny";
 
 TEST(DenyTest, ipv4)
 {
-	const config::Main	*config = config::init_config("test/conf/directives_parser/Deny/1.conf");
+	const config::Main	*config = config::init_config("test/conf/directives_parser/deny/1.conf");
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -57,7 +57,7 @@ TEST(DenyTest, ipv4)
 
 TEST(DenyTest, ipv6)
 {
-	const config::Main	*config = config::init_config("test/conf/directives_parser/Deny/2.conf");
+	const config::Main	*config = config::init_config("test/conf/directives_parser/deny/2.conf");
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
