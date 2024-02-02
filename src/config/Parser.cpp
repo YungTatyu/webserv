@@ -64,6 +64,10 @@ const static	std::string kUSERID_EXPIRES = "userid_expires";
 const static	std::string kUSERID_PATH = "userid_path";
 const static	std::string kUSERID_SERVICE = "userid_service";
 const static	std::string kWORKER_CONNECTIONS = "worker_connections";
+const static	std::string kSELECT = "select";
+const static	std::string kPOLL = "poll";
+const static	std::string kEPOLL = "epoll";
+const static	std::string kKQUEUE = "kqueue";
 
 config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath) :
 	config_(config), tokens_(tokens), filepath_(filepath), ti(0)
@@ -623,26 +627,26 @@ bool	config::Parser::parseUse()
 
 	switch (currentOS) {
 		case config::Mac:
-			if (!(token_value == "select" ||
-				token_value == "poll" ||
-				token_value == "kqueue"))
+			if (token_value != kSELECT &&
+				token_value != kPOLL &&
+				token_value != kKQUEUE)
 			{
 				std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 			break;
 		case config::Linux:
-			if (!(token_value == "select" ||
-				token_value == "poll" ||
-				token_value == "epoll"))
+			if (token_value != kSELECT &&
+				token_value != kPOLL &&
+				token_value != kEPOLL)
 			{
 				std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
 			}
 			break;
 		case config::Unknown:
-			if (!(token_value == "select" ||
-				token_value == "poll"))
+			if (token_value != kSELECT &&
+				token_value != kPOLL)
 			{
 				std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 				return false;
@@ -653,21 +657,14 @@ bool	config::Parser::parseUse()
 			break;
 	}
 
+	std::map<std::string, config::CONNECTION_METHOD>	method_map;
 	config::CONNECTION_METHOD	method;
 
-	if (token_value == "select")
-		method = config::SELECT;
-	else if (token_value == "poll")
-		method = config::POLL;
-	else if (token_value == "kqueue")
-		method = config::KQUEUE;
-	else if (token_value == "epoll")
-		method = config::EPOLL;
-	else
-	{
-		std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
-		return false;
-	}
+	method_map[kSELECT] = config::SELECT;
+	method_map[kPOLL] = config::POLL;
+	method_map[kEPOLL] = config::EPOLL;
+	method_map[kKQUEUE] = config::KQUEUE;
+	method = method_map.find(token_value)->second;
 
 	this->config_.events.use.setConnectionMethod(method);
 	this->config_.events.directives_set.insert(kUSE);
@@ -695,7 +692,7 @@ bool	config::Parser::parseWorkerConnections()
 
 	std::istringstream	iss(str);
 
-	// 値が範囲外であればエラー
+	// 値が正の数かつLONG_MAX以内でなければエラー
 	if (iss >> value)
 	{
 		if (0 == value || value == 1) // 本当はserver側で弾く
@@ -703,7 +700,7 @@ bool	config::Parser::parseWorkerConnections()
 			std::cerr << "webserv: [emerg] \"" << value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
 			return false;
 		}
-		else if (value < 0 || LONG_MAX < value)
+		else if (value < 0)
 		{
 			std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
 			return false;
@@ -715,7 +712,7 @@ bool	config::Parser::parseWorkerConnections()
 		return (false);
 	}
 
-	// エラー判定に引っかからなかったのでセット
+
 	this->config_.events.worker_connections.setWorkerConnections(value);
 	this->config_.events.directives_set.insert(kWORKER_CONNECTIONS);
 
@@ -794,7 +791,6 @@ long	config::Parser::parseTime()
 			return 0;
 		if (num < 0 || !canConvertMinTime(num, unit)) // ms 変更できればOK
 		{
-				std::cerr << "err here" << std::endl;
 			return -1;
 		}
 	}
@@ -897,7 +893,7 @@ bool	config::Parser::parseClientMaxBodySize()
 {
 	ti++;
 
-	long ret = parseTime();
+	long ret = parseSize();
 	if (ret == -1)
 	{
 		std::cerr << "webserv: [emerg] \"client_max_body_size\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti].line_ << std::endl;
@@ -905,7 +901,7 @@ bool	config::Parser::parseClientMaxBodySize()
 	}
 
 	this->config_.http.client_max_body_size.setSize(ret);
-		this->config_.http.directives_set.insert(kCLIENT_MAX_BODY_SIZE);
+	this->config_.http.directives_set.insert(kCLIENT_MAX_BODY_SIZE);
 
 	return true;
 }
