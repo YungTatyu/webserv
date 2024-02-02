@@ -1386,7 +1386,7 @@ bool	config::Parser::parseListen()
 					std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 					return false;
 				}
-				if (port < 0 || port < 65535)
+				if (port < 0 || 65535 < port)
 				{
 					std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 					return false;
