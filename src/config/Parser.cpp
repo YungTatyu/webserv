@@ -909,8 +909,8 @@ bool	config::Parser::parseClientMaxBodySize()
 bool	config::Parser::parseIndex()
 {
 	ti_++;
-	std::string	file;
-	config::CONTEXT context = this->current_context_.top();
+	std::string		file;
+	config::CONTEXT	context = this->current_context_.top();
 	config::Index	tmp_index;
 
 
@@ -921,7 +921,7 @@ bool	config::Parser::parseIndex()
 		// 空文字列があればエラー
 		if (file.empty())
 		{
-			std::cerr << "webserv: [emerg] index " << file << "in \"index\" directive is invalid in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			std::cerr << "webserv: [emerg] index \"" << file << "\" in \"index\" directive is invalid in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
 
@@ -930,18 +930,19 @@ bool	config::Parser::parseIndex()
 		if (context == config::CONF_HTTP)
 		{
 			this->config_.http.index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+			this->config_.http.directives_set.insert(kINDEX);
 		}
 		else if (context == config::CONF_HTTP_SERVER)
 		{
 			this->config_.http.server_list.back().index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+			this->config_.http.server_list.back().directives_set.insert(kINDEX);
 		}
 		else if (context == config::CONF_HTTP_LOCATION)
 		{
 			this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
 			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
 		}
+
 		ti_++;
 	}
 
@@ -956,7 +957,7 @@ bool	config::Parser::parseAutoindex()
 
 	if (tmp_switch != "on" && tmp_switch != "off")
 	{
-		std::cerr << "webserv: [emerg] invalid value " << tmp_switch << " in \"autoindex\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] invalid value \"" << tmp_switch << "\" in \"autoindex\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
@@ -1319,31 +1320,34 @@ bool	config::Parser::parseListen()
 		return false;
 	}
 
-	// 2. ip addressとportに分ける
+	// 2. 'address:' ':port' ならエラー
+	if (this->tokens_[ti_].value_[0] == ':'
+		|| this->tokens_[ti_].value_[this->tokens_[ti_].value_.size() - 1] == ':')
+	{
+		std::cerr << "webserv: [emerg] no host in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		return false;
+	}
+
+	// 3. ip addressとportに分ける
+	// "0.0.0.0:"の時に、要素が一つになる
 	iss.str(this->tokens_[ti_].value_.c_str());
 	while (getline(iss, segment, ':'))
 	{
 		segments.push_back(segment);
 	}
 
-	// 3. 2つ以上に分かれてしまっていたらエラー
+	// 4. 2つ以上に分かれてしまっていたらエラー
 	if (segments.size() > 2)
 	{
 		std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
-	// 4. ip address と portがある場合
+	// 5. ip address と portがある場合
 	if (segments.size() == 2)
 	{
 		// ip addressがあれば値を確認する。
-		// なければデフォルト値を入れる。
-		if (segments[0].empty())
-		{
-			std::cerr << "webserv: [emerg] no host in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return false;
-		}
-		else if (!isIPv4(segments[0]) && !isIPv6(segments[0]))
+		if (!isIPv4(segments[0]) && !isIPv6(segments[0]))
 		{
 			std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
@@ -1351,40 +1355,31 @@ bool	config::Parser::parseListen()
 		tmp_listen.setAddress(segments[0]);
 
 		// port番号があれば値を確認しする。
-		// なければデフォルト値を入れる。
-		if (segments[1].empty())
+		iss.clear();
+		iss.str(segments[1].c_str());
+		if (iss >> port)
 		{
-			std::cerr << "webserv: [emerg] invalid port in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return false;
+			if (iss >> remaining_char)
+			{
+				std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+				return false;
+			}
+			if (port < 0 || 65535 < port)
+			{
+				std::cerr << "webserv: [emerg] invalid port in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+				return false;
+			}
 		}
 		else
 		{
-			iss.clear();
-			iss.str(segments[1].c_str());
-			if (iss >> port)
-			{
-				if (iss >> remaining_char)
-				{
-					std::cerr << "webserv: [emerg] host not found in \"" << segments[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-					return false;
-				}
-				if (port < 0 || port < 65535)
-				{
-					std::cerr << "webserv: [emerg] invalid port in \"" << segments[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-					return false;
-				}
-			}
-			else
-			{
-				std::cerr << "webserv: [emerg] host not found in \"" << segments[1] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-				return false;
-			}
+			std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			return false;
 		}
 		tmp_listen.setPort(port);
 	}
 	else
 	{
-		// 5. ip addressかportのどちらかしかない場合
+		// 6. ip addressかportのどちらかしかない場合
 		iss.clear();
 		iss.str(segments[0].c_str());
 
@@ -1393,18 +1388,21 @@ bool	config::Parser::parseListen()
 			tmp_listen.setAddress(segments[0]);
 		else if (iss >> port)
 		{
-			if (!(iss >> remaining_char) 
-				&& (0 <= port && port <= 65535))
+			if (iss >> remaining_char 
+				|| port < 0
+				|| 65535 < port)
 			{
-				tmp_listen.setPort(port);
+				std::cerr << "webserv: [emerg] invalid port in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+				return false;
 			}
 		}
 		else
 		{
 			// addressでもportでもなければエラー
-			std::cerr << "webserv: [emerg] host not found in \"" << segments[0] << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			std::cerr << "webserv: [emerg] host not found in \"" << this->tokens_[ti_].value_ << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
+		tmp_listen.setPort(port);
 	}
 
 	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
