@@ -196,15 +196,19 @@ assert $conf_path "${err_start_with} invalid port in \"0.0.0.0:65536\" of the \"
 
 conf_path="test/conf/conf_files/directive_error/listen_not_address_and_port_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} invalid port in \"-1\" of the \"listen\" directiv ${err_path}:6"
+assert $conf_path "${err_start_with} invalid port in \"-1\" of the \"listen\" directive ${err_path}:6"
 
 # return
 g_test_directive="return"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
+conf_path="test/conf/conf_files/directive_error/return_invalid_code_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+assert $conf_path "${err_start_with} invalid return code \"a300\" ${err_path}:7"
+
+conf_path="test/conf/conf_files/directive_error/return_over_code_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid return code \"1000\" ${err_path}:7"
 
 # root
 g_test_directive="root"
