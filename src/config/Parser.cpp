@@ -984,7 +984,7 @@ bool	config::Parser::parseAutoindex()
 	return true;
 }
 
-long	config::Parser::retCodeIfValid()
+unsigned int	config::Parser::retCodeIfValid()
 {
 	std::istringstream	iss(this->tokens_[ti_].value_.c_str());
 	long	code;
@@ -995,20 +995,20 @@ long	config::Parser::retCodeIfValid()
 		if (iss >> remaining_char)
 		{
 			std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return -1;
+			return 0;
 		}
 		if (300 <= code && code <= 599)
-			return code;
+			return static_cast<unsigned int>(code);
 		else
 		{
 			std::cerr << "webserv: [emerg] value \"" << code << "\" must be between 300 and 599 in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return -1;
+			return 0;
 		}
 	}
 	else // LONG_MAX/MINを超えたり、数値ではなければエラー
 	{
 		std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return -1;
+		return 0;
 	}
 }
 
@@ -1024,14 +1024,14 @@ long	config::Parser::retErrorPageOptNumIfValid()
 		if (iss >> remaining_char || tmp_code < 0)
 		{
 			std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return -1;
+			return 0;
 		}
 		return tmp_code;
 	}
 	else // LONG_MAX/MIN を超えたり、数値ではなければエラー
 	{
 		std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return -1;
+		return 0;
 	}
 }
 
@@ -1039,7 +1039,7 @@ bool	config::Parser::parseErrorPage()
 {
 	ti_++;
 	config::ErrorPage	tmp_err_pg;
-	long	code;
+	unsigned int	code;
 	unsigned int	tmp_ti = ti_;
 
 	// uriまではcodeとしてみていく
@@ -1050,15 +1050,15 @@ bool	config::Parser::parseErrorPage()
 			&& this->tokens_[ti_ + 1].type_ == config::TK_SEMICOLON 
 			&& tokens_[ti_].value_[0] == '=')
 		{
-			long	ret = retErrorPageOptNumIfValid();
-			if (ret == -1)
+			long	response = retErrorPageOptNumIfValid();
+			if (!response)
 				return false;
-			tmp_err_pg.setResponse(ret);
+			tmp_err_pg.setResponse(response);
 			break ;
 		}
 
 		code = retCodeIfValid();
-		if (code == -1)
+		if (!code)
 			return false;
 
 		tmp_err_pg.addCode(code);

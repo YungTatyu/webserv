@@ -54,7 +54,6 @@ class Parser
 		bool	parseIndex();
 		bool	parseAutoindex();
 		bool	parseErrorPage();
-		long	retErrorPageOptNumIfValid();
 		bool	parseAllow();
 		bool	parseDeny();
 		bool	parseListen();
@@ -69,11 +68,12 @@ class Parser
 		bool	parseUseridService();
 		bool	isIPv4(const std::string& ipv4);
 		bool	isIPv6(const std::string& ipv6);
-		long	retCodeIfValid();
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
 		long	parseTime();
 		long	parseSize();
+		unsigned int	retCodeIfValid();
+		long	retErrorPageOptNumIfValid();
 		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
 		std::string	toUpper(std::string) const;
 		Parser();
