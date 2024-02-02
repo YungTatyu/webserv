@@ -29,8 +29,9 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directives_parser/access_log/access_log_test.cpp 
 	test/conf/directives_parser/alias/alias_test.cpp 
 	test/conf/directives_parser/autoindex/autoindex_test.cpp 
-	test/conf/directives_parser/client_max_body_size/client_max_body_size_test.cpp 
 	
+	test/conf/directives_parser/deny/deny_test.cpp 
+	test/conf/directives_parser/client_max_body_size/client_max_body_size_test.cpp 
 	test/conf/directives_parser/allow/allow_test.cpp 
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
