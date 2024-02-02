@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "conf.hpp"
+
 namespace config
 {
 class ErrorPage
@@ -21,6 +23,7 @@ class ErrorPage
 		void	addCode(const unsigned int &code) { this->code_list_.push_back(code); }
 		void	setResponse(const unsigned int &response) { this->response_ = response; }
 		void	setUri(const std::string &uri) { this->uri_ = uri; }
+		const static unsigned int	kType_ = CONF_HTTP|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|CONF_1MORE|CONF_NOT_UNIQUE;
 };
 } // namespace config
 

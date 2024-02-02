@@ -20,6 +20,11 @@ void	config::Lexer::tokenize()
 	this->tokens_.push_back(end_token);
 }
 
+const std::vector<config::Token>	&config::Lexer::getTokens() const
+{
+	return this->tokens_;
+}
+
 const config::Token&	config::Lexer::getToken(int key)
 {
 	return this->tokens_[key];

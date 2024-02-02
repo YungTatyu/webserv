@@ -5,6 +5,8 @@
 #include <set>
 #include <string>
 
+#include "conf.hpp"
+#include "Location.hpp"
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
@@ -26,7 +28,9 @@ namespace config
 {
 struct Server
 {
-	std::set<std::string>	set_directives;
+	const static unsigned int	type = CONF_HTTP|CONF_NOARGS|CONF_NOT_UNIQUE;
+	std::set<std::string>	directives_set;
+	std::vector<Location>	location_list;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;

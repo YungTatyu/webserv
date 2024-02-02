@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "conf.hpp"
+
 namespace config
 {
 class Root
@@ -15,9 +17,9 @@ class Root
 		const static char	*kDefaultPath_;
 		const std::string	&getPath() const { return this->path_; }
 		void	setPath(const std::string &path) { this->path_ = path; }
+		const static unsigned int	kType_ = CONF_HTTP_LOCATION|CONF_HTTP_SERVER|CONF_HTTP_LOCATION|
+											CONF_TAKE1|CONF_UNIQUE;
 };
-
-const char	*Root::kDefaultPath_ = "html";
 } // namespace config
 
 #endif

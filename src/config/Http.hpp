@@ -5,6 +5,8 @@
 #include <set>
 #include <string>
 
+#include "conf.hpp"
+#include "Server.hpp"
 #include "AccessLog.hpp"
 #include "SendTimeout.hpp"
 #include "KeepaliveTimeout.hpp"
@@ -28,7 +30,9 @@ namespace config
 {
 struct Http
 {
-	std::set<std::string>	set_directives;
+	const static unsigned int	type = CONF_MAIN|CONF_NOARGS|CONF_UNIQUE;
+	std::set<std::string>	directives_set;
+	std::vector<Server>	server_list;
 	Root	root;
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;

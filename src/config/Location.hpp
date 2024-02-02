@@ -5,6 +5,8 @@
 #include <set>
 #include <string>
 
+#include "conf.hpp"
+#include "LimitExcept.hpp"
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
@@ -12,7 +14,7 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
-#include "KeepAliveTimeout.hpp"
+#include "KeepaliveTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
 #include "TryFiles.hpp"
@@ -28,8 +30,10 @@ struct Location
 {
 	Location(const std::string &uri) : uri_(uri) {}
 	~Location() {}
-	std::set<std::string>	set_directives;
+	const static unsigned int	type = CONF_HTTP_SERVER|CONF_TAKE1|CONF_NOT_UNIQUE;
+	std::set<std::string>	directives_set;
 	const std::string	uri_;
+	LimitExcept	limit_except;
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
