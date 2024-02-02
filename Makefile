@@ -66,6 +66,9 @@ test:
 	cmake --build $(BUILD_DIR)
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
+format:
+	find ./src -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
+
 -include $(DEPS)
 
 # run:
