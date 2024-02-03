@@ -1133,7 +1133,9 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	{
 		field = fields[i];
 		unsigned int value;
-		std::istringstream(field) >> value;
+		iss.clear();
+		iss.str(field);
+		iss >> value;
 		if (255 < value)
 		{
 			return false;
@@ -1143,13 +1145,21 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	// 4. subnetmaskの値が正しいか確認
 	if (!mask_part.empty())
 	{
-		int	subnet_mask;
-		std::istringstream(mask_part) >> subnet_mask;
-
-		if (subnet_mask < 0 || 32 < subnet_mask)
+		int		subnet_mask;
+		char	remaining_char;
+		iss.clear();
+		iss.str(mask_part);
+		if (iss >> subnet_mask)
 		{
-			return false;
+			if (iss >> remaining_char
+				|| subnet_mask < 0
+				|| 32 < subnet_mask)
+			{
+				return false;
+			}
 		}
+		else
+			return false;
 	}
 
 	// 全ての条件を満たす場合、IPv4アドレスと見なす
@@ -1200,7 +1210,9 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	{
 		field = fields[i];
 		unsigned int value;
-		std::istringstream(field) >> std::hex >> value;
+		iss.clear();
+		iss.str(field);
+		iss >> std::hex >> value;
 		if (value > 0xFFFF)
 		{
 			return false;
@@ -1210,13 +1222,21 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	// 4. subnetmaskの値が正しいか確認
 	if (!mask_part.empty())
 	{
-		int	subnet_mask;
-		std::istringstream(mask_part) >> subnet_mask;
-
-		if (subnet_mask < 0 || 128 < subnet_mask)
+		int		subnet_mask;
+		char	remaining_char;
+		iss.clear();
+		iss.str(mask_part);
+		if (iss >> subnet_mask)
 		{
-			return false;
+			if (iss >> remaining_char
+				|| subnet_mask < 0
+				|| 128 < subnet_mask)
+			{
+				return false;
+			}
 		}
+		else
+			return false;
 	}
 
 	// 全ての条件を満たす場合、IPv6アドレスと見なす
