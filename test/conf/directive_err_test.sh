@@ -69,9 +69,13 @@ conf_path="test/conf/conf_files/directive_error/allow_empty_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid parameter \"\" ${err_path}:6"
 
-conf_path="test/conf/conf_files/directive_error/allow_subnetmask_err.conf"
+conf_path="test/conf/conf_files/directive_error/allow_ipv4_subnetmask_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} invalid parameter \"\" ${err_path}:6"
+assert $conf_path "${err_start_with} invalid parameter \"192.168.0.0/33\" ${err_path}:8"
+
+conf_path="test/conf/conf_files/directive_error/allow_ipv6_subnetmask_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid parameter \"A0:48:9F:C3:FF:BD:12:FF/-1\" ${err_path}:8"
 
 # autoindex
 g_test_directive="autoindex"
@@ -125,6 +129,14 @@ assert $conf_path "${err_start_with} invalid parameter \"FF:4E:CC:50:2B::9A\" ${
 conf_path="test/conf/conf_files/directive_error/deny_empty_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid parameter \"\" ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/deny_ipv4_subnetmask_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid parameter \"192.168.0.0/-1\" ${err_path}:8"
+
+conf_path="test/conf/conf_files/directive_error/deny_ipv6_subnetmask_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid parameter \"A0:48:9F:C3:FF:BD:12:FF/129\" ${err_path}:8"
 
 # error_page
 g_test_directive="error_page"
