@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directives_parser/allow/allow_test.cpp 
 	test/conf/directives_parser/error_log/error_log_test.cpp 
 	test/conf/directives_parser/error_page/error_page_test.cpp 
+	test/conf/directives_parser/index/index_test.cpp 
 	
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)

@@ -56,7 +56,7 @@ TEST(ErrorPageTest, allContext)
 	// http
 	test::test_value(http.error_page_list,
 		{{300, 599}, {301, 598}, {300, 301, 302, 303, 598}},
-		{0, 0, 0},
+		{-1, -1, -1},
 		{"error1", "error2", "error3"}
 	);
 	test::test_directives_set(http.directives_set, kErrorPage, true);
@@ -64,14 +64,14 @@ TEST(ErrorPageTest, allContext)
 	// server	
 	test::test_value(http.server_list[0].error_page_list,
 		{{400, 500}, {450, 550}, {401, 501}, {302}},
-		{922337203685477586, 922337203685477587, 0, 0},
+		{922337203685477586, 922337203685477587, 0, -1},
 		{"response1", "response2", "response3", "response4"}
 	);
 	test::test_directives_set(http.server_list[0].directives_set, kErrorPage, true);
 
 	test::test_value(http.server_list[0].location_list[0].error_page_list,
 		{{400, 401, 402, 403, 404, 405}, {500, 501, 502, 503, 504, 505}},
-		{0, 0},
+		{-1, -1},
 		{"=0", "=922337203685477588"}
 	);
 	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kErrorPage, true);
