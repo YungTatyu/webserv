@@ -1184,7 +1184,7 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	std::string field;
 	std::vector<std::string> fields;
 
-	while (std::getline(iss, field, '.'))
+	while (std::getline(iss, field, ':'))
 	{
 		// 各フィールドが16進数であることを確認
 		for (int i = 0; field[i] != '\0'; i++)
