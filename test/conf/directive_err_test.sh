@@ -69,6 +69,10 @@ conf_path="test/conf/conf_files/directive_error/allow_empty_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid parameter \"\" ${err_path}:6"
 
+conf_path="test/conf/conf_files/directive_error/allow_subnetmask_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid parameter \"\" ${err_path}:6"
+
 # autoindex
 g_test_directive="autoindex"
 g_test_index=0
@@ -305,8 +309,16 @@ assert $conf_path "${err_start_with} \"userid_service\" directive invalid value 
 g_test_directive="worker_conections"
 g_test_index=0
 
-conf_path="test/conf/conf_files/directive_error/.conf"
+conf_path="test/conf/conf_files/directive_error/workerConnections_invalid_num_err.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} unexpected end of file, expecting \";\" or \"}\" ${err_path}:2"
+assert $conf_path "${err_start_with} invalid number \"10a0\" ${err_path}:2"
+
+conf_path="test/conf/conf_files/directive_error/workerConnections_over_longmax_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid number \"9223372036854775808\" ${err_path}:2"
+
+conf_path="test/conf/conf_files/directive_error/workerConnections_not_enough_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"1\" worker_connections are not enough for 1 listening sockets"
 
 printLog
