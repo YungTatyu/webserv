@@ -12,17 +12,31 @@
 
 namespace test
 {
-void	test_value(const std::vector<config::ErrorPage> &error_page_list, const std::vector<std::vector<unsigned int>> &expects)
+void	test_value(
+	const std::vector<config::ErrorPage> &error_page_list,
+	const std::vector<std::vector<unsigned int>> &expect_codes,
+	const std::vector<long> &expect_response,
+	const std::vector<std::string> &expect_uri
+)
 {
-	int	ei = 0;
-	std::for_each(error_page_list.begin(), error_page_list.end(), [&ei, &expects](config::ErrorPage error_page){
+	int	ei = 0; // error page index
+	std::for_each(error_page_list.begin(), error_page_list.end(),
+		[&ei, &expect_codes, &expect_response, &expect_uri](config::ErrorPage error_page){
 		const std::vector<unsigned int>	&code_list = error_page.getCodeList();
-		const std::vector<unsigned int>	&expect = expects[ei];
-		int	ci = 0;
-		std::for_each(code_list.begin(), code_list.end(), [&ci, &expect](unsigned int code){
-			EXPECT_EQ(code, expect[ci]);
+		const std::vector<unsigned int>	&expect_code = expect_codes[ei];
+		int	ci = 0; // code list index
+
+		// test code_list
+		std::for_each(code_list.begin(), code_list.end(), [&error_page, &ci, &expect_code](unsigned int code){
+			EXPECT_EQ(code, expect_code[ci]);
 			++ci;
 		});
+
+		// test response
+		EXPECT_EQ(error_page.getResponse(), expect_response[ei]);
+
+		// test uri
+		EXPECT_EQ(error_page.getUri(), expect_uri[ei]);
 		++ei;
 	});
 }
@@ -40,7 +54,27 @@ TEST(ErrorPageTest, allContext)
 	const std::vector<config::Server>	&server_list = http.server_list;
 
 	// http
-	test::test_value(http.error_page_list, {{300, 599}, {301, 598}, {300, 301, 302, 303, 598}});
+	test::test_value(http.error_page_list,
+		{{300, 599}, {301, 598}, {300, 301, 302, 303, 598}},
+		{0, 0, 0},
+		{"error1", "error2", "error3"}
+	);
+	test::test_directives_set(http.directives_set, kErrorPage, true);
+
+	// server	
+	test::test_value(http.server_list[0].error_page_list,
+		{{400, 500}, {450, 550}, {401, 501}, {302}},
+		{922337203685477586, 922337203685477587, 0, 0},
+		{"response1", "response2", "response3", "response4"}
+	);
+	test::test_directives_set(http.server_list[0].directives_set, kErrorPage, true);
+
+	test::test_value(http.server_list[0].location_list[0].error_page_list,
+		{{400, 401, 402, 403, 404, 405}, {500, 501, 502, 503, 504, 505}},
+		{0, 0},
+		{"=0", "=922337203685477588"}
+	);
+	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kErrorPage, true);
 
 }
 
