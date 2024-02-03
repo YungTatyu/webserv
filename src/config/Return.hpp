@@ -13,7 +13,7 @@ class Return
 		int			code_;
 		std::string	url_; // url or text
 	public:
-		Return() : code(this->kCodeUnset) {}
+		Return() : code_(this->kCodeUnset) {}
 		~Return() {}
 		const int	&getCode() const { return this->code_; }
 		const std::string	&getUrl() const { return this->url_; }
