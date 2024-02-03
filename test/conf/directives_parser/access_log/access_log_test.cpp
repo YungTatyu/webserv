@@ -27,6 +27,8 @@ const std::string	kAccessLog = "access_log";
 TEST(accesslogTest, allContext)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/access_log/1.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -56,6 +58,8 @@ TEST(accesslogTest, allContext)
 TEST(accesslogTest, notFound) {
 		
 	const config::Main	*config = config::init_config("test/conf/directives_parser/only_context.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;

@@ -27,6 +27,8 @@ const std::string	kErrorLog = "error_log";
 TEST(ErrorLogTest, allContext)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/error_log/1.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -51,6 +53,8 @@ TEST(ErrorLogTest, allContext)
 TEST(ErrorLogTest, notFound) {
 		
 	const config::Main	*config = config::init_config("test/conf/directives_parser/only_context.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;

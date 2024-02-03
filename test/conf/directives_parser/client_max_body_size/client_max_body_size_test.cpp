@@ -13,6 +13,8 @@ const std::string	kClientMaxBodySize = "client_max_body_size";
 TEST(clientMaxBodySizeTest, longMax)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/client_max_body_size/1.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -24,6 +26,8 @@ TEST(clientMaxBodySizeTest, longMax)
 TEST(clientMaxBodySizeTest, longMaxKilo)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/client_max_body_size/3.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -35,6 +39,8 @@ TEST(clientMaxBodySizeTest, longMaxKilo)
 TEST(clientMaxBodySizeTest, longMaxMega)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/client_max_body_size/4.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -47,6 +53,8 @@ TEST(clientMaxBodySizeTest, longMaxMega)
 TEST(clientMaxBodySizeTest, zero)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/client_max_body_size/2.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -58,6 +66,8 @@ TEST(clientMaxBodySizeTest, zero)
 
 TEST(clientMaxBodySizeTest, notFound) {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/only_context.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;

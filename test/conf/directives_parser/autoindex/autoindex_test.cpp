@@ -25,6 +25,8 @@ const std::string	kAutoindex = "autoindex";
 TEST(autoindexTest, allContext)
 {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/autoindex/1.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
@@ -45,6 +47,8 @@ TEST(autoindexTest, allContext)
 
 TEST(autoindexTest, notFound) {
 	const config::Main	*config = config::init_config("test/conf/directives_parser/only_context.conf");
+	ASSERT_NE(config, nullptr);
+
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
