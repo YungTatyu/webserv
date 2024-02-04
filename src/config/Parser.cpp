@@ -1352,7 +1352,7 @@ bool	config::Parser::parseListen()
 	config::Listen				tmp_listen;
 	std::istringstream			iss;
 	char						remaining_char;
-	long						port;
+	long						port = 80;
 	std::string					segment;
 	std::vector<std::string>	segments;
 
@@ -1456,6 +1456,7 @@ bool	config::Parser::parseListen()
 				std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 				return false;
 			}
+			tmp_listen.setPort(port);
 		}
 		else
 		{
@@ -1463,7 +1464,6 @@ bool	config::Parser::parseListen()
 			std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
-		tmp_listen.setPort(port);
 	}
 
 	// 6. defalt_serverがあるばあい
