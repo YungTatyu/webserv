@@ -1,4 +1,5 @@
 #include "SysCallWrapper.hpp"
+#include <cstdlib>
 
 int SysCallWrapper::Socket( int domain, int type, int protocol )
 {
@@ -67,3 +68,33 @@ int SysCallWrapper::Poll(struct pollfd fds[], nfds_t nfds, int timeout)
 	return re;
 }
 
+int SysCallWrapper::Pipe(int fildes[2])
+{
+	int re = pipe( fildes );
+	if ( re == -1 )
+	{
+		perror( "pipe" );
+	}
+	return re;
+}
+
+pid_t SysCallWrapper::Fork(void)
+{
+	int re = fork();
+	if ( re == -1 )
+	{
+		perror( "fork" );
+	}
+	return re;
+}
+
+int SysCallWrapper::Dup2(int fildes, int fildes2)
+{
+	int re = dup2(fildes, fildes2);
+	if ( re == -1 )
+	{
+		perror( "dup2" );
+		std::exit( EXIT_FAILURE );
+	}
+	return re;
+}

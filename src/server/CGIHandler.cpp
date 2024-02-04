@@ -1,5 +1,7 @@
 #include "CGIHandler.hpp"
 #include "FileUtils.hpp"
+#include "SysCallWrapper.hpp"
+#include <cstdlib>
 
 // ./cgi/script.hpp or ./cgi/scirpt.hpp?aaa ./cgi/script.hpp?
 // or ./a.out
@@ -41,14 +43,21 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 	int status;
 	// extern char **environ;
 
-	pipe( pipefd );
+	if ( SysCallWrapper::Pipe( pipefd ) == -1 )
+		return "CGI Execution Failed";
 	fcntl(pipefd[READ], F_SETFL, O_NONBLOCK);
 	fcntl(pipefd[WRITE], F_SETFL, O_NONBLOCK);
-	pid_t pid = fork();
+	pid_t pid = SysCallWrapper::Fork();
+	if ( pid == -1 )
+	{
+		close ( pipefd[WRITE] );
+		close ( pipefd[READ] );
+		return "CGI Execution Failed";
+	}
 	if ( pid == 0 )
 	{
 		close( pipefd[READ] );
-		dup2( pipefd[WRITE], STDOUT_FILENO );
+		SysCallWrapper::Dup2( pipefd[WRITE], STDOUT_FILENO ); // Exit in Wrapper on fail.
 		close( pipefd[WRITE] );
 		// setenv("QUERY_STRING", query.c_str(), 1);
 		std::string env = "QUERY_STRING=" + query;
@@ -65,7 +74,7 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 			char *cmd[] = {const_cast<char *>(uri.c_str()), NULL};
 			execve(uri.c_str(), cmd, environ);
 		}
-		std::exit(1);
+		std::exit( EXIT_FAILURE );
 	}
 	else
 	{
