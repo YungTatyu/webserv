@@ -173,7 +173,7 @@ bool	config::Parser::parse()
 			continue;
 		}
 
-		// directiveが終了しているか
+		// ";", "{"が存在するはず
 		if (!expectTerminatingToken())
 			return false;
 		
@@ -404,7 +404,7 @@ bool	config::Parser::isDirective(const config::Token &token) const
 
 /**
  * tokenを一時的に進める必要があるため、引数でtokenを渡さない
- * @date terminating_token: directive、contextの終了条件
+ * @param terminating_token: directive、contextの終了条件
  * directive ;
  * context   {
  * 
@@ -550,24 +550,30 @@ bool	config::Parser::parseAccessLog()
 	// 文字列が空でなければオブジェクトを追加する
 	if (!path.empty())
 	{
+		ti_ += 2;
+		return true;
+	}
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.directives_set.insert(kACCESS_LOG);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kACCESS_LOG);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kACCESS_LOG);
+
+
+	if (path == "off")
+		tmp_acs_log.setIsAccesslogOn(false);
+	else
 		tmp_acs_log.setFile(path);
 
-		if (context == config::CONF_HTTP)
-		{
-			this->config_.http.access_log_list.push_back(tmp_acs_log);
-			this->config_.http.directives_set.insert(kACCESS_LOG);
-		}
-		else if (context == config::CONF_HTTP_SERVER)
-		{
-			this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
-			this->config_.http.server_list.back().directives_set.insert(kACCESS_LOG);
-		}
-		else if (context == config::CONF_HTTP_LOCATION)
-		{
-			this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kACCESS_LOG);
-		}
-	}
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.access_log_list.push_back(tmp_acs_log);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
 
 	ti_ += 2;
 	return true;
@@ -583,28 +589,31 @@ bool	config::Parser::parseErrorLog()
 	// 文字列が空でなければオブジェクトを追加する
 	if (!path.empty())
 	{
-		tmp_err_log.setFile(path);
+		ti_ += 2;
+		return true;
+	}
 
-		if (context == config::CONF_MAIN)
-		{
-			this->config_.error_log_list.push_back(tmp_err_log);
-			this->config_.directives_set.insert(kERROR_LOG);
-		}
-		else if (context == config::CONF_HTTP)
-		{
-			this->config_.http.error_log_list.push_back(tmp_err_log);
-			this->config_.http.directives_set.insert(kERROR_LOG);
-		}
-		else if (context == config::CONF_HTTP_SERVER)
-		{
-			this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
-			this->config_.http.server_list.back().directives_set.insert(kERROR_LOG);
-		}
-		else if (context == config::CONF_HTTP_LOCATION)
-		{
-			this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_LOG);
-		}
+	tmp_err_log.setFile(path);
+
+	if (context == config::CONF_MAIN)
+	{
+		this->config_.error_log_list.push_back(tmp_err_log);
+		this->config_.directives_set.insert(kERROR_LOG);
+	}
+	else if (context == config::CONF_HTTP)
+	{
+		this->config_.http.error_log_list.push_back(tmp_err_log);
+		this->config_.http.directives_set.insert(kERROR_LOG);
+	}
+	else if (context == config::CONF_HTTP_SERVER)
+	{
+		this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
+		this->config_.http.server_list.back().directives_set.insert(kERROR_LOG);
+	}
+	else if (context == config::CONF_HTTP_LOCATION)
+	{
+		this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_LOG);
 	}
 
 	ti_ += 2;
@@ -724,25 +733,25 @@ bool	config::Parser::canConvertMinTime(long &value, const std::string& unit)
 {
 	if (unit == "" || unit == "s")
 	{
-		if (config::Time::seconds > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::seconds > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::seconds;
 	}
 	else if (unit == "m")
 	{
-		if (config::Time::minutes > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::minutes > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::minutes;
 	}
 	else if (unit == "h")
 	{
-		if (config::Time::hours > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::hours > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::hours;
 	}
 	else if (unit == "d")
 	{
-		if (config::Time::days > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::days > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::days;
 	}
@@ -753,13 +762,13 @@ bool	config::Parser::canConvertMinSize(long &value, const std::string& unit)
 {
 	if (unit == "k" || unit == "K")
 	{
-		if (config::Size::kilobytes > config::Size::kMaxSizeInBytes_ / value)
+		if (config::Size::kilobytes > (config::Size::kMaxSizeInBytes_ / value))
 			return false;
 		value *= config::Size::kilobytes;
 	}
 	else if (unit == "m" || unit == "M")
 	{
-		if (config::Size::megabytes > config::Size::kMaxSizeInBytes_ / value)
+		if (config::Size::megabytes > (config::Size::kMaxSizeInBytes_ / value))
 			return false;
 		value *= config::Size::megabytes;
 	}
@@ -839,8 +848,23 @@ bool	config::Parser::parseSendTimeout()
 		return false;
 	}
 
-	this->config_.http.send_timeout.setTime(ret);
-	this->config_.http.directives_set.insert(kSEND_TIMEOUT);
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+	{
+		this->config_.http.send_timeout.setTime(ret);
+		this->config_.http.directives_set.insert(kSEND_TIMEOUT);
+	}
+	else if (context == config::CONF_HTTP_SERVER)
+	{
+		this->config_.http.server_list.back().send_timeout.setTime(ret);
+		this->config_.http.server_list.back().directives_set.insert(kSEND_TIMEOUT);
+	}
+	else if (context == config::CONF_HTTP_LOCATION)
+	{
+		this->config_.http.server_list.back().location_list.back().send_timeout.setTime(ret);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kSEND_TIMEOUT);
+	}
 
 	ti_ += 2;
 	return true;
@@ -903,6 +927,7 @@ bool	config::Parser::parseClientMaxBodySize()
 	this->config_.http.client_max_body_size.setSize(ret);
 	this->config_.http.directives_set.insert(kCLIENT_MAX_BODY_SIZE);
 
+	ti_ += 2;
 	return true;
 }
 
@@ -928,24 +953,21 @@ bool	config::Parser::parseIndex()
 		tmp_index.setFile(file);
 
 		if (context == config::CONF_HTTP)
-		{
 			this->config_.http.index_list.push_back(tmp_index);
-			this->config_.http.directives_set.insert(kINDEX);
-		}
 		else if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().directives_set.insert(kINDEX);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
-		}
 
 		ti_++;
 	}
 
+	if (context == config::CONF_HTTP)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
 	ti_++;
 	return true;
 }
@@ -962,23 +984,22 @@ bool	config::Parser::parseAutoindex()
 	}
 
 	config::CONTEXT context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.directives_set.insert(kAUTOINDEX);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kAUTOINDEX);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kAUTOINDEX);
+
 	if (tmp_switch == "on")
 	{
 		if (context == config::CONF_HTTP)
-		{
 			this->config_.http.autoindex.setIsAutoindexOn(true);
-			this->config_.http.directives_set.insert(kAUTOINDEX);
-		}
 		else if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().autoindex.setIsAutoindexOn(true);
-			this->config_.http.server_list.back().directives_set.insert(kAUTOINDEX);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().autoindex.setIsAutoindexOn(true);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kAUTOINDEX);
-		}
 	}
 
 	ti_ += 2;
@@ -1048,13 +1069,14 @@ bool	config::Parser::parseErrorPage()
 	{
 		// 最後から二番目の引数が=responseオプションの場合
 		if (ti_ != tmp_ti 
-			&& this->tokens_[ti_ + 1].type_ == config::TK_SEMICOLON 
+			&& this->tokens_[ti_ + 2].type_ == config::TK_SEMICOLON 
 			&& tokens_[ti_].value_[0] == '=')
 		{
 			long	response = retErrorPageOptNumIfValid();
 			if (!response)
 				return false;
 			tmp_err_pg.setResponse(response);
+			ti_++;
 			break ;
 		}
 
@@ -1469,17 +1491,19 @@ bool	config::Parser::parseListen()
 bool	config::Parser::parseServerName()
 {
 	ti_++;
-	config::ServerName	tmp_server_name;
+
+	// 最初のserver_nameディレクティブであれば、デフォルト値を削除する
+	if (this->config_.http.server_list.back().directives_set.find(kSERVER_NAME) == this->config_.http.server_list.back().directives_set.end())
+		this->config_.http.server_list.back().server_name.eraseDefaultName();
 
 	while (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
 	{
-		tmp_server_name.setName(this->tokens_[ti_].value_);
+		this->config_.http.server_list.back().server_name.addName(this->tokens_[ti_].value_);
 
-		this->config_.http.server_list.back().server_name_list.push_back(tmp_server_name);
-		this->config_.http.server_list.back().directives_set.insert(kSERVER_NAME);
 		ti_++;
 	}
 
+	this->config_.http.server_list.back().directives_set.insert(kSERVER_NAME);
 	ti_++;
 	return true;
 }
@@ -1496,15 +1520,9 @@ bool	config::Parser::parseTryFiles()
 		file = this->tokens_[ti_].value_;
 
 		if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().try_files.addFile(file);
-			this->config_.http.server_list.back().directives_set.insert(kTRY_FILES);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().try_files.addFile(file);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kTRY_FILES);
-		}
 
 		ti_++;
 	}
@@ -1554,6 +1572,11 @@ bool	config::Parser::parseTryFiles()
 		else if (context == config::CONF_HTTP_LOCATION)
 			this->config_.http.server_list.back().location_list.back().try_files.setUri(uri);
 	}
+
+	if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kTRY_FILES);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kTRY_FILES);
 
 	ti_ += 2;
 	return true;
@@ -1686,10 +1709,21 @@ bool	config::Parser::parseUseridExpires()
 {
 	ti_++;
 	std::string	tmp_switch = this->tokens_[ti_].value_;
+	config::CONTEXT	context = this->current_context_.top();
 
 	// off であれば、なにもしない
 	if (tmp_switch == "off")
+	{
+		if (context == config::CONF_HTTP)
+			this->config_.http.directives_set.insert(kUSERID_EXPIRES);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
+
+		ti_ += 2;
 		return true;
+	}
 
 	long time = parseTime();
 	if (time == -1)
@@ -1698,22 +1732,23 @@ bool	config::Parser::parseUseridExpires()
 		return false;
 	}
 
-	config::CONTEXT	context = this->current_context_.top();
-
 	if (context == config::CONF_HTTP)
 	{
 		this->config_.http.userid_expires.setTime(time);
 		this->config_.http.userid_expires.setIsUseridExpiresOn(true);
+		this->config_.http.directives_set.insert(kUSERID_EXPIRES);
 	}
 	else if (context == config::CONF_HTTP_SERVER)
 	{
 		this->config_.http.server_list.back().userid_expires.setTime(time);
 		this->config_.http.server_list.back().userid_expires.setIsUseridExpiresOn(true);
+		this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
 	}
 	else if (context == config::CONF_HTTP_LOCATION)
 	{
 		this->config_.http.server_list.back().location_list.back().userid_expires.setTime(time);
 		this->config_.http.server_list.back().location_list.back().userid_expires.setIsUseridExpiresOn(true);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
 	}
 
 	ti_ += 2;

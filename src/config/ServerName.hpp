@@ -6,17 +6,20 @@
 #include "conf.hpp"
 
 namespace config
-{
+{ 
 class ServerName
 {
 	private:
-		std::string	name_;
+		// defaultでは空文字列が入る。
+		// セットされた場合、デフォルト値は削除する
+		std::set<std::string>	name_set_;
 	public:
-		ServerName() : name_(this->kDefaultName_) {}
+		ServerName() { this->name_set_.insert(kDefaultName_); }
 		~ServerName() {}
 		const static char	*kDefaultName_;
-		const std::string	&getName() const { return this->name_; }
-		void	setName(const std::string &name) { this->name_ = name; }
+		const std::set<std::string>	&getName() const { return this->name_set_; }
+		void	addName(const std::string &name) { name_set_.insert(name); }
+		void	eraseDefaultName() { this->name_set_.erase(kDefaultName_); }
 		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_1MORE|CONF_NOT_UNIQUE;
 };
 } // namespace config
