@@ -724,25 +724,25 @@ bool	config::Parser::canConvertMinTime(long &value, const std::string& unit)
 {
 	if (unit == "" || unit == "s")
 	{
-		if (config::Time::seconds > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::seconds > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::seconds;
 	}
 	else if (unit == "m")
 	{
-		if (config::Time::minutes > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::minutes > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::minutes;
 	}
 	else if (unit == "h")
 	{
-		if (config::Time::hours > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::hours > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::hours;
 	}
 	else if (unit == "d")
 	{
-		if (config::Time::days > config::Time::kMaxTimeInMilliseconds_ / value)
+		if (config::Time::days > (config::Time::kMaxTimeInMilliseconds_ / value))
 			return false;
 		value *= config::Time::days;
 	}
@@ -753,13 +753,13 @@ bool	config::Parser::canConvertMinSize(long &value, const std::string& unit)
 {
 	if (unit == "k" || unit == "K")
 	{
-		if (config::Size::kilobytes > config::Size::kMaxSizeInBytes_ / value)
+		if (config::Size::kilobytes > (config::Size::kMaxSizeInBytes_ / value))
 			return false;
 		value *= config::Size::kilobytes;
 	}
 	else if (unit == "m" || unit == "M")
 	{
-		if (config::Size::megabytes > config::Size::kMaxSizeInBytes_ / value)
+		if (config::Size::megabytes > (config::Size::kMaxSizeInBytes_ / value))
 			return false;
 		value *= config::Size::megabytes;
 	}
@@ -928,23 +928,20 @@ bool	config::Parser::parseIndex()
 		tmp_index.setFile(file);
 
 		if (context == config::CONF_HTTP)
-		{
 			this->config_.http.index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
-		}
 		else if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
-		}
 		ti_++;
 	}
 
+	if (context == config::CONF_HTTP)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
 	ti_++;
 	return true;
 }
@@ -961,23 +958,22 @@ bool	config::Parser::parseAutoindex()
 	}
 
 	config::CONTEXT context = this->current_context_.top();
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.directives_set.insert(kAUTOINDEX);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kAUTOINDEX);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kAUTOINDEX);
+
 	if (tmp_switch == "on")
 	{
 		if (context == config::CONF_HTTP)
-		{
 			this->config_.http.autoindex.setIsAutoindexOn(true);
-			this->config_.http.directives_set.insert(kAUTOINDEX);
-		}
 		else if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().autoindex.setIsAutoindexOn(true);
-			this->config_.http.server_list.back().directives_set.insert(kAUTOINDEX);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().autoindex.setIsAutoindexOn(true);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kAUTOINDEX);
-		}
 	}
 
 	ti_ += 2;
@@ -1460,10 +1456,10 @@ bool	config::Parser::parseServerName()
 		tmp_server_name.setName(this->tokens_[ti_].value_);
 
 		this->config_.http.server_list.back().server_name_list.push_back(tmp_server_name);
-		this->config_.http.server_list.back().directives_set.insert(kSERVER_NAME);
 		ti_++;
 	}
 
+	this->config_.http.server_list.back().directives_set.insert(kSERVER_NAME);
 	ti_++;
 	return true;
 }
@@ -1480,15 +1476,9 @@ bool	config::Parser::parseTryFiles()
 		file = this->tokens_[ti_].value_;
 
 		if (context == config::CONF_HTTP_SERVER)
-		{
 			this->config_.http.server_list.back().try_files.addFile(file);
-			this->config_.http.server_list.back().directives_set.insert(kTRY_FILES);
-		}
 		else if (context == config::CONF_HTTP_LOCATION)
-		{
 			this->config_.http.server_list.back().location_list.back().try_files.addFile(file);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kTRY_FILES);
-		}
 
 		ti_++;
 	}
@@ -1538,6 +1528,11 @@ bool	config::Parser::parseTryFiles()
 		else if (context == config::CONF_HTTP_LOCATION)
 			this->config_.http.server_list.back().location_list.back().try_files.setUri(uri);
 	}
+
+	if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kTRY_FILES);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kTRY_FILES);
 
 	ti_ += 2;
 	return true;
@@ -1670,10 +1665,19 @@ bool	config::Parser::parseUseridExpires()
 {
 	ti_++;
 	std::string	tmp_switch = this->tokens_[ti_].value_;
+	config::CONTEXT	context = this->current_context_.top();
 
 	// off であれば、なにもしない
 	if (tmp_switch == "off")
+	{
+		if (context == config::CONF_HTTP)
+			this->config_.http.directives_set.insert(kUSERID_EXPIRES);
+		else if (context == config::CONF_HTTP_SERVER)
+			this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
+		else if (context == config::CONF_HTTP_LOCATION)
+			this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
 		return true;
+	}
 
 	long time = parseTime();
 	if (time == -1)
@@ -1682,22 +1686,23 @@ bool	config::Parser::parseUseridExpires()
 		return false;
 	}
 
-	config::CONTEXT	context = this->current_context_.top();
-
 	if (context == config::CONF_HTTP)
 	{
 		this->config_.http.userid_expires.setTime(time);
 		this->config_.http.userid_expires.setIsUseridExpiresOn(true);
+		this->config_.http.directives_set.insert(kUSERID_EXPIRES);
 	}
 	else if (context == config::CONF_HTTP_SERVER)
 	{
 		this->config_.http.server_list.back().userid_expires.setTime(time);
 		this->config_.http.server_list.back().userid_expires.setIsUseridExpiresOn(true);
+		this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
 	}
 	else if (context == config::CONF_HTTP_LOCATION)
 	{
 		this->config_.http.server_list.back().location_list.back().userid_expires.setTime(time);
 		this->config_.http.server_list.back().location_list.back().userid_expires.setIsUseridExpiresOn(true);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
 	}
 
 	ti_ += 2;
