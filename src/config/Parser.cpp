@@ -1473,13 +1473,15 @@ bool	config::Parser::parseListen()
 bool	config::Parser::parseServerName()
 {
 	ti_++;
-	config::ServerName	tmp_server_name;
+
+	// 最初のserver_nameディレクティブであれば、デフォルト値を削除する
+	if (this->config_.http.server_list.back().directives_set.find(kSERVER_NAME) == this->config_.http.server_list.back().directives_set.end())
+		this->config_.http.server_list.back().server_name.eraseDefaultName();
 
 	while (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
 	{
-		tmp_server_name.setName(this->tokens_[ti_].value_);
+		this->config_.http.server_list.back().server_name.addName(this->tokens_[ti_].value_);
 
-		this->config_.http.server_list.back().server_name_list.push_back(tmp_server_name);
 		ti_++;
 	}
 

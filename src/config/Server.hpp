@@ -44,7 +44,7 @@ struct Server
 	KeepaliveTimeout	keepalive_timeout;
 	Root	root;
 	SendTimeout	send_timeout;
-	std::vector<ServerName>	server_name_list;
+	ServerName	server_name;
 	TryFiles	try_files;
 	Userid	userid;
 	UseridDomain	userid_domain;
