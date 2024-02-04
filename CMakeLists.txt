@@ -39,6 +39,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directives_parser/return/return_test.cpp
 	test/conf/directives_parser/root/root_test.cpp
 	test/conf/directives_parser/send_timeout/send_timeout_test.cpp
+	test/conf/directives_parser/try_files/try_files_test.cpp
 
 	test/conf/directives_parser/index/index_test.cpp 
 
