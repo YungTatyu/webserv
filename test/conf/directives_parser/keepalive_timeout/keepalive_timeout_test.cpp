@@ -91,7 +91,7 @@ TEST(KeepaliveTimeoutTest, random)
 	test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
 
 	// location
-	test::test_value(http.server_list[0].location_list, {1, 1000 * 60, 1000 * 60 * 60, 1000 * 60 * 60 * 24});
+	test::test_value(http.server_list[0].location_list, {1000, 1000 * 60, 1000 * 60 * 60, 1000 * 60 * 60 * 24});
 }
 
 

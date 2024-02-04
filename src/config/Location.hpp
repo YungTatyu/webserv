@@ -16,6 +16,7 @@
 #include "Index.hpp"
 #include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
+#include "SendTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
 #include "TryFiles.hpp"
@@ -44,6 +45,7 @@ struct Location
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
+	SendTimeout	send_timeout;
 	std::vector<Return>	return_list;
 	Root	root;
 	TryFiles	try_files;
