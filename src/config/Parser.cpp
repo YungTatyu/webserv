@@ -1702,6 +1702,8 @@ bool	config::Parser::parseUseridExpires()
 			this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
 		else if (context == config::CONF_HTTP_LOCATION)
 			this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
+
+		ti_ += 2;
 		return true;
 	}
 
