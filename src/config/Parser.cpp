@@ -839,8 +839,23 @@ bool	config::Parser::parseSendTimeout()
 		return false;
 	}
 
-	this->config_.http.send_timeout.setTime(ret);
-	this->config_.http.directives_set.insert(kSEND_TIMEOUT);
+	config::CONTEXT	context = this->current_context_.top();
+
+	if (context & config::CONF_HTTP)
+	{
+		this->config_.http.send_timeout.setTime(ret);
+		this->config_.http.directives_set.insert(kSEND_TIMEOUT);
+	}
+	else if (context & config::CONF_HTTP_SERVER)
+	{
+		this->config_.http.server_list.back().send_timeout.setTime(ret);
+		this->config_.http.server_list.back().directives_set.insert(kSEND_TIMEOUT);
+	}
+	else if (context & config::CONF_HTTP_LOCATION)
+	{
+		this->config_.http.server_list.back().location_list.back().send_timeout.setTime(ret);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kSEND_TIMEOUT);
+	}
 
 	ti_ += 2;
 	return true;

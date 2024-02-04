@@ -18,6 +18,7 @@
 #include "KeepaliveTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
+#include "SendTimeout.hpp"
 #include "TryFiles.hpp"
 #include "Userid.hpp"
 #include "UseridDomain.hpp"
@@ -46,6 +47,7 @@ struct Location
 	KeepaliveTimeout	keepalive_timeout;
 	std::vector<Return>	return_list;
 	Root	root;
+	SendTimeout	send_timeout;
 	TryFiles	try_files;
 	Userid	userid;
 	UseridDomain	userid_domain;

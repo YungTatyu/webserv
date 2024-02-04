@@ -17,6 +17,7 @@
 #include "KeepaliveTimeout.hpp"
 #include "Listen.hpp"
 #include "Root.hpp"
+#include "SendTimeout.hpp"
 #include "ServerName.hpp"
 #include "TryFiles.hpp"
 #include "Userid.hpp"
@@ -42,6 +43,7 @@ struct Server
 	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
 	Root	root;
+	SendTimeout	send_timeout;
 	std::vector<ServerName>	server_name_list;
 	TryFiles	try_files;
 	Userid	userid;
