@@ -550,24 +550,30 @@ bool	config::Parser::parseAccessLog()
 	// 文字列が空でなければオブジェクトを追加する
 	if (!path.empty())
 	{
+		ti_ += 2;
+		return true;
+	}
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.directives_set.insert(kACCESS_LOG);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().directives_set.insert(kACCESS_LOG);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kACCESS_LOG);
+
+
+	if (path == "off")
+		tmp_acs_log.setIsAccesslogOn(false);
+	else
 		tmp_acs_log.setFile(path);
 
-		if (context == config::CONF_HTTP)
-		{
-			this->config_.http.access_log_list.push_back(tmp_acs_log);
-			this->config_.http.directives_set.insert(kACCESS_LOG);
-		}
-		else if (context == config::CONF_HTTP_SERVER)
-		{
-			this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
-			this->config_.http.server_list.back().directives_set.insert(kACCESS_LOG);
-		}
-		else if (context == config::CONF_HTTP_LOCATION)
-		{
-			this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kACCESS_LOG);
-		}
-	}
+
+	if (context == config::CONF_HTTP)
+		this->config_.http.access_log_list.push_back(tmp_acs_log);
+	else if (context == config::CONF_HTTP_SERVER)
+		this->config_.http.server_list.back().access_log_list.push_back(tmp_acs_log);
+	else if (context == config::CONF_HTTP_LOCATION)
+		this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
 
 	ti_ += 2;
 	return true;
@@ -841,17 +847,17 @@ bool	config::Parser::parseSendTimeout()
 
 	config::CONTEXT	context = this->current_context_.top();
 
-	if (context & config::CONF_HTTP)
+	if (context == config::CONF_HTTP)
 	{
 		this->config_.http.send_timeout.setTime(ret);
 		this->config_.http.directives_set.insert(kSEND_TIMEOUT);
 	}
-	else if (context & config::CONF_HTTP_SERVER)
+	else if (context == config::CONF_HTTP_SERVER)
 	{
 		this->config_.http.server_list.back().send_timeout.setTime(ret);
 		this->config_.http.server_list.back().directives_set.insert(kSEND_TIMEOUT);
 	}
-	else if (context & config::CONF_HTTP_LOCATION)
+	else if (context == config::CONF_HTTP_LOCATION)
 	{
 		this->config_.http.server_list.back().location_list.back().send_timeout.setTime(ret);
 		this->config_.http.server_list.back().location_list.back().directives_set.insert(kSEND_TIMEOUT);
