@@ -173,7 +173,7 @@ bool	config::Parser::parse()
 			continue;
 		}
 
-		// directiveが終了しているか
+		// ";", "{"が存在するはず
 		if (!expectTerminatingToken())
 			return false;
 		
@@ -404,7 +404,7 @@ bool	config::Parser::isDirective(const config::Token &token) const
 
 /**
  * tokenを一時的に進める必要があるため、引数でtokenを渡さない
- * @date terminating_token: directive、contextの終了条件
+ * @param terminating_token: directive、contextの終了条件
  * directive ;
  * context   {
  * 
