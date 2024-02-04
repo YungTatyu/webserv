@@ -589,28 +589,31 @@ bool	config::Parser::parseErrorLog()
 	// 文字列が空でなければオブジェクトを追加する
 	if (!path.empty())
 	{
-		tmp_err_log.setFile(path);
+		ti_ += 2;
+		return true;
+	}
 
-		if (context == config::CONF_MAIN)
-		{
-			this->config_.error_log_list.push_back(tmp_err_log);
-			this->config_.directives_set.insert(kERROR_LOG);
-		}
-		else if (context == config::CONF_HTTP)
-		{
-			this->config_.http.error_log_list.push_back(tmp_err_log);
-			this->config_.http.directives_set.insert(kERROR_LOG);
-		}
-		else if (context == config::CONF_HTTP_SERVER)
-		{
-			this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
-			this->config_.http.server_list.back().directives_set.insert(kERROR_LOG);
-		}
-		else if (context == config::CONF_HTTP_LOCATION)
-		{
-			this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
-			this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_LOG);
-		}
+	tmp_err_log.setFile(path);
+
+	if (context == config::CONF_MAIN)
+	{
+		this->config_.error_log_list.push_back(tmp_err_log);
+		this->config_.directives_set.insert(kERROR_LOG);
+	}
+	else if (context == config::CONF_HTTP)
+	{
+		this->config_.http.error_log_list.push_back(tmp_err_log);
+		this->config_.http.directives_set.insert(kERROR_LOG);
+	}
+	else if (context == config::CONF_HTTP_SERVER)
+	{
+		this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
+		this->config_.http.server_list.back().directives_set.insert(kERROR_LOG);
+	}
+	else if (context == config::CONF_HTTP_LOCATION)
+	{
+		this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_LOG);
 	}
 
 	ti_ += 2;
