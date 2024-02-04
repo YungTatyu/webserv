@@ -927,6 +927,7 @@ bool	config::Parser::parseClientMaxBodySize()
 	this->config_.http.client_max_body_size.setSize(ret);
 	this->config_.http.directives_set.insert(kCLIENT_MAX_BODY_SIZE);
 
+	ti_ += 2;
 	return true;
 }
 
