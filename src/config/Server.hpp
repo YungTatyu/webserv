@@ -13,9 +13,11 @@
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
+#include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "Listen.hpp"
 #include "Root.hpp"
+#include "SendTimeout.hpp"
 #include "ServerName.hpp"
 #include "TryFiles.hpp"
 #include "Userid.hpp"
@@ -38,15 +40,17 @@ struct Server
 	std::vector<Deny>	deny_list;
 	std::vector<Index>	index_list;
 	std::vector<Listen>	listen_list;
+	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
 	Root	root;
-	std::vector<ServerName>	server_name_list;
+	SendTimeout	send_timeout;
+	ServerName	server_name;
 	TryFiles	try_files;
 	Userid	userid;
 	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
-	UseridService	user_service;
+	UseridService	userid_service;
 };
 } // namespace config
 

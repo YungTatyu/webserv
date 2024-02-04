@@ -64,7 +64,7 @@ void	config::Lexer::skipSpaces()
 {
 	if (isEndOfFile())
 		return ;
-	while (std::isspace(getChar()))
+	while (!isEndOfFile() && std::isspace(getChar()))
 	{
 		if (getChar() == '\n')
 			current_line_++;
@@ -80,11 +80,16 @@ void	config::Lexer::skipComment()
 	if (getChar() == '#')
 	{
 		file_iterator_++;
-		while (getChar() != '\n')
+		while (!isEndOfFile() && getChar() != '\n')
+		{
 			file_iterator_++;
-		file_iterator_++;
-		current_line_++;
-		skipSpaces();
+		}
+		if (!isEndOfFile())
+		{
+			file_iterator_++;
+			current_line_++;
+			skipSpaces();
+		}
 	}
 }
 
@@ -105,7 +110,7 @@ bool	config::Lexer::isMetaChar() const
 
 void	config::Lexer::addToken()
 {
-	if (isEndOfFile())
+	if (isEndOfFile() || getChar() == '#')
 		return ;
 
 	std::string		tmp_value;
@@ -132,16 +137,18 @@ void	config::Lexer::addToken()
 		case '\'':
 		case '"':
 			tmp_quote = getChar();
-			tmp_line = this->current_line_;
 			tmp_type = config::TK_STR; 
 			file_iterator_++;
 			while (!isEndOfFile() && getChar() != tmp_quote)
 			{
+				if (getChar() == '\n')
+					this->current_line_++;
 				tmp_value += getChar();
 				file_iterator_++;
 			}
 			if (getChar() == tmp_quote)
 				file_iterator_++;
+			tmp_line = this->current_line_;
 			break ;
 		default:
 			while (!isEndOfFile() && !isMetaChar())

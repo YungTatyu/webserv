@@ -149,6 +149,16 @@ TEST(LexerTokenizeTest, comment_skip)
 	SAME_TOKEN(config::TK_TYPE::TK_END, "", 15, lexer.getToken(24));
 }
 
+TEST(LexerTokenizeTest, only_comment)
+{
+	std::string filePath= "test/conf/confFile/only_comment.conf";
+	config::Lexer	lexer(filePath);
+
+	lexer.tokenize();
+
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 82, lexer.getToken(0));
+}
+
 TEST(LexerTokenizeTest, quote_file)
 {
 	std::string filePath= "test/conf/confFile/quote.conf";
@@ -178,8 +188,8 @@ TEST(LexerTokenizeTest, quote_file)
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "root", 12, lexer.getToken(19));
 	SAME_TOKEN(config::TK_TYPE::TK_STR, "/home/student/webserv/html", 12, lexer.getToken(20));
 	SAME_TOKEN(config::TK_TYPE::TK_SEMICOLON, ";", 12, lexer.getToken(21));
-	SAME_TOKEN(config::TK_TYPE::TK_STR, "index index.html;\n\t}\n}", 13, lexer.getToken(22));
-	SAME_TOKEN(config::TK_TYPE::TK_END, "", 13, lexer.getToken(23));
+	SAME_TOKEN(config::TK_TYPE::TK_STR, "index index.html;\n\t}\n}", 15, lexer.getToken(22));
+	SAME_TOKEN(config::TK_TYPE::TK_END, "", 15, lexer.getToken(23));
 }
 
 TEST(LexerTokenizeTest, continuous_quote)
