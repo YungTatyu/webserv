@@ -1331,7 +1331,7 @@ bool	config::Parser::parseListen()
 	config::Listen				tmp_listen;
 	std::istringstream			iss;
 	char						remaining_char;
-	long						port;
+	long						port = 0;
 	std::string					segment;
 	std::vector<std::string>	segments;
 
