@@ -45,7 +45,6 @@ struct Server
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
 	Root	root;
-	SendTimeout	send_timeout;
 	ServerName	server_name;
 	TryFiles	try_files;
 	Userid	userid;
