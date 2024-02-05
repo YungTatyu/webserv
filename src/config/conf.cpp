@@ -19,6 +19,7 @@ const char	*config::UseridPath::kDefaultPath_ = "/";
 const unsigned long	config::SendTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
 const char	*config::Listen::kDefaultAddress_ = "127.0.0.1";
 const char	*config::ServerName::kDefaultName_ = "";
+const unsigned long	config::Time::kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();
 const unsigned long	config::Size::kMaxSizeInBytes_ = std::numeric_limits<long>::max();
 const char	*config::UseridDomain::kDefaultName_ = "none";
 const char	*config::AccessLog::kDefaultFile_ = "logs/access.log";

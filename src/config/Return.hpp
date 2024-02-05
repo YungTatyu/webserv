@@ -10,7 +10,7 @@ namespace config
 class Return
 {
 	private:
-		int	code_;
+		int			code_;
 		std::string	url_; // url or text
 	public:
 		Return() : code_(this->kCodeUnset) {}
@@ -20,7 +20,7 @@ class Return
 		void	setCode(const int &code) { this->code_ = code; }
 		void	setUrl(const std::string &url) { this->url_ = url; }
 		const static unsigned int	kType_ = CONF_HTTP_LOCATION|CONF_TAKE12|CONF_NOT_UNIQUE;
-		const static int kCodeUnset = -1;
+		const static int	kCodeUnset = -1;
 };
 } // namespace config
 

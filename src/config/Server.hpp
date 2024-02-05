@@ -18,6 +18,7 @@
 #include "SendTimeout.hpp"
 #include "Listen.hpp"
 #include "Root.hpp"
+#include "SendTimeout.hpp"
 #include "ServerName.hpp"
 #include "TryFiles.hpp"
 #include "Userid.hpp"
@@ -44,7 +45,8 @@ struct Server
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
 	Root	root;
-	std::vector<ServerName>	server_name_list;
+	SendTimeout	send_timeout;
+	ServerName	server_name;
 	TryFiles	try_files;
 	Userid	userid;
 	UseridDomain	userid_domain;

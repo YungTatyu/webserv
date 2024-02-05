@@ -19,6 +19,7 @@
 #include "SendTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
+#include "SendTimeout.hpp"
 #include "TryFiles.hpp"
 #include "Userid.hpp"
 #include "UseridDomain.hpp"
@@ -48,6 +49,7 @@ struct Location
 	SendTimeout	send_timeout;
 	std::vector<Return>	return_list;
 	Root	root;
+	SendTimeout	send_timeout;
 	TryFiles	try_files;
 	Userid	userid;
 	UseridDomain	userid_domain;
