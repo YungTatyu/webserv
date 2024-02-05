@@ -46,6 +46,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/userid_expires/userid_expires_test.cpp
 	test/conf/directive_parser/userid_path/userid_path_test.cpp
 	test/conf/directive_parser/userid_service/userid_service_test.cpp
+	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
 
 	test/conf/directive_parser/index/index_test.cpp 
 
