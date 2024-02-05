@@ -26,26 +26,28 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directives_test.cpp 
 	test/conf/confLexerTest.cpp 
 	test/conf/main_parser_test.cpp 
-	test/conf/directives_parser/access_log/access_log_test.cpp 
-	test/conf/directives_parser/alias/alias_test.cpp 
-	test/conf/directives_parser/autoindex/autoindex_test.cpp 
-	test/conf/directives_parser/deny/deny_test.cpp 
-	test/conf/directives_parser/client_max_body_size/client_max_body_size_test.cpp 
-	test/conf/directives_parser/allow/allow_test.cpp 
-	test/conf/directives_parser/error_log/error_log_test.cpp 
-	test/conf/directives_parser/error_page/error_page_test.cpp 
-	test/conf/directives_parser/keepalive_timeout/keepalive_timeout_test.cpp 
-	test/conf/directives_parser/listen/listen_test.cpp
-	test/conf/directives_parser/return/return_test.cpp
-	test/conf/directives_parser/root/root_test.cpp
-	test/conf/directives_parser/send_timeout/send_timeout_test.cpp
-	test/conf/directives_parser/try_files/try_files_test.cpp
-	test/conf/directives_parser/use/use_test.cpp
-	test/conf/directives_parser/userid/userid_test.cpp
-	test/conf/directives_parser/userid_domain/userid_domain_test.cpp
-	test/conf/directives_parser/userid_expires/userid_expires_test.cpp
+	test/conf/directive_parser/access_log/access_log_test.cpp 
+	test/conf/directive_parser/alias/alias_test.cpp 
+	test/conf/directive_parser/autoindex/autoindex_test.cpp 
+	test/conf/directive_parser/deny/deny_test.cpp 
+	test/conf/directive_parser/client_max_body_size/client_max_body_size_test.cpp 
+	test/conf/directive_parser/allow/allow_test.cpp 
+	test/conf/directive_parser/error_log/error_log_test.cpp 
+	test/conf/directive_parser/error_page/error_page_test.cpp 
+	test/conf/directive_parser/keepalive_timeout/keepalive_timeout_test.cpp 
+	test/conf/directive_parser/listen/listen_test.cpp
+	test/conf/directive_parser/return/return_test.cpp
+	test/conf/directive_parser/root/root_test.cpp
+	test/conf/directive_parser/send_timeout/send_timeout_test.cpp
+	test/conf/directive_parser/try_files/try_files_test.cpp
+	test/conf/directive_parser/use/use_test.cpp
+	test/conf/directive_parser/userid/userid_test.cpp
+	test/conf/directive_parser/userid_domain/userid_domain_test.cpp
+	test/conf/directive_parser/userid_expires/userid_expires_test.cpp
+	test/conf/directive_parser/userid_path/userid_path_test.cpp
+	test/conf/directive_parser/userid_service/userid_service_test.cpp
 
-	test/conf/directives_parser/index/index_test.cpp 
+	test/conf/directive_parser/index/index_test.cpp 
 
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
