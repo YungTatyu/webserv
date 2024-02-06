@@ -2,9 +2,9 @@
 #include <poll.h>
 
 /* ConnectionManagerクラスの実装 */
-void ConnectionManager::setConnection( const struct pollfd& pfd )
+void ConnectionManager::setConnection( const int fd )
 {
-	connections_[pfd.fd] = ConnectionData();
+	connections_[fd] = ConnectionData();
 }
 
 void ConnectionManager::removeConnection( const int fd )
@@ -41,4 +41,9 @@ void ConnectionManager::setEvent( const int fd, const ConnectionData::EVENT even
 ConnectionData::EVENT ConnectionManager::getEvent( const int fd ) const
 {
 	return connections_.at(fd).event;
+}
+
+const std::map<int, ConnectionData> &ConnectionManager::getConnections() const
+{
+	return this->connections_;
 }

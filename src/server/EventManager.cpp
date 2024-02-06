@@ -2,7 +2,7 @@
 
 void EventManager::updateEvents( const int fd, const short events )
 {
-	for ( std::vector<struct pollfd>::iterator cur = fds.begin(); cur != fds.end(); ++cur )
+	for ( std::vector<struct pollfd>::iterator cur = active_events_.begin(); cur != active_events_.end(); ++cur )
 	{
 		if ( cur->fd == fd)
 		{
@@ -13,17 +13,17 @@ void EventManager::updateEvents( const int fd, const short events )
 
 void EventManager::addEvent( const struct pollfd pfd )
 {
-	this->fds.push_back( pfd );
+	this->active_events_.push_back( pfd );
 }
 
 const std::vector<struct pollfd>& EventManager::getAllPollfd() const
 {
-	return this->fds;
+	return this->active_events_;
 }
 
 struct pollfd EventManager::getPollfd( const int fd ) const
 {
-	for ( std::vector<struct pollfd>::const_iterator cur = fds.begin(); cur != fds.end(); ++cur )
+	for ( std::vector<struct pollfd>::const_iterator cur = active_events_.begin(); cur != active_events_.end(); ++cur )
 	{
 	       if ( cur->fd == fd )
 	       {
@@ -48,4 +48,3 @@ bool EventManager::isInvalidFd( const struct pollfd& pfd )
 {
 	return pfd.fd == -1;
 }
-

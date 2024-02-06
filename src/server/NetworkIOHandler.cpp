@@ -18,10 +18,10 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons( servConfig->getServPort() );
-		
+
 		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
 		SysCallWrapper::Listen( this->listenfd_, servConfig->getListenQ() );
-		
+
 		std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
 
 	}
@@ -84,7 +84,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 	struct pollfd setting = EventManager::genPollFd( connfd, POLLIN, 0 );
-	connManager.setConnection( setting );
+	connManager.setConnection( connfd );
 	eventManager.addEvent( setting );
 
 	// show ip address of newly connected client.
@@ -104,4 +104,3 @@ int NetworkIOHandler::getListenfd()
 {
 	return this->listenfd_;
 }
-

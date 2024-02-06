@@ -20,7 +20,7 @@ class ConnectionData
 class ConnectionManager
 {
 	public:
-		void setConnection( const struct pollfd& pfd );
+		void setConnection( const int fd );
 		void removeConnection( const int fd );
 		void setRawRequest( const int fd, const std::vector<char>& rawRequest );
 		const std::vector<char>& getRawRequest( const int fd ) const;
@@ -28,7 +28,7 @@ class ConnectionManager
 		const std::vector<char>& getResponse( const int fd ) const;
 		void setEvent( const int fd, const ConnectionData::EVENT event );
 		ConnectionData::EVENT getEvent( const int fd ) const;
-
+		const std::map<int, ConnectionData> &getConnections() const;
 	private:
 		std::map<int, class ConnectionData> connections_;
 };

@@ -8,6 +8,8 @@
 # include "EventManager.hpp"
 # include "SysCallWrapper.hpp"
 # include <algorithm>
+# include <vector>
+# include <map>
 
 class WebServer
 {
@@ -16,13 +18,13 @@ class WebServer
 		~WebServer();
 		void initializeServer();
 		void eventLoop();
-	
 	private:
 		NetworkIOHandler *ioHandler;
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;
 		EventManager *eventManager;
 		ServerConfig *serverConfig;
+		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData> &connections);
 };
 
 #endif
