@@ -30,8 +30,8 @@
 *.exe
 *.out
 *.app
-.vscode
 webserv
 
 build
 *tmp*
+.vscode
