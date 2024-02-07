@@ -21,10 +21,10 @@ class HttpRequest
 		std::string body;
 
 	private:
-		void parseUri();
-		void parseRequestLine(std::istringstream& requestLine);
-		void parseHeaders(std::istringstream& headers);
-		void parseBody(std::istringstream& body);
+		static void parseUri();
+		static void parseRequestLine(std::istringstream& requestLine);
+		static void parseHeaders(std::istringstream& headers);
+		static void parseBody(std::istringstream& body);
 		std::string urlDecode(const std::string& str);
 		//chunked??
 };
