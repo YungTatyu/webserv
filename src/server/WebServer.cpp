@@ -2,7 +2,6 @@
 #include "ActiveEventManager.hpp"
 #include "SysCallWrapper.hpp"
 #include <cerrno>
-#include <sys/types.h>
 
 /* WebServerクラスの実装 */
 WebServer::WebServer()
@@ -65,16 +64,16 @@ WebServer::~WebServer()
  */
 std::vector<struct pollfd>	WebServer::convertToPollfds(const std::map<int, ConnectionData> &connections)
 {
-	std::vector<struct pollfd>	pollfds;
+	std::vector<struct pollfd>	list;
 	for (std::map<int, ConnectionData>::const_iterator it = connections.begin(); it != connections.end(); ++it)
 	{
 		struct pollfd	pollfd;
 		pollfd.fd = it->first;
 		pollfd.events = it->second.event == ConnectionData::READ ? POLLIN : POLLOUT;
 		pollfd.revents = 0;
-		pollfds.push_back(pollfd);
+		list.push_back(pollfd);
 	}
-	return pollfds;
+	return list;
 }
 
 int	WebServer::waitForEvents(std::vector<struct pollfd> &pollfds)
@@ -102,6 +101,17 @@ void	WebServer::processEvents(const std::vector<struct pollfd> &pollfds)
 	)
 	{
 		callEventHandler(*it);
+		// {
+		// 	{READ, isReadEvent()},
+		// 	{WRITE, isWriteEvent()},
+		// }
+		// EVENT = findEvent();
+		// handler = handler_map[EVENT];
+		// handler();
+		// if  read
+			// request_handler.readEventHandler();
+		// else if  write
+			// request_handler.writeEventHandler();
 	}
 }
 
@@ -115,28 +125,10 @@ void	WebServer::callEventHandler(const struct pollfd &pollfd)
 {
 	if (pollfd.revents & POLLIN) // read event
 	{
-		ssize_t re = this->ioHandler->receiveRequest( *this->connManager, pollfd.fd );
-		// リスニングソケットへの新規リクエスト
-		if (pollfd.fd == this->ioHandler->getListenfd())
-		{
-			this->ioHandler->acceptConnection(*(this->connManager));
-			return;
-		}
-		// クライアントソケットへのリクエスト（既存コネクション）
-		if (re == -1) //ソケット使用不可。
-			return;
-		if (re == 0) // クライアントが接続を閉じる
-		{
-			this->ioHandler->closeConnection( *this->connManager, pollfd.fd );
-			this->connManager->removeConnection(pollfd.fd);
-			return;
-		}
-		this->requestHandler->handle( *this->connManager, pollfd.fd );
-		this->connManager->setEvent(pollfd.fd, ConnectionData::WRITE); // writeイベントに更新
+		this->requestHandler->handleReadEvent(*(this->ioHandler), *(this->connManager), pollfd);
 	}
 	else if (pollfd.revents & POLLOUT) // write event
 	{
-		if (this->ioHandler->sendResponse( *this->connManager, pollfd.fd ) != -1)
-			this->connManager->setEvent(pollfd.fd, ConnectionData::READ); // readイベントに更新
+		this->requestHandler->handleWriteEvent(*(this->ioHandler), *(this->connManager), pollfd);
 	}
 }

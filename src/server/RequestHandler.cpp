@@ -1,5 +1,6 @@
 #include "RequestHandler.hpp"
 #include "HttpMessage.hpp"
+#include <sys/types.h>
 
 /* RequestHandlerクラスの実装 */
 void RequestHandler::handle( ConnectionManager &connManager, const int target )
@@ -16,3 +17,30 @@ void RequestHandler::handle( ConnectionManager &connManager, const int target )
     connManager.setResponse( target, vec );
 }
 
+void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
+{
+    	ssize_t re = ioHandler.receiveRequest( connManager, pollfd.fd );
+		// リスニングソケットへの新規リクエスト
+		if (pollfd.fd == ioHandler.getListenfd())
+		{
+			ioHandler.acceptConnection(connManager);
+			return;
+		}
+		// クライアントソケットへのリクエスト（既存コネクション）
+		if (re == -1) //ソケット使用不可。
+			return;
+		if (re == 0) // クライアントが接続を閉じる
+		{
+			ioHandler.closeConnection( connManager, pollfd.fd );
+			connManager.removeConnection(pollfd.fd);
+			return;
+		}
+		handle( connManager, pollfd.fd );
+		connManager.setEvent(pollfd.fd, ConnectionData::WRITE); // writeイベントに更新
+}
+
+void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
+{
+    if (ioHandler.sendResponse( connManager, pollfd.fd ) != -1)
+		connManager.setEvent(pollfd.fd, ConnectionData::READ); // readイベントに更新
+}

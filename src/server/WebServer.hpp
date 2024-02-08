@@ -1,5 +1,5 @@
-#ifndef Web_SERVER_HPP
-# define Web_SERVER_HPP
+#ifndef WEB_SERVER_HPP
+# define WEB_SERVER_HPP
 
 # include "ConnectionManager.hpp"
 # include "RequestHandler.hpp"
