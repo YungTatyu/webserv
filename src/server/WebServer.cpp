@@ -122,11 +122,12 @@ void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
 	}
 }
 
-void	WebServer::processEvents()
-{
-
-}
-
+/**
+*
+* 発生したイベントのhandlerを呼ぶ
+* eventhandlerを呼んだ後、監視するイベントを更新
+*
+*/
 void	WebServer::callEventHandler(const struct pollfd pollfd)
 {
 	if (pollfd.revents & POLLIN)
@@ -141,9 +142,11 @@ void	WebServer::callEventHandler(const struct pollfd pollfd)
 			return;
 		}
 		this->requestHandler->handle( *this->connManager, pollfd.fd );
+		this->connManager.setEvent(pollfd.fd, ConnectionData::WRITE); // writeイベントに更新
 	}
 	else if (pollfd.revents & POLLOUT)
 	{
-		this->ioHandler->sendResponse( *this->connManager, curPfd.fd );
+		if (this->ioHandler->sendResponse( *this->connManager, curPfd.fd ) != -1)
+			this->connManager.setEvent(pollfd.fd, ConnectionData::READ); // readイベントに更新
 	}
 }

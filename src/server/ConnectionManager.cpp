@@ -33,6 +33,13 @@ const std::vector<char>& ConnectionManager::getResponse( const int fd ) const
 	return connections_.at(fd).response;
 }
 
+
+/**
+* 
+* 監視するイベントを更新
+* イベントをupdateする際にも使用
+* 
+*/
 void ConnectionManager::setEvent( const int fd, const ConnectionData::EVENT event )
 {
 	connections_[fd].event = event;
