@@ -4,11 +4,14 @@
 # include <poll.h>
 # include <vector>
 
+/**
+ * @brief 発生したイベントを管理する
+ * 
+ */
 class ActiveEventManager
 {
 	public:
 		std::vector<struct pollfd> active_events_;
-		void updateEvents( const int fd, const short events );
 		void addEvent( const struct pollfd pfd );
 		const std::vector<struct pollfd>& getAllPollfd() const;
 		struct pollfd getPollfd( const int fd ) const;

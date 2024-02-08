@@ -1,16 +1,5 @@
 #include "ActiveEventManager.hpp"
 
-void ActiveEventManager::updateEvents( const int fd, const short events )
-{
-	for ( std::vector<struct pollfd>::iterator cur = active_events_.begin(); cur != active_events_.end(); ++cur )
-	{
-		if ( cur->fd == fd)
-		{
-			cur->events = events;
-		}
-	}
-}
-
 void ActiveEventManager::addEvent( const struct pollfd pfd )
 {
 	this->active_events_.push_back( pfd );
