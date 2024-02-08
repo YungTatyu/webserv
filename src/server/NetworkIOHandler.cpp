@@ -73,7 +73,7 @@ int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cl
 	return totalSent;
 }
 
-void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
+void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
@@ -83,9 +83,9 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
-	struct pollfd setting = EventManager::genPollFd( connfd, POLLIN, 0 );
+	// 新規クライントfdを追加
 	connManager.setConnection( connfd );
-	eventManager.addEvent( setting );
+	connManager.setEvent( connfd, ConnectionData::READ );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

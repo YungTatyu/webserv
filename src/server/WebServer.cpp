@@ -24,7 +24,6 @@ void WebServer::initializeServer()
 
 void WebServer::eventLoop()
 {
-	// this->eventManager->addEvent( EventManager::genPollFd( this->ioHandler->getListenfd(), POLLIN, 0 ) );
 	// listening socket監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();
 	this->connManager->setConnection(listenfd);
@@ -32,8 +31,8 @@ void WebServer::eventLoop()
 
 	for ( ; ; )
 	{
-		// SysCallWrapper::Poll ( this->eventManager->active_events_.data(), this->eventManager->active_events_.size(), -1 );
 		std::vector<struct pollfd> pollfds = convertToPollfds(this->connManager->getConnections());
+		
 		SysCallWrapper::Poll ( pollfds.data(), pollfds.size(), -1 );
 		addActiveEvents(pollfds);
 
@@ -110,9 +109,16 @@ void	WebServer::callEventHandler(const struct pollfd &pollfd)
 	if (pollfd.revents & POLLIN) // read event
 	{
 		ssize_t re = this->ioHandler->receiveRequest( *this->connManager, pollfd.fd );
+		// リスニングソケットへの新規リクエスト
+		if (pollfd.fd == this->ioHandler->getListenfd())
+		{
+			this->ioHandler->acceptConnection(*(this->connManager));
+			return;
+		}
+		// クライアントソケットへのリクエスト（既存コネクション）
 		if (re == -1) //ソケット使用不可。
 			return;
-		if (re == 0)
+		if (re == 0) // クライアントが接続を閉じる
 		{
 			this->ioHandler->closeConnection( *this->connManager, pollfd.fd );
 			this->connManager->removeConnection(pollfd.fd);
