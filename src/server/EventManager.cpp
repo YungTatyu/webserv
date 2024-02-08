@@ -16,6 +16,11 @@ void EventManager::addEvent( const struct pollfd pfd )
 	this->active_events_.push_back( pfd );
 }
 
+void EventManager::clearAllEvents()
+{
+	this->active_events_.clear();
+}
+
 const std::vector<struct pollfd>& EventManager::getAllPollfd() const
 {
 	return this->active_events_;
