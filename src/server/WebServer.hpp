@@ -25,6 +25,11 @@ class WebServer
 		EventManager *eventManager;
 		ServerConfig *serverConfig;
 		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData> &connections);
+		int	waitForEvents();
+		void	addActiveEvents(const std::vector<struct pollfd> &pollfds);
+		void	processEvents();
+		void	callEventHandler();
+
 };
 
 #endif

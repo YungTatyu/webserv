@@ -29,7 +29,6 @@ void WebServer::eventLoop()
 	const int listenfd = this->ioHandler->getListenfd();
 	this->connManager->setConnection(listenfd);
 	this->connManager->setEvent(listenfd, ConnectionData::READ);
-	std::cout << "befor loop\n";
 
 	for ( ; ; )
 	{
@@ -109,4 +108,42 @@ std::vector<struct pollfd>	WebServer::convertToPollfds(const std::map<int, Conne
 		pollfds.push_back(pollfd);
 	}
 	return pollfds;
+}
+
+void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
+{
+	const size_t	size = this->connManager->getConnections().size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		const struct pollfd& cur_pfd = pollfds[i];
+		// readもしくはwriteイベントが発生していたら、active_eventに追加
+		if (cur_pfd.revents & POLLIN || cur_pfd.revents & POLLOUT)
+			this->eventManager.addEvent(cur_pfd);
+	}
+}
+
+void	WebServer::processEvents()
+{
+
+}
+
+void	WebServer::callEventHandler(const struct pollfd pollfd)
+{
+	if (pollfd.revents & POLLIN)
+	{
+		ssize_t re = this->ioHandler->receiveRequest( *this->connManager, pollfd.fd );
+		if (re == -1) //ソケット使用不可。
+			return;
+		if (re == 0)
+		{
+			this->ioHandler->closeConnection( *this->connManager, pollfd.fd );
+			this->connManager.removeConnection(pollfd.fd);
+			return;
+		}
+		this->requestHandler->handle( *this->connManager, pollfd.fd );
+	}
+	else if (pollfd.revents & POLLOUT)
+	{
+		this->ioHandler->sendResponse( *this->connManager, curPfd.fd );
+	}
 }

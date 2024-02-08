@@ -31,6 +31,7 @@ class ConnectionManager
 		const std::map<int, ConnectionData> &getConnections() const;
 	private:
 		std::map<int, class ConnectionData> connections_;
+
 };
 
 #endif
