@@ -38,7 +38,7 @@ void WebServer::eventLoop()
 		addActiveEvents(pollfds);
 
 		// 発生したイベントをhandleする
-		processEvents(pollfds);
+		callEventHandler(pollfds);
 
 		// 発生したすべてイベントを削除
 		this->eventManager->clearAllEvents();
@@ -93,42 +93,36 @@ void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
 	}
 }
 
-void	WebServer::processEvents(const std::vector<struct pollfd> &pollfds)
-{
-	for (std::vector<struct pollfd>::const_iterator it = pollfds.begin();
-		it != pollfds.end();
-		++it
-	)
-	{
-		callEventHandler(*it);
-		// {
-		// 	{READ, isReadEvent()},
-		// 	{WRITE, isWriteEvent()},
-		// }
-		// EVENT = findEvent();
-		// handler = handler_map[EVENT];
-		// handler();
-		// if  read
-			// request_handler.readEventHandler();
-		// else if  write
-			// request_handler.writeEventHandler();
-	}
-}
-
 /**
  * @brief 発生したイベントのhandlerを呼ぶ
  * eventhandlerを呼んだ後、監視するイベントを更新
  * 
  * @param pollfd 
  */
-void	WebServer::callEventHandler(const struct pollfd &pollfd)
+void	WebServer::callEventHandler(const std::vector<struct pollfd> &pollfds)
 {
-	if (pollfd.revents & POLLIN) // read event
+	const std::map<RequestHandler::isEvent, RequestHandler::eventHandler>	&handler_map = this->requestHandler->handler_map;
+
+	// 発生したイベントの数だけloopする
+	// eit: event iterator
+	for (std::vector<struct pollfd>::const_iterator eit = pollfds.begin();
+		eit != pollfds.end();
+		++eit
+	)
 	{
-		this->requestHandler->handleReadEvent(*(this->ioHandler), *(this->connManager), pollfd);
-	}
-	else if (pollfd.revents & POLLOUT) // write event
-	{
-		this->requestHandler->handleWriteEvent(*(this->ioHandler), *(this->connManager), pollfd);
+		// 発生したeventに対するhandlerを呼ぶ
+		// mit: map iterator
+		for (
+			std::map<RequestHandler::isEvent, RequestHandler::eventHandler>::const_iterator mit = handler_map.begin();
+			mit != handler_map.end();
+			++mit
+		)
+		{
+			if ((*mit->first)(*eit))
+			{
+				RequestHandler::eventHandler event_handler = mit->second;
+				(this->requestHandler->*event_handler)(*(this->ioHandler), *(this->connManager), *eit);
+			}
+		}
 	}
 }

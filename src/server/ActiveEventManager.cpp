@@ -42,3 +42,13 @@ bool ActiveEventManager::isInvalidFd( const struct pollfd& pfd )
 {
 	return pfd.fd == -1;
 }
+
+bool ActiveEventManager::isReadEvent( const struct pollfd& pfd )
+{
+	return pfd.revents & POLLIN;
+}
+
+bool ActiveEventManager::isWriteEvent( const struct pollfd& pfd )
+{
+	return pfd.revents & POLLOUT;
+}

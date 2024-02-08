@@ -1,6 +1,13 @@
 #include "RequestHandler.hpp"
 #include "HttpMessage.hpp"
 #include <sys/types.h>
+#include <algorithm>
+
+RequestHandler::RequestHandler()
+{
+    this->handler_map[ActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
+    this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
+}
 
 /* RequestHandlerクラスの実装 */
 void RequestHandler::handle( ConnectionManager &connManager, const int target )
