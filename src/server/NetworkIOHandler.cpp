@@ -55,7 +55,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 	return 1;
 }
 
-int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
+ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
 	std::vector<char> response = connManager.getResponse( cli_sock );
 	size_t totalSent = 0;

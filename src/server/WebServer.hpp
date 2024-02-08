@@ -25,7 +25,7 @@ class WebServer
 		ActiveEventManager *eventManager;
 		ServerConfig *serverConfig;
 		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData> &connections);
-		int	waitForEvents();
+		int	waitForEvents(std::vector<struct pollfd> &pollfds);
 		void	addActiveEvents(const std::vector<struct pollfd> &pollfds);
 		void	processEvents(const std::vector<struct pollfd> &pollfds);
 		void	callEventHandler(const struct pollfd &pollfd);

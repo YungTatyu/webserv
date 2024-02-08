@@ -2,6 +2,7 @@
 #include "ActiveEventManager.hpp"
 #include "SysCallWrapper.hpp"
 #include <cerrno>
+#include <sys/types.h>
 
 /* WebServerクラスの実装 */
 WebServer::WebServer()
@@ -32,8 +33,7 @@ void WebServer::eventLoop()
 	for ( ; ; )
 	{
 		std::vector<struct pollfd> pollfds = convertToPollfds(this->connManager->getConnections());
-		
-		SysCallWrapper::Poll ( pollfds.data(), pollfds.size(), -1 );
+		waitForEvents(pollfds);
 
 		// 発生したイベントをActiveEventManagerにすべて追加
 		addActiveEvents(pollfds);
@@ -75,6 +75,11 @@ std::vector<struct pollfd>	WebServer::convertToPollfds(const std::map<int, Conne
 		pollfds.push_back(pollfd);
 	}
 	return pollfds;
+}
+
+int	WebServer::waitForEvents(std::vector<struct pollfd> &pollfds)
+{
+	 return SysCallWrapper::Poll ( pollfds.data(), pollfds.size(), -1 );
 }
 
 void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
