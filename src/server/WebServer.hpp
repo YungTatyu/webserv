@@ -5,7 +5,7 @@
 # include "RequestHandler.hpp"
 # include "NetworkIOHandler.hpp"
 # include "ServerConfig.hpp"
-# include "EventManager.hpp"
+# include "ActiveEventManager.hpp"
 # include "SysCallWrapper.hpp"
 # include <algorithm>
 # include <vector>
@@ -22,7 +22,7 @@ class WebServer
 		NetworkIOHandler *ioHandler;
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;
-		EventManager *eventManager;
+		ActiveEventManager *eventManager;
 		ServerConfig *serverConfig;
 		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData> &connections);
 		int	waitForEvents();

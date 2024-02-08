@@ -1,10 +1,10 @@
-#ifndef EVENT_MANAGER_HPP
-# define EVENT_MANAGER_HPP
+#ifndef ACTIVE_EVENT_MANAGER_HPP
+# define ACTIVE_EVENT_MANAGER_HPP
 
 # include <poll.h>
 # include <vector>
 
-class EventManager
+class ActiveEventManager
 {
 	public:
 		std::vector<struct pollfd> active_events_;

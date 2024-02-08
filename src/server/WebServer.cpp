@@ -1,5 +1,5 @@
 #include "WebServer.hpp"
-#include "EventManager.hpp"
+#include "ActiveEventManager.hpp"
 #include "SysCallWrapper.hpp"
 #include <cerrno>
 
@@ -19,12 +19,12 @@ void WebServer::initializeServer()
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
-	this->eventManager = new EventManager();
+	this->eventManager = new ActiveEventManager();
 }
 
 void WebServer::eventLoop()
 {
-	// listening socket監視するリストに追加
+	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();
 	this->connManager->setConnection(listenfd);
 	this->connManager->setEvent(listenfd, ConnectionData::READ);
@@ -34,6 +34,8 @@ void WebServer::eventLoop()
 		std::vector<struct pollfd> pollfds = convertToPollfds(this->connManager->getConnections());
 		
 		SysCallWrapper::Poll ( pollfds.data(), pollfds.size(), -1 );
+
+		// 発生したイベントをActiveEventManagerにすべて追加
 		addActiveEvents(pollfds);
 
 		// 発生したイベントをhandleする

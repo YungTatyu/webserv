@@ -13,7 +13,7 @@
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
-# include "EventManager.hpp"
+# include "ActiveEventManager.hpp"
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
