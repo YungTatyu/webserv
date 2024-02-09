@@ -22,19 +22,24 @@ class ServerConfig
  *    本体のconfig_はグローバル変数にする
  *    exterm const config::Main* config_;
  * 2. publicでconfig_もつ
- * 　 この場合、すべてのクラスがこのクラスを持たなければならない
+ * 　 この場合、すべてのクラスがこのクラスのオブジェクトを持たなければならない
+ * 3. すべてのディレクティブのgetterを作る。
+ *    メリットは使う側のコードはすっきりすること。
+ * 4. sigletonクラスで作る
 */ 
 
 
-// 1
+// 1 static class
 class ConfigReadUtils
 {
 	public:
 		//補助関数
+		const config::Server	&getServer(); // address port server_name
+		const config::Loaction	&getLocation(const std::string& url);
+		std::string	getFullPath();
+		void	writeErrorLog();
 	private:
 		ConfigReadUtils();
-		ConfigReadUtils( const ConfigReadUtils& copy );
-		ConfigReadUtils&	ConfigReadUtils( const ConfigReadUtils& copy );
 }
 
 
@@ -46,6 +51,36 @@ class ConfigReader
 		const config::Main	config_;
 
 		// 補助関数
+};
+
+// 4 singleton
+class ConfigSingleton
+{
+	public:
+		static ConfigSingleton& getInstance() {
+			if (!instanceInitialized_)
+			{
+				initSingleton();
+				instanceInitialized_ = true;
+			}
+			return *instance_;
+		}
+
+	private:
+		ConfigSingleton() {}
+		ConfigSingleton(const ConfigSingleton& copy);
+		const ConfigSingleton&	operato=(const ConfigSingleton& copy);
+
+		static void	initSingleton() {
+			instance = new ConfigSingleton;
+		}
+		static void lexerConfigSingleton();
+		static void parseConfigSingleton();
+
+		static const ConfigSingleton* instance_;
+		static bool	instanceInitialized_;
+		const std::string& config_file_;
+		config::Token	&tokens_;
 };
 
 #endif
