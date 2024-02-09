@@ -1,21 +1,23 @@
 #ifndef HTTP_MESSAGE_HPP
 # define HTTP_MESSAGE_HPP
 
-#include <string>
+# include <string>
+# include <sstream>
+# include <iostream>
+# include <fstream>
+# include <dirent.h>
+# include <sys/stat.h>
 
-namespace httpUtils
+class HttpRequest
 {
-	bool isDirectory(const std::string& path);
-	std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
-	std::string readFile(const std::string& filePath);
-	std::string listDirectory(const std::string& directoryPath);
-}
+	public:
+		static std::string setQueryString( std::string& uri );
+		static std::string setScriptPath( std::string& uri );
 
-struct HttpRequest
-{
-	std::string method;
-	std::string uri;
-	std::string version;
+		std::string method;
+		std::string uri;
+		std::string version;
+		std::string query;
 	// header, body
 };
 
@@ -29,9 +31,11 @@ struct HttpResponse
 class HttpMessage
 {
 	public:
-		// HttpResponse static responseGenerater( HttpRequest requeset );
-		HttpRequest static requestParser( std::string &rawRequest );
-		std::string static responseGenerater( HttpRequest &request );
+		static HttpRequest requestParser( std::string &rawRequest );
+		static std::string responseGenerater( HttpRequest &request );
+
+		static std::string autoIndex(const std::string& directoryPath);
+		static std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
 
 	private:
 		HttpMessage();
