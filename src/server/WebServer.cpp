@@ -40,7 +40,7 @@ void WebServer::eventLoop()
 		// 発生したイベントをhandleする
 		callEventHandler(pollfds);
 
-		// 発生したすべてイベントを削除
+		// 発生したすべてのイベントを削除
 		this->eventManager->clearAllEvents();
 	}
 }
@@ -122,6 +122,7 @@ void	WebServer::callEventHandler(const std::vector<struct pollfd> &pollfds)
 			{
 				RequestHandler::eventHandler event_handler = mit->second;
 				(this->requestHandler->*event_handler)(*(this->ioHandler), *(this->connManager), *eit);
+				break;
 			}
 		}
 	}
