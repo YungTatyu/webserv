@@ -88,7 +88,7 @@ void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
 	{
 		const struct pollfd& cur_pfd = pollfds[i];
 		// readもしくはwriteイベントが発生していたら、active_eventに追加
-		if ((cur_pfd.revents & POLLIN) || (cur_pfd.revents & POLLOUT))
+		if (ActiveEventManager::isReadEvent(cur_pfd) || ActiveEventManager::isWriteEvent(cur_pfd))
 			this->eventManager->addEvent(cur_pfd);
 	}
 }
