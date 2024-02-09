@@ -1,12 +1,16 @@
 #ifndef SERVER_CONFIG_HPP
 # define SERVER_CONFIG_HPP
 
+# include "Main.hpp"
+
 /* Confファイルの設定を管理する */
 class ServerConfig
 {
 	public:
-		void	loadConfiguration();
+		ServerConfig() : config_(NULL) {};
+		void	loadConfiguration( const config::Main* config );
 
+		const config::Main*	config_;
 		int		getServPort();
 		int		getListenQ();
 
@@ -28,7 +32,7 @@ class ServerConfig
  * 4. sigletonクラスで作る
 */ 
 
-
+/*
 // 1 static class
 class ConfigReadUtils
 {
@@ -42,25 +46,26 @@ class ConfigReadUtils
 		ConfigReadUtils();
 }
 
-
 // 2
 class ConfigReader
 {
 	public:
-		ConfigReader( config::Main config ) : config_(config) {};
-		const config::Main	config_;
+		ConfigReader( config::Main* config ) : config_(*config) {};
+		const config::Main*	config_;
 
 		// 補助関数
 };
 
 // 4 singleton
+# include "Main.hpp"
+struct config::Main;
 class ConfigSingleton
 {
 	public:
-		static ConfigSingleton& getInstance() {
+		static const ConfigSingleton&	getInstance(const config::Main& config) {
 			if (!instanceInitialized_)
 			{
-				initSingleton();
+				initSingleton(config);
 				instanceInitialized_ = true;
 			}
 			return *instance_;
@@ -69,18 +74,20 @@ class ConfigSingleton
 	private:
 		ConfigSingleton() {}
 		ConfigSingleton(const ConfigSingleton& copy);
-		const ConfigSingleton&	operato=(const ConfigSingleton& copy);
+		const ConfigSingleton&	operator=(const ConfigSingleton& copy);
 
-		static void	initSingleton() {
-			instance = new ConfigSingleton;
+		static void	initSingleton(const config::Main& config) {
+			instance_ = new ConfigSingleton;
+			config_ = config;
 		}
-		static void lexerConfigSingleton();
-		static void parseConfigSingleton();
+		//static void lexerConfigSingleton();
+		//static void parseConfigSingleton();
 
-		static const ConfigSingleton* instance_;
-		static bool	instanceInitialized_;
-		const std::string& config_file_;
-		config::Token	&tokens_;
-};
+		static const ConfigSingleton*	instance_;
+		static const bool	instanceInitialized_;
+		static const config::Main&	config_;
+		//const std::string& config_file_;
+		//config::Token	&tokens_;
+};*/
 
 #endif
