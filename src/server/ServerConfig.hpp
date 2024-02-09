@@ -14,16 +14,30 @@
 class ServerConfig
 {
 	public:
-		ServerConfig() : config_(NULL) {};
-		void	loadConfiguration( const config::Main* config );
-
 		// data
 		const config::Main*	config_;
 
+		// initialize
+		ServerConfig() : config_(NULL) {};
+		void	loadConfiguration( const config::Main* config );
+
+		// method
+		bool	allowReqest( const config::Server& server, config::Location& location ) const;
+		const std::string&	getFile() const;
+		void	writeAcsLog( const config::Server& server, const config::Location& location );
+		void	writeErrLog( const config::Server& server, const config::Location& location );
+		const config::Time&	getKeepaliveTimeout();
+		const config::Time&	getSendTimeout();
+		const config::Time&	getUseridExpires();
+		const config::Size&	getClientMaxBodySize();
+
+	private:
 		//utils
 		config::Server&	getServer( const std::string& server_name, const std::string& address, const unsigned int port );
 		config::Location&	getLocation( const config::Server&server, const std::string& path );
 		const std::string&	getFullPath( const config::Server& server, const config::Location& location );
+
+	public:
 		int		getServPort();
 		int		getListenQ();
 
@@ -31,18 +45,5 @@ class ServerConfig
 		int		servPort_; /*port*/
 		int		listenQ_; /*maximum number of client connections */
 };
-
-/**
- * ServerConfig (ConfigReader) 方針
- * 基本的に、直接config_を見てもらって、個々のメソッドは補助関数のようなものだけ
- * 1. ServerConfigクラスをstaticクラスにする
- *    本体のconfig_はグローバル変数にする
- *    exterm const config::Main* config_;
- * 2. publicでconfig_もつ
- * 　 この場合、すべてのクラスがこのクラスのオブジェクトを持たなければならない
- * 3. すべてのディレクティブのgetterを作る。
- *    メリットは使う側のコードはすっきりすること。
- * 4. sigletonクラスで作る
-*/ 
 
 #endif
