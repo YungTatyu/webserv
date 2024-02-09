@@ -3,6 +3,13 @@
 
 # include "Main.hpp"
 
+/**
+ * ServerConfig (ConfigReader) 方針
+ * 基本的に、直接publicのconfig_を見てもらう
+ * 個々のメソッドは補助関数のようなものだけ
+ * この場合、すべてのクラスがこのクラスのオブジェクトを持たなければならない
+*/ 
+
 /* Confファイルの設定を管理する */
 class ServerConfig
 {
@@ -31,63 +38,5 @@ class ServerConfig
  *    メリットは使う側のコードはすっきりすること。
  * 4. sigletonクラスで作る
 */ 
-
-/*
-// 1 static class
-class ConfigReadUtils
-{
-	public:
-		//補助関数
-		const config::Server	&getServer(); // address port server_name
-		const config::Loaction	&getLocation(const std::string& url);
-		std::string	getFullPath();
-		void	writeErrorLog();
-	private:
-		ConfigReadUtils();
-}
-
-// 2
-class ConfigReader
-{
-	public:
-		ConfigReader( config::Main* config ) : config_(*config) {};
-		const config::Main*	config_;
-
-		// 補助関数
-};
-
-// 4 singleton
-# include "Main.hpp"
-struct config::Main;
-class ConfigSingleton
-{
-	public:
-		static const ConfigSingleton&	getInstance(const config::Main& config) {
-			if (!instanceInitialized_)
-			{
-				initSingleton(config);
-				instanceInitialized_ = true;
-			}
-			return *instance_;
-		}
-
-	private:
-		ConfigSingleton() {}
-		ConfigSingleton(const ConfigSingleton& copy);
-		const ConfigSingleton&	operator=(const ConfigSingleton& copy);
-
-		static void	initSingleton(const config::Main& config) {
-			instance_ = new ConfigSingleton;
-			config_ = config;
-		}
-		//static void lexerConfigSingleton();
-		//static void parseConfigSingleton();
-
-		static const ConfigSingleton*	instance_;
-		static const bool	instanceInitialized_;
-		static const config::Main&	config_;
-		//const std::string& config_file_;
-		//config::Token	&tokens_;
-};*/
 
 #endif
