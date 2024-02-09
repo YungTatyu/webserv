@@ -22,20 +22,20 @@ class ServerConfig
 		void	loadConfiguration( const config::Main* config );
 
 		// method
-		bool	allowReqest( const config::Server& server, config::Location& location ) const;
-		const std::string&	getFile() const;
-		void	writeAcsLog( const config::Server& server, const config::Location& location );
-		void	writeErrLog( const config::Server& server, const config::Location& location );
-		const config::Time&	getKeepaliveTimeout();
-		const config::Time&	getSendTimeout();
-		const config::Time&	getUseridExpires();
+		bool	allowRequest( const std::string& server_name, const std::string& address, const unsigned int port ) const;
+		const std::string&	getFile( const std::string& server_name, const std::string& address, const unsigned int port ) const;
+		void	writeAcsLog( const std::string& server_name, const std::string& address, const unsigned int port );
+		void	writeErrLog( const std::string& server_name, const std::string& address, const unsigned int port );
+		const config::Time&	getKeepaliveTimeout( const std::string& server_name, const std::string& address, const unsigned int port );
+		const config::Time&	getSendTimeout( const std::string& server_name, const std::string& address, const unsigned int port );
+		const config::Time&	getUseridExpires( const std::string& server_name, const std::string& address, const unsigned int port );
 		const config::Size&	getClientMaxBodySize();
 
 	private:
 		//utils
 		config::Server&	getServer( const std::string& server_name, const std::string& address, const unsigned int port );
 		config::Location&	getLocation( const config::Server&server, const std::string& path );
-		const std::string&	getFullPath( const config::Server& server, const config::Location& location );
+		// const std::string&	getFullPath( const config::Server& server, const config::Location& location );
 
 	public:
 		int		getServPort();
