@@ -24,13 +24,14 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/Parser.cpp
 	src/config/conf.cpp
 	src/config/Parser.cpp
+	test/server/server_config_test.cpp
+	src/server/ServerConfig.cpp
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	./src
 	./src/server
 	./src/config
-	./src/config/parser
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
