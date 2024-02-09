@@ -22,53 +22,88 @@ protected:
 		server_config_.loadConfiguration(config);
 	}
 
+
+	void TearDown() override {
+        // テストケースのクリーンアップ処理
+		delete server_config_.config_;
+    }
+
 	// テストに使う共有のオブジェクト
 	ServerConfig	server_config_;
 };
 
-TEST_F(ServerConfigTest, getServer1)
+TEST_F(ServerConfigTest, allowRequest)
 {
-	config::Server&	server;
-
-	server = server_config_.getServer("first_server", "127.0.0.1", 8001);
-
-	EXPECT_EQ(server_config_.config_->http.server_list[0], server);
+	EXPECT_FALSE(server_config_.allowRequest());
+	EXPECT_FALSE(server_config_.allowRequest());
+	EXPECT_FALSE(server_config_.allowRequest());
+	EXPECT_FALSE(server_config_.allowRequest());
+	EXPECT_FALSE(server_config_.allowRequest());
+	EXPECT_FALSE(server_config_.allowRequest());
 }
 
-TEST_F(ServerConfigTest, getServer2)
+TEST_F(ServerConfigTest, getFile)
 {
-	config::Server&	server;
-
-	server = server_config_.getServer("second_server", "127.0.0.2", 8002);
-
-	EXPECT_EQ(server_config_.config_->http.server_list[1], server);
+	EXPECT_EQ("", server_config_.getFile());
+	EXPECT_EQ("", server_config_.getFile());
+	EXPECT_EQ("", server_config_.getFile());
+	EXPECT_EQ("", server_config_.getFile());
+	EXPECT_EQ("", server_config_.getFile());
+	EXPECT_EQ("", server_config_.getFile());
+	EXPECT_EQ("", server_config_.getFile());
 }
 
-TEST_F(ServerConfigTest, getServer3)
+TEST_F(ServerConfigTest, getKeepaliveTimeout)
 {
-	config::Server&	server;
-
-	server = server_config_.getServer("third_server", "127.0.0.3", 8003);
-
-	EXPECT_EQ(server_config_.config_->http.server_list[2], server);
+	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
+	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
+	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
+	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
+	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
+	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
 }
 
-TEST_F(ServerConfigTest, getServer4)
+TEST_F(ServerConfigTest, getSendTimeout)
 {
-	config::Server&	server;
-
-	server = server_config_.getServer("default_server", "127.0.0.10", 8080);
-
-	// server[1]がデフォルトサーバー
-	EXPECT_EQ(server_config_.config_->http.server_list[1], server);
+	EXPECT_EQ(, server_config_.getSendTimeout());
+	EXPECT_EQ(, server_config_.getSendTimeout());
+	EXPECT_EQ(, server_config_.getSendTimeout());
+	EXPECT_EQ(, server_config_.getSendTimeout());
+	EXPECT_EQ(, server_config_.getSendTimeout());
+	EXPECT_EQ(, server_config_.getSendTimeout());
 }
 
-TEST_F(ServerConfigTest, getLocatio1)
+TEST_F(ServerConfigTest, getUseridExpires)
 {
-	config::Location&	location;
+	EXPECT_EQ(, server_config_.getUseridExpires());
+	EXPECT_EQ(, server_config_.getUseridExpires());
+	EXPECT_EQ(, server_config_.getUseridExpires());
+	EXPECT_EQ(, server_config_.getUseridExpires());
+	EXPECT_EQ(, server_config_.getUseridExpires());
+	EXPECT_EQ(, server_config_.getUseridExpires());
+}
 
-	location = server_config_.getLocation(server_config_.http.server[0], "hello");
+TEST_F(ServerConfigTest, getClientMaxBodySize())
+{
+	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+}
 
-	EXPECT_EQ(server_config_.config_->http.server_list[0].location_list[1], location);
+TEST_F(ServerConfigTest, writeAcsLog)
+{
+	server_config_.writeAcsLog();
+
+	WRITE_ACCURATE();
+}
+
+TEST_F(ServerConfigTest, writeErrLog)
+{
+	server_config_.writeErrLog();
+
+	WRITE_ACCURATE();
 }
 
