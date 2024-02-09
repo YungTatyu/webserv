@@ -17,7 +17,13 @@ class ServerConfig
 		ServerConfig() : config_(NULL) {};
 		void	loadConfiguration( const config::Main* config );
 
+		// data
 		const config::Main*	config_;
+
+		//utils
+		config::Server&	getServer( const std::string& server_name, const std::string& address, const unsigned int port );
+		config::Location&	getLocation( const config::Server&server, const std::string& path );
+		const std::string&	getFullPath( const config::Server& server, const config::Location& location );
 		int		getServPort();
 		int		getListenQ();
 
