@@ -4,6 +4,7 @@
 #include <set>
 #include <algorithm>
 #include <string>
+#include <limits>
 
 #include "conf.hpp"
 #include "Main.hpp"
@@ -39,17 +40,19 @@ TEST(useridExpiresTest, allContext)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
+	const long	kLongMax = std::numeric_limits<long>::max();
+
 	// http
 	EXPECT_FALSE(http.userid_expires.getIsUseridExpiresOn());
 	test::test_directives_set(http.directives_set, kUseridExpires, true);
 
 	// server
 	EXPECT_TRUE(http.server_list[0].userid_expires.getIsUseridExpiresOn());
-	EXPECT_EQ(http.server_list[0].userid_expires.getTime().time_in_ms_, LONG_MAX);
+	EXPECT_EQ(http.server_list[0].userid_expires.getTime().time_in_ms_, kLongMax);
 	test::test_directives_set(http.server_list[0].directives_set, kUseridExpires, true);
 
 	// location
-	test::test_value(http.server_list[0].location_list, {LONG_MAX, 0, 1000 * 60}, {true, true, true});
+	test::test_value(http.server_list[0].location_list, {kLongMax, 0, 1000 * 60}, {true, true, true});
 }
 
 

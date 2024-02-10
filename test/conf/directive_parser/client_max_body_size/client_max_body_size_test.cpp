@@ -3,12 +3,14 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <limits>
 
 #include "conf.hpp"
 #include "Main.hpp"
 #include "directives_test.hpp"
 
 const std::string	kClientMaxBodySize = "client_max_body_size";
+const long	kLongMax = std::numeric_limits<long>::max();
 
 TEST(clientMaxBodySizeTest, longMax)
 {
@@ -19,7 +21,7 @@ TEST(clientMaxBodySizeTest, longMax)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
-	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, LONG_MAX);
+	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, kLongMax);
 	test::test_directives_set(http.directives_set, kClientMaxBodySize, true);
 }
 
@@ -32,7 +34,7 @@ TEST(clientMaxBodySizeTest, longMaxKilo)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
-	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, LONG_MAX / config::Size::kilobytes);
+	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, kLongMax / config::Size::kilobytes);
 	test::test_directives_set(http.directives_set, kClientMaxBodySize, true);
 }
 
@@ -45,7 +47,7 @@ TEST(clientMaxBodySizeTest, longMaxMega)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
-	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, LONG_MAX / config::Size::megabytes);
+	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, kLongMax / config::Size::megabytes);
 	test::test_directives_set(http.directives_set, kClientMaxBodySize, true);
 }
 

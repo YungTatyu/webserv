@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <limits>
 
 #include "conf.hpp"
 #include "Main.hpp"
@@ -33,18 +34,20 @@ TEST(sendTimeoutTest, max)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
+	const long	kLongMax = std::numeric_limits<long>::max();
+
 	// http
-	EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, LONG_MAX);
+	EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, kLongMax);
 	test::test_directives_set(http.directives_set, kSendTimeout, true);
 
 	// server
-	EXPECT_EQ(http.server_list[0].send_timeout.getTime().time_in_ms_, LONG_MAX);
+	EXPECT_EQ(http.server_list[0].send_timeout.getTime().time_in_ms_, kLongMax);
 	test::test_directives_set(http.server_list[0].directives_set, kSendTimeout, true);
 
 	// location
 	for (size_t i = 0; i < http.server_list[0].location_list.size(); i++)
 	{
-		EXPECT_EQ(http.server_list[0].location_list[i].send_timeout.getTime().time_in_ms_, LONG_MAX);
+		EXPECT_EQ(http.server_list[0].location_list[i].send_timeout.getTime().time_in_ms_, kLongMax);
 		test::test_directives_set(http.server_list[0].location_list[i].directives_set, kSendTimeout, true);
 	}
 }
