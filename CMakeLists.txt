@@ -30,6 +30,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/deny/deny_test.cpp 
 	test/conf/directive_parser/client_max_body_size/client_max_body_size_test.cpp 
 	test/conf/directive_parser/allow/allow_test.cpp 
+	test/conf/directive_parser/index/index_test.cpp 
 	test/conf/directive_parser/error_log/error_log_test.cpp 
 	test/conf/directive_parser/error_page/error_page_test.cpp 
 	test/conf/directive_parser/keepalive_timeout/keepalive_timeout_test.cpp 
@@ -45,9 +46,6 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/userid_path/userid_path_test.cpp
 	test/conf/directive_parser/userid_service/userid_service_test.cpp
 	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
-
-	test/conf/directive_parser/index/index_test.cpp 
-
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
