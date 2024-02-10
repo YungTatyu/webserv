@@ -18,9 +18,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/HttpMessage.cpp 
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
-	src/config/Parser.cpp
 	src/config/conf.cpp
-	src/config/Parser.cpp
 
 	test/test.cpp 
 	test/conf/directives_test.cpp 
