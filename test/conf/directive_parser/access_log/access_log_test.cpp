@@ -52,6 +52,7 @@ TEST(accesslogTest, allContext)
 		"path5",
 	});
 	test::test_value(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
+	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAccessLog, true);
 	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAccessLog, true);
 }
 
