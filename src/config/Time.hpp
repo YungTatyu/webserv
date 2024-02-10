@@ -18,8 +18,6 @@ class Time
 		const static unsigned int	days = hours * 24;
 		const static unsigned long	kMaxTimeInMilliseconds_;
 };
-const unsigned long	kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();
-
 } // namespace config
 
 #endif

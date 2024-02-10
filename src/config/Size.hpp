@@ -12,7 +12,6 @@ class Size
 		unsigned long	size_in_bytes_;
 		const static unsigned int	kilobytes = 1024;
 		const static unsigned int	megabytes = kilobytes * 1024;
-		// 設定できる最大値 nginxを参照
 		const static unsigned long	kMaxSizeInBytes_;
 };
 } // namespace config
