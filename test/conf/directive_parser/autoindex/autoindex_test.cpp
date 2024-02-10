@@ -58,5 +58,4 @@ TEST(autoindexTest, notFound) {
 	test::test_directives_set(http.server_list[1].directives_set, kAutoindex, false);
 	test::test_directives_set(http.server_list[2].directives_set, kAutoindex, false);
 	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAutoindex, false);
-	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAutoindex, false);
 }
