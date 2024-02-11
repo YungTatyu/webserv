@@ -21,6 +21,7 @@ class ActiveEventManager
 		static bool isInvalidFd( const struct pollfd& pfd );
 		static bool isReadEvent( const struct pollfd& pfd );
 		static bool isWriteEvent( const struct pollfd& pfd );
+		static bool isErrorEvent( const struct pollfd& pfd );
 };
 
 #endif

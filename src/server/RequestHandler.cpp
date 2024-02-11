@@ -7,6 +7,7 @@ RequestHandler::RequestHandler()
 {
     this->handler_map[ActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
     this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
+    this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
 }
 
 /* RequestHandlerクラスの実装 */
@@ -50,4 +51,10 @@ void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMan
 {
     if (ioHandler.sendResponse( connManager, pollfd.fd ) != -1)
 		connManager.setEvent(pollfd.fd, ConnectionData::READ); // readイベントに更新
+}
+
+void RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
+{
+	ioHandler.closeConnection( connManager, pollfd.fd );
+	connManager.removeConnection(pollfd.fd);
 }

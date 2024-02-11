@@ -101,7 +101,7 @@ void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
  */
 void	WebServer::callEventHandler(const std::vector<struct pollfd> &pollfds)
 {
-	const std::map<RequestHandler::isEvent, RequestHandler::eventHandler>	&handler_map = this->requestHandler->handler_map;
+	const std::map<RequestHandler::whichEvent, RequestHandler::eventHandler>	&handler_map = this->requestHandler->handler_map;
 
 	// 発生したイベントの数だけloopする
 	// eit: event iterator
@@ -113,7 +113,7 @@ void	WebServer::callEventHandler(const std::vector<struct pollfd> &pollfds)
 		// 発生したeventに対するhandlerを呼ぶ
 		// mit: map iterator
 		for (
-			std::map<RequestHandler::isEvent, RequestHandler::eventHandler>::const_iterator mit = handler_map.begin();
+			std::map<RequestHandler::whichEvent, RequestHandler::eventHandler>::const_iterator mit = handler_map.begin();
 			mit != handler_map.end();
 			++mit
 		)
