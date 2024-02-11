@@ -547,8 +547,8 @@ bool	config::Parser::parseAccessLog()
 	config::CONTEXT context = this->current_context_.top();
 	config::AccessLog	tmp_acs_log;
 
-	// 文字列が空でなければオブジェクトを追加する
-	if (!path.empty())
+	// 文字列が空の場合はobjectを追加しない
+	if (path.empty())
 	{
 		ti_ += 2;
 		return true;
@@ -1588,6 +1588,7 @@ bool	config::Parser::parseAlias()
 	std::string	path = this->tokens_[ti_].value_;
 
 	this->config_.http.server_list.back().location_list.back().alias.setPath(path);
+	this->config_.http.server_list.back().location_list.back().directives_set.insert(kALIAS);
 
 	ti_ += 2;
 	return true;

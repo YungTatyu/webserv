@@ -34,8 +34,10 @@ TEST(aliasTest, allContext)
 	// location
 	test::test_value(http.server_list[0].location_list, {"/", "/tmp"});
 	test::test_value(http.server_list[1].location_list, {"/path/to/file", "/file"});
-	test::test_directives_set(http.server_list[0].directives_set, kAlias, true);
-	test::test_directives_set(http.server_list[1].directives_set, kAlias, true);
+	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAlias, true);
+	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAlias, true);
+	test::test_directives_set(http.server_list[1].location_list[0].directives_set, kAlias, true);
+	test::test_directives_set(http.server_list[1].location_list[1].directives_set, kAlias, true);
 }
 
 TEST(aliasTest, notFound) {
