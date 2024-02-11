@@ -85,7 +85,6 @@ class ServerConfig
 		const config::Time&	getUseridExpires( const std::string& server_name,
 											const std::string& address,
 											const unsigned int port );
-		const config::Size&	getClientMaxBodySize();
 
 	private:
 		//utils

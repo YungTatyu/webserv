@@ -28,9 +28,6 @@ protected:
 		else if (IsSubTest("getUseridExpires")) {
 			file_path = "test/server/conf_files/getUseridExpires_test.conf";
 		}
-		else if (IsSubTest("getClientMaxBodySize")) {
-			file_path = "test/server/conf_files/getClientMaxBodySize_test.conf";
-		}
 		else if (IsSubTest("writeAcsLog")) {
 			file_path = "test/server/conf_files/writeAcsLog_test.conf";
 		}
@@ -148,42 +145,68 @@ TEST_F(ServerConfigTest, getFile)
 
 TEST_F(ServerConfigTest, getKeepaliveTimeout)
 {
-	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
-	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
-	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
-	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
-	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
-	EXPECT_EQ(, server_config_.getKeepaliveTimeout());
+	// http set
+	EXPECT_EQ(server_config_.http.keepalive_timeout.getTime(),
+			server_config_.getKeepaliveTimeout("first_server",
+											"127.0.0.1",
+											8001,
+											"/"));
+	// location set
+	EXPECT_EQ(server_config_.http.server_list[0].location_list[1].keepalive_timeout.getTime(),
+			server_config_.getKeepaliveTimeout("first_server",
+											"127.0.0.1",
+											8001,
+											"/hello"));
+	// server set
+	EXPECT_EQ(server_config_.http.server_list[1].keepalive_timeout.getTime(),
+			server_config_.getKeepaliveTimeout("second_server",
+											"127.0.0.2",
+											8002,
+											"/"));
 }
 
 TEST_F(ServerConfigTest, getSendTimeout)
 {
-	EXPECT_EQ(, server_config_.getSendTimeout());
-	EXPECT_EQ(, server_config_.getSendTimeout());
-	EXPECT_EQ(, server_config_.getSendTimeout());
-	EXPECT_EQ(, server_config_.getSendTimeout());
-	EXPECT_EQ(, server_config_.getSendTimeout());
-	EXPECT_EQ(, server_config_.getSendTimeout());
+	// default time
+	EXPECT_EQ(server_config_.http.send_timeout.getTime(),
+			server_config_.getSendTimeout("first_server",
+										"127.0.0.1",
+										8001,
+										"/"));
+	// location set
+	EXPECT_EQ(server_config_.http.server_list[0].location_list[1].send_timeout.getTime(),
+			server_config_.getSendTimeout("first_server",
+										"127.0.0.1",
+										8001,
+										"/hello"));
+	// server set
+	EXPECT_EQ(server_config_.http.server_list[1].send_timeout.getTime(),
+			server_config_.getSendTimeout("second_server",
+										"127.0.0.2",
+										8002,
+										"/"));
 }
 
 TEST_F(ServerConfigTest, getUseridExpires)
 {
-	EXPECT_EQ(, server_config_.getUseridExpires());
-	EXPECT_EQ(, server_config_.getUseridExpires());
-	EXPECT_EQ(, server_config_.getUseridExpires());
-	EXPECT_EQ(, server_config_.getUseridExpires());
-	EXPECT_EQ(, server_config_.getUseridExpires());
-	EXPECT_EQ(, server_config_.getUseridExpires());
-}
-
-TEST_F(ServerConfigTest, getClientMaxBodySize())
-{
-	EXPECT_EQ(, server_client_.getClientMaxBodySize());
-	EXPECT_EQ(, server_client_.getClientMaxBodySize());
-	EXPECT_EQ(, server_client_.getClientMaxBodySize());
-	EXPECT_EQ(, server_client_.getClientMaxBodySize());
-	EXPECT_EQ(, server_client_.getClientMaxBodySize());
-	EXPECT_EQ(, server_client_.getClientMaxBodySize());
+	// http set
+	EXPECT_EQ(server_config_.http.userid_expires.getTime(),
+			server_config_.getUseridExpires("first_server",
+										"127.0.0.1",
+										8001,
+										"/"));
+	// location set
+	EXPECT_EQ(server_config_.http.server_list[0].location_list[1].userid_expires.getTime(),
+			server_config_.getUseridExpires("first_server",
+										"127.0.0.1",
+										8001,
+										"/hello"));
+	// server set
+	EXPECT_EQ(server_config_.http.server_list[1].userid_expires.getTime(),
+			server_config_.getUseridExpires("second_server",
+										"127.0.0.2",
+										8002,
+										"/"));
 }
 
 TEST_F(ServerConfigTest, writeAcsLog)
