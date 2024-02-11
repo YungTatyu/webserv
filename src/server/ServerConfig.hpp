@@ -64,32 +64,37 @@ class ServerConfig
 		// cli_addrのデータ型どうするか？これだとipv4しか対応できない。
 		bool	allowRequest( const std::string& server_name,
 							const std::string& serv_addr,
-							const unsigned int 
+							const unsigned int port,
 							const std::string& uri,
 							const in_addr_t cli_addr ) const;
 		const std::string&	getFile( const std::string& server_name,
 									const std::string& address,
-									const unsigned int port ) const;
+									const unsigned int port,
+									const std::string& uri ) const;
 		void	writeAcsLog( const std::string& server_name,
 							const std::string& address,
-							const unsigned int port );
+							const unsigned int port,
+							const std::string& uri ) const;
 		void	writeErrLog( const std::string& server_name,
 							const std::string& address,
-							const unsigned int port );
+							const unsigned int port,
+							const std::string& uri ) const;
 		const config::Time&	getKeepaliveTimeout( const std::string& server_name,
 												const std::string& address,
-												const unsigned int port );
+												const unsigned int port,
+												const std::string& uri ) const;
 		const config::Time&	getSendTimeout( const std::string& server_name,
 											const std::string& address,
-											const unsigned int port );
+											const unsigned int port,
+											const std::string& uri ) const;
 		const config::Time&	getUseridExpires( const std::string& server_name,
 											const std::string& address,
-											const unsigned int port );
+											const unsigned int port,
+											const std::string& uri ) const;
 
 	private:
 		//utils
-		config::Server&	getServer( const std::string& server_name, const std::string& address, const unsigned int port );
-		config::Location&	getLocation( const config::Server&server, const std::string& path );
+		//必要なメソッド追加
 
 	public:
 		int		getServPort();
