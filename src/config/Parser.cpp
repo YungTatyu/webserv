@@ -1221,16 +1221,18 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 		fields.push_back(field);
 	}
 	
-		// フィールドの数が正しいかを確認
-	if (fields.size() != 8)
+	// フィールドの数が正しいかを確認
+	if (fields.size() < 2 || fields.size() > 8)
 	{
 		return false;
 	}
 
 	// 各フィールドが0からFFFFまでの値を持っていることを確認
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < fields.size(); i++)
 	{
 		field = fields[i];
+		if (field.empty()) // "::"によるから文字は許容する
+			continue;
 		unsigned int value;
 		iss.clear();
 		iss.str(field);
