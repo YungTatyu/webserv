@@ -586,8 +586,8 @@ bool	config::Parser::parseErrorLog()
 	config::CONTEXT context = this->current_context_.top();
 	config::ErrorLog	tmp_err_log;
 
-	// 文字列が空でなければオブジェクトを追加する
-	if (!path.empty())
+	// 文字列が空の場合はobjectを追加しない
+	if (path.empty())
 	{
 		ti_ += 2;
 		return true;
