@@ -14,10 +14,8 @@ namespace test
 {
 void	test_value(const std::set<std::string> &set, const std::vector<std::string> &expects)
 {
-	int	i = 0;
-	std::for_each(expects.begin(), expects.end(), [&i, &set](std::string expect){
+	std::for_each(expects.begin(), expects.end(), [&set](std::string expect){
 		EXPECT_TRUE(set.find(expect) != set.end());
-		++i;
 	});
 }
 } // namespace test
