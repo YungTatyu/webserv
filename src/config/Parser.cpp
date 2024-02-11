@@ -934,8 +934,8 @@ bool	config::Parser::parseClientMaxBodySize()
 bool	config::Parser::parseIndex()
 {
 	ti_++;
-	std::string	file;
-	config::CONTEXT context = this->current_context_.top();
+	std::string		file;
+	config::CONTEXT	context = this->current_context_.top();
 	config::Index	tmp_index;
 
 
@@ -946,7 +946,7 @@ bool	config::Parser::parseIndex()
 		// 空文字列があればエラー
 		if (file.empty())
 		{
-			std::cerr << "webserv: [emerg] index " << file << "in \"index\" directive is invalid in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			std::cerr << "webserv: [emerg] index \"" << file << "\" in \"index\" directive is invalid in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
 
@@ -958,6 +958,7 @@ bool	config::Parser::parseIndex()
 			this->config_.http.server_list.back().index_list.push_back(tmp_index);
 		else if (context == config::CONF_HTTP_LOCATION)
 			this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
+
 		ti_++;
 	}
 
@@ -978,7 +979,7 @@ bool	config::Parser::parseAutoindex()
 
 	if (tmp_switch != "on" && tmp_switch != "off")
 	{
-		std::cerr << "webserv: [emerg] invalid value " << tmp_switch << " in \"autoindex\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] invalid value \"" << tmp_switch << "\" in \"autoindex\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
@@ -1154,7 +1155,9 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	{
 		field = fields[i];
 		unsigned int value;
-		std::istringstream(field) >> value;
+		iss.clear();
+		iss.str(field);
+		iss >> value;
 		if (255 < value)
 		{
 			return false;
@@ -1164,13 +1167,21 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	// 4. subnetmaskの値が正しいか確認
 	if (!mask_part.empty())
 	{
-		int	subnet_mask;
-		std::istringstream(mask_part) >> subnet_mask;
-
-		if (subnet_mask < 0 || 32 < subnet_mask)
+		int		subnet_mask;
+		char	remaining_char;
+		iss.clear();
+		iss.str(mask_part);
+		if (iss >> subnet_mask)
 		{
-			return false;
+			if (iss >> remaining_char
+				|| subnet_mask < 0
+				|| 32 < subnet_mask)
+			{
+				return false;
+			}
 		}
+		else
+			return false;
 	}
 
 	// 全ての条件を満たす場合、IPv4アドレスと見なす
@@ -1195,7 +1206,7 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	std::string field;
 	std::vector<std::string> fields;
 
-	while (std::getline(iss, field, '.'))
+	while (std::getline(iss, field, ':'))
 	{
 		// 各フィールドが16進数であることを確認
 		for (int i = 0; field[i] != '\0'; i++)
@@ -1221,7 +1232,9 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	{
 		field = fields[i];
 		unsigned int value;
-		std::istringstream(field) >> std::hex >> value;
+		iss.clear();
+		iss.str(field);
+		iss >> std::hex >> value;
 		if (value > 0xFFFF)
 		{
 			return false;
@@ -1231,13 +1244,21 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	// 4. subnetmaskの値が正しいか確認
 	if (!mask_part.empty())
 	{
-		int	subnet_mask;
-		std::istringstream(mask_part) >> subnet_mask;
-
-		if (subnet_mask < 0 || 128 < subnet_mask)
+		int		subnet_mask;
+		char	remaining_char;
+		iss.clear();
+		iss.str(mask_part);
+		if (iss >> subnet_mask)
 		{
-			return false;
+			if (iss >> remaining_char
+				|| subnet_mask < 0
+				|| 128 < subnet_mask)
+			{
+				return false;
+			}
 		}
+		else
+			return false;
 	}
 
 	// 全ての条件を満たす場合、IPv6アドレスと見なす
@@ -1350,10 +1371,6 @@ bool	config::Parser::parseListen()
 			std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
-	if (ori_val[0] == ':')
-	{
-		segments.push_back("");
-	}
 
 	iss.str(ori_val.c_str());
 	while (getline(iss, segment, ':'))
@@ -1377,7 +1394,6 @@ bool	config::Parser::parseListen()
 	if (segments.size() == 2)
 	{
 		// ip addressがあれば値を確認する。
-		// なければデフォルト値を入れる。
 		if (segments[0].empty())
 		{
 			std::cerr << "webserv: [emerg] no host in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
@@ -1391,7 +1407,7 @@ bool	config::Parser::parseListen()
 		tmp_listen.setAddress(segments[0]);
 
 		// port番号があれば値を確認しする。
-		// なければデフォルト値を入れる。
+
 		if (segments[1].empty())
 		{
 			std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
@@ -1462,6 +1478,7 @@ bool	config::Parser::parseListen()
 			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
+		tmp_listen.setPort(port);
 	}
 
 	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
@@ -1512,7 +1529,7 @@ bool	config::Parser::parseTryFiles()
 
 	// codeかuriか判定
 	std::string			uri;
-	long				code;
+	int					code;
 	std::istringstream	iss;
 	char				remaining_char;
 
@@ -1585,38 +1602,38 @@ bool	config::Parser::parseReturn()
 	char				remaining_char;
 	config::Return		tmp_return;
 
-	// もしトークンが2つあるなら一つ目はcodeなので処理する
-	if (this->tokens_[ti_ + 2].type_ == config::TK_SEMICOLON)
+	// 1つ目はcodeなので処理する
+	iss.str(this->tokens_[ti_].value_.c_str());
+
+	if (iss >> code)
 	{
-		iss.str(this->tokens_[ti_].value_.c_str());
-
-		if (iss >> code)
-		{
-			if (iss >> remaining_char)
-			{
-				std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-				return false;
-			}
-
-			if (code < 0 || 999 < code)
-			{
-				std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-				return false;
-			}
-		}
-		else
+		if (iss >> remaining_char)
 		{
 			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
 
-		ti_++;
-		tmp_return.setCode(code);
+		if (code < 0 || 999 < code)
+		{
+			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			return false;
+		}
+	}
+	else
+	{
+		std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		return false;
 	}
 
+	tmp_return.setCode(code);
+
 	// url をセットする
-	url = this->tokens_[ti_].value_;
-	tmp_return.setUrl(url);
+	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
+	{
+		ti_++;
+		url = this->tokens_[ti_].value_;
+		tmp_return.setUrl(url);
+	}
 
 	this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
 	this->config_.http.server_list.back().location_list.back().directives_set.insert(kRETURN);
@@ -1633,7 +1650,7 @@ bool	config::Parser::parseUserid()
 	// もし、on/offではなかったらエラー
 	if (tmp_switch != "on" && tmp_switch != "off")
 	{
-		std::cerr << "webserv: [emerg] invalid value " << tmp_switch << " in \"userid\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] invalid value \"" << tmp_switch << "\" in \"userid\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
@@ -1711,7 +1728,7 @@ bool	config::Parser::parseUseridExpires()
 	long time = parseTime();
 	if (time == -1)
 	{
-		std::cerr << "webserv: [emerg] \"client_max_body_size\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] \"userid_expires\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
