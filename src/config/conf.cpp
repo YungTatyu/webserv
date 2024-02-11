@@ -68,7 +68,10 @@ config::Main	*config::init_config(const std::string& file_path)
 	Main	*config = new Main();
 	config::Parser	parser(*config, tokens, absolute_path);
 	if (!parser.parse())
+	{
+		delete config;
 		return NULL;
+	}
 
 	return config;
 }
