@@ -77,11 +77,13 @@ TEST(DenyTest, ipv6)
 
 	// location
 	test::test_value(http.server_list[0].location_list[0].deny_list, {
-		"allow 3001:0db8::/32",
-		"allow fe81::/1",
-		"allow fc01::/7",
-		"allow ::/127",
-		"allow abcd:ef01:2345:6789::/64",
+		"3001:0db8::/32",
+		"fe81::/1",
+		"fc01::/7",
+		"::/127",
+		"abcd:ef01:2345:6789::/64",
+		"::ffff",
+		"FFFF::",
 	});
 	test::test_value(http.server_list[0].location_list[1].deny_list, {
 		"3001:db8:0:42:0:8a2e:370:7334",
