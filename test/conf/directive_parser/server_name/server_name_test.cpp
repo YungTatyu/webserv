@@ -12,11 +12,11 @@
 
 namespace test
 {
-void	test_value(const std::vector<config::ServerName> &list, const std::vector<std::string> &expect)
+void	test_value(const std::set<std::string> &set, const std::vector<std::string> &expects)
 {
 	int	i = 0;
-	std::for_each(list.begin(), list.end(), [&i, &expect](config::ServerName server_name){
-		EXPECT_EQ(server_name.getFile(), expect[i]);
+	std::for_each(expects.begin(), expects.end(), [&i, &set](std::string expect){
+		EXPECT_TRUE(set.find(expect) != set.end());
 		++i;
 	});
 }
@@ -28,18 +28,22 @@ TEST(ServerNameTest, allContext)
 {
 	const config::Main	*config = config::init_config("test/conf/directive_parser/server_name/1.conf");
 	ASSERT_NE(config, nullptr);
-	EXPECT_TRUE(false); // server_nameの設計変更につき、テスト一旦保留
 
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
 	// server
-	test::test_value(http.server_list[0].server_name_list, {"path/to/file1", "path/to/file2"});
-	test::test_value(http.server_list[1].server_name_list, {"server2path1", "server2path2"});
+	test::test_value(http.server_list[0].server_name.getName(), {
+		"tachu",
+		"",
+		"1",
+		"2",
+		"3",
+		"server name",
+		"sn:8000",
+	});
 	test::test_directives_set(http.server_list[0].directives_set, kServerName, true);
-	test::test_directives_set(http.server_list[1].directives_set, kServerName, true);
-
 }
 
 TEST(ServerNameTest, notFound) {
@@ -51,7 +55,6 @@ TEST(ServerNameTest, notFound) {
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
-	test::test_directives_set(http.directives_set, kServerName, false);
 	test::test_directives_set(http.server_list[0].directives_set, kServerName, false);
 	test::test_directives_set(http.server_list[1].directives_set, kServerName, false);
 }

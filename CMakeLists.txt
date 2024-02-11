@@ -16,11 +16,14 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
 	src/server/HttpMessage.cpp 
+	src/server/FileUtils.cpp 
+	src/server/CGIHandler.cpp 
+	src/server/SysCallWrapper.cpp 
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
 
-	test/test.cpp 
+	# test/test.cpp
 	test/conf/directives_test.cpp 
 	test/conf/confLexerTest.cpp 
 	test/conf/main_parser_test.cpp 
@@ -38,6 +41,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/return/return_test.cpp
 	test/conf/directive_parser/root/root_test.cpp
 	test/conf/directive_parser/send_timeout/send_timeout_test.cpp
+	test/conf/directive_parser/server_name/server_name_test.cpp
 	test/conf/directive_parser/try_files/try_files_test.cpp
 	test/conf/directive_parser/use/use_test.cpp
 	test/conf/directive_parser/userid/userid_test.cpp
@@ -49,10 +53,10 @@ add_executable(${PROJECT_NAME}-googletest
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
-	./src
-	./src/server
-	./src/config
-	test/conf/
+	src
+	src/server
+	src/config
+	test/conf
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
