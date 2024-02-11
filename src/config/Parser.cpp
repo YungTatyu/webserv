@@ -1228,7 +1228,7 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	}
 
 	// 各フィールドが0からFFFFまでの値を持っていることを確認
-	for (int i = 0; i < fields.size(); i++)
+	for (size_t i = 0; i < fields.size(); i++)
 	{
 		field = fields[i];
 		if (field.empty()) // "::"によるから文字は許容する
@@ -1267,12 +1267,36 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	return true;
 }
 
+/**
+ * @brief IPv6とIPv4がmixされたアドレスかを判定
+ * 
+ * @param mixed_ip 
+ * @return true 
+ * @return false 
+ */
+bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip)
+{
+	if (mixed_ip.empty())
+	{
+		return false;
+	}
+	size_t	ipv6_pos = mixed_ip.rfind(":") + 1;
+	if (ipv6_pos == std::string::npos)
+		return false;
+	const std::string	ipv6 = mixed_ip.substr(0, ipv6_pos);
+	const std::string	ipv4 = mixed_ip.substr(ipv6_pos);
+	std::cout << "ipv6=" << ipv6 << "\n";
+	std::cout << "ipv4=" << ipv4 << "\n";
+
+	return isIPv4(ipv4) && isIPv6(ipv6);
+}
+
 bool	config::Parser::parseAllow()
 {
 	ti_++;
 	std::string	address = this->tokens_[ti_].value_;
 
-	if (address != "all" && !isIPv4(address) && !isIPv6(address))
+	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
 	{
 		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
@@ -1312,7 +1336,7 @@ bool	config::Parser::parseDeny()
 	ti_++;
 	std::string	address = this->tokens_[ti_].value_;
 
-	if (address != "all" && !isIPv4(address) && !isIPv6(address))
+	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
 	{
 		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;

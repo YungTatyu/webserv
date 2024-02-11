@@ -68,6 +68,7 @@ class Parser
 		bool	parseUseridService();
 		bool	isIPv4(const std::string& ipv4);
 		bool	isIPv6(const std::string& ipv6);
+		bool	isMixedIPAddress(const std::string& ipv6);
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
 		long	parseTime();

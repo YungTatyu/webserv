@@ -87,6 +87,8 @@ TEST(allowTest, ipv6)
 		"2001:db8:0:42:0:8a2e:370:7334",
 		"::ffff:192.168.0.1",
 		"FFFF::192.24.0.1",
+		"21::12.24.0.1/128",
+		"aaaa::12.24.0.1/128",
 	});
 	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAllow, true);
 	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAllow, true);
