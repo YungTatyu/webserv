@@ -27,7 +27,6 @@ void RequestHandler::handle( ConnectionManager &connManager, const int target )
 
 void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
 {
-    	ssize_t re = ioHandler.receiveRequest( connManager, pollfd.fd );
 		// リスニングソケットへの新規リクエスト
 		if (pollfd.fd == ioHandler.getListenfd())
 		{
@@ -35,6 +34,7 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
 			return;
 		}
 		// クライアントソケットへのリクエスト（既存コネクション）
+    	ssize_t re = ioHandler.receiveRequest( connManager, pollfd.fd );
 		if (re == -1) //ソケット使用不可。
 			return;
 		if (re == 0) // クライアントが接続を閉じる
