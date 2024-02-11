@@ -6,12 +6,40 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <sys/param.h>
 
 class ServerConfigTest : public ::testing::Test {
 protected:
     // 各TESTの前に呼び出されるセットアップメソッド
 	void SetUp() override {
-		std::string		file_path = "test/server/conf_files/server_config_test.conf";
+		std::string		file_path;
+		if (IsSubTest("allowRequest")) {
+			file_path = "test/server/conf_files/allowRequest_test.conf";
+		}
+		else if (IsSubTest("getFile")) {
+			file_path = "test/server/conf_files/getFile_test.conf";
+		}
+		else if (IsSubTest("getKeepaliveTimeout")) {
+			file_path = "test/server/conf_files/getKeepaliveTimeout_test.conf";
+		}
+		else if (IsSubTest("getSendTimeout")) {
+			file_path = "test/server/conf_files/getSendTimeout_test.conf";
+		}
+		else if (IsSubTest("getUseridExpires")) {
+			file_path = "test/server/conf_files/getUseridExpires_test.conf";
+		}
+		else if (IsSubTest("getClientMaxBodySize")) {
+			file_path = "test/server/conf_files/getClientMaxBodySize_test.conf";
+		}
+		else if (IsSubTest("writeAcsLog")) {
+			file_path = "test/server/conf_files/writeAcsLog_test.conf";
+		}
+		else if (IsSubTest("writeErrLog")) {
+			file_path = "test/server/conf_files/writeErrLog_test.conf";
+		}
+		else {
+			SKIP();
+		}
 		config::Main	*config = new config::Main();
 		config::Lexer	lexer(file_path);
 		lexer.tokenize();
@@ -72,13 +100,50 @@ TEST_F(ServerConfigTest, allowRequest)
 
 TEST_F(ServerConfigTest, getFile)
 {
-	EXPECT_EQ("", server_config_.getFile());
-	EXPECT_EQ("", server_config_.getFile());
-	EXPECT_EQ("", server_config_.getFile());
-	EXPECT_EQ("", server_config_.getFile());
-	EXPECT_EQ("", server_config_.getFile());
-	EXPECT_EQ("", server_config_.getFile());
-	EXPECT_EQ("", server_config_.getFile());
+	std::string	file_path = "../../";
+	char		absolute_path[MAXPATHLEN];
+	std::string	absolutepath;
+
+	// 絶対pathを取得
+	if (realpath(file_path.c_str(), absolute_path) == NULL)
+	{
+		std::cerr << file_path << " is not found." << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	//absolutepath = ~/webserv/html
+	absolutepath = static_cast<std::string>(absolute_path);
+
+	// indexのみ設定されているケース
+	EXPECT_EQ(absolutepath + "/index.html",
+			server_config_.getFile("first_server",
+									"127.0.0.1",
+									8001,
+									"/"));
+	// indexとtry_filesが設定されているケース
+	EXPECT_EQ(absolutepath + "/test/try.html",
+			server_config_.getFile("first_server",
+									"127.0.0.1",
+									8001,
+									"/test/"));
+	// index,try_files.returnが設定されているケース
+	EXPECT_EQ(absolutepath + "/404.html",
+			server_config_.getFile("second_server",
+									"127.0.0.2",
+									8002,
+									"/test"));
+	// location内でrootが変わっているケース
+	EXPECT_EQ(absolutepath + "/change/change_root.html",
+			server_config_.getFile("third_server",
+									"127.0.0.3",
+									8003,
+									"/"));
+	// aliasでrootが変わるケース
+	EXPECT_EQ(absolutepath + "/alias/alias.html",
+			server_config_.getFile("third_server",
+									"127.0.0.3",
+									8003,
+									"/test"));
 }
 
 TEST_F(ServerConfigTest, getKeepaliveTimeout)
