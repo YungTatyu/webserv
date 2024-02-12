@@ -209,17 +209,123 @@ TEST_F(ServerConfigTest, getUseridExpires)
 										"/"));
 }
 
+namespase test {
+bool	WRITE_ACCURATE( const std::vector<std::string> file_pathes, const std::string& phrase ) {
+	std::istringstream	iss;
+	std::string			content;
+
+	iss.str( file );
+	iss >> content;
+	return (content.find(phrase) != std::string::npos );
+}
+};
+
 TEST_F(ServerConfigTest, writeAcsLog)
 {
-	server_config_.writeAcsLog();
+	std::string	file_path = "../../";
+	char		absolute_path[MAXPATHLEN];
+	std::string	absolutepath;
 
-	WRITE_ACCURATE();
+	// 絶対pathを取得
+	if (realpath(file_path.c_str(), absolute_path) == NULL)
+	{
+		std::cerr << file_path << " is not found." << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	//absolutepath = ~/webserv
+	absolutepath = static_cast<std::string>(absolute_path);
+	std::string	file;
+	std::string	msg;
+
+	// offというファイルに書き込むのではなく、どこにも書き込まない
+	file = absolutepath + "/off";
+	msg = "aiueo";
+	server_config_.writeAcsLog("first_server",
+							"127.0.0.1",
+							8001,
+							"/",
+							msg);
+	EXPECT_FALSE(WRITE_ACCURATE(file, msg));
+
+	// ロケーションブロックで指定されたところへ出力
+	file = absolutepath + "/logs/location.log";
+	msg = "kakikukeko";
+	server_config_.writeAcsLog("first_server",
+							"127.0.0.1",
+							8001,
+							"/hello",
+							msg);
+	EXPECT_TRUE(WRITE_ACCURATE(files, msg));
+
+	// 親ブロックで指定されたファイルに出力
+	file = absolutepath + "/logs/server.log";
+	msg = "sashisuseso";
+	server_config_.writeAcsLog("first_server",
+							"127.0.0.1",
+							8001,
+							"/goodnight",
+							msg);
+	EXPECT_TRUE(WRITE_ACCURATE(files, msg));
+
+	// 親の親ブロックで指定されたファイルに出力
+	file = absolutepath + "/logs/http.log";
+	msg = "tachitsuteto";
+	server_config_.writeAcsLog("second_server",
+							"127.0.0.2",
+							8002,
+							"/",
+							msg);
+	EXPECT_TRUE(WRITE_ACCURATE(file, msg));
 }
 
 TEST_F(ServerConfigTest, writeErrLog)
 {
-	server_config_.writeErrLog();
+	std::string	file_path = "../../";
+	char		absolute_path[MAXPATHLEN];
+	std::string	absolutepath;
 
-	WRITE_ACCURATE();
+	// 絶対pathを取得
+	if (realpath(file_path.c_str(), absolute_path) == NULL)
+	{
+		std::cerr << file_path << " is not found." << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	//absolutepath = ~/webserv
+	absolutepath = static_cast<std::string>(absolute_path);
+	std::string	file;
+	std::string	msg;
+
+	// ログオフ
+	file = /dev/null;
+	msg = "aiueo";
+	server_config_.writeAcsLog("first_server",
+							"127.0.0.1",
+							8001,
+							"/",
+							msg);
+	EXPECT_FALSE(WRITE_ACCURATE(file, msg));
+
+	// location.logに出力
+	file = absolutepath + "/logs/location.log";
+	msg = "kakikukeko";
+	server_config_.writeAcsLog("first_server",
+							"127.0.0.1",
+							8001,
+							"/hello",
+							msg);
+	EXPECT_TRUE(WRITE_ACCURATE(file, msg));
+
+	// default fileに出力
+	file = absolutepath + "/logs/error.log";
+	msg = "sashisuseso";
+	server_config_.writeAcsLog("second_server",
+							"127.0.0.2",
+							8002,
+							"/",
+							msg);
+	EXPECT_TRUE(WRITE_ACCURATE(file, msg));
+
 }
 
