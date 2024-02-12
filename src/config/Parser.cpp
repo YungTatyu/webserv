@@ -1237,6 +1237,7 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 		iss.clear();
 		iss.str(field);
 		iss >> std::hex >> value;
+		std::cout << "value=" << value << "\n";
 		if (value > 0xFFFF)
 		{
 			return false;
@@ -1280,13 +1281,35 @@ bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip)
 	{
 		return false;
 	}
-	size_t	ipv6_pos = mixed_ip.rfind(":") + 1;
+	size_t	ipv6_pos = mixed_ip.rfind(":");
 	if (ipv6_pos == std::string::npos)
 		return false;
+	++ipv6_pos;
+	size_t	subnet_pos = mixed_ip.rfind("/");
+	const std::string mask_part = subnet_pos != std::string::npos ? mixed_ip.substr(subnet_pos + 1) : "";
 	const std::string	ipv6 = mixed_ip.substr(0, ipv6_pos);
-	const std::string	ipv4 = mixed_ip.substr(ipv6_pos);
+	const std::string	ipv4 = subnet_pos == std::string::npos ? mixed_ip.substr(ipv6_pos) : mixed_ip.substr(ipv6_pos, subnet_pos - ipv6_pos);
 	std::cout << "ipv6=" << ipv6 << "\n";
 	std::cout << "ipv4=" << ipv4 << "\n";
+	std::cout << "subnet=" << subnet_pos << "\n";
+	std::cout << "mask=" << mask_part << "\n";
+	if (!mask_part.empty())
+	{
+		int		subnet_mask;
+		char	remaining_char;
+		std::istringstream iss(mask_part);
+		if (iss >> subnet_mask)
+		{
+			if (iss >> remaining_char
+				|| subnet_mask < 0
+				|| 128 < subnet_mask)
+			{
+				return false;
+			}
+		}
+		else
+			return false;
+	}
 
 	return isIPv4(ipv4) && isIPv6(ipv6);
 }
