@@ -1201,6 +1201,9 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	std::string address_part = (mask_pos != std::string::npos) ? ipv6.substr(0, mask_pos) : ipv6;
 	std::string mask_part = (mask_pos != std::string::npos) ? ipv6.substr(mask_pos + 1) : "";
 
+	std::cout << address_part << "\n";
+	std::cout << mask_part << "\n";
+
 	// 3. 文字列がIPv6の基本的な構造に従っているかを確認
 	std::istringstream iss(address_part);
 	std::string field;
@@ -1240,31 +1243,40 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 		std::cout << "value=" << value << "\n";
 		if (value > 0xFFFF)
 		{
+		std::cout << "hex false" << value << "\n";
 			return false;
 		}
 	}
 
+	std::cout << "mask test" << "\n";
 	// 4. subnetmaskの値が正しいか確認
 	if (!mask_part.empty())
 	{
-		int		subnet_mask;
-		char	remaining_char;
-		iss.clear();
-		iss.str(mask_part);
-		if (iss >> subnet_mask)
+		if (!isNumeric(mask_part))
+			return false;
+		unsigned int	subnet_mask;
+		std::istringstream converter(mask_part);
+		std::cout << "maskpart=" << mask_part << "--\n";
+
+		converter >> subnet_mask;
+		if (subnet_mask < 0
+			|| 128 < subnet_mask)
 		{
-			if (iss >> remaining_char
-				|| subnet_mask < 0
-				|| 128 < subnet_mask)
-			{
-				return false;
-			}
+			std::cout << subnet_mask << "\n";
+			return false;
 		}
-		else
+	}
+	// 全ての条件を満たす場合、IPv6アドレスと見なす
+	return true;
+}
+
+bool	config::Parser::isNumeric(const std::string& str) const
+{
+	for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
+	{
+		if(!std::isdigit(*it))
 			return false;
 	}
-
-	// 全ての条件を満たす場合、IPv6アドレスと見なす
 	return true;
 }
 
@@ -1289,10 +1301,10 @@ bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip)
 	const std::string mask_part = subnet_pos != std::string::npos ? mixed_ip.substr(subnet_pos + 1) : "";
 	const std::string	ipv6 = mixed_ip.substr(0, ipv6_pos);
 	const std::string	ipv4 = subnet_pos == std::string::npos ? mixed_ip.substr(ipv6_pos) : mixed_ip.substr(ipv6_pos, subnet_pos - ipv6_pos);
-	std::cout << "ipv6=" << ipv6 << "\n";
-	std::cout << "ipv4=" << ipv4 << "\n";
-	std::cout << "subnet=" << subnet_pos << "\n";
-	std::cout << "mask=" << mask_part << "\n";
+	// std::cout << "ipv6=" << ipv6 << "\n";
+	// std::cout << "ipv4=" << ipv4 << "\n";
+	// std::cout << "subnet=" << subnet_pos << "\n";
+	// std::cout << "mask=" << mask_part << "\n";
 	if (!mask_part.empty())
 	{
 		int		subnet_mask;
