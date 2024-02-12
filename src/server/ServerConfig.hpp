@@ -61,6 +61,7 @@ class ServerConfig
 		void	loadConfiguration( const config::Main* config );
 
 		// method
+		// 全体的に引数多いからどこかのデータ構造でまとめる
 		// cli_addrのデータ型どうするか？これだとipv4しか対応できない。
 		bool	allowRequest( const std::string& server_name,
 							const std::string& serv_addr,
@@ -74,11 +75,13 @@ class ServerConfig
 		void	writeAcsLog( const std::string& server_name,
 							const std::string& address,
 							const unsigned int port,
-							const std::string& uri ) const;
+							const std::string& uri,
+							const std::string& msg ) const;
 		void	writeErrLog( const std::string& server_name,
 							const std::string& address,
 							const unsigned int port,
-							const std::string& uri ) const;
+							const std::string& uri,
+							const std::string& msg ) const;
 		const config::Time&	getKeepaliveTimeout( const std::string& server_name,
 												const std::string& address,
 												const unsigned int port,
