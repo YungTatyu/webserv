@@ -34,7 +34,7 @@ TEST(clientMaxBodySizeTest, longMaxKilo)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
-	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, kLongMax / config::Size::kilobytes);
+	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, 9007199254740991 * config::Size::kilobytes);
 	test::test_directives_set(http.directives_set, kClientMaxBodySize, true);
 }
 
@@ -47,7 +47,7 @@ TEST(clientMaxBodySizeTest, longMaxMega)
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;
 
-	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, kLongMax / config::Size::megabytes);
+	EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, 8796093022207 * config::Size::megabytes);
 	test::test_directives_set(http.directives_set, kClientMaxBodySize, true);
 }
 
