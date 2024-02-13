@@ -4,6 +4,8 @@
 # include <vector>
 # include <map>
 
+# include "HttpMessage.hpp"
+
 class ConnectionData
 {
 	public:
@@ -14,6 +16,7 @@ class ConnectionData
 		std::vector<char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<char> response;
 		EVENT event;
+		HttpRequest	request;
 };
 
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
