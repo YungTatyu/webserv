@@ -1270,7 +1270,8 @@ bool	config::Parser::isNumInRange(const std::string& num, long min, long max) co
 
 	std::istringstream converter(num);
 	long	value;
-	converter >> value;
+	if (!(converter >> value))
+		return false;
 	if (value < min || value > max)
 		return false;
 	return true;
