@@ -25,36 +25,37 @@ void RequestHandler::handle( ConnectionManager &connManager, const int target )
     connManager.setResponse( target, vec );
 }
 
-void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
+void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
-		if (pollfd.fd == ioHandler.getListenfd())
+		if (sockfd == ioHandler.getListenfd())
 		{
 			ioHandler.acceptConnection(connManager);
 			return;
 		}
 		// クライアントソケットへのリクエスト（既存コネクション）
-    	ssize_t re = ioHandler.receiveRequest( connManager, pollfd.fd );
+    	ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
 		if (re == -1) //ソケット使用不可。
 			return;
 		if (re == 0) // クライアントが接続を閉じる
 		{
-			ioHandler.closeConnection( connManager, pollfd.fd );
-			connManager.removeConnection(pollfd.fd);
+			ioHandler.closeConnection( connManager, sockfd );
+			connManager.removeConnection(sockfd);
 			return;
 		}
-		handle( connManager, pollfd.fd );
-		connManager.setEvent(pollfd.fd, ConnectionData::WRITE); // writeイベントに更新
+		connManager.setEvent(sockfd, ConnectionData::WRITE); // writeイベントに更新
 }
 
-void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
+void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
-    if (ioHandler.sendResponse( connManager, pollfd.fd ) != -1)
-		connManager.setEvent(pollfd.fd, ConnectionData::READ); // readイベントに更新
+	// response作成
+	handle( connManager, sockfd );
+    if (ioHandler.sendResponse( connManager, sockfd ) != -1)
+		connManager.setEvent(sockfd, ConnectionData::READ); // readイベントに更新
 }
 
-void RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd)
+void RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
-	ioHandler.closeConnection( connManager, pollfd.fd );
-	connManager.removeConnection(pollfd.fd);
+	ioHandler.closeConnection( connManager, sockfd );
+	connManager.removeConnection(sockfd);
 }

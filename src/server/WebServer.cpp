@@ -121,7 +121,7 @@ void	WebServer::callEventHandler()
 			if ((*mit->first)(*eit))
 			{
 				RequestHandler::eventHandler event_handler = mit->second;
-				(this->requestHandler->*event_handler)(*(this->ioHandler), *(this->connManager), *eit);
+				(this->requestHandler->*event_handler)(*(this->ioHandler), *(this->connManager), eit->fd);
 				break;
 			}
 		}

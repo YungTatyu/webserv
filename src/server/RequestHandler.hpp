@@ -14,15 +14,15 @@ class RequestHandler
 	public:
 		RequestHandler();
 		void handle( ConnectionManager &connManager, const int target );
-		void handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd);
-		void handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd);
-		void handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const struct pollfd pollfd);
+		void handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		void handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		void handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 
 		typedef bool (*whichEvent)(const struct pollfd& pfd);
 		typedef void (RequestHandler::*eventHandler)(
 			NetworkIOHandler &ioHandler,
 			ConnectionManager &connManager,
-			const struct pollfd pollfd
+			const int sockfd
 		);
 		// key: eventを判別する関数 value: そのイベントのhandler
 		std::map<whichEvent, eventHandler> handler_map;
