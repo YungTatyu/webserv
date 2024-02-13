@@ -40,15 +40,16 @@ TEST(KeepaliveTimeoutTest, max)
 	test::test_directives_set(http.directives_set, kKeepaliveTimeout, true);
 
 	// server
-	EXPECT_EQ(http.server_list[0].keepalive_timeout.getTime().time_in_ms_, kLongMax);
+	EXPECT_EQ(http.server_list[0].keepalive_timeout.getTime().time_in_ms_, 9223372036854775 * config::Time::seconds);
 	test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
 
 	// location
-	for (size_t i = 0; i < http.server_list[0].location_list.size(); i++)
-	{
-		EXPECT_EQ(http.server_list[0].location_list[i].keepalive_timeout.getTime().time_in_ms_, kLongMax);
-		test::test_directives_set(http.server_list[0].location_list[i].directives_set, kKeepaliveTimeout, true);
-	}
+	test::test_value(http.server_list[0].location_list, {
+		9223372036854775 * config::Time::seconds,
+		153722867280912 * config::Time::minutes,
+		2562047788015 * config::Time::hours,
+		106751991167 * config::Time::days,
+	});
 }
 
 TEST(KeepaliveTimeoutTest, zero)
@@ -69,11 +70,12 @@ TEST(KeepaliveTimeoutTest, zero)
 	test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
 
 	// location
-	for (size_t i = 0; i < http.server_list[0].location_list.size(); i++)
-	{
-		EXPECT_EQ(http.server_list[0].location_list[i].keepalive_timeout.getTime().time_in_ms_, 0);
-		test::test_directives_set(http.server_list[0].location_list[i].directives_set, kKeepaliveTimeout, true);
-	}
+	test::test_value(http.server_list[0].location_list, {
+		0,
+		0,
+		0,
+		0,
+	});
 }
 
 TEST(KeepaliveTimeoutTest, random)

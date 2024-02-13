@@ -785,7 +785,8 @@ long	config::Parser::parseTime()
 	{
 		if (iss >> unit)
 		{
-			if (unit != "m" &&
+			if (unit != "ms" &&
+				unit != "m" &&
 				unit != "s" &&
 				unit != "h" &&
 				unit != "d")
