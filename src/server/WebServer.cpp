@@ -38,7 +38,7 @@ void WebServer::eventLoop()
 		addActiveEvents(pollfds);
 
 		// 発生したイベントをhandleする
-		callEventHandler(pollfds);
+		callEventHandler();
 
 		// 発生したすべてのイベントを削除
 		this->eventManager->clearAllEvents();
@@ -97,16 +97,16 @@ void	WebServer::addActiveEvents(const std::vector<struct pollfd> &pollfds)
  * @brief 発生したイベントのhandlerを呼ぶ
  * eventhandlerを呼んだ後、監視するイベントを更新
  * 
- * @param pollfd 
  */
-void	WebServer::callEventHandler(const std::vector<struct pollfd> &pollfds)
+void	WebServer::callEventHandler()
 {
+	const std::vector<struct pollfd> &active_events = this->eventManager->active_events_;
 	const std::map<RequestHandler::whichEvent, RequestHandler::eventHandler>	&handler_map = this->requestHandler->handler_map;
 
 	// 発生したイベントの数だけloopする
 	// eit: event iterator
-	for (std::vector<struct pollfd>::const_iterator eit = pollfds.begin();
-		eit != pollfds.end();
+	for (std::vector<struct pollfd>::const_iterator eit = active_events.begin();
+		eit != active_events.end();
 		++eit
 	)
 	{
