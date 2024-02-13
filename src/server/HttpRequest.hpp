@@ -26,7 +26,6 @@ class HttpRequest
 		static void parseHeaders(std::istringstream& headers);
 		static void parseBody(std::istringstream& body);
 		std::string urlDecode(const std::string& str);
-		//chunked??
 };
 
 #endif
