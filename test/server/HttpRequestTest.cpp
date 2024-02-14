@@ -27,7 +27,7 @@ bool checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
 
 TEST(HttpRequest, HttpRequest)
 {
-    std::string rawRequest = "";
+    std::string rawRequest = "GET / HTTP/1.1\r\n:\r\n\r\n";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
