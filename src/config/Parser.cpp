@@ -1070,14 +1070,14 @@ long	config::Parser::retErrorPageOptNumIfValid()
 		if (iss >> remaining_char || tmp_code < 0)
 		{
 			std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return 0;
+			return -1;
 		}
 		return tmp_code;
 	}
 	else // LONG_MAX/MIN を超えたり、数値ではなければエラー
 	{
 		std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return 0;
+		return -1;
 	}
 }
 
@@ -1097,7 +1097,7 @@ bool	config::Parser::parseErrorPage()
 			&& tokens_[ti_].value_[0] == '=')
 		{
 			long	response = retErrorPageOptNumIfValid();
-			if (!response)
+			if (response == -1)
 				return false;
 			tmp_err_pg.setResponse(response);
 			ti_++;
