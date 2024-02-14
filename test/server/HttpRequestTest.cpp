@@ -17,8 +17,6 @@ TEST(HttpRequest, Test1)
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
-    headers.insert(std::make_pair("", ""));
-    queries.insert(std::make_pair("", ""));
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "");
     checkHttpRequestEqual(expect, test);
 }
@@ -30,9 +28,8 @@ TEST(HttpRequest, Test2)
     std::string rawRequest = "GET / HTTP/1.1\r\nname1:value1\r\n\r\nthis is body";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
     std::map<std::string, std::string> headers;
+    headers["name1"] = "value1";
     std::map<std::string, std::string> queries;
-    headers.insert(std::make_pair("name1", "value1"));
-    queries.insert(std::make_pair("", ""));
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "this is body");
     checkHttpRequestEqual(expect, test);
 }
@@ -43,10 +40,9 @@ TEST(HttpRequest, Test3)
     std::string rawRequest = "GET / HTTP/1.1\r\nname1:value1\r\nname2:value2\r\n\r\n";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
     std::map<std::string, std::string> headers;
+    headers["name1"] = "value1";
+    headers["name2"] = "value2";
     std::map<std::string, std::string> queries;
-    headers.insert(std::make_pair("name1", "value1"));
-    headers.insert(std::make_pair("name2", "value2"));
-    queries.insert(std::make_pair("", ""));
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "");
     checkHttpRequestEqual(expect, test);
 }
@@ -58,8 +54,7 @@ TEST(HttpRequest, Test4)
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
-    headers.insert(std::make_pair("", ""));
-    queries.insert(std::make_pair("query1", "value1"));
+    queries["query1"] = "value1";
     HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "");
     checkHttpRequestEqual(expect, test);
 }
@@ -71,9 +66,8 @@ TEST(HttpRequest, Test5)
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
-    headers.insert(std::make_pair("", ""));
-    queries.insert(std::make_pair("query1", "value1"));
-    queries.insert(std::make_pair("query2", "value2"));
+    queries["query1"] = "value1";
+    queries["query2"] = "value2";
     HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "");
     checkHttpRequestEqual(expect, test);
 }
