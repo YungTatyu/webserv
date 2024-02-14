@@ -13,7 +13,7 @@ void checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
 
 TEST(HttpRequest, Test1)
 {
-    //リクエストラインだけ
+    //testcase: リクエストラインだけ
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "");
@@ -27,8 +27,8 @@ TEST(HttpRequest, Test1)
 
 TEST(HttpRequest, Test2)
 {
-    //header fieldが一対ある時
-    //bodyもある
+    //testcase: header fieldが一対ある時
+    //testcase: bodyもある
     std::map<std::string, std::string> headers;
     headers["name1"] = "value1";
     std::map<std::string, std::string> queries;
@@ -43,7 +43,7 @@ TEST(HttpRequest, Test2)
 
 TEST(HttpRequest, Test3)
 {
-    //header fieldが複数ある時
+    //testcase: header fieldが複数ある時
     std::map<std::string, std::string> headers;
     headers["name1"] = "value1";
     headers["name2"] = "value2";
@@ -59,7 +59,7 @@ TEST(HttpRequest, Test3)
 
 TEST(HttpRequest, Test4)
 {
-    //query stringが単体
+    //testcase: query stringが単体
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     queries["query1"] = "value1";
@@ -74,7 +74,7 @@ TEST(HttpRequest, Test4)
 
 TEST(HttpRequest, Test5)
 {
-    //query stringが複数ある時
+    //testcase: query stringが複数ある時
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     queries["query1"] = "value1";
