@@ -1,45 +1,14 @@
 #include <gtest/gtest.h>
 #include "HttpRequest.hpp"
-#include <iostream>
-#include <iterator>
 
-bool printError(std::string method, std::string expected, std::string real)
+void checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
 {
-    std::cerr << "Expected:'" << expected << "' but, got:'" << real << "'" << std::endl;
-    return false;
-}
-
-bool printError(std::string method, std::map<std::string, std::string> expected, std::map<std::string, std::string> real)
-{
-    std::cerr << "Expected:'" << std::endl;
-    for (std::map<std::string, std::string>::iterator it = expected.begin(); it != expected.end(); ++it)
-    {
-	 std::cerr << it->first << ":" << it->second << std::endl;
-    }
-    std::cerr << "' but, got:'" << std::endl;
-    for (std::map<std::string, std::string>::iterator it = real.begin(); it != real.end(); ++it)
-    {
-	 std::cerr << it->first << ":" << it->second << std::endl;
-    }
-    std::cerr << "'" << std::endl;
-    return false;
-}
-
-bool checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
-{
-    if ( expect.method != test.method )
-	return printError("method", expect.method, test.method);
-    if ( expect.uri != test.uri )
-	return printError("uri", expect.uri, test.uri);
-    if ( expect.version != test.version )
-	return printError("version", expect.version, test.version);
-    if ( expect.headers != test.headers )
-	return printError("headers", expect.headers, test.headers);
-    if ( expect.queries != test.queries )
-	return printError("queries", expect.queries, test.queries);
-    if ( expect.body != test.body )
-	return printError("body", expect.body, test.body);
-    return true;
+    EXPECT_EQ( expect.method, test.method );
+    EXPECT_EQ( expect.uri, test.uri );
+    EXPECT_EQ( expect.version, test.version );
+    EXPECT_EQ( expect.headers, test.headers );
+    EXPECT_EQ( expect.queries, test.queries );
+    EXPECT_EQ( expect.body, test.body );
 }
 
 TEST(HttpRequest, Test1)
@@ -51,7 +20,7 @@ TEST(HttpRequest, Test1)
     headers.insert(std::make_pair("", ""));
     queries.insert(std::make_pair("", ""));
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "");
-    EXPECT_TRUE(checkHttpRequestEqual(expect, test));
+    checkHttpRequestEqual(expect, test);
 }
 
 TEST(HttpRequest, Test2)
@@ -65,7 +34,7 @@ TEST(HttpRequest, Test2)
     headers.insert(std::make_pair("name1", "value1"));
     queries.insert(std::make_pair("", ""));
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "this is body");
-    EXPECT_TRUE(checkHttpRequestEqual(expect, test));
+    checkHttpRequestEqual(expect, test);
 }
 
 TEST(HttpRequest, Test3)
@@ -79,7 +48,7 @@ TEST(HttpRequest, Test3)
     headers.insert(std::make_pair("name2", "value2"));
     queries.insert(std::make_pair("", ""));
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "");
-    EXPECT_TRUE(checkHttpRequestEqual(expect, test));
+    checkHttpRequestEqual(expect, test);
 }
 
 TEST(HttpRequest, Test4)
@@ -92,7 +61,7 @@ TEST(HttpRequest, Test4)
     headers.insert(std::make_pair("", ""));
     queries.insert(std::make_pair("query1", "value1"));
     HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "");
-    EXPECT_TRUE(checkHttpRequestEqual(expect, test));
+    checkHttpRequestEqual(expect, test);
 }
 
 TEST(HttpRequest, Test5)
@@ -106,7 +75,7 @@ TEST(HttpRequest, Test5)
     queries.insert(std::make_pair("query1", "value1"));
     queries.insert(std::make_pair("query2", "value2"));
     HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "");
-    EXPECT_TRUE(checkHttpRequestEqual(expect, test));
+    checkHttpRequestEqual(expect, test);
 }
 
 int main(int argc, char **argv)
