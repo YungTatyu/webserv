@@ -882,8 +882,27 @@ bool	config::Parser::parseKeepaliveTimeout()
 		return false;
 	}
 
-	this->config_.http.keepalive_timeout.setTime(ret);
-	this->config_.http.directives_set.insert(kKEEPALIVE_TIMEOUT);
+	const config::CONTEXT context = this->current_context_.top();
+	switch (context)
+	{
+	case config::CONF_HTTP:
+		this->config_.http.keepalive_timeout.setTime(ret);
+		this->config_.http.directives_set.insert(kKEEPALIVE_TIMEOUT);
+		break;
+	
+	case config::CONF_HTTP_SERVER:
+		this->config_.http.server_list.back().keepalive_timeout.setTime(ret);
+		this->config_.http.server_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
+		break;
+
+	case config::CONF_HTTP_LOCATION:
+		this->config_.http.server_list.back().location_list.back().keepalive_timeout.setTime(ret);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
+		break;
+
+	default:
+		break;
+	}
 	ti_ += 2;
 	return true;
 }

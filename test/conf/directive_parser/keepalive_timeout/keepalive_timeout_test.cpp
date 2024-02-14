@@ -70,17 +70,12 @@ TEST(KeepaliveTimeoutTest, zero)
 	test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
 
 	// location
-	test::test_value(http.server_list[0].location_list, {
-		0,
-		0,
-		0,
-		0,
-	});
+	test::test_value(http.server_list[0].location_list, {0, 0, 0, 0});
 }
 
 TEST(KeepaliveTimeoutTest, random)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/keepalive_timeout/2.conf");
+	const config::Main	*config = config::init_config("test/conf/directive_parser/keepalive_timeout/3.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
