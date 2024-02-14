@@ -173,6 +173,10 @@ bool	config::Parser::parse()
 			continue;
 		}
 
+		// meta charではない
+		if (!expectTokenType(TK_STR, current_token))
+			return false;
+
 		// ";", "{"が存在するはず
 		if (!expectTerminatingToken())
 			return false;
