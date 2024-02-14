@@ -5,14 +5,12 @@
 
 bool printError(std::string method, std::string expected, std::string real)
 {
-    std::cerr << "Value Not Equal" << std::endl;
     std::cerr << "Expected:'" << expected << "' but, got:'" << real << "'" << std::endl;
     return false;
 }
 
 bool printError(std::string method, std::map<std::string, std::string> expected, std::map<std::string, std::string> real)
 {
-    std::cerr << "Value Not Equal" << std::endl;
     std::cerr << "Expected:'" << std::endl;
     for (std::map<std::string, std::string>::iterator it = expected.begin(); it != expected.end(); ++it)
     {
