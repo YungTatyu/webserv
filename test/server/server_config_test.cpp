@@ -20,17 +20,17 @@ protected:
 		if (test_info->name() == "allowRequest") {
 			file_path = "test/server/conf_files/allowRequest_test.conf";
 		}
-		else if (test_info->name() == "getFile") {
-			file_path = "test/server/conf_files/getFile_test.conf";
+		else if (test_info->name() == "searchFile") {
+			file_path = "test/server/conf_files/searchFile_test.conf";
 		}
-		else if (test_info->name() == "getKeepaliveTimeout") {
-			file_path = "test/server/conf_files/getKeepaliveTimeout_test.conf";
+		else if (test_info->name() == "searchKeepaliveTimeout") {
+			file_path = "test/server/conf_files/searchKeepaliveTimeout_test.conf";
 		}
-		else if (test_info->name() == "getSendTimeout") {
-			file_path = "test/server/conf_files/getSendTimeout_test.conf";
+		else if (test_info->name() == "searchSendTimeout") {
+			file_path = "test/server/conf_files/searchSendTimeout_test.conf";
 		}
-		else if (test_info->name() == "getUseridExpires") {
-			file_path = "test/server/conf_files/getUseridExpires_test.conf";
+		else if (test_info->name() == "searchUseridExpires") {
+			file_path = "test/server/conf_files/searchUseridExpires_test.conf";
 		}
 		else if (test_info->name() == "writeAcsLog") {
 			file_path = "test/server/conf_files/writeAcsLog_test.conf";
@@ -139,7 +139,7 @@ TEST_F(ServerConfigTest, allowRequest)
 									cli_addr4));
 }
 
-TEST_F(ServerConfigTest, getFile)
+TEST_F(ServerConfigTest, searchFile)
 {
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
@@ -161,12 +161,12 @@ TEST_F(ServerConfigTest, getFile)
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[0]);
 	// indexのみ設定されているケース
 	EXPECT_EQ(absolutepath + "/index.html",
-			server_config_.getFile(vserver_,
+			server_config_.searchFile(vserver_,
 									"first_server",
 									"/"));
 	// indexとtry_filesが設定されているケース
 	EXPECT_EQ(absolutepath + "/test/try.html",
-			server_config_.getFile(vserver_,
+			server_config_.searchFile(vserver_,
 									"first_server",
 									"/test/"));
 
@@ -174,7 +174,7 @@ TEST_F(ServerConfigTest, getFile)
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[1]);
 	// index,try_files.returnが設定されているケース
 	EXPECT_EQ(absolutepath + "/404.html",
-			server_config_.getFile(vserver_,
+			server_config_.searchFile(vserver_,
 									"second_server",
 									"/test"));
 
@@ -182,28 +182,28 @@ TEST_F(ServerConfigTest, getFile)
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[2]);
 	// location内でrootが変わっているケース
 	EXPECT_EQ(absolutepath + "/change/change_root.html",
-			server_config_.getFile(vserver_,
+			server_config_.searchFile(vserver_,
 									"third_server",
 									"/"));
 	// aliasでrootが変わるケース
 	EXPECT_EQ(absolutepath + "/alias/alias.html",
-			server_config_.getFile(vserver_,
+			server_config_.searchFile(vserver_,
 									"third_server",
 									"/test"));
 }
 
-TEST_F(ServerConfigTest, getKeepaliveTimeout)
+TEST_F(ServerConfigTest, searchKeepaliveTimeout)
 {
 	vserver_.tied_servers_.clear();
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[0]);
 	// http set
 	EXPECT_EQ(server_config_.config_->http.keepalive_timeout.getTime(),
-			server_config_.getKeepaliveTimeout(vserver_,
+			server_config_.searchKeepaliveTimeout(vserver_,
 											"first_server",
 											"/"));
 	// location set
 	EXPECT_EQ(server_config_.config_->http.server_list[0].location_list[1].keepalive_timeout.getTime(),
-			server_config_.getKeepaliveTimeout(vserver_,
+			server_config_.searchKeepaliveTimeout(vserver_,
 											"first_server",
 											"/hello"));
 
@@ -211,23 +211,23 @@ TEST_F(ServerConfigTest, getKeepaliveTimeout)
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[1]);
 	// server set
 	EXPECT_EQ(server_config_.config_->http.server_list[1].keepalive_timeout.getTime(),
-			server_config_.getKeepaliveTimeout(vserver_,
+			server_config_.searchKeepaliveTimeout(vserver_,
 											"second_server",
 											"/"));
 }
 
-TEST_F(ServerConfigTest, getSendTimeout)
+TEST_F(ServerConfigTest, searchSendTimeout)
 {
 	vserver_.tied_servers_.clear();
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[0]);
 	// default time
 	EXPECT_EQ(server_config_.config_->http.send_timeout.getTime(),
-			server_config_.getSendTimeout(vserver_,
+			server_config_.searchSendTimeout(vserver_,
 										"first_server",
 										"/"));
 	// location set
 	EXPECT_EQ(server_config_.config_->http.server_list[0].location_list[1].send_timeout.getTime(),
-			server_config_.getSendTimeout(vserver_,
+			server_config_.searchSendTimeout(vserver_,
 										"first_server",
 										"/hello"));
 
@@ -235,23 +235,23 @@ TEST_F(ServerConfigTest, getSendTimeout)
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[1]);
 	// server set
 	EXPECT_EQ(server_config_.config_->http.server_list[1].send_timeout.getTime(),
-			server_config_.getSendTimeout(vserver_,
+			server_config_.searchSendTimeout(vserver_,
 										"second_server",
 										"/"));
 }
 
-TEST_F(ServerConfigTest, getUseridExpires)
+TEST_F(ServerConfigTest, searchUseridExpires)
 {
 	vserver_.tied_servers_.clear();
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[0]);
 	// http set
 	EXPECT_EQ(server_config_.config_->http.userid_expires.getTime(),
-			server_config_.getUseridExpires(vserver_,
+			server_config_.searchUseridExpires(vserver_,
 										"first_server",
 										"/"));
 	// location set
 	EXPECT_EQ(server_config_.config_->http.server_list[0].location_list[1].userid_expires.getTime(),
-			server_config_.getUseridExpires(vserver_,
+			server_config_.searchUseridExpires(vserver_,
 										"first_server",
 										"/hello"));
 
@@ -259,7 +259,7 @@ TEST_F(ServerConfigTest, getUseridExpires)
 	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[1]);
 	// server set
 	EXPECT_EQ(server_config_.config_->http.server_list[1].userid_expires.getTime(),
-			server_config_.getUseridExpires(vserver_,
+			server_config_.searchUseridExpires(vserver_,
 										"second_server",
 										"/"));
 }

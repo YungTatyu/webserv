@@ -71,7 +71,7 @@ class ServerConfig
 							const std::string& server_name,
 							const std::string& uri,
 							const int cli_sock ) const;
-		const std::string&	getFile( const struct VServer& server_config,
+		const std::string&	searchFile( const struct VServer& server_config,
 									const std::string& server_name,
 									const std::string& uri ) const;
 		void	writeAcsLog( const struct VServer& server_config,
@@ -82,13 +82,13 @@ class ServerConfig
 							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		const config::Time&	getKeepaliveTimeout( const struct VServer& server_config,
+		const config::Time&	searchKeepaliveTimeout( const struct VServer& server_config,
 												const std::string& server_name,
 												const std::string& uri ) const;
-		const config::Time&	getSendTimeout( const struct VServer& server_config,
+		const config::Time&	searchSendTimeout( const struct VServer& server_config,
 											const std::string& server_name,
 											const std::string& uri ) const;
-		const config::Time&	getUseridExpires( const struct VServer& server_config,
+		const config::Time&	searchUseridExpires( const struct VServer& server_config,
 											const std::string& server_name,
 											const std::string& uri ) const;
 
