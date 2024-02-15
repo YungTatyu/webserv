@@ -5,9 +5,9 @@
 
 RequestHandler::RequestHandler()
 {
-    this->handler_map[ActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
-    this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
-    this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
+	this->handler_map[ActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
+	this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
+	this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
 }
 
 void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
@@ -40,12 +40,12 @@ void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMan
 {
 	// response作成
 	HttpRequest request = connManager.getRequest( sockfd );
-    std::string response = HttpMessage::responseGenerater( request );
+	std::string response = HttpMessage::responseGenerater( request );
 
-    std::vector<char> vec( response.begin(), response.end()) ;
-    connManager.setResponse( sockfd, vec );
+	std::vector<char> vec( response.begin(), response.end()) ;
+	connManager.setResponse( sockfd, vec );
 
-    if (ioHandler.sendResponse( connManager, sockfd ) != -1)
+	if (ioHandler.sendResponse( connManager, sockfd ) != -1)
 		connManager.setEvent(sockfd, ConnectionData::READ); // readイベントに更新
 }
 
