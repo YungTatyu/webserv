@@ -15,6 +15,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
+<<<<<<< HEAD
 	# src files
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
@@ -23,6 +24,9 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/conf.cpp
 	src/server/ServerConfig.cpp
 	src/server/HttpMessage.cpp 
+	src/server/CGIHandler.cpp
+	src/server/FileUtils.cpp
+	src/server/SysCallWrapper.cpp
 
 	# test files
 	test/test.cpp 
@@ -55,10 +59,10 @@ add_executable(${PROJECT_NAME}-googletest
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
-	./src
-	./src/server
-	./src/config
-	./test/conf/
+	src
+	src/server
+	src/config
+	test/conf
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.

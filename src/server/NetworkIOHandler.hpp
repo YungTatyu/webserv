@@ -2,6 +2,7 @@
 # define NETWORK_IO_HANDLER_HPP
 
 # include <unistd.h>
+# include <sys/types.h>
 # include <stdio.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
@@ -13,7 +14,7 @@
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
-# include "EventManager.hpp"
+# include "ActiveEventManager.hpp"
 # include "Server.hpp"
 
 class ServerConfig;
@@ -30,8 +31,8 @@ class NetworkIOHandler
 	public:
 		void setupSocket( ServerConfig *serverConfig );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
-		int sendResponse( ConnectionManager& connManager, const int cli_sock );
-		void acceptConnection( ConnectionManager& connManager, EventManager& eventManager );
+		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
+		void acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		int getListenfd();
 

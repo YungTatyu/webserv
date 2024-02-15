@@ -22,7 +22,7 @@ SRCS = $(wildcard $(addsuffix /*.$(SRC_EXT), $(VPATH)))
 
 DEPS = $(patsubst $(SRCS_DIR)/%.cpp,$(DEPS_DIR)/%.d,$(SRCS))
 OBJS = $(patsubst $(SRCS_DIR)/%.cpp,$(OBJS_DIR)/%.o,$(SRCS))
-INCLUDES			= -I$(SRCS_DIR) -I$(SRCS_DIR)/config/ 
+INCLUDES			= -I$(SRCS_DIR) -I$(SRCS_DIR)/config/
 CGI_EXEFILE			= $(CGI_DIR)/cgi_exe
 # CONFIG				= $(CONF_DIR)/test.conf
 
