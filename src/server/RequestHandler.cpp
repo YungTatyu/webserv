@@ -30,7 +30,8 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
 		}
 		const std::vector<char>& context = connManager.getRawRequest( sockfd );
 		std::string requestData = context.data();
-		HttpMessage::requestParser( requestData );
+		HttpRequest request = HttpMessage::requestParser( requestData );
+		connManager.setRequest( sockfd, request );
 
 		connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
 }
