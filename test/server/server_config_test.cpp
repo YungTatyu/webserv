@@ -59,12 +59,12 @@ protected:
 
 	// テストに使うオブジェクト
 	ServerConfig	server_config_;
-	struct VServer	vserver_;
+	struct TiedServer	vserver_;
 };
 
 namespace test {
 // 実際に使うallowRequestはソケットをつくらないと使えないので、ここではソケットの代わりに、アドレスを渡している。
-bool	allowRequestIPv4( const struct VServer& server_config,
+bool	allowRequestIPv4( const struct TiedServer& server_config,
 					const std::string& server_name,
 					const std::string& uri,
 					const in_addr cli_addr );

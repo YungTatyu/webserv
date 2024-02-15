@@ -9,7 +9,6 @@ WebServer::WebServer( const config::Main* config )
 	this->serverConfig = new ServerConfig();
 
 	this->serverConfig->loadConfiguration(config);
-	this->serverConfig->loadConfiguration();
 	this->initializeServer();
 }
 
