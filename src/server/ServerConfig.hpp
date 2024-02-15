@@ -4,6 +4,8 @@
 # include "NetworkIOHandler.hpp"
 # include "Main.hpp"
 
+# include <map>
+
 /**
  * ServerConfig (ConfigReader) 方針
  * 基本的に、直接publicのconfig_を見てもらう
@@ -94,8 +96,11 @@ class ServerConfig
 		const struct VServer	retTiedServer( const std::string addr, const unsigned int port ) const;
 
 	private:
-		//utils
-		//必要なメソッド追加
+		// data
+		static std::map<int, std::string> error_page_map_; // error_code と error pageのmap
+
+		// utils
+		// 必要なメソッド追加
 
 	public:
 		int		getServPort();
