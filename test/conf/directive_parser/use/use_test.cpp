@@ -62,11 +62,11 @@ TEST(UseTest, epoll)
 	const config::Main	*config = config::init_config("test/conf/directive_parser/use/4.conf");
 
 	// 環境によって挙動が変わる
-	#if defined(__APPLE__)
+	#if defined(__LINUX__)
+		ASSERT_NE(config, nullptr);
+	#else
 		ASSERT_EQ(config, nullptr);
 		return;
-	#else
-		ASSERT_NE(config, nullptr);
 	#endif
 
 	const config::Http	&http = config->http;
