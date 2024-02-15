@@ -10,21 +10,6 @@ RequestHandler::RequestHandler()
     this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
 }
 
-/* RequestHandlerクラスの実装 */
-void RequestHandler::handle( ConnectionManager &connManager, const int target )
-{
-    const std::vector<char>& context = connManager.getRawRequest( target );
-	// std::cout << "----- request -----" << std::endl;
-	std::cout << context.data() << std::endl; // std::cout << "------- end -------" << std::endl;
-
-    std::string requestData = context.data();
-    HttpRequest request = HttpMessage::requestParser( requestData );
-    std::string response = HttpMessage::responseGenerater( request );
-
-    std::vector<char> vec(response.begin(), response.end());
-    connManager.setResponse( target, vec );
-}
-
 void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト

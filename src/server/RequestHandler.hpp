@@ -13,7 +13,6 @@ class RequestHandler
 {
 	public:
 		RequestHandler();
-		void handle( ConnectionManager &connManager, const int target );
 		void handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 		void handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 		void handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);

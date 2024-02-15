@@ -13,12 +13,9 @@ class ActiveEventManager
 	public:
 		std::vector<struct pollfd> active_events_;
 		void addEvent( const struct pollfd pfd );
-		const std::vector<struct pollfd>& getAllPollfd() const;
-		struct pollfd getPollfd( const int fd ) const;
+		const std::vector<struct pollfd>& getActiveEvents() const;
 		void clearAllEvents();
 
-		static struct pollfd genPollFd( const int fd, const short events, const short revents );
-		static bool isInvalidFd( const struct pollfd& pfd );
 		static bool isReadEvent( const struct pollfd& pfd );
 		static bool isWriteEvent( const struct pollfd& pfd );
 		static bool isErrorEvent( const struct pollfd& pfd );
