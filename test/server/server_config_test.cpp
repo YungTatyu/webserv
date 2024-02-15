@@ -379,3 +379,23 @@ TEST_F(ServerConfigTest, writeErrLog)
 
 }
 
+TEST_F(ServerConfigTest, retTiedServer)
+{
+	// 3つのサーバーが該当する場合。
+	vserver_.tied_servers_.clear();
+	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[0]);
+	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[2]);
+	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[3]);
+	EXPECT_EQ(vserver_, server_config_.retTiedServer("127.0.0.1", 8001));
+
+	// １つのサーバーが該当する場合
+	vserver_.tied_servers_.clear();
+	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[1]);
+	EXPECT_EQ(vserver_, server_config_.retTiedServer("127.0.0.2", 8002));
+
+	// 1つのサーバーが該当する場合
+	vserver_.tied_servers_.clear();
+	vserver_.tied_servers_.push_back(&server_config_.config_->http.server_list[4]);
+	EXPECT_EQ(vserver_, server_config_.retTiedServer("127.0.0.3", 8003));
+}
+

@@ -91,6 +91,7 @@ class ServerConfig
 		const config::Time&	searchUseridExpires( const struct VServer& server_config,
 											const std::string& server_name,
 											const std::string& uri ) const;
+		const struct VServer	retTiedServer( const std::string addr, const unsigned int port ) const;
 
 	private:
 		//utils
