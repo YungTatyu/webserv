@@ -15,13 +15,13 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
-	src/server/HttpMessage.cpp 
-	src/server/FileUtils.cpp 
-	src/server/CGIHandler.cpp 
-	src/server/SysCallWrapper.cpp 
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
+	src/server/HttpMessage.cpp
+	src/server/CGIHandler.cpp
+	src/server/FileUtils.cpp
+	src/server/SysCallWrapper.cpp
 
 	# test/test.cpp
 	test/conf/directives_test.cpp 
