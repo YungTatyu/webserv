@@ -25,23 +25,23 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
 		if (re == 0) // クライアントが接続を閉じる
 		{
 			ioHandler.closeConnection( connManager, sockfd );
-			connManager.removeConnection(sockfd);
+			connManager.removeConnection( sockfd );
 			return;
 		}
 		const std::vector<char>& context = connManager.getRawRequest( sockfd );
 		std::string requestData = context.data();
 		HttpMessage::requestParser( requestData );
 
-		connManager.setEvent(sockfd, ConnectionData::WRITE); // writeイベントに更新
+		connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
 }
 
 void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 	// response作成
-	HttpRequest request = connManager.getRequest(sockfd);
+	HttpRequest request = connManager.getRequest( sockfd );
     std::string response = HttpMessage::responseGenerater( request );
 
-    std::vector<char> vec(response.begin(), response.end());
+    std::vector<char> vec( response.begin(), response.end()) ;
     connManager.setResponse( sockfd, vec );
 
     if (ioHandler.sendResponse( connManager, sockfd ) != -1)
@@ -51,5 +51,5 @@ void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMan
 void RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 	ioHandler.closeConnection( connManager, sockfd );
-	connManager.removeConnection(sockfd);
+	connManager.removeConnection( sockfd );
 }
