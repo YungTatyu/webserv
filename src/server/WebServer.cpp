@@ -4,11 +4,11 @@
 #include <cerrno>
 
 /* WebServerクラスの実装 */
-WebServer::WebServer()
+WebServer::WebServer( const config::Main* config )
 {
 	this->serverConfig = new ServerConfig();
 	
-	this->serverConfig->loadConfiguration(); 
+	this->serverConfig->loadConfiguration(config);
 	this->initializeServer();
 }
 
@@ -53,7 +53,7 @@ void WebServer::eventLoop()
 					else if ( re == -1 ) //ソケット使用不可。
 					{
 						continue ;
-					}	
+					}
 					this->requestHandler->handle( *this->connManager, curPfd.fd );
 					this->eventManager->updateEvents( curPfd.fd , POLLOUT );
 				}

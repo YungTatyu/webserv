@@ -12,7 +12,7 @@
 class WebServer
 {
 	public:
-		WebServer();
+		WebServer( const config::Main* config );
 		~WebServer();
 		void initializeServer();
 		void eventLoop();

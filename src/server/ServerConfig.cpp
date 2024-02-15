@@ -1,9 +1,10 @@
 #include "ServerConfig.hpp"
 
 /* ServerConfigクラスの実装 */
-void ServerConfig::loadConfiguration()
+void ServerConfig::loadConfiguration( const config::Main* config )
 {
 	/* ConfファイルをパースしてデータをServConfigクラスにセットする */
+	this->config_ = config;
 	this->servPort_ = 3001;
 	this->listenQ_ = 8;
 }
