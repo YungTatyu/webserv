@@ -14,6 +14,15 @@
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
 # include "EventManager.hpp"
+# include "Server.hpp"
+
+class ServerConfig;
+
+/* listen socketと結びついたserver config を持つ構造体 */
+struct VServer
+{
+	std::vector<config::Server*>	tied_servers_;
+};
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
@@ -28,6 +37,7 @@ class NetworkIOHandler
 
 	private:
 		int listenfd_; // リスニングソケットを管理
+		std::map<int, struct VServer> listenfd_map_; // リスニングソケットとそれに紐づくserver configを管理
 		static const size_t bufferSize_ = 1024;
 };
 

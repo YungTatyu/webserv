@@ -1,6 +1,7 @@
 #ifndef SERVER_CONFIG_HPP
-# define SERVER_CONFIG_HPP
+#define SERVER_CONFIG_HPP
 
+# include "NetworkIOHandler.hpp"
 # include "Main.hpp"
 
 /**
@@ -49,6 +50,8 @@
   };
  */
 
+struct VServer;
+
 /* Confファイルの設定を管理する */
 class ServerConfig
 {
@@ -61,38 +64,32 @@ class ServerConfig
 		void	loadConfiguration( const config::Main* config );
 
 		// method
-		// 全体的に引数多いからどこかのデータ構造でまとめる
-		// cli_addrのデータ型どうするか？これだとipv4しか対応できない。
-		bool	allowRequest( const std::string& server_name,
-							const std::string& serv_addr,
-							const unsigned int port,
+		// getsockname()でcli_sockからアドレスとるようにしているが
+		// 問題があれば、引数をsockaddr_storageにして、sockaddr_in[6]をreinterpret_cast<sockaddr_storage>()で渡してもいいかもしれない
+		// それか、ipv4用とipv6用を両方つくる
+		bool	allowRequest( const struct VServer& server_config,
+							const std::string& server_name,
 							const std::string& uri,
-							const in_addr_t cli_addr ) const;
-		const std::string&	getFile( const std::string& server_name,
-									const std::string& address,
-									const unsigned int port,
+							const int cli_sock ) const;
+		const std::string&	getFile( const struct VServer& server_config,
+									const std::string& server_name,
 									const std::string& uri ) const;
-		void	writeAcsLog( const std::string& server_name,
-							const std::string& address,
-							const unsigned int port,
+		void	writeAcsLog( const struct VServer& server_config,
+							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		void	writeErrLog( const std::string& server_name,
-							const std::string& address,
-							const unsigned int port,
+		void	writeErrLog( const struct VServer& server_config,
+							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		const config::Time&	getKeepaliveTimeout( const std::string& server_name,
-												const std::string& address,
-												const unsigned int port,
+		const config::Time&	getKeepaliveTimeout( const struct VServer& server_config,
+												const std::string& server_name,
 												const std::string& uri ) const;
-		const config::Time&	getSendTimeout( const std::string& server_name,
-											const std::string& address,
-											const unsigned int port,
+		const config::Time&	getSendTimeout( const struct VServer& server_config,
+											const std::string& server_name,
 											const std::string& uri ) const;
-		const config::Time&	getUseridExpires( const std::string& server_name,
-											const std::string& address,
-											const unsigned int port,
+		const config::Time&	getUseridExpires( const struct VServer& server_config,
+											const std::string& server_name,
 											const std::string& uri ) const;
 
 	private:
