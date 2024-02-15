@@ -45,8 +45,8 @@ TEST(ReturnTest, allContext)
 
 	// location
 	test::test_value(http.server_list[0].location_list[0].return_list,
-		{301, -1, 999, 998, 0, 0},
-		{"url", "https://www.tachu.com", "url999", "1000", "", ""}
+		{301, -1, -1, 999, 998, 0, 0},
+		{"url", "https://www.tachu.com", "http://", "url999", "1000", "", ""}
 	);
 	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kReturn, true);
 }

@@ -1642,49 +1642,48 @@ bool	config::Parser::parseAlias()
 bool	config::Parser::parseReturn()
 {
 	ti_++;
-	long				code;
-	std::string			url;
-	std::istringstream	iss;
-	char				remaining_char;
-	config::Return		tmp_return;
+	long			code;
+	config::Return	tmp_return;
+	const			std::string http = "http://"; 
+	const			std::string https = "https://"; 
 
-	// 1つ目はcodeなので処理する
-	iss.str(this->tokens_[ti_].value_.c_str());
 
-	if (iss >> code)
+	if (isNumeric(this->tokens_[ti_].value_))
 	{
-		if (iss >> remaining_char)
+		if (!isNumInRange(this->tokens_[ti_].value_, 0, 999))
 		{
-			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"", this->tokens_[ti_]);
 			return false;
 		}
+		std::istringstream	iss(this->tokens_[ti_].value_);
+		iss >> code;
+		tmp_return.setCode(code);
+		++ti_;
+	}
 
-		if (code < 0 || 999 < code)
+	// urlの場合のみ文字列をチェックする
+	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && tmp_return.getCode() == config::Return::kCodeUnset)
+	{
+		const std::string url = this->tokens_[ti_].value_;
+		if (url.substr(0, http.length()) != http &&
+			url.substr(0, https.length()) != https)
 		{
-			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"", this->tokens_[ti_]);
 			return false;
 		}
+		tmp_return.setUrl(this->tokens_[ti_].value_); //textをset
+		++ti_;
 	}
-	else
+	else if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
 	{
-		std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return false;
-	}
-
-	tmp_return.setCode(code);
-
-	// url をセットする
-	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
-	{
-		ti_++;
-		url = this->tokens_[ti_].value_;
-		tmp_return.setUrl(url);
+		tmp_return.setUrl(this->tokens_[ti_].value_); //textをset
+		++ti_;
 	}
 
 	this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
 	this->config_.http.server_list.back().location_list.back().directives_set.insert(kRETURN);
 
-	ti_ += 2;
+	ti_ += 1;
 	return true;
 }
 
