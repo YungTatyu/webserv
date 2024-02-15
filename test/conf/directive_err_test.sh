@@ -226,6 +226,14 @@ conf_path="test/conf/conf_files/directive_error/return_over_code_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid return code \"1000\" ${err_path}:7"
 
+conf_path="test/conf/conf_files/directive_error/return_not_httpurl.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid return code \"\" ${err_path}:7"
+
+conf_path="test/conf/conf_files/directive_error/return_not_httpsurl.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid return code \"https:/\" ${err_path}:7"
+
 # send_timeout
 g_test_directive="send_timeout"
 g_test_index=0
