@@ -34,7 +34,7 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
 			return;
 		}
 		// クライアントソケットへのリクエスト（既存コネクション）
-    	ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
+		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
 		if (re == -1) //ソケット使用不可。
 			return;
 		if (re == 0) // クライアントが接続を閉じる
@@ -43,13 +43,22 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
 			connManager.removeConnection(sockfd);
 			return;
 		}
+		const std::vector<char>& context = connManager.getRawRequest( sockfd );
+		std::string requestData = context.data();
+		HttpMessage::requestParser( requestData );
+
 		connManager.setEvent(sockfd, ConnectionData::WRITE); // writeイベントに更新
 }
 
 void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 	// response作成
-	handle( connManager, sockfd );
+	HttpRequest request = connManager.getRequest(sockfd);
+    std::string response = HttpMessage::responseGenerater( request );
+
+    std::vector<char> vec(response.begin(), response.end());
+    connManager.setResponse( sockfd, vec );
+
     if (ioHandler.sendResponse( connManager, sockfd ) != -1)
 		connManager.setEvent(sockfd, ConnectionData::READ); // readイベントに更新
 }

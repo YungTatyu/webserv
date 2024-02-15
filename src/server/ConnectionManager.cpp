@@ -33,7 +33,6 @@ const std::vector<char>& ConnectionManager::getResponse( const int fd ) const
 	return connections_.at(fd).response;
 }
 
-
 /**
 * 
 * 監視するイベントを更新
@@ -53,4 +52,14 @@ ConnectionData::EVENT ConnectionManager::getEvent( const int fd ) const
 const std::map<int, ConnectionData> &ConnectionManager::getConnections() const
 {
 	return this->connections_;
+}
+
+void ConnectionManager::setRequest( const int fd, const HttpRequest request )
+{
+	connections_[fd].request = request;
+}
+
+const HttpRequest &ConnectionManager::getRequest( const int fd ) const
+{
+	return connections_.at(fd).request;
 }

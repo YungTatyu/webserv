@@ -31,6 +31,8 @@ class ConnectionManager
 		const std::vector<char>& getResponse( const int fd ) const;
 		void setEvent( const int fd, const ConnectionData::EVENT event );
 		ConnectionData::EVENT getEvent( const int fd ) const;
+		void setRequest( const int fd, const HttpRequest request );
+		const HttpRequest &getRequest( const int fd ) const;
 		const std::map<int, ConnectionData> &getConnections() const;
 	private:
 		std::map<int, class ConnectionData> connections_;
