@@ -21,9 +21,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/Lexer.cpp
 	test/conf/main_parser_test.cpp 
 	src/config/Parser.cpp
-	src/config/Parser.cpp
 	src/config/conf.cpp
-	src/config/Parser.cpp
 	test/server/server_config_test.cpp
 	src/server/ServerConfig.cpp
 )
