@@ -1662,7 +1662,13 @@ bool	config::Parser::parseReturn()
 	}
 
 	// urlの場合のみ文字列をチェックする
-	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && tmp_return.getCode() == config::Return::kCodeUnset)
+	code = tmp_return.getCode();
+	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON &&
+		(
+			code == config::Return::kCodeUnset
+			|| config::Return::isRedirectCode(code)
+		)
+	)
 	{
 		const std::string url = this->tokens_[ti_].value_;
 		if (url.substr(0, http.length()) != http &&
@@ -1671,7 +1677,7 @@ bool	config::Parser::parseReturn()
 			printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"", this->tokens_[ti_]);
 			return false;
 		}
-		tmp_return.setUrl(this->tokens_[ti_].value_); //textをset
+		tmp_return.setUrl(this->tokens_[ti_].value_);
 		++ti_;
 	}
 	else if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
