@@ -1663,12 +1663,7 @@ bool	config::Parser::parseReturn()
 
 	// urlの場合のみ文字列をチェックする
 	code = tmp_return.getCode();
-	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON &&
-		(
-			code == config::Return::kCodeUnset
-			|| config::Return::isRedirectCode(code)
-		)
-	)
+	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && code == config::Return::kCodeUnset)
 	{
 		const std::string url = this->tokens_[ti_].value_;
 		if (url.substr(0, http.length()) != http &&
