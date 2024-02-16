@@ -234,6 +234,10 @@ conf_path="test/conf/conf_files/directive_error/return_not_httpsurl.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid return code \"https:/\" ${err_path}:7"
 
+conf_path="test/conf/conf_files/directive_error/return_wrong_url.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid return code \"301 url/\" ${err_path}:7"
+
 # send_timeout
 g_test_directive="send_timeout"
 g_test_index=0
