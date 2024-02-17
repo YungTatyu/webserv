@@ -52,7 +52,7 @@
   };
  */
 
-struct VServer;
+struct TiedServer;
 
 /* Confファイルの設定を管理する */
 class ServerConfig
@@ -69,35 +69,35 @@ class ServerConfig
 		// getsockname()でcli_sockからアドレスとるようにしているが
 		// 問題があれば、引数をsockaddr_storageにして、sockaddr_in[6]をreinterpret_cast<sockaddr_storage>()で渡してもいいかもしれない
 		// それか、ipv4用とipv6用を両方つくる
-		bool	allowRequest( const struct VServer& server_config,
+		bool	allowRequest( const struct TiedServer& server_config,
 							const std::string& server_name,
 							const std::string& uri,
 							const int cli_sock ) const;
-		const std::string&	searchFile( const struct VServer& server_config,
+		const std::string&	searchFile( const struct TiedServer& server_config,
 									const std::string& server_name,
 									const std::string& uri ) const;
-		void	writeAcsLog( const struct VServer& server_config,
+		void	writeAcsLog( const struct TiedServer& server_config,
 							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		void	writeErrLog( const struct VServer& server_config,
+		void	writeErrLog( const struct TiedServer& server_config,
 							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		const config::Time&	searchKeepaliveTimeout( const struct VServer& server_config,
+		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& server_config,
 												const std::string& server_name,
 												const std::string& uri ) const;
-		const config::Time&	searchSendTimeout( const struct VServer& server_config,
+		const config::Time&	searchSendTimeout( const struct TiedServer& server_config,
 											const std::string& server_name,
 											const std::string& uri ) const;
-		const config::Time&	searchUseridExpires( const struct VServer& server_config,
+		const config::Time&	searchUseridExpires( const struct TiedServer& server_config,
 											const std::string& server_name,
 											const std::string& uri ) const;
-		const struct VServer	retTiedServer( const std::string addr, const unsigned int port ) const;
+		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
 
 	private:
 		// data
-		static std::map<int, std::string> error_page_map_; // error_code と error pageのmap
+		static std::map<int, std::string> default_page_map_; // error code と default error pageのmap
 
 		// utils
 		// 必要なメソッド追加
