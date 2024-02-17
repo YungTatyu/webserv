@@ -1278,7 +1278,7 @@ bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip)
 		return false;
 	++ipv6_pos;
 	size_t	subnet_pos = mixed_ip.rfind("/");
-	const std::string mask_part = subnet_pos != std::string::npos ? mixed_ip.substr(subnet_pos + 1) : "";
+	const std::string	mask_part = subnet_pos != std::string::npos ? mixed_ip.substr(subnet_pos + 1) : "";
 	const std::string	ipv6 = mixed_ip.substr(0, ipv6_pos);
 	const std::string	ipv4 = subnet_pos == std::string::npos ? mixed_ip.substr(ipv6_pos) : mixed_ip.substr(ipv6_pos, subnet_pos - ipv6_pos);
 	if (!mask_part.empty() && !isNumInRange(mask_part, 0, 128))
