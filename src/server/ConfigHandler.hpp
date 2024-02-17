@@ -1,5 +1,5 @@
-#ifndef SERVER_CONFIG_HPP
-#define SERVER_CONFIG_HPP
+#ifndef CONFIG_HANDLER_HPP
+#define CONFIG_HANDLER_HPP
 
 # include "NetworkIOHandler.hpp"
 # include "Main.hpp"
@@ -7,7 +7,7 @@
 # include <map>
 
 /**
- * ServerConfig (ConfigReader) 方針
+ * ConfigHandler 方針
  * 基本的に、直接publicのconfig_を見てもらう
  * 個々のメソッドは補助関数のようなものだけ
  * この場合、すべてのクラスがこのクラスのオブジェクトを持たなければならない
@@ -55,14 +55,14 @@
 struct TiedServer;
 
 /* Confファイルの設定を管理する */
-class ServerConfig
+class ConfigHandler
 {
 	public:
 		// data
 		const config::Main*	config_;
 
 		// initialize
-		ServerConfig() : config_(NULL) {};
+		ConfigHandler() : config_(NULL) {};
 		void	loadConfiguration( const config::Main* config );
 
 		// method

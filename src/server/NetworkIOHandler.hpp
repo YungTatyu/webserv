@@ -11,25 +11,25 @@
 # include <cstdlib>
 # include <poll.h>
 # include <fcntl.h>
-# include "ServerConfig.hpp"
+# include "ConfigHandler.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
 # include "ActiveEventManager.hpp"
 # include "Server.hpp"
 
-class ServerConfig;
+class ConfigHandler;
 
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer
 {
-	std::vector<config::Server*>	tied_servers_;
+	std::vector<config::Server*>	servers_;
 };
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
 {
 	public:
-		void setupSocket( ServerConfig *serverConfig );
+		void setupSocket( ConfigHandler *configHandler );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
 		void acceptConnection( ConnectionManager& connManager );

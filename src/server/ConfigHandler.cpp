@@ -1,7 +1,7 @@
-#include "ServerConfig.hpp"
+#include "ConfigHandler.hpp"
 
-/* ServerConfigクラスの実装 */
-void ServerConfig::loadConfiguration( const config::Main* config )
+/* ConfigHandlerクラスの実装 */
+void ConfigHandler::loadConfiguration( const config::Main* config )
 {
 	/* ConfファイルをパースしてデータをServConfigクラスにセットする */
 	this->config_ = config;
@@ -9,12 +9,12 @@ void ServerConfig::loadConfiguration( const config::Main* config )
 	this->listenQ_ = 8;
 }
 
-int ServerConfig::getServPort()
+int ConfigHandler::getServPort()
 {
 	return this->servPort_;
 }
 
-int ServerConfig::getListenQ()
+int ConfigHandler::getListenQ()
 {
 	return this->listenQ_;
 }

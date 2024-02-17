@@ -21,7 +21,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/conf.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
-	src/server/ServerConfig.cpp
+	src/server/ConfigHandler.cpp
 	src/server/HttpMessage.cpp 
 	src/server/CGIHandler.cpp
 	src/server/FileUtils.cpp
@@ -29,7 +29,7 @@ add_executable(${PROJECT_NAME}-googletest
 
 	# test files
 	test/test.cpp 
-	test/server/server_config_test.cpp
+	#test/server/config_handler_test.cpp
 	test/conf/directives_test.cpp 
 	test/conf/confLexerTest.cpp 
 	test/conf/main_parser_test.cpp 

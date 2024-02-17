@@ -4,7 +4,7 @@
 # include "ConnectionManager.hpp"
 # include "RequestHandler.hpp"
 # include "NetworkIOHandler.hpp"
-# include "ServerConfig.hpp"
+# include "ConfigHandler.hpp"
 # include "ActiveEventManager.hpp"
 # include "SysCallWrapper.hpp"
 # include <algorithm>
@@ -23,7 +23,7 @@ class WebServer
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;
 		ActiveEventManager *eventManager;
-		ServerConfig *serverConfig;
+		ConfigHandler *configHandler;
 		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData> &connections);
 		int	waitForEvents(std::vector<struct pollfd> &pollfds);
 		void	addActiveEvents(const std::vector<struct pollfd> &pollfds);

@@ -3,7 +3,7 @@
 #include "conf.hpp"
 #include "Main.hpp"
 #include "WebServer.hpp"
-#include "ServerConfig.hpp"
+#include "ConfigHandler.hpp"
 
 int main(int ac, char *av[])
 {
