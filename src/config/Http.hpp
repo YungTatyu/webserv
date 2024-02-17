@@ -14,6 +14,7 @@
 #include "ErrorLog.hpp"
 #include "Root.hpp"
 #include "ClientMaxBodySize.hpp"
+#include "AllowDeny.hpp"
 #include "Allow.hpp"
 #include "Deny.hpp"
 #include "Index.hpp"
@@ -42,6 +43,7 @@ struct Http
 	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
+	std::vector<AllowDeny>	access_list;
 	std::vector<Allow>	allow_list;
 	std::vector<Deny>	deny_list;
 	Userid	userid;

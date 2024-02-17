@@ -76,7 +76,6 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->current_context_.push(CONF_MAIN);
 
 	// context
-	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
 	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
 	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
 	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
@@ -126,8 +125,8 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->parser_map_[kINDEX] = &config::Parser::parseIndex;
 	this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
 	this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
-	this->parser_map_[kALLOW] = &config::Parser::parseAllow;
-	this->parser_map_[kDENY] = &config::Parser::parseDeny;
+	this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
+	this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
 	this->parser_map_[kLISTEN] = &config::Parser::parseListen;
 	this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
 	this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
@@ -1135,7 +1134,7 @@ bool	config::Parser::parseErrorPage()
 	return true;
 }
 
-bool	config::Parser::isIPv4(const std::string& ipv4)
+bool	config::Parser::isIPv4(const std::string& ipv4) const
 {
 	// 1.文字列が空でないかを確認
 	if (ipv4.empty())
@@ -1196,7 +1195,7 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	return true;
 }
 
-bool	config::Parser::isIPv6(const std::string& ipv6)
+bool	config::Parser::isIPv6(const std::string& ipv6) const
 {
 	// 1.文字列が空でないかを確認
 	if (ipv6.empty())
@@ -1267,7 +1266,7 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
  * @return true 
  * @return false 
  */
-bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip)
+bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip) const
 {
 	if (mixed_ip.empty())
 	{
@@ -1310,6 +1309,57 @@ bool	config::Parser::isNumeric(const std::string& str) const
 	}
 	return true;
 }
+
+/**
+ * @brief parse allow or deny directive, same syntax
+ * 
+ * @return true 
+ * @return false 
+ */
+bool	config::Parser::parseAllowDeny()
+{
+	const config::ACCESS_DIRECTIVE directive_type = this->tokens_[ti_].value_ == kALLOW ? config::ALLOW : config::DENY;
+	++ti_;
+	std::string	address = this->tokens_[ti_].value_;
+
+	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
+	{
+		printError(std::string("invalid parameter \"" + address + "\""), this->tokens_[ti_]);
+		return false;
+	}
+
+	config::AllowDeny	tmp;
+	tmp.setAccessDirective(directive_type);
+	tmp.setAddress(this->tokens_[ti_].value_);
+	const std::string	directive_name = directive_type == config::ALLOW ? kALLOW : kDENY;
+
+	switch (this->current_context_.top())
+	{
+	case config::CONF_HTTP:
+		this->config_.http.access_list.push_back(tmp);
+		this->config_.http.directives_set.insert(directive_name);
+		break;
+
+	case config::CONF_HTTP_SERVER:
+		this->config_.http.server_list.back().access_list.push_back(tmp);
+		this->config_.http.server_list.back().directives_set.insert(directive_name);
+	
+	case config::CONF_HTTP_LOCATION:
+		this->config_.http.server_list.back().location_list.back().access_list.push_back(tmp);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(directive_name);
+
+	case config::CONF_HTTP_LIMIT_EXCEPT:
+		this->config_.http.server_list.back().location_list.back().limit_except.access_list.push_back(tmp);
+		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(directive_name);
+
+	default:
+		break;
+	}
+
+	ti_ += 2;
+	return true;
+}
+
 bool	config::Parser::parseAllow()
 {
 	ti_++;
