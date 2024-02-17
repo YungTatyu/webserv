@@ -14,10 +14,9 @@ const unsigned int	config::Location::type;
 const unsigned int	config::LimitExcept::type;
 const unsigned int	config::AccessLog::kType_;
 const unsigned int	config::Alias::kType_;
-const unsigned int	config::Allow::kType_;
+const unsigned int	config::AllowDeny::kType_;
 const unsigned int	config::Autoindex::kType_;
 const unsigned int	config::ClientMaxBodySize::kType_;
-const unsigned int	config::Deny::kType_;
 const unsigned int	config::ErrorLog::kType_;
 const unsigned int	config::ErrorPage::kType_;
 const unsigned int	config::Index::kType_;
@@ -85,10 +84,10 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	// directive
 	this->all_directives_.insert(std::make_pair(kACCESS_LOG, config::AccessLog::kType_));
 	this->all_directives_.insert(std::make_pair(kALIAS, config::Alias::kType_));
-	this->all_directives_.insert(std::make_pair(kALLOW, config::Allow::kType_));
+	this->all_directives_.insert(std::make_pair(kALLOW, config::AllowDeny::kType_));
 	this->all_directives_.insert(std::make_pair(kAUTOINDEX, config::Autoindex::kType_));
 	this->all_directives_.insert(std::make_pair(kCLIENT_MAX_BODY_SIZE, config::ClientMaxBodySize::kType_));
-	this->all_directives_.insert(std::make_pair(kDENY, config::Deny::kType_));
+	this->all_directives_.insert(std::make_pair(kDENY, config::AllowDeny::kType_));
 	this->all_directives_.insert(std::make_pair(kERROR_LOG, config::ErrorLog::kType_));
 	this->all_directives_.insert(std::make_pair(kERROR_PAGE, config::ErrorPage::kType_));
 	this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
@@ -1354,86 +1353,6 @@ bool	config::Parser::parseAllowDeny()
 
 	default:
 		break;
-	}
-
-	ti_ += 2;
-	return true;
-}
-
-bool	config::Parser::parseAllow()
-{
-	ti_++;
-	std::string	address = this->tokens_[ti_].value_;
-
-	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
-	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return false;
-	}
-
-	config::Allow	tmp_allow;
-	tmp_allow.setAddress(this->tokens_[ti_].value_);
-	config::CONTEXT	context = this->current_context_.top();
-
-	if (context == config::CONF_HTTP)
-	{
-		this->config_.http.allow_list.push_back(tmp_allow);
-		this->config_.http.directives_set.insert(kALLOW);
-	}
-	else if (context == config::CONF_HTTP_SERVER)
-	{
-		this->config_.http.server_list.back().allow_list.push_back(tmp_allow);
-		this->config_.http.server_list.back().directives_set.insert(kALLOW);
-	}
-	else if (context == config::CONF_HTTP_LOCATION)
-	{
-		this->config_.http.server_list.back().location_list.back().allow_list.push_back(tmp_allow);
-		this->config_.http.server_list.back().location_list.back().directives_set.insert(kALLOW);
-	}
-	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
-	{
-		this->config_.http.server_list.back().location_list.back().limit_except.allow_list.push_back(tmp_allow);
-		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(kALLOW);
-	}
-
-	ti_ += 2;
-	return true;
-}
-
-bool	config::Parser::parseDeny()
-{
-	ti_++;
-	std::string	address = this->tokens_[ti_].value_;
-
-	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
-	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return false;
-	}
-
-	config::Deny	tmp_deny;
-	tmp_deny.setAddress(this->tokens_[ti_].value_);
-	config::CONTEXT	context = this->current_context_.top();
-
-	if (context == config::CONF_HTTP)
-	{
-		this->config_.http.deny_list.push_back(tmp_deny);
-		this->config_.http.directives_set.insert(kDENY);
-	}
-	else if (context == config::CONF_HTTP_SERVER)
-	{
-		this->config_.http.server_list.back().deny_list.push_back(tmp_deny);
-		this->config_.http.server_list.back().directives_set.insert(kDENY);
-	}
-	else if (context == config::CONF_HTTP_LOCATION)
-	{
-		this->config_.http.server_list.back().location_list.back().deny_list.push_back(tmp_deny);
-		this->config_.http.server_list.back().location_list.back().directives_set.insert(kDENY);
-	}
-	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
-	{
-		this->config_.http.server_list.back().location_list.back().limit_except.deny_list.push_back(tmp_deny);
-		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(kDENY);
 	}
 
 	ti_ += 2;

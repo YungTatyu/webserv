@@ -1,5 +1,5 @@
-#ifndef CONFIG_ALLOW_Deny_HPP
-#define CONFIG_ALLOW_Deny_HPP
+#ifndef CONFIG_ALLOW_DENY_HPP
+#define CONFIG_ALLOW_DENY_HPP
 
 #include <string>
 #include "conf.hpp"

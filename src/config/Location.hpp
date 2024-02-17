@@ -12,8 +12,6 @@
 #include "ErrorPage.hpp"
 #include "Alias.hpp"
 #include "AllowDeny.hpp"
-#include "Allow.hpp"
-#include "Deny.hpp"
 #include "Index.hpp"
 #include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
@@ -43,8 +41,6 @@ struct Location
 	std::vector<ErrorPage>	error_page_list;
 	Alias	alias; 
 	std::vector<AllowDeny>	access_list;
-	std::vector<Allow>	allow_list;
-	std::vector<Deny>	deny_list;
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;

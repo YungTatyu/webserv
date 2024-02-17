@@ -54,8 +54,6 @@ class Parser
 		bool	parseIndex();
 		bool	parseAutoindex();
 		bool	parseErrorPage();
-		bool	parseAllow();
-		bool	parseDeny();
 		bool	parseAllowDeny();
 		bool	parseListen();
 		bool	parseServerName();
