@@ -1319,7 +1319,7 @@ bool	config::Parser::parseAllowDeny()
 {
 	const config::ACCESS_DIRECTIVE directive_type = this->tokens_[ti_].value_ == kALLOW ? config::ALLOW : config::DENY;
 	++ti_;
-	std::string	address = this->tokens_[ti_].value_;
+	const std::string	address = this->tokens_[ti_].value_;
 
 	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
 	{
@@ -1329,7 +1329,7 @@ bool	config::Parser::parseAllowDeny()
 
 	config::AllowDeny	tmp;
 	tmp.setAccessDirective(directive_type);
-	tmp.setAddress(this->tokens_[ti_].value_);
+	tmp.setAddress(address);
 	const std::string	directive_name = directive_type == config::ALLOW ? kALLOW : kDENY;
 
 	switch (this->current_context_.top())
@@ -1342,14 +1342,17 @@ bool	config::Parser::parseAllowDeny()
 	case config::CONF_HTTP_SERVER:
 		this->config_.http.server_list.back().access_list.push_back(tmp);
 		this->config_.http.server_list.back().directives_set.insert(directive_name);
+		break;
 	
 	case config::CONF_HTTP_LOCATION:
 		this->config_.http.server_list.back().location_list.back().access_list.push_back(tmp);
 		this->config_.http.server_list.back().location_list.back().directives_set.insert(directive_name);
+		break;
 
 	case config::CONF_HTTP_LIMIT_EXCEPT:
 		this->config_.http.server_list.back().location_list.back().limit_except.access_list.push_back(tmp);
 		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(directive_name);
+		break;
 
 	default:
 		break;

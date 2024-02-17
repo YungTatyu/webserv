@@ -8,23 +8,6 @@
 #include "Main.hpp"
 #include "directives_test.hpp"
 
-namespace test
-{
-void	test_value(
-			const std::vector<config::AllowDeny> &list,
-			const std::vector<std::string> &address_expects,
-			const std::vector<config::ACCESS_DIRECTIVE> &access_expects
-		)
-{
-	int	i = 0;
-	std::for_each(list.begin(), list.end(), [&i, &address_expects, &access_expects](config::AllowDeny access){
-		EXPECT_EQ(access.getAddress(), address_expects[i]);
-		EXPECT_EQ(access.getAccessDirective(), access_expects[i]);
-		++i;
-	});
-}
-} // namespace test
-
 const std::string	kAllow = "allow";
 
 TEST(allowTest, ipv4)
