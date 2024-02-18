@@ -41,3 +41,18 @@ bool	PollActiveEventManager::isWriteEvent(const void *event)
 	const pollfd	*poll_fd = static_cast<const pollfd*>(event);
 	return poll_fd->revents & POLLOUT;
 }
+
+/**
+ * @brief 発生したeventがerror eventかを判定
+ * POLLERR: error発生
+ * POLLNVAL: fdがopenされていない
+ * 
+ * @param event
+ * @return true 
+ * @return false 
+ */
+bool	PollActiveEventManager::isErrorEvent(const void *event)
+{
+	const pollfd	*poll_fd = static_cast<const pollfd*>(event);
+	return (poll_fd->revents & POLLERR) || (poll_fd->revents & POLLNVAL);
+}

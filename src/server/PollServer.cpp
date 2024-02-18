@@ -13,7 +13,7 @@ void	PollServer::eventLoop(
 {
 	for ( ; ; )
 	{
-		waitForEvent(conn_manager);
+		waitForEvent(conn_manager, event_manager);
 
 		// 発生したイベントをhandleする
 		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
@@ -23,16 +23,34 @@ void	PollServer::eventLoop(
 	}
 }
 
-int	PollServer::waitForEvent(ConnectionManager* conn_manager)
+int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
 {
-	std::vector<struct pollfd> pollfds = convertToPollfds(conn_manager->getConnections());
+	std::vector<pollfd> pollfds = convertToPollfds(conn_manager->getConnections());
 
 	// TODO: error起きたときどうしようか? 一定数retry? serverはdownしたらダメな気がする
 	int re = SysCallWrapper::Poll(pollfds.data(), pollfds.size(), -1);
 
 	// 発生したイベントをActiveEventManagerにすべて追加
-	addActiveEvents(pollfds);
+	addActiveEvents(pollfds, conn_manager, event_manager);
 	return re;
+}
+
+void	PollServer::addActiveEvents(
+	const std::vector<pollfd> &pollfds,
+	ConnectionManager* conn_manager,
+	IActiveEventManager* event_manager
+)
+{
+	const size_t	size = conn_manager->getConnections().size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		const struct pollfd& cur_pfd = pollfds[i];
+		// readもしくはwriteイベントが発生していたら、active_eventに追加
+		if (event_manager->isReadEvent(static_cast<const void*>(&cur_pfd))
+			&& event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd))
+		)
+			event_manager->addEvent(static_cast<const void*>(&cur_pfd));
+	}
 }
 
 void	PollServer::callEventHandler(
@@ -42,33 +60,42 @@ void	PollServer::callEventHandler(
 	RequestHandler* request_handler
 )
 {
-	const std::vector<struct pollfd> *active_events =
-		static_cast<const std::vector<struct pollfd>*>(event_manager->getActiveEvents());
-	const std::map<RequestHandler::whichEvent, RequestHandler::eventHandler>	&handler_map =
-		request_handler->handler_map;
+	const std::vector<pollfd> *active_events =
+		static_cast<const std::vector<pollfd>*>(event_manager->getActiveEvents());
 
 	// 発生したイベントの数だけloopする
-	// eit: event iterator
-	for (std::vector<struct pollfd>::const_iterator eit = active_events->begin();
-		eit != active_events->end();
-		++eit
+	for (std::vector<pollfd>::const_iterator it = active_events->begin();
+		it != active_events->end();
+		++it
 	)
 	{
 		// 発生したeventに対するhandlerを呼ぶ
-		// mit: map iterator
-		for (
-			std::map<RequestHandler::whichEvent, RequestHandler::eventHandler>::const_iterator mit = handler_map.begin();
-			mit != handler_map.end();
-			++mit
-		)
-		{
-			if ((*mit->first)(*eit))
-			{
-				RequestHandler::eventHandler event_handler = mit->second;
-				(request_handler->*event_handler)(*(io_handler), *(conn_manager), eit->fd);
-				break;
-			}
-		}
+		// interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
+		if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
+			request_handler->handleReadEvent(*io_handler, *conn_manager, it->fd);
+		else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, it->fd);
+		else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
+			request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd);
 	}
+}
 
+/**
+ * @brief pollfdのvectorを作成する
+ *
+ * @param connections : すべてのクライアントソケットとそれにひもづくデータ
+ * @return std::vector<struct pollfd>
+ */
+std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, ConnectionData> &connections)
+{
+	std::vector<struct pollfd>	list;
+	for (std::map<int, ConnectionData>::const_iterator it = connections.begin(); it != connections.end(); ++it)
+	{
+		struct pollfd	pollfd;
+		pollfd.fd = it->first;
+		pollfd.events = it->second.event == ConnectionData::READ ? POLLIN : POLLOUT;
+		pollfd.revents = 0;
+		list.push_back(pollfd);
+	}
+	return list;
 }

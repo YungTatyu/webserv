@@ -15,6 +15,7 @@ class PollActiveEventManager : public IActiveEventManager
 		void	clearAllEvents();
 		bool	isReadEvent(const void *event);
 		bool	isWriteEvent(const void *event);
+		bool	isErrorEvent(const void *event);
 	private:
 		std::vector<struct pollfd> active_events_;
 };
