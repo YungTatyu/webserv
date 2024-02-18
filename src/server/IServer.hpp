@@ -13,7 +13,8 @@ class IServer
 								NetworkIOHandler* io_handler,
 								RequestHandler* request_handler) = 0;
 		virtual int	waitForEvent(ConnectionManager* conn_manager) = 0;
-		virtual void	callEventHandler(IActiveEventManager* event_manager,
+		virtual void	callEventHandler(ConnectionManager* conn_manager,
+										IActiveEventManager* event_manager,
 										NetworkIOHandler* io_handler,
 										RequestHandler* request_handler) = 0;
 };
