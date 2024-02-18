@@ -1,8 +1,10 @@
 #ifndef CONFIG_HANDLER_HPP
 #define CONFIG_HANDLER_HPP
 
-# include "NetworkIOHandler.hpp"
+//# include "HttpRequest.hpp"
+# include "HttpMessage.hpp"
 # include "Main.hpp"
+# include "NetworkIOHandler.hpp"
 
 # include <map>
 
@@ -52,9 +54,10 @@
   };
  */
 
+class HttpRequest;
 struct TiedServer;
 
-/* Confファイルの設定を管理する */
+/* Confファイルの設定値を取り出したり、エラーを判断する */
 class ConfigHandler
 {
 	public:
@@ -68,14 +71,12 @@ class ConfigHandler
 		// method
 		// getsockname()でcli_sockからアドレスとるようにしているが
 		// 問題があれば、引数をsockaddr_storageにして、sockaddr_in[6]をreinterpret_cast<sockaddr_storage>()で渡してもいいかもしれない
-		// それか、ipv4用とipv6用を両方つくる
+		// とりあえずipv4だけ想定
 		bool	allowRequest( const struct TiedServer& server_config,
-							const std::string& server_name,
-							const std::string& uri,
+							const HttpRequest& request,
 							const int cli_sock ) const;
 		const std::string&	searchFile( const struct TiedServer& server_config,
-									const std::string& server_name,
-									const std::string& uri ) const;
+										const HttpRequest& request ) const;
 		void	writeAcsLog( const struct TiedServer& server_config,
 							const std::string& server_name,
 							const std::string& uri,
@@ -85,14 +86,14 @@ class ConfigHandler
 							const std::string& uri,
 							const std::string& msg ) const;
 		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& server_config,
+													const std::string& server_name,
+													const std::string& uri ) const;
+		const config::Time&	searchSendTimeout( const struct TiedServer& server_config,
 												const std::string& server_name,
 												const std::string& uri ) const;
-		const config::Time&	searchSendTimeout( const struct TiedServer& server_config,
-											const std::string& server_name,
-											const std::string& uri ) const;
 		const config::Time&	searchUseridExpires( const struct TiedServer& server_config,
-											const std::string& server_name,
-											const std::string& uri ) const;
+												const std::string& server_name,
+												const std::string& uri ) const;
 		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
 
 	private:

@@ -58,15 +58,14 @@ protected:
     }
 
 	// テストに使うオブジェクト
-	ConfigHandler	config_handler_;
+	ConfigHandler		config_handler_;
 	struct TiedServer	tied_server_;
 };
 
 namespace test {
 // 実際に使うallowRequestはソケットをつくらないと使えないので、ここではソケットの代わりに、アドレスを渡している。
 bool	allowRequestIPv4( const struct TiedServer& tied_server,
-					const std::string& server_name,
-					const std::string& uri,
+					const HttpRequest& request,
 					const in_addr cli_addr );
 // writeAcs/ErrLogのテスト用
 bool	WRITE_ACCURATE( const std::string file, const std::string& phrase ) {
@@ -91,6 +90,7 @@ TEST_F(ConfigHandlerTest, allowRequest)
 	struct in_addr	cli_addr2;
 	struct in_addr	cli_addr3;
 	struct in_addr	cli_addr4;
+	HttpRequest		request;
 
 	// 初期化
 	inet_pton(AF_INET, "192.168.0.1", &cli_addr1);
@@ -101,46 +101,50 @@ TEST_F(ConfigHandlerTest, allowRequest)
 
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	request.headers["Host"] = "first_server";
 	// allow all
+	request.uri = "/";
 	EXPECT_TRUE(test::allowRequestIPv4(tied_server_,
-									"first_server",
-									"/",
+									request,
 									cli_addr1));
 	// deny all
+	request.uri = "/hello";
 	EXPECT_FALSE(test::allowRequestIPv4(tied_server_,
-									"first_server",
-									"/hello/",
+									request,
 									cli_addr1));
 
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	request.headers["Host"] = "second_server";
 	// allow cli_addr2
+	request.uri = "/";
 	EXPECT_TRUE(test::allowRequestIPv4(tied_server_,
-									"second_server",
-									"/",
+									request,
 									cli_addr2));
 	// deny cli_addr2
+	request.uri = "/hello";
 	EXPECT_FALSE(test::allowRequestIPv4(tied_server_,
-									"second_server",
-									"/hello",
+									request,
 									cli_addr2));
 
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[2]);
+	request.headers["Host"] = "third_server";
 	// deny cli_addr3 
+	request.uri = "/";
 	EXPECT_FALSE(test::allowRequestIPv4(tied_server_,
-									"third_server",
-									"/",
+									request,
 									cli_addr3));
 	// allow cli_addr4
+	request.uri = "/hello";
 	EXPECT_TRUE(test::allowRequestIPv4(tied_server_,
-									"third_server",
-									"/hello",
+									request,
 									cli_addr4));
 }
 
 TEST_F(ConfigHandlerTest, searchFile)
 {
+	// 絶対パス取得
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
 	std::string	absolutepath;
@@ -155,41 +159,44 @@ TEST_F(ConfigHandlerTest, searchFile)
 	//absolutepath = ~/webserv/html
 	absolutepath = static_cast<std::string>(absolute_path);
 
-
+	HttpRequest	request;
 
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	request.headers["Host"] = "first_server";
 	// indexのみ設定されているケース
+	request.uri = "/";
 	EXPECT_EQ(absolutepath + "/index.html",
 			config_handler_.searchFile(tied_server_,
-									"first_server",
-									"/"));
+									request));
 	// indexとtry_filesが設定されているケース
+	request.uri = "/test/";
 	EXPECT_EQ(absolutepath + "/test/try.html",
 			config_handler_.searchFile(tied_server_,
-									"first_server",
-									"/test/"));
+									request));
 
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	request.headers["Host"] = "second_server";
 	// index,try_files.returnが設定されているケース
+	request.uri = "/test";
 	EXPECT_EQ(absolutepath + "/404.html",
 			config_handler_.searchFile(tied_server_,
-									"second_server",
-									"/test"));
+									request));
 
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[2]);
+	request.headers["Host"] = "third_server";
 	// location内でrootが変わっているケース
+	request.uri = "/";
 	EXPECT_EQ(absolutepath + "/change/change_root.html",
 			config_handler_.searchFile(tied_server_,
-									"third_server",
-									"/"));
+									request));
 	// aliasでrootが変わるケース
+	request.uri = "/test";
 	EXPECT_EQ(absolutepath + "/alias/alias.html",
 			config_handler_.searchFile(tied_server_,
-									"third_server",
-									"/test"));
+									request));
 }
 
 TEST_F(ConfigHandlerTest, searchKeepaliveTimeout)
