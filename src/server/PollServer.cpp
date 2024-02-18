@@ -45,9 +45,10 @@ void	PollServer::addActiveEvents(
 	for (size_t i = 0; i < size; ++i)
 	{
 		const struct pollfd& cur_pfd = pollfds[i];
-		// readもしくはwriteイベントが発生していたら、active_eventに追加
+		// イベントが発生していたら、active_eventに追加
 		if (event_manager->isReadEvent(static_cast<const void*>(&cur_pfd))
-			&& event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd))
+			|| event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd))
+			|| event_manager->isErrorEvent(static_cast<const void*>(&cur_pfd))
 		)
 			event_manager->addEvent(static_cast<const void*>(&cur_pfd));
 	}
