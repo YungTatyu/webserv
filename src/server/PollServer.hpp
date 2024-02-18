@@ -1,6 +1,7 @@
 #ifndef POLL_SERVER_HPP
 #define POLL_SERVER_HPP
 
+#include <poll.h>
 #include <vector>
 #include <map>
 

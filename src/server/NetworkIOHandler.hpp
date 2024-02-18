@@ -9,12 +9,10 @@
 # include <vector>
 # include <iostream>
 # include <cstdlib>
-# include <poll.h>
 # include <fcntl.h>
 # include "ServerConfig.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
-# include "ActiveEventManager.hpp"
 
 
 /* クライアントとデータの送受信を行う */

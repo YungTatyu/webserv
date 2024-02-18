@@ -1,5 +1,4 @@
 #include "ConnectionManager.hpp"
-#include <poll.h>
 
 /* ConnectionManagerクラスの実装 */
 void ConnectionManager::setConnection( const int fd )

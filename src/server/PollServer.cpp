@@ -28,7 +28,7 @@ int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager
 	std::vector<pollfd> pollfds = convertToPollfds(conn_manager->getConnections());
 
 	// TODO: error起きたときどうしようか? 一定数retry? serverはdownしたらダメな気がする
-	int re = SysCallWrapper::Poll(pollfds.data(), pollfds.size(), -1);
+	int re = poll(pollfds.data(), pollfds.size(), -1);
 
 	// 発生したイベントをActiveEventManagerにすべて追加
 	addActiveEvents(pollfds, conn_manager, event_manager);
