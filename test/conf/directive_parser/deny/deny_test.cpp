@@ -21,15 +21,15 @@ TEST(DenyTest, ipv4)
 
 
 	// http
-	test::test_value(http.access_list, {"all", "192.168.1.0/24"}, {config::DENY, config::DENY});
+	test::test_value(http.allow_deny_list, {"all", "192.168.1.0/24"}, {config::DENY, config::DENY});
 	test::test_directives_set(http.directives_set, kDeny, true);
 
 	// server
-	test::test_value(http.server_list[0].access_list, {"87.65.43.21/32", "87.65.0.0/16"}, {config::DENY, config::DENY});
+	test::test_value(http.server_list[0].allow_deny_list, {"87.65.43.21/32", "87.65.0.0/16"}, {config::DENY, config::DENY});
 	test::test_directives_set(http.server_list[0].directives_set, kDeny, true);
 
 	// location
-	test::test_value(http.server_list[0].location_list[0].access_list, {
+	test::test_value(http.server_list[0].location_list[0].allow_deny_list, {
 		"203.0.113.1/24",
 		"45.33.32.156/28",
 		"45.33.32.1/32",
@@ -42,12 +42,12 @@ TEST(DenyTest, ipv4)
 		config::DENY,
 		config::DENY
 	});
-	test::test_value(http.server_list[0].location_list[1].access_list, {"192.0.2.2", "10.0.0.2"}, {config::DENY, config::DENY});
+	test::test_value(http.server_list[0].location_list[1].allow_deny_list, {"192.0.2.2", "10.0.0.2"}, {config::DENY, config::DENY});
 	test::test_directives_set(http.server_list[0].location_list[0].directives_set, kDeny, true);
 	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kDeny, true);
 
 	// limit_except
-	test::test_value(http.server_list[0].location_list[1].limit_except.access_list,
+	test::test_value(http.server_list[0].location_list[1].limit_except.allow_deny_list,
 		{"112.85.90.68", "192.168.0.1", "0.0.0.0"},
 		{config::DENY, config::DENY, config::DENY}
 	);
@@ -65,15 +65,15 @@ TEST(DenyTest, ipv6)
 
 
 	// http
-	test::test_value(http.access_list, {"3001:0db8::1", "fe81::2"}, {config::DENY, config::DENY});
+	test::test_value(http.allow_deny_list, {"3001:0db8::1", "fe81::2"}, {config::DENY, config::DENY});
 	test::test_directives_set(http.directives_set, kDeny, true);
 
 	// server
-	test::test_value(http.server_list[0].access_list, {"::4", "::5", "all"}, {config::DENY, config::DENY, config::DENY});
+	test::test_value(http.server_list[0].allow_deny_list, {"::4", "::5", "all"}, {config::DENY, config::DENY, config::DENY});
 	test::test_directives_set(http.server_list[0].directives_set, kDeny, true);
 
 	// location
-	test::test_value(http.server_list[0].location_list[0].access_list, {
+	test::test_value(http.server_list[0].location_list[0].allow_deny_list, {
 		"3001:0db8::/32",
 		"fe81::/1",
 		"fc01::/7",
@@ -90,7 +90,7 @@ TEST(DenyTest, ipv6)
 		config::DENY,
 		config::DENY
 	});
-	test::test_value(http.server_list[0].location_list[1].access_list, {
+	test::test_value(http.server_list[0].location_list[1].allow_deny_list, {
 		"3001:db8:0:42:0:8a2e:370:7334",
 		"::ffff:192.168.0.4",
 		"FFFF::192.24.0.4",
@@ -103,7 +103,7 @@ TEST(DenyTest, ipv6)
 	test::test_directives_set(http.server_list[0].location_list[1].directives_set, kDeny, true);
 
 	// limit_except
-	test::test_value(http.server_list[0].location_list[1].limit_except.access_list, {
+	test::test_value(http.server_list[0].location_list[1].limit_except.allow_deny_list, {
 		"3001:0db8::/128",
 		"3001:DB8::fFFf:4/127",
 		"3001:0db8:0000:0042:0000:8a2e:0370:7334/0",

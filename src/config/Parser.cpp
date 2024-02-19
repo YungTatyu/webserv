@@ -1335,22 +1335,22 @@ bool	config::Parser::parseAllowDeny()
 	switch (this->current_context_.top())
 	{
 	case config::CONF_HTTP:
-		this->config_.http.access_list.push_back(tmp);
+		this->config_.http.allow_deny_list.push_back(tmp);
 		this->config_.http.directives_set.insert(directive_name);
 		break;
 
 	case config::CONF_HTTP_SERVER:
-		this->config_.http.server_list.back().access_list.push_back(tmp);
+		this->config_.http.server_list.back().allow_deny_list.push_back(tmp);
 		this->config_.http.server_list.back().directives_set.insert(directive_name);
 		break;
 	
 	case config::CONF_HTTP_LOCATION:
-		this->config_.http.server_list.back().location_list.back().access_list.push_back(tmp);
+		this->config_.http.server_list.back().location_list.back().allow_deny_list.push_back(tmp);
 		this->config_.http.server_list.back().location_list.back().directives_set.insert(directive_name);
 		break;
 
 	case config::CONF_HTTP_LIMIT_EXCEPT:
-		this->config_.http.server_list.back().location_list.back().limit_except.access_list.push_back(tmp);
+		this->config_.http.server_list.back().location_list.back().limit_except.allow_deny_list.push_back(tmp);
 		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(directive_name);
 		break;
 

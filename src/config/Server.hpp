@@ -36,7 +36,7 @@ struct Server
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
-	std::vector<AllowDeny>	access_list;
+	std::vector<AllowDeny>	allow_deny_list;
 	std::vector<Index>	index_list;
 	std::vector<Listen>	listen_list;
 	Autoindex	autoindex;

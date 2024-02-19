@@ -40,7 +40,7 @@ struct Http
 	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
-	std::vector<AllowDeny>	access_list;
+	std::vector<AllowDeny>	allow_deny_list;
 	Userid	userid;
 	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;

@@ -40,7 +40,7 @@ struct Location
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
 	Alias	alias; 
-	std::vector<AllowDeny>	access_list;
+	std::vector<AllowDeny>	allow_deny_list;
 	std::vector<Index>	index_list;
 	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
