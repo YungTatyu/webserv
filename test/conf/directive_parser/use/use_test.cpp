@@ -7,7 +7,6 @@
 
 #include "conf.hpp"
 #include "Main.hpp"
-#include "Parser.hpp"
 #include "directives_test.hpp"
 
 const std::string	kUse = "use";
