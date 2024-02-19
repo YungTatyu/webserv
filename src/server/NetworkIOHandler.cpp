@@ -18,10 +18,10 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons( servConfig->getServPort() );
-		
+
 		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
 		SysCallWrapper::Listen( this->listenfd_, servConfig->getListenQ() );
-		
+
 		std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
 
 	}
@@ -55,7 +55,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 	return 1;
 }
 
-int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
+ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
 	std::vector<char> response = connManager.getResponse( cli_sock );
 	size_t totalSent = 0;
@@ -73,7 +73,7 @@ int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cl
 	return totalSent;
 }
 
-void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventManager& eventManager )
+void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
@@ -83,9 +83,9 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager, EventMa
 	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
-	struct pollfd setting = EventManager::genPollFd( connfd, POLLIN, 0 );
-	connManager.setConnection( setting );
-	eventManager.addEvent( setting );
+	// 新規クライントfdを追加
+	connManager.setConnection( connfd );
+	connManager.setEvent( connfd, ConnectionData::READ );
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];
@@ -104,4 +104,3 @@ int NetworkIOHandler::getListenfd()
 {
 	return this->listenfd_;
 }
-
