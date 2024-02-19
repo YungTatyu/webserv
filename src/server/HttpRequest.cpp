@@ -18,7 +18,7 @@ HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
 	return HttpRequest();
 }
 
-void parseChunked(HttpRequest& request)
+void HttpRequest::parseChunked(HttpRequest& request)
 {
 	(void)request;
 }
