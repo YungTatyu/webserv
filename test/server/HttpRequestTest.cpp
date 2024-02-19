@@ -22,7 +22,7 @@ TEST(HttpRequest, Test1)
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "", true, false);
 
     //test
-    std::string rawRequest = "GET / HTTP/1.1\r\n\r\n\r\n";
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "\r\n";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     checkHttpRequestEqual(expect, test);
@@ -38,7 +38,10 @@ TEST(HttpRequest, Test2)
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "this is body", true, false);
 
     //test
-    std::string rawRequest = "GET / HTTP/1.1\r\nname1:value1\r\n\r\nthis is body";
+    std::string rawRequest = "GET / HTTP/1.1\r\n"
+                             "name1:value1\r\n"
+                             "\r\n"
+                             "this is body";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     checkHttpRequestEqual(expect, test);
@@ -54,7 +57,10 @@ TEST(HttpRequest, Test3)
     HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "", true, false);
 
     //test
-    std::string rawRequest = "GET / HTTP/1.1\r\nname1:value1\r\nname2:value2\r\n\r\n";
+    std::string rawRequest = "GET / HTTP/1.1\r\n"
+                             "name1:value1\r\n"
+                             "name2:value2\r\n"
+                             "\r\n";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     checkHttpRequestEqual(expect, test);
@@ -69,7 +75,7 @@ TEST(HttpRequest, Test4)
     HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "", true, false);
 
     //test
-    std::string rawRequest = "GET /html?query1=value1 HTTP/1.1\r\n\r\n";
+    std::string rawRequest = "GET /html?query1=value1 HTTP/1.1\r\n" "\r\n";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     checkHttpRequestEqual(expect, test);
@@ -85,7 +91,7 @@ TEST(HttpRequest, Test5)
     HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "", true, false);
 
     //test
-    std::string rawRequest = "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n\r\n";
+    std::string rawRequest = "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n" "\r\n";
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     checkHttpRequestEqual(expect, test);
