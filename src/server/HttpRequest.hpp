@@ -20,6 +20,9 @@ class HttpRequest
 		std::map<std::string, std::string> queries;
 		std::string body;
 
+		bool isParseCompleted;
+		bool isParseError;
+
 	private:
 		static void parseUri();
 		static void parseRequestLine(std::istringstream& requestLine);
