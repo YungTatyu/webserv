@@ -26,7 +26,6 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/FileUtils.cpp
 	src/server/SysCallWrapper.cpp
 
-	test/test.cpp 
 	test/conf/directives_test.cpp 
 	test/conf/confLexerTest.cpp 
 	test/conf/main_parser_test.cpp 
