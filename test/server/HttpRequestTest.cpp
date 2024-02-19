@@ -10,8 +10,7 @@ void checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
     EXPECT_EQ( expect.queries, test.queries );
     EXPECT_EQ( expect.body, test.body );
 
-    EXPECT_EQ( expect.isParseCompleted, test.isParseCompleted );
-    EXPECT_EQ( expect.isParseError, test.isParseError );
+    EXPECT_EQ( expect.parseState, test.parseState );
 }
 
 TEST(HttpRequest, Test1)
@@ -19,7 +18,7 @@ TEST(HttpRequest, Test1)
     //testcase: リクエストラインだけ
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
-    HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "", true, false);
+    HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET / HTTP/1.1\r\n" "\r\n";
@@ -35,7 +34,7 @@ TEST(HttpRequest, Test2)
     std::map<std::string, std::string> headers;
     headers["name1"] = "value1";
     std::map<std::string, std::string> queries;
-    HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "this is body", true, false);
+    HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "this is body", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET / HTTP/1.1\r\n"
@@ -54,7 +53,7 @@ TEST(HttpRequest, Test3)
     headers["name1"] = "value1";
     headers["name2"] = "value2";
     std::map<std::string, std::string> queries;
-    HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "", true, false);
+    HttpRequest expect("GET", "/", "HTTP/1.1", headers, queries, "", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET / HTTP/1.1\r\n"
@@ -72,7 +71,7 @@ TEST(HttpRequest, Test4)
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     queries["query1"] = "value1";
-    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "", true, false);
+    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET /html?query1=value1 HTTP/1.1\r\n" "\r\n";
@@ -88,7 +87,7 @@ TEST(HttpRequest, Test5)
     std::map<std::string, std::string> queries;
     queries["query1"] = "value1";
     queries["query2"] = "value2";
-    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "", true, false);
+    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n" "\r\n";
@@ -103,7 +102,7 @@ TEST(HttpRequest, Test6)
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     queries["Transfer-Encoding"] = "chunked";
-    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "hello", false, false);
+    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "hello", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
@@ -122,7 +121,7 @@ TEST(HttpRequest, Test7)
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     queries["Transfer-Encoding"] = "chunked";
-    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "hello", false, false);
+    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "hello", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
@@ -133,7 +132,7 @@ TEST(HttpRequest, Test7)
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     //testcase: chunked second
-    HttpRequest expect2("GET", "/html", "HTTP/1.1", headers, queries, "hello world", false, false);
+    HttpRequest expect2("GET", "/html", "HTTP/1.1", headers, queries, "hello world", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string chunked = "6\r\n" " world" "\r\n";
@@ -148,7 +147,7 @@ TEST(HttpRequest, Test8)
     std::map<std::string, std::string> headers;
     std::map<std::string, std::string> queries;
     queries["Transfer-Encoding"] = "chunked";
-    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "hello", false, false);
+    HttpRequest expect("GET", "/html", "HTTP/1.1", headers, queries, "hello", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
@@ -159,19 +158,18 @@ TEST(HttpRequest, Test8)
     HttpRequest test = HttpRequest::parseRequest(rawRequest);
 
     //testcase: chunked second
-    HttpRequest expect2("GET", "/html", "HTTP/1.1", headers, queries, "hello world", true, false);
+    HttpRequest expect2("GET", "/html", "HTTP/1.1", headers, queries, "hello world", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string chunked = "6\r\n" " world" "\r\n";
     HttpRequest test2 = HttpRequest::parseRequest(chunked);
 
     //testcase: chunked third (end)
-    HttpRequest expect3("GET", "/html", "HTTP/1.1", headers, queries, "hello world", true, false);
+    HttpRequest expect3("GET", "/html", "HTTP/1.1", headers, queries, "hello world", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string chunked2 = "0\r\n" "\r\n";
     HttpRequest test3 = HttpRequest::parseRequest(chunked2);
-
  
     checkHttpRequestEqual(expect, test3);
 }
