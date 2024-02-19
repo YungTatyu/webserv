@@ -13,7 +13,7 @@ void checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
     EXPECT_EQ( expect.parseState, test.parseState );
 }
 
-TEST(HttpRequest, Test1)
+TEST(HttpRequest, OkTest1)
 {
     //testcase: リクエストラインだけ
     std::map<std::string, std::string> headers;
@@ -27,7 +27,7 @@ TEST(HttpRequest, Test1)
     checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, Test2)
+TEST(HttpRequest, OkTest2)
 {
     //testcase: header fieldが一対ある時
     //testcase: bodyもある
@@ -46,7 +46,7 @@ TEST(HttpRequest, Test2)
     checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, Test3)
+TEST(HttpRequest, OkTest3)
 {
     //testcase: header fieldが複数ある時
     std::map<std::string, std::string> headers;
@@ -65,7 +65,7 @@ TEST(HttpRequest, Test3)
     checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, Test4)
+TEST(HttpRequest, OkTest4)
 {
     //testcase: query stringが単体
     std::map<std::string, std::string> headers;
@@ -80,7 +80,7 @@ TEST(HttpRequest, Test4)
     checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, Test5)
+TEST(HttpRequest, OkTest5)
 {
     //testcase: query stringが複数ある時
     std::map<std::string, std::string> headers;
@@ -96,7 +96,7 @@ TEST(HttpRequest, Test5)
     checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, Test6)
+TEST(HttpRequest, OkTest6)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
@@ -115,7 +115,7 @@ TEST(HttpRequest, Test6)
     checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, Test7)
+TEST(HttpRequest, OkTest7)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
@@ -141,7 +141,7 @@ TEST(HttpRequest, Test7)
     checkHttpRequestEqual(expect, test2);
 }
 
-TEST(HttpRequest, Test8)
+TEST(HttpRequest, OkTest8)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
