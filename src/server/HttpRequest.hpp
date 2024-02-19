@@ -8,7 +8,7 @@
 class HttpRequest
 {
 	public:
-		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "", const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(), const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(), const std::string& body = "");
+		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "", const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(), const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(), const std::string& body = "", bool isParseCompleted = false, bool isParseError = false);
 		~HttpRequest();
 
 		static HttpRequest parseRequest(const std::string& rawRequest);
