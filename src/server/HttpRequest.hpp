@@ -16,7 +16,11 @@ class HttpRequest
 			PARSE_ERROR
 		};
 
-		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "", const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(), const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(), const std::string& body = "", const ParseState parseState = PARSE_BEFORE);
+		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "",
+			    const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(),
+			    const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(),
+			    const std::string& body = "",
+			    const ParseState parseState = PARSE_BEFORE);
 		~HttpRequest();
 
 		static HttpRequest parseRequest(const std::string& rawRequest);
