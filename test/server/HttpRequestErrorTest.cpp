@@ -19,3 +19,8 @@ TEST(HttpRequest, ErrorTest2)
     EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
+//Content-Lengthと実際のボディのサイズが正しいかとか？
+//重複するヘッダーがあったらどうするんだっけ
+//リクエストラインでは何がエラー？
+//ヘッダーでは何がエラー？
+//chunkだと？
