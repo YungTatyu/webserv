@@ -8,7 +8,15 @@
 class HttpRequest
 {
 	public:
-		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "", const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(), const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(), const std::string& body = "", bool isParseCompleted = false, bool isParseError = false);
+		enum ParseState
+		{
+			PARSE_BEFORE,
+			PARSE_COMPLETE,
+			PARSE_INPROGRESS,
+			PARSE_ERROR
+		};
+
+		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "", const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(), const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(), const std::string& body = "", const ParseState parseState = PARSE_BEFORE);
 		~HttpRequest();
 
 		static HttpRequest parseRequest(const std::string& rawRequest);
@@ -21,8 +29,7 @@ class HttpRequest
 		std::map<std::string, std::string> queries;
 		std::string body;
 
-		bool isParseCompleted; // false when chunked
-		bool isParseError;
+		ParseState parseState;
 
 	private:
 		static void parseUri();

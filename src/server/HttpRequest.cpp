@@ -4,9 +4,8 @@ HttpRequest::HttpRequest(const std::string& method, const std::string& uri, cons
 			 const std::map<std::string, std::string>& headers,
 			 const std::map<std::string, std::string>& queries,
 			 const std::string& body,
-			 const bool isParseCompleted,
-			 const bool isParseError)
-			: method(method), uri(uri), version(version), headers(headers), queries(queries), body(body), isParseCompleted(isParseCompleted), isParseError(isParseError)
+			 const ParseState parseState)
+			: method(method), uri(uri), version(version), headers(headers), queries(queries), body(body), parseState(parseState)
 {
 }
 
