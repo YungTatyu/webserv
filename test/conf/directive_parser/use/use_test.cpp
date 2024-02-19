@@ -7,6 +7,7 @@
 
 #include "conf.hpp"
 #include "Main.hpp"
+#include "Parser.hpp"
 #include "directives_test.hpp"
 
 const std::string	kUse = "use";
@@ -42,7 +43,7 @@ TEST(UseTest, kqueue)
 	const config::Main	*config = config::init_config("test/conf/directive_parser/use/3.conf");
 
 	// 環境によって挙動が変わる
-	#if defined(__APPLE__)
+	#if defined(KQUEUE_AVAILABLE)
 		ASSERT_NE(config, nullptr);
 	#else
 		ASSERT_EQ(config, nullptr);

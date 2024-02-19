@@ -622,12 +622,12 @@ bool	config::Parser::parseErrorLog()
 	return true;
 }
 
-#if defined(__APPLE__)
-const config::OS  currentOS = config::Mac;
+#if defined(KQUEUE_AVAILABLE)
+const config::OS  currentOS = config::OS_BSD_BASED;
 #elif defined(__linux__)
-const config::OS  currentOS = config::Linux;
+const config::OS  currentOS = config::OS_LINUX
 #else
-const config::OS  currentOS = config::Unknown;
+const config::OS  currentOS = config::OS_OTHER;
 #endif
 
 bool	config::Parser::parseUse()
@@ -637,7 +637,7 @@ bool	config::Parser::parseUse()
 	std::string token_value = this->tokens_[ti_].value_;
 
 	switch (currentOS) {
-		case config::Mac:
+		case config::OS_BSD_BASED:
 			if (token_value != kSELECT &&
 				token_value != kPOLL &&
 				token_value != kKQUEUE)
@@ -646,7 +646,7 @@ bool	config::Parser::parseUse()
 				return false;
 			}
 			break;
-		case config::Linux:
+		case config::OS_LINUX:
 			if (token_value != kSELECT &&
 				token_value != kPOLL &&
 				token_value != kEPOLL)
@@ -655,7 +655,7 @@ bool	config::Parser::parseUse()
 				return false;
 			}
 			break;
-		case config::Unknown:
+		case config::OS_OTHER:
 			if (token_value != kSELECT &&
 				token_value != kPOLL)
 			{

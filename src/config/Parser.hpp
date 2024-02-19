@@ -1,6 +1,10 @@
 #ifndef CONFIG_PARSER_HPP
 #define CONFIG_PARSER_HPP
 
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#define KQUEUE_AVAILABLE
+#endif
+
 #include <vector>
 #include <set>
 #include <map>
@@ -17,9 +21,9 @@ namespace config
 {
 enum OS
 {
-	Mac,
-	Linux,
-	Unknown
+	OS_BSD_BASED,
+	OS_LINUX,
+	OS_OTHER
 };
 
 class Parser
