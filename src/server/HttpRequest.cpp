@@ -18,6 +18,11 @@ HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
 	return HttpRequest();
 }
 
+void parseChunked(HttpRequest& request)
+{
+	(void)request;
+}
+
 void HttpRequest::parseUri()
 {
 }

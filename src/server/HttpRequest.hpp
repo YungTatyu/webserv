@@ -12,6 +12,7 @@ class HttpRequest
 		~HttpRequest();
 
 		static HttpRequest parseRequest(const std::string& rawRequest);
+		static void parseChunked(HttpRequest& request);
 
 		std::string method;
 		std::string uri;
@@ -20,7 +21,7 @@ class HttpRequest
 		std::map<std::string, std::string> queries;
 		std::string body;
 
-		bool isParseCompleted;
+		bool isParseCompleted; // false when chunked
 		bool isParseError;
 
 	private:
