@@ -49,9 +49,12 @@ void HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest&
 			newRequest.method = POST;
 		break;
 	default:
-		newRequest.parseState = HttpRequest::PARSE_ERROR;
+		newRequest.parseState = HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
 	}
+
+	newRequest.uri = uri;
+	newRequest.version = version;
 }
 
 void HttpRequest::parseHeaders(std::istringstream& headers, HttpRequest& newRequest)
