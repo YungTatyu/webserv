@@ -10,9 +10,8 @@
 
 /**
  * ConfigHandler 方針
- * 基本的に、直接publicのconfig_を見てもらう
- * 個々のメソッドは補助関数のようなものだけ
- * この場合、すべてのクラスがこのクラスのオブジェクトを持たなければならない
+ * 基本的に、直接取りに行くのに条件が必要なものはすべてmethodで撮りに行く
+ * 計算量1で撮りに行けるものだけpublicのconfig_を見てもらう
 */ 
 
 /**
@@ -102,6 +101,11 @@ class ConfigHandler
 
 		// utils
 		// 必要なメソッド追加
+		const config::Server&	searchServerConfig( const struct TiedServer& server_configs, const std::string& server_name ) const;
+		const config::Location&	searchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
+		const std::string&	searchErrorPage( const config::Server& server,
+										const config::Location& location,
+										const unsigned int code );
 
 	public:
 		int		getServPort();
