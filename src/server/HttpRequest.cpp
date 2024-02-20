@@ -17,7 +17,9 @@ HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
 {
 	HttpRequest newRequest;
 	std::istringstream iss(rawRequest);
-	HttpRequest::parseRequestLine(iss, newRequest);
+	newRequest.parseState = HttpRequest::parseRequestLine(iss, newRequest);
+	if ( newRequest.parseState == HttpRequest::PARSE_ERROR )
+		return newRequest;
 	newRequest.parseState = HttpRequest::PARSE_COMPLETE;
 	return newRequest;
 }
@@ -31,7 +33,7 @@ void HttpRequest::parseUri()
 {
 }
 
-void HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
 {
 	std::string method;
 	std::string uri;
@@ -49,12 +51,13 @@ void HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest&
 			newRequest.method = POST;
 		break;
 	default:
-		newRequest.parseState = HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
+		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
 	}
 
 	newRequest.uri = uri;
 	newRequest.version = version;
+	return HttpRequest::PARSE_INPROGRESS;
 }
 
 void HttpRequest::parseHeaders(std::istringstream& headers, HttpRequest& newRequest)
