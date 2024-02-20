@@ -29,8 +29,9 @@ void HttpRequest::parseChunked(HttpRequest& request)
 	(void)request;
 }
 
-void HttpRequest::parseUri()
+void HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
 {
+	newRequest.uri = uri;
 }
 
 HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
@@ -55,7 +56,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 		break;
 	}
 
-	newRequest.uri = uri;
+	HttpRequest::parseUri(uri, newRequest);
 	newRequest.version = version;
 	return HttpRequest::PARSE_INPROGRESS;
 }
