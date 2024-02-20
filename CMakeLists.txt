@@ -16,22 +16,22 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
 	# src files
+	src/config/conf.cpp
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
-	src/config/conf.cpp
-	src/config/Parser.cpp
-	src/config/conf.cpp
-	src/server/ConfigHandler.cpp
-	src/server/HttpMessage.cpp 
 	src/server/CGIHandler.cpp
+	src/server/ConfigHandler.cpp
 	src/server/FileUtils.cpp
+	src/server/HttpMessage.cpp 
+	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
 
 	# test files
-	test/test.cpp 
 	#test/server/config_handler_test.cpp
-	test/conf/directives_test.cpp 
+	test/server/HttpRequestErrorTest.cpp 
+	test/server/HttpRequestOkTest.cpp 
 	test/conf/confLexerTest.cpp 
+	test/conf/directives_test.cpp 
 	test/conf/main_parser_test.cpp 
 	test/conf/directive_parser/access_log/access_log_test.cpp 
 	test/conf/directive_parser/alias/alias_test.cpp 
