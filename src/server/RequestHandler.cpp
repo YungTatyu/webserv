@@ -5,9 +5,9 @@
 
 RequestHandler::RequestHandler()
 {
-	this->handler_map[ActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
-	this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
-	this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
+	// this->handler_map[IActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
+	// this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
+	// this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
 }
 
 void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
