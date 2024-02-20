@@ -33,7 +33,25 @@ void HttpRequest::parseUri()
 
 void HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
 {
-	requestLine >> newRequest.method >> newRequest.uri >> newRequest.version;
+	std::string method;
+	std::string uri;
+	std::string version;
+	requestLine >> method >> uri >> version;
+	switch (method.size()){
+	case 3:
+		if (method == "GET")
+			newRequest.method = GET;
+		break;
+	case 4:
+		if (method == "HEAD")
+			newRequest.method = HEAD;
+		else if (method == "POST")
+			newRequest.method = POST;
+		break;
+	default:
+		newRequest.parseState = HttpRequest::PARSE_ERROR;
+		break;
+	}
 }
 
 void HttpRequest::parseHeaders(std::istringstream& headers, HttpRequest& newRequest)
