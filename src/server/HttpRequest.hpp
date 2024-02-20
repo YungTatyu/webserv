@@ -37,10 +37,10 @@ class HttpRequest
 
 	private:
 		static void parseUri();
-		static void parseRequestLine(std::istringstream& requestLine);
-		static void parseHeaders(std::istringstream& headers);
-		static void parseBody(std::istringstream& body);
-		std::string urlDecode(const std::string& str);
+		static void parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest);
+		static void parseHeaders(std::istringstream& headers, HttpRequest& newRequest);
+		static void parseBody(std::istringstream& body,  HttpRequest& newRequest);
+		std::string urlDecode(const std::string& str, HttpRequest& newRequest);
 };
 
 #endif
