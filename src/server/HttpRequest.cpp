@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-HttpRequest::HttpRequest(const std::string& method, const std::string& uri, const std::string& version,
+HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::map<std::string, std::string>& headers,
 			 const std::map<std::string, std::string>& queries,
 			 const std::string& body,
@@ -54,5 +54,4 @@ std::string HttpRequest::urlDecode(const std::string& str, HttpRequest& newReque
 	(void)newRequest;
 	return "";
 }
-
 

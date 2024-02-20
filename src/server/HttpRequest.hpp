@@ -5,6 +5,11 @@
 # include <string>
 # include <map>
 
+#define UNKNOWN	0b0000000
+#define GET	0b0000001
+#define HEAD	0b0000010
+#define POST	0b0000100
+
 class HttpRequest
 {
 	public:
@@ -16,7 +21,7 @@ class HttpRequest
 			PARSE_ERROR
 		};
 
-		HttpRequest(const std::string& method = "", const std::string& uri = "", const std::string& version = "",
+		HttpRequest(const unsigned int method = 0, const std::string& uri = "", const std::string& version = "",
 			    const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(),
 			    const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(),
 			    const std::string& body = "",
@@ -26,7 +31,7 @@ class HttpRequest
 		static HttpRequest parseRequest(const std::string& rawRequest);
 		static void parseChunked(HttpRequest& request);
 
-		std::string method;
+		unsigned int method;
 		std::string uri;
 		std::string version;
 		std::map<std::string, std::string> headers;
