@@ -34,6 +34,11 @@ void HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
 	newRequest.uri = uri;
 }
 
+void HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
+{
+	newRequest.version = version;
+}
+
 HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
 {
 	std::string method;
@@ -57,7 +62,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 	}
 
 	HttpRequest::parseUri(uri, newRequest);
-	newRequest.version = version;
+	HttpRequest::parseVersion(version, newRequest);
 	return HttpRequest::PARSE_INPROGRESS;
 }
 
