@@ -9,12 +9,10 @@
 # include <vector>
 # include <iostream>
 # include <cstdlib>
-# include <poll.h>
 # include <fcntl.h>
 # include "ConfigHandler.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
-# include "ActiveEventManager.hpp"
 # include "Server.hpp"
 
 class ConfigHandler;

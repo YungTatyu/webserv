@@ -18,7 +18,7 @@ int main(int ac, char *av[])
 		return 1;
 
 	WebServer server = WebServer(config);
-	server.eventLoop();
+	server.run();
 	delete config;
 	return 0;
 }
