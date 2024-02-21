@@ -21,7 +21,7 @@ class HttpRequest
 			PARSE_ERROR
 		};
 
-		HttpRequest(const unsigned int method = 0, const std::string& uri = "", const std::string& version = "",
+		HttpRequest(const unsigned int method = UNKNOWN, const std::string& uri = "", const std::string& version = "",
 			    const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(),
 			    const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(),
 			    const std::string& body = "",
