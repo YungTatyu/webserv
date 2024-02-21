@@ -71,7 +71,8 @@ class ConfigHandler
 		// getsockname()でcli_sockからアドレスとるようにしているが
 		// 問題があれば、引数をsockaddr_storageにして、sockaddr_in[6]をreinterpret_cast<sockaddr_storage>()で渡してもいいかもしれない
 		// とりあえずipv4だけ想定
-		bool	allowRequest( const struct TiedServer& server_config,
+		bool	allowRequest( const config::Server& server,
+							const config::Location& location,
 							const HttpRequest& request,
 							const int cli_sock ) const;
 		const std::string&	searchFile( const struct TiedServer& server_config,

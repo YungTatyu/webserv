@@ -1,6 +1,11 @@
 #include "ConfigHandler.hpp"
 #include <sys/socket.h>
 
+/** Configにあってほしい機能
+ * デフォルトサーバがどれか
+ *  ipとmask分けて保存
+*/
+
 /* ConfigHandlerクラスの実装 */
 void ConfigHandler::loadConfiguration( const config::Main* config )
 {
@@ -92,12 +97,9 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 }
 
 // parseが失敗したときはその情報どう受け取るか
-bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const HttpRequest& request, const int cli_sock ) const
+// uriがファイルでもdenyの影響受ける
+bool	ConfigHandler::allowRequest( const config::Server& server, const config::location& location, const HttpRequest& request, const int cli_sock ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
-
-	// cli_Sockからアドレス読み取る
 	struct sockaddr_in client_addr;
     socklen_t client_addrlen = sizeof(client_addr);
 	if (getsockname(cli_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
@@ -108,7 +110,7 @@ bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const 
 
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
-	if (location.directives_set[kDENY])
+	if (location && location.directives_set[kDENY])
 	{
 		if (!limitLoop(location.allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
@@ -145,6 +147,11 @@ bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const 
 	return true;
 }
 
+/** request 処理の順番
+ * 1. parse error 400 Bad Request
+ * 2. access restrict 403 Invalid Access
+ * 3. no location / no file 404 Not Found
+ */
 
 	const std::string&	ConfigHandler::searchFile( const struct TiedServer& server_config, const HttpRequest& request ) const
 {
@@ -152,9 +159,17 @@ bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const 
 	config::Location&	location = searchLocationConfig(server, uri);
 
 	// parseが失敗していれば、400 Bad Request
+	if (request.parseStatus == HttpRequest::PARSE_ERROR)
+		return searchErrorPage(400);
 
 	// allowReuestがfalseなら403 Forbidden
+	if (!allowRequest(server, location, request, cli_sock))
+		return searchErrorPafe(403);
 
+	// if (unfinished slash directory)
+		// return 301 Moved Permanently
+
+	// uriがファイルだろうがディレクトリだろうが、location観に行っている
 
 	// urlのlocationがあるか探す
 		// なければ上位のcontextから探す
@@ -202,7 +217,6 @@ const config::Time&	ConfigHandler::getUseridExpires( const struct TiedServer& se
 
 const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer& server_configs, const std::string& server_name ) const
 {
-	// Serverクラスにどれがデフォルトサーバーかわかる変数付ける
 	for (int i = 0; i < server_configs.size(); i++)
 	{
 		if (server_name == server_configs.tied_servers_[i].server_name.getName())
