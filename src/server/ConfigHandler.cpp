@@ -20,6 +20,77 @@ int ConfigHandler::getListenQ()
 	return this->listenQ_;
 }
 
+uint32_t	ConfigHandler::StrToIpAddress( const std::string& ip)
+{
+	std::istringstream iss(ip);
+	std::string segment;
+	std::vector<std::string> segments;
+
+	// "." で分割
+	while (std::getline(iss, segment, '.')) {
+		segments.push_back(segment);
+	}
+
+	uint32_t result = 0;
+
+	for (int i = 0; i < 4; i++)
+	{
+		int value = std::stoi(segments[i]);
+
+		result = (result << 8) | value;
+	}
+
+	return result;
+}
+
+bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr )
+{
+	std::istringstream	iss(ip_addr_str);
+	std::string			ip;
+	std::string			mask;
+
+	std::string std::getline(iss, ip, '/');
+	std::string std::getline(iss, mask);
+
+	uint32_t			conf_addr = StrToIPAddress(ip);
+	uint32_t			mask_val = 0xFFFFFFFF;
+	// サブネットマスクが指定されている場合
+	if (!mask.empty())
+	{
+		int prefix_length = std::stoi(mask);
+		mask_val <<= (32 - prefix_length);
+	}
+
+	return (ip & mask_val) == (cli_addr & mask_val);
+}
+
+bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr )
+{
+	// 上から順に制限適用する
+		//制限されているアドレスであれば、false
+		//エラーページどのタイミングで返すか？
+	for (int i = 0; i < allow_deny_list.size(); i++)
+	{
+		if (addressInLimit(allow_deny_list[i].getAddress(), cli_addr))
+		{
+			switch (allow_deny_list[i].getAllowDirective())
+			{
+				case config::ALLOW:
+					return true;
+					break;
+				case config::DENY:
+					return false;
+					break;
+				default:
+					return false;
+					break;
+			}
+		}
+	}
+
+	return true;
+}
+
 // parseが失敗したときはその情報どう受け取るか
 bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const HttpRequest& request, const int cli_sock ) const
 {
@@ -31,41 +102,26 @@ bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const 
     socklen_t client_addrlen = sizeof(client_addr);
 	if (getsockname(cli_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
 	{
-		printError();
+		std::cerr << "webserv: [emerge] getsockname() \"" << cli_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 	}
-	std::cout << "" << client_addr.sin_addr.s_addr << std::endl;
+	//std::cout << "" << client_addr.sin_addr.s_addr << std::endl;
 
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
 	if (location.directives_set[kDENY])
 	{
-		// 関数分割
-		// 上から順に制限適用する
-			//制限されているアドレスであれば、false
-			//エラーページどのタイミングで返すか？
-		for (int i = 0; i < location.allow_deny_list.size(); i++)
-		{
-			if (addressInLimit())
-			{
-				switch (location.allow_deny_list[i].getAllowDirective()) {
-					case config::ALLOW:
-						return true;
-						break;
-					case config::DENY:
-						return false;
-						break;
-					default:
-						return false;
-						break;
-				}
-			}
-		}
+		if (!limitLoop(location.allow_deny_list, client_addr.sin_addr.s_addr))
+			return false;
 	}
 	else if (server.directives_set[kDENY])
 	{
+		if (!limitLoop(server.allow_deny_list, client_addr.sin_addr.s_addr))
+			return false;
 	}
 	else if (this->config_.http.directives_set[kDENY])
 	{
+		if (!limitLoop(this->config_.http.allow_deny_list, client_addr.sin_addr.s_addr))
+			return false;
 	}
 
 
@@ -79,24 +135,8 @@ bool	ConfigHandler::allowRequest( const struct TiedServer& server_config, const 
 		// 制限されたメソッドでなければ、スルー
 			if (request.getMethod() == location.limit_except[i].excepted_methods)
 			{
-				// 上から順に適用していく
-				for (int j = 0; j < location.limit_except[i].allow_deny_list.size(), j++)
-				{
-					if (addressInLimits())
-					{
-						switch (location.limit_except[i].allow_deny_list[j].getAccessDirective()) {
-							case config::ALLOW:
-								return true;
-								break;
-							case config::DENY:
-								return false;
-								break;
-							default :
-								return false;
-								break;
-						}
-					}
-				}
+				if (!limitLoop(location.limit_except[i].allow_deny_list, client_addr.sin_addr.s_addr))
+					return false;
 			}
 		}
 	}

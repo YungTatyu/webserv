@@ -106,6 +106,9 @@ class ConfigHandler
 		const std::string&	searchErrorPage( const config::Server& server,
 										const config::Location& location,
 										const unsigned int code );
+		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr );
+		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr );
+		uint32_t	StrToIPAddress( const std::string& ip );
 
 	public:
 		int		getServPort();
