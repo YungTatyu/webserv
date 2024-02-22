@@ -45,7 +45,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 	std::string uri;
 	std::string version;
 	requestLine >> method >> uri >> version;
-	switch (method.size()){
+	switch (method.size()) {
 	case 3:
 		if (method == "GET")
 			newRequest.method = GET;
