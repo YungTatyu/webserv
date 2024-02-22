@@ -42,7 +42,7 @@ class HttpRequest
 
 	private:
 		static void parseUri(std::string uri, HttpRequest& newRequest);
-		static void parseVersion(std::string version, HttpRequest& newRequest);
+		static bool parseVersion(std::string version, HttpRequest& newRequest);
 		static ParseState parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest);
 		static void parseHeaders(std::istringstream& headers, HttpRequest& newRequest);
 		static void parseBody(std::istringstream& body,  HttpRequest& newRequest);

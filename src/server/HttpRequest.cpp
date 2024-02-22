@@ -34,9 +34,12 @@ void HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
 	newRequest.uri = uri;
 }
 
-void HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
+bool HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
 {
+	if ( version != "HTTP/1.1" )
+		return false;
 	newRequest.version = version;
+	return true;
 }
 
 HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
@@ -48,21 +51,34 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 	switch (method.size()) {
 	case 3:
 		if (method == "GET")
+		{
 			newRequest.method = GET;
-		break;
+			break;
+		}
+		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 	case 4:
 		if (method == "HEAD")
+		{
 			newRequest.method = HEAD;
+			break;
+
+		}
 		else if (method == "POST")
+		{
 			newRequest.method = POST;
-		break;
+			break;
+		}
+		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 	default:
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
 	}
 
 	HttpRequest::parseUri(uri, newRequest);
-	HttpRequest::parseVersion(version, newRequest);
+
+	if ( HttpRequest::parseVersion(version, newRequest) == false )
+		return HttpRequest::PARSE_ERROR;
+
 	return HttpRequest::PARSE_INPROGRESS;
 }
 
