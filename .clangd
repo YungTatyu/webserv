@@ -1,0 +1,10 @@
+CompileFlags:
+  Add: 
+    - "-I"
+    - "/Users/kohshi54/42/webserv_team/src/server"
+    - "-I"
+    - "/Users/kohshi54/42/webserv_team/src/config"
+    - "-I"
+    - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1"
+    - "-I"
+    - "/opt/homebrew/include/"
