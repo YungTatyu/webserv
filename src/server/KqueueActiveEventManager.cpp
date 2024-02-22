@@ -36,7 +36,8 @@ void	KqueueActiveEventManager::clearAllEvents()
 }
 
 /**
- * @brief ソケットが閉じられた場合(eof)もreadイベントとして対応する
+ * @brief ソケットが閉じられた、もしくはerror発生した場合はreadイベントとして対応しない
+ * 不必要なreadを避けるため
  * 
  * @param event 
  * @return true 
@@ -45,7 +46,7 @@ void	KqueueActiveEventManager::clearAllEvents()
 bool	KqueueActiveEventManager::isReadEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return kq_e->filter == EVFILT_READ && !(kq_e->flags & EV_ERROR);
+	return kq_e->filter == EVFILT_READ && !isErrorEvent(event);
 }
 
 /**
