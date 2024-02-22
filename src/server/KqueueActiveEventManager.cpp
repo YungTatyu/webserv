@@ -33,6 +33,11 @@ void	KqueueActiveEventManager::addEvent(const void *event)
 void	KqueueActiveEventManager::clearAllEvents()
 {
 	this->active_events_.clear();
+	// vectorのメモリを毎回解放するべきか、それとも確保した領域を引き続き使うべきか？
+	// イベントが大量に発生した場合、メモリをたくさん使うので解放することが重要だと思う
+	// 次に発生するイベントの数が同様に多いとは限らない
+	// ただイベントが発生する度に新しい領域を確保すると、メモリ確保・解放のオーバーヘッドが発生する
+	this->active_events_.shrink_to_fit();
 }
 
 /**
