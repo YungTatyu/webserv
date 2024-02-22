@@ -16,7 +16,8 @@ void WebServer::initializeServer()
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
-	this->server = new PollServer();
+	// this->server = new PollServer();
+	this->server = new KqueueServer();
 	this->eventManager = new PollActiveEventManager();
 
 	// listening socketを監視するリストに追加

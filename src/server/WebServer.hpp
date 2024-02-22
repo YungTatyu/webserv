@@ -9,6 +9,7 @@
 # include "PollActiveEventManager.hpp"
 # include "IServer.hpp"
 # include "PollServer.hpp"
+# include "KqueueServer.hpp"
 # include "SysCallWrapper.hpp"
 
 class WebServer

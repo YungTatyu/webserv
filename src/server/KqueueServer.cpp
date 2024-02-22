@@ -19,7 +19,9 @@ void	KqueueServer::eventLoop(
 
 	for ( ; ; )
 	{
+		std::cout << "waiting events\n";
 		waitForEvent(conn_manager, event_manager);
+		std::cout << "events occured\n";
 
 		// 発生したイベントをhandleする
 		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
@@ -42,11 +44,18 @@ bool	KqueueServer::initKqueueServer()
 
 int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
 {
+	static bool	init = true;
+
 	std::vector<struct kevent>	event_list; // 監視したいevent
 	std::vector<struct kevent>	*active_events =
 		static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
 
-	initKevents(event_list, conn_manager->getConnections());
+	// event loop1回目はすべてのイベントを監視リストに追加
+	if (init)
+		initKevents(event_list, conn_manager->getConnections());
+	else
+		AddNewEvents(event_list, conn_manager->getConnections());
+	init = false;
 
 	// 発生したeventをすべて格納できるサイズにする
 	active_events->reserve(event_list.size());
@@ -83,20 +92,70 @@ void	KqueueServer::callEventHandler(
 	RequestHandler* request_handler
 )
 {
-	const std::vector<struct kevent>	*active_events_ptr =
+	std::vector<struct kevent>	*active_events_ptr =
 		static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
-	const std::vector<struct kevent>	&active_events = *active_events_ptr;
+	std::vector<struct kevent>	&active_events = *active_events_ptr;
 
 	// 発生したイベントの数だけloopする
 	for (int i = 0; i < event_manager->getActiveEventsNum(); ++i)
 	{
+		RequestHandler::UPDATE_STATUS	status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-			request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].ident);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].ident);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].ident);
+			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].ident);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-			request_handler->handleErrorEvent(*io_handler, *conn_manager, (active_events[i].ident));
+			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].ident);
+		
+		// kqueueで監視しているイベント情報を更新
+		switch (status)
+		{
+		case RequestHandler::UPDATE_READ:
+			updateEvent(active_events[i], EVFILT_READ);
+			break;
+
+		case RequestHandler::UPDATE_WRITE:
+			updateEvent(active_events[i], EVFILT_WRITE);
+			break;
+
+		case RequestHandler::UPDATE_CLOSE:
+			deleteEvent(active_events[i]);
+			break;
+
+		default:
+			break;
+		}	
 	}
+}
+
+/**
+ * @brief kqueueで監視するイベントをupdate
+ * 
+ * @param event 
+ * @param event_flag 
+ */
+void	KqueueServer::updateEvent(struct kevent &event, const int event_flag)
+{
+	EV_SET(&event, event.filter, event_flag, EV_ADD, 0, 0, 0);
+}
+
+/**
+ * @brief kqueueで監視するイベントから削除
+ * 
+ * @param event 
+ */
+void	KqueueServer::deleteEvent(struct kevent &event)
+{
+	EV_SET(&event, event.filter, event.flags, EV_DELETE, 0, 0, 0);
+}
+
+void	KqueueServer::AddNewEvents(
+	std::vector<struct kevent> &event_list,
+	const std::map<int, ConnectionData> &connections)
+{
+	// TODO: 新しいイベントのみを追加するロジックを追加する
+	// refactor時に対応する
+	initKevents(event_list, connections);
 }
 
 #endif
