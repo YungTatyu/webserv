@@ -31,7 +31,27 @@ void HttpRequest::parseChunked(HttpRequest& request)
 
 void HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
 {
-	newRequest.uri = uri;
+	enum parseUriPhase {
+		sw_start,
+		sw_uriBeforeSlash,
+		sw_schema,
+		sw_end
+	};
+	parseUriPhase state = sw_start;
+	// ここでステートマシンを実装する
+	for (size_t i = 0; i < uri.size(); ++i) {
+		switch (state) {
+		case sw_start:
+			state = sw_start;
+		case sw_uriBeforeSlash:
+			state = sw_schema;
+		case sw_schema:
+			state = sw_end;
+		case sw_end:
+			newRequest.uri = uri;	
+			break;
+		}
+	}
 }
 
 bool HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
@@ -55,7 +75,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 			newRequest.method = GET;
 			break;
 		}
-		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
+		return HttpRequest::PARSE_ERROR;
 	case 4:
 		if (method == "HEAD")
 		{
@@ -68,7 +88,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 			newRequest.method = POST;
 			break;
 		}
-		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
+		return HttpRequest::PARSE_ERROR;
 	default:
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
