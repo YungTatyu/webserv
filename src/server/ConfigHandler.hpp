@@ -103,7 +103,7 @@ class ConfigHandler
 		// utils
 		// 必要なメソッド追加
 		const config::Server&	searchServerConfig( const struct TiedServer& server_configs, const std::string& server_name ) const;
-		const config::Location&	searchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
+		const config::Location* const	searchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 		const std::string&	searchErrorPage( const config::Server& server,
 										const config::Location& location,
 										const unsigned int code );

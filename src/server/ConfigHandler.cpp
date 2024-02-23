@@ -155,19 +155,27 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::lo
 
 	const std::string&	ConfigHandler::searchFile( const struct TiedServer& server_config, const HttpRequest& request ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
-
 	// parseが失敗していれば、400 Bad Request
 	if (request.parseStatus == HttpRequest::PARSE_ERROR)
 		return searchErrorPage(400);
 
+	config::Server&	server = searchServerConfig(server_config, server_name);
+	// server の return を見に行く。今はreturn はlocationだけ
+
+	config::Location*	location = searchLocationConfig(server, uri);
+
 	// allowReuestがfalseなら403 Forbidden
 	if (!allowRequest(server, location, request, cli_sock))
-		return searchErrorPafe(403);
+		return searchErrorPage(403);
+
 
 	// if (unfinished slash directory)
-		// return 301 Moved Permanently
+		// return searchErrorPage(301); // 301 Moved Permanently
+	// if (there is no location which is same with request uri)
+		// 前方一致するロケーション、または上のコンテキストをみて、index listingがonならそれを表示、offなら403エラー
+
+	// locationがなければ、前方一致したところの設定が適用される。しかしそこでのファイルはリクエストuriからの相対パスとなる。
+	// indexのファイルがなく、autoindexもoffならば、403エラー
 
 	// uriがファイルだろうがディレクトリだろうが、location観に行っている
 
@@ -185,7 +193,7 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::lo
 void	ConfigHandler::writeAcsLog( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLocationConfig(server, uri);
 
 	// access_logがどのコンテキストにあるか
 	//
@@ -194,45 +202,69 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& server_config, const s
 void	ConfigHandler::writeErrLog( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLocationConfig(server, uri);
 }
 
 const config::Time&	ConfigHandler::getKeepaliveTimeout( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLocationConfig(server, uri);
 }
 
 const config::Time&	ConfigHandler::getSendTimeout( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLocationConfig(server, uri);
 }
 
 const config::Time&	ConfigHandler::getUseridExpires( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location&	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLocationConfig(server, uri);
 }
 
 const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer& server_configs, const std::string& server_name ) const
 {
+	config::Server	default_server = &server_configs.tied_servers_[0];
+
 	for (int i = 0; i < server_configs.size(); i++)
 	{
 		if (server_name == server_configs.tied_servers_[i].server_name.getName())
 			return server_configs.tied_servers[i];
+		if (server_configs.tied_servers_[i].listen.getIsDefaultServer())
+			default_server = &server_configs.tied_servers_[i];
 	}
-	// return default_server
+
+	// server_nameが一致するものがなければデフォルトサーバーを返す
+	return *default_server;
 }
 
-const config::Location&	ConfigHandler::searchLocationConfig( const config::Server& server_config, const std::string& uri ) const
+bool	sameURI( const std::string& request_uri, std::string config_uri )
 {
+	// location uriが'/'で始まってなかったらスラッシュをつける
+	if (config_uri.front() != '/')
+		config_uri.insert(config_uri.begin(), '/');
+	// location uriが'/'で終わってなかったらスラッシュをつける
+	if (config_uri.back() != '/')
+		config_uri.push_back('/');
+
+	if (request_uri == config_uri)
+		return true;
+	return false;
+}
+
+const config::Location* const	ConfigHandler::searchLocationConfig( const config::Server& server_config, const std::string& uri ) const
+{
+	// uriがファイルなら直前の/まで切る
+	// でもそのファイルやディレクトリが存在しなかったら location / の内容を探すわけではない
+
+	// location探す
 	for (int i = 0; i < server_config.location_list.size(); i++)
 	{
-		if (uri == server_config.location_list[i].uri)
-			return server_config.location_list[i];
+		if (sameURI(uri, server_config.location_list[i].uri))
+			return &server_config.location_list[i];
 	}
-	// return 404 Not Found
+	return nullptr;
 }
 
 const std::string&	ConfigHandler::searchErrorPage( const config::Server& server, const config::Location& location, const unsigned int code )
