@@ -29,7 +29,7 @@ class KqueueServer : public IServer
 									IActiveEventManager* event_manager,
 									NetworkIOHandler* io_handler,
 									RequestHandler* request_handler);
-		void	updateEvent(struct kevent &event, const int event_flag);
+		void	updateEvent(struct kevent &event, const int event_filter);
 		void	deleteEvent(struct kevent &event);
 		void	AddNewEvents(std::vector<struct kevent> &event_list, const std::map<int, ConnectionData> &connections);
 	private:

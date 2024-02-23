@@ -18,7 +18,8 @@ void WebServer::initializeServer()
 	this->connManager = new ConnectionManager();
 	// this->server = new PollServer();
 	this->server = new KqueueServer();
-	this->eventManager = new PollActiveEventManager();
+	// this->eventManager = new PollActiveEventManager();
+	this->eventManager = new KqueueActiveEventManager();
 
 	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();

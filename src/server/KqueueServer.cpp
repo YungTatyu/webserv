@@ -59,9 +59,13 @@ int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 
 	// 発生したeventをすべて格納できるサイズにする
 	active_events->reserve(event_list.size());
+	active_events->clear();
+	// struct timespec	timeout;
+	// timeout.tv_sec = 1000;
+	// timeout.tv_nsec = 0;
 	// TODO: error処理どうするか？ server downさせる？
 	int re = kevent(this->kq_, event_list.data(), event_list.size(), active_events->data(), active_events->size(), NULL);
-	event_manager->setActiveEventsNum(re);
+		event_manager->setActiveEventsNum(re);
 	return re;
 }
 
@@ -78,9 +82,9 @@ void	KqueueServer::initKevents(
 		it != connections.end();
 		++it)
 	{
-		const int	event_flag = it->second.event == ConnectionData::READ ? EVFILT_READ : EVFILT_WRITE;
+		const int	event_filter = it->second.event == ConnectionData::READ ? EVFILT_READ : EVFILT_WRITE;
 		// TODO: flag詳細調べる
-		EV_SET(&event_list[i], it->first, event_flag, EV_ADD|EV_ENABLE, 0, 0, 0);
+		EV_SET(&event_list[i], it->first, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
 		++i;
 	}
 }
@@ -132,11 +136,11 @@ void	KqueueServer::callEventHandler(
  * @brief kqueueで監視するイベントをupdate
  * 
  * @param event 
- * @param event_flag 
+ * @param event_filter 
  */
-void	KqueueServer::updateEvent(struct kevent &event, const int event_flag)
+void	KqueueServer::updateEvent(struct kevent &event, const int event_filter)
 {
-	EV_SET(&event, event.filter, event_flag, EV_ADD, 0, 0, 0);
+	EV_SET(&event, event.ident, event_filter, EV_ADD, 0, 0, 0);
 }
 
 /**
@@ -146,7 +150,7 @@ void	KqueueServer::updateEvent(struct kevent &event, const int event_flag)
  */
 void	KqueueServer::deleteEvent(struct kevent &event)
 {
-	EV_SET(&event, event.filter, event.flags, EV_DELETE, 0, 0, 0);
+	EV_SET(&event, event.ident, event.filter, EV_DELETE, 0, 0, 0);
 }
 
 void	KqueueServer::AddNewEvents(
