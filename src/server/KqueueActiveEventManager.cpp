@@ -37,7 +37,7 @@ void	KqueueActiveEventManager::clearAllEvents()
 	// イベントが大量に発生した場合、メモリをたくさん使うので解放することが重要だと思う
 	// 次に発生するイベントの数が同様に多いとは限らない
 	// ただイベントが発生する度に新しい領域を確保すると、メモリ確保・解放のオーバーヘッドが発生する
-	this->active_events_.shrink_to_fit();
+	// this->active_events_.shrink_to_fit();
 }
 
 /**

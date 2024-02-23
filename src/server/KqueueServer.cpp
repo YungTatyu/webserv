@@ -46,7 +46,7 @@ int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 {
 	static bool	init = true;
 
-	std::vector<struct kevent>	event_list; // 監視したいevent
+	static std::vector<struct kevent>	event_list; // 監視したいevent
 	std::vector<struct kevent>	*active_events =
 		static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
 
@@ -58,14 +58,10 @@ int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 	init = false;
 
 	// 発生したeventをすべて格納できるサイズにする
-	active_events->reserve(event_list.size());
-	active_events->clear();
-	// struct timespec	timeout;
-	// timeout.tv_sec = 1000;
-	// timeout.tv_nsec = 0;
+	active_events->resize(event_list.size());
 	// TODO: error処理どうするか？ server downさせる？
 	int re = kevent(this->kq_, event_list.data(), event_list.size(), active_events->data(), active_events->size(), NULL);
-		event_manager->setActiveEventsNum(re);
+	event_manager->setActiveEventsNum(re);
 	return re;
 }
 
@@ -75,7 +71,7 @@ void	KqueueServer::initKevents(
 )
 {
 	// 監視するeventの数だけ、要素を確保する
-	event_list.reserve(connections.size());
+	event_list.resize(connections.size());
 
 	size_t	i = 0;
 	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
