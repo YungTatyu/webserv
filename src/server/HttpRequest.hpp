@@ -32,7 +32,7 @@ class HttpRequest
 		static void parseChunked(HttpRequest& request);
 
 		unsigned int method;
-		std::string uri;
+		std::string uri; // スキーマ、ポートは？？
 		std::string version;
 		std::map<std::string, std::string> headers;
 		std::map<std::string, std::string> queries;
