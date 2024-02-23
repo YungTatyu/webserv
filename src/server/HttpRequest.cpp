@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+#include <functional>
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::map<std::string, std::string>& headers,
@@ -20,6 +21,7 @@ HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
 	newRequest.parseState = HttpRequest::parseRequestLine(iss, newRequest);
 	if ( newRequest.parseState == HttpRequest::PARSE_ERROR )
 		return newRequest;
+	newRequest.parseState = HttpRequest::parseHeaders(iss, newRequest);
 	newRequest.parseState = HttpRequest::PARSE_COMPLETE;
 	return newRequest;
 }
@@ -29,6 +31,11 @@ void HttpRequest::parseChunked(HttpRequest& request)
 	(void)request;
 }
 
+/* 
+ * URLのパース
+ * URIかと思っていた、、
+ * URLからスキーマ、ポート、パス、クエリーに分解する？
+ */
 void HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
 {
 	enum parseUriPhase {
@@ -102,10 +109,53 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 	return HttpRequest::PARSE_INPROGRESS;
 }
 
-void HttpRequest::parseHeaders(std::istringstream& headers, HttpRequest& newRequest)
+/*
+ * read each into hash??
+ *
+ *
+ */
+HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequest& newRequest)
 {
-	(void)headers;
+	enum parseHeaderPhase {
+		sw_start,
+		sw_name,
+		sw_column,
+		sw_space_before_value,
+		sw_value,
+		sw_space_after_value,
+		sw_almost_done,
+		sw_header_almost_done,
+		sw_end
+	} state;
+
+	state = sw_start;
+	for (size_t i = 0; i < headers.size(); ++i) {
+		char ch = headers[i];
+		switch (state) {
+		case sw_start:
+			if (ch == '\r')
+				state = sw_header_almost_done;
+			else if (ch == '\n') {
+				state = sw_end;
+				return HttpRequest::PARSE_INPROGRESS;
+			}
+			else {
+				return HttpRequest::PARSE_ERROR;
+			}
+			break;
+		case sw_name:
+			std::string substring = &headers[i];
+			size_t coron = substring.find(':');
+			if (coron != substring.end())
+				i += coron;
+			
+			
+
+		}
+	}
+		
 	(void)newRequest;
+	return HttpRequest::PARSE_INPROGRESS;
 }
 
 void HttpRequest::parseBody(std::istringstream& body, HttpRequest& newRequest)
