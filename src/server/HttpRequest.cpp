@@ -119,7 +119,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequ
 	enum parseHeaderPhase {
 		sw_start,
 		sw_name,
-		sw_column,
+		sw_colon,
 		sw_space_before_value,
 		sw_value,
 		sw_space_after_value,
@@ -142,18 +142,34 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequ
 			else {
 				return HttpRequest::PARSE_ERROR;
 			}
+			state = sw_name;
 			break;
 		case sw_name:
-			std::string substring = &headers[i];
-			size_t coron = substring.find(':');
-			if (coron != substring.end())
-				i += coron;
-			
-			
-
+			state = sw_colon;
+			break;
+		case sw_colon:
+			if (ch != ':')
+				return HttpRequest::PARSE_ERROR;
+			state = sw_space_before_value;
+			break;
+		case sw_space_before_value:
+			if (ch != ' ')
+				return HttpRequest::PARSE_ERROR;
+			state = sw_value;
+			break;
+		case sw_value:
+			//store value here;
+			state = sw_space_after_value;
+			break;	
+		case sw_space_after_value:
+			state = sw_start;
+			break;
+		default:
+			// hmm
+			break;
 		}
 	}
-		
+
 	(void)newRequest;
 	return HttpRequest::PARSE_INPROGRESS;
 }

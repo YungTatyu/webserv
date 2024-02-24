@@ -34,7 +34,7 @@ class HttpRequest
 		unsigned int method;
 		std::string uri; // スキーマ、ポートは？？
 		std::string version;
-		std::map<std::string, std::string> headers;
+		std::map<std::string, std::string> headers; // hashにするためには、unordered_mapを使った方がいい。mapは赤黒木なので計算量logN.hashは最悪O(N)だけど基本O(1).
 		std::map<std::string, std::string> queries;
 		std::string body;
 
@@ -44,7 +44,7 @@ class HttpRequest
 		static void parseUri(std::string uri, HttpRequest& newRequest);
 		static bool parseVersion(std::string version, HttpRequest& newRequest);
 		static ParseState parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest);
-		static ParseState parseHeaders(std::istringstream& headers, HttpRequest& newRequest);
+		static ParseState parseHeaders(std::string& headers, HttpRequest& newRequest);
 		static void parseBody(std::istringstream& body,  HttpRequest& newRequest);
 		std::string urlDecode(const std::string& str, HttpRequest& newRequest);
 };
