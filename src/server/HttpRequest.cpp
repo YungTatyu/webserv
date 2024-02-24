@@ -1,5 +1,7 @@
 #include "HttpRequest.hpp"
+#include <cctype>
 #include <functional>
+#include <unordered_map>
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::map<std::string, std::string>& headers,
@@ -17,11 +19,11 @@ HttpRequest::~HttpRequest()
 HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
 {
 	HttpRequest newRequest;
-	std::istringstream iss(rawRequest);
-	newRequest.parseState = HttpRequest::parseRequestLine(iss, newRequest);
+	newRequest.parseState = HttpRequest::parseRequestLine(rawRequest, newRequest);
 	if ( newRequest.parseState == HttpRequest::PARSE_ERROR )
 		return newRequest;
-	newRequest.parseState = HttpRequest::parseHeaders(iss, newRequest);
+	newRequest.parseState = HttpRequest::parseHeaders(rawRequest, newRequest);
+	// std::unordered_map<int, int> aa;
 	newRequest.parseState = HttpRequest::PARSE_COMPLETE;
 	return newRequest;
 }
@@ -31,50 +33,8 @@ void HttpRequest::parseChunked(HttpRequest& request)
 	(void)request;
 }
 
-/* 
- * URLのパース
- * URIかと思っていた、、
- * URLからスキーマ、ポート、パス、クエリーに分解する？
- */
-void HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseMethod(std::string method, HttpRequest& newRequest)
 {
-	enum parseUriPhase {
-		sw_start,
-		sw_uriBeforeSlash,
-		sw_schema,
-		sw_end
-	};
-	parseUriPhase state = sw_start;
-	// ここでステートマシンを実装する
-	for (size_t i = 0; i < uri.size(); ++i) {
-		switch (state) {
-		case sw_start:
-			state = sw_start;
-		case sw_uriBeforeSlash:
-			state = sw_schema;
-		case sw_schema:
-			state = sw_end;
-		case sw_end:
-			newRequest.uri = uri;	
-			break;
-		}
-	}
-}
-
-bool HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
-{
-	if ( version != "HTTP/1.1" )
-		return false;
-	newRequest.version = version;
-	return true;
-}
-
-HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest)
-{
-	std::string method;
-	std::string uri;
-	std::string version;
-	requestLine >> method >> uri >> version;
 	switch (method.size()) {
 	case 3:
 		if (method == "GET")
@@ -100,13 +60,87 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
 	}
+	return HttpRequest::PARSE_METHOD_DONE;
+}
 
-	HttpRequest::parseUri(uri, newRequest);
+/* 
+ * URLのパース
+ * URIかと思っていた、、
+ * URLからスキーマ、ポート、パス、クエリーに分解する？
+ */
+HttpRequest::ParseState HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
+{
+	enum parseUriPhase {
+		sw_start,
+		sw_uriBeforeSlash,
+		sw_schema,
+		sw_end
+	};
+	parseUriPhase state = sw_start;
+	// ここでステートマシンを実装する
+	for (size_t i = 0; i < uri.size(); ++i) {
+		switch (state) {
+		case sw_start:
+			state = sw_start;
+		case sw_uriBeforeSlash:
+			state = sw_schema;
+		case sw_schema:
+			state = sw_end;
+		case sw_end:
+			newRequest.uri = uri;	
+			break;
+		}
+	}
+	return HttpRequest::PARSE_URI_DONE;
+}
 
-	if ( HttpRequest::parseVersion(version, newRequest) == false )
+HttpRequest::ParseState HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
+{
+	if ( version != "HTTP/1.1" )
 		return HttpRequest::PARSE_ERROR;
+	newRequest.version = version;
+	return HttpRequest::PARSE_VERSION_DONE;
+}
 
-	return HttpRequest::PARSE_INPROGRESS;
+HttpRequest::ParseState HttpRequest::parseRequestLine(const std::string& requestLine, HttpRequest& newRequest)
+{
+	enum parseRequestLineState {
+		sw_start,
+		sw_method,
+		sw_uri,
+		sw_version,
+		sw_end
+	} state;
+
+	std::string method;
+	std::string uri;
+	std::string version;
+	(void)requestLine;
+
+	state = sw_start;
+	switch (state) {
+	case sw_start:
+		state = sw_method;
+		break;
+	case sw_method:
+		HttpRequest::parseMethod(method, newRequest);
+		state = sw_uri;
+		break;
+	case sw_uri:
+		HttpRequest::parseUri(uri, newRequest);
+		state = sw_version;
+		break;
+	case sw_version:
+		if ( HttpRequest::parseVersion(version, newRequest) == false )
+			return HttpRequest::PARSE_ERROR;
+		state = sw_end;
+		break;
+	case sw_end:
+		break;
+	default:
+		break;
+	};
+	return HttpRequest::PARSE_REQUEST_LINE_DONE;
 }
 
 /*
@@ -114,7 +148,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::istringstream& reques
  *
  *
  */
-HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& headers, HttpRequest& newRequest)
 {
 	enum parseHeaderPhase {
 		sw_start,
@@ -128,6 +162,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequ
 		sw_end
 	} state;
 
+	std::string cur_name;
+	std::string cur_value;
 	state = sw_start;
 	for (size_t i = 0; i < headers.size(); ++i) {
 		char ch = headers[i];
@@ -145,7 +181,11 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequ
 			state = sw_name;
 			break;
 		case sw_name:
-			state = sw_colon;
+			if (!std::isalpha(ch)) {
+				newRequest.headers[cur_name];
+				state = sw_colon;
+			}
+			cur_name += ch;
 			break;
 		case sw_colon:
 			if (ch != ':')
@@ -153,25 +193,30 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& headers, HttpRequ
 			state = sw_space_before_value;
 			break;
 		case sw_space_before_value:
-			if (ch != ' ')
-				return HttpRequest::PARSE_ERROR;
-			state = sw_value;
+			if (ch != ' ') {
+				state = sw_value;
+			}
 			break;
 		case sw_value:
-			//store value here;
-			state = sw_space_after_value;
+			if (!std::isalpha(ch)) {
+				newRequest.headers[cur_name] = cur_value;
+				cur_name = "";
+				cur_value = "";
+				state = sw_space_after_value;
+			}
+			cur_value += ch;
 			break;	
 		case sw_space_after_value:
-			state = sw_start;
+			if (ch != ' ') {
+				state = sw_start;
+			}
 			break;
 		default:
 			// hmm
 			break;
 		}
 	}
-
-	(void)newRequest;
-	return HttpRequest::PARSE_INPROGRESS;
+	return HttpRequest::PARSE_HEADER_DONE;
 }
 
 void HttpRequest::parseBody(std::istringstream& body, HttpRequest& newRequest)

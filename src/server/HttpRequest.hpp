@@ -18,6 +18,12 @@ class HttpRequest
 			PARSE_BEFORE,
 			PARSE_COMPLETE,
 			PARSE_INPROGRESS,
+			PARSE_METHOD_DONE,
+			PARSE_REQUEST_LINE_DONE,
+			PARSE_URI_DONE,
+			PARSE_VERSION_DONE,
+			PARSE_HEADER_DONE,
+			PARSE_BODY_DONE,
 			PARSE_ERROR
 		};
 
@@ -41,10 +47,11 @@ class HttpRequest
 		ParseState parseState;
 
 	private:
-		static void parseUri(std::string uri, HttpRequest& newRequest);
-		static bool parseVersion(std::string version, HttpRequest& newRequest);
-		static ParseState parseRequestLine(std::istringstream& requestLine, HttpRequest& newRequest);
-		static ParseState parseHeaders(std::string& headers, HttpRequest& newRequest);
+		static ParseState parseMethod(std::string method, HttpRequest& newRequest);
+		static ParseState parseUri(std::string uri, HttpRequest& newRequest);
+		static ParseState parseVersion(std::string version, HttpRequest& newRequest);
+		static ParseState parseRequestLine(const std::string& requestLine, HttpRequest& newRequest);
+		static ParseState parseHeaders(const std::string& headers, HttpRequest& newRequest);
 		static void parseBody(std::istringstream& body,  HttpRequest& newRequest);
 		std::string urlDecode(const std::string& str, HttpRequest& newRequest);
 };
