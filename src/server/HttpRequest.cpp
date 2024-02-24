@@ -18,11 +18,40 @@ HttpRequest::~HttpRequest()
 
 HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
 {
+	enum parseRequestPhase {
+		sw_start,
+		sw_request_line,
+		sw_headers,
+		sw_body,
+		sw_end
+	} state;
+
 	HttpRequest newRequest;
-	newRequest.parseState = HttpRequest::parseRequestLine(rawRequest, newRequest);
-	if ( newRequest.parseState == HttpRequest::PARSE_ERROR )
-		return newRequest;
-	newRequest.parseState = HttpRequest::parseHeaders(rawRequest, newRequest);
+	state = sw_start;
+	while (state != sw_end) {
+		switch (state) {
+		case sw_start:
+			state = sw_request_line;
+			break;
+		case sw_request_line:
+			newRequest.parseState = HttpRequest::parseRequestLine(rawRequest, newRequest);
+			if ( newRequest.parseState == HttpRequest::PARSE_ERROR )
+				return newRequest;
+			state = sw_headers;
+			break;
+		case sw_headers:
+			newRequest.parseState = HttpRequest::parseHeaders(rawRequest, newRequest);
+			state = sw_body;
+			break;
+		case sw_body:
+			// parseBody();
+			state = sw_end;
+			break;
+		case sw_end:
+			break;
+		}
+	}
+
 	// std::unordered_map<int, int> aa;
 	newRequest.parseState = HttpRequest::PARSE_COMPLETE;
 	return newRequest;
@@ -115,31 +144,32 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(const std::string& request
 	std::string method;
 	std::string uri;
 	std::string version;
-	(void)requestLine;
 
 	state = sw_start;
-	switch (state) {
-	case sw_start:
-		state = sw_method;
-		break;
-	case sw_method:
-		HttpRequest::parseMethod(method, newRequest);
-		state = sw_uri;
-		break;
-	case sw_uri:
-		HttpRequest::parseUri(uri, newRequest);
-		state = sw_version;
-		break;
-	case sw_version:
-		if ( HttpRequest::parseVersion(version, newRequest) == false )
-			return HttpRequest::PARSE_ERROR;
-		state = sw_end;
-		break;
-	case sw_end:
-		break;
-	default:
-		break;
-	};
+	for (size_t i = 0; i < requestLine.size(); ++i) {
+		switch (state) {
+		case sw_start:
+			state = sw_method;
+			break;
+		case sw_method:
+			HttpRequest::parseMethod(method, newRequest);
+			state = sw_uri;
+			break;
+		case sw_uri:
+			HttpRequest::parseUri(uri, newRequest);
+			state = sw_version;
+			break;
+		case sw_version:
+			if ( HttpRequest::parseVersion(version, newRequest) == false )
+				return HttpRequest::PARSE_ERROR;
+			state = sw_end;
+			break;
+		case sw_end:
+			break;
+		default:
+			break;
+		};
+	}
 	return HttpRequest::PARSE_REQUEST_LINE_DONE;
 }
 
