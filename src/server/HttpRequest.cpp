@@ -1,7 +1,4 @@
 #include "HttpRequest.hpp"
-#include <cctype>
-#include <functional>
-#include <unordered_map>
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::unordered_map<std::string, std::string>& headers,
