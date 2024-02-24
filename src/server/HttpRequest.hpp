@@ -3,7 +3,7 @@
 
 # include <sstream>
 # include <string>
-# include <map>
+# include <unordered_map>
 
 #define UNKNOWN	0b0000000
 #define GET	0b0000001
@@ -28,8 +28,8 @@ class HttpRequest
 		};
 
 		HttpRequest(const unsigned int method = UNKNOWN, const std::string& uri = "", const std::string& version = "",
-			    const std::map<std::string, std::string>& headers = std::map<std::string, std::string>(),
-			    const std::map<std::string, std::string>& queries = std::map<std::string, std::string>(),
+			    const std::unordered_map<std::string, std::string>& headers = std::unordered_map<std::string, std::string>(),
+			    const std::unordered_map<std::string, std::string>& queries = std::unordered_map<std::string, std::string>(),
 			    const std::string& body = "",
 			    const ParseState parseState = PARSE_BEFORE);
 		~HttpRequest();
@@ -40,8 +40,8 @@ class HttpRequest
 		unsigned int method;
 		std::string uri; // スキーマ、ポートは？？
 		std::string version;
-		std::map<std::string, std::string> headers; // hashにするためには、unordered_mapを使った方がいい。mapは赤黒木なので計算量logN.hashは最悪O(N)だけど基本O(1).
-		std::map<std::string, std::string> queries;
+		std::unordered_map<std::string, std::string> headers; // hashにするためには、unordered_unordered_mapを使った方がいい。unordered_mapは赤黒木なので計算量logN.hashは最悪O(N)だけど基本O(1).
+		std::unordered_map<std::string, std::string> queries;
 		std::string body;
 
 		ParseState parseState;
