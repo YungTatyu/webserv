@@ -2,13 +2,14 @@
 #define SELECT_SERVER_HPP
 
 #include "ConnectionManager.hpp"
-#include "IActiveEventManager.hpp"
 #include "NetworkIOHandler.hpp"
 #include "RequestHandler.hpp"
+#include "SelectActiveEventManager.hpp"
+#include "IServer.hpp"
 
 #include <sys/select.h>
 
-class SelectServer
+class SelectServer : public IServer
 {
 	public:
 		SelectServer();
@@ -22,6 +23,10 @@ class SelectServer
 										IActiveEventManager* event_manager,
 										NetworkIOHandler* io_handler,
 										RequestHandler* request_handler);
+		int	addSocketToSets(const std::map<int, ConnectionData> &connections);
+		void	addActiveEvents(const std::map<int, ConnectionData> &connections, IActiveEventManager *event_manager);
+		fd_set	read_set_;
+		fd_set	write_set_;
 };
 
 #endif

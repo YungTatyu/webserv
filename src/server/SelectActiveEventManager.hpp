@@ -7,6 +7,18 @@
 
 #include <sys/select.h>
 
+struct SelectEvent
+{
+	enum SELECT_EVENT
+	{
+		SELECT_READ,
+		SELECT_WRITE,
+	};
+	int	fd_;
+	SELECT_EVENT	event_;
+	SelectEvent(const int fd, const SELECT_EVENT event) : fd_(fd), event_(event) {}
+};
+
 class SelectActiveEventManager : public IActiveEventManager
 {
 	public:
@@ -21,7 +33,7 @@ class SelectActiveEventManager : public IActiveEventManager
 		bool	isWriteEvent(const void *event);
 		bool	isErrorEvent(const void *event);
 	private:
-		std::vector<struct fd_set> active_events_;
+		std::vector<SelectEvent> active_events_;
 		int active_events_num_;
 };
 
