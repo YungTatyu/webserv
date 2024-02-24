@@ -50,7 +50,6 @@ HttpRequest HttpRequest::parseRequest(std::string& rawRequest)
 		}
 	}
 
-	// std::unordered_unordered_map<int, int> aa;
 	newRequest.parseState = HttpRequest::PARSE_COMPLETE;
 	return newRequest;
 }
@@ -125,17 +124,18 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
  * URIかと思っていた、、
  * URLからスキーマ、ポート、パス、クエリーに分解する？
  */
-HttpRequest::ParseState HttpRequest::parseUri(std::string uri, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpRequest& newRequest)
 {
 	enum parseUriPhase {
 		sw_start,
 		sw_uriBeforeSlash,
 		sw_schema,
 		sw_end
-	};
-	parseUriPhase state = sw_start;
+	} state;
+
+	state = sw_start;
 	// ここでステートマシンを実装する
-	for (size_t i = 0; i < uri.size(); ++i) {
+	for (size_t i = 0; i < rawRequest.size(); ++i) {
 		switch (state) {
 		case sw_start:
 			state = sw_start;
@@ -144,18 +144,19 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string uri, HttpRequest& newR
 		case sw_schema:
 			state = sw_end;
 		case sw_end:
-			newRequest.uri = uri;	
+			newRequest.uri = rawRequest;	
 			break;
 		}
 	}
 	return HttpRequest::PARSE_URI_DONE;
 }
 
-HttpRequest::ParseState HttpRequest::parseVersion(std::string version, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseVersion(std::string& rawRequest, HttpRequest& newRequest)
 {
-	if ( version != "HTTP/1.1" )
-		return HttpRequest::PARSE_ERROR;
-	newRequest.version = version;
+	// if ( version != "HTTP/1.1" )
+	// 	return HttpRequest::PARSE_ERROR;
+	// newRequest.version = version;
+	(void)rawRequest, (void)newRequest;
 	return HttpRequest::PARSE_VERSION_DONE;
 }
 

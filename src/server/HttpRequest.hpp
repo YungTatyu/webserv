@@ -47,9 +47,9 @@ class HttpRequest
 		ParseState parseState;
 
 	private:
-		static ParseState parseMethod(std::string& method, HttpRequest& newRequest);
-		static ParseState parseUri(std::string uri, HttpRequest& newRequest);
-		static ParseState parseVersion(std::string version, HttpRequest& newRequest);
+		static ParseState parseMethod(std::string& rawRequest, HttpRequest& newRequest);
+		static ParseState parseUri(std::string& rawRequest, HttpRequest& newRequest);
+		static ParseState parseVersion(std::string& rawRequest, HttpRequest& newRequest);
 		static ParseState parseRequestLine(std::string& rawRequest, HttpRequest& newRequest);
 		static ParseState parseHeaders(const std::string& rawRequest, HttpRequest& newRequest);
 		static void parseBody(std::istringstream& rawRequest,  HttpRequest& newRequest);
