@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+#include <cctype>
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::unordered_map<std::string, std::string>& headers,
@@ -13,7 +14,7 @@ HttpRequest::~HttpRequest()
 {
 }
 
-HttpRequest HttpRequest::parseRequest(const std::string& rawRequest)
+HttpRequest HttpRequest::parseRequest(std::string& rawRequest)
 {
 	enum parseRequestPhase {
 		sw_start,
@@ -59,8 +60,37 @@ void HttpRequest::parseChunked(HttpRequest& request)
 	(void)request;
 }
 
-HttpRequest::ParseState HttpRequest::parseMethod(std::string method, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRequest& newRequest)
 {
+	enum ParseMethodPhase {
+		sw_method_start,
+		sw_method_mid,
+		sw_method_end,
+	} state;
+
+	std::string method;
+
+	state = sw_method_start;
+	for (size_t i = 0; i < rawRequest.size() && state != sw_method_end; ++i) {
+		char ch = rawRequest[i];
+		switch (state) {
+		case sw_method_start:
+			method += ch;
+			state = sw_method_mid;
+			break;
+		case sw_method_mid:
+			if (std::isalpha(ch)) {
+				method += ch;
+			} else {
+				state = sw_method_end;
+			}
+			break;
+		case sw_method_end:
+			rawRequest = rawRequest.substr(i);
+			break;
+		}
+	}
+
 	switch (method.size()) {
 	case 3:
 		if (method == "GET")
@@ -86,6 +116,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string method, HttpRequest
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
 	}
+
 	return HttpRequest::PARSE_METHOD_DONE;
 }
 
@@ -128,7 +159,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string version, HttpReque
 	return HttpRequest::PARSE_VERSION_DONE;
 }
 
-HttpRequest::ParseState HttpRequest::parseRequestLine(const std::string& requestLine, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, HttpRequest& newRequest)
 {
 	enum parseRequestLineState {
 		sw_start,
@@ -138,30 +169,27 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(const std::string& request
 		sw_end
 	} state;
 
-	std::string method;
-	std::string uri;
-	std::string version;
-
 	state = sw_start;
-	for (size_t i = 0; i < requestLine.size(); ++i) {
+	for (size_t i = 0; i < rawRequest.size(); ++i) {
 		switch (state) {
 		case sw_start:
 			state = sw_method;
 			break;
 		case sw_method:
-			HttpRequest::parseMethod(method, newRequest);
+			HttpRequest::parseMethod(rawRequest, newRequest);
 			state = sw_uri;
 			break;
 		case sw_uri:
-			HttpRequest::parseUri(uri, newRequest);
+			HttpRequest::parseUri(rawRequest, newRequest);
 			state = sw_version;
 			break;
 		case sw_version:
-			if ( HttpRequest::parseVersion(version, newRequest) == false )
+			if ( HttpRequest::parseVersion(rawRequest, newRequest) == false )
 				return HttpRequest::PARSE_ERROR;
 			state = sw_end;
 			break;
 		case sw_end:
+			rawRequest = rawRequest.substr(i);
 			break;
 		default:
 			break;

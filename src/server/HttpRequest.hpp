@@ -34,7 +34,7 @@ class HttpRequest
 			    const ParseState parseState = PARSE_BEFORE);
 		~HttpRequest();
 
-		static HttpRequest parseRequest(const std::string& rawRequest);
+		static HttpRequest parseRequest(std::string& rawRequest);
 		static void parseChunked(HttpRequest& request);
 
 		unsigned int method;
@@ -47,10 +47,10 @@ class HttpRequest
 		ParseState parseState;
 
 	private:
-		static ParseState parseMethod(std::string method, HttpRequest& newRequest);
+		static ParseState parseMethod(std::string& method, HttpRequest& newRequest);
 		static ParseState parseUri(std::string uri, HttpRequest& newRequest);
 		static ParseState parseVersion(std::string version, HttpRequest& newRequest);
-		static ParseState parseRequestLine(const std::string& rawRequest, HttpRequest& newRequest);
+		static ParseState parseRequestLine(std::string& rawRequest, HttpRequest& newRequest);
 		static ParseState parseHeaders(const std::string& rawRequest, HttpRequest& newRequest);
 		static void parseBody(std::istringstream& rawRequest,  HttpRequest& newRequest);
 		std::string urlDecode(const std::string& str, HttpRequest& newRequest);
