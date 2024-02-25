@@ -245,7 +245,7 @@ assert $conf_path "${err_start_with} invalid method \"test\" ${err_path}:5"
 # test context
 conf_path="test/conf/conf_files/error/invalid_context1.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:6"
+assert $conf_path "${err_start_with} \"index\" directive is not allowed here ${err_path}:2"
 
 
 printLog

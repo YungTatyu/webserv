@@ -17,9 +17,9 @@ namespace config
 {
 enum OS
 {
-	Mac,
-	Linux,
-	Unknown
+	OS_BSD_BASED,
+	OS_LINUX,
+	OS_OTHER
 };
 
 class Parser
@@ -54,8 +54,7 @@ class Parser
 		bool	parseIndex();
 		bool	parseAutoindex();
 		bool	parseErrorPage();
-		bool	parseAllow();
-		bool	parseDeny();
+		bool	parseAllowDeny();
 		bool	parseListen();
 		bool	parseServerName();
 		bool	parseTryFiles();
@@ -66,8 +65,11 @@ class Parser
 		bool	parseUseridExpires();
 		bool	parseUseridPath();
 		bool	parseUseridService();
-		bool	isIPv4(const std::string& ipv4);
-		bool	isIPv6(const std::string& ipv6);
+		bool	isIPv4(const std::string& ipv4) const;
+		bool	isIPv6(const std::string& ipv6) const;
+		bool	isMixedIPAddress(const std::string& ipv6) const;
+		bool	isNumInRange(const std::string& num, long min, long max) const;
+		bool	isNumeric(const std::string& str) const;
 		bool	canConvertMinTime(long &value, const std::string& unit);
 		bool	canConvertMinSize(long &value, const std::string& unit);
 		long	parseTime();

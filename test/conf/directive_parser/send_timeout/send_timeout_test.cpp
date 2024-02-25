@@ -41,15 +41,16 @@ TEST(sendTimeoutTest, max)
 	test::test_directives_set(http.directives_set, kSendTimeout, true);
 
 	// server
-	EXPECT_EQ(http.server_list[0].send_timeout.getTime().time_in_ms_, kLongMax);
+	EXPECT_EQ(http.server_list[0].send_timeout.getTime().time_in_ms_, 9223372036854775 * config::Time::seconds);
 	test::test_directives_set(http.server_list[0].directives_set, kSendTimeout, true);
 
 	// location
-	for (size_t i = 0; i < http.server_list[0].location_list.size(); i++)
-	{
-		EXPECT_EQ(http.server_list[0].location_list[i].send_timeout.getTime().time_in_ms_, kLongMax);
-		test::test_directives_set(http.server_list[0].location_list[i].directives_set, kSendTimeout, true);
-	}
+	test::test_st_value(http.server_list[0].location_list, {
+		9223372036854775 * config::Time::seconds,
+		153722867280912 * config::Time::minutes,
+		2562047788015 * config::Time::hours,
+		106751991167 * config::Time::days,
+	});
 }
 
 TEST(SendTimeoutTest, zero)
@@ -70,16 +71,12 @@ TEST(SendTimeoutTest, zero)
 	test::test_directives_set(http.server_list[0].directives_set, kSendTimeout, true);
 
 	// location
-	for (size_t i = 0; i < http.server_list[0].location_list.size(); i++)
-	{
-		EXPECT_EQ(http.server_list[0].location_list[i].send_timeout.getTime().time_in_ms_, 0);
-		test::test_directives_set(http.server_list[0].location_list[i].directives_set, kSendTimeout, true);
-	}
+	test::test_st_value(http.server_list[0].location_list, {0 ,0, 0 ,0});
 }
 
 TEST(SendTimeoutTest, random)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/keepalive_timeout/3.conf");
+	const config::Main	*config = config::init_config("test/conf/directive_parser/send_timeout/3.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -87,7 +84,7 @@ TEST(SendTimeoutTest, random)
 	const std::vector<config::Server>	&server_list = http.server_list;
 
 	// http
-	EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, 1);
+	EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, 2);
 	test::test_directives_set(http.directives_set, kSendTimeout, true);
 
 	// server
@@ -95,7 +92,12 @@ TEST(SendTimeoutTest, random)
 	test::test_directives_set(http.server_list[0].directives_set, kSendTimeout, true);
 
 	// location
-	test::test_st_value(http.server_list[0].location_list, {2 * 1000, 2 * 1000 * 60, 2 * 1000 * 60 * 60, 2 * 1000 * 60 * 60 * 24});
+	test::test_st_value(http.server_list[0].location_list, {
+		2 * 1000,
+		2 * 1000 * 60,
+		2 * 1000 * 60 * 60,
+		2 * 1000 * 60 * 60 * 24
+	});
 }
 
 TEST(SendTimeoutTest, notFound) {
