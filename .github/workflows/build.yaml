@@ -1,0 +1,42 @@
+name: Compile Test (on PR)
+
+on:
+  pull_request:
+    types:
+      - ready_for_review
+
+jobs:
+  build-macos:
+    if: github.event.pull_request.draft == false
+    name: Build on macOS
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run make (macOS)
+      run: make
+
+  build-ubuntu:
+    if: github.event.pull_request.draft == false
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run make (Ubuntu)
+      run: make
+
+  build-windows:
+    if: github.event.pull_request.draft == false
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run make (Windows)
+      run: make
+
+
