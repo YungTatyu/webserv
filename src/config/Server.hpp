@@ -10,8 +10,7 @@
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
-#include "Allow.hpp"
-#include "Deny.hpp"
+#include "AllowDeny.hpp"
 #include "Index.hpp"
 #include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
@@ -37,8 +36,7 @@ struct Server
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
-	std::vector<Allow>	allow_list;
-	std::vector<Deny>	deny_list;
+	std::vector<AllowDeny>	allow_deny_list;
 	std::vector<Index>	index_list;
 	std::vector<Listen>	listen_list;
 	Autoindex	autoindex;

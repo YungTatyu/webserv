@@ -14,10 +14,9 @@ const unsigned int	config::Location::type;
 const unsigned int	config::LimitExcept::type;
 const unsigned int	config::AccessLog::kType_;
 const unsigned int	config::Alias::kType_;
-const unsigned int	config::Allow::kType_;
+const unsigned int	config::AllowDeny::kType_;
 const unsigned int	config::Autoindex::kType_;
 const unsigned int	config::ClientMaxBodySize::kType_;
-const unsigned int	config::Deny::kType_;
 const unsigned int	config::ErrorLog::kType_;
 const unsigned int	config::ErrorPage::kType_;
 const unsigned int	config::Index::kType_;
@@ -76,7 +75,6 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->current_context_.push(CONF_MAIN);
 
 	// context
-	this->all_directives_.insert(std::make_pair("main", CONF_MAIN));
 	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
 	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
 	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
@@ -86,10 +84,10 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	// directive
 	this->all_directives_.insert(std::make_pair(kACCESS_LOG, config::AccessLog::kType_));
 	this->all_directives_.insert(std::make_pair(kALIAS, config::Alias::kType_));
-	this->all_directives_.insert(std::make_pair(kALLOW, config::Allow::kType_));
+	this->all_directives_.insert(std::make_pair(kALLOW, config::AllowDeny::kType_));
 	this->all_directives_.insert(std::make_pair(kAUTOINDEX, config::Autoindex::kType_));
 	this->all_directives_.insert(std::make_pair(kCLIENT_MAX_BODY_SIZE, config::ClientMaxBodySize::kType_));
-	this->all_directives_.insert(std::make_pair(kDENY, config::Deny::kType_));
+	this->all_directives_.insert(std::make_pair(kDENY, config::AllowDeny::kType_));
 	this->all_directives_.insert(std::make_pair(kERROR_LOG, config::ErrorLog::kType_));
 	this->all_directives_.insert(std::make_pair(kERROR_PAGE, config::ErrorPage::kType_));
 	this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
@@ -126,8 +124,8 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->parser_map_[kINDEX] = &config::Parser::parseIndex;
 	this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
 	this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
-	this->parser_map_[kALLOW] = &config::Parser::parseAllow;
-	this->parser_map_[kDENY] = &config::Parser::parseDeny;
+	this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
+	this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
 	this->parser_map_[kLISTEN] = &config::Parser::parseListen;
 	this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
 	this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
@@ -172,6 +170,10 @@ bool	config::Parser::parse()
 			++ti_;
 			continue;
 		}
+
+		// meta charではない
+		if (!expectTokenType(TK_STR, current_token))
+			return false;
 
 		// ";", "{"が存在するはず
 		if (!expectTerminatingToken())
@@ -547,8 +549,8 @@ bool	config::Parser::parseAccessLog()
 	config::CONTEXT context = this->current_context_.top();
 	config::AccessLog	tmp_acs_log;
 
-	// 文字列が空でなければオブジェクトを追加する
-	if (!path.empty())
+	// 文字列が空の場合はobjectを追加しない
+	if (path.empty())
 	{
 		ti_ += 2;
 		return true;
@@ -586,8 +588,8 @@ bool	config::Parser::parseErrorLog()
 	config::CONTEXT context = this->current_context_.top();
 	config::ErrorLog	tmp_err_log;
 
-	// 文字列が空でなければオブジェクトを追加する
-	if (!path.empty())
+	// 文字列が空の場合はobjectを追加しない
+	if (path.empty())
 	{
 		ti_ += 2;
 		return true;
@@ -620,12 +622,12 @@ bool	config::Parser::parseErrorLog()
 	return true;
 }
 
-#if defined(__APPLE__)
-const config::OS  currentOS = config::Mac;
+#if defined(KQUEUE_AVAILABLE)
+const config::OS  currentOS = config::OS_BSD_BASED;
 #elif defined(__linux__)
-const config::OS  currentOS = config::Linux;
+const config::OS  currentOS = config::OS_LINUX;
 #else
-const config::OS  currentOS = config::Unknown;
+const config::OS  currentOS = config::OS_OTHER;
 #endif
 
 bool	config::Parser::parseUse()
@@ -635,7 +637,7 @@ bool	config::Parser::parseUse()
 	std::string token_value = this->tokens_[ti_].value_;
 
 	switch (currentOS) {
-		case config::Mac:
+		case config::OS_BSD_BASED:
 			if (token_value != kSELECT &&
 				token_value != kPOLL &&
 				token_value != kKQUEUE)
@@ -644,7 +646,7 @@ bool	config::Parser::parseUse()
 				return false;
 			}
 			break;
-		case config::Linux:
+		case config::OS_LINUX:
 			if (token_value != kSELECT &&
 				token_value != kPOLL &&
 				token_value != kEPOLL)
@@ -653,7 +655,7 @@ bool	config::Parser::parseUse()
 				return false;
 			}
 			break;
-		case config::Unknown:
+		case config::OS_OTHER:
 			if (token_value != kSELECT &&
 				token_value != kPOLL)
 			{
@@ -785,7 +787,8 @@ long	config::Parser::parseTime()
 	{
 		if (iss >> unit)
 		{
-			if (unit != "m" &&
+			if (unit != "ms" &&
+				unit != "m" &&
 				unit != "s" &&
 				unit != "h" &&
 				unit != "d")
@@ -881,8 +884,27 @@ bool	config::Parser::parseKeepaliveTimeout()
 		return false;
 	}
 
-	this->config_.http.keepalive_timeout.setTime(ret);
-	this->config_.http.directives_set.insert(kKEEPALIVE_TIMEOUT);
+	const config::CONTEXT context = this->current_context_.top();
+	switch (context)
+	{
+	case config::CONF_HTTP:
+		this->config_.http.keepalive_timeout.setTime(ret);
+		this->config_.http.directives_set.insert(kKEEPALIVE_TIMEOUT);
+		break;
+	
+	case config::CONF_HTTP_SERVER:
+		this->config_.http.server_list.back().keepalive_timeout.setTime(ret);
+		this->config_.http.server_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
+		break;
+
+	case config::CONF_HTTP_LOCATION:
+		this->config_.http.server_list.back().location_list.back().keepalive_timeout.setTime(ret);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
+		break;
+
+	default:
+		break;
+	}
 	ti_ += 2;
 	return true;
 }
@@ -1046,14 +1068,14 @@ long	config::Parser::retErrorPageOptNumIfValid()
 		if (iss >> remaining_char || tmp_code < 0)
 		{
 			std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return 0;
+			return -1;
 		}
 		return tmp_code;
 	}
 	else // LONG_MAX/MIN を超えたり、数値ではなければエラー
 	{
 		std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return 0;
+		return -1;
 	}
 }
 
@@ -1073,7 +1095,7 @@ bool	config::Parser::parseErrorPage()
 			&& tokens_[ti_].value_[0] == '=')
 		{
 			long	response = retErrorPageOptNumIfValid();
-			if (!response)
+			if (response == -1)
 				return false;
 			tmp_err_pg.setResponse(response);
 			ti_++;
@@ -1111,7 +1133,7 @@ bool	config::Parser::parseErrorPage()
 	return true;
 }
 
-bool	config::Parser::isIPv4(const std::string& ipv4)
+bool	config::Parser::isIPv4(const std::string& ipv4) const
 {
 	// 1.文字列が空でないかを確認
 	if (ipv4.empty())
@@ -1165,30 +1187,14 @@ bool	config::Parser::isIPv4(const std::string& ipv4)
 	}
 
 	// 4. subnetmaskの値が正しいか確認
-	if (!mask_part.empty())
-	{
-		int		subnet_mask;
-		char	remaining_char;
-		iss.clear();
-		iss.str(mask_part);
-		if (iss >> subnet_mask)
-		{
-			if (iss >> remaining_char
-				|| subnet_mask < 0
-				|| 32 < subnet_mask)
-			{
-				return false;
-			}
-		}
-		else
-			return false;
-	}
+	if (!mask_part.empty() && !isNumInRange(mask_part, 0, 32))
+		return false;
 
 	// 全ての条件を満たす場合、IPv4アドレスと見なす
 	return true;
 }
 
-bool	config::Parser::isIPv6(const std::string& ipv6)
+bool	config::Parser::isIPv6(const std::string& ipv6) const
 {
 	// 1.文字列が空でないかを確認
 	if (ipv6.empty())
@@ -1200,6 +1206,7 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	size_t	mask_pos = ipv6.find('/');
 	std::string address_part = (mask_pos != std::string::npos) ? ipv6.substr(0, mask_pos) : ipv6;
 	std::string mask_part = (mask_pos != std::string::npos) ? ipv6.substr(mask_pos + 1) : "";
+
 
 	// 3. 文字列がIPv6の基本的な構造に従っているかを確認
 	std::istringstream iss(address_part);
@@ -1221,16 +1228,18 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 		fields.push_back(field);
 	}
 	
-		// フィールドの数が正しいかを確認
-	if (fields.size() != 8)
+	// フィールドの数が正しいかを確認
+	if (fields.size() < 2 || fields.size() > 8)
 	{
 		return false;
 	}
 
 	// 各フィールドが0からFFFFまでの値を持っていることを確認
-	for (int i = 0; i < 8; i++)
+	for (size_t i = 0; i < fields.size(); i++)
 	{
 		field = fields[i];
+		if (field.empty()) // "::"によるから文字は許容する
+			continue;
 		unsigned int value;
 		iss.clear();
 		iss.str(field);
@@ -1242,103 +1251,111 @@ bool	config::Parser::isIPv6(const std::string& ipv6)
 	}
 
 	// 4. subnetmaskの値が正しいか確認
-	if (!mask_part.empty())
-	{
-		int		subnet_mask;
-		char	remaining_char;
-		iss.clear();
-		iss.str(mask_part);
-		if (iss >> subnet_mask)
-		{
-			if (iss >> remaining_char
-				|| subnet_mask < 0
-				|| 128 < subnet_mask)
-			{
-				return false;
-			}
-		}
-		else
-			return false;
-	}
+	if (!mask_part.empty() && !isNumInRange(mask_part, 0, 128))
+		return false;
 
 	// 全ての条件を満たす場合、IPv6アドレスと見なす
 	return true;
 }
 
-bool	config::Parser::parseAllow()
+/**
+ * @brief IPv6とIPv4がmixされたアドレスかを判定
+ * 
+ * @param mixed_ip 
+ * @return true 
+ * @return false 
+ */
+bool	config::Parser::isMixedIPAddress(const std::string& mixed_ip) const
 {
-	ti_++;
-	std::string	address = this->tokens_[ti_].value_;
-
-	if (address != "all" && !isIPv4(address) && !isIPv6(address))
+	if (mixed_ip.empty())
 	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
+	size_t	ipv6_pos = mixed_ip.rfind(":");
+	if (ipv6_pos == std::string::npos)
+		return false;
+	++ipv6_pos;
+	size_t	subnet_pos = mixed_ip.rfind("/");
+	const std::string	mask_part = subnet_pos != std::string::npos ? mixed_ip.substr(subnet_pos + 1) : "";
+	const std::string	ipv6 = mixed_ip.substr(0, ipv6_pos);
+	const std::string	ipv4 = subnet_pos == std::string::npos ? mixed_ip.substr(ipv6_pos) : mixed_ip.substr(ipv6_pos, subnet_pos - ipv6_pos);
+	if (!mask_part.empty() && !isNumInRange(mask_part, 0, 128))
+		return false;
 
-	config::Allow	tmp_allow;
-	tmp_allow.setAddress(this->tokens_[ti_].value_);
-	config::CONTEXT	context = this->current_context_.top();
+	return isIPv4(ipv4) && isIPv6(ipv6);
+}
 
-	if (context == config::CONF_HTTP)
-	{
-		this->config_.http.allow_list.push_back(tmp_allow);
-		this->config_.http.directives_set.insert(kALLOW);
-	}
-	else if (context == config::CONF_HTTP_SERVER)
-	{
-		this->config_.http.server_list.back().allow_list.push_back(tmp_allow);
-		this->config_.http.server_list.back().directives_set.insert(kALLOW);
-	}
-	else if (context == config::CONF_HTTP_LOCATION)
-	{
-		this->config_.http.server_list.back().location_list.back().allow_list.push_back(tmp_allow);
-		this->config_.http.server_list.back().location_list.back().directives_set.insert(kALLOW);
-	}
-	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
-	{
-		this->config_.http.server_list.back().location_list.back().limit_except.allow_list.push_back(tmp_allow);
-		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(kALLOW);
-	}
+bool	config::Parser::isNumInRange(const std::string& num, long min, long max) const
+{
+	if (!isNumeric(num))
+		return false;
 
-	ti_ += 2;
+	std::istringstream converter(num);
+	long	value;
+	if (!(converter >> value))
+		return false;
+	if (value < min || value > max)
+		return false;
 	return true;
 }
 
-bool	config::Parser::parseDeny()
+bool	config::Parser::isNumeric(const std::string& str) const
 {
-	ti_++;
-	std::string	address = this->tokens_[ti_].value_;
-
-	if (address != "all" && !isIPv4(address) && !isIPv6(address))
+	for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
 	{
-		std::cerr << "webserv: [emerg] invalid parameter \"" << address << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		if(!std::isdigit(*it))
+			return false;
+	}
+	return true;
+}
+
+/**
+ * @brief parse allow or deny directive, same syntax
+ * 
+ * @return true 
+ * @return false 
+ */
+bool	config::Parser::parseAllowDeny()
+{
+	const config::ACCESS_DIRECTIVE directive_type = this->tokens_[ti_].value_ == kALLOW ? config::ALLOW : config::DENY;
+	++ti_;
+	const std::string	address = this->tokens_[ti_].value_;
+
+	if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address))
+	{
+		printError(std::string("invalid parameter \"" + address + "\""), this->tokens_[ti_]);
 		return false;
 	}
 
-	config::Deny	tmp_deny;
-	tmp_deny.setAddress(this->tokens_[ti_].value_);
-	config::CONTEXT	context = this->current_context_.top();
+	config::AllowDeny	tmp;
+	tmp.setAccessDirective(directive_type);
+	tmp.setAddress(address);
+	const std::string	directive_name = directive_type == config::ALLOW ? kALLOW : kDENY;
 
-	if (context == config::CONF_HTTP)
+	switch (this->current_context_.top())
 	{
-		this->config_.http.deny_list.push_back(tmp_deny);
-		this->config_.http.directives_set.insert(kDENY);
-	}
-	else if (context == config::CONF_HTTP_SERVER)
-	{
-		this->config_.http.server_list.back().deny_list.push_back(tmp_deny);
-		this->config_.http.server_list.back().directives_set.insert(kDENY);
-	}
-	else if (context == config::CONF_HTTP_LOCATION)
-	{
-		this->config_.http.server_list.back().location_list.back().deny_list.push_back(tmp_deny);
-		this->config_.http.server_list.back().location_list.back().directives_set.insert(kDENY);
-	}
-	else if (context == config::CONF_HTTP_LIMIT_EXCEPT)
-	{
-		this->config_.http.server_list.back().location_list.back().limit_except.deny_list.push_back(tmp_deny);
-		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(kDENY);
+	case config::CONF_HTTP:
+		this->config_.http.allow_deny_list.push_back(tmp);
+		this->config_.http.directives_set.insert(directive_name);
+		break;
+
+	case config::CONF_HTTP_SERVER:
+		this->config_.http.server_list.back().allow_deny_list.push_back(tmp);
+		this->config_.http.server_list.back().directives_set.insert(directive_name);
+		break;
+	
+	case config::CONF_HTTP_LOCATION:
+		this->config_.http.server_list.back().location_list.back().allow_deny_list.push_back(tmp);
+		this->config_.http.server_list.back().location_list.back().directives_set.insert(directive_name);
+		break;
+
+	case config::CONF_HTTP_LIMIT_EXCEPT:
+		this->config_.http.server_list.back().location_list.back().limit_except.allow_deny_list.push_back(tmp);
+		this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(directive_name);
+		break;
+
+	default:
+		break;
 	}
 
 	ti_ += 2;
@@ -1588,6 +1605,7 @@ bool	config::Parser::parseAlias()
 	std::string	path = this->tokens_[ti_].value_;
 
 	this->config_.http.server_list.back().location_list.back().alias.setPath(path);
+	this->config_.http.server_list.back().location_list.back().directives_set.insert(kALIAS);
 
 	ti_ += 2;
 	return true;
@@ -1596,49 +1614,49 @@ bool	config::Parser::parseAlias()
 bool	config::Parser::parseReturn()
 {
 	ti_++;
-	long				code;
-	std::string			url;
-	std::istringstream	iss;
-	char				remaining_char;
-	config::Return		tmp_return;
+	long			code;
+	config::Return	tmp_return;
+	const			std::string http = "http://"; 
+	const			std::string https = "https://"; 
 
-	// 1つ目はcodeなので処理する
-	iss.str(this->tokens_[ti_].value_.c_str());
 
-	if (iss >> code)
+	if (isNumeric(this->tokens_[ti_].value_))
 	{
-		if (iss >> remaining_char)
+		if (!isNumInRange(this->tokens_[ti_].value_, 0, 999))
 		{
-			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"", this->tokens_[ti_]);
 			return false;
 		}
+		std::istringstream	iss(this->tokens_[ti_].value_);
+		iss >> code;
+		tmp_return.setCode(code);
+		++ti_;
+	}
 
-		if (code < 0 || 999 < code)
+	// urlの場合のみ文字列をチェックする
+	code = tmp_return.getCode();
+	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && code == config::Return::kCodeUnset)
+	{
+		const std::string url = this->tokens_[ti_].value_;
+		if (url.substr(0, http.length()) != http &&
+			url.substr(0, https.length()) != https)
 		{
-			std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"", this->tokens_[ti_]);
 			return false;
 		}
+		tmp_return.setUrl(this->tokens_[ti_].value_);
+		++ti_;
 	}
-	else
+	else if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
 	{
-		std::cerr << "webserv: [emerg] invalid return code \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return false;
-	}
-
-	tmp_return.setCode(code);
-
-	// url をセットする
-	if (this->tokens_[ti_].type_ != config::TK_SEMICOLON)
-	{
-		ti_++;
-		url = this->tokens_[ti_].value_;
-		tmp_return.setUrl(url);
+		tmp_return.setUrl(this->tokens_[ti_].value_); //textをset
+		++ti_;
 	}
 
 	this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
 	this->config_.http.server_list.back().location_list.back().directives_set.insert(kRETURN);
 
-	ti_ += 2;
+	ti_ += 1;
 	return true;
 }
 
