@@ -2,7 +2,6 @@
 #define CONFIG_RETURN_HPP
 
 #include <string>
-#include <array>
 #include <algorithm>
 
 #include "conf.hpp"
