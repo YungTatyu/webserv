@@ -155,14 +155,17 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::lo
 
 	const std::string&	ConfigHandler::searchFile( const struct TiedServer& server_config, const HttpRequest& request ) const
 {
+	unsigned int	status_code;
+
 	// parseが失敗していれば、400 Bad Request
 	if (request.parseStatus == HttpRequest::PARSE_ERROR)
 		return searchErrorPage(400);
 
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	// server の return を見に行く。今はreturn はlocationだけ
+	// server の return を見に行く。今はreturn はlocationにしかない
 
-	config::Location*	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	// location の　return を見に行く。
 
 	// allowReuestがfalseなら403 Forbidden
 	if (!allowRequest(server, location, request, cli_sock))
@@ -171,29 +174,23 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::lo
 
 	// if (unfinished slash directory)
 		// return searchErrorPage(301); // 301 Moved Permanently
-	// if (there is no location which is same with request uri)
-		// 前方一致するロケーション、または上のコンテキストをみて、index listingがonならそれを表示、offなら403エラー
 
-	// locationがなければ、前方一致したところの設定が適用される。しかしそこでのファイルはリクエストuriからの相対パスとなる。
-	// indexのファイルがなく、autoindexもoffならば、403エラー
+	/* ~ try_filesとindex/autoindexのファイル検索 ~
+	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
+	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
+	 * 3つともなかったら上位のcontextで検索する
+	 */
 
-	// uriがファイルだろうがディレクトリだろうが、location観に行っている
+	// try_filesとindex/autoindexをuriが属するcontextから探して返す。見つからなければ403エラー
 
-	// urlのlocationがあるか探す
-		// なければ上位のcontextから探す
-		// あればlocationから探す
+	// request uriがそもそもrootディレクティブになければ404 Not Found
 
-	// ファイルが存在するか
-		// あれば返す
-		// なければ
-			// error_pageあればそれ返す
-			// なければデフォルト404エラーページ返す
 }
 
 void	ConfigHandler::writeAcsLog( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
 	// access_logがどのコンテキストにあるか
 	//
@@ -202,25 +199,25 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& server_config, const s
 void	ConfigHandler::writeErrLog( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 }
 
 const config::Time&	ConfigHandler::getKeepaliveTimeout( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 }
 
 const config::Time&	ConfigHandler::getSendTimeout( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 }
 
 const config::Time&	ConfigHandler::getUseridExpires( const struct TiedServer& server_config, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLocationConfig(server, uri);
+	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 }
 
 const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer& server_configs, const std::string& server_name ) const
@@ -253,7 +250,7 @@ bool	sameURI( const std::string& request_uri, std::string config_uri )
 	return false;
 }
 
-const config::Location* const	ConfigHandler::searchLocationConfig( const config::Server& server_config, const std::string& uri ) const
+const config::Location* const	ConfigHandler::searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const
 {
 	// uriがファイルなら直前の/まで切る
 	// でもそのファイルやディレクトリが存在しなかったら location / の内容を探すわけではない
