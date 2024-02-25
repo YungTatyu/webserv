@@ -14,6 +14,7 @@ class SelectServer : public IServer
 	public:
 		SelectServer();
 		~SelectServer();
+		void	initSelectServer();
 		void	eventLoop(ConnectionManager* conn_manager,
 								IActiveEventManager* event_manager,
 								NetworkIOHandler* io_handler,
