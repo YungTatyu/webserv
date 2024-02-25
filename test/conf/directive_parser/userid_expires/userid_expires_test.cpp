@@ -52,7 +52,7 @@ TEST(useridExpiresTest, allContext)
 	test::test_directives_set(http.server_list[0].directives_set, kUseridExpires, true);
 
 	// location
-	test::test_value(http.server_list[0].location_list, {kLongMax, 0, 1000 * 60}, {true, true, true});
+	test::test_value(http.server_list[0].location_list, {9223372036854775 * 1000, 0, 3 * 1000 * 60}, {true, true, true});
 }
 
 

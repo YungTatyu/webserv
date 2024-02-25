@@ -1,6 +1,10 @@
 #ifndef CONF_HPP
 #define CONF_HPP
 
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#define KQUEUE_AVAILABLE
+#endif
+
 # include <string>
 
 namespace config
