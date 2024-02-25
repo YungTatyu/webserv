@@ -33,28 +33,21 @@ void	SelectActiveEventManager::clearAllEvents()
 	// this->active_events_.resize(0);
 }
 
-/**
- * selectは引数が多いため、使用しない
-*/
 bool	SelectActiveEventManager::isReadEvent(const void *event)
 {
-	static_cast<void>(event);
-	return false;
+	const SelectEvent	*sel_event = static_cast<const SelectEvent*>(event);
+	return sel_event->event_ == SelectEvent::SELECT_READ;
 }
 
-/**
- * selectは引数が多いため、使用しない
-*/
 bool	SelectActiveEventManager::isWriteEvent(const void *event)
 {
-	static_cast<void>(event);
-	return false;
+	const SelectEvent	*sel_event = static_cast<const SelectEvent*>(event);
+	return sel_event->event_ == SelectEvent::SELECT_WRITE;
 }
 
 /**
- * selectは引数が多いため、使用しない
+ * selectはerrorを判定できない
 */
-
 bool	SelectActiveEventManager::isErrorEvent(const void *event)
 {
 	static_cast<void>(event);

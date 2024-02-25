@@ -101,20 +101,9 @@ void	SelectServer::callEventHandler(
 
 	for (size_t i = 0; i < active_events.size(); ++i)
 	{
-		const SelectEvent	event = active_events[i];
-
-		switch (event.event_)
-		{
-		case SelectEvent::SELECT_READ:
-			request_handler->handleReadEvent(*io_handler, *conn_manager, event.fd_);
-			break;
-		
-		case SelectEvent::SELECT_WRITE:
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, event.fd_);
-			break;
-		
-		default:
-			break;
-		}
+		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
+			request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].fd_);
+		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].fd_);
 	}
 }
