@@ -1,8 +1,7 @@
 #ifndef CONFIG_HANDLER_HPP
 #define CONFIG_HANDLER_HPP
 
-//# include "HttpRequest.hpp"
-# include "HttpMessage.hpp"
+# include "HttpRequest.hpp"
 # include "Main.hpp"
 # include "NetworkIOHandler.hpp"
 
@@ -53,7 +52,6 @@
   };
  */
 
-class HttpRequest;
 struct TiedServer;
 
 /* Confファイルの設定値を取り出したり、エラーを判断する */
@@ -72,26 +70,27 @@ class ConfigHandler
 		// 問題があれば、引数をsockaddr_storageにして、sockaddr_in[6]をreinterpret_cast<sockaddr_storage>()で渡してもいいかもしれない
 		// とりあえずipv4だけ想定
 		bool	allowRequest( const config::Server& server,
-							const config::Location& location,
+							const config::Location* location,
 							const HttpRequest& request,
 							const int cli_sock ) const;
-		const std::string&	searchFile( const struct TiedServer& server_config,
-										const HttpRequest& request ) const;
-		void	writeAcsLog( const struct TiedServer& server_config,
+		const std::string&	searchFile( const struct TiedServer& tied_servers,
+										const HttpRequest& request,
+										const int cli_sock ) const;
+		void	writeAcsLog( const struct TiedServer& tied_servers,
 							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		void	writeErrLog( const struct TiedServer& server_config,
+		void	writeErrLog( const struct TiedServer& tied_servers,
 							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
-		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& server_config,
+		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& tied_servers,
 													const std::string& server_name,
 													const std::string& uri ) const;
-		const config::Time&	searchSendTimeout( const struct TiedServer& server_config,
+		const config::Time&	searchSendTimeout( const struct TiedServer& tied_servers,
 												const std::string& server_name,
 												const std::string& uri ) const;
-		const config::Time&	searchUseridExpires( const struct TiedServer& server_config,
+		const config::Time&	searchUseridExpires( const struct TiedServer& tied_servers,
 												const std::string& server_name,
 												const std::string& uri ) const;
 		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
@@ -102,14 +101,14 @@ class ConfigHandler
 
 		// utils
 		// 必要なメソッド追加
-		const config::Server&	searchServerConfig( const struct TiedServer& server_configs, const std::string& server_name ) const;
-		const config::Location* const	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
+		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
+		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 		const std::string&	searchErrorPage( const config::Server& server,
 										const config::Location& location,
 										const unsigned int code );
-		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr );
-		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr );
-		uint32_t	StrToIPAddress( const std::string& ip );
+		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
+		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
+		uint32_t	StrToIPAddress( const std::string& ip ) const;
 
 	public:
 		int		getServPort();
