@@ -62,7 +62,7 @@ class ConfigHandler
 		const config::Main*	config_;
 
 		// initialize
-		ConfigHandler() : config_(NULL) {};
+		ConfigHandler();
 		void	loadConfiguration( const config::Main* config );
 
 		// method

@@ -8,6 +8,172 @@
  *  ipとmask分けて保存
 */
 
+static std::string webserv_error_301_page =
+"<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n";
+
+
+static std::string webserv_error_302_page =
+"<html>\r\n<head><title>302 Found</title></head>\r\n<body>\r\n<center><h1>302 Found</h1></center>\r\n";
+
+
+static std::string webserv_error_303_page =
+"<html>\r\n<head><title>303 See Other</title></head>\r\n<body>\r\n<center><h1>303 See Other</h1></center>\r\n";
+
+
+static std::string webserv_error_307_page =
+"<html>\r\n<head><title>307 Temporary Redirect</title></head>\r\n<body>\r\n<center><h1>307 Temporary Redirect</h1></center>\r\n";
+
+
+static std::string webserv_error_308_page =
+"<html>\r\n<head><title>308 Permanent Redirect</title></head>\r\n<body>\r\n<center><h1>308 Permanent Redirect</h1></center>\r\n";
+
+static std::string webserv_error_400_page =
+"<html>\r\n<head><title>400 Bad Request</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n";
+
+static std::string webserv_error_401_page =
+"<html>\r\n<head><title>401 Authorization Required</title></head>\r\n<body>\r\n<center><h1>401 Authorization Required</h1></center>\r\n";
+
+static std::string webserv_error_402_page =
+"<html>\r\n<head><title>402 Payment Required</title></head>\r\n<body>\r\n<center><h1>402 Payment Required</h1></center>\r\n";
+
+static std::string webserv_error_403_page =
+"<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n";
+
+static std::string webserv_error_404_page =
+"<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n";
+
+static std::string webserv_error_405_page =
+"<html>\r\n<head><title>405 Not Allowed</title></head>\r\n<body>\r\n<center><h1>405 Not Allowed</h1></center>\r\n";
+
+static std::string webserv_error_406_page =
+"<html>\r\n<head><title>406 Not Acceptable</title></head>\r\n<body>\r\n<center><h1>406 Not Acceptable</h1></center>\r\n";
+
+static std::string webserv_error_408_page =
+"<html>\r\n<head><title>408 Request Time-out</title></head>\r\n<body>\r\n<center><h1>408 Request Time-out</h1></center>\r\n";
+
+static std::string webserv_error_409_page =
+"<html>\r\n<head><title>409 Conflict</title></head>\r\n<body>\r\n<center><h1>409 Conflict</h1></center>\r\n";
+
+static std::string webserv_error_410_page =
+"<html>\r\n<head><title>410 Gone</title></head>\r\n<body>\r\n<center><h1>410 Gone</h1></center>\r\n";
+
+static std::string webserv_error_411_page =
+"<html>\r\n<head><title>411 Length Required</title></head>\r\n<body>\r\n<center><h1>411 Length Required</h1></center>\r\n";
+
+static std::string webserv_error_412_page =
+"<html>\r\n<head><title>412 Precondition Failed</title></head>\r\n<body>\r\n<center><h1>412 Precondition Failed</h1></center>\r\n";
+
+static std::string webserv_error_413_page =
+"<html>\r\n<head><title>413 Request Entity Too Large</title></head>\r\n<body>\r\n<center><h1>413 Request Entity Too Large</h1></center>\r\n";
+
+static std::string webserv_error_414_page =
+"<html>\r\n<head><title>414 Request-URI Too Large</title></head>\r\n<body>\r\n<center><h1>414 Request-URI Too Large</h1></center>\r\n";
+
+static std::string webserv_error_415_page =
+"<html>\r\n<head><title>415 Unsupported Media Type</title></head>\r\n<body>\r\n<center><h1>415 Unsupported Media Type</h1></center>\r\n";
+
+static std::string webserv_error_416_page =
+"<html>\r\n<head><title>416 Requested Range Not Satisfiable</title></head>\r\n<body>\r\n<center><h1>416 Requested Range Not Satisfiable</h1></center>\r\n";
+
+static std::string webserv_error_421_page =
+"<html>\r\n<head><title>421 Misdirected Request</title></head>\r\n<body>\r\n<center><h1>421 Misdirected Request</h1></center>\r\n";
+
+static std::string webserv_error_429_page =
+"<html>\r\n<head><title>429 Too Many Requests</title></head>\r\n<body>\r\n<center><h1>429 Too Many Requests</h1></center>\r\n";
+
+static std::string webserv_error_494_page =
+"<html>\r\n<head><title>400 Request Header Or Cookie Too Large</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>Request Header Or Cookie Too Large</center>\r\n";
+
+
+static std::string webserv_error_495_page =
+"<html>\r\n<head><title>400 The SSL certificate error</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>The SSL certificate error</center>\r\n";
+
+static std::string webserv_error_496_page =
+"<html>\r\n<head><title>400 No required SSL certificate was sent</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>No required SSL certificate was sent</center>\r\n";
+
+static std::string webserv_error_497_page =
+"<html>\r\n<head><title>400 The plain HTTP request was sent to HTTPS port</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>The plain HTTP request was sent to HTTPS port</center>\r\n";
+
+
+static std::string webserv_error_500_page =
+"<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n";
+
+static std::string webserv_error_501_page =
+"<html>\r\n<head><title>501 Not Implemented</title></head>\r\n<body>\r\n<center><h1>501 Not Implemented</h1></center>\r\n";
+
+static std::string webserv_error_502_page =
+"<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n";
+
+static std::string webserv_error_503_page =
+"<html>\r\n<head><title>503 Service Temporarily Unavailable</title></head>\r\n<body>\r\n<center><h1>503 Service Temporarily Unavailable</h1></center>\r\n";
+
+static std::string webserv_error_504_page =
+"<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n";
+
+static std::string webserv_error_505_page =
+"<html>\r\n<head><title>505 HTTP Version Not Supported</title></head>\r\n<body>\r\n<center><h1>505 HTTP Version Not Supported</h1></center>\r\n";
+
+static std::string webserv_error_507_page =
+"<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
+
+ConfigHandler::ConfigHandler()
+	: config_(NULL)
+{
+	this->default_page_map_[300] = "";
+	this->default_page_map_[301] = webserv_error_301_page;
+	this->default_page_map_[302] = webserv_error_302_page;
+	this->default_page_map_[303] = webserv_error_303_page;
+	this->default_page_map_[307] = webserv_error_307_page;
+	this->default_page_map_[308] = webserv_error_308_page;
+
+	this->default_page_map_[400] = webserv_error_400_page;
+	this->default_page_map_[401] = webserv_error_401_page;
+	this->default_page_map_[402] = webserv_error_402_page;
+	this->default_page_map_[403] = webserv_error_403_page;
+	this->default_page_map_[404] = webserv_error_404_page;
+	this->default_page_map_[405] = webserv_error_405_page;
+	this->default_page_map_[406] = webserv_error_406_page;
+	this->default_page_map_[407] = "";
+	this->default_page_map_[408] = webserv_error_408_page;
+	this->default_page_map_[409] = webserv_error_409_page;
+	this->default_page_map_[410] = webserv_error_410_page;
+	this->default_page_map_[411] = webserv_error_411_page;
+	this->default_page_map_[412] = webserv_error_412_page;
+	this->default_page_map_[413] = webserv_error_413_page;
+	this->default_page_map_[414] = webserv_error_414_page;
+	this->default_page_map_[415] = webserv_error_415_page;
+	this->default_page_map_[416] = webserv_error_416_page;
+	this->default_page_map_[417] = "";
+	this->default_page_map_[418] = "";
+	this->default_page_map_[419] = "";
+	this->default_page_map_[420] = "";
+	this->default_page_map_[421] = webserv_error_421_page;
+	this->default_page_map_[422] = "";
+	this->default_page_map_[423] = "";
+	this->default_page_map_[424] = "";
+	this->default_page_map_[425] = "";
+	this->default_page_map_[426] = "";
+	this->default_page_map_[427] = "";
+	this->default_page_map_[428] = "";
+	this->default_page_map_[429] = webserv_error_429_page;
+
+	this->default_page_map_[494] = webserv_error_494_page;
+	this->default_page_map_[495] = webserv_error_495_page;
+	this->default_page_map_[496] = webserv_error_496_page;
+	this->default_page_map_[497] = webserv_error_497_page;
+	this->default_page_map_[498] = webserv_error_404_page;
+	this->default_page_map_[499] = "";
+
+	this->default_page_map_[500] = webserv_error_500_page;
+	this->default_page_map_[501] = webserv_error_501_page;
+	this->default_page_map_[502] = webserv_error_502_page;
+	this->default_page_map_[503] = webserv_error_503_page;
+	this->default_page_map_[504] = webserv_error_504_page;
+	this->default_page_map_[505] = webserv_error_505_page;
+	this->default_page_map_[506] = "";
+	this->default_page_map_[507] = webserv_error_507_page;
+}
+
 /* ConfigHandlerクラスの実装 */
 void ConfigHandler::loadConfiguration( const config::Main* config )
 {
