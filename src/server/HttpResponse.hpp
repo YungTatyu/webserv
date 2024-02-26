@@ -10,23 +10,24 @@ class HttpResponse
 		// initializer
 		HttpResponse( const ConfigHandler& config_handler );
 
-		// member availables
-		static std::string http_version_ = "HTTP/1.1";
-		std::string status_code_;
-		std::stiring reason_phrase_;
-		std::map<std::string, std::string> headers_;
-		std::string body_;
-
 		// member methods
-		static std::string responseHandler( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
+		static std::string	responseHandler( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
 
 	private:
-		// member objects
+		// private member availables
+		std::string			status_code_;
+		std::map<std::string, std::string>	headers_;
+		std::string			body_;
+		static std::map<int, std::string> webserv_status_line_map_; // status codeに基づくstatus lineを格納するmap
+		static std::map<int, std::string> default_error_page_map_; // defaultのerror pageを格納するmap
+
+		// private member objects
 		ConfigHandler	config_handler_;
 
 		// utils methods
-		static std::string createStaticResponse( const std::string& body, const std::string& statusCode, const std::string& contentType );
-		static std::string autoIndex( const std::string& directoryPath );
+		static void	
+		static std::string	createStaticResponse( const std::string& body, const std::string& statusCode, const std::string& contentType );
+		static std::string	autoIndex( const std::string& directoryPath );
 };
 
 
