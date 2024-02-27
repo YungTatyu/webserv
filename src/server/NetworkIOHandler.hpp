@@ -22,7 +22,7 @@ class NetworkIOHandler
 		void setupSocket( ServerConfig *serverConfig );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
-		void acceptConnection( ConnectionManager& connManager );
+		int acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		int getListenfd();
 

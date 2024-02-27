@@ -12,17 +12,21 @@
 class RequestHandler
 {
 	public:
+		/**
+		 * > 0の値ははfdと被るので避ける
+		 * -10 <の値はシステムコールのエラーと被るので避ける
+		*/
 		enum UPDATE_STATUS
 		{
-			NONE,
-			UPDATE_READ,
-			UPDATE_WRITE,
-			UPDATE_CLOSE
+			NONE = -10,
+			UPDATE_READ = -11,
+			UPDATE_WRITE = -12,
+			UPDATE_CLOSE = -13
 		};
 		RequestHandler();
-		UPDATE_STATUS handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		UPDATE_STATUS handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		UPDATE_STATUS handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 
 		typedef bool (*whichEvent)(const struct pollfd& pfd);
 		typedef void (RequestHandler::*eventHandler)(

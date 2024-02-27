@@ -10,13 +10,12 @@ RequestHandler::RequestHandler()
 	// this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
 }
 
-RequestHandler::UPDATE_STATUS RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
 		if (sockfd == ioHandler.getListenfd())
 		{
-			ioHandler.acceptConnection(connManager);
-			return RequestHandler::NONE;
+			return ioHandler.acceptConnection(connManager);
 		}
 		// クライアントソケットへのリクエスト（既存コネクション）
 		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
@@ -37,7 +36,7 @@ RequestHandler::UPDATE_STATUS RequestHandler::handleReadEvent(NetworkIOHandler &
 		return RequestHandler::UPDATE_WRITE;
 }
 
-RequestHandler::UPDATE_STATUS RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 	// response作成
 	HttpRequest request = connManager.getRequest( sockfd );
@@ -52,7 +51,7 @@ RequestHandler::UPDATE_STATUS RequestHandler::handleWriteEvent(NetworkIOHandler 
 	return RequestHandler::UPDATE_READ;
 }
 
-RequestHandler::UPDATE_STATUS RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 	ioHandler.closeConnection( connManager, sockfd );
 	connManager.removeConnection( sockfd );

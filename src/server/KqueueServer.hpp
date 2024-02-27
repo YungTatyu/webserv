@@ -19,7 +19,7 @@ class KqueueServer : public IServer
 		KqueueServer();
 		~KqueueServer();
 		bool	initKqueueServer();
-		void	initKevents(std::vector<struct kevent> &event_list, const std::map<int, ConnectionData> &connections);
+		int	initKevents(const std::map<int, ConnectionData> &connections);
 		void	eventLoop(ConnectionManager* conn_manager,
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
@@ -29,9 +29,9 @@ class KqueueServer : public IServer
 									IActiveEventManager* event_manager,
 									NetworkIOHandler* io_handler,
 									RequestHandler* request_handler);
-		void	updateEvent(struct kevent &event, const int event_filter);
-		void	deleteEvent(struct kevent &event);
-		void	AddNewEvents(std::vector<struct kevent> &event_list, const std::map<int, ConnectionData> &connections);
+		int	updateEvent(struct kevent &event, const int event_filter);
+		int	deleteEvent(struct kevent &event);
+		int	AddNewEvent(const int fd, const int event_filter);
 	private:
 		int	kq_; // kqueue fd
 };
