@@ -1,7 +1,7 @@
 #include "NetworkIOHandler.hpp"
 
 /* NetworkIOHandlerクラスの実装 */
-void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
+void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
 {
 	try
 	{
@@ -17,12 +17,12 @@ void NetworkIOHandler::setupSocket( ServerConfig *servConfig )
 		struct sockaddr_in servaddr;
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		servaddr.sin_port = htons( servConfig->getServPort() );
+		servaddr.sin_port = htons( configHandler->getServPort() );
 
 		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
-		SysCallWrapper::Listen( this->listenfd_, servConfig->getListenQ() );
+		SysCallWrapper::Listen( this->listenfd_, configHandler->getListenQ() );
 
-		std::cout << "Server running on port " << servConfig->getServPort() << std::endl;
+		std::cout << "Server running on port " << configHandler->getServPort() << std::endl;
 
 	}
 	catch ( const std::runtime_error& e )

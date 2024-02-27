@@ -18,7 +18,15 @@ class Use
 	private:
 		CONNECTION_METHOD	connection_method_;
 	public:
-		Use() {}
+		Use() {
+			#if defined(KQUEUE_AVAILABLE)
+			this->connection_method_ = KQUEUE;
+			#elif defined(__linux__)
+			this->connection_method_ = EPOLL;
+			#else
+			this->connection_method_ = POLL;
+			#endif
+		}
 		~Use() {}
 		CONNECTION_METHOD	getConnectionMethod() const { return this->connection_method_; }
 		void	setConnectionMethod(const CONNECTION_METHOD connection_method) { this->connection_method_ = connection_method; }

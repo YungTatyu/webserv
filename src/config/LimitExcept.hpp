@@ -7,8 +7,7 @@
 
 #include "Use.hpp"
 #include "conf.hpp"
-#include "Allow.hpp"
-#include "Deny.hpp"
+#include "AllowDeny.hpp"
 
 namespace config
 {
@@ -28,8 +27,7 @@ struct LimitExcept
 	const static unsigned int	type = CONF_HTTP_LOCATION|CONF_1MORE|CONF_UNIQUE;
 	std::set<std::string>	directives_set;
 	std::set<REQUEST_METHOD>	excepted_methods; // limit_exceptの制限から除外されるmethod
-	std::vector<Allow>	allow_list;
-	std::vector<Deny>	deny_list;
+	std::vector<AllowDeny>	allow_deny_list;
 };
 } // namespace config
 

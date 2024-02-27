@@ -63,7 +63,7 @@ assert $conf_path "${err_start_with} invalid parameter \"FF:4E:CC:50:2B:A0:9A:0Q
 
 conf_path="test/conf/conf_files/directive_error/allow_ipv6_err2.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} invalid parameter \"FF:4E:CC:50:2B::9A\" ${err_path}:6"
+assert $conf_path "${err_start_with} invalid parameter \"9A\" ${err_path}:6"
 
 conf_path="test/conf/conf_files/directive_error/allow_empty_err.conf"
 err_path="in $(readlink -f $conf_path)"
@@ -124,7 +124,7 @@ assert $conf_path "${err_start_with} invalid parameter \"FF:4E:CC:50:2B:A0:9A:0Q
 
 conf_path="test/conf/conf_files/directive_error/deny_ipv6_err2.conf"
 err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} invalid parameter \"FF:4E:CC:50:2B::9A\" ${err_path}:6"
+assert $conf_path "${err_start_with} invalid parameter \"FF\" ${err_path}:6"
 
 conf_path="test/conf/conf_files/directive_error/deny_empty_err.conf"
 err_path="in $(readlink -f $conf_path)"
@@ -225,6 +225,14 @@ assert $conf_path "${err_start_with} invalid return code \"a300\" ${err_path}:7"
 conf_path="test/conf/conf_files/directive_error/return_over_code_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid return code \"1000\" ${err_path}:7"
+
+conf_path="test/conf/conf_files/directive_error/return_not_httpurl.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid return code \"\" ${err_path}:7"
+
+conf_path="test/conf/conf_files/directive_error/return_not_httpsurl.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid return code \"https:/\" ${err_path}:7"
 
 # send_timeout
 g_test_directive="send_timeout"

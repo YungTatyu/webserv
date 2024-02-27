@@ -17,6 +17,7 @@
 const char	*config::Root::kDefaultPath_ = "html";
 const char	*config::UseridPath::kDefaultPath_ = "/";
 const unsigned long	config::SendTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
+const int	config::Return::kRedirectCodes_[] = {301, 302, 302, 307, 308};
 const char	*config::Listen::kDefaultAddress_ = "127.0.0.1";
 const char	*config::ServerName::kDefaultName_ = "";
 const unsigned long	config::Time::kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();
@@ -68,7 +69,10 @@ config::Main	*config::init_config(const std::string& file_path)
 	Main	*config = new Main();
 	config::Parser	parser(*config, tokens, absolute_path);
 	if (!parser.parse())
+	{
+		delete config;
 		return NULL;
+	}
 
 	return config;
 }

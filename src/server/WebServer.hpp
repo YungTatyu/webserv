@@ -6,6 +6,7 @@
 # include "NetworkIOHandler.hpp"
 # include "ServerConfig.hpp"
 # include "SysCallWrapper.hpp"
+# include "ConfigHandler.hpp"
 
 # include "IActiveEventManager.hpp"
 # include "PollActiveEventManager.hpp"
@@ -18,7 +19,7 @@
 class WebServer
 {
 	public:
-		WebServer();
+		WebServer( const config::Main* config );
 		~WebServer();
 		void run();
 	private:
@@ -27,7 +28,7 @@ class WebServer
 		ConnectionManager *connManager;
 		IActiveEventManager *eventManager;
 		IServer *server;
-		ServerConfig *serverConfig;
+		ConfigHandler *configHandler;
 		void initializeServer();
 };
 
