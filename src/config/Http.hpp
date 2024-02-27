@@ -14,11 +14,9 @@
 #include "ErrorLog.hpp"
 #include "Root.hpp"
 #include "ClientMaxBodySize.hpp"
-#include "Allow.hpp"
-#include "Deny.hpp"
+#include "AllowDeny.hpp"
 #include "Index.hpp"
 #include "Autoindex.hpp"
-#include "Allow.hpp"
 #include "Userid.hpp"
 #include "UseridDomain.hpp"
 #include "UseridExpires.hpp"
@@ -42,8 +40,7 @@ struct Http
 	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
 	SendTimeout	send_timeout;
-	std::vector<Allow>	allow_list;
-	std::vector<Deny>	deny_list;
+	std::vector<AllowDeny>	allow_deny_list;
 	Userid	userid;
 	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;

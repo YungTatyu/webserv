@@ -1,18 +1,18 @@
 #include "WebServer.hpp"
 
 /* WebServerクラスの実装 */
-WebServer::WebServer()
+WebServer::WebServer( const config::Main* config )
 {
-	this->serverConfig = new ServerConfig();
+	this->configHandler = new ConfigHandler();
 
-	this->serverConfig->loadConfiguration();
+	this->configHandler->loadConfiguration(config);
 	this->initializeServer();
 }
 
 void WebServer::initializeServer()
 {
 	this->ioHandler = new NetworkIOHandler();
-	this->ioHandler->setupSocket( this->serverConfig );
+	this->ioHandler->setupSocket( this->configHandler );
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
@@ -32,7 +32,7 @@ WebServer::~WebServer()
 	delete this->ioHandler;
 	delete this->requestHandler;
 	delete this->connManager;
-	delete this->serverConfig;
+	delete this->configHandler;
 	delete this->eventManager;
 }
 
