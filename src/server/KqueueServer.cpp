@@ -121,7 +121,7 @@ void	KqueueServer::callEventHandler(
 
 		default:
 			if (status > 0) // fdだったら
-				AddNewEvent(status, EVFILT_READ);
+				addNewEvent(status, EVFILT_READ);
 			break;
 		}
 	}
@@ -153,7 +153,7 @@ int	KqueueServer::deleteEvent(struct kevent &event)
 	return kevent(this->kq_, &event, 1, NULL, 0, NULL);
 }
 
-int	KqueueServer::AddNewEvent(const int fd, const int event_filter)
+int	KqueueServer::addNewEvent(const int fd, const int event_filter)
 {
 	struct kevent	event;
 	EV_SET(&event, fd, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
