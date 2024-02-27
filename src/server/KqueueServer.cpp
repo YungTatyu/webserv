@@ -23,17 +23,13 @@ void	KqueueServer::eventLoop(
 		return;
 	for ( ; ; )
 	{
-		std::cout << "waiting events\n";
 		waitForEvent(conn_manager, event_manager);
-		std::cout << "events occured\n";
 
 		// 発生したイベントをhandleする
 		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
-		std::cout << "events handled\n";
 
 		// 発生したすべてのイベントを削除
 		event_manager->clearAllEvents();
-		std::cout << "active events deleted\n";
 	}
 }
 
@@ -48,23 +44,10 @@ bool	KqueueServer::initKqueueServer()
 	return true;
 }
 
-int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
-{
-	std::vector<struct kevent>	*active_events =
-		static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
-
-	// 発生したeventをすべて格納できるサイズにする
-	active_events->resize(conn_manager->getConnections().size());
-	// TODO: error処理どうするか？ server downさせる？
-	int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), NULL);
-	std::cout << "event counts=" << re << "\n";
-	event_manager->setActiveEventsNum(re);
-	return re;
-}
-
 int	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 {
 	std::vector<struct kevent>	event_list;// 監視したいevent
+
 	// 監視するeventの数だけ、要素を確保する
 	event_list.resize(connections.size());
 
@@ -74,13 +57,25 @@ int	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 		++it)
 	{
 		const int	event_filter = it->second.event == ConnectionData::READ ? EVFILT_READ : EVFILT_WRITE;
-		// TODO: flag詳細調べる
 		EV_SET(&event_list[i], it->first, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
 		++i;
 	}
 	int re = kevent(this->kq_, event_list.data(), event_list.size(), NULL, 0, NULL);
 	if (re == -1)
 		std::cerr << "webserv: [emerg] kevent (" << errno << ":"<< strerror(errno) << ")\n";
+	return re;
+}
+
+int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
+{
+	std::vector<struct kevent>	*active_events =
+		static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
+
+	// 発生したeventをすべて格納できるサイズにする
+	active_events->resize(conn_manager->getConnections().size());
+	// TODO: error処理どうするか？ server downさせる？
+	int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), NULL);
+	event_manager->setActiveEventsNum(re);
 	return re;
 }
 
@@ -100,13 +95,10 @@ void	KqueueServer::callEventHandler(
 	{
 		int	status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-			// request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].ident);
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].ident);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-			// request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].ident);
 			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].ident);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-			// request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].ident);
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].ident);
 		
 		// kqueueで監視しているイベント情報を更新
@@ -141,6 +133,8 @@ void	KqueueServer::callEventHandler(
 int	KqueueServer::updateEvent(struct kevent &old_event, const int event_filter)
 {
 	struct kevent	update;
+
+	deleteEvent(old_event);
 	EV_SET(&update, old_event.ident, event_filter, EV_ADD|EV_ENABLE, old_event.fflags, old_event.data, old_event.udata);
 	return kevent(this->kq_, &update, 1, NULL, 0, NULL);
 }
