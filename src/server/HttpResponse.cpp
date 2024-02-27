@@ -1,5 +1,8 @@
 #include "HttpResponse.hpp"
 
+std::map<int, std::string> HttpResponse::status_line_map_;
+std::map<int, std::string> HttpResponse::default_error_page_map_;
+
 const static std::string http_version = "HTTP/1.1 ";
 
 const static std::string webserv_error_301_page =
@@ -107,7 +110,7 @@ const static std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse( const ConfigHandler& config_handler )
-	: config_handler_(config_handler)
+	: status_code_(200), body_(""), config_handler_(config_handler)
 {
 	// status_line
 	this->status_line_map_[200] = http_version + "200 OK";

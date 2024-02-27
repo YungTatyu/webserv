@@ -4,6 +4,10 @@
 # include <string>
 # include <map>
 
+# include "ConfigHandler.hpp"
+//# include "HttpRequst.hpp"
+# include "NetworkIOHandler.hpp"
+
 class HttpResponse
 {
 	public:
@@ -15,14 +19,14 @@ class HttpResponse
 
 	private:
 		// private member availables
-		std::string			status_code_;
+		unsigned int		status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string>	headers_;
 		std::string			body_;
-		static std::map<int, std::string> webserv_status_line_map_; // status codeに基づくstatus lineを格納するmap
+		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap
 		static std::map<int, std::string> default_error_page_map_; // defaultのerror pageを格納するmap
 
 		// private member objects
-		ConfigHandler	config_handler_;
+		const ConfigHandler	&config_handler_;
 
 		// utils methods
 		static std::string	createStaticResponse();
