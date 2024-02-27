@@ -25,7 +25,7 @@ class HttpResponse
 		ConfigHandler	config_handler_;
 
 		// utils methods
-		static std::string	createStaticResponse( const std::string& body, const std::string& statusCode, const std::string& contentType );
+		static std::string	createStaticResponse();
 		static std::string	autoIndex( const std::string& directoryPath );
 };
 
