@@ -5,7 +5,10 @@
 
 KqueueServer::KqueueServer() {}
 
-KqueueServer::~KqueueServer() {}
+KqueueServer::~KqueueServer()
+{
+	close(this->kq_);
+}
 
 void	KqueueServer::eventLoop(
 	ConnectionManager* conn_manager,
