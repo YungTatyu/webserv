@@ -19,7 +19,7 @@ void	KqueueServer::eventLoop(
 {
 	if (!initKqueueServer())
 		return;
-	if (initKevents(conn_manager->getConnections()))
+	if (!initKevents(conn_manager->getConnections()))
 		return;
 	for ( ; ; )
 	{
@@ -44,7 +44,7 @@ bool	KqueueServer::initKqueueServer()
 	return true;
 }
 
-int	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
+bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 {
 	std::vector<struct kevent>	event_list;// 監視したいevent
 
@@ -62,8 +62,11 @@ int	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 	}
 	int re = kevent(this->kq_, event_list.data(), event_list.size(), NULL, 0, NULL);
 	if (re == -1)
+	{
 		std::cerr << "webserv: [emerg] kevent (" << errno << ":"<< strerror(errno) << ")\n";
-	return re;
+		return false;
+	}
+	return true;
 }
 
 int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)

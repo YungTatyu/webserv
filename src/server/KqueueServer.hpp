@@ -19,7 +19,7 @@ class KqueueServer : public IServer
 		KqueueServer();
 		~KqueueServer();
 		bool	initKqueueServer();
-		int	initKevents(const std::map<int, ConnectionData> &connections);
+		bool	initKevents(const std::map<int, ConnectionData> &connections);
 		void	eventLoop(ConnectionManager* conn_manager,
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
