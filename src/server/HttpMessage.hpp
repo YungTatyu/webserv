@@ -23,12 +23,12 @@
 //	// header, body
 //};
 
-struct HttpResponse
-{
-	std::string status;
-	std::string body;
-	// header
-};
+//struct HttpResponse
+//{
+//	std::string status;
+//	std::string body;
+//	// header
+//};
 
 class HttpMessage
 {

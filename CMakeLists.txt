@@ -16,6 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
 	# src files
+	src/config/Lexer.cpp
+	src/config/Parser.cpp
 	src/config/conf.cpp
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
