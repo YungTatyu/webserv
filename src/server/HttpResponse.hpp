@@ -15,10 +15,11 @@ class HttpResponse
 		HttpResponse( const ConfigHandler& config_handler );
 
 		// member methods
-		static std::string	responseHandler( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
+		static void	prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
+		static std::string	createStaticResponse();
 
 	private:
-		// private member availables
+		// private variables
 		unsigned int		status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string>	headers_;
 		std::string			body_;
@@ -29,8 +30,8 @@ class HttpResponse
 		const ConfigHandler	&config_handler_;
 
 		// utils methods
-		static std::string	createStaticResponse();
 		static std::string	autoIndex( const std::string& directoryPath );
+		static void	prepareErrorResponse();
 };
 
 
