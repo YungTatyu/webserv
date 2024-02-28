@@ -6,7 +6,7 @@
 
 Timer::Timer(const int fd, const config::Time &time) : fd_(fd)
 {
-	this->raw_time_ms_ = time.time_in_ms_;
+	setTimeout(time);
 }
 
 Timer::~Timer() {}
@@ -21,4 +21,30 @@ unsigned long	Timer::getCurrentTime() const
 		return 0;
 	}
 	return (t.tv_sec * 1000) + (t.tv_usec / 1000);
+}
+
+int	Timer::getFd() const
+{
+	return this->fd_;
+}
+
+unsigned long	Timer::getRawtime() const
+{
+	return this->raw_time_ms_;
+}
+
+unsigned long	Timer::getTimeout() const
+{
+	return this->timeout_ms_;
+}
+
+void	Timer::setTimeout(const config::Time &time)
+{
+	this->raw_time_ms_ = time.time_in_ms_;
+	this->timeout_ms_ = time.time_in_ms_ + getCurrentTime();
+}
+
+bool	Timer::operator<(const Timer &other) const
+{
+	return this->timeout_ms_ < other.timeout_ms_;
 }
