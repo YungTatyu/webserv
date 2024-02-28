@@ -96,16 +96,10 @@ class ConfigHandler
 		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
 
 	private:
-		// data
-		static std::map<int, std::string> default_page_map_; // error code と default error pageのmap
-
 		// utils
 		// 必要なメソッド追加
 		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
 		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
-		const std::string&	searchErrorPage( const config::Server& server,
-										const config::Location& location,
-										const unsigned int code );
 		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
 		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
 		uint32_t	StrToIPAddress( const std::string& ip ) const;
