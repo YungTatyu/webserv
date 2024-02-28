@@ -269,3 +269,42 @@ const config::Location*	ConfigHandler::searchLongestMatchLocationConfig( const c
 	return NULL;
 }
 
+const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server* server, const config::Location* location, const unsigned int code )
+{
+	if (location && !location->error_page_list.empty())
+	{
+		std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
+		for (size_t i = 0; i < ep_list.size(); i++)
+		{
+			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			{
+				return &ep_list[i];
+			}
+		}
+	}
+	else if (server && !server->error_page_list.empty())
+	{
+		std::vector<config::ErrorPage>&	ep_list = server->error_page_list;
+		for (size_t i = 0; i < ep_list.size(); i++)
+		{
+			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			{
+				return &ep_list[i];
+			}
+		}
+	}
+	else if (!this->config_->http.error_page_list.empty())
+	{
+		std::vector<config::ErrorPage>&	ep_list = this->config_->error_page_list;
+		for (size_t i = 0; i < ep_list.size(); i++)
+		{
+			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			{
+				return &ep_list[i];
+			}
+		}
+	}
+
+	return NULL;
+}
+

@@ -94,6 +94,9 @@ class ConfigHandler
 												const std::string& server_name,
 												const std::string& uri ) const;
 		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
+		const ErrorPage*	searchErrorPage( const config::Server* server,
+														const config::Location* location,
+														const unsigned int code );
 
 	private:
 		// utils
