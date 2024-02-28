@@ -15,11 +15,7 @@ unsigned long	Timer::getCurrentTime() const
 {
 	struct timeval	t;
 
-	if (gettimeofday(&t, NULL) == -1)
-	{
-		std::cerr << "webserv: [emerg] gettimeofday() failed (" << errno << ": " << strerror(errno) << ")\n";
-		return 0;
-	}
+	gettimeofday(&t, NULL);
 	return (t.tv_sec * 1000) + (t.tv_usec / 1000);
 }
 

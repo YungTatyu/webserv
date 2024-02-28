@@ -17,6 +17,7 @@ class TimerTree
 		void	addTimer(const Timer &timer);
 		void	deleteTimer(const Timer &timer);
 		int	findTimer() const; // timeoutに一番近いnode
+		const std::multiset<Timer>	&getTimerTree() const;
 };
 
 #endif
