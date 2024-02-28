@@ -50,14 +50,6 @@ TEST(timertree, add)
 	TimerTree	timer_tree;
 	unsigned long	longmax = std::numeric_limits<long>::max();
 
-	// timer_tree.addTimer(Timer(0, config::Time(now + longmax)));
-	// timer_tree.addTimer(Timer(1, config::Time(longmax)));
-	// timer_tree.addTimer(Timer(2, config::Time(now)));
-	// timer_tree.addTimer(Timer(3, config::Time(100)));
-	// timer_tree.addTimer(Timer(4, config::Time(1)));
-	// timer_tree.addTimer(Timer(5, config::Time(2)));
-	// timer_tree.addTimer(Timer(6, config::Time(0)));
-	// timer_tree.addTimer(Timer(7, config::Time(longmax - now)));
 	test::initTimerTree(timer_tree ,{
 		(now + longmax),
 		longmax,
