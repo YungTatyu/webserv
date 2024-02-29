@@ -120,7 +120,7 @@ void	KqueueServer::callEventHandler(
 			break;
 
 		default:
-			if (status > 0) // fdだったら
+			if (status >= 0) // fdだったら
 				addNewEvent(status, EVFILT_READ);
 			break;
 		}
