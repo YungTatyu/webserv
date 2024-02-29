@@ -1,4 +1,6 @@
 #include "HttpResponse.hpp"
+#include "FileUtils.hpp"
+#include "string.h"
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, std::string> HttpResponse::default_error_page_map_;
@@ -230,3 +232,101 @@ HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 	this->default_error_page_map_[506] = "";
 	this->default_error_page_map_[507] = webserv_error_507_page;
 }
+void	HttpResponse::prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock )
+{
+	// server 探す
+	const config::Server&	server = config_handler_.searchServerConfig(tied_servers, request.headers.find("Host")->second);
+
+	// clientのip_addressを取る
+	struct sockaddr_in client_addr;
+	socklen_t client_addrlen = sizeof(client_addr);
+	if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
+	{
+		std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	}
+
+	// parseが失敗していれば、400 Bad Request
+	if (request.parseState == HttpRequest::PARSE_ERROR)
+	{
+		prepareErrorResponse(request, server, NULL, client_addr, 400);
+		return;
+	}
+
+	// 内部リダイレクトなどはこれ再帰で回る
+	responseHandler(request, server, client_addr);
+}
+
+void	HttpResponse::responseHandler( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr)
+{
+	// server の return を見に行く。今はreturn はlocationにしかない
+	const config::Location*	location = config_handler_.searchLongestMatchLocationConfig(server, request.uri);
+	// location の　return を見に行く。
+	// 以下は再帰用関数に入れる
+	// allowReuestがfalseなら403 Forbidden
+	if (!config_handler_.allowRequest(server, location, request, client_addr))
+	{
+		prepareErrorResponse(request, server, location, client_addr, 403);
+		return;
+	}
+
+
+	// uriが'/'で終わってない、かつdirectoryでないとき301MovedPermanently
+	if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
+	{
+		prepareErrorResponse(request, server, location, client_addr, 301);
+		return;
+	}
+
+	// ここらへんでメソッドごとに分岐
+
+	/* ~ try_filesとindex/autoindexのファイル検索 ~
+	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
+	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
+	 * 3つともなかったら上位のcontextで検索する
+	 */
+
+	// try_filesとindex/autoindexをuriが属するcontextから探して返す。見つからなければ403エラー
+
+
+}
+
+void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code )
+{
+	long tmp_code;
+
+	const config::ErrorPage* ep = config_handler_.searchErrorPage(server, location, code);
+	if (ep)
+	{
+		if ((tmp_code = ep->getResponse()) != -1)
+			status_code_ = tmp_code;
+		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度prepareResponseをする
+	}
+	else
+	{
+		status_code_ = code;
+		body_ = default_error_page_map_[code];
+	}
+}
+
+//alias: ディレクトリ内のリクエストに対して、別の場所からファイルを提供するために使用される。内部的にリダイレクトが発生する可能性があります。
+
+//error_page: エラーページを指定するディレクティブ。指定されたエラーが発生した場合に、指定されたエラーページに対して再度処理が行われる可能性があります。
+
+//return: 特定の条件に基づいてレスポンスを生成し、クライアントに返すディレクティブ。return を使用して新しいURIにリダイレクトすることができます。
+
+//try_files: ファイルの存在を確認し、存在すればそのファイルを提供し、存在しなければ指定されたファイルまたはURIに対して再度処理が行われる可能性があります。
+
+void	HttpResponse::internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri )
+{
+	// status_codeはerror_pageからのリダイレクトの場合変更する可能性がある
+	if (!redirect_uri.empty())
+	{
+		HttpRequest	redirect_request = request;
+		redirect_request.uri = redirect_uri;
+		responseHandler(redirect_request, server, client_addr);
+	}
+
+	// methodは必ずＧＥＴになる?
+	responseHandler(request, server, client_addr);
+}
+

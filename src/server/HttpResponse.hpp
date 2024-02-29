@@ -15,7 +15,7 @@ class HttpResponse
 		HttpResponse( const ConfigHandler& config_handler );
 
 		// member methods
-		static void	prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
+		void	prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
 		static std::string	createStaticResponse();
 
 	private:
@@ -30,8 +30,10 @@ class HttpResponse
 		const ConfigHandler	&config_handler_;
 
 		// utils methods
+		void	responseHandler( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr );
 		static std::string	autoIndex( const std::string& directoryPath );
-		static void	prepareErrorResponse();
+		void	prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code );
+		void	internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri );
 };
 
 
