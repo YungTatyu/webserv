@@ -2,8 +2,8 @@
 #include <cctype>
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
-			 const std::unordered_map<std::string, std::string>& headers,
-			 const std::unordered_map<std::string, std::string>& queries,
+			 const std::map<std::string, std::string>& headers,
+			 const std::map<std::string, std::string>& queries,
 			 const std::string& body,
 			 const ParseState parseState)
 			: method(method), uri(uri), version(version), headers(headers), queries(queries), body(body), parseState(parseState)
