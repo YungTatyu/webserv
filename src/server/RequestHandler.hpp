@@ -12,10 +12,17 @@
 class RequestHandler
 {
 	public:
+		enum UPDATE_STATUS
+		{
+			NONE,
+			UPDATE_READ,
+			UPDATE_WRITE,
+			UPDATE_CLOSE
+		};
 		RequestHandler();
-		void handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		void handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		void handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		UPDATE_STATUS handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		UPDATE_STATUS handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		UPDATE_STATUS handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 
 		typedef bool (*whichEvent)(const struct pollfd& pfd);
 		typedef void (RequestHandler::*eventHandler)(

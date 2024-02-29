@@ -16,8 +16,8 @@ void WebServer::initializeServer()
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
-	this->server = new PollServer();
-	this->eventManager = new PollActiveEventManager();
+	this->server = new SelectServer();
+	this->eventManager = new SelectActiveEventManager();
 
 	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();
