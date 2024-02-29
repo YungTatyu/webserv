@@ -76,6 +76,12 @@ namespace test
 			timer_tree.deleteTimer(*it);
 		}
 	}
+
+	void	expectTimer(const int actual, const int expect)
+	{
+		// timerの誤差(10ms)は許容する
+		EXPECT_TRUE((expect - actual) < 10);
+	}
 } // namespace test
 
 
@@ -117,7 +123,7 @@ TEST(timertree, deletetimer)
 	TimerTree	timer_tree;
 	unsigned long	now = test::getCurrentTime();
 
-	test::initTimerTree(timer_tree ,{
+	test::initTimerTree(timer_tree, {
 		now + 1, // fd 0
 		now + 2, // fd 1
 		now + 3, // fd 2
@@ -163,5 +169,31 @@ TEST(timertree, findTimer_notimer)
 
 	test::initTimerTree(timer_tree, {now + 1, now + 100});
 	test::deleteTimers(timer_tree, {0, 1});
+
+	EXPECT_EQ(timer_tree.findTimer(), -1);
 	test::testFdsSet(timer_tree.getFdSet(), {0, 1}, {false, false});
+}
+
+TEST(timertree, findTimer)
+{
+	TimerTree	timer_tree;
+	unsigned long	longmax = std::numeric_limits<long>::max();
+
+	test::initTimerTree(timer_tree, {
+		3000, // fd 0
+		4000, // fd 1
+		1000, // fd 2
+		longmax, // fd 3
+	});
+
+	test::expectTimer(timer_tree.findTimer(), 1000);
+
+	timer_tree.deleteTimer(2);
+	test::expectTimer(timer_tree.findTimer(), 3000);
+
+	timer_tree.deleteTimer(0);
+	test::expectTimer(timer_tree.findTimer(), 4000);
+
+	timer_tree.deleteTimer(1);
+	test::expectTimer(timer_tree.findTimer(), std::numeric_limits<int>::max());
 }
