@@ -18,13 +18,23 @@ namespace test
 		return (t.tv_sec * 1000) + (t.tv_usec / 1000);
 	}
 
-	void	testFdSet(const std::set<int> &fd_set, const int fd, bool expect_found)
+	void	testFdSet(const std::set<int> &fd_set, const int fd, const bool expect_found)
 	{
 		if (!expect_found) {
 			EXPECT_TRUE(fd_set.find(fd) == fd_set.end());
 			return;
 		}
 		EXPECT_TRUE(fd_set.find(fd) != fd_set.end());
+	}
+
+	void	testFdsSet(const std::set<int> &fd_set, const std::vector<int> &fds, const std::vector<bool> &expect_founds)
+	{
+		size_t	i = 0;
+		for (std::vector::const_iterator it = fds.begin(); it != fds.end(); ++it)
+		{
+			testFdSet(fd_set, *it, expect_founds[i]);
+			++i;
+		}
 	}
 
 	void	testValue(const TimerTree &timer_tree, const std::vector<unsigned long> &expect)
@@ -136,4 +146,22 @@ TEST(timertree, deletetimer)
 		now + 8, // fd 7
 		now + 9, // fd 8
 	});
+
+	test::testFdsSet(timer_tree.getFdSet(),
+		{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13},
+		{false, true, false, false, true, true, true, true, true, false, true, true, false, false}
+	);
+}
+
+TEST(timertree, findTimer_notimer)
+{
+	TimerTree	timer_tree;
+	unsigned long	now = test::getCurrentTime();
+
+	// timerが見つからない
+	EXPECT_EQ(timer_tree.findTimer(), -1);
+
+	test::initTimerTree(timer_tree, {now + 1, now + 100});
+	test::deleteTimers(timer_tree, {0, 1});
+	test::testFdsSet(timer_tree.getFdSet(), {0, 1}, {false, false});
 }
