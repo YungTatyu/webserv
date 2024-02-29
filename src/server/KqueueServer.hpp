@@ -18,6 +18,8 @@ class KqueueServer : public IServer
 	public:
 		KqueueServer();
 		~KqueueServer();
+		bool	initKqueueServer();
+		void	initKevents(std::vector<struct kevent> &event_list, const std::map<int, ConnectionData> &connections);
 		void	eventLoop(ConnectionManager* conn_manager,
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
