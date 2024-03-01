@@ -104,16 +104,22 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 	return true;
 }
 
-bool	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, const int cli_sock ) const
+config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& method_str ) const
 {
-	struct sockaddr_in client_addr;
-    socklen_t client_addrlen = sizeof(client_addr);
-	if (getsockname(cli_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
-	{
-		std::cerr << "webserv: [emerge] getsockname() \"" << cli_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
-	}
-	//std::cout << "" << client_addr.sin_addr.s_addr << std::endl;
+	if (method_str == "GET")
+		return config::GET;
+	else if (method_str == "HEAD")
+		return config::HEAD;
+	else if (method_str == "POST")
+		return config::POST;
+	else if (method_str == "PUT")
+		return config::PUT;
+	else
+		return config::DELETE;
+}
 
+bool	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
+{
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
 	if (location != NULL && location->directives_set.find("deny") != location->directives_set.end())
@@ -139,7 +145,7 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
-		if (location->limit_except.excepted_methods.find(request.method) == location->limit_except.excepted_methods.end())
+		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
 				return false;
@@ -156,27 +162,8 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
  * 3. no location / no file 404 Not Found
  */
 
-	const std::string&	ConfigHandler::searchFile( const struct TiedServer& tied_servers, const HttpRequest& request, const int cli_sock ) const
+	const std::string&	ConfigHandler::searchFile( const struct config::Server& server, const HttpRequest& request ) const
 {
-	struct HttpResponse	response;
-
-	// parseが失敗していれば、400 Bad Request
-	if (request.parseState == HttpRequest::PARSE_ERROR)
-		return searchErrorPage(response, NULL, NULL, 400);
-
-	const config::Server&	server = searchServerConfig(tied_servers, request.headers.find("Host")->second);
-	// server の return を見に行く。今はreturn はlocationにしかない
-
-	const config::Location*	location = searchLongestMatchLocationConfig(server, request.uri);
-	// location の　return を見に行く。
-
-	// allowReuestがfalseなら403 Forbidden
-	if (!allowRequest(server, location, request, cli_sock))
-		return searchErrorPage(403);
-
-
-	// if (unfinished slash directory)
-		// return searchErrorPage(301); // 301 Moved Permanently
 	if (FileUtils::isDirectory(server.root.getPath() + request.uri))
 		return searchErrorPage(301);
 
@@ -269,25 +256,25 @@ const config::Location*	ConfigHandler::searchLongestMatchLocationConfig( const c
 	return NULL;
 }
 
-const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server* server, const config::Location* location, const unsigned int code )
+const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& server, const config::Location* location, const unsigned int code ) const
 {
 	if (location && !location->error_page_list.empty())
 	{
-		std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
+		const std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
 		{
-			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end())
 			{
 				return &ep_list[i];
 			}
 		}
 	}
-	else if (server && !server->error_page_list.empty())
+	else if (!server.error_page_list.empty())
 	{
-		std::vector<config::ErrorPage>&	ep_list = server->error_page_list;
+		const std::vector<config::ErrorPage>&	ep_list = server.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
 		{
-			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end())
 			{
 				return &ep_list[i];
 			}
@@ -295,10 +282,10 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server* s
 	}
 	else if (!this->config_->http.error_page_list.empty())
 	{
-		std::vector<config::ErrorPage>&	ep_list = this->config_->error_page_list;
+		const std::vector<config::ErrorPage>&	ep_list = this->config_->http.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
 		{
-			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end())
 			{
 				return &ep_list[i];
 			}
