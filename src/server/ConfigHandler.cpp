@@ -260,8 +260,16 @@ const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer
 		if (tied_servers.servers_[i]->server_name.getName().find(server_name) != tied_servers.servers_[i]->server_name.getName().end())
 			return *tied_servers.servers_[i];
 		// default_server特定できるようにする
-		if (tied_servers.servers_[i]->listen_list[0].getIsDefaultServer())
-			default_server = &tied_servers.servers_[i];
+		for (size_t j = 0; j < tied_server.servers_[i]->listen_list.size(); j++)
+		{
+			const config::Listen& tmp_listen = tied_servers.servers_[i]->listen_list[j];
+			if (tmp_listen.getIsDefaultServer() &&
+				tied_servers.port_ == tmp_listen.getport() &&
+				tied_servers.addr_ == tmp_listen.getAddress())
+			{
+				default_server = &tied_servers.servers_[i];
+			}
+		}
 	}
 
 	// server_nameが一致するものがなければデフォルトサーバーを返す
