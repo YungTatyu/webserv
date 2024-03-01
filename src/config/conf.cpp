@@ -1,18 +1,18 @@
 #include "conf.hpp"
-#include "Main.hpp"
+#include "initLogFd.hpp"
 #include "Lexer.hpp"
+#include "Main.hpp"
 #include "Parser.hpp"
 #include <fstream>
 #include <iostream>
-#include <unistd.h>
+#include <limits>
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/stat.h>
-#include "Parser.hpp"
-#include <limits>
-#include <sys/param.h>
 #include <stdlib.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 const char	*config::Root::kDefaultPath_ = "html";
 const char	*config::UseridPath::kDefaultPath_ = "/";
@@ -28,7 +28,7 @@ const char	*config::ErrorLog::kDefaultFile_ = "logs/error.log";
 const unsigned long	config::KeepaliveTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
 const char	*config::Index::kDefaultFile_ = "index.html";
 
-config::Main	*config::init_config(const std::string& file_path)
+config::Main	*config::initConfig( const std::string& file_path )
 {
 	char	absolute_path[MAXPATHLEN];
 
@@ -69,6 +69,12 @@ config::Main	*config::init_config(const std::string& file_path)
 	Main	*config = new Main();
 	config::Parser	parser(*config, tokens, absolute_path);
 	if (!parser.parse())
+	{
+		delete config;
+		return NULL;
+	}
+
+	if (!initLogFds(*config))
 	{
 		delete config;
 		return NULL;

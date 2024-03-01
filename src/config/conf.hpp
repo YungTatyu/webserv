@@ -73,8 +73,7 @@ enum UNIQUE
 	CONF_NOT_UNIQUE = 0x00020000
 };
 
-
-Main	*init_config(const std::string& file_path);
+Main	*initConfig( const std::string& file_path );
 
 } // namespace config
 

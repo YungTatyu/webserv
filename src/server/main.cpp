@@ -13,7 +13,7 @@ int main(int ac, char *av[])
 		return 1;
 	}
 
-	const config::Main *config = config::init_config(av[1]);
+	const config::Main *config = config::initConfig(av[1]);
 	if (config == NULL)
 		return 1;
 
