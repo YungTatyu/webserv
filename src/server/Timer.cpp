@@ -13,10 +13,28 @@ Timer::~Timer() {}
 
 unsigned long	Timer::getCurrentTime() const
 {
-	struct timeval	t;
+	// struct timeval	t;
 
-	gettimeofday(&t, NULL);
-	return (t.tv_sec * 1000) + (t.tv_usec / 1000);
+	// gettimeofday(&t, NULL);
+	// return (t.tv_sec * 1000) + (t.tv_usec / 1000);
+
+	/**
+	 * nginxでは、
+	 * gettimeofday()の後に、clock_gettime(CLOCK_MONOTONIC, &ts)でmsをupdateしている
+	 * gettimeofday(): 日付と時刻の取得
+	 * clock_gettime(): システム起動以降の経過時間を取得でき、システム時刻の変更に影響を受けない
+	 * 
+	 */
+	struct timespec  ts;
+	#if defined(CLOCK_MONOTONIC_FAST)
+		clock_gettime(CLOCK_MONOTONIC_FAST, &ts);
+	#else
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+	#endif
+
+	time_t	sec = ts.tv_sec;
+	long	msec = ts.tv_nsec / 1000000;
+	return (sec * 1000) + msec;
 }
 
 int	Timer::getFd() const
