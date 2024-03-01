@@ -39,23 +39,15 @@ config::Main	*config::initConfig( const std::string& file_path )
 		return NULL;
 
 	// file_path が存在するかどうか
-	if (access(absolute_path.c_str(), F_OK))
-	{
-		std::cerr << "webserv: [emerg] access() \"" << absolute_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	if (FileUtils::wrapperAccess(absolute_path.c_str(), F_OK) == -1)
 		return NULL;
-	}
 
-	// file_path の読み取り権限があるかどうか？ 
-	if (access(absolute_path.c_str(), R_OK))
-	{
-		std::cerr << "webserv: [emerg] access() \"" << absolute_path << "\" failed (" << errno << ": " << strerror(errno) << ")"<< std::endl;
+	// file_path の読み取り権限があるかどうか
+	if (FileUtils::wrapperAccess(absolute_path.c_str(), R_OK) == -1)
 		return NULL;
-	}
 
 	// file_path がファイルかどうか確認する。
-	struct stat fileInfo;
-
-	if (stat(absolute_path.c_str(), &fileInfo) == 0 && !S_ISREG(fileInfo.st_mode))
+	if (!FileUtils::isFile(absolute_path))
 	{
 		std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
 		return NULL;

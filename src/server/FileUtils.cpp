@@ -14,6 +14,16 @@ int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
 	return fd;
 }
 
+int	FileUtils::wrapperAccess( const std::string path, int modes )
+{
+	int ret = access(path.c_str(), modes);
+	if (ret == -1)
+	{
+		std::cerr << "webserv: [emerg] access() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	}
+	return ret;
+}
+
 std::string	FileUtils::deriveAbsolutePath( const std::string& path )
 {
 	DIR *dir;
@@ -40,11 +50,23 @@ std::string	FileUtils::deriveAbsolutePath( const std::string& path )
 	return "";
 }
 
+bool FileUtils::isFile( const std::string& path )
+{
+	struct stat statbuf;
+	if ( stat(path.c_str(), &statbuf) != 0 )
+	{
+		std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		return false;
+	}
+	return S_ISREG(statbuf.st_mode);
+}
+
 bool FileUtils::isDirectory( const std::string& path )
 {
 	struct stat statbuf;
 	if ( stat(path.c_str(), &statbuf) != 0 )
 	{
+		std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		return false;
 	}
 	return S_ISDIR(statbuf.st_mode);
