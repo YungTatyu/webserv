@@ -12,7 +12,7 @@
 namespace FileUtils
 {
 	int wrapperOpen(const std::string path, int flags, mode_t modes );
-	std::string getAbsolutePath( const char* path );
+	std::string deriveAbsolutePath( const std::string& path );
 	bool isDirectory( const std::string& path );
 	std::string readFile( const std::string& filePath );
 	std::vector<std::string> getDirectoryContents( const std::string& directoryPath );

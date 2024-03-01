@@ -14,12 +14,12 @@ int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
 	return fd;
 }
 
-std::string	FileUtils::getAbsolutePath( const char* path )
+std::string	FileUtils::deriveAbsolutePath( const std::string& path )
 {
 	DIR *dir;
 	struct dirent *ent;
 
-	if ((dir = opendir(path)) != NULL)
+	if ((dir = opendir(path.c_str())) != NULL)
 	{
 		while ((ent = readdir(dir)) != NULL)
 		{
