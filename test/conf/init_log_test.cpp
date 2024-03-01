@@ -2,7 +2,7 @@
 #include <gtest/gtest-param-test.h>
 #include "Lexer.hpp"
 #include "Parser.hpp"
-#include "InitLogFds.hpp"
+#include "InitLogFd.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -37,25 +37,25 @@ protected:
 		config::Lexer	lexer(file_path);
 		lexer.tokenize();
 
-		config::Parser	parser(*config, lexer.getTokens(), file_path);
+		config::Parser	parser(*this->config_, lexer.getTokens(), file_path);
 		parser.parse();
 	}
 
 
 	void TearDown() override {
         // テストケースのクリーンアップ処理
-		delete config_handler_.config_;
+		delete config_;
     }
 
 	// テストに使うオブジェクト
 	config::Main	*config_;
-}
+};
 
-TEST(InitLogTest, initAcsLogFds_Success)
+TEST_F(InitLogTest, initAcsLogFds_Success)
 {
 	int	ret;
 
-	ret = config::initAcsLogsFds(*config_);
+	ret = config::initAcsLogFds(*config_);
 
 	// 関数の結果が正しいか
 	EXPECT_TRUE(ret);
@@ -77,21 +77,21 @@ TEST(InitLogTest, initAcsLogFds_Success)
 	}
 }
 
-TEST(InitLogTest, initAcsLogFds_Fail)
+TEST_F(InitLogTest, initAcsLogFds_Fail)
 {
 	int	ret;
 
-	ret = config::initAcsLogsFds(*config_);
+	ret = config::initAcsLogFds(*config_);
 
 	// 関数の結果が正しいか
 	EXPECT_FALSE(ret);
 }
 
-TEST(InitLogTest, initErrLogFds_Success)
+TEST_F(InitLogTest, initErrLogFds_Success)
 {
 	int	ret;
 
-	ret = config::initErrLogsFds(*config_);
+	ret = config::initErrLogFds(*config_);
 
 	// 関数の結果が正しいか
 	EXPECT_TRUE(ret);
@@ -115,11 +115,11 @@ TEST(InitLogTest, initErrLogFds_Success)
 	}
 }
 
-TEST(InitLogTest, initErrLogFds_Fail)
+TEST_F(InitLogTest, initErrLogFds_Fail)
 {
 	int	ret;
 
-	ret = config::initErrLogsFds(*config_);
+	ret = config::initErrLogFds(*config_);
 
 	// 関数の結果が正しいか
 	EXPECT_FALSE(ret);

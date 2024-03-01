@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/conf.cpp
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
+	src/config/InitLogFd.cpp
 	src/server/CGIHandler.cpp
 	src/server/ConfigHandler.cpp
 	src/server/FileUtils.cpp
@@ -58,6 +59,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/userid_path/userid_path_test.cpp
 	test/conf/directive_parser/userid_service/userid_service_test.cpp
 	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
+	test/conf/init_log_test.cpp
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
