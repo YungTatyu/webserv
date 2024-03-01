@@ -1,6 +1,46 @@
 #include "FileUtils.hpp"
+#include <dirent.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 
-bool FileUtils::isDirectory(const std::string& path)
+int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
+{
+	int fd = open(path.c_str(), flags, modes);
+	if (fd == -1)
+	{
+		std::cerr << "webserv: [emerg] open() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	}
+	return fd;
+}
+
+std::string	FileUtils::getAbsolutePath( const char* path )
+{
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir(path)) != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+		{
+		// current directoryを探して返す
+			if (ent->d_type == DT_DIR && std::string(ent->d_name) == path) {
+				closedir(dir);
+				return std::string(ent->d_name);
+			}
+		}
+		closedir(dir);
+	}
+	else
+	{
+		std::cerr << "webserv: [emerg] opendir() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	}
+
+	// 見つからなかったら空文字列を返す
+	return "";
+}
+
+bool FileUtils::isDirectory( const std::string& path )
 {
 	struct stat statbuf;
 	if ( stat(path.c_str(), &statbuf) != 0 )
@@ -10,7 +50,7 @@ bool FileUtils::isDirectory(const std::string& path)
 	return S_ISDIR(statbuf.st_mode);
 }
 
-std::string FileUtils::readFile(const std::string& filePath)
+std::string FileUtils::readFile( const std::string& filePath )
 {
 	std::ifstream file(filePath.c_str());
 	std::stringstream buffer;
@@ -18,7 +58,7 @@ std::string FileUtils::readFile(const std::string& filePath)
 	return buffer.str();
 }
 
-std::vector<std::string> FileUtils::getDirectoryContents(const std::string& directoryPath)
+std::vector<std::string> FileUtils::getDirectoryContents( const std::string& directoryPath )
 {
 	std::vector<std::string> contents;
 	DIR* dir = opendir(directoryPath.c_str());
@@ -40,7 +80,7 @@ std::vector<std::string> FileUtils::getDirectoryContents(const std::string& dire
 	return contents;
 }
 
-bool FileUtils::isExecutable(const char* filename)
+bool FileUtils::isExecutable( const char* filename )
 {
 	struct stat sbuf;
 	if ( stat(filename, &sbuf) < 0 )
@@ -48,7 +88,7 @@ bool FileUtils::isExecutable(const char* filename)
 	return S_ISREG(sbuf.st_mode) && (S_IXUSR & sbuf.st_mode);
 }
 
-bool FileUtils::isPHPExtension(const std::string& filename)
+bool FileUtils::isPHPExtension( const std::string& filename )
 {
 	std::string phpExt = ".php";
 	if ( filename.length() < phpExt.length() )

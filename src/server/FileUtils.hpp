@@ -11,11 +11,13 @@
 
 namespace FileUtils
 {
-	bool isDirectory(const std::string& path);
-	std::string readFile(const std::string& filePath);
-	std::vector<std::string> getDirectoryContents(const std::string& directoryPath);
+	int wrapperOpen(const std::string path, int flags, mode_t modes );
+	std::string getAbsolutePath( const char* path );
+	bool isDirectory( const std::string& path );
+	std::string readFile( const std::string& filePath );
+	std::vector<std::string> getDirectoryContents( const std::string& directoryPath );
 	bool isExecutable( const char* filename );
-	bool isPHPExtension(const std::string& filename);
+	bool isPHPExtension( const std::string& filename );
 }
 
 #endif
