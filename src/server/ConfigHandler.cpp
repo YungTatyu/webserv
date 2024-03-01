@@ -162,10 +162,13 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
  * 3. no location / no file 404 Not Found
  */
 
-	const std::string&	ConfigHandler::searchFile( const struct config::Server& server, const HttpRequest& request ) const
+const std::string	ConfigHandler::searchFile( const struct config::Server& server, const HttpRequest& request ) const
 {
-	if (FileUtils::isDirectory(server.root.getPath() + request.uri))
-		return searchErrorPage(301);
+	(void)server;
+	(void)request;
+	return "";
+	//if (FileUtils::isDirectory(server.root.getPath() + request.uri))
+	//	return searchErrorPage(301);
 
 	/* ~ try_filesとindex/autoindexのファイル検索 ~
 	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
@@ -178,19 +181,69 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 	// request uriがそもそもrootディレクティブになければ404 Not Found
 }
 
+// 最終的なlocationで記録
 void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
-	//config::Server&	server = searchServerConfig(server_config, server_name);
-	//config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	// access_logがどのコンテキストにあるか
-	//
-	// access_logのパスすべてに
+	// access_logがどのコンテキスがあれば出力する
+	if (location && location->directives_set.find("access_fd") != location->directives_set.end())
+	{
+		for (size_t i = 0; i < location->access_fd_list.size(); i++)
+		{
+			write(location->access_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (server.directives_set.find("access_fd") != server.directives_set.end())
+	{
+		for (size_t i = 0; i < server.access_fd_list.size(); i++)
+		{
+			write(server.access_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (this->config_->http.directives_set.find("access_fd") != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
+		{
+			write(this->config_->http.access_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
 }
 void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
-	//config::Server&	server = searchServerConfig(server_config, server_name);
-	//config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	// error_logがどのコンテキスがあれば出力する
+	if (location && location->directives_set.find("error_fd") != location->directives_set.end())
+	{
+		for (size_t i = 0; i < location->error_fd_list.size(); i++)
+		{
+			write(location->error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (server.directives_set.find("error_fd") != server.directives_set.end())
+	{
+		for (size_t i = 0; i < server.error_fd_list.size(); i++)
+		{
+			write(server.error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (this->config_->http.directives_set.find("error_fd") != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
+		{
+			write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (this->config_->directives_set.find("error_fd") != this->config_->directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
+		{
+			write(this->config_->error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
 }
 
 const config::Time&	ConfigHandler::searchKeepaliveTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const

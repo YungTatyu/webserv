@@ -73,7 +73,7 @@ class ConfigHandler
 							const config::Location* location,
 							const HttpRequest& request,
 							struct sockaddr_in client_addr ) const;
-		const std::string&	searchFile( const struct config::Server& server,
+		const std::string	searchFile( const struct config::Server& server,
 										const HttpRequest& request ) const;
 		void	writeAcsLog( const struct TiedServer& tied_servers,
 							const std::string& server_name,
