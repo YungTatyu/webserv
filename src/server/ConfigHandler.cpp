@@ -193,81 +193,81 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 	//config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 }
 
-const config::Time&	ConfigHandler::getKeepaliveTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
+const config::Time&	ConfigHandler::searchKeepaliveTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("keepalive_timeout"))
+	if (location && location->directives_set.find("keepalive_timeout") != location->directives_set.end())
 	{
 		return location->keepalive_timeout.getTime();
 	}
-	else if (server.directives_set.find("keepalive_timeout"))
+	else if (server.directives_set.find("keepalive_timeout") != server.directives_set.end())
 	{
 		return server.keepalive_timeout.getTime();
 	}
 	else // http兼default
 	{
-		return this->config_.http.keepalive_timeout.getTime();
+		return this->config_->http.keepalive_timeout.getTime();
 	}
 }
 
 
-const config::Time&	ConfigHandler::getSendTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
+const config::Time&	ConfigHandler::searchSendTimeout( const TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("send_timeout"))
+	if (location && location->directives_set.find("send_timeout") != location->directives_set.end())
 	{
 		return location->send_timeout.getTime();
 	}
-	else if (server.directives_set.find("send_timeout"))
+	else if (server.directives_set.find("send_timeout") != server.directives_set.end())
 	{
 		return server.send_timeout.getTime();
 	}
 	else // http兼default
 	{
-		return this->config_.http.send_timeout.getTime();
+		return this->config_->http.send_timeout.getTime();
 	}
 }
 
-const config::Time&	ConfigHandler::getUseridExpires( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
+const config::Time&	ConfigHandler::searchUseridExpires( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("userid_expires"))
+	if (location && location->directives_set.find("userid_expires") != location->directives_set.end())
 	{
 		return location->userid_expires.getTime();
 	}
-	else if (server.directives_set.find("userid_expires"))
+	else if (server.directives_set.find("userid_expires") != server.directives_set.end())
 	{
 		return server.userid_expires.getTime();
 	}
 	else // http兼default
 	{
-		return this->config_.http.userid_expires.getTime();
+		return this->config_->http.userid_expires.getTime();
 	}
 }
 
 const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const
 {
-	config::Server	*default_server = &tied_servers.servers_[0];
+	const config::Server*	default_server = tied_servers.servers_[0];
 
 	for (size_t i = 0; i < tied_servers.servers_.size(); i++)
 	{
 		if (tied_servers.servers_[i]->server_name.getName().find(server_name) != tied_servers.servers_[i]->server_name.getName().end())
 			return *tied_servers.servers_[i];
 		// default_server特定できるようにする
-		for (size_t j = 0; j < tied_server.servers_[i]->listen_list.size(); j++)
+		for (size_t j = 0; j < tied_servers.servers_[i]->listen_list.size(); j++)
 		{
 			const config::Listen& tmp_listen = tied_servers.servers_[i]->listen_list[j];
 			if (tmp_listen.getIsDefaultServer() &&
 				tied_servers.port_ == tmp_listen.getport() &&
 				tied_servers.addr_ == tmp_listen.getAddress())
 			{
-				default_server = &tied_servers.servers_[i];
+				default_server = tied_servers.servers_[i];
 			}
 		}
 	}
