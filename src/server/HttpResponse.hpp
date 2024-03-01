@@ -24,7 +24,7 @@ class HttpResponse
 		std::map<std::string, std::string>	headers_;
 		std::string			body_;
 		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap
-		static std::map<int, std::string> default_error_page_map_; // defaultのerror pageを格納するmap
+		static std::map<int, const std::string*> default_error_page_map_; // defaultのerror pageを格納するmap
 
 		// private member objects
 		const ConfigHandler	&config_handler_;
