@@ -17,21 +17,21 @@ TEST(ConfigTest, no_file)
 {
 	std::string filePath = "";
 
-	EXPECT_FALSE(config::init_config(filePath));
+	EXPECT_FALSE(config::initConfig(filePath));
 }
 
 TEST(ConfigTest, is_dir)
 {
 	std::string filePath = "test/conf/confFile/dir.conf";
 
-	EXPECT_FALSE(config::init_config(filePath));
+	EXPECT_FALSE(config::initConfig(filePath));
 }
 
 TEST(ConfigTest, inaccessible_file)
 {
 	std::string filePath = "test/conf/confFile/inaccessible.conf";
 
-	EXPECT_FALSE(config::init_config(filePath));
+	EXPECT_FALSE(config::initConfig(filePath));
 }
 
 TEST(LexerTokenizeTest, empty_file)

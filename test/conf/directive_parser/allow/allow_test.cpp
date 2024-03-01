@@ -12,7 +12,7 @@ const std::string	kAllow = "allow";
 
 TEST(allowTest, ipv4)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/allow/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/allow/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -56,7 +56,7 @@ TEST(allowTest, ipv4)
 
 TEST(allowTest, ipv6)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/allow/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/allow/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -121,7 +121,7 @@ TEST(allowTest, ipv6)
 
 
 TEST(allowTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

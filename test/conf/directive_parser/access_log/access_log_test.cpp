@@ -26,7 +26,7 @@ const std::string	kAccessLog = "access_log";
 
 TEST(accesslogTest, allContext)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/access_log/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/access_log/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -58,7 +58,7 @@ TEST(accesslogTest, allContext)
 
 TEST(accesslogTest, notFound) {
 		
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
