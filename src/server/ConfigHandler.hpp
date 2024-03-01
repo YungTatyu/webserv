@@ -62,7 +62,7 @@ class ConfigHandler
 		const config::Main*	config_;
 
 		// initialize
-		ConfigHandler();
+		ConfigHandler() : config_(NULL) {};
 		void	loadConfiguration( const config::Main* config );
 
 		// method
@@ -92,7 +92,7 @@ class ConfigHandler
 		const config::Time&	searchUseridExpires( const struct TiedServer& tied_servers,
 												const std::string& server_name,
 												const std::string& uri ) const;
-		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
+		//const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
 		const config::ErrorPage*	searchErrorPage( const config::Server& server,
 														const config::Location* location,
 														const unsigned int code ) const;
