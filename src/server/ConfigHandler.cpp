@@ -197,18 +197,58 @@ const config::Time&	ConfigHandler::getKeepaliveTimeout( const struct TiedServer&
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
 	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	if (location && location->directives_set.find("keepalive_timeout"))
+	{
+		return location->keepalive_timeout.getTime();
+	}
+	else if (server.directives_set.find("keepalive_timeout"))
+	{
+		return server.keepalive_timeout.getTime();
+	}
+	else // http兼default
+	{
+		return this->config_.http.keepalive_timeout.getTime();
+	}
 }
+
 
 const config::Time&	ConfigHandler::getSendTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
 	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	if (location && location->directives_set.find("send_timeout"))
+	{
+		return location->send_timeout.getTime();
+	}
+	else if (server.directives_set.find("send_timeout"))
+	{
+		return server.send_timeout.getTime();
+	}
+	else // http兼default
+	{
+		return this->config_.http.send_timeout.getTime();
+	}
 }
 
 const config::Time&	ConfigHandler::getUseridExpires( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
 	config::Server&	server = searchServerConfig(server_config, server_name);
 	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	if (location && location->directives_set.find("userid_expires"))
+	{
+		return location->userid_expires.getTime();
+	}
+	else if (server.directives_set.find("userid_expires"))
+	{
+		return server.userid_expires.getTime();
+	}
+	else // http兼default
+	{
+		return this->config_.http.userid_expires.getTime();
+	}
 }
 
 const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const
