@@ -3,6 +3,7 @@
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
+#include "FileUtils.hpp"
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -30,24 +31,22 @@ const char	*config::Index::kDefaultFile_ = "index.html";
 
 config::Main	*config::initConfig( const std::string& file_path )
 {
-	char	absolute_path[MAXPATHLEN];
+	std::string	absolute_path;
 
 	// 絶対pathを取得
-	if (realpath(file_path.c_str(), absolute_path) == NULL)
-	{
-		std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	absolute_path = FileUtils::deriveAbsolutePath(file_path);
+	if (absolute_path == "")
 		return NULL;
-	}
 
 	// file_path が存在するかどうか
-	if (access(absolute_path, F_OK))
+	if (access(absolute_path.c_str(), F_OK))
 	{
 		std::cerr << "webserv: [emerg] access() \"" << absolute_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		return NULL;
 	}
 
 	// file_path の読み取り権限があるかどうか？ 
-	if (access(absolute_path, R_OK))
+	if (access(absolute_path.c_str(), R_OK))
 	{
 		std::cerr << "webserv: [emerg] access() \"" << absolute_path << "\" failed (" << errno << ": " << strerror(errno) << ")"<< std::endl;
 		return NULL;
@@ -56,7 +55,7 @@ config::Main	*config::initConfig( const std::string& file_path )
 	// file_path がファイルかどうか確認する。
 	struct stat fileInfo;
 
-	if (stat(absolute_path, &fileInfo) == 0 && !S_ISREG(fileInfo.st_mode))
+	if (stat(absolute_path.c_str(), &fileInfo) == 0 && !S_ISREG(fileInfo.st_mode))
 	{
 		std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
 		return NULL;

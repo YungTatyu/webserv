@@ -1,5 +1,5 @@
 #include "InitLogFd.hpp"
-#include "../server/FileUtils.hpp"
+#include "FileUtils.hpp"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -27,7 +27,8 @@ bool	config::addAcsFdList( std::vector<int>& fd_list, const std::vector<config::
 			fd_list.clear();
 			return true;
 		}
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_CREAT | O_WRONLY, S_IWRITE);
+		// access権限がない時ときは落ちないようにする
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
 		if (tmp_fd == -1)
 			return false;
 		fd_list.push_back(tmp_fd);
@@ -44,7 +45,8 @@ bool	config::addErrFdList( std::vector<int>& fd_list, const std::vector<config::
 	for (size_t i = 0; i < error_log_list.size(); i++)
 	{
 		tmp_path = error_log_list[i].getFile();
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_CREAT | O_WRONLY, S_IWRITE);
+		// access権限がない時ときは落ちないようにする
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
 		if (tmp_fd == -1)
 			return false;
 		fd_list.push_back(tmp_fd);
@@ -66,7 +68,7 @@ bool	config::initAcsLogFds( config::Main& config )
 	}
 	else
 	{
-		int tmp_fd = FileUtils::wrapperOpen(FileUtils::getAbsolutePath("../../") + "logs/access_log", O_CREAT | O_WRONLY, S_IWRITE);
+		int tmp_fd = FileUtils::wrapperOpen(FileUtils::deriveAbsolutePath("../../") + "logs/access_log", O_CREAT | O_WRONLY, S_IWRITE);
 		if (tmp_fd == -1)
 			return false;
 		config.http.access_fd_list.push_back(tmp_fd);
@@ -114,7 +116,7 @@ bool	config::initErrLogFds( config::Main& config )
 	}
 	else
 	{
-		int tmp_fd = FileUtils::wrapperOpen(FileUtils::getAbsolutePath("../../") + "logs/error_log", O_CREAT | O_WRONLY, S_IWRITE);
+		int tmp_fd = FileUtils::wrapperOpen(FileUtils::deriveAbsolutePath("../../") + "logs/error_log", O_CREAT | O_WRONLY, S_IWRITE);
 		if (tmp_fd == -1)
 			return false;
 		config.http.error_fd_list.push_back(tmp_fd);
