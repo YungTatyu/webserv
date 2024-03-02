@@ -168,6 +168,8 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 		}
 	}
 	newRequest.uri = rawRequest.substr(0, rawRequest.find(' '));
+	rawRequest = rawRequest.substr(rawRequest.find(' ') + 1);
+	std::cout << "ending uri parse: " << rawRequest << std::endl;
 	return HttpRequest::PARSE_URI_DONE;
 }
 
@@ -176,7 +178,10 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string& rawRequest, HttpR
 	// if ( version != "HTTP/1.1" )
 	// 	return HttpRequest::PARSE_ERROR;
 	// newRequest.version = version;
-	(void)rawRequest, (void)newRequest;
+	std::cout << "in version" << rawRequest << std::endl;
+	newRequest.version = rawRequest.substr(0, rawRequest.find('\r'));
+	// /r -> almost done
+	// /n -> done
 	return HttpRequest::PARSE_VERSION_DONE;
 }
 
@@ -191,7 +196,8 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, H
 	} state;
 
 	state = sw_start;
-	for (size_t i = 0; i < rawRequest.size(); ++i) {
+	size_t i = 0;
+	while (state != sw_end && i < rawRequest.size()) {
 		switch (state) {
 		case sw_start:
 			state = sw_method;
@@ -202,19 +208,19 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, H
 			break;
 		case sw_uri:
 			HttpRequest::parseUri(rawRequest, newRequest);
+			std::cout << "sw_uri done" << std::endl;
 			state = sw_version;
 			break;
 		case sw_version:
+			std::cout << "version???" << std::endl;
 			if ( HttpRequest::parseVersion(rawRequest, newRequest) == false )
 				return HttpRequest::PARSE_ERROR;
 			state = sw_end;
 			break;
 		case sw_end:
-			rawRequest = rawRequest.substr(i);
-			break;
-		default:
 			break;
 		};
+		++i;
 	}
 	return HttpRequest::PARSE_REQUEST_LINE_DONE;
 }
