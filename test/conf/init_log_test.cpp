@@ -17,19 +17,20 @@ protected:
 	void SetUp() override {
 		std::string		file_path;
 		const testing::TestInfo*	test_info = testing::UnitTest::GetInstance()->current_test_info();
-		if (test_info->name() == "initAcsLogFds_Success") {
+		if (static_cast<std::string>(test_info->name()) == "initAcsLogFds_Success") {
 			file_path = "test/conf/log_test_files/initAcsLogFds_success.conf";
 		}
-		else if (test_info->name() == "initAcsLogFds_Fail") {
+		else if (static_cast<std::string>(test_info->name()) == "initAcsLogFds_Fail") {
 			file_path = "test/conf/log_test_files/initAcsLogFds_fail.conf";
 		}
-		else if (test_info->name() == "initErrLogFds_Success") {
+		else if (static_cast<std::string>(test_info->name()) == "initErrLogFds_Success") {
 			file_path = "test/conf/log_test_files/initErrLogFds_success.conf";
 		}
-		else if (test_info->name() == "initErrLogFds_Fail") {
+		else if (static_cast<std::string>(test_info->name()) == "initErrLogFds_Fail") {
 			file_path = "test/conf/log_test_files/initErrLogFds_fail.conf";
 		}
 		else {
+			this->config_ = new config::Main();
 			GTEST_SKIP();
 		}
 
