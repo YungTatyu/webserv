@@ -10,6 +10,7 @@ class Timer
 		unsigned long	raw_time_ms_; // directiveに設定されたraw value
 		unsigned long	timeout_ms_; // timeoutの時間 = now + raw_time_ms_
 		Timer();
+		Timer	&operator=(const Timer &other);
 	public:
 		Timer(const int fd, const config::Time &time);
 		~Timer();
