@@ -58,19 +58,21 @@ void HttpRequest::parseChunked(HttpRequest& request)
 {
 	(void)request;
 }
-
+#include <iostream>
 HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRequest& newRequest)
 {
 	enum ParseMethodPhase {
 		sw_method_start,
 		sw_method_mid,
+		sw_method_almost_end,
 		sw_method_end,
 	} state;
 
 	std::string method;
 
 	state = sw_method_start;
-	for (size_t i = 0; i < rawRequest.size() && state != sw_method_end; ++i) {
+	size_t i = 0;
+	while (state != sw_method_end && i < rawRequest.size()) {
 		char ch = rawRequest[i];
 		switch (state) {
 		case sw_method_start:
@@ -78,16 +80,28 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 			state = sw_method_mid;
 			break;
 		case sw_method_mid:
-			if (std::isalpha(ch)) {
+			if (ch == ' ') {
+				std::cout << "space detected" << std::endl;
+			}
+			if (std::isalpha(static_cast<unsigned char>(ch))) {
 				method += ch;
+				std::cout << "cur:" << ch << std::endl;
 			} else {
-				state = sw_method_end;
+				state = sw_method_almost_end;
+				std::cout << "state changed to method end" << std::endl;
 			}
 			break;
-		case sw_method_end:
+		case sw_method_almost_end:
+			std::cout << "in almost method end" << std::endl;
 			rawRequest = rawRequest.substr(i);
+			std::cout << "update??" << std::endl;
+			std::cout << rawRequest << std::endl;
+			state = sw_method_end;
+			break;
+		case sw_method_end:
 			break;
 		}
+		++i;
 	}
 
 	switch (method.size()) {
@@ -116,6 +130,9 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 		break;
 	}
 
+
+	std::cout << "newwwwwwwww" << std::endl;
+	std::cout << rawRequest << std::endl;
 	return HttpRequest::PARSE_METHOD_DONE;
 }
 
