@@ -33,6 +33,8 @@
 class HttpMessage
 {
 	public:
+		static std::string setQueryString( std::string& uri );
+		static std::string setScriptPath( std::string& uri );
 		static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 
