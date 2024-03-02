@@ -14,6 +14,7 @@ class Timer
 		Timer(const int fd, const config::Time &time);
 		~Timer();
 		bool	operator<(const Timer &other) const;
+		bool	operator>(const Timer &other) const;
 		int	getFd() const;
 		unsigned long	getRawtime() const;
 		unsigned long	getTimeout() const;

@@ -44,3 +44,8 @@ bool	Timer::operator<(const Timer &other) const
 {
 	return this->timeout_ms_ < other.timeout_ms_;
 }
+
+bool	Timer::operator>(const Timer &other) const
+{
+	return this->timeout_ms_ > other.timeout_ms_;
+}
