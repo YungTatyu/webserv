@@ -10,9 +10,9 @@ class TimerTree
 {
 	public:
 		typedef std::priority_queue<
-			Timer,
-			std::vector<Timer>,
-			std::greater<Timer>
+			const Timer,
+			std::vector<const Timer>,
+			std::greater<const Timer>
 		> timer_que;
 		TimerTree();
 		~TimerTree();
