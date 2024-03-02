@@ -20,10 +20,11 @@ int	TimerTree::findTimer() const
 	return 1;
 }
 
-const TimerTree::timer_que	&TimerTree::getTimerTree() const
+const std::multiset<Timer>	&TimerTree::getTimerTree() const
 {
-	return this->timer_que_;
+	return this->timer_tree_;
 }
+
 
 const std::set<int>	&TimerTree::getFdSet() const
 {
