@@ -80,22 +80,14 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 			state = sw_method_mid;
 			break;
 		case sw_method_mid:
-			if (ch == ' ') {
-				std::cout << "space detected" << std::endl;
-			}
 			if (std::isalpha(static_cast<unsigned char>(ch))) {
 				method += ch;
-				std::cout << "cur:" << ch << std::endl;
 			} else {
 				state = sw_method_almost_end;
-				std::cout << "state changed to method end" << std::endl;
 			}
 			break;
 		case sw_method_almost_end:
-			std::cout << "in almost method end" << std::endl;
 			rawRequest = rawRequest.substr(i);
-			std::cout << "update??" << std::endl;
-			std::cout << rawRequest << std::endl;
 			state = sw_method_end;
 			break;
 		case sw_method_end:
@@ -129,10 +121,6 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
 	}
-
-
-	std::cout << "newwwwwwwww" << std::endl;
-	std::cout << rawRequest << std::endl;
 	return HttpRequest::PARSE_METHOD_DONE;
 }
 
@@ -208,11 +196,9 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, H
 			break;
 		case sw_uri:
 			HttpRequest::parseUri(rawRequest, newRequest);
-			std::cout << "sw_uri done" << std::endl;
 			state = sw_version;
 			break;
 		case sw_version:
-			std::cout << "version???" << std::endl;
 			if ( HttpRequest::parseVersion(rawRequest, newRequest) == false )
 				return HttpRequest::PARSE_ERROR;
 			state = sw_end;
