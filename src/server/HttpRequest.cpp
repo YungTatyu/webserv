@@ -58,7 +58,7 @@ void HttpRequest::parseChunked(HttpRequest& request)
 {
 	(void)request;
 }
-#include <iostream>
+
 HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRequest& newRequest)
 {
 	enum ParseMethodPhase {
@@ -157,7 +157,6 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 	}
 	newRequest.uri = rawRequest.substr(0, rawRequest.find(' '));
 	rawRequest = rawRequest.substr(rawRequest.find(' ') + 1);
-	std::cout << "ending uri parse: " << rawRequest << std::endl;
 	return HttpRequest::PARSE_URI_DONE;
 }
 
@@ -166,7 +165,6 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string& rawRequest, HttpR
 	// if ( version != "HTTP/1.1" )
 	// 	return HttpRequest::PARSE_ERROR;
 	// newRequest.version = version;
-	std::cout << "in version" << rawRequest << std::endl;
 	newRequest.version = rawRequest.substr(0, rawRequest.find('\r'));
 	// /r -> almost done
 	// /n -> done
@@ -235,10 +233,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& rawRequest, HttpR
 	std::string cur_value;
 	state = sw_start;
 	size_t i = 0;
-	std::cout << "entering header parse: " << rawRequest << std::endl;
 	while (state != sw_end && i < rawRequest.size()) {
 		char ch = rawRequest[i];
-		std::cout << "ch=" << ch << std::endl;
 		switch (state) {
 		case sw_start:
 			if (!std::isalnum(ch)) state = sw_end;
@@ -263,8 +259,6 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string& rawRequest, HttpR
 			break;
 		case sw_value:
 			if (!std::isalnum(ch)) {
-				std::cout << "curname:" << cur_name << std::endl;
-				std::cout << "curvalue:" << cur_value << std::endl;
 				newRequest.headers[cur_name] = cur_value;
 				cur_name = "";
 				cur_value = "";
