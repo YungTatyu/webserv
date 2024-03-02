@@ -42,7 +42,7 @@ HttpRequest HttpRequest::parseRequest(std::string& rawRequest)
 			state = sw_body;
 			break;
 		case sw_body:
-			// parseBody();
+			HttpRequest::parseBody(rawRequest, newRequest);
 			state = sw_end;
 			break;
 		case sw_end:
@@ -217,7 +217,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, H
  *
  *
  */
-HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& rawRequest, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseHeaders(std::string& rawRequest, HttpRequest& newRequest)
 {
 	enum parseHeaderPhase {
 		sw_start,
@@ -226,8 +226,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& rawRequest,
 		sw_space_before_value,
 		sw_value,
 		sw_space_after_value,
-		sw_almost_done,
 		sw_header_almost_done,
+		sw_header_done,
 		sw_end
 	} state;
 
@@ -241,59 +241,70 @@ HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& rawRequest,
 		std::cout << "ch=" << ch << std::endl;
 		switch (state) {
 		case sw_start:
-			if (ch == '\r') {
-				state = sw_header_almost_done;
-			}
-			else if (ch == '\n') {
-				state = sw_end;
-				return HttpRequest::PARSE_INPROGRESS;
-			}
-			state = sw_name;
+			if (!std::isalnum(ch)) state = sw_end;
+			else state = sw_name;
 			break;
 		case sw_name:
-			if (!cur_name.empty() && !std::isalpha(ch)) {
+			if (!cur_name.empty() && ch == ':') {
 				newRequest.headers[cur_name];
 				state = sw_colon;
+			} else {
+				cur_name += ch;
+				++i;
 			}
-			cur_name += ch;
 			break;
 		case sw_colon:
-			if (ch != ':')
-				return HttpRequest::PARSE_ERROR;
 			state = sw_space_before_value;
+			++i;
 			break;
 		case sw_space_before_value:
-			if (ch != ' ') {
-				state = sw_value;
-			}
+			if (ch != ' ') state = sw_value;
+			else ++i;
 			break;
 		case sw_value:
-			if (!std::isalpha(ch)) {
+			if (!std::isalnum(ch)) {
+				std::cout << "curname:" << cur_name << std::endl;
+				std::cout << "curvalue:" << cur_value << std::endl;
 				newRequest.headers[cur_name] = cur_value;
 				cur_name = "";
 				cur_value = "";
 				state = sw_space_after_value;
+			} else {
+				cur_value += ch;
+				++i;
 			}
-			cur_value += ch;
 			break;	
 		case sw_space_after_value:
 			if (ch != ' ') {
-				state = sw_start;
+				state = sw_header_almost_done;
+			} else {
+				++i;
 			}
+			break;
+		case sw_header_almost_done:
+			if (ch != '\r')
+				return HttpRequest::PARSE_ERROR;
+			state = sw_header_done;
+			++i;
+			break;
+		case sw_header_done:
+			if (ch != '\n')
+				return HttpRequest::PARSE_ERROR;
+			state = sw_start;
+			++i;
 			break;
 		default:
 			// hmm
 			break;
 		}
-		++i;
 	}
+	rawRequest = rawRequest.substr(i + 2);
 	return HttpRequest::PARSE_HEADER_DONE;
 }
 
-void HttpRequest::parseBody(std::istringstream& body, HttpRequest& newRequest)
+void HttpRequest::parseBody(std::string& body, HttpRequest& newRequest)
 {
-	(void)body;
-	(void)newRequest;
+	newRequest.body = body;
 }
 
 std::string HttpRequest::urlDecode(const std::string& str, HttpRequest& newRequest)

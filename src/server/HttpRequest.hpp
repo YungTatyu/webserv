@@ -51,8 +51,8 @@ class HttpRequest
 		static ParseState parseUri(std::string& rawRequest, HttpRequest& newRequest);
 		static ParseState parseVersion(std::string& rawRequest, HttpRequest& newRequest);
 		static ParseState parseRequestLine(std::string& rawRequest, HttpRequest& newRequest);
-		static ParseState parseHeaders(const std::string& rawRequest, HttpRequest& newRequest);
-		static void parseBody(std::istringstream& rawRequest,  HttpRequest& newRequest);
+		static ParseState parseHeaders(std::string& rawRequest, HttpRequest& newRequest);
+		static void parseBody(std::string& rawRequest,  HttpRequest& newRequest);
 		std::string urlDecode(const std::string& str, HttpRequest& newRequest);
 };
 
