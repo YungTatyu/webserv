@@ -170,6 +170,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string& rawRequest, HttpR
 	newRequest.version = rawRequest.substr(0, rawRequest.find('\r'));
 	// /r -> almost done
 	// /n -> done
+	rawRequest = rawRequest.substr(rawRequest.find('\n') + 1);
 	return HttpRequest::PARSE_VERSION_DONE;
 }
 
@@ -216,7 +217,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, H
  *
  *
  */
-HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& headers, HttpRequest& newRequest)
+HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& rawRequest, HttpRequest& newRequest)
 {
 	enum parseHeaderPhase {
 		sw_start,
@@ -233,23 +234,24 @@ HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& headers, Ht
 	std::string cur_name;
 	std::string cur_value;
 	state = sw_start;
-	for (size_t i = 0; i < headers.size(); ++i) {
-		char ch = headers[i];
+	size_t i = 0;
+	std::cout << "entering header parse: " << rawRequest << std::endl;
+	while (state != sw_end && i < rawRequest.size()) {
+		char ch = rawRequest[i];
+		std::cout << "ch=" << ch << std::endl;
 		switch (state) {
 		case sw_start:
-			if (ch == '\r')
+			if (ch == '\r') {
 				state = sw_header_almost_done;
+			}
 			else if (ch == '\n') {
 				state = sw_end;
 				return HttpRequest::PARSE_INPROGRESS;
 			}
-			else {
-				return HttpRequest::PARSE_ERROR;
-			}
 			state = sw_name;
 			break;
 		case sw_name:
-			if (!std::isalpha(ch)) {
+			if (!cur_name.empty() && !std::isalpha(ch)) {
 				newRequest.headers[cur_name];
 				state = sw_colon;
 			}
@@ -283,6 +285,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(const std::string& headers, Ht
 			// hmm
 			break;
 		}
+		++i;
 	}
 	return HttpRequest::PARSE_HEADER_DONE;
 }
