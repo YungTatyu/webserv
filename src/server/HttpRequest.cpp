@@ -147,24 +147,27 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 		sw_start,
 		sw_uriBeforeSlash,
 		sw_schema,
+		sw_almost_end,
 		sw_end
 	} state;
 
 	state = sw_start;
 	// ここでステートマシンを実装する
-	for (size_t i = 0; i < rawRequest.size(); ++i) {
+	while (state != sw_end) {
 		switch (state) {
 		case sw_start:
 			state = sw_start;
 		case sw_uriBeforeSlash:
 			state = sw_schema;
 		case sw_schema:
+			state = sw_almost_end;
+		case sw_almost_end:
 			state = sw_end;
 		case sw_end:
-			newRequest.uri = rawRequest;	
 			break;
 		}
 	}
+	newRequest.uri = rawRequest.substr(0, rawRequest.find(' '));
 	return HttpRequest::PARSE_URI_DONE;
 }
 
