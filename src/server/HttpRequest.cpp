@@ -3,7 +3,7 @@
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::map<std::string, std::string>& headers,
-			 const std::map<std::string, std::string>& queries,
+			 const std::string& queries,
 			 const std::string& body,
 			 const ParseState parseState)
 			: method(method), uri(uri), version(version), headers(headers), queries(queries), body(body), parseState(parseState)
@@ -155,7 +155,11 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 			break;
 		}
 	}
-	newRequest.uri = rawRequest.substr(0, rawRequest.find(' '));
+	std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
+	newRequest.uri = tmp.substr(0, tmp.find('?'));
+	size_t qindex = tmp.find('?');
+	if (qindex != std::string::npos)
+		newRequest.queries = tmp.substr(tmp.find('?') + 1);
 	rawRequest = rawRequest.substr(rawRequest.find(' ') + 1);
 	return HttpRequest::PARSE_URI_DONE;
 }
