@@ -6,7 +6,6 @@ TimerTree::TimerTree() {}
 
 TimerTree::~TimerTree() {}
 
-
 void	TimerTree::addTimer(const Timer &timer)
 {
 	deleteTimer(timer.getFd());
@@ -39,6 +38,24 @@ std::multiset<Timer>::iterator	TimerTree::findTimerByFd(const int fd)
 	return this->timer_tree_.end();
 }
 
+/**
+ * @brief timeoutが存在するか
+ * findTimer()を呼ぶ前に、この関数を呼ぶ必要がある
+ * 
+ * @return true 
+ * @return false 
+ */
+bool	TimerTree::haveTimeout() const
+{
+	return this->timer_tree_.size() != 0;
+}
+
+/**
+ * @brief timeoutに一番近いnodeのtimeout値を返す
+ * この関数を呼ぶ前に、haveTimeout()を呼ぶ必要がある
+ * 
+ * @return int timeout
+ */
 int	TimerTree::findTimer() const
 {
 	const std::multiset<Timer>::iterator it = this->timer_tree_.begin();
@@ -46,7 +63,8 @@ int	TimerTree::findTimer() const
 	if (it == this->timer_tree_.end())
 		return -1;
 
-	const unsigned long	timeout_raw = it->getTimeout();
+	const unsigned long	timeout_raw = it->getTimeout() - Timer::getCurrentTime();
+	// timeoutの値がintmaxを超えている場合は、intmaxを返す
 	const int	timeout = timeout_raw > static_cast<unsigned long>(std::numeric_limits<int>::max()) ?
 		std::numeric_limits<int>::max() : static_cast<int>(timeout_raw);
 	return timeout;

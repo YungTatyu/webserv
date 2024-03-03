@@ -11,7 +11,7 @@ Timer::Timer(const int fd, const config::Time &time) : fd_(fd)
 
 Timer::~Timer() {}
 
-unsigned long	Timer::getCurrentTime() const
+unsigned long	Timer::getCurrentTime()
 {
 	// struct timeval	t;
 

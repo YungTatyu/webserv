@@ -20,7 +20,7 @@ class Timer
 		unsigned long	getRawtime() const;
 		unsigned long	getTimeout() const;
 		void	setTimeout(const config::Time &time);
-		unsigned long	getCurrentTime() const;
+		static unsigned long	getCurrentTime();
 };
 
 #endif

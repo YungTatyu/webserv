@@ -2,21 +2,17 @@
 #include <gtest/gtest-param-test.h>
 
 #include "TimerTree.hpp"
+#include "Timer.hpp"
 
 #include <vector>
 #include <limits> 
 #include <sys/time.h>
 
+// timer testで許容する範囲: 3ms
+const int kacceptable_timer_gap = 3;
+
 namespace test
 {
-	unsigned long	getCurrentTime()
-	{
-		struct timeval	t;
-
-		gettimeofday(&t, NULL);
-		return (t.tv_sec * 1000) + (t.tv_usec / 1000);
-	}
-
 	void	testFdSet(const std::set<int> &fd_set, const int fd, const bool expect_found)
 	{
 		if (!expect_found) {
@@ -29,7 +25,7 @@ namespace test
 	void	testFdsSet(const std::set<int> &fd_set, const std::vector<int> &fds, const std::vector<bool> &expect_founds)
 	{
 		size_t	i = 0;
-		for (std::vector::const_iterator it = fds.begin(); it != fds.end(); ++it)
+		for (std::vector<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
 		{
 			testFdSet(fd_set, *it, expect_founds[i]);
 			++i;
@@ -46,7 +42,10 @@ namespace test
 			++it
 		)
 		{
-			EXPECT_EQ(it->getTimeout(), expect[i]);
+			// timerの誤差(3ms)は許容する
+			const long	gap = (expect[i] + Timer::getCurrentTime()) - it->getTimeout();
+			EXPECT_TRUE(gap <= kacceptable_timer_gap && gap >= -kacceptable_timer_gap);
+			EXPECT_EQ(expect[i] + Timer::getCurrentTime(), it->getTimeout());
 			testFdSet(fd_set, it->getFd(), true);
 			++i;
 		}
@@ -78,15 +77,17 @@ namespace test
 
 	void	expectTimer(const int actual, const int expect)
 	{
-		// timerの誤差(10ms)は許容する
-		EXPECT_TRUE((expect - actual) < 10);
+		// timerの誤差(3ms)は許容する
+		const long	gap = expect - actual;
+		EXPECT_TRUE(gap <= kacceptable_timer_gap && gap >= -kacceptable_timer_gap);
+		EXPECT_EQ(expect, actual);
 	}
 } // namespace test
 
 
 TEST(timertree, addtimer)
 {
-	unsigned long	now = test::getCurrentTime();
+	unsigned long	now = Timer::getCurrentTime();
 	TimerTree	timer_tree;
 	unsigned long	longmax = std::numeric_limits<long>::max();
 
@@ -120,36 +121,35 @@ TEST(timertree, addtimer)
 TEST(timertree, deletetimer)
 {
 	TimerTree	timer_tree;
-	unsigned long	now = test::getCurrentTime();
 
 	test::initTimerTree(timer_tree, {
-		now + 1, // fd 0
-		now + 2, // fd 1
-		now + 3, // fd 2
-		now + 4, // fd 3
-		now + 5, // fd 4
-		now + 6, // fd 5
-		now + 7, // fd 6
-		now + 8, // fd 7
-		now + 9, // fd 8
-		now + 10, // fd 9
-		now + 2, // fd 10
-		now + 3, // fd 11
-		now + 4, // fd 12
-		now + 5 // fd 13
+		1, // fd 0
+		2, // fd 1
+		3, // fd 2
+		4, // fd 3
+		5, // fd 4
+		6, // fd 5
+		7, // fd 6
+		8, // fd 7
+		9, // fd 8
+		10, // fd 9
+		2, // fd 10
+		3, // fd 11
+		4, // fd 12
+		5 // fd 13
 	});
 
 	test::deleteTimers(timer_tree, {0, 2, 3, 9, 12, 13});
 
 	test::testValue(timer_tree, {
-		now + 2, // fd 1
-		now + 2, // fd 10
-		now + 3, // fd 11
-		now + 5, // fd 4
-		now + 6, // fd 5
-		now + 7, // fd 6
-		now + 8, // fd 7
-		now + 9, // fd 8
+		2, // fd 1
+		2, // fd 10
+		3, // fd 11
+		5, // fd 4
+		6, // fd 5
+		7, // fd 6
+		8, // fd 7
+		9, // fd 8
 	});
 
 	test::testFdsSet(timer_tree.getFdSet(),
@@ -161,7 +161,7 @@ TEST(timertree, deletetimer)
 TEST(timertree, findTimer_notimer)
 {
 	TimerTree	timer_tree;
-	unsigned long	now = test::getCurrentTime();
+	unsigned long	now = Timer::getCurrentTime();
 
 	// timerが見つからない
 	EXPECT_EQ(timer_tree.findTimer(), -1);
