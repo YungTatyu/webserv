@@ -9,7 +9,7 @@
 #include <sys/time.h>
 
 // timer testで許容する範囲: 3ms
-const int kacceptable_timer_gap = 3;
+const int kAcceptableTimerGap = 3;
 
 namespace test
 {
@@ -44,7 +44,7 @@ namespace test
 		{
 			// timerの誤差(3ms)は許容する
 			const long	gap = (expect[i] + Timer::getCurrentTime()) - it->getTimeout();
-			EXPECT_TRUE(gap <= kacceptable_timer_gap && gap >= -kacceptable_timer_gap);
+			EXPECT_TRUE(gap <= kAcceptableTimerGap && gap >= -kAcceptableTimerGap);
 			EXPECT_EQ(expect[i] + Timer::getCurrentTime(), it->getTimeout());
 			testFdSet(fd_set, it->getFd(), true);
 			++i;
@@ -79,7 +79,7 @@ namespace test
 	{
 		// timerの誤差(3ms)は許容する
 		const long	gap = expect - actual;
-		EXPECT_TRUE(gap <= kacceptable_timer_gap && gap >= -kacceptable_timer_gap);
+		EXPECT_TRUE(gap <= kAcceptableTimerGap && gap >= -kAcceptableTimerGap);
 		EXPECT_EQ(expect, actual);
 	}
 } // namespace test
