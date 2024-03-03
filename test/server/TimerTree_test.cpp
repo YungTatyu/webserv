@@ -65,9 +65,9 @@ namespace test
 		}
 	}
 	
-	void	deleteTimers(TimerTree &timer_tree, const std::vector<unsigned long> &fds)
+	void	deleteTimers(TimerTree &timer_tree, const std::vector<int> &fds)
 	{
-		for (std::vector<unsigned long>::const_iterator it = fds.begin();
+		for (std::vector<int>::const_iterator it = fds.begin();
 			it != fds.end();
 			++it
 		)
