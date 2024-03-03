@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <iostream>
 
+unsigned long	Timer::current_time_;
+
 Timer::Timer(const int fd, const config::Time &time) : fd_(fd)
 {
 	setTimeout(time);
@@ -11,7 +13,12 @@ Timer::Timer(const int fd, const config::Time &time) : fd_(fd)
 
 Timer::~Timer() {}
 
-unsigned long	Timer::getCurrentTime()
+/**
+ * @brief getCurrentTime()を呼ぶたびに計算の処理をしたくない
+ * getCurrentTime()を呼ぶ前に、この関数を読ぶ
+ * 
+ */
+void	Timer::updateCurrentTime()
 {
 	// struct timeval	t;
 
@@ -34,7 +41,19 @@ unsigned long	Timer::getCurrentTime()
 
 	time_t	sec = ts.tv_sec;
 	long	msec = ts.tv_nsec / 1000000;
-	return (sec * 1000) + msec;
+	current_time_ = (sec * 1000) + msec;
+}
+
+/**
+ * @brief この関数を呼ぶ前に、updateCurrentTime()を呼んで、
+ * current_timeを初期化する必要がある（毎回初期化する必要はない）
+ * timeoutの処理をする前に、一度だけcurrent_timeをupdateする
+ * 
+ * @return unsigned long 
+ */
+unsigned long	Timer::getCurrentTime()
+{
+	return current_time_;
 }
 
 int	Timer::getFd() const

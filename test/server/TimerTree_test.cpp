@@ -45,7 +45,6 @@ namespace test
 			// timerの誤差(3ms)は許容する
 			const long	gap = (expect[i] + Timer::getCurrentTime()) - it->getTimeout();
 			EXPECT_TRUE(gap <= kAcceptableTimerGap && gap >= -kAcceptableTimerGap);
-			EXPECT_EQ(expect[i] + Timer::getCurrentTime(), it->getTimeout());
 			testFdSet(fd_set, it->getFd(), true);
 			++i;
 		}
@@ -87,6 +86,7 @@ namespace test
 
 TEST(timertree, addtimer)
 {
+	Timer::updateCurrentTime();
 	unsigned long	now = Timer::getCurrentTime();
 	TimerTree	timer_tree;
 	unsigned long	longmax = std::numeric_limits<long>::max();
@@ -122,6 +122,7 @@ TEST(timertree, deletetimer)
 {
 	TimerTree	timer_tree;
 
+	Timer::updateCurrentTime();
 	test::initTimerTree(timer_tree, {
 		1, // fd 0
 		2, // fd 1
@@ -161,6 +162,7 @@ TEST(timertree, deletetimer)
 TEST(timertree, findTimer_notimer)
 {
 	TimerTree	timer_tree;
+	Timer::updateCurrentTime();
 	unsigned long	now = Timer::getCurrentTime();
 
 	// timerが見つからない
@@ -176,6 +178,7 @@ TEST(timertree, findTimer_notimer)
 TEST(timertree, findTimer)
 {
 	TimerTree	timer_tree;
+	Timer::updateCurrentTime();
 	unsigned long	longmax = std::numeric_limits<long>::max();
 
 	test::initTimerTree(timer_tree, {
