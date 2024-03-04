@@ -16,6 +16,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
 	# src files
+	src/FileUtils.cpp
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
@@ -24,7 +25,6 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/InitLogFd.cpp
 	src/server/CGIHandler.cpp
 	src/server/ConfigHandler.cpp
-	src/server/FileUtils.cpp
 	src/server/HttpMessage.cpp 
 	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
