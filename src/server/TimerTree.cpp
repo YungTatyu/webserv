@@ -45,14 +45,14 @@ std::multiset<Timer>::iterator	TimerTree::findTimerByFd(const int fd)
  * @return true 
  * @return false 
  */
-bool	TimerTree::haveTimeout() const
+bool	TimerTree::haveTimer() const
 {
 	return this->timer_tree_.size() != 0;
 }
 
 /**
  * @brief timeoutに一番近いnodeのtimeout値を返す
- * この関数を呼ぶ前に、haveTimeout()を呼ぶ必要がある
+ * この関数を呼ぶ前に、haveTimer()を呼ぶ必要がある
  * 
  * @return int timeout
  */
