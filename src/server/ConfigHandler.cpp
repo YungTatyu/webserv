@@ -104,16 +104,22 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 	return true;
 }
 
-bool	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, const int cli_sock ) const
+config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& method_str ) const
 {
-	struct sockaddr_in client_addr;
-    socklen_t client_addrlen = sizeof(client_addr);
-	if (getsockname(cli_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
-	{
-		std::cerr << "webserv: [emerge] getsockname() \"" << cli_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
-	}
-	//std::cout << "" << client_addr.sin_addr.s_addr << std::endl;
+	if (method_str == "GET")
+		return config::GET;
+	else if (method_str == "HEAD")
+		return config::HEAD;
+	else if (method_str == "POST")
+		return config::POST;
+	else if (method_str == "PUT")
+		return config::PUT;
+	else
+		return config::DELETE;
+}
 
+bool	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
+{
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
 	if (location != NULL && location->directives_set.find("deny") != location->directives_set.end())
@@ -139,7 +145,7 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
-		if (location->limit_except.excepted_methods.find(request.method) == location->limit_except.excepted_methods.end())
+		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
 				return false;
@@ -156,29 +162,13 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
  * 3. no location / no file 404 Not Found
  */
 
-	const std::string&	ConfigHandler::searchFile( const struct TiedServer& tied_servers, const HttpRequest& request, const int cli_sock ) const
+const std::string	ConfigHandler::searchFile( const struct config::Server& server, const HttpRequest& request ) const
 {
-	struct HttpResponse	response;
-
-	// parseが失敗していれば、400 Bad Request
-	if (request.parseState == HttpRequest::PARSE_ERROR)
-		return searchErrorPage(response, NULL, NULL, 400);
-
-	const config::Server&	server = searchServerConfig(tied_servers, request.headers.find("Host")->second);
-	// server の return を見に行く。今はreturn はlocationにしかない
-
-	const config::Location*	location = searchLongestMatchLocationConfig(server, request.uri);
-	// location の　return を見に行く。
-
-	// allowReuestがfalseなら403 Forbidden
-	if (!allowRequest(server, location, request, cli_sock))
-		return searchErrorPage(403);
-
-
-	// if (unfinished slash directory)
-		// return searchErrorPage(301); // 301 Moved Permanently
-	if (FileUtils::isDirectory(server.root.getPath() + request.uri))
-		return searchErrorPage(301);
+	(void)server;
+	(void)request;
+	return "";
+	//if (FileUtils::isDirectory(server.root.getPath() + request.uri))
+	//	return searchErrorPage(301);
 
 	/* ~ try_filesとindex/autoindexのファイル検索 ~
 	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
@@ -191,50 +181,148 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 	// request uriがそもそもrootディレクティブになければ404 Not Found
 }
 
+// 最終的なlocationで記録
 void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
-	//config::Server&	server = searchServerConfig(server_config, server_name);
-	//config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	// access_logがどのコンテキストにあるか
-	//
-	// access_logのパスすべてに
+	// access_logがどのコンテキスがあれば出力する
+	if (location && location->directives_set.find("access_fd") != location->directives_set.end())
+	{
+		for (size_t i = 0; i < location->access_fd_list.size(); i++)
+		{
+			write(location->access_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (server.directives_set.find("access_fd") != server.directives_set.end())
+	{
+		for (size_t i = 0; i < server.access_fd_list.size(); i++)
+		{
+			write(server.access_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (this->config_->http.directives_set.find("access_fd") != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
+		{
+			write(this->config_->http.access_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
 }
 void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
-	//config::Server&	server = searchServerConfig(server_config, server_name);
-	//config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	// error_logがどのコンテキスがあれば出力する
+	if (location && location->directives_set.find("error_fd") != location->directives_set.end())
+	{
+		for (size_t i = 0; i < location->error_fd_list.size(); i++)
+		{
+			write(location->error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (server.directives_set.find("error_fd") != server.directives_set.end())
+	{
+		for (size_t i = 0; i < server.error_fd_list.size(); i++)
+		{
+			write(server.error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (this->config_->http.directives_set.find("error_fd") != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
+		{
+			write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
+	else if (this->config_->directives_set.find("error_fd") != this->config_->directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
+		{
+			write(this->config_->error_fd_list[i], msg.c_str(), msg.length());
+		}
+	}
 }
 
-const config::Time&	ConfigHandler::getKeepaliveTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
+const config::Time&	ConfigHandler::searchKeepaliveTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	if (location && location->directives_set.find("keepalive_timeout") != location->directives_set.end())
+	{
+		return location->keepalive_timeout.getTime();
+	}
+	else if (server.directives_set.find("keepalive_timeout") != server.directives_set.end())
+	{
+		return server.keepalive_timeout.getTime();
+	}
+	else // http兼default
+	{
+		return this->config_->http.keepalive_timeout.getTime();
+	}
 }
 
-const config::Time&	ConfigHandler::getSendTimeout( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
+
+const config::Time&	ConfigHandler::searchSendTimeout( const TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	if (location && location->directives_set.find("send_timeout") != location->directives_set.end())
+	{
+		return location->send_timeout.getTime();
+	}
+	else if (server.directives_set.find("send_timeout") != server.directives_set.end())
+	{
+		return server.send_timeout.getTime();
+	}
+	else // http兼default
+	{
+		return this->config_->http.send_timeout.getTime();
+	}
 }
 
-const config::Time&	ConfigHandler::getUseridExpires( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
+const config::Time&	ConfigHandler::searchUseridExpires( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri ) const
 {
-	config::Server&	server = searchServerConfig(server_config, server_name);
-	config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	const config::Server&	server = searchServerConfig(tied_servers, server_name);
+	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+
+	if (location && location->directives_set.find("userid_expires") != location->directives_set.end())
+	{
+		return location->userid_expires.getTime();
+	}
+	else if (server.directives_set.find("userid_expires") != server.directives_set.end())
+	{
+		return server.userid_expires.getTime();
+	}
+	else // http兼default
+	{
+		return this->config_->http.userid_expires.getTime();
+	}
 }
 
 const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const
 {
-	config::Server	*default_server = &tied_servers.servers_[0];
+	const config::Server*	default_server = tied_servers.servers_[0];
 
 	for (size_t i = 0; i < tied_servers.servers_.size(); i++)
 	{
 		if (tied_servers.servers_[i]->server_name.getName().find(server_name) != tied_servers.servers_[i]->server_name.getName().end())
 			return *tied_servers.servers_[i];
 		// default_server特定できるようにする
-		if (tied_servers.servers_[i]->listen_list[0].getIsDefaultServer())
-			default_server = &tied_servers.servers_[i];
+		for (size_t j = 0; j < tied_servers.servers_[i]->listen_list.size(); j++)
+		{
+			const config::Listen& tmp_listen = tied_servers.servers_[i]->listen_list[j];
+			if (tmp_listen.getIsDefaultServer() &&
+				tied_servers.port_ == tmp_listen.getport() &&
+				tied_servers.addr_ == tmp_listen.getAddress())
+			{
+				default_server = tied_servers.servers_[i];
+			}
+		}
 	}
 
 	// server_nameが一致するものがなければデフォルトサーバーを返す
@@ -269,25 +357,25 @@ const config::Location*	ConfigHandler::searchLongestMatchLocationConfig( const c
 	return NULL;
 }
 
-const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server* server, const config::Location* location, const unsigned int code )
+const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& server, const config::Location* location, const unsigned int code ) const
 {
 	if (location && !location->error_page_list.empty())
 	{
-		std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
+		const std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
 		{
-			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end())
 			{
 				return &ep_list[i];
 			}
 		}
 	}
-	else if (server && !server->error_page_list.empty())
+	else if (!server.error_page_list.empty())
 	{
-		std::vector<config::ErrorPage>&	ep_list = server->error_page_list;
+		const std::vector<config::ErrorPage>&	ep_list = server.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
 		{
-			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end())
 			{
 				return &ep_list[i];
 			}
@@ -295,10 +383,10 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server* s
 	}
 	else if (!this->config_->http.error_page_list.empty())
 	{
-		std::vector<config::ErrorPage>&	ep_list = this->config_->error_page_list;
+		const std::vector<config::ErrorPage>&	ep_list = this->config_->http.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
 		{
-			if (ep_list[i].getCodeList.find(code) != ep_list[i].end())
+			if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end())
 			{
 				return &ep_list[i];
 			}

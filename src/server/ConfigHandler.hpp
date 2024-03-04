@@ -62,7 +62,7 @@ class ConfigHandler
 		const config::Main*	config_;
 
 		// initialize
-		ConfigHandler();
+		ConfigHandler() : config_(NULL) {};
 		void	loadConfiguration( const config::Main* config );
 
 		// method
@@ -72,10 +72,9 @@ class ConfigHandler
 		bool	allowRequest( const config::Server& server,
 							const config::Location* location,
 							const HttpRequest& request,
-							const int cli_sock ) const;
-		const std::string&	searchFile( const struct TiedServer& tied_servers,
-										const HttpRequest& request,
-										const int cli_sock ) const;
+							struct sockaddr_in client_addr ) const;
+		const std::string	searchFile( const struct config::Server& server,
+										const HttpRequest& request ) const;
 		void	writeAcsLog( const struct TiedServer& tied_servers,
 							const std::string& server_name,
 							const std::string& uri,
@@ -93,19 +92,20 @@ class ConfigHandler
 		const config::Time&	searchUseridExpires( const struct TiedServer& tied_servers,
 												const std::string& server_name,
 												const std::string& uri ) const;
-		const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
-		const ErrorPage*	searchErrorPage( const config::Server* server,
+		//const struct TiedServer	retTiedServer( const std::string addr, const unsigned int port ) const;
+		const config::ErrorPage*	searchErrorPage( const config::Server& server,
 														const config::Location* location,
-														const unsigned int code );
+														const unsigned int code ) const;
+		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
+		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 
 	private:
 		// utils
 		// 必要なメソッド追加
-		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
-		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
 		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
 		uint32_t	StrToIPAddress( const std::string& ip ) const;
+		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
 
 	public:
 		int		getServPort();
