@@ -10,8 +10,8 @@ namespace config {
 bool	initLogFds( Main& config );
 bool	initAcsLogFds( Main& config );
 bool	initErrLogFds( Main& config );
-bool	addAcsFdList( std::vector<int>& fd_list, const std::vector<AccessLog>& access_log_list );
-bool	addErrFdList( std::vector<int>& fd_list, const std::vector<ErrorLog>& error_log_list );
+int		addAcsFdList ( std::set<std::string>& directives_set, const std::vector<config::AccessLog>& access_log_list, std::vector<int>& fd_list );
+int		addErrFdList ( std::set<std::string>& directives_set, const std::vector<config::ErrorLog>& error_log_list, std::vector<int>& fd_list );
 
 }
 
