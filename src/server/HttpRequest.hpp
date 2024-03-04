@@ -35,7 +35,8 @@ class HttpRequest
 		~HttpRequest();
 
 
-		static HttpRequest parseRequest(std::string& rawRequest, HttpRequest oldRequest);
+		// static HttpRequest parseRequest(std::string& rawRequest, HttpRequest& oldRequest);
+		static void parseRequest(std::string& rawRequest, HttpRequest& oldRequest);
 		static HttpRequest doParseRequest(std::string& rawRequest);
 		static void doParseChunked(std::string& rawRequest, HttpRequest& request);
 

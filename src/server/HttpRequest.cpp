@@ -14,13 +14,12 @@ HttpRequest::~HttpRequest()
 {
 }
 
-HttpRequest HttpRequest::parseRequest(std::string& rawRequest, HttpRequest oldRequest)
+void HttpRequest::parseRequest(std::string& rawRequest, HttpRequest& oldRequest)
 {
 	if (oldRequest.parseState == PARSE_BEFORE)
-		return HttpRequest::doParseRequest(rawRequest);
+		oldRequest =  HttpRequest::doParseRequest(rawRequest);
 	else
 		HttpRequest::doParseChunked(rawRequest, oldRequest);
-	return HttpRequest();
 }
 
 HttpRequest HttpRequest::doParseRequest(std::string& rawRequest)
