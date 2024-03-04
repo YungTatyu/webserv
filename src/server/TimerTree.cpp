@@ -63,7 +63,8 @@ int	TimerTree::findTimer() const
 	if (it == this->timer_tree_.end())
 		return -1;
 
-	const unsigned long	timeout_raw = it->getTimeout() - Timer::getCurrentTime();
+	// この時点ですでにtimeoutになっている場合は、3msをtimeoutの値として設定する
+	const unsigned long	timeout_raw = it->getTimeout() > Timer::getCurrentTime() ? it->getTimeout() - Timer::getCurrentTime() : 3;
 	// timeoutの値がintmaxを超えている場合は、intmaxを返す
 	const int	timeout = timeout_raw > static_cast<unsigned long>(std::numeric_limits<int>::max()) ?
 		std::numeric_limits<int>::max() : static_cast<int>(timeout_raw);
