@@ -21,7 +21,7 @@ TEST(HttpRequest, OkTest1)
 
     //test
     std::string rawRequest = "GET / HTTP/1.1\r\n" "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     checkHttpRequestEqual(expect, test);
 }
@@ -39,7 +39,7 @@ TEST(HttpRequest, OkTest2)
                              "name1:value1\r\n"
                              "\r\n"
                              "this is body";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     checkHttpRequestEqual(expect, test);
 }
@@ -57,7 +57,7 @@ TEST(HttpRequest, OkTest3)
                              "name1:value1\r\n"
                              "name2:value2\r\n"
                              "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     checkHttpRequestEqual(expect, test);
 }
@@ -70,7 +70,7 @@ TEST(HttpRequest, OkTest4)
 
     //test
     std::string rawRequest = "GET /html?query1=value1 HTTP/1.1\r\n" "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     checkHttpRequestEqual(expect, test);
 }
@@ -83,7 +83,7 @@ TEST(HttpRequest, OkTest5)
 
     //test
     std::string rawRequest = "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n" "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     checkHttpRequestEqual(expect, test);
 }
@@ -101,7 +101,7 @@ TEST(HttpRequest, OkTest6)
                              "5\r\n"
                              "hello"
                              "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     checkHttpRequestEqual(expect, test);
 }
@@ -120,14 +120,14 @@ TEST(HttpRequest, OkTest7)
                              "5\r\n"
                              "hello"
                              "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     //testcase: chunked second
     HttpRequest expect2(GET, "/html", "HTTP/1.1", headers, "", "hello world", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string chunked = "6\r\n" " world" "\r\n";
-    HttpRequest test2 = HttpRequest::parseRequest(chunked);
+    HttpRequest test2 = HttpRequest::parseRequest(chunked, test);
 
     checkHttpRequestEqual(expect, test2);
 }
@@ -146,21 +146,21 @@ TEST(HttpRequest, OkTest8)
                              "5\r\n"
                              "hello"
                              "\r\n";
-    HttpRequest test = HttpRequest::parseRequest(rawRequest);
+    HttpRequest test = HttpRequest::parseRequest(rawRequest, HttpRequest());
 
     //testcase: chunked second
     HttpRequest expect2(GET, "/html", "HTTP/1.1", headers, "", "hello world", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string chunked = "6\r\n" " world" "\r\n";
-    HttpRequest test2 = HttpRequest::parseRequest(chunked);
+    HttpRequest test2 = HttpRequest::parseRequest(chunked, test);
 
     //testcase: chunked third (end)
     HttpRequest expect3(GET, "/html", "HTTP/1.1", headers, "", "hello world", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string chunked2 = "0\r\n" "\r\n";
-    HttpRequest test3 = HttpRequest::parseRequest(chunked2);
+    HttpRequest test3 = HttpRequest::parseRequest(chunked2, test);
  
     checkHttpRequestEqual(expect, test3);
 }
