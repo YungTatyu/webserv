@@ -14,13 +14,23 @@ HttpRequest::~HttpRequest()
 {
 }
 
-HttpRequest HttpRequest::parseRequest(std::string& rawRequest)
+HttpRequest HttpRequest::parseRequest(std::string& rawRequest, HttpRequest oldRequest)
+{
+	if (oldRequest.parseState == PARSE_BEFORE)
+		return HttpRequest::doParseRequest(rawRequest);
+	else
+		HttpRequest::doParseChunked(rawRequest, oldRequest);
+	return HttpRequest();
+}
+
+HttpRequest HttpRequest::doParseRequest(std::string& rawRequest)
 {
 	enum parseRequestPhase {
 		sw_start,
 		sw_request_line,
 		sw_headers,
 		sw_body,
+		sw_chunked,
 		sw_end
 	} state;
 
@@ -39,10 +49,17 @@ HttpRequest HttpRequest::parseRequest(std::string& rawRequest)
 			break;
 		case sw_headers:
 			newRequest.parseState = HttpRequest::parseHeaders(rawRequest, newRequest);
-			state = sw_body;
+			if ( newRequest.headers.find("Transfer-Encoding") != newRequest.headers.end() )
+				state = sw_chunked;
+			else
+				state = sw_body;
 			break;
 		case sw_body:
 			HttpRequest::parseBody(rawRequest, newRequest);
+			state = sw_end;
+			break;
+		case sw_chunked:
+			HttpRequest::doParseChunked(rawRequest, newRequest);
 			state = sw_end;
 			break;
 		case sw_end:
@@ -54,9 +71,9 @@ HttpRequest HttpRequest::parseRequest(std::string& rawRequest)
 	return newRequest;
 }
 
-void HttpRequest::parseChunked(HttpRequest& request)
+void HttpRequest::doParseChunked(std::string& rawRequest, HttpRequest& oldRequest)
 {
-	(void)request;
+	oldRequest.body += rawRequest;
 }
 
 HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRequest& newRequest)

@@ -34,8 +34,10 @@ class HttpRequest
 			    const ParseState parseState = PARSE_BEFORE);
 		~HttpRequest();
 
-		static HttpRequest parseRequest(std::string& rawRequest);
-		static void parseChunked(HttpRequest& request);
+
+		static HttpRequest parseRequest(std::string& rawRequest, HttpRequest oldRequest);
+		static HttpRequest doParseRequest(std::string& rawRequest);
+		static void doParseChunked(std::string& rawRequest, HttpRequest& request);
 
 		unsigned int method;
 		std::string uri; // スキーマ、ポートは？？
