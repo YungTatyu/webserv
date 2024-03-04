@@ -155,6 +155,7 @@ TEST(HttpRequest, OkTest8)
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
                              "Transfer-Encoding: chunked\r\n"
+                             "\r\n"
                              "5\r\n"
                              "hello"
                              "\r\n";
@@ -175,7 +176,7 @@ TEST(HttpRequest, OkTest8)
     std::string chunked2 = "0\r\n" "\r\n";
     HttpRequest::parseRequest(chunked2, test);
  
-    checkHttpRequestEqual(expect, test);
+    checkHttpRequestEqual(expect3, test);
 }
 
 int main(int argc, char **argv)
