@@ -1,5 +1,5 @@
 #include "conf.hpp"
-#include "InitLogFd.hpp"
+#include "InitLog.hpp"
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"

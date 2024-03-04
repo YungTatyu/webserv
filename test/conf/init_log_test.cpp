@@ -2,7 +2,7 @@
 #include <gtest/gtest-param-test.h>
 #include "Lexer.hpp"
 #include "Parser.hpp"
-#include "InitLogFd.hpp"
+#include "InitLog.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>

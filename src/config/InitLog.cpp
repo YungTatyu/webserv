@@ -1,4 +1,4 @@
-#include "InitLogFd.hpp"
+#include "InitLog.hpp"
 #include "FileUtils.hpp"
 #include <dirent.h>
 #include <errno.h>

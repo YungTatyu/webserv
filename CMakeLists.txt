@@ -22,7 +22,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/conf.cpp
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
-	src/config/InitLogFd.cpp
+	src/config/InitLog.cpp
 	src/server/CGIHandler.cpp
 	src/server/ConfigHandler.cpp
 	src/server/HttpMessage.cpp 
