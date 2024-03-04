@@ -16,7 +16,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
 	# src files
-	src/FileUtils.cpp
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
@@ -28,6 +27,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/HttpMessage.cpp 
 	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
+	src/utils/FileUtils.cpp
 
 	# test files
 	#test/server/config_handler_test.cpp
@@ -66,6 +66,7 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	src
 	src/server
 	src/config
+	src/utils
 	test/conf
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
