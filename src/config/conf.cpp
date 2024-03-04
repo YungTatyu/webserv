@@ -31,19 +31,21 @@ const char	*config::Index::kDefaultFile_ = "index.html";
 
 config::Main	*config::initConfig( const std::string& file_path )
 {
-	std::string	absolute_path;
+	char	absolute_path[MAXPATHLEN];
 
 	// 絶対pathを取得
-	absolute_path = FileUtils::deriveAbsolutePath(file_path);
-	if (absolute_path == "")
+	if (realpath(file_path.c_str(), absolute_path) == NULL)
+	{
+		std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		return NULL;
+	}
 
 	// file_path が存在するかどうか
-	if (FileUtils::wrapperAccess(absolute_path.c_str(), F_OK) == -1)
+	if (FileUtils::wrapperAccess(absolute_path, F_OK) == -1)
 		return NULL;
 
 	// file_path の読み取り権限があるかどうか
-	if (FileUtils::wrapperAccess(absolute_path.c_str(), R_OK) == -1)
+	if (FileUtils::wrapperAccess(absolute_path, R_OK) == -1)
 		return NULL;
 
 	// file_path がファイルかどうか確認する。

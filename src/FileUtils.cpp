@@ -24,32 +24,6 @@ int	FileUtils::wrapperAccess( const std::string path, int modes )
 	return ret;
 }
 
-std::string	FileUtils::deriveAbsolutePath( const std::string& path )
-{
-	DIR *dir;
-	struct dirent *ent;
-
-	if ((dir = opendir(path.c_str())) != NULL)
-	{
-		while ((ent = readdir(dir)) != NULL)
-		{
-		// current directoryを探して返す
-			if (ent->d_type == DT_DIR && std::string(ent->d_name) == path) {
-				closedir(dir);
-				return std::string(ent->d_name);
-			}
-		}
-		closedir(dir);
-	}
-	else
-	{
-		std::cerr << "webserv: [emerg] opendir() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
-	}
-
-	// 見つからなかったら空文字列を返す
-	return "";
-}
-
 bool FileUtils::isFile( const std::string& path )
 {
 	struct stat statbuf;

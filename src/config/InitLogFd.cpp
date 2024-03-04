@@ -90,7 +90,11 @@ bool	config::initAcsLogFds( config::Main& config )
 	{
 		char	absolute_path[MAXPATHLEN];
 		// 絶対pathを取得
-		realpath(".", absolute_path);
+		if (realpath(".", absolute_path) == NULL)
+		{
+			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			return false;
+		}
 		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/access_log", O_WRONLY | O_CREAT, S_IWUSR);
 		if (tmp_fd == -1)
 			return false;
@@ -127,7 +131,11 @@ bool	config::initErrLogFds( config::Main& config )
 	{
 		char	absolute_path[MAXPATHLEN];
 		// 絶対pathを取得
-		realpath(".", absolute_path);
+		if (realpath(".", absolute_path) == NULL)
+		{
+			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			return false;
+		}
 
 		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/error_log", O_WRONLY | O_CREAT, S_IWUSR);
 		if (tmp_fd == -1)
