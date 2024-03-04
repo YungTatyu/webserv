@@ -16,8 +16,14 @@ void WebServer::initializeServer()
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
+
+	#if defined(KQUEUE_AVAILABLE)
+	this->server = new KqueueServer();
+	this->eventManager = new KqueueActiveEventManager();
+	#else
 	this->server = new PollServer();
 	this->eventManager = new PollActiveEventManager();
+	#endif
 
 	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();

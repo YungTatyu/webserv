@@ -5,7 +5,9 @@ class IActiveEventManager
 {
 	public:
 		virtual ~IActiveEventManager() {}
-		virtual const void	*getActiveEvents() = 0;
+		virtual void	*getActiveEvents() = 0;
+		virtual int	getActiveEventsNum() = 0;
+		virtual void	setActiveEventsNum(const int num) = 0;
 		virtual void	addEvent(const void *event) = 0;
 		virtual void	clearAllEvents() = 0;
 		virtual bool	isReadEvent(const void *event) = 0;
