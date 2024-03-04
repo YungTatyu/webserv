@@ -1,5 +1,7 @@
 #include "WebServer.hpp"
 
+#include <vector>
+
 /* WebServerクラスの実装 */
 WebServer::WebServer( const config::Main* config )
 {
@@ -31,10 +33,24 @@ void WebServer::initializeServer()
 	this->connManager->setEvent(listenfd, ConnectionData::READ);
 }
 
+void	WebServer::initializeVServers()
+{
+	const config::Main	*conf = this->configHandler->config_;
+	const std::vector<config::Server>	&server_list = conf->http.server_list;
+	for (std::vector<config::Server>::const_iterator it = server_list.begin();
+		it != server_list.end();
+		++it
+	)
+	{
+		
+	}
+}
+
 WebServer::~WebServer()
 {
 	close( this->ioHandler->getListenfd() ); // リスニングソケットのクローズ
 	// close( this->connManager->getConnection() ); // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
+	delete this->configHandler->config_;
 	delete this->ioHandler;
 	delete this->requestHandler;
 	delete this->connManager;

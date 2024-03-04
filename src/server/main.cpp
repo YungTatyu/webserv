@@ -19,7 +19,6 @@ int main(int ac, char *av[])
 
 	WebServer server = WebServer(config);
 	server.run();
-	delete config;
 	return 0;
 }
 

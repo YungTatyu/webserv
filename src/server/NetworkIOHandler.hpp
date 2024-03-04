@@ -15,12 +15,18 @@
 # include "SysCallWrapper.hpp"
 # include "Server.hpp"
 
+#include <string>
+
 class ConfigHandler;
 
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer
 {
 	std::vector<config::Server*>	servers_;
+	const std::string	address_;
+	const unsigned int	port_;
+	TiedServer(const std::string &address, const unsigned int port) :
+		address_(address), port_(port) {}
 };
 
 /* クライアントとデータの送受信を行う */

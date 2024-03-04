@@ -30,6 +30,7 @@ class WebServer
 		IServer *server;
 		ConfigHandler *configHandler;
 		void initializeServer();
+		void initializeVServers();
 };
 
 #endif
