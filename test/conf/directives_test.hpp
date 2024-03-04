@@ -9,5 +9,6 @@ void	test_value(
 			const std::vector<std::string> &address_expects,
 			const std::vector<config::ACCESS_DIRECTIVE> &access_expects
 		);
+config::Main	*initConfigTest( const std::string& file_path );
 
 } // namespace test

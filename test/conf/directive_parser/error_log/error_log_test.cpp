@@ -4,10 +4,15 @@
 #include <set>
 #include <algorithm>
 #include <string>
+#include <stdlib.h>
+#include <sys/param.h>
 
 #include "conf.hpp"
+#include "Lexer.hpp"
+#include "Parser.hpp"
 #include "Main.hpp"
 #include "directives_test.hpp"
+#include "FileUtils.hpp"
 
 
 namespace test
@@ -26,7 +31,7 @@ const std::string	kErrorLog = "error_log";
 
 TEST(ErrorLogTest, allContext)
 {
-	const config::Main	*config = config::initConfig("test/conf/directive_parser/error_log/1.conf");
+	const config::Main	*config = test::initConfigTest("test/conf/directive_parser/error_log/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

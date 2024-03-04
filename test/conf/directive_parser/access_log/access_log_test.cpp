@@ -4,10 +4,15 @@
 #include <set>
 #include <algorithm>
 #include <string>
+#include <stdlib.h>
+#include <sys/param.h>
 
 #include "conf.hpp"
+#include "Lexer.hpp"
+#include "Parser.hpp"
 #include "Main.hpp"
 #include "directives_test.hpp"
+#include "FileUtils.hpp"
 
 
 namespace test
@@ -20,13 +25,54 @@ void	test_value(const std::vector<config::AccessLog> &list, const std::vector<st
 		++i;
 	});
 }
+
+config::Main	*initConfigTest( const std::string& file_path )
+{
+	char	absolute_path[MAXPATHLEN];
+
+	// 絶対pathを取得
+	if (realpath(file_path.c_str(), absolute_path) == NULL)
+	{
+		std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		return NULL;
+	}
+
+	// file_path が存在するかどうか
+	if (FileUtils::wrapperAccess(absolute_path, F_OK, true) == -1)
+		return NULL;
+
+	// file_path の読み取り権限があるかどうか
+	if (FileUtils::wrapperAccess(absolute_path, R_OK, true) == -1)
+		return NULL;
+
+	// file_path がファイルかどうか確認する。
+	if (!FileUtils::isFile(absolute_path))
+	{
+		std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
+		return NULL;
+	}
+
+	config::Lexer lexer(absolute_path);
+	lexer.tokenize();
+	const std::vector<config::Token>	&tokens = lexer.getTokens();
+
+	config::Main	*config = new config::Main();
+	config::Parser	parser(*config, tokens, absolute_path);
+	if (!parser.parse())
+	{
+		delete config;
+		return NULL;
+	}
+	return config;
+}
+
 } // namespace test
 
 const std::string	kAccessLog = "access_log";
 
 TEST(accesslogTest, allContext)
 {
-	const config::Main	*config = config::initConfig("test/conf/directive_parser/access_log/1.conf");
+	const config::Main	*config = test::initConfigTest("test/conf/directive_parser/access_log/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
