@@ -41,11 +41,11 @@ config::Main	*config::initConfig( const std::string& file_path )
 	}
 
 	// file_path が存在するかどうか
-	if (FileUtils::wrapperAccess(absolute_path, F_OK) == -1)
+	if (FileUtils::wrapperAccess(absolute_path, F_OK, true) == -1)
 		return NULL;
 
 	// file_path の読み取り権限があるかどうか
-	if (FileUtils::wrapperAccess(absolute_path, R_OK) == -1)
+	if (FileUtils::wrapperAccess(absolute_path, R_OK, true) == -1)
 		return NULL;
 
 	// file_path がファイルかどうか確認する。

@@ -40,7 +40,7 @@ int	config::addAcsFdList ( std::set<std::string>& directives_set, const std::vec
 		tmp_path = access_log_list[i].getFile();
 		// ファイルはあるが、write権限がない時ときは飛ばす
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
-		if (FileUtils::wrapperAccess(tmp_path, F_OK) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK) == -1)
+		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
 		// openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
 		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
@@ -66,7 +66,7 @@ int	config::addErrFdList ( std::set<std::string>& directives_set, const std::vec
 		tmp_path = error_log_list[i].getFile();
 		// ファイルはあるが、write権限がない時ときは飛ばす
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
-		if (FileUtils::wrapperAccess(tmp_path, F_OK) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK) == -1)
+		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
 		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
 		if (tmp_fd == -1)

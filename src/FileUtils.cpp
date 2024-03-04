@@ -14,10 +14,10 @@ int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
 	return fd;
 }
 
-int	FileUtils::wrapperAccess( const std::string path, int modes )
+int	FileUtils::wrapperAccess( const std::string path, int modes, bool err_log )
 {
 	int ret = access(path.c_str(), modes);
-	if (ret == -1)
+	if (ret == -1 && err_log)
 	{
 		std::cerr << "webserv: [emerg] access() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 	}
