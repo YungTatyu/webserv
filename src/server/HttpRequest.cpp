@@ -1,6 +1,4 @@
 #include "HttpRequest.hpp"
-#include <cctype>
-#include <iostream>
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, const std::string& version,
 			 const std::map<std::string, std::string>& headers,

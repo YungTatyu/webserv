@@ -4,6 +4,8 @@
 # include <sstream>
 # include <string>
 # include <map>
+# include <cctype>
+# include <iostream>
 
 #define UNKNOWN	0b0000000
 #define GET	0b0000001
