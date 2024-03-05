@@ -119,8 +119,10 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 		case sw_method_mid:
 			if (std::isalpha(static_cast<unsigned char>(ch))) {
 				method += ch;
-			} else {
+			} else if (ch == ' ') {
 				state = sw_method_almost_end;
+			} else {
+				return HttpRequest::PARSE_ERROR;
 			}
 			break;
 		case sw_method_almost_end:
@@ -132,6 +134,9 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 		}
 		++i;
 	}
+
+	std::cout << "cur method is..." << std::endl;
+	std::cout << "\"" << method << "\"" << std::endl;
 
 	switch (method.size()) {
 	case 3:
