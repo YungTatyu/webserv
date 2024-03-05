@@ -282,14 +282,41 @@ void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const confi
 	const config::ErrorPage* ep = config_handler_.searchErrorPage(server, location, code);
 	if (ep)
 	{
-		if ((tmp_code = ep->getResponse()) != -1)
+		if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
 			status_code_ = tmp_code;
-		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度prepareResponseをする
+		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度responseHandlerをする
 	}
 	else
 	{
 		status_code_ = code;
-		body_ = default_error_page_map_[code];
+		body_ = *default_error_page_map_[code];
+	}
+}
+
+void	HttpResponse::returnResponse( config::Return& return_directive )
+{
+	const std::string	http = "http://"; 
+	const std::string	https = "https://"; 
+	std::string	url = return_directive.getUrl();
+	int	code = return_directive.getCode();
+
+	if (code == config::Return::kCodeUnset)
+	{
+		this->headers["Location"] = url;
+		this->status_code_ = 302;
+		this->headers["Content-Type"] = "text/html"; // ここでやるべきか
+	}
+	else if (301 <= code && code <= 8)
+	{
+		this->headers["Location"] = url;
+		this->status_code_ = code;
+		this->headers["Content-Type"] = "text/html";
+	}
+	else
+	{
+		this->body_ = url;
+		this->status_code_ = code;
+		this->headers["Content-Type"] = "text/plain";
 	}
 }
 

@@ -5,7 +5,7 @@
 # include <map>
 
 # include "ConfigHandler.hpp"
-//# include "HttpRequst.hpp"
+# include "HttpRequest.hpp"
 # include "NetworkIOHandler.hpp"
 
 class HttpResponse
@@ -30,10 +30,12 @@ class HttpResponse
 		const ConfigHandler	&config_handler_;
 
 		// utils methods
+		// 名前微妙
 		void	responseHandler( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr );
 		static std::string	autoIndex( const std::string& directoryPath );
 		void	prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code );
 		void	internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri );
+void	returnResponse( config::Return& return_directive );
 };
 
 
