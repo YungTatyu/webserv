@@ -3,6 +3,9 @@
 #include <sys/socket.h>
 #include <cstring>
 
+const static	std::string kACCESS_FD = "access_fd";
+const static	std::string kERROR_FD = "error_fd";
+
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
  *  ipとmask分けて保存
@@ -191,21 +194,21 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
 	// access_logがどのコンテキスがあれば出力する
-	if (location && location->directives_set.find("access_fd") != location->directives_set.end())
+	if (location && location->directives_set.find(kACCESS_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->access_fd_list.size(); i++)
 		{
 			write(location->access_fd_list[i], msg.c_str(), msg.length());
 		}
 	}
-	else if (server.directives_set.find("access_fd") != server.directives_set.end())
+	else if (server.directives_set.find(kACCESS_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.access_fd_list.size(); i++)
 		{
 			write(server.access_fd_list[i], msg.c_str(), msg.length());
 		}
 	}
-	else if (this->config_->http.directives_set.find("access_fd") != this->config_->http.directives_set.end())
+	else if (this->config_->http.directives_set.find(kACCESS_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
 		{
@@ -213,34 +216,35 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 		}
 	}
 }
+
 void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
 	// error_logがどのコンテキスがあれば出力する
-	if (location && location->directives_set.find("error_fd") != location->directives_set.end())
+	if (location && location->directives_set.find(kERROR_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
 		{
 			write(location->error_fd_list[i], msg.c_str(), msg.length());
 		}
 	}
-	else if (server.directives_set.find("error_fd") != server.directives_set.end())
+	else if (server.directives_set.find(kERROR_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.error_fd_list.size(); i++)
 		{
 			write(server.error_fd_list[i], msg.c_str(), msg.length());
 		}
 	}
-	else if (this->config_->http.directives_set.find("error_fd") != this->config_->http.directives_set.end())
+	else if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
 		{
 			write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
 		}
 	}
-	else if (this->config_->directives_set.find("error_fd") != this->config_->directives_set.end())
+	else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
 		{
