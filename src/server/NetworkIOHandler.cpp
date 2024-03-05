@@ -4,6 +4,13 @@
 #include <cstring>
 #include <utility>
 
+NetworkIOHandler::NetworkIOHandler() {}
+
+NetworkIOHandler::~NetworkIOHandler()
+{
+	closeAllListenSockets(); // リスニングソケットのクローズ
+}
+
 /* NetworkIOHandlerクラスの実装 */
 int NetworkIOHandler::setupSocket( const std::string address, const unsigned int port )
 {
@@ -32,7 +39,6 @@ int NetworkIOHandler::setupSocket( const std::string address, const unsigned int
 
 		std::cout << "Server running on port " << port << std::endl;
 		return listen_fd;
-
 	}
 	catch ( const std::runtime_error& e )
 	{
@@ -105,6 +111,19 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	return connfd;
 }
 
+bool	NetworkIOHandler::isListenSocket(const int listen_fd) const
+{
+	try
+	{
+		this->listenfd_map_.at(listen_fd);
+		return true;
+	}
+	catch(const std::out_of_range& e)
+	{
+		return false;
+	}
+}
+
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int cli_sock )
 {
 	close( cli_sock );
@@ -112,7 +131,19 @@ void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const in
 	printf("%s\n", "< Client disconnected.");
 }
 
-int NetworkIOHandler::getListenfd()
+const std::map<int, TiedServer>&	NetworkIOHandler::getListenfdMap()
 {
-	return this->listenfd_;
+	return this->listenfd_map_;
+}
+
+void	NetworkIOHandler::closeAllListenSockets()
+{
+	for (std::map<int, TiedServer>::iterator it = this->listenfd_map_.begin();
+		it != this->listenfd_map_.end();
+		++it
+	)
+	{
+		close(it->first);
+	}
+	this->listenfd_map_.clear();
 }

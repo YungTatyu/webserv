@@ -13,7 +13,7 @@ RequestHandler::RequestHandler()
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
-		if (sockfd == ioHandler.getListenfd())
+		if (ioHandler.isListenSocket(sockfd))
 		{
 			return ioHandler.acceptConnection(connManager);
 		}

@@ -19,6 +19,7 @@ void WebServer::initializeServer()
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
+	initializeConnManager();
 
 	#if defined(KQUEUE_AVAILABLE)
 	this->server = new KqueueServer();
@@ -27,11 +28,6 @@ void WebServer::initializeServer()
 	this->server = new PollServer();
 	this->eventManager = new PollActiveEventManager();
 	#endif
-
-	// listening socketを監視するリストに追加
-	const int listenfd = this->ioHandler->getListenfd();
-	this->connManager->setConnection(listenfd);
-	this->connManager->setEvent(listenfd, ConnectionData::READ);
 }
 
 void	WebServer::initializeListenSocket(
@@ -78,9 +74,26 @@ void	WebServer::initializeVServers()
 	}
 }
 
+/**
+ * @brief listen socketを監視するリストに追加
+ * 
+ */
+void	WebServer::initializeConnManager()
+{
+	const std::map<int, TiedServer>&	listenfd_map = this->ioHandler->getListenfdMap();
+
+	for (std::map<int, TiedServer>::const_iterator it = listenfd_map.begin();
+		it != listenfd_map.end();
+		++it
+	)
+	{
+		this->connManager->setConnection(it->first);
+		this->connManager->setEvent(it->first, ConnectionData::READ);
+	}
+}
+
 WebServer::~WebServer()
 {
-	close( this->ioHandler->getListenfd() ); // リスニングソケットのクローズ
 	// close( this->connManager->getConnection() ); // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
 	delete this->configHandler->config_;
 	delete this->ioHandler;

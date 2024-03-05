@@ -23,6 +23,8 @@ class ConnectionData
 class ConnectionManager
 {
 	public:
+		ConnectionManager();
+		~ConnectionManager();
 		void setConnection( const int fd );
 		void removeConnection( const int fd );
 		void setRawRequest( const int fd, const std::vector<char>& rawRequest );
@@ -34,8 +36,9 @@ class ConnectionManager
 		void setRequest( const int fd, const HttpRequest request );
 		const HttpRequest &getRequest( const int fd ) const;
 		const std::map<int, ConnectionData> &getConnections() const;
+		void	closeAllConnections();
 	private:
-		std::map<int, class ConnectionData> connections_;
+		std::map<int, ConnectionData> connections_;
 
 };
 
