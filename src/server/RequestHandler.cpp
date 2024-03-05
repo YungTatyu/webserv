@@ -3,19 +3,14 @@
 #include <sys/types.h>
 #include <algorithm>
 
-RequestHandler::RequestHandler()
-{
-	// this->handler_map[IActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
-	// this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
-	// this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
-}
+RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
 		if (ioHandler.isListenSocket(sockfd))
 		{
-			return ioHandler.acceptConnection(connManager);
+			return ioHandler.acceptConnection(connManager, sockfd);
 		}
 		// クライアントソケットへのリクエスト（既存コネクション）
 		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );

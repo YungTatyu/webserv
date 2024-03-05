@@ -18,11 +18,11 @@ int NetworkIOHandler::setupSocket( const std::string address, const unsigned int
 	{
 		//creation of the socket
 		const int listen_fd = SysCallWrapper::Socket( AF_INET, SOCK_STREAM, 0 );
-		fcntl( this->listenfd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
+		fcntl( listen_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 		// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
 		int yes = 1;
-		SysCallWrapper::Setsockopt( this->listenfd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes) );
+		SysCallWrapper::Setsockopt( listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes) );
 
 		//preparation of the socket address
 		struct sockaddr_in servaddr;
@@ -34,8 +34,8 @@ int NetworkIOHandler::setupSocket( const std::string address, const unsigned int
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons( port );
 
-		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
-		SysCallWrapper::Listen( this->listenfd_, SOMAXCONN );
+		SysCallWrapper::Bind( listen_fd, (struct sockaddr *) &servaddr, sizeof(servaddr) );
+		SysCallWrapper::Listen( listen_fd, SOMAXCONN );
 
 		std::cout << "Server running on port " << port << std::endl;
 		return listen_fd;
@@ -90,14 +90,14 @@ ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const in
 	return totalSent;
 }
 
-int NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
+int NetworkIOHandler::acceptConnection( ConnectionManager& connManager, const int listen_fd )
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
 	socklen_t client;
 
 	client = sizeof(cliaddr);
-	connfd = SysCallWrapper::Accept( listenfd_, (struct sockaddr *) &cliaddr, &client );
+	connfd = SysCallWrapper::Accept( listen_fd, (struct sockaddr *) &cliaddr, &client );
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 	// 新規クライントfdを追加
