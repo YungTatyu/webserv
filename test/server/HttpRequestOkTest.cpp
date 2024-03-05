@@ -177,6 +177,20 @@ TEST(HttpRequest, OkTest8)
     checkHttpRequestEqual(expect3, test);
 }
 
+TEST(HttpRequest, OkTest9)
+{
+    //testcase: encoded url
+    std::map<std::string, std::string> headers;
+    HttpRequest expect(GET, "/Hello World!", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+
+    //test
+    std::string rawRequest = "GET /Hello%20World%21 HTTP/1.1\r\n" "\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    checkHttpRequestEqual(expect, test);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
