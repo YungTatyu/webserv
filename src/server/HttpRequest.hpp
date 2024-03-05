@@ -58,7 +58,7 @@ class HttpRequest
 		static ParseState parseRequestLine(std::string& rawRequest, HttpRequest& newRequest);
 		static ParseState parseHeaders(std::string& rawRequest, HttpRequest& newRequest);
 		static void parseBody(std::string& rawRequest,  HttpRequest& newRequest);
-		std::string urlDecode(const std::string& str, HttpRequest& newRequest);
+		static std::string urlDecode(const std::string& encoded);
 };
 
 #endif

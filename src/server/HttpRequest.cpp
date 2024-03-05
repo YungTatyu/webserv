@@ -197,6 +197,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 	}
 	std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
 	newRequest.uri = tmp.substr(0, tmp.find('?'));
+	newRequest.uri = urlDecode(newRequest.uri);
 	size_t qindex = tmp.find('?');
 	if (qindex != std::string::npos)
 		newRequest.queries = tmp.substr(tmp.find('?') + 1);
@@ -364,10 +365,18 @@ void HttpRequest::parseBody(std::string& body, HttpRequest& newRequest)
 	newRequest.body = body;
 }
 
-std::string HttpRequest::urlDecode(const std::string& str, HttpRequest& newRequest)
+std::string HttpRequest::urlDecode(const std::string& encoded)
 {
-	(void)str;
-	(void)newRequest;
-	return "";
+    std::string decoded;
+    for (std::size_t i = 0; i < encoded.size(); ++i) {
+        if (encoded[i] == '%' && i + 2 < encoded.size()) {
+            int hexValue = std::strtol(encoded.substr(i + 1, 2).c_str(), nullptr, 16);
+            decoded += static_cast<char>(hexValue);
+            i += 2;
+        } else {
+            decoded += encoded[i];
+        }
+    }
+    return decoded;
 }
 
