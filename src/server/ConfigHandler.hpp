@@ -13,6 +13,72 @@
  * 計算量1で撮りに行けるものだけpublicのconfig_を見てもらう
 */ 
 
+struct TiedServer;
+
+/* Confファイルの設定値を取り出す */
+class ConfigHandler
+{
+	public:
+		// data
+		const config::Main*	config_;
+
+		// initialize
+		ConfigHandler() : config_(NULL) {};
+		void	loadConfiguration( const config::Main* config );
+
+		// method
+		// とりあえずipv4だけ想定
+		bool	allowRequest( const config::Server& server,
+							const config::Location* location,
+							const HttpRequest& request,
+							struct sockaddr_in client_addr ) const;
+		// ちょっと保留
+		const std::string	searchFile( const struct config::Server& server,
+										const HttpRequest& request ) const;
+		// log出力
+		void	writeAcsLog( const struct TiedServer& tied_servers,
+							const std::string& server_name,
+							const std::string& uri,
+							const std::string& msg ) const;
+		void	writeErrLog( const struct TiedServer& tied_servers,
+							const std::string& server_name,
+							const std::string& uri,
+							const std::string& msg ) const;
+		// timeout値の取得
+		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& tied_servers,
+													const std::string& server_name,
+													const std::string& uri ) const;
+		const config::Time&	searchSendTimeout( const struct TiedServer& tied_servers,
+												const std::string& server_name,
+												const std::string& uri ) const;
+		const config::Time&	searchUseridExpires( const struct TiedServer& tied_servers,
+												const std::string& server_name,
+												const std::string& uri ) const;
+		// TiedServerの作成
+		const struct TiedServer	createTiedServer( const std::string addr, const unsigned int port ) const;
+		const config::ErrorPage*	searchErrorPage( const config::Server& server,
+														const config::Location* location,
+														const unsigned int code ) const;
+		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
+		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
+
+	private:
+		// utils
+		// 必要なメソッド追加
+		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
+		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
+		uint32_t	StrToIPAddress( const std::string& ip ) const;
+		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
+
+	public:
+		int		getServPort();
+		int		getListenQ();
+
+	private:
+		int		servPort_; /*port*/
+		int		listenQ_; /*maximum number of client connections */
+};
+
 /**
  *IPv4
  *
@@ -47,73 +113,9 @@
         sa_family_t     sin6_family;    // AF_INET6 (sa_family_t)
         in_port_t       sin6_port;      // Transport layer port # (in_port_t)
         __uint32_t      sin6_flowinfo;  // IP6 flow information
-        struct in6_addr sin6_addr;      // IP6 address 
+        struct in6_addr sin6_addr;      // IP6 address
         __uint32_t      sin6_scope_id;  // scope zone index
   };
  */
-
-struct TiedServer;
-
-/* Confファイルの設定値を取り出したり、エラーを判断する */
-class ConfigHandler
-{
-	public:
-		// data
-		const config::Main*	config_;
-
-		// initialize
-		ConfigHandler() : config_(NULL) {};
-		void	loadConfiguration( const config::Main* config );
-
-		// method
-		// getsockname()でcli_sockからアドレスとるようにしているが
-		// 問題があれば、引数をsockaddr_storageにして、sockaddr_in[6]をreinterpret_cast<sockaddr_storage>()で渡してもいいかもしれない
-		// とりあえずipv4だけ想定
-		bool	allowRequest( const config::Server& server,
-							const config::Location* location,
-							const HttpRequest& request,
-							struct sockaddr_in client_addr ) const;
-		const std::string	searchFile( const struct config::Server& server,
-										const HttpRequest& request ) const;
-		void	writeAcsLog( const struct TiedServer& tied_servers,
-							const std::string& server_name,
-							const std::string& uri,
-							const std::string& msg ) const;
-		void	writeErrLog( const struct TiedServer& tied_servers,
-							const std::string& server_name,
-							const std::string& uri,
-							const std::string& msg ) const;
-		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& tied_servers,
-													const std::string& server_name,
-													const std::string& uri ) const;
-		const config::Time&	searchSendTimeout( const struct TiedServer& tied_servers,
-												const std::string& server_name,
-												const std::string& uri ) const;
-		const config::Time&	searchUseridExpires( const struct TiedServer& tied_servers,
-												const std::string& server_name,
-												const std::string& uri ) const;
-		const struct TiedServer	createTiedServer( const std::string addr, const unsigned int port ) const;
-		const config::ErrorPage*	searchErrorPage( const config::Server& server,
-														const config::Location* location,
-														const unsigned int code ) const;
-		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
-		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
-
-	private:
-		// utils
-		// 必要なメソッド追加
-		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
-		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
-		uint32_t	StrToIPAddress( const std::string& ip ) const;
-		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
-
-	public:
-		int		getServPort();
-		int		getListenQ();
-
-	private:
-		int		servPort_; /*port*/
-		int		listenQ_; /*maximum number of client connections */
-};
 
 #endif
