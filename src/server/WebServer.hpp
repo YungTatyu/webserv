@@ -4,17 +4,22 @@
 # include "ConnectionManager.hpp"
 # include "RequestHandler.hpp"
 # include "NetworkIOHandler.hpp"
-# include "ServerConfig.hpp"
-# include "IActiveEventManager.hpp"
-# include "PollActiveEventManager.hpp"
-# include "IServer.hpp"
-# include "PollServer.hpp"
 # include "SysCallWrapper.hpp"
+# include "ConfigHandler.hpp"
+# include "IActiveEventManager.hpp"
+# include "SelectActiveEventManager.hpp"
+# include "PollActiveEventManager.hpp"
+# include "KqueueActiveEventManager.hpp"
+
+# include "IServer.hpp"
+# include "SelectServer.hpp"
+# include "PollServer.hpp"
+# include "KqueueServer.hpp"
 
 class WebServer
 {
 	public:
-		WebServer();
+		WebServer( const config::Main* config );
 		~WebServer();
 		void run();
 	private:
@@ -23,7 +28,7 @@ class WebServer
 		ConnectionManager *connManager;
 		IActiveEventManager *eventManager;
 		IServer *server;
-		ServerConfig *serverConfig;
+		ConfigHandler *configHandler;
 		void initializeServer();
 };
 

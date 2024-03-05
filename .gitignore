@@ -35,3 +35,4 @@ webserv
 build
 *tmp*
 .vscode
+.DS_Store

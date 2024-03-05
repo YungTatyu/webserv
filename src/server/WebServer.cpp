@@ -1,23 +1,29 @@
 #include "WebServer.hpp"
 
 /* WebServerクラスの実装 */
-WebServer::WebServer()
+WebServer::WebServer( const config::Main* config )
 {
-	this->serverConfig = new ServerConfig();
+	this->configHandler = new ConfigHandler();
 
-	this->serverConfig->loadConfiguration();
+	this->configHandler->loadConfiguration(config);
 	this->initializeServer();
 }
 
 void WebServer::initializeServer()
 {
 	this->ioHandler = new NetworkIOHandler();
-	this->ioHandler->setupSocket( this->serverConfig );
+	this->ioHandler->setupSocket( this->configHandler );
 
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
+
+	#if defined(KQUEUE_AVAILABLE)
+	this->server = new KqueueServer();
+	this->eventManager = new KqueueActiveEventManager();
+	#else
 	this->server = new PollServer();
 	this->eventManager = new PollActiveEventManager();
+	#endif
 
 	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();
@@ -32,7 +38,7 @@ WebServer::~WebServer()
 	delete this->ioHandler;
 	delete this->requestHandler;
 	delete this->connManager;
-	delete this->serverConfig;
+	delete this->configHandler;
 	delete this->eventManager;
 }
 

@@ -10,24 +10,33 @@
 # include <iostream>
 # include <cstdlib>
 # include <fcntl.h>
-# include "ServerConfig.hpp"
+# include "ConfigHandler.hpp"
 # include "ConnectionManager.hpp"
 # include "SysCallWrapper.hpp"
+# include "Server.hpp"
 
+class ConfigHandler;
+
+/* listen socketと結びついたserver config を持つ構造体 */
+struct TiedServer
+{
+	std::vector<config::Server*>	servers_;
+};
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
 {
 	public:
-		void setupSocket( ServerConfig *serverConfig );
+		void setupSocket( ConfigHandler *configHandler );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
-		void acceptConnection( ConnectionManager& connManager );
+		int acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		int getListenfd();
 
 	private:
 		int listenfd_; // リスニングソケットを管理
+		std::map<int, struct TiedServer> listenfd_map_; // リスニングソケットとそれに紐づくserver configを管理
 		static const size_t bufferSize_ = 1024;
 };
 
