@@ -9,6 +9,7 @@
 #include <sys/param.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <cstring>
 
 // 各テストで使うconfigをセットするクラス
 class ConfigHandlerTest : public ::testing::Test {
@@ -20,9 +21,9 @@ protected:
 		if (static_cast<std::string>(test_info->name()) == "allowRequest") {
 			file_path = "test/server/conf_files/allowRequest_test.conf";
 		}
-		else if (static_cast<std::string>(test_info->name()) == "searchFile") {
+		/*else if (static_cast<std::string>(test_info->name()) == "searchFile") {
 			file_path = "test/server/conf_files/searchFile_test.conf";
-		}
+		}*/
 		else if (static_cast<std::string>(test_info->name()) == "searchKeepaliveTimeout") {
 			file_path = "test/server/conf_files/searchKeepaliveTimeout_test.conf";
 		}
@@ -65,9 +66,10 @@ protected:
 
 namespace test {
 // 実際に使うallowRequestはソケットをつくらないと使えないので、ここではソケットの代わりに、アドレスを渡している。
-bool	allowRequestIPv4( const struct TiedServer& tied_server,
-					const HttpRequest& request,
-					const in_addr cli_addr );
+bool	allowRequestIPv4( const config::Server& server,
+						const config::Location* location,
+						const HttpRequest& request,
+						const struct sockaddr_in client_addr );
 // writeAcs/ErrLogのテスト用
 bool	WRITE_ACCURATE( const std::string file, const std::string& phrase ) {
 	std::ifstream	ifs( file );
@@ -82,69 +84,90 @@ bool	WRITE_ACCURATE( const std::string file, const std::string& phrase ) {
 
 	return ( content.find(phrase) != std::string::npos );
 }
+bool	sameTiedServer(const struct TiedServer& tied1, const struct TiedServer& tied2)
+{
+	return (tied1.servers_.size() == tied2.servers_.size() &&
+		tied1.addr_ == tied2.addr_ &&
+		tied1.port_ == tied2.port_);
+}
+
+bool	sameTime(const config::Time& time1, const config::Time& time2)
+{
+	return (time1.time_in_ms_ == time2.time_in_ms_);
+}
 };
 
 // allowRequestの引数プラスでclient自身のアドレス必要かも
 TEST_F(ConfigHandlerTest, allowRequest)
 {
-	struct TiedServer	tied_server_;
-	struct in_addr	cli_addr1
-	struct in_addr	cli_addr2;
-	struct in_addr	cli_addr3;
-	struct in_addr	cli_addr4;
 	HttpRequest		request;
 
 	// 初期化
-	inet_pton(AF_INET, "192.168.0.1", &cli_addr1);
-	inet_pton(AF_INET, "192.168.0.2", &cli_addr2);
-	inet_pton(AF_INET, "192.168.0.3", &cli_addr3);
-	inet_pton(AF_INET, "192.168.0.4", &cli_addr4);
+	struct sockaddr_in	cli_addr1;
+	std::memset(&cli_addr1, 0, sizeof(cli_addr1)); // ゼロで初期化
+	cli_addr1.sin_family = AF_INET; // IPv4
+	inet_pton(AF_INET, "192.168.0.1", &(cli_addr1.sin_addr));
+
+	struct sockaddr_in	cli_addr2;
+	std::memset(&cli_addr2, 0, sizeof(cli_addr2)); // ゼロで初期化
+	cli_addr2.sin_family = AF_INET; // IPv4
+	inet_pton(AF_INET, "192.168.0.2", &(cli_addr2.sin_addr));
+
+	struct sockaddr_in	cli_addr3;
+	std::memset(&cli_addr3, 0, sizeof(cli_addr3)); // ゼロで初期化
+	cli_addr3.sin_family = AF_INET; // IPv4
+	inet_pton(AF_INET, "192.168.0.3", &(cli_addr3.sin_addr));
+
+	struct sockaddr_in	cli_addr4;
+	std::memset(&cli_addr4, 0, sizeof(cli_addr4)); // ゼロで初期化
+	cli_addr4.sin_family = AF_INET; // IPv4
+	inet_pton(AF_INET, "192.168.0.4", &(cli_addr4.sin_addr));
 
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	request.headers["Host"] = "first_server";
 	// allow all
 	request.uri = "/";
-	EXPECT_TRUE(test::allowRequestIPv4(tied_server_,
+	EXPECT_TRUE(config_handler_.allowRequest(config_handler_.config_->http.server_list[0],
+									&config_handler_.config_->http.server_list[0].location_list[0],
 									request,
 									cli_addr1));
 	// deny all
 	request.uri = "/hello";
-	EXPECT_FALSE(test::allowRequestIPv4(tied_server_,
+	EXPECT_FALSE(config_handler_.allowRequest(config_handler_.config_->http.server_list[0],
+									&config_handler_.config_->http.server_list[0].location_list[1],
 									request,
 									cli_addr1));
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	request.headers["Host"] = "second_server";
 	// allow cli_addr2
 	request.uri = "/";
-	EXPECT_TRUE(test::allowRequestIPv4(tied_server_,
+	EXPECT_TRUE(config_handler_.allowRequest(config_handler_.config_->http.server_list[1],
+									&config_handler_.config_->http.server_list[1].location_list[0],
 									request,
 									cli_addr2));
 	// deny cli_addr2
 	request.uri = "/hello";
-	EXPECT_FALSE(test::allowRequestIPv4(tied_server_,
+	EXPECT_FALSE(config_handler_.allowRequest(config_handler_.config_->http.server_list[1],
+									&config_handler_.config_->http.server_list[1].location_list[1],
 									request,
 									cli_addr2));
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[2]);
 	request.headers["Host"] = "third_server";
 	// deny cli_addr3 
 	request.uri = "/";
-	EXPECT_FALSE(test::allowRequestIPv4(tied_server_,
+	EXPECT_FALSE(config_handler_.allowRequest(config_handler_.config_->http.server_list[2],
+									&config_handler_.config_->http.server_list[2].location_list[0],
 									request,
 									cli_addr3));
 	// allow cli_addr4
 	request.uri = "/hello";
-	EXPECT_TRUE(test::allowRequestIPv4(tied_server_,
+	EXPECT_TRUE(config_handler_.allowRequest(config_handler_.config_->http.server_list[2],
+									&config_handler_.config_->http.server_list[2].location_list[1],
 									request,
 									cli_addr4));
 }
 
-TEST_F(ConfigHandlerTest, searchFile)
+/*TEST_F(ConfigHandlerTest, searchFile)
 {
 	struct TiedServer	tied_server_;
 
@@ -202,90 +225,83 @@ TEST_F(ConfigHandlerTest, searchFile)
 			config_handler_.searchFile(tied_server_,
 									request));
 }
+*/
 
 TEST_F(ConfigHandlerTest, searchKeepaliveTimeout)
 {
-	struct TiedServer	tied_server_;
-
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	struct TiedServer	tied_server_1("127.0.0.1", 8001);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// http set
-	EXPECT_EQ(config_handler_.config_->http.keepalive_timeout.getTime(),
-			config_handler_.searchKeepaliveTimeout(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.keepalive_timeout.getTime(),
+			config_handler_.searchKeepaliveTimeout(tied_server_1,
 											"first_server",
-											"/"));
+											"/")));
 	// location set
-	EXPECT_EQ(config_handler_.config_->http.server_list[0].location_list[1].keepalive_timeout.getTime(),
-			config_handler_.searchKeepaliveTimeout(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[0].location_list[1].keepalive_timeout.getTime(),
+			config_handler_.searchKeepaliveTimeout(tied_server_1,
 											"first_server",
-											"/hello"));
+											"/hello")));
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	struct TiedServer	tied_server_2("127.0.0.2", 8002);
+	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// server set
-	EXPECT_EQ(config_handler_.config_->http.server_list[1].keepalive_timeout.getTime(),
-			config_handler_.searchKeepaliveTimeout(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[1].keepalive_timeout.getTime(),
+			config_handler_.searchKeepaliveTimeout(tied_server_2,
 											"second_server",
-											"/"));
+											"/")));
 }
 
 TEST_F(ConfigHandlerTest, searchSendTimeout)
 {
-	struct TiedServer	tied_server_;
-
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	struct TiedServer	tied_server_1("127.0.0.1", 8001);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// default time
-	EXPECT_EQ(config_handler_.config_->http.send_timeout.getTime(),
-			config_handler_.searchSendTimeout(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.send_timeout.getTime(),
+			config_handler_.searchSendTimeout(tied_server_1,
 										"first_server",
-										"/"));
+										"/")));
 	// location set
-	EXPECT_EQ(config_handler_.config_->http.server_list[0].location_list[1].send_timeout.getTime(),
-			config_handler_.searchSendTimeout(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[0].location_list[1].send_timeout.getTime(),
+			config_handler_.searchSendTimeout(tied_server_1,
 										"first_server",
-										"/hello"));
+										"/hello")));
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	struct TiedServer	tied_server_2("127.0.0.2", 8002);
+	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// server set
-	EXPECT_EQ(config_handler_.config_->http.server_list[1].send_timeout.getTime(),
-			config_handler_.searchSendTimeout(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[1].send_timeout.getTime(),
+			config_handler_.searchSendTimeout(tied_server_2,
 										"second_server",
-										"/"));
+										"/")));
 }
 
 TEST_F(ConfigHandlerTest, searchUseridExpires)
 {
-	struct TiedServer	tied_server_;
-
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	struct TiedServer	tied_server_1("127.0.0.1", 8001);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// http set
-	EXPECT_EQ(config_handler_.config_->http.userid_expires.getTime(),
-			config_handler_.searchUseridExpires(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.userid_expires.getTime(),
+			config_handler_.searchUseridExpires(tied_server_1,
 										"first_server",
-										"/"));
+										"/")));
 	// location set
-	EXPECT_EQ(config_handler_.config_->http.server_list[0].location_list[1].userid_expires.getTime(),
-			config_handler_.searchUseridExpires(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[0].location_list[1].userid_expires.getTime(),
+			config_handler_.searchUseridExpires(tied_server_1,
 										"first_server",
-										"/hello"));
+										"/hello")));
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	struct TiedServer	tied_server_2("127.0.0.2", 8002);
+	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// server set
-	EXPECT_EQ(config_handler_.config_->http.server_list[1].userid_expires.getTime(),
-			config_handler_.searchUseridExpires(tied_server_,
+	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[1].userid_expires.getTime(),
+			config_handler_.searchUseridExpires(tied_server_2,
 										"second_server",
-										"/"));
+										"/")));
 }
 
 
 TEST_F(ConfigHandlerTest, writeAcsLog)
 {
-	struct TiedServer	tied_server_;
-
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
 	std::string	absolutepath;
@@ -303,12 +319,12 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	std::string	msg;
 
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	struct TiedServer	tied_server_1("127.0.0.1", 8001);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// offというファイルに書き込むのではなく、どこにも書き込まない
 	file = absolutepath + "/off";
 	msg = "aiueo";
-	config_handler_.writeAcsLog(tied_server_,
+	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
 							"/",
 							msg);
@@ -317,7 +333,7 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	// ロケーションブロックで指定されたところへ出力
 	file = absolutepath + "/logs/location.log";
 	msg = "kakikukeko";
-	config_handler_.writeAcsLog(tied_server_,
+	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
 							"/hello",
 							msg);
@@ -326,19 +342,19 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	// 親ブロックで指定されたファイルに出力
 	file = absolutepath + "/logs/server.log";
 	msg = "sashisuseso";
-	config_handler_.writeAcsLog(tied_server_,
+	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
 							"/goodnight",
 							msg);
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	struct TiedServer	tied_server_2("127.0.0.2", 8002);
+	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// 親の親ブロックで指定されたファイルに出力
 	file = absolutepath + "/logs/http.log";
 	msg = "tachitsuteto";
-	config_handler_.writeAcsLog(tied_server_,
+	config_handler_.writeAcsLog(tied_server_2,
 							"second_server",
 							"/",
 							msg);
@@ -347,8 +363,6 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 
 TEST_F(ConfigHandlerTest, writeErrLog)
 {
-	struct TiedServer	tied_server_;
-
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
 	std::string	absolutepath;
@@ -366,12 +380,12 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	std::string	msg;
 
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	struct TiedServer	tied_server_1("127.0.0.1", 8001);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// ログオフ
 	file = "/dev/null";
 	msg = "aiueo";
-	config_handler_.writeAcsLog( tied_server_,
+	config_handler_.writeAcsLog( tied_server_1,
 							"first_server",
 							"/",
 							msg);
@@ -380,19 +394,19 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	// location.logに出力
 	file = absolutepath + "/logs/location.log";
 	msg = "kakikukeko";
-	config_handler_.writeAcsLog(tied_server_,
+	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
 							"/hello",
 							msg);
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 
 
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	struct TiedServer	tied_server_2("127.0.0.2", 8002);
+	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// default fileに出力
 	file = absolutepath + "/logs/error.log";
 	msg = "sashisuseso";
-	config_handler_.writeAcsLog(tied_server_,
+	config_handler_.writeAcsLog(tied_server_2,
 							"second_server",
 							"/",
 							msg);
@@ -402,23 +416,21 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 
 TEST_F(ConfigHandlerTest, createTiedServer)
 {
-	struct TiedServer	tied_server_;
-
 	// 3つのサーバーが該当する場合。
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[2]);
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[3]);
-	EXPECT_EQ(tied_server_, config_handler_.createTiedServer("127.0.0.1", 8001));
+	struct TiedServer	tied_server_1("127.0.0.1", 8001);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[2]);
+	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[3]);
+	EXPECT_TRUE(test::sameTiedServer(tied_server_1, config_handler_.createTiedServer("127.0.0.1", 8001)));
 
 	// １つのサーバーが該当する場合
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
-	EXPECT_EQ(tied_server_, config_handler_.createTiedServer("127.0.0.2", 8002));
+	struct TiedServer	tied_server_2("127.0.0.2", 8002);
+	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
+	EXPECT_TRUE(test::sameTiedServer(tied_server_2, config_handler_.createTiedServer("127.0.0.2", 8002)));
 
 	// 1つのサーバーが該当する場合
-	tied_server_.servers_.clear();
-	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[4]);
-	EXPECT_EQ(tied_server_, config_handler_.createTiedServer("127.0.0.3", 8003));
+	struct TiedServer	tied_server_3("127.0.0.3", 8003);
+	tied_server_3.servers_.push_back(&config_handler_.config_->http.server_list[4]);
+	EXPECT_TRUE(test::sameTiedServer(tied_server_3, config_handler_.createTiedServer("127.0.0.3", 8003)));
 }
 

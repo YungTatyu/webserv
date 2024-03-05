@@ -30,7 +30,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/utils/FileUtils.cpp
 
 	# test files
-	#test/server/config_handler_test.cpp
+	test/server/config_handler_test.cpp
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
 	test/conf/confLexerTest.cpp 
