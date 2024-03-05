@@ -33,12 +33,13 @@ struct TiedServer
 class NetworkIOHandler
 {
 	public:
-		void setupSocket( ConfigHandler *configHandler );
+		int setupSocket( const std::string address, const unsigned int port );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
 		int acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		int getListenfd();
+		void	addVServer(const int listen_fd, const TiedServer server);
 
 	private:
 		int listenfd_; // リスニングソケットを管理

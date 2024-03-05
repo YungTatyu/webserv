@@ -31,6 +31,8 @@ class WebServer
 		ConfigHandler *configHandler;
 		void initializeServer();
 		void initializeVServers();
+		void	initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
+										const std::string address, const unsigned int port);
 };
 
 #endif

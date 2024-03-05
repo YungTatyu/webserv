@@ -1,12 +1,16 @@
 #include "NetworkIOHandler.hpp"
 
+#include <arpa/inet.h>
+#include <cstring>
+#include <utility>
+
 /* NetworkIOHandlerクラスの実装 */
-void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
+int NetworkIOHandler::setupSocket( const std::string address, const unsigned int port )
 {
 	try
 	{
 		//creation of the socket
-		this->listenfd_ = SysCallWrapper::Socket( AF_INET, SOCK_STREAM, 0 );
+		const int listen_fd = SysCallWrapper::Socket( AF_INET, SOCK_STREAM, 0 );
 		fcntl( this->listenfd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 		// socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
@@ -15,23 +19,30 @@ void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
 
 		//preparation of the socket address
 		struct sockaddr_in servaddr;
+		std::memset(&servaddr, 0, sizeof(servaddr));
+	
 		servaddr.sin_family = AF_INET;
+		// TODO: strtoipaddressを適応する
+		(void)address;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		servaddr.sin_port = htons( configHandler->getServPort() );
+		servaddr.sin_port = htons( port );
 
 		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
-		SysCallWrapper::Listen( this->listenfd_, configHandler->getListenQ() );
+		SysCallWrapper::Listen( this->listenfd_, SOMAXCONN );
 
-		std::cout << "Server running on port " << configHandler->getServPort() << std::endl;
+		std::cout << "Server running on port " << port << std::endl;
+		return listen_fd;
 
 	}
 	catch ( const std::runtime_error& e )
 	{
-		// std::cout << e.what() << std::endl;
-		if ( this->listenfd_ != -1 )
-			close( this->listenfd_ );
 		std::exit( EXIT_FAILURE );
 	}
+}
+
+void	NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server)
+{
+	this->listenfd_map_.insert(std::make_pair(listen_fd, server));
 }
 
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int cli_sock )
