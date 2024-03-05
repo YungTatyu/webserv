@@ -373,7 +373,7 @@ std::string HttpRequest::urlDecode(const std::string& encoded)
     std::string decoded;
     for (std::size_t i = 0; i < encoded.size(); ++i) {
         if (encoded[i] == '%' && i + 2 < encoded.size()) {
-            int hexValue = std::strtol(encoded.substr(i + 1, 2).c_str(), nullptr, 16);
+            int hexValue = std::strtol(encoded.substr(i + 1, 2).c_str(), NULL, 16);
             decoded += static_cast<char>(hexValue);
             i += 2;
         } else {
