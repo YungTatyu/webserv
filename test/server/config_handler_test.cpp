@@ -65,11 +65,6 @@ protected:
 };
 
 namespace test {
-// 実際に使うallowRequestはソケットをつくらないと使えないので、ここではソケットの代わりに、アドレスを渡している。
-bool	allowRequestIPv4( const config::Server& server,
-						const config::Location* location,
-						const HttpRequest& request,
-						const struct sockaddr_in client_addr );
 // writeAcs/ErrLogのテスト用
 bool	WRITE_ACCURATE( const std::string file, const std::string& phrase ) {
 	std::ifstream	ifs( file );
@@ -84,6 +79,7 @@ bool	WRITE_ACCURATE( const std::string file, const std::string& phrase ) {
 
 	return ( content.find(phrase) != std::string::npos );
 }
+
 bool	sameTiedServer(const struct TiedServer& tied1, const struct TiedServer& tied2)
 {
 	return (tied1.servers_.size() == tied2.servers_.size() &&
@@ -240,7 +236,7 @@ TEST_F(ConfigHandlerTest, searchKeepaliveTimeout)
 	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[0].location_list[1].keepalive_timeout.getTime(),
 			config_handler_.searchKeepaliveTimeout(tied_server_1,
 											"first_server",
-											"/hello")));
+											"/hello/")));
 
 	struct TiedServer	tied_server_2("127.0.0.2", 8002);
 	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
@@ -264,7 +260,7 @@ TEST_F(ConfigHandlerTest, searchSendTimeout)
 	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[0].location_list[1].send_timeout.getTime(),
 			config_handler_.searchSendTimeout(tied_server_1,
 										"first_server",
-										"/hello")));
+										"/hello/")));
 
 	struct TiedServer	tied_server_2("127.0.0.2", 8002);
 	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
@@ -288,7 +284,7 @@ TEST_F(ConfigHandlerTest, searchUseridExpires)
 	EXPECT_TRUE(test::sameTime(config_handler_.config_->http.server_list[0].location_list[1].userid_expires.getTime(),
 			config_handler_.searchUseridExpires(tied_server_1,
 										"first_server",
-										"/hello")));
+										"/hello/")));
 
 	struct TiedServer	tied_server_2("127.0.0.2", 8002);
 	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
@@ -335,7 +331,7 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	msg = "kakikukeko";
 	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
-							"/hello",
+							"/hello/",
 							msg);
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 
@@ -344,7 +340,7 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	msg = "sashisuseso";
 	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
-							"/goodnight",
+							"/goodnight/",
 							msg);
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 
@@ -396,7 +392,7 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	msg = "kakikukeko";
 	config_handler_.writeAcsLog(tied_server_1,
 							"first_server",
-							"/hello",
+							"/hello/",
 							msg);
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 
