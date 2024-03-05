@@ -50,11 +50,13 @@ uint32_t	ConfigHandler::StrToIPAddress( const std::string& ip) const
 		result = (result << 8) | value;
 	}
 
-	return result;
+	return htonl(result);
 }
 
 bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr ) const
 {
+	if (ip_addr_str == "all")
+		return true;
 	std::istringstream	iss(ip_addr_str);
 	std::string			ip;
 	std::string			mask;
@@ -64,6 +66,7 @@ bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32
 
 	uint32_t			conf_addr = StrToIPAddress(ip);
 	uint32_t			mask_val = 0xFFFFFFFF;
+
 	// サブネットマスクが指定されている場合
 	if (!mask.empty())
 	{
