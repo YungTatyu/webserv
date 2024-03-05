@@ -120,7 +120,6 @@ TEST(HttpRequest, OkTest7)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
-    std::map<std::string, std::string> queries;
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
 
@@ -148,7 +147,6 @@ TEST(HttpRequest, OkTest8)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
-    std::map<std::string, std::string> queries;
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
 
