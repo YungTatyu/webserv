@@ -37,6 +37,7 @@ $(OBJS_DIR):
 	@mkdir -p $(dir $@)
 
 $(NAME): $(OBJS)
+	@mkdir -p logs/
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(DEPS_DIR)/%.d: $(SRCS_DIR)/%.cpp
@@ -62,6 +63,7 @@ re: fclean all
 TEST_FILTER ?= '*'
 
 test:
+	@mkdir -p logs/
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)

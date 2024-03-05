@@ -33,6 +33,7 @@
 webserv
 
 build
+logs
 *tmp*
 .vscode
 .DS_Store
