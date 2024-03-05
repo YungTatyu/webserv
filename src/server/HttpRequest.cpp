@@ -184,13 +184,17 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 	while (state != sw_end) {
 		switch (state) {
 		case sw_start:
-			state = sw_start;
+			state = sw_uriBeforeSlash;
+			break;
 		case sw_uriBeforeSlash:
 			state = sw_schema;
+			break;
 		case sw_schema:
 			state = sw_almost_end;
+			break;
 		case sw_almost_end:
 			state = sw_end;
+			break;
 		case sw_end:
 			break;
 		}
