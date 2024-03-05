@@ -196,8 +196,8 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string& rawRequest, HttpReque
 		}
 	}
 	std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
+	tmp = urlDecode(tmp);
 	newRequest.uri = tmp.substr(0, tmp.find('?'));
-	newRequest.uri = urlDecode(newRequest.uri);
 	size_t qindex = tmp.find('?');
 	if (qindex != std::string::npos)
 		newRequest.queries = tmp.substr(tmp.find('?') + 1);
@@ -365,6 +365,9 @@ void HttpRequest::parseBody(std::string& body, HttpRequest& newRequest)
 	newRequest.body = body;
 }
 
+/*
+ * https://www.techieclues.com/blogs/convert-url-encoding-to-string-in-cpp
+ */
 std::string HttpRequest::urlDecode(const std::string& encoded)
 {
     std::string decoded;
