@@ -43,7 +43,7 @@ int	config::addAcsFdList ( std::set<std::string>& directives_set, const std::vec
 		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
 		// openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
 			return -1;
 		fd_list.push_back(tmp_fd);
@@ -68,7 +68,7 @@ int	config::addErrFdList ( std::set<std::string>& directives_set, const std::vec
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
 		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
 			return -1;
 		fd_list.push_back(tmp_fd);
@@ -95,7 +95,7 @@ bool	config::initAcsLogFds( config::Main& config )
 			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
-		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/access_log", O_WRONLY | O_CREAT, S_IWUSR);
+		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/access.log", O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
 			return false;
 		config.http.access_fd_list.push_back(tmp_fd);
@@ -137,10 +137,10 @@ bool	config::initErrLogFds( config::Main& config )
 			return false;
 		}
 
-		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/error_log", O_WRONLY | O_CREAT, S_IWUSR);
+		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/error.log", O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
 			return false;
-		config.http.error_fd_list.push_back(tmp_fd);
+		config.error_fd_list.push_back(tmp_fd);
 		config.directives_set.insert(kERROR_FD);
 	}
 
