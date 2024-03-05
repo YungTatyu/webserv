@@ -5,15 +5,8 @@ HttpRequest::HttpRequest(const unsigned int method, const std::string& uri, cons
 			 const std::string& queries,
 			 const std::string& body,
 			 const ParseState parseState)
-			// : method(method), uri(uri), version(version), headers(headers), queries(queries), body(body), parseState(parseState)
+			 : method(method), uri(uri), version(version), headers(headers), queries(queries), body(body), parseState(parseState)
 {
-	(void)method;
-	(void)uri;
-	(void)version;
-	(void)headers;
-	(void)queries;
-	(void)body;
-	(void)parseState;
 }
 
 HttpRequest::~HttpRequest()
