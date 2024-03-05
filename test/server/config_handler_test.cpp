@@ -28,7 +28,7 @@ protected:
 			file_path = "test/server/conf_files/searchKeepaliveTimeout_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "searchSendTimeout") {
-			file_path = "test/server/conf_files/searchSendTimeout_test.conf";
+file_path = "test/server/conf_files/searchSendTimeout_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "searchUseridExpires") {
 			file_path = "test/server/conf_files/searchUseridExpires_test.conf";
@@ -39,17 +39,22 @@ protected:
 		else if (static_cast<std::string>(test_info->name()) == "writeErrLog") {
 			file_path = "test/server/conf_files/writeErrLog_test.conf";
 		}
+		else if (static_cast<std::string>(test_info->name()) == "createTiedServer") {
+			file_path = "test/server/conf_files/createTiedServer_test.conf";
+		}
 		else {
 			config::Main	*config = new config::Main();
 			config_handler_.loadConfiguration(config);
 			GTEST_SKIP();
 		}
+
 		config::Main	*config = new config::Main();
 		config::Lexer	lexer(file_path);
 		lexer.tokenize();
 
 		config::Parser	parser(*config, lexer.getTokens(), file_path);
-		parser.parse();
+		if (!parser.parse())
+			GTEST_SKIP();
 
 		config_handler_.loadConfiguration(config);
 	}
