@@ -17,28 +17,30 @@ protected:
 	void SetUp() override {
 		std::string		file_path;
 		const testing::TestInfo*	test_info = testing::UnitTest::GetInstance()->current_test_info();
-		if (test_info->name() == "allowRequest") {
+		if (static_cast<std::string>(test_info->name()) == "allowRequest") {
 			file_path = "test/server/conf_files/allowRequest_test.conf";
 		}
-		else if (test_info->name() == "searchFile") {
+		else if (static_cast<std::string>(test_info->name()) == "searchFile") {
 			file_path = "test/server/conf_files/searchFile_test.conf";
 		}
-		else if (test_info->name() == "searchKeepaliveTimeout") {
+		else if (static_cast<std::string>(test_info->name()) == "searchKeepaliveTimeout") {
 			file_path = "test/server/conf_files/searchKeepaliveTimeout_test.conf";
 		}
-		else if (test_info->name() == "searchSendTimeout") {
+		else if (static_cast<std::string>(test_info->name()) == "searchSendTimeout") {
 			file_path = "test/server/conf_files/searchSendTimeout_test.conf";
 		}
-		else if (test_info->name() == "searchUseridExpires") {
+		else if (static_cast<std::string>(test_info->name()) == "searchUseridExpires") {
 			file_path = "test/server/conf_files/searchUseridExpires_test.conf";
 		}
-		else if (test_info->name() == "writeAcsLog") {
+		else if (static_cast<std::string>(test_info->name()) == "writeAcsLog") {
 			file_path = "test/server/conf_files/writeAcsLog_test.conf";
 		}
-		else if (test_info->name() == "writeErrLog") {
+		else if (static_cast<std::string>(test_info->name()) == "writeErrLog") {
 			file_path = "test/server/conf_files/writeErrLog_test.conf";
 		}
 		else {
+			config::Main	*config = new config::Main();
+			config_handler_.loadConfiguration(config);
 			GTEST_SKIP();
 		}
 		config::Main	*config = new config::Main();
@@ -59,7 +61,6 @@ protected:
 
 	// テストに使うオブジェクト
 	ConfigHandler		config_handler_;
-	struct TiedServer	tied_server_;
 };
 
 namespace test {
@@ -86,6 +87,7 @@ bool	WRITE_ACCURATE( const std::string file, const std::string& phrase ) {
 // allowRequestの引数プラスでclient自身のアドレス必要かも
 TEST_F(ConfigHandlerTest, allowRequest)
 {
+	struct TiedServer	tied_server_;
 	struct in_addr	cli_addr1
 	struct in_addr	cli_addr2;
 	struct in_addr	cli_addr3;
@@ -144,6 +146,8 @@ TEST_F(ConfigHandlerTest, allowRequest)
 
 TEST_F(ConfigHandlerTest, searchFile)
 {
+	struct TiedServer	tied_server_;
+
 	// 絶対パス取得
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
@@ -201,6 +205,8 @@ TEST_F(ConfigHandlerTest, searchFile)
 
 TEST_F(ConfigHandlerTest, searchKeepaliveTimeout)
 {
+	struct TiedServer	tied_server_;
+
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// http set
@@ -225,6 +231,8 @@ TEST_F(ConfigHandlerTest, searchKeepaliveTimeout)
 
 TEST_F(ConfigHandlerTest, searchSendTimeout)
 {
+	struct TiedServer	tied_server_;
+
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// default time
@@ -249,6 +257,8 @@ TEST_F(ConfigHandlerTest, searchSendTimeout)
 
 TEST_F(ConfigHandlerTest, searchUseridExpires)
 {
+	struct TiedServer	tied_server_;
+
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// http set
@@ -274,6 +284,8 @@ TEST_F(ConfigHandlerTest, searchUseridExpires)
 
 TEST_F(ConfigHandlerTest, writeAcsLog)
 {
+	struct TiedServer	tied_server_;
+
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
 	std::string	absolutepath;
@@ -335,6 +347,8 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 
 TEST_F(ConfigHandlerTest, writeErrLog)
 {
+	struct TiedServer	tied_server_;
+
 	std::string	file_path = "../../";
 	char		absolute_path[MAXPATHLEN];
 	std::string	absolutepath;
@@ -386,23 +400,25 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 
 }
 
-TEST_F(ConfigHandlerTest, retTiedServer)
+TEST_F(ConfigHandlerTest, createTiedServer)
 {
+	struct TiedServer	tied_server_;
+
 	// 3つのサーバーが該当する場合。
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[2]);
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[3]);
-	EXPECT_EQ(tied_server_, config_handler_.retTiedServer("127.0.0.1", 8001));
+	EXPECT_EQ(tied_server_, config_handler_.createTiedServer("127.0.0.1", 8001));
 
 	// １つのサーバーが該当する場合
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[1]);
-	EXPECT_EQ(tied_server_, config_handler_.retTiedServer("127.0.0.2", 8002));
+	EXPECT_EQ(tied_server_, config_handler_.createTiedServer("127.0.0.2", 8002));
 
 	// 1つのサーバーが該当する場合
 	tied_server_.servers_.clear();
 	tied_server_.servers_.push_back(&config_handler_.config_->http.server_list[4]);
-	EXPECT_EQ(tied_server_, config_handler_.retTiedServer("127.0.0.3", 8003));
+	EXPECT_EQ(tied_server_, config_handler_.createTiedServer("127.0.0.3", 8003));
 }
 

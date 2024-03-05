@@ -396,3 +396,21 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 	return NULL;
 }
 
+const struct TiedServer	ConfigHandler::createTiedServer( const std::string addr, const unsigned int port ) const
+{
+	struct TiedServer tied_server(addr, port);
+
+	for (size_t i = 0; i < config_->http.server_list.size(); i++)
+	{
+		for (size_t j = 0; j < config_->http.server_list[i].listen_list.size(); j++)
+		{
+			if (config_->http.server_list[i].listen_list[j].getAddress() == addr &&
+				config_->http.server_list[i].listen_list[j].getport() == port)
+			{
+				tied_server.servers_.push_back(&config_->http.server_list[i]);
+			}
+		}
+	}
+	return tied_server;
+}
+
