@@ -74,11 +74,13 @@ file_path = "test/server/conf_files/searchSendTimeout_test.conf";
 		const testing::TestInfo*	test_info = testing::UnitTest::GetInstance()->current_test_info();
         // テストケースのクリーンアップ処理
 		if (static_cast<std::string>(test_info->name()) == "writeAcsLog") {
+			config::terminateLogFds(config_handler_.config_);
 			unlink("logs/http_access.log");
 			unlink("logs/server_access.log");
 			unlink("logs/location_access.log");
 		}
 		else if (static_cast<std::string>(test_info->name()) == "writeErrLog") {
+			config::terminateLogFds(config_handler_.config_);
 			unlink("logs/server_error.log");
 			unlink("logs/location_error.log");
 		}

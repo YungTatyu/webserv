@@ -4,6 +4,7 @@
 #include "Main.hpp"
 #include "WebServer.hpp"
 #include "ConfigHandler.hpp"
+#include "InitLog.hpp"
 
 int main(int ac, char *av[])
 {
@@ -19,6 +20,7 @@ int main(int ac, char *av[])
 
 	WebServer server = WebServer(config);
 	server.run();
+	config::terminateLogFds(config);
 	delete config;
 	return 0;
 }

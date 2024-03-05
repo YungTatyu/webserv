@@ -172,4 +172,32 @@ bool	config::initLogFds( config::Main& config )
 	return true;
 }
 
+void	config::closeLogFds( const std::vector<int> log_list )
+{
+	for (size_t i = 0; i < log_list.size(); i++)
+		close(log_list[i]);
+}
+
+void config::terminateLogFds( const config::Main* config )
+{
+	// main context
+	closeLogFds(config->error_fd_list);
+
+	// http context
+	closeLogFds(config->http.access_fd_list);
+	closeLogFds(config->http.error_fd_list);
+
+	// server context
+	for (size_t i = 0; i < config->http.server_list.size(); i++)
+	{
+		closeLogFds(config->http.server_list[i].access_fd_list);
+		closeLogFds(config->http.server_list[i].error_fd_list);
+
+		for (size_t j = 0; j < config->http.server_list[i].location_list.size(); j++)
+		{
+			closeLogFds(config->http.server_list[i].location_list[j].access_fd_list);
+			closeLogFds(config->http.server_list[i].location_list[j].error_fd_list);
+		}
+	}
+}
 
