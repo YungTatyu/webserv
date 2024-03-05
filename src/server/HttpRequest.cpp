@@ -231,7 +231,8 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string& rawRequest, H
 			state = sw_method;
 			break;
 		case sw_method:
-			HttpRequest::parseMethod(rawRequest, newRequest);
+			if (HttpRequest::parseMethod(rawRequest, newRequest) == HttpRequest::PARSE_ERROR)
+				return HttpRequest::PARSE_ERROR;
 			state = sw_uri;
 			break;
 		case sw_uri:
