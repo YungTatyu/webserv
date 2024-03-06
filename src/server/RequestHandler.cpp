@@ -40,9 +40,12 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 {
 	// response作成
 	HttpRequest request = connManager.getRequest( sockfd );
-	std::string response = HttpMessage::responseGenerater( request );
+	HttpResponse response = connManager.getResponse( sockfd );
 
-	std::vector<char> vec( response.begin(), response.end()) ;
+	response.prepareResponse( request, connManager.getTiedServer, sockfd );
+	std::string response_str = response.createStaticResponse();
+
+	std::vector<char> vec( response_str.begin(), response_str.end()) ;
 	connManager.setResponse( sockfd, vec );
 
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)

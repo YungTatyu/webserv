@@ -217,6 +217,27 @@ HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 	this->default_error_page_map_[505] = &webserv_error_505_page;
 	this->default_error_page_map_[507] = &webserv_error_507_page;
 }
+
+std::string	HttpResponse::createStaticResponse()
+{
+	std::stringstream response;
+
+	// status line
+	response << this->status_line_map_[this->status_code_] << "\r\n";
+
+	// headers
+	for (std::map<std::string, std::string>::iterator it = this->connections_.begin();
+		it != this->connections_.end();
+		++it
+		)
+		response << it->first << ": " << it->second << "\r\n";
+	response << "\r\n";
+
+	// body
+	response << this->body_;
+	return response.str();
+}
+
 void	HttpResponse::prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock )
 {
 	// server 探す
