@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
 {
@@ -22,6 +23,15 @@ int	FileUtils::wrapperAccess( const std::string path, int modes, bool err_log )
 		std::cerr << "webserv: [emerg] access() \"" << path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 	}
 	return ret;
+}
+
+bool	FileUtils::wrapperRealpath( const std::string path, char absolute_path[] )
+{
+	if (realpath(path.c_str(), absolute_path) == NULL)
+	{
+		return false;
+	}
+	return true;
 }
 
 bool FileUtils::isFile( const std::string& path )

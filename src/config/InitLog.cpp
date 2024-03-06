@@ -1,10 +1,8 @@
 #include "InitLog.hpp"
 #include "FileUtils.hpp"
-#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stdlib.h>
 #include <sys/param.h>
 #include <unistd.h>
 
@@ -89,8 +87,7 @@ bool	config::initAcsLogFds( config::Main& config )
 	else if (ret == 0)
 	{
 		char	absolute_path[MAXPATHLEN];
-		// 絶対pathを取得
-		if (realpath(".", absolute_path) == NULL)
+		if (FileUtils::wrapperRealpath(".", absolute_path))
 		{
 			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
@@ -130,8 +127,7 @@ bool	config::initErrLogFds( config::Main& config )
 	else if (ret == 0)
 	{
 		char	absolute_path[MAXPATHLEN];
-		// 絶対pathを取得
-		if (realpath(".", absolute_path) == NULL)
+		if (FileUtils::wrapperRealpath(".", absolute_path))
 		{
 			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;

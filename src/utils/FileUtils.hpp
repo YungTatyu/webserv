@@ -13,6 +13,7 @@ namespace FileUtils
 {
 	int wrapperOpen(const std::string path, int flags, mode_t modes );
 	int wrapperAccess( const std::string path, int modes, bool err_log );
+	bool	wrapperRealpath( const std::string path, char absolute_path[] );
 	bool isFile( const std::string& path );
 	bool isDirectory( const std::string& path );
 	std::string readFile( const std::string& filePath );
