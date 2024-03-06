@@ -315,19 +315,19 @@ const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer
 {
 	const config::Server*	default_server = tied_servers.servers_[0];
 
-	for (size_t i = 0; i < tied_servers.servers_.size(); i++)
+	for (size_t si = 0; si < tied_servers.servers_.size(); si++)
 	{
-		if (tied_servers.servers_[i]->server_name.getName().find(server_name) != tied_servers.servers_[i]->server_name.getName().end())
-			return *tied_servers.servers_[i];
+		if (tied_servers.servers_[si]->server_name.getName().find(server_name) != tied_servers.servers_[si]->server_name.getName().end())
+			return *tied_servers.servers_[si];
 		// default_server特定できるようにする
-		for (size_t j = 0; j < tied_servers.servers_[i]->listen_list.size(); j++)
+		for (size_t li = 0; li < tied_servers.servers_[si]->listen_list.size(); li++)
 		{
-			const config::Listen& tmp_listen = tied_servers.servers_[i]->listen_list[j];
+			const config::Listen& tmp_listen = tied_servers.servers_[si]->listen_list[li];
 			if (tmp_listen.getIsDefaultServer() &&
 				tied_servers.port_ == tmp_listen.getport() &&
 				tied_servers.addr_ == tmp_listen.getAddress())
 			{
-				default_server = tied_servers.servers_[i];
+				default_server = tied_servers.servers_[si];
 			}
 		}
 	}

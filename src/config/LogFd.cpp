@@ -100,15 +100,15 @@ bool	config::initAcsLogFds( config::Main& config )
 	}
 
 	// server context
-	for (size_t i = 0; i < config.http.server_list.size(); i++)
+	for (size_t si = 0; si < config.http.server_list.size(); si++)
 	{
-		if (addAcsFdList(config.http.server_list[i].directives_set, config.http.server_list[i].access_log_list, config.http.server_list[i].access_fd_list) == -1)
+		if (addAcsFdList(config.http.server_list[si].directives_set, config.http.server_list[si].access_log_list, config.http.server_list[si].access_fd_list) == -1)
 			return false;
 
 		// location context
-		for (size_t j = 0; j < config.http.server_list[i].location_list.size(); j++)
+		for (size_t li = 0; li < config.http.server_list[si].location_list.size(); li++)
 		{
-			if (addAcsFdList(config.http.server_list[i].location_list[j].directives_set, config.http.server_list[i].location_list[j].access_log_list, config.http.server_list[i].location_list[j].access_fd_list) == -1)
+			if (addAcsFdList(config.http.server_list[si].location_list[li].directives_set, config.http.server_list[si].location_list[li].access_log_list, config.http.server_list[si].location_list[li].access_fd_list) == -1)
 				return false;
 		}
 	}
@@ -145,15 +145,15 @@ bool	config::initErrLogFds( config::Main& config )
 		return false;
 
 	// server context
-	for (size_t i = 0; i < config.http.server_list.size(); i++)
+	for (size_t si = 0; si < config.http.server_list.size(); si++)
 	{
-		if (addErrFdList(config.http.server_list[i].directives_set, config.http.server_list[i].error_log_list, config.http.server_list[i].error_fd_list) == -1)
+		if (addErrFdList(config.http.server_list[si].directives_set, config.http.server_list[si].error_log_list, config.http.server_list[si].error_fd_list) == -1)
 			return false;
 
 		// location context
-		for (size_t j = 0; j < config.http.server_list[i].location_list.size(); j++)
+		for (size_t li = 0; li < config.http.server_list[si].location_list.size(); li++)
 		{
-			if (addErrFdList(config.http.server_list[i].location_list[j].directives_set, config.http.server_list[i].location_list[j].error_log_list, config.http.server_list[i].location_list[j].error_fd_list) == -1)
+			if (addErrFdList(config.http.server_list[si].location_list[li].directives_set, config.http.server_list[si].location_list[li].error_log_list, config.http.server_list[si].location_list[li].error_fd_list) == -1)
 				return false;
 		}
 	}
