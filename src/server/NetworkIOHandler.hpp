@@ -22,7 +22,7 @@ class ConfigHandler;
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer
 {
-	std::vector<config::Server*>	servers_;
+	std::vector<const config::Server*>	servers_;
 	const std::string	address_;
 	const unsigned int	port_;
 	TiedServer(const std::string &address, const unsigned int port) :
