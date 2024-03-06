@@ -1,4 +1,5 @@
 #include "RequestHandler.hpp"
+#include "HttpResponse.hpp"
 #include "HttpMessage.hpp"
 #include <sys/types.h>
 #include <algorithm>
@@ -36,14 +37,13 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		return RequestHandler::UPDATE_WRITE;
 }
 
-int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
 {
 	// response作成
 	HttpRequest request = connManager.getRequest( sockfd );
-	HttpResponse response = connManager.getResponse( sockfd );
+	HttpResponse response( configHandler );
 
-	response.prepareResponse( request, connManager.getTiedServer, sockfd );
-	std::string response_str = response.createStaticResponse();
+	std::string response_str = response.generateResponse( request, connManager.getTiedServer(sockfd), sockfd );
 
 	std::vector<char> vec( response_str.begin(), response_str.end()) ;
 	connManager.setResponse( sockfd, vec );

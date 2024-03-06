@@ -9,14 +9,15 @@ void	SelectServer::eventLoop(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	for ( ; ; )
 	{
 		waitForEvent(conn_manager, event_manager);
 
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
 
 		event_manager->clearAllEvents();
 	}
@@ -92,7 +93,8 @@ void	SelectServer::callEventHandler(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	const std::vector<SelectEvent> *active_events_ptr =
@@ -104,6 +106,6 @@ void	SelectServer::callEventHandler(
 		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
 			request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].fd_);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].fd_);
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, active_events[i].fd_);
 	}
 }

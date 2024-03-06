@@ -62,3 +62,14 @@ const HttpRequest &ConnectionManager::getRequest( const int fd ) const
 {
 	return connections_.at(fd).request;
 }
+
+void	ConnectionManager::setTiedServer( const int fd, const TiedServer* tied_server )
+{
+	connections_[fd].tied_server_ = tied_server;
+}
+
+const TiedServer&	ConnectionManager::getTiedServer( const int fd ) const
+{
+	return *connections_.at(fd).tied_server_;
+}
+

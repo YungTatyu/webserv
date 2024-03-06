@@ -86,6 +86,7 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	// 新規クライントfdを追加
 	connManager.setConnection( connfd );
 	connManager.setEvent( connfd, ConnectionData::READ );
+	connManager.setTiedServer( connfd, &this->listenfd_map_[listenfd_]);
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

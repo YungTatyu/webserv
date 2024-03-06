@@ -6,6 +6,8 @@
 
 # include "HttpMessage.hpp"
 
+struct TiedServer;
+
 class ConnectionData
 {
 	public:
@@ -17,6 +19,7 @@ class ConnectionData
 		std::vector<char> response;
 		EVENT event;
 		HttpRequest	request;
+		const TiedServer* tied_server_;
 };
 
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
@@ -34,6 +37,8 @@ class ConnectionManager
 		void setRequest( const int fd, const HttpRequest request );
 		const HttpRequest &getRequest( const int fd ) const;
 		const std::map<int, ConnectionData> &getConnections() const;
+		void setTiedServer( const int fd, const TiedServer* tied_server );
+		const TiedServer& getTiedServer( const int fd ) const;
 	private:
 		std::map<int, class ConnectionData> connections_;
 
