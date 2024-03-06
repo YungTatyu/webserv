@@ -199,21 +199,27 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < location->access_fd_list.size(); i++)
 		{
-			write(location->access_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(location->access_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (server.directives_set.find(kACCESS_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.access_fd_list.size(); i++)
 		{
-			write(server.access_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(server.access_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (this->config_->http.directives_set.find(kACCESS_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
 		{
-			write(this->config_->http.access_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(this->config_->http.access_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 }
@@ -228,28 +234,36 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
 		{
-			write(location->error_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(location->error_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (server.directives_set.find(kERROR_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.error_fd_list.size(); i++)
 		{
-			write(server.error_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(server.error_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
 		{
-			write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
 		{
-			write(this->config_->error_fd_list[i], msg.c_str(), msg.length());
+			int ret = write(this->config_->error_fd_list[i], msg.c_str(), msg.length());
+			if (ret == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 }
