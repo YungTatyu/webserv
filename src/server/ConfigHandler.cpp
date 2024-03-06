@@ -5,6 +5,9 @@
 
 const static	std::string kACCESS_FD = "access_fd";
 const static	std::string kERROR_FD = "error_fd";
+const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static	std::string kSEND_TIMEOUT = "send_timeout";
+const static	std::string kUSERID_EXPIRES = "userid_expires";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -118,8 +121,6 @@ config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& m
 		return config::HEAD;
 	else if (method_str == "POST")
 		return config::POST;
-	else if (method_str == "PUT")
-		return config::PUT;
 	else
 		return config::DELETE;
 }
@@ -258,11 +259,11 @@ const config::Time&	ConfigHandler::searchKeepaliveTimeout( const struct TiedServ
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("keepalive_timeout") != location->directives_set.end())
+	if (location && location->directives_set.find(kKEEPALIVE_TIMEOUT) != location->directives_set.end())
 	{
 		return location->keepalive_timeout.getTime();
 	}
-	else if (server.directives_set.find("keepalive_timeout") != server.directives_set.end())
+	else if (server.directives_set.find(kKEEPALIVE_TIMEOUT) != server.directives_set.end())
 	{
 		return server.keepalive_timeout.getTime();
 	}
@@ -278,11 +279,11 @@ const config::Time&	ConfigHandler::searchSendTimeout( const TiedServer& tied_ser
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("send_timeout") != location->directives_set.end())
+	if (location && location->directives_set.find(kSEND_TIMEOUT) != location->directives_set.end())
 	{
 		return location->send_timeout.getTime();
 	}
-	else if (server.directives_set.find("send_timeout") != server.directives_set.end())
+	else if (server.directives_set.find(kSEND_TIMEOUT) != server.directives_set.end())
 	{
 		return server.send_timeout.getTime();
 	}
@@ -297,11 +298,11 @@ const config::Time&	ConfigHandler::searchUseridExpires( const struct TiedServer&
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("userid_expires") != location->directives_set.end())
+	if (location && location->directives_set.find(kUSERID_EXPIRES) != location->directives_set.end())
 	{
 		return location->userid_expires.getTime();
 	}
-	else if (server.directives_set.find("userid_expires") != server.directives_set.end())
+	else if (server.directives_set.find(kUSERID_EXPIRES) != server.directives_set.end())
 	{
 		return server.userid_expires.getTime();
 	}

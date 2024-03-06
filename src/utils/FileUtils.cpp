@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/param.h>
 
 int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
 {
@@ -25,12 +26,15 @@ int	FileUtils::wrapperAccess( const std::string path, int modes, bool err_log )
 	return ret;
 }
 
-bool	FileUtils::wrapperRealpath( const std::string path, char absolute_path[] )
+bool	FileUtils::wrapperRealpath( const std::string path, std::string& absolute_path )
 {
-	if (realpath(path.c_str(), absolute_path) == NULL)
+	char	tmp_path[MAXPATHLEN];
+	if (realpath(path.c_str(), tmp_path) == NULL)
 	{
 		return false;
 	}
+
+	absolute_path = static_cast<std::string>(tmp_path);
 	return true;
 }
 

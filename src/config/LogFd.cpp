@@ -1,4 +1,4 @@
-#include "InitLog.hpp"
+#include "LogFd.hpp"
 #include "FileUtils.hpp"
 #include <errno.h>
 #include <fcntl.h>
@@ -43,7 +43,9 @@ int	config::addAcsFdList ( std::set<std::string>& directives_set, const std::vec
 		// openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
 		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
+		{
 			return -1;
+		}
 		fd_list.push_back(tmp_fd);
 	}
 	directives_set.insert(kACCESS_FD);
@@ -68,7 +70,9 @@ int	config::addErrFdList ( std::set<std::string>& directives_set, const std::vec
 			continue;
 		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
+		{
 			return -1;
+		}
 		fd_list.push_back(tmp_fd);
 	}
 
@@ -86,15 +90,17 @@ bool	config::initAcsLogFds( config::Main& config )
 		return false;
 	else if (ret == 0)
 	{
-		char	absolute_path[MAXPATHLEN];
-		if (FileUtils::wrapperRealpath(".", absolute_path))
+		std::string	absolute_path;
+		if (!FileUtils::wrapperRealpath(".", absolute_path))
 		{
-			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			std::cerr << "webserv: [emerg] realpath() \"" << "." <<"\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
-		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/access.log", O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
+		{
 			return false;
+		}
 		config.http.access_fd_list.push_back(tmp_fd);
 		config.http.directives_set.insert(kACCESS_FD);
 	}
@@ -126,16 +132,18 @@ bool	config::initErrLogFds( config::Main& config )
 		return false;
 	else if (ret == 0)
 	{
-		char	absolute_path[MAXPATHLEN];
-		if (FileUtils::wrapperRealpath(".", absolute_path))
+		std::string	absolute_path;
+		if (!FileUtils::wrapperRealpath(".", absolute_path))
 		{
-			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			std::cerr << "webserv: [emerg] realpath() \"" << "." << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
 
-		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/error.log", O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 		if (tmp_fd == -1)
+		{
 			return false;
+		}
 		config.error_fd_list.push_back(tmp_fd);
 		config.directives_set.insert(kERROR_FD);
 	}
