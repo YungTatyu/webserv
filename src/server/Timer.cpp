@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <iostream>
+#include <chrono>
 
 unsigned long	Timer::current_time_;
 
@@ -73,8 +74,14 @@ unsigned long	Timer::getTimeout() const
 
 void	Timer::setTimeout(const config::Time &time)
 {
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+	duration += std::chrono::milliseconds(time.time_in_ms_);
+
+
 	this->raw_time_ms_ = time.time_in_ms_;
-	this->timeout_ms_ = time.time_in_ms_ + getCurrentTime();
+	// this->timeout_ms_ = time.time_in_ms_ + getCurrentTime();
+	this->timeout_ms_ = duration.count();
 }
 
 bool	Timer::operator<(const Timer &other) const
