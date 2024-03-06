@@ -1,7 +1,7 @@
 #include "HttpResponse.hpp"
 
 std::map<int, std::string> HttpResponse::status_line_map_;
-std::map<int, std::string> HttpResponse::default_error_page_map_;
+std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 
 const static std::string http_version = "HTTP/1.1 ";
 
@@ -176,57 +176,42 @@ HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 
 
 	// default error_page
-	this->default_error_page_map_[300] = "";
-	this->default_error_page_map_[301] = webserv_error_301_page;
-	this->default_error_page_map_[302] = webserv_error_302_page;
-	this->default_error_page_map_[303] = webserv_error_303_page;
-	this->default_error_page_map_[307] = webserv_error_307_page;
-	this->default_error_page_map_[308] = webserv_error_308_page;
+	this->default_error_page_map_[301] = &webserv_error_301_page;
+	this->default_error_page_map_[302] = &webserv_error_302_page;
+	this->default_error_page_map_[303] = &webserv_error_303_page;
+	this->default_error_page_map_[307] = &webserv_error_307_page;
+	this->default_error_page_map_[308] = &webserv_error_308_page;
 
-	this->default_error_page_map_[400] = webserv_error_400_page;
-	this->default_error_page_map_[401] = webserv_error_401_page;
-	this->default_error_page_map_[402] = webserv_error_402_page;
-	this->default_error_page_map_[403] = webserv_error_403_page;
-	this->default_error_page_map_[404] = webserv_error_404_page;
-	this->default_error_page_map_[405] = webserv_error_405_page;
-	this->default_error_page_map_[406] = webserv_error_406_page;
-	this->default_error_page_map_[407] = "";
-	this->default_error_page_map_[408] = webserv_error_408_page;
-	this->default_error_page_map_[409] = webserv_error_409_page;
-	this->default_error_page_map_[410] = webserv_error_410_page;
-	this->default_error_page_map_[411] = webserv_error_411_page;
-	this->default_error_page_map_[412] = webserv_error_412_page;
-	this->default_error_page_map_[413] = webserv_error_413_page;
-	this->default_error_page_map_[414] = webserv_error_414_page;
-	this->default_error_page_map_[415] = webserv_error_415_page;
-	this->default_error_page_map_[416] = webserv_error_416_page;
-	this->default_error_page_map_[417] = "";
-	this->default_error_page_map_[418] = "";
-	this->default_error_page_map_[419] = "";
-	this->default_error_page_map_[420] = "";
-	this->default_error_page_map_[421] = webserv_error_421_page;
-	this->default_error_page_map_[422] = "";
-	this->default_error_page_map_[423] = "";
-	this->default_error_page_map_[424] = "";
-	this->default_error_page_map_[425] = "";
-	this->default_error_page_map_[426] = "";
-	this->default_error_page_map_[427] = "";
-	this->default_error_page_map_[428] = "";
-	this->default_error_page_map_[429] = webserv_error_429_page;
+	this->default_error_page_map_[400] = &webserv_error_400_page;
+	this->default_error_page_map_[401] = &webserv_error_401_page;
+	this->default_error_page_map_[402] = &webserv_error_402_page;
+	this->default_error_page_map_[403] = &webserv_error_403_page;
+	this->default_error_page_map_[404] = &webserv_error_404_page;
+	this->default_error_page_map_[405] = &webserv_error_405_page;
+	this->default_error_page_map_[406] = &webserv_error_406_page;
+	this->default_error_page_map_[408] = &webserv_error_408_page;
+	this->default_error_page_map_[409] = &webserv_error_409_page;
+	this->default_error_page_map_[410] = &webserv_error_410_page;
+	this->default_error_page_map_[411] = &webserv_error_411_page;
+	this->default_error_page_map_[412] = &webserv_error_412_page;
+	this->default_error_page_map_[413] = &webserv_error_413_page;
+	this->default_error_page_map_[414] = &webserv_error_414_page;
+	this->default_error_page_map_[415] = &webserv_error_415_page;
+	this->default_error_page_map_[416] = &webserv_error_416_page;
+	this->default_error_page_map_[421] = &webserv_error_421_page;
+	this->default_error_page_map_[429] = &webserv_error_429_page;
 
-	this->default_error_page_map_[494] = webserv_error_494_page;
-	this->default_error_page_map_[495] = webserv_error_495_page;
-	this->default_error_page_map_[496] = webserv_error_496_page;
-	this->default_error_page_map_[497] = webserv_error_497_page;
-	this->default_error_page_map_[498] = webserv_error_404_page;
-	this->default_error_page_map_[499] = "";
+	this->default_error_page_map_[494] = &webserv_error_494_page;
+	this->default_error_page_map_[495] = &webserv_error_495_page;
+	this->default_error_page_map_[496] = &webserv_error_496_page;
+	this->default_error_page_map_[497] = &webserv_error_497_page;
+	this->default_error_page_map_[498] = &webserv_error_404_page;
 
-	this->default_error_page_map_[500] = webserv_error_500_page;
-	this->default_error_page_map_[501] = webserv_error_501_page;
-	this->default_error_page_map_[502] = webserv_error_502_page;
-	this->default_error_page_map_[503] = webserv_error_503_page;
-	this->default_error_page_map_[504] = webserv_error_504_page;
-	this->default_error_page_map_[505] = webserv_error_505_page;
-	this->default_error_page_map_[506] = "";
-	this->default_error_page_map_[507] = webserv_error_507_page;
+	this->default_error_page_map_[500] = &webserv_error_500_page;
+	this->default_error_page_map_[501] = &webserv_error_501_page;
+	this->default_error_page_map_[502] = &webserv_error_502_page;
+	this->default_error_page_map_[503] = &webserv_error_503_page;
+	this->default_error_page_map_[504] = &webserv_error_504_page;
+	this->default_error_page_map_[505] = &webserv_error_505_page;
+	this->default_error_page_map_[507] = &webserv_error_507_page;
 }

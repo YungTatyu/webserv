@@ -1,15 +1,22 @@
-#ifndef POLL_ACTIVE_EVENT_MANAGER_HPP
-#define POLL_ACTIVE_EVENT_MANAGER_HPP
+#ifndef KQUEUE_ACTIVE_EVENT_MANAGER_HPP
+#define KQUEUE_ACTIVE_EVENT_MANAGER_HPP
 
+#include "conf.hpp"
+
+#if defined(KQUEUE_AVAILABLE)
+
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
 #include <vector>
 
 #include "IActiveEventManager.hpp"
 
-class PollActiveEventManager : public IActiveEventManager
+class KqueueActiveEventManager : public IActiveEventManager
 {
 	public:
-		PollActiveEventManager();
-		~PollActiveEventManager();
+		KqueueActiveEventManager();
+		~KqueueActiveEventManager();
 		void	*getActiveEvents();
 		int	getActiveEventsNum();
 		void	setActiveEventsNum(const int num);
@@ -19,8 +26,9 @@ class PollActiveEventManager : public IActiveEventManager
 		bool	isWriteEvent(const void *event);
 		bool	isErrorEvent(const void *event);
 	private:
-		std::vector<struct pollfd> active_events_;
+		std::vector<struct kevent> active_events_;
 		int active_events_num_;
 };
 
+#endif
 #endif
