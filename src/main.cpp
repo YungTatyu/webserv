@@ -4,7 +4,7 @@
 #include "Main.hpp"
 #include "WebServer.hpp"
 #include "ConfigHandler.hpp"
-#include "InitLog.hpp"
+#include "LogFd.hpp"
 
 int main(int ac, char *av[])
 {

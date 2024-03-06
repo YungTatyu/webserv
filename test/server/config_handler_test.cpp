@@ -3,7 +3,7 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "ConfigHandler.hpp"
-#include "InitLog.hpp"
+#include "LogFd.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -61,6 +61,7 @@ file_path = "test/server/conf_files/searchSendTimeout_test.conf";
 			static_cast<std::string>(test_info->name()) == "writeErrLog") {
 			if (!initLogFds(*config))
 			{
+				config_handler_.loadConfiguration(config);
 				GTEST_SKIP();
 			}
 		}

@@ -1,5 +1,5 @@
-#ifndef INIT_LOG_HPP
-#define INIT_LOG_HPP
+#ifndef LOGFD_HPP
+#define LOGFD_HPP
 
 # include "Main.hpp"
 # include "AccessLog.hpp"
