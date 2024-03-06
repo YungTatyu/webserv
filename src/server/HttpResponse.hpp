@@ -15,8 +15,8 @@ class HttpResponse
 		HttpResponse( const ConfigHandler& config_handler );
 
 		// member methods
-		void	prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
-		static std::string	createStaticResponse();
+		std::string	generateResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
+		std::string	createStaticResponse();
 
 	private:
 		// private variables
@@ -31,11 +31,12 @@ class HttpResponse
 
 		// utils methods
 		// 名前微妙
-		void	responseHandler( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr );
+		void	prepareResponse( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr );
 		static std::string	autoIndex( const std::string& directoryPath );
 		void	prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code );
 		void	internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri );
-void	returnResponse( config::Return& return_directive );
+		void	returnResponse( config::Return& return_directive );
+		std::string	getCurrentGMTTime();
 };
 
 

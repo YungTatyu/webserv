@@ -1,6 +1,8 @@
 #include "HttpResponse.hpp"
 #include "FileUtils.hpp"
 #include "string.h"
+#include <ctime>
+#include <iomanip>
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -111,10 +113,16 @@ const static std::string webserv_error_505_page =
 const static std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
+
+
 HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 	: status_code_(200), body_(""), config_handler_(config_handler)
 {
-	// status_line
+	this->headers_["Server"] = "webserv/1";
+	this->headers_["Connection"] = "keep-alive";
+	this->headers_["Date"] = getCurrentGMTTime();
+
+		// status_line
 	this->status_line_map_[200] = http_version + "200 OK";
 	this->status_line_map_[201] = http_version + "201 Created";
 	this->status_line_map_[202] = http_version + "202 Accepted";
@@ -218,16 +226,44 @@ HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 	this->default_error_page_map_[507] = &webserv_error_507_page;
 }
 
+std::string	HttpResponse::getCurrentGMTTime()
+{
+	// 現在の時間を取得
+	std::time_t currentTime = std::time(NULL);
+
+	// 構造体 tm に変換
+	std::tm *gmTime = std::gmtime(&currentTime);
+
+	// 曜日の文字列
+	const char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+
+	// 月の文字列
+	const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+	// 指定されたフォーマットで文字列に変換
+	std::ostringstream oss;
+	oss << days[gmTime->tm_wday] << ", "
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_mday << " "
+		<< months[gmTime->tm_mon] << " "
+		<< 1900 + gmTime->tm_year << " "
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_hour << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_min << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_sec
+		<< " GMT";
+
+	return oss.str();
+}
+
 std::string	HttpResponse::createStaticResponse()
 {
 	std::stringstream response;
 
 	// status line
-	response << this->status_line_map_[this->status_code_] << "\r\n";
+	response << status_line_map_[this->status_code_] << "\r\n";
 
 	// headers
-	for (std::map<std::string, std::string>::iterator it = this->connections_.begin();
-		it != this->connections_.end();
+	for (std::map<std::string, std::string>::iterator it = this->headers_.begin();
+		it != this->headers_.end();
 		++it
 		)
 		response << it->first << ": " << it->second << "\r\n";
@@ -238,7 +274,7 @@ std::string	HttpResponse::createStaticResponse()
 	return response.str();
 }
 
-void	HttpResponse::prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock )
+std::string	HttpResponse::generateResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock )
 {
 	// server 探す
 	const config::Server&	server = config_handler_.searchServerConfig(tied_servers, request.headers.find("Host")->second);
@@ -255,14 +291,15 @@ void	HttpResponse::prepareResponse( const HttpRequest& request, const struct Tie
 	if (request.parseState == HttpRequest::PARSE_ERROR)
 	{
 		prepareErrorResponse(request, server, NULL, client_addr, 400);
-		return;
+		return createStaticResponse();
 	}
 
 	// 内部リダイレクトなどはこれ再帰で回る
-	responseHandler(request, server, client_addr);
+	prepareResponse(request, server, client_addr);
+	return createStaticResponse();
 }
 
-void	HttpResponse::responseHandler( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr)
+void	HttpResponse::prepareResponse( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr)
 {
 	// server の return を見に行く。今はreturn はlocationにしかない
 	const config::Location*	location = config_handler_.searchLongestMatchLocationConfig(server, request.uri);
@@ -305,7 +342,7 @@ void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const confi
 	{
 		if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
 			status_code_ = tmp_code;
-		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度responseHandlerをする
+		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度prepareResponseをする
 	}
 	else
 	{
@@ -323,21 +360,21 @@ void	HttpResponse::returnResponse( config::Return& return_directive )
 
 	if (code == config::Return::kCodeUnset)
 	{
-		this->headers["Location"] = url;
+		this->headers_["Location"] = url;
 		this->status_code_ = 302;
-		this->headers["Content-Type"] = "text/html"; // ここでやるべきか
+		this->headers_["Content-Type"] = "text/html"; // ここでやるべきか
 	}
 	else if (301 <= code && code <= 8)
 	{
-		this->headers["Location"] = url;
+		this->headers_["Location"] = url;
 		this->status_code_ = code;
-		this->headers["Content-Type"] = "text/html";
+		this->headers_["Content-Type"] = "text/html";
 	}
 	else
 	{
 		this->body_ = url;
 		this->status_code_ = code;
-		this->headers["Content-Type"] = "text/plain";
+		this->headers_["Content-Type"] = "text/plain";
 	}
 }
 
@@ -356,10 +393,10 @@ void	HttpResponse::internalRedirect( const HttpRequest& request, const config::S
 	{
 		HttpRequest	redirect_request = request;
 		redirect_request.uri = redirect_uri;
-		responseHandler(redirect_request, server, client_addr);
+		prepareResponse(redirect_request, server, client_addr);
 	}
 
 	// methodは必ずＧＥＴになる?
-	responseHandler(request, server, client_addr);
+	prepareResponse(request, server, client_addr);
 }
 
