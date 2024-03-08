@@ -19,7 +19,6 @@ class TimerTree
 		int	findTimer() const;
 		const std::multiset<Timer>	&getTimerTree() const;
 		const std::set<int>	&getFdSet() const;
-		bool	haveTimer() const;
 };
 
 #endif
