@@ -4,6 +4,9 @@
 #include <ctime>
 #include <iomanip>
 
+const static bool WBSRV_OK = true;
+const static bool WBSRV_NG = false;
+
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 
@@ -294,6 +297,68 @@ std::string	HttpResponse::generateResponse( const HttpRequest& request, const st
 		return createStaticResponse();
 	}
 
+	Response response;
+
+	enum PrepareResponsePhase {
+		START_PHASE = 0,
+		SEARCH_LOCATION_PHASE,
+		RETURN_PHASE,
+		ALLOW_PHASE,
+		URI_CHECK_PHASE,
+		CONTENT_PHASE,
+		INTERNAL_REDIRECT_PHASE,
+		ERROR_PAGE_PHASE,
+		END_PHASE
+	} state;
+
+	state = 0;
+
+	while (state != END_PHASE) {
+		switch (state) {
+			case START_PHASE:
+				std::cout << "start phase" << std::endl;
+				state = SEARCH_LOCATION_PHASE;
+				break;
+			case SEARCH_LOCATION_PHASE:
+				std::cout << "search location phase" << std::endl;
+				const config::Location*	location = config_handler_.searchLongestMatchLocationConfig(server, request.uri);
+				state = RETURN_PHASE;
+				break;
+			case RETURN_PHASE:
+				std::cout << "return phase" << std::endl;
+				if (!returnPhase(response, location)
+					state = ERROR_PAGE_PHASE;
+				else
+					state = ALLOW_PHASE;
+				break;
+			case ALLOW_PHASE:
+				std::cout << "allow phase" << std::endl;
+				if (!config_handler_.allowRequest(server, location, request, client_addr))
+					state = ERROR_PAGE_PHASE;
+				state = URI_CHECK_PHASE;
+			case URI_CHECK_PHASE:
+				std::cout << "uri check phase" << std::endl;
+			case: CONTENT_PHASE:
+				std::cout << "content phase" << std::endl;
+				//contentHandler();
+			case ERROR_PAGE_PHASE:
+				std::cout << "error page phase" << std::endl;
+				if (!errorPagePhase(response, server, location)
+					state = SEARCH_LOCATION_PHASE;
+				else
+					state = END_PHASE;
+				break;
+			case END_PHASE:
+				std::cout << "end phase" << std::endl;
+				state = END_PHASE;
+				break;
+
+
+
+
+
+
+
 	// 内部リダイレクトなどはこれ再帰で回る
 	prepareResponse(request, server, client_addr);
 	return createStaticResponse();
@@ -333,6 +398,17 @@ void	HttpResponse::prepareResponse( const HttpRequest& request, const config::Se
 
 }
 
+bool	HttpResponse::errorPagePhase( HttpResponse& response, const config::Server& server, const config::Location* location)
+{
+	const config::ErrorPage* ep = config_handler.serachErrorPage(server, location, response.status_code_);
+
+	if (!ep)
+		return WBSRV_OK;
+
+	// error page process
+	return WBSRV_NG;
+}
+
 void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code )
 {
 	long tmp_code;
@@ -351,7 +427,16 @@ void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const confi
 	}
 }
 
-void	HttpResponse::returnResponse( config::Return& return_directive )
+bool	HttpResponse::returnPhase( HttpResponse& response, const config::Location* location )
+{
+	if (location->directives_set.find("return") == location->directives_set.end())
+		return WBSRV_OK;
+
+	returnResponse(response, location->return_list[i]);
+	return WBSRV_NG;
+}
+
+void	HttpResponse::returnResponse( HttpResponse& response, const config::Return& return_directive )
 {
 	const std::string	http = "http://"; 
 	const std::string	https = "https://"; 
@@ -360,21 +445,21 @@ void	HttpResponse::returnResponse( config::Return& return_directive )
 
 	if (code == config::Return::kCodeUnset)
 	{
-		this->headers_["Location"] = url;
-		this->status_code_ = 302;
-		this->headers_["Content-Type"] = "text/html"; // ここでやるべきか
+		response.headers_["Location"] = url;
+		response.status_code_ = 302;
+		response.headers_["Content-Type"] = "text/html"; // ここでやるべきか
 	}
 	else if (301 <= code && code <= 8)
 	{
-		this->headers_["Location"] = url;
-		this->status_code_ = code;
-		this->headers_["Content-Type"] = "text/html";
+		response.headers_["Location"] = url;
+		response.status_code_ = code;
+		response.headers_["Content-Type"] = "text/html";
 	}
 	else
 	{
-		this->body_ = url;
-		this->status_code_ = code;
-		this->headers_["Content-Type"] = "text/plain";
+		response.body_ = url;
+		response.status_code_ = code;
+		response.headers_["Content-Type"] = "text/plain";
 	}
 }
 

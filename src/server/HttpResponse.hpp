@@ -35,7 +35,8 @@ class HttpResponse
 		static std::string	autoIndex( const std::string& directoryPath );
 		void	prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code );
 		void	internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri );
-		void	returnResponse( config::Return& return_directive );
+		bool	returnPhase( HttpResponse& response, const config::Location* location )
+		void	returnResponse( HttpResponse& response, const config::Return& return_directive );
 		std::string	getCurrentGMTTime();
 };
 
