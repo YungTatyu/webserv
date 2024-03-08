@@ -41,7 +41,7 @@ int	config::addAcsFdList ( std::set<std::string>& directives_set, const std::vec
 		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
 		// openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR);
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return -1;
@@ -68,7 +68,7 @@ int	config::addErrFdList ( std::set<std::string>& directives_set, const std::vec
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
 		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR);
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return -1;
@@ -96,7 +96,7 @@ bool	config::initAcsLogFds( config::Main& config )
 			std::cerr << "webserv: [emerg] realpath() \"" << "." <<"\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
-		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return false;
@@ -139,7 +139,7 @@ bool	config::initErrLogFds( config::Main& config )
 			return false;
 		}
 
-		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return false;
