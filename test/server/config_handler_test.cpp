@@ -103,7 +103,7 @@ bool	WRITE_ACCURATE( std::string file_path, const std::string& msg ) {
 
     std::vector<std::string> logContent;
     std::string line;
-    while (std::getline(logFile, line)) {
+    while (std::getline(logFile, line, '\0')) {
         logContent.push_back(line);
     }
 	for (size_t i = 0; i < logContent.size(); i++)
@@ -357,7 +357,6 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 							"first_server",
 							"/",
 							msg);
-	//EXPECT_FALSE(test::WRITE_ACCURATE(config_handler_.config_->http.server_list[0].location_list[0].access_fd_list, msg));
 
 	// ロケーションブロックで指定されたところへ出力
 	msg = "kakikukeko";
@@ -365,7 +364,6 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 							"first_server",
 							"/hello/",
 							msg);
-	//EXPECT_TRUE(test::WRITE_ACCURATE(config_handler_.config_->http.server_list[0].location_list[1].access_fd_list, msg));
 
 	// 親ブロックで指定されたファイルに出力
 	msg = "sashisuseso";
@@ -373,7 +371,6 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 							"first_server",
 							"/goodnight/",
 							msg);
-	//EXPECT_TRUE(test::WRITE_ACCURATE(config_handler_.config_->http.server_list[0].access_fd_list, msg));
 
 
 	struct TiedServer	tied_server_2("127.0.0.2", 8002);
@@ -384,19 +381,7 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 							"second_server",
 							"/",
 							msg);
-	//EXPECT_TRUE(test::WRITE_ACCURATE(config_handler_.config_->http.access_fd_list, msg));
 
-
-	for (size_t i = 0; i < config_handler_.config_->http.access_fd_list.size(); i++)
-		close(config_handler_.config_->http.access_fd_list[i]);
-
-	for (size_t i = 0; i < config_handler_.config_->http.server_list.size(); i++)
-		for (size_t j = 0; j < config_handler_.config_->http.server_list[i].access_fd_list.size(); j++)
-			close(config_handler_.config_->http.server_list[i].access_fd_list[j]);
-
-	for (size_t i = 0; i < config_handler_.config_->http.server_list[0].location_list.size(); i++)
-		for (size_t j = 0; j < config_handler_.config_->http.server_list[0].location_list[i].access_fd_list.size(); j++)
-			close(config_handler_.config_->http.server_list[0].location_list[i].access_fd_list[j]);
 
 	// test
 	std::string file1 = absolutepath + "/off";
@@ -436,15 +421,14 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// ログオフ
 	file = "/dev/null";
-	msg = "aiueo";
+	msg = "aiueo\n";
 	config_handler_.writeErrLog( tied_server_1,
 							"first_server",
 							"/",
 							msg);
-	//EXPECT_FALSE(test::WRITE_ACCURATE(config_handler_.config_->http.server_list[0].location_list[0].access_fd_list, msg));
 
 	// location.logに出力
-	msg = "kakikukeko";
+	msg = "kakikukeko\n";
 	config_handler_.writeErrLog(tied_server_1,
 							"first_server",
 							"/hello/",
@@ -454,21 +438,30 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	struct TiedServer	tied_server_2("127.0.0.2", 8002);
 	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// default fileに出力
-	msg = "sashisuseso";
+	msg = "sashisuseso\n";
 	config_handler_.writeErrLog(tied_server_2,
 							"second_server",
 							"/",
 							msg);
 
+	// default fileに出力し、ファイル内容が追加されるかテスト
+	msg = "tachitsuteto\n";
+	config_handler_.writeErrLog(tied_server_2,
+								"second_server",
+								"/",
+								msg);
+
 	// test
 	file = "/dev/null";
-	msg = "aiueo";
+	msg = "aiueo\n";
 	EXPECT_FALSE(test::WRITE_ACCURATE(file, msg));
 	file = absolutepath + "/logs/location_error.log";
-	msg = "kakikukeko";
+	msg = "kakikukeko\n";
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 	file = absolutepath + "/logs/error.log";
-	msg = "sashisuseso";
+	msg = "sashisuseso\n";
+	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
+	msg = "sashisuseso\ntachitsuteto\n";
 	EXPECT_TRUE(test::WRITE_ACCURATE(file, msg));
 }
 
