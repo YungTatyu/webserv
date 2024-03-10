@@ -1,5 +1,5 @@
 #include "ConfigHandler.hpp"
-#include "FileUtils.hpp"
+#include "IOUtils.hpp"
 #include <sys/socket.h>
 #include <cstring>
 
@@ -8,6 +8,7 @@ const static	std::string kERROR_FD = "error_fd";
 const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
 const static	std::string kSEND_TIMEOUT = "send_timeout";
 const static	std::string kUSERID_EXPIRES = "userid_expires";
+const static	std::string kDENY = "deny";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -129,17 +130,17 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 {
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
-	if (location != NULL && location->directives_set.find("deny") != location->directives_set.end())
+	if (location != NULL && location->directives_set.find(kDENY) != location->directives_set.end())
 	{
 		if (!limitLoop(location->allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
 	}
-	else if (server.directives_set.find("deny") != server.directives_set.end())
+	else if (server.directives_set.find(kDENY) != server.directives_set.end())
 	{
 		if (!limitLoop(server.allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
 	}
-	else if (this->config_->http.directives_set.find("deny") != this->config_->http.directives_set.end())
+	else if (this->config_->http.directives_set.find(kDENY) != this->config_->http.directives_set.end())
 	{
 		if (!limitLoop(this->config_->http.allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
@@ -199,8 +200,7 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < location->access_fd_list.size(); i++)
 		{
-			int ret = write(location->access_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(location->access_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -208,8 +208,7 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < server.access_fd_list.size(); i++)
 		{
-			int ret = write(server.access_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(server.access_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -217,8 +216,7 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
 		{
-			int ret = write(this->config_->http.access_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -234,8 +232,7 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
 		{
-			int ret = write(location->error_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(location->error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -243,8 +240,7 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < server.error_fd_list.size(); i++)
 		{
-			int ret = write(server.error_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(server.error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -252,8 +248,7 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
 		{
-			int ret = write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -261,8 +256,7 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 	{
 		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
 		{
-			int ret = write(this->config_->error_fd_list[i], msg.c_str(), msg.length());
-			if (ret == -1)
+			if (IOUtils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
