@@ -30,12 +30,12 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		const std::vector<char>& context = connManager.getRawRequest( sockfd );
 		std::string requestData = context.data();
 
-		HttpRequest request = HttpMessage::requestParser( requestData );
-		// HttpRequest request = HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
+		// HttpRequest request = HttpMessage::requestParser( requestData );
+		HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
 
-		connManager.setRequest( sockfd, request );
+		connManager.setRequest( sockfd, connManager.getRequest(sockfd));
 
-		// if (request.parseState == HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+		if ( connManager.getRequest(sockfd).parseState == HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
 			connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
 		return RequestHandler::UPDATE_WRITE;
 }

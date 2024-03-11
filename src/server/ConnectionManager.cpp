@@ -58,7 +58,7 @@ void ConnectionManager::setRequest( const int fd, const HttpRequest request )
 	connections_[fd].request = request;
 }
 
-const HttpRequest &ConnectionManager::getRequest( const int fd ) const
+HttpRequest &ConnectionManager::getRequest( const int fd )
 {
 	return connections_.at(fd).request;
 }

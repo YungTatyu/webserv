@@ -9,10 +9,9 @@
 #include "conf.hpp"
 #include "AllowDeny.hpp"
 
-namespace config
-{
 enum REQUEST_METHOD
 {
+	UNKNOWN,
 	GET,
 	HEAD,
 	POST,
@@ -20,6 +19,8 @@ enum REQUEST_METHOD
 	DELETE,
 };
 
+namespace config
+{
 struct LimitExcept
 {
 	LimitExcept() {}

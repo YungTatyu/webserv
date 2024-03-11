@@ -1,34 +1,34 @@
 #include "HttpMessage.hpp"
 #include "CGIHandler.hpp"
 #include "FileUtils.hpp"
-
-std::string HttpRequest::setQueryString( std::string& uri )
-{
-	std::size_t pos = uri.find("?");
-	if ( pos != std::string::npos )
-		return uri.substr( pos + 1 );
-	return "";
-}
-
-std::string HttpRequest::setScriptPath( std::string& uri )
-{
-	return uri.substr(0, uri.find("?"));
-}
-
-HttpRequest HttpMessage::requestParser( std::string &rawRequest )
-{
-	std::istringstream iss;
-	HttpRequest requestline;
-	std::string uriAndPath;
-
-	iss.str( rawRequest );
-	iss >> requestline.method >> uriAndPath >> requestline.version;
-
-	requestline.uri = HttpRequest::setScriptPath(uriAndPath);
-	requestline.query = HttpRequest::setQueryString(uriAndPath);
-
-	return requestline;
-}
+//
+// std::string HttpRequest::setQueryString( std::string& uri )
+// {
+// 	std::size_t pos = uri.find("?");
+// 	if ( pos != std::string::npos )
+// 		return uri.substr( pos + 1 );
+// 	return "";
+// }
+//
+// std::string HttpRequest::setScriptPath( std::string& uri )
+// {
+// 	return uri.substr(0, uri.find("?"));
+// }
+//
+// HttpRequest HttpMessage::requestParser( std::string &rawRequest )
+// {
+// 	std::istringstream iss;
+// 	HttpRequest requestline;
+// 	std::string uriAndPath;
+//
+// 	iss.str( rawRequest );
+// 	iss >> requestline.method >> uriAndPath >> requestline.version;
+//
+// 	requestline.uri = HttpRequest::setScriptPath(uriAndPath);
+// 	requestline.query = HttpRequest::setQueryString(uriAndPath);
+//
+// 	return requestline;
+// }
 
 std::string HttpMessage::autoIndex(const std::string& directoryPath)
 {
@@ -87,7 +87,7 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		if ( ifile )
 		{
 			if ( CGIHandler::isCGI( request.uri ) )
-				return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.query ) );
+				return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.queries ) );
 			return HttpMessage::createResponse( FileUtils::readFile(request.uri) );
 		}
 		else

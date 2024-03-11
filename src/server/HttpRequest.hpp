@@ -7,11 +7,12 @@
 # include <cctype>
 # include <iostream>
 # include <cstdlib>
+# include "LimitExcept.hpp"
 
-#define UNKNOWN	0b0000000
-#define GET	0b0000001
-#define HEAD	0b0000010
-#define POST	0b0000100
+// #define UNKNOWN	0b0000000
+// #define GET	0b0000001
+// #define HEAD	0b0000010
+// #define POST	0b0000100
 
 class HttpRequest
 {

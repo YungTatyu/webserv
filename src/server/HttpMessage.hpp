@@ -7,19 +7,19 @@
 # include <fstream>
 # include <dirent.h>
 # include <sys/stat.h>
-
-class HttpRequest
-{
-	public:
-		static std::string setQueryString( std::string& uri );
-		static std::string setScriptPath( std::string& uri );
-
-		std::string method;
-		std::string uri;
-		std::string version;
-		std::string query;
-	// header, body
-};
+//
+// class HttpRequest
+// {
+// 	public:
+// 		static std::string setQueryString( std::string& uri );
+// 		static std::string setScriptPath( std::string& uri );
+//
+// 		std::string method;
+// 		std::string uri;
+// 		std::string version;
+// 		std::string query;
+// 	// header, body
+// };
 
 //struct HttpResponse
 //{
@@ -27,11 +27,14 @@ class HttpRequest
 //	std::string body;
 //	// header
 //};
+//
+
+#include "HttpRequest.hpp"
 
 class HttpMessage
 {
 	public:
-		static HttpRequest requestParser( std::string &rawRequest );
+		// static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 
 		static std::string autoIndex(const std::string& directoryPath);
