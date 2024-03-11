@@ -9,6 +9,9 @@ const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
 const static	std::string kSEND_TIMEOUT = "send_timeout";
 const static	std::string kUSERID_EXPIRES = "userid_expires";
 const static	std::string kDENY = "deny";
+const static	std::string kALIAS = "alias";
+const static	std::string kAUTOINDEX = "autoindex";
+const static	std::string kROOT = "root";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -162,31 +165,6 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 
 	// 問題なければtrue
 	return true;
-}
-
-/** request 処理の順番
- * 1. parse error 400 Bad Request
- * 2. access restrict 403 Invalid Access
- * 3. no location / no file 404 Not Found
- */
-
-const std::string	ConfigHandler::searchFile( const struct config::Server& server, const HttpRequest& request ) const
-{
-	(void)server;
-	(void)request;
-	return "";
-	//if (FileUtils::isDirectory(server.root.getPath() + request.uri))
-	//	return searchErrorPage(301);
-
-	/* ~ try_filesとindex/autoindexのファイル検索 ~
-	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
-	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
-	 * 3つともなかったら上位のcontextで検索する
-	 */
-
-	// try_filesとindex/autoindexをuriが属するcontextから探して返す。見つからなければ403エラー
-
-	// request uriがそもそもrootディレクティブになければ404 Not Found
 }
 
 // 最終的なlocationで記録
@@ -428,5 +406,34 @@ const struct TiedServer	ConfigHandler::createTiedServer( const std::string addr,
 		}
 	}
 	return tied_server;
+}
+
+std::string	ConfigHandler::searchRootPath( const config::Server& server, const config::Location* location ) const
+{
+	if (location)
+	{
+		if (location->directives_set.find(kROOT) != location->directives_set.end())
+			return location->root.getPath();
+		if (location->directives_set.find(kALIAS) != location->directives_set.end())
+			return location->alias.getPath();
+	}
+	else if (server.directives_set.find(kROOT) != server.directives_set.end())
+		return server.root.getPath();
+	else if (config_->http.directives_set.find(kROOT) != config_->http.directives_set.end())
+		return config_->http.root.getPath();
+	// これいるか？上のやつと一緒でいいのでは？
+	return config::Root::kDefaultPath_;
+}
+
+
+bool	ConfigHandler::isAutoIndexOn( const config::Server& server, const config::Location* location ) const
+{
+	if (location && location->directives_set.find(kAUTOINDEX) != location->directives_set.end() && location->autoindex.getIsAutoindexOn())
+			return true;
+	else if (server.directives_set.find(kAUTOINDEX) != server.directives_set.end() && server.autoindex.getIsAutoindexOn())
+			return true;
+	else if (config_->http.directives_set.find(kAUTOINDEX) != config_->http.directives_set.end() && config_->http.autoindex.getIsAutoindexOn())
+			return true;
+	return false;
 }
 
