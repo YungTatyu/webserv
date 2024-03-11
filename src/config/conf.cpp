@@ -1,5 +1,5 @@
 #include "conf.hpp"
-#include "InitLog.hpp"
+#include "LogFd.hpp"
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
@@ -24,17 +24,17 @@ const char	*config::ServerName::kDefaultName_ = "";
 const unsigned long	config::Time::kMaxTimeInMilliseconds_ = std::numeric_limits<long>::max();
 const unsigned long	config::Size::kMaxSizeInBytes_ = std::numeric_limits<long>::max();
 const char	*config::UseridDomain::kDefaultName_ = "none";
-const char	*config::AccessLog::kDefaultFile_ = "logs/access.log";
-const char	*config::ErrorLog::kDefaultFile_ = "logs/error.log";
+const char	*config::AccessLog::kDefaultFile_ = "/logs/access.log";
+const char	*config::ErrorLog::kDefaultFile_ = "/logs/error.log";
 const unsigned long	config::KeepaliveTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
 const char	*config::Index::kDefaultFile_ = "index.html";
 
 config::Main	*config::initConfig( const std::string& file_path )
 {
-	char	absolute_path[MAXPATHLEN];
+	std::string	absolute_path;
 
 	// 絶対pathを取得
-	if (realpath(file_path.c_str(), absolute_path) == NULL)
+	if (!FileUtils::wrapperRealpath(file_path, absolute_path))
 	{
 		std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		return NULL;

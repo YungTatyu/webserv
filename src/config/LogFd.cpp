@@ -1,10 +1,8 @@
-#include "InitLog.hpp"
+#include "LogFd.hpp"
 #include "FileUtils.hpp"
-#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stdlib.h>
 #include <sys/param.h>
 #include <unistd.h>
 
@@ -43,9 +41,11 @@ int	config::addAcsFdList ( std::set<std::string>& directives_set, const std::vec
 		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
 		// openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
+		{
 			return -1;
+		}
 		fd_list.push_back(tmp_fd);
 	}
 	directives_set.insert(kACCESS_FD);
@@ -68,9 +68,11 @@ int	config::addErrFdList ( std::set<std::string>& directives_set, const std::vec
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
 		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_CREAT, S_IWUSR);
+		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
+		{
 			return -1;
+		}
 		fd_list.push_back(tmp_fd);
 	}
 
@@ -88,30 +90,31 @@ bool	config::initAcsLogFds( config::Main& config )
 		return false;
 	else if (ret == 0)
 	{
-		char	absolute_path[MAXPATHLEN];
-		// 絶対pathを取得
-		if (realpath(".", absolute_path) == NULL)
+		std::string	absolute_path;
+		if (!FileUtils::wrapperRealpath(".", absolute_path))
 		{
-			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			std::cerr << "webserv: [emerg] realpath() \"" << "." <<"\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
-		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/access_log", O_WRONLY | O_CREAT, S_IWUSR);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
+		{
 			return false;
+		}
 		config.http.access_fd_list.push_back(tmp_fd);
 		config.http.directives_set.insert(kACCESS_FD);
 	}
 
 	// server context
-	for (size_t i = 0; i < config.http.server_list.size(); i++)
+	for (size_t si = 0; si < config.http.server_list.size(); si++)
 	{
-		if (addAcsFdList(config.http.server_list[i].directives_set, config.http.server_list[i].access_log_list, config.http.server_list[i].access_fd_list) == -1)
+		if (addAcsFdList(config.http.server_list[si].directives_set, config.http.server_list[si].access_log_list, config.http.server_list[si].access_fd_list) == -1)
 			return false;
 
 		// location context
-		for (size_t j = 0; j < config.http.server_list[i].location_list.size(); j++)
+		for (size_t li = 0; li < config.http.server_list[si].location_list.size(); li++)
 		{
-			if (addAcsFdList(config.http.server_list[i].location_list[j].directives_set, config.http.server_list[i].location_list[j].access_log_list, config.http.server_list[i].location_list[j].access_fd_list) == -1)
+			if (addAcsFdList(config.http.server_list[si].location_list[li].directives_set, config.http.server_list[si].location_list[li].access_log_list, config.http.server_list[si].location_list[li].access_fd_list) == -1)
 				return false;
 		}
 	}
@@ -129,18 +132,19 @@ bool	config::initErrLogFds( config::Main& config )
 		return false;
 	else if (ret == 0)
 	{
-		char	absolute_path[MAXPATHLEN];
-		// 絶対pathを取得
-		if (realpath(".", absolute_path) == NULL)
+		std::string	absolute_path;
+		if (!FileUtils::wrapperRealpath(".", absolute_path))
 		{
-			std::cerr << "webserv: [emerg] realpath() \".\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			std::cerr << "webserv: [emerg] realpath() \"" << "." << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
 
-		int tmp_fd = FileUtils::wrapperOpen(static_cast<std::string>(absolute_path) + "/logs/error_log", O_WRONLY | O_CREAT, S_IWUSR);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
+		{
 			return false;
-		config.http.error_fd_list.push_back(tmp_fd);
+		}
+		config.error_fd_list.push_back(tmp_fd);
 		config.directives_set.insert(kERROR_FD);
 	}
 
@@ -149,15 +153,15 @@ bool	config::initErrLogFds( config::Main& config )
 		return false;
 
 	// server context
-	for (size_t i = 0; i < config.http.server_list.size(); i++)
+	for (size_t si = 0; si < config.http.server_list.size(); si++)
 	{
-		if (addErrFdList(config.http.server_list[i].directives_set, config.http.server_list[i].error_log_list, config.http.server_list[i].error_fd_list) == -1)
+		if (addErrFdList(config.http.server_list[si].directives_set, config.http.server_list[si].error_log_list, config.http.server_list[si].error_fd_list) == -1)
 			return false;
 
 		// location context
-		for (size_t j = 0; j < config.http.server_list[i].location_list.size(); j++)
+		for (size_t li = 0; li < config.http.server_list[si].location_list.size(); li++)
 		{
-			if (addErrFdList(config.http.server_list[i].location_list[j].directives_set, config.http.server_list[i].location_list[j].error_log_list, config.http.server_list[i].location_list[j].error_fd_list) == -1)
+			if (addErrFdList(config.http.server_list[si].location_list[li].directives_set, config.http.server_list[si].location_list[li].error_log_list, config.http.server_list[si].location_list[li].error_fd_list) == -1)
 				return false;
 		}
 	}
@@ -172,4 +176,32 @@ bool	config::initLogFds( config::Main& config )
 	return true;
 }
 
+void	config::closeLogFds( const std::vector<int> log_list )
+{
+	for (size_t i = 0; i < log_list.size(); i++)
+		close(log_list[i]);
+}
+
+void config::terminateLogFds( const config::Main* config )
+{
+	// main context
+	closeLogFds(config->error_fd_list);
+
+	// http context
+	closeLogFds(config->http.access_fd_list);
+	closeLogFds(config->http.error_fd_list);
+
+	// server context
+	for (size_t i = 0; i < config->http.server_list.size(); i++)
+	{
+		closeLogFds(config->http.server_list[i].access_fd_list);
+		closeLogFds(config->http.server_list[i].error_fd_list);
+
+		for (size_t j = 0; j < config->http.server_list[i].location_list.size(); j++)
+		{
+			closeLogFds(config->http.server_list[i].location_list[j].access_fd_list);
+			closeLogFds(config->http.server_list[i].location_list[j].error_fd_list);
+		}
+	}
+}
 

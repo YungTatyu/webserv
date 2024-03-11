@@ -1,7 +1,14 @@
 #include "ConfigHandler.hpp"
-#include "FileUtils.hpp"
+#include "IOUtils.hpp"
 #include <sys/socket.h>
 #include <cstring>
+
+const static	std::string kACCESS_FD = "access_fd";
+const static	std::string kERROR_FD = "error_fd";
+const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static	std::string kSEND_TIMEOUT = "send_timeout";
+const static	std::string kUSERID_EXPIRES = "userid_expires";
+const static	std::string kDENY = "deny";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -50,11 +57,13 @@ uint32_t	ConfigHandler::StrToIPAddress( const std::string& ip) const
 		result = (result << 8) | value;
 	}
 
-	return result;
+	return htonl(result);
 }
 
 bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr ) const
 {
+	if (ip_addr_str == "all")
+		return true;
 	std::istringstream	iss(ip_addr_str);
 	std::string			ip;
 	std::string			mask;
@@ -64,6 +73,7 @@ bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32
 
 	uint32_t			conf_addr = StrToIPAddress(ip);
 	uint32_t			mask_val = 0xFFFFFFFF;
+
 	// サブネットマスクが指定されている場合
 	if (!mask.empty())
 	{
@@ -112,8 +122,6 @@ config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& m
 		return config::HEAD;
 	else if (method_str == "POST")
 		return config::POST;
-	else if (method_str == "PUT")
-		return config::PUT;
 	else
 		return config::DELETE;
 }
@@ -122,17 +130,17 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 {
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
-	if (location != NULL && location->directives_set.find("deny") != location->directives_set.end())
+	if (location != NULL && location->directives_set.find(kDENY) != location->directives_set.end())
 	{
 		if (!limitLoop(location->allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
 	}
-	else if (server.directives_set.find("deny") != server.directives_set.end())
+	else if (server.directives_set.find(kDENY) != server.directives_set.end())
 	{
 		if (!limitLoop(server.allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
 	}
-	else if (this->config_->http.directives_set.find("deny") != this->config_->http.directives_set.end())
+	else if (this->config_->http.directives_set.find(kDENY) != this->config_->http.directives_set.end())
 	{
 		if (!limitLoop(this->config_->http.allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
@@ -188,60 +196,68 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
 	// access_logがどのコンテキスがあれば出力する
-	if (location && location->directives_set.find("access_fd") != location->directives_set.end())
+	if (location && location->directives_set.find(kACCESS_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->access_fd_list.size(); i++)
 		{
-			write(location->access_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(location->access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
-	else if (server.directives_set.find("access_fd") != server.directives_set.end())
+	else if (server.directives_set.find(kACCESS_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.access_fd_list.size(); i++)
 		{
-			write(server.access_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(server.access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
-	else if (this->config_->http.directives_set.find("access_fd") != this->config_->http.directives_set.end())
+	else if (this->config_->http.directives_set.find(kACCESS_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
 		{
-			write(this->config_->http.access_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 }
+
 void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
 	// error_logがどのコンテキスがあれば出力する
-	if (location && location->directives_set.find("error_fd") != location->directives_set.end())
+	if (location && location->directives_set.find(kERROR_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
 		{
-			write(location->error_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(location->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
-	else if (server.directives_set.find("error_fd") != server.directives_set.end())
+	else if (server.directives_set.find(kERROR_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.error_fd_list.size(); i++)
 		{
-			write(server.error_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(server.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
-	else if (this->config_->http.directives_set.find("error_fd") != this->config_->http.directives_set.end())
+	else if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
 		{
-			write(this->config_->http.error_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
-	else if (this->config_->directives_set.find("error_fd") != this->config_->directives_set.end())
+	else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
 		{
-			write(this->config_->error_fd_list[i], msg.c_str(), msg.length());
+			if (IOUtils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		}
 	}
 }
@@ -251,11 +267,11 @@ const config::Time&	ConfigHandler::searchKeepaliveTimeout( const struct TiedServ
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("keepalive_timeout") != location->directives_set.end())
+	if (location && location->directives_set.find(kKEEPALIVE_TIMEOUT) != location->directives_set.end())
 	{
 		return location->keepalive_timeout.getTime();
 	}
-	else if (server.directives_set.find("keepalive_timeout") != server.directives_set.end())
+	else if (server.directives_set.find(kKEEPALIVE_TIMEOUT) != server.directives_set.end())
 	{
 		return server.keepalive_timeout.getTime();
 	}
@@ -271,11 +287,11 @@ const config::Time&	ConfigHandler::searchSendTimeout( const TiedServer& tied_ser
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("send_timeout") != location->directives_set.end())
+	if (location && location->directives_set.find(kSEND_TIMEOUT) != location->directives_set.end())
 	{
 		return location->send_timeout.getTime();
 	}
-	else if (server.directives_set.find("send_timeout") != server.directives_set.end())
+	else if (server.directives_set.find(kSEND_TIMEOUT) != server.directives_set.end())
 	{
 		return server.send_timeout.getTime();
 	}
@@ -290,11 +306,11 @@ const config::Time&	ConfigHandler::searchUseridExpires( const struct TiedServer&
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
 
-	if (location && location->directives_set.find("userid_expires") != location->directives_set.end())
+	if (location && location->directives_set.find(kUSERID_EXPIRES) != location->directives_set.end())
 	{
 		return location->userid_expires.getTime();
 	}
-	else if (server.directives_set.find("userid_expires") != server.directives_set.end())
+	else if (server.directives_set.find(kUSERID_EXPIRES) != server.directives_set.end())
 	{
 		return server.userid_expires.getTime();
 	}
@@ -308,19 +324,19 @@ const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer
 {
 	const config::Server*	default_server = tied_servers.servers_[0];
 
-	for (size_t i = 0; i < tied_servers.servers_.size(); i++)
+	for (size_t si = 0; si < tied_servers.servers_.size(); si++)
 	{
-		if (tied_servers.servers_[i]->server_name.getName().find(server_name) != tied_servers.servers_[i]->server_name.getName().end())
-			return *tied_servers.servers_[i];
+		if (tied_servers.servers_[si]->server_name.getName().find(server_name) != tied_servers.servers_[si]->server_name.getName().end())
+			return *tied_servers.servers_[si];
 		// default_server特定できるようにする
-		for (size_t j = 0; j < tied_servers.servers_[i]->listen_list.size(); j++)
+		for (size_t li = 0; li < tied_servers.servers_[si]->listen_list.size(); li++)
 		{
-			const config::Listen& tmp_listen = tied_servers.servers_[i]->listen_list[j];
+			const config::Listen& tmp_listen = tied_servers.servers_[si]->listen_list[li];
 			if (tmp_listen.getIsDefaultServer() &&
 				tied_servers.port_ == tmp_listen.getport() &&
 				tied_servers.addr_ == tmp_listen.getAddress())
 			{
-				default_server = tied_servers.servers_[i];
+				default_server = tied_servers.servers_[si];
 			}
 		}
 	}
@@ -394,5 +410,23 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 	}
 
 	return NULL;
+}
+
+const struct TiedServer	ConfigHandler::createTiedServer( const std::string addr, const unsigned int port ) const
+{
+	struct TiedServer tied_server(addr, port);
+
+	for (size_t i = 0; i < config_->http.server_list.size(); i++)
+	{
+		for (size_t j = 0; j < config_->http.server_list[i].listen_list.size(); j++)
+		{
+			if (config_->http.server_list[i].listen_list[j].getAddress() == addr &&
+				config_->http.server_list[i].listen_list[j].getport() == port)
+			{
+				tied_server.servers_.push_back(&config_->http.server_list[i]);
+			}
+		}
+	}
+	return tied_server;
 }
 
