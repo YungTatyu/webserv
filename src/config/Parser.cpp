@@ -518,7 +518,7 @@ bool	config::Parser::parseLimitExcept()
 	return true;
 }
 
-REQUEST_METHOD	config::Parser::convertToRequestMethod(const std::string &method) const
+config::REQUEST_METHOD	config::Parser::convertToRequestMethod(const std::string &method) const
 {
 	REQUEST_METHOD ret = GET;
 

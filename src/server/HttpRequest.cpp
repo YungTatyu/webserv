@@ -140,20 +140,20 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string& rawRequest, HttpRe
 	case 3:
 		if (method == "GET")
 		{
-			newRequest.method = GET;
+			newRequest.method = config::GET;
 			break;
 		}
 		return HttpRequest::PARSE_ERROR;
 	case 4:
 		if (method == "HEAD")
 		{
-			newRequest.method = HEAD;
+			newRequest.method = config::HEAD;
 			break;
 
 		}
 		else if (method == "POST")
 		{
-			newRequest.method = POST;
+			newRequest.method = config::POST;
 			break;
 		}
 		return HttpRequest::PARSE_ERROR;

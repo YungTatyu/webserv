@@ -8,6 +8,8 @@
 #include "Use.hpp"
 #include "conf.hpp"
 #include "AllowDeny.hpp"
+namespace config
+{
 
 enum REQUEST_METHOD
 {
@@ -19,8 +21,6 @@ enum REQUEST_METHOD
 	DELETE,
 };
 
-namespace config
-{
 struct LimitExcept
 {
 	LimitExcept() {}
