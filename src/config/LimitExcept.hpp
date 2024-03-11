@@ -8,9 +8,9 @@
 #include "Use.hpp"
 #include "conf.hpp"
 #include "AllowDeny.hpp"
+
 namespace config
 {
-
 enum REQUEST_METHOD
 {
 	UNKNOWN,
