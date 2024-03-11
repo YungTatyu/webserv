@@ -5,7 +5,7 @@
 #include <iomanip>
 
 const static bool WBSRV_OK = true;
-const static bool WBSRV_NG = false;
+const static bool WBSRV_ERR = false;
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -257,183 +257,222 @@ std::string	HttpResponse::getCurrentGMTTime()
 	return oss.str();
 }
 
-std::string	HttpResponse::createStaticResponse()
+std::string	HttpResponse::createResponse( const HttpResponse& response )
 {
-	std::stringstream response;
+	std::stringstream res;
 
 	// status line
-	response << status_line_map_[this->status_code_] << "\r\n";
+	res << status_line_map_[response.status_code_] << "\r\n";
 
 	// headers
-	for (std::map<std::string, std::string>::iterator it = this->headers_.begin();
-		it != this->headers_.end();
+	for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
+		it != response.headers_.end();
 		++it
 		)
-		response << it->first << ": " << it->second << "\r\n";
-	response << "\r\n";
+		res << it->first << ": " << it->second << "\r\n";
+	res << "\r\n";
 
 	// body
-	response << this->body_;
-	return response.str();
+	res << response.body_;
+	return res.str();
 }
 
-std::string	HttpResponse::generateResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock )
+std::string	HttpResponse::generateResponse( HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
 {
-	// server 探す
-	const config::Server&	server = config_handler_.searchServerConfig(tied_servers, request.headers.find("Host")->second);
-
-	// clientのip_addressを取る
+	HttpResponse response(config_handler);
+	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find("Host")->second);
+	const config::Location*	location;
 	struct sockaddr_in client_addr;
 	socklen_t client_addrlen = sizeof(client_addr);
-	if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
-	{
-		std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
-	}
-
-	// parseが失敗していれば、400 Bad Request
-	if (request.parseState == HttpRequest::PARSE_ERROR)
-	{
-		prepareErrorResponse(request, server, NULL, client_addr, 400);
-		return createStaticResponse();
-	}
-
-	Response response;
 
 	enum PrepareResponsePhase {
 		START_PHASE = 0,
+		PRE_SEARCH_LOCATION_PHASE,
 		SEARCH_LOCATION_PHASE,
 		RETURN_PHASE,
 		ALLOW_PHASE,
 		URI_CHECK_PHASE,
 		CONTENT_PHASE,
-		INTERNAL_REDIRECT_PHASE,
 		ERROR_PAGE_PHASE,
+		LOG_PHASE,
 		END_PHASE
 	} state;
 
-	state = 0;
+	state = START_PHASE;
 
 	while (state != END_PHASE) {
 		switch (state) {
-			case START_PHASE:
-				std::cout << "start phase" << std::endl;
-				state = SEARCH_LOCATION_PHASE;
+		case START_PHASE:
+			std::cout << "start phase" << std::endl;
+			state = PRE_SEARCH_LOCATION_PHASE;
+			break;
+		case PRE_SEARCH_LOCATION_PHASE:
+			std::cout << "post search server phase" << std::endl;
+			// parse error
+			if (request.parseState == HttpRequest::PARSE_ERROR)
+			{
+				response.status_code_ = 400;
+				state = ERROR_PAGE_PHASE;
 				break;
-			case SEARCH_LOCATION_PHASE:
-				std::cout << "search location phase" << std::endl;
-				const config::Location*	location = config_handler_.searchLongestMatchLocationConfig(server, request.uri);
-				state = RETURN_PHASE;
-				break;
-			case RETURN_PHASE:
-				std::cout << "return phase" << std::endl;
-				if (!returnPhase(response, location)
-					state = ERROR_PAGE_PHASE;
-				else
-					state = ALLOW_PHASE;
-				break;
-			case ALLOW_PHASE:
-				std::cout << "allow phase" << std::endl;
-				if (!config_handler_.allowRequest(server, location, request, client_addr))
-					state = ERROR_PAGE_PHASE;
-				state = URI_CHECK_PHASE;
-			case URI_CHECK_PHASE:
-				std::cout << "uri check phase" << std::endl;
-			case: CONTENT_PHASE:
-				std::cout << "content phase" << std::endl;
-				//contentHandler();
-			case ERROR_PAGE_PHASE:
-				std::cout << "error page phase" << std::endl;
-				if (!errorPagePhase(response, server, location)
-					state = SEARCH_LOCATION_PHASE;
-				else
-					state = END_PHASE;
-				break;
-			case END_PHASE:
-				std::cout << "end phase" << std::endl;
+			}
+
+			// clientのip_addressを取る
+			// retry するか？
+			if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
+			{
+				std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 				state = END_PHASE;
-				break;
-
-
-
-
-
-
+			}
+			else
+				state = SEARCH_LOCATION_PHASE;
+			break;
+		case SEARCH_LOCATION_PHASE:
+			std::cout << "search location phase" << std::endl;
+			location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
+			state = RETURN_PHASE;
+			break;
+		case RETURN_PHASE:
+			std::cout << "return phase" << std::endl;
+			if (returnPhase(response, location) == WBSRV_ERR)
+				state = ERROR_PAGE_PHASE;
+			else
+				state = ALLOW_PHASE;
+			break;
+		case ALLOW_PHASE:
+			std::cout << "allow phase" << std::endl;
+			if (config_handler.allowRequest(server, location, request, client_addr) == WBSRV_ERR)
+			{
+				response.status_code_ = 403;
+				state = ERROR_PAGE_PHASE;
+			}
+			else
+				state = URI_CHECK_PHASE;
+			break;
+		case URI_CHECK_PHASE:
+			std::cout << "uri check phase" << std::endl;
+			// uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
+			if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
+			{
+				response.status_code_ = 301;
+				state = ERROR_PAGE_PHASE;
+			}
+			else
+				state = CONTENT_PHASE;
+			break;
+		case CONTENT_PHASE:
+			std::cout << "content phase" << std::endl;
+			//contentHandler();
+			state = LOG_PHASE;
+			break;
+		case ERROR_PAGE_PHASE:
+			std::cout << "error page phase" << std::endl;
+			if (errorPagePhase(response, request, server, location) == WBSRV_ERR)
+				state = SEARCH_LOCATION_PHASE;
+			else
+				state = LOG_PHASE;
+			break;
+		case LOG_PHASE:
+			std::cout << "log phase" << std::endl;
+			state = END_PHASE;
+			break;
+		//case END_PHASE:
+		//	std::cout << "end phase" << std::endl;
+		//	break;
+		default:
+			state = END_PHASE;
+			break;
+		}
+	}
 
 	// 内部リダイレクトなどはこれ再帰で回る
-	prepareResponse(request, server, client_addr);
-	return createStaticResponse();
+	//prepareResponse(request, server, client_addr);
+	return createResponse(response);
 }
-
-void	HttpResponse::prepareResponse( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr)
+/*
+bool	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, config::Server& server, config::Location* location )
 {
-	// server の return を見に行く。今はreturn はlocationにしかない
-	const config::Location*	location = config_handler_.searchLongestMatchLocationConfig(server, request.uri);
-	// location の　return を見に行く。
-	// 以下は再帰用関数に入れる
-	// allowReuestがfalseなら403 Forbidden
-	if (!config_handler_.allowRequest(server, location, request, client_addr))
-	{
-		prepareErrorResponse(request, server, location, client_addr, 403);
-		return;
-	}
-
-
-	// uriが'/'で終わってない、かつdirectoryでないとき301MovedPermanently
-	if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
-	{
-		prepareErrorResponse(request, server, location, client_addr, 301);
-		return;
-	}
-
-	// ここらへんでメソッドごとに分岐
-
-	/* ~ try_filesとindex/autoindexのファイル検索 ~
-	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
-	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
-	 * 3つともなかったら上位のcontextで検索する
-	 */
-
-	// try_filesとindex/autoindexをuriが属するcontextから探して返す。見つからなければ403エラー
-
-
+	if (request.method == config::GET)
+		response.config_handler_.searchFile(server, location);
+	return WBSRV_OK;
 }
+*/
+//void	HttpResponse::prepareResponse( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr)
+//{
+//	// server の return を見に行く。今はreturn はlocationにしかない
+//	const config::Location*	location = config_handler_.searchLongestMatchLocationConfig(server, request.uri);
+//	// location の　return を見に行く。
+//	// 以下は再帰用関数に入れる
+//	// allowReuestがfalseなら403 Forbidden
+//	if (!config_handler_.allowRequest(server, location, request, client_addr))
+//	{
+//		prepareErrorResponse(request, server, location, client_addr, 403);
+//		return;
+//	}
+//
+//
+//	// uriが'/'で終わってない、かつdirectoryでないとき301MovedPermanently
+//	if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
+//	{
+//		prepareErrorResponse(request, server, location, client_addr, 301);
+//		return;
+//	}
+//
+//	// ここらへんでメソッドごとに分岐
+//
+//	/* ~ try_filesとindex/autoindexのファイル検索 ~
+//	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
+//	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
+//	 * 3つともなかったら上位のcontextで検索する
+//	 */
+//
+//	// try_filesとindex/autoindexをuriが属するcontextから探して返す。見つからなければ403エラー
+//
+//
+//}
 
-bool	HttpResponse::errorPagePhase( HttpResponse& response, const config::Server& server, const config::Location* location)
+bool	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
 {
-	const config::ErrorPage* ep = config_handler.serachErrorPage(server, location, response.status_code_);
+	const config::ErrorPage* ep = response.config_handler_.searchErrorPage(server, location, response.status_code_);
 
 	if (!ep)
+	{
+		response.body_ = *default_error_page_map_[response.status_code_];
 		return WBSRV_OK;
+	}
 
 	// error page process
-	return WBSRV_NG;
+	int tmp_code;
+	if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
+		response.status_code_ = tmp_code;
+	request.uri = ep->getUri();
+	return WBSRV_ERR;
 }
 
-void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code )
-{
-	long tmp_code;
-
-	const config::ErrorPage* ep = config_handler_.searchErrorPage(server, location, code);
-	if (ep)
-	{
-		if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
-			status_code_ = tmp_code;
-		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度prepareResponseをする
-	}
-	else
-	{
-		status_code_ = code;
-		body_ = *default_error_page_map_[code];
-	}
-}
+//void	HttpResponse::prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code )
+//{
+//	long tmp_code;
+//
+//	const config::ErrorPage* ep = config_handler_.searchErrorPage(server, location, code);
+//	if (ep)
+//	{
+//		if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
+//			status_code_ = tmp_code;
+//		internalRedirect(request, server, client_addr, ep->getUri()); // 新しいリクエストを作ってもう一度prepareResponseをする
+//	}
+//	else
+//	{
+//		status_code_ = code;
+//		body_ = *default_error_page_map_[code];
+//	}
+//}
 
 bool	HttpResponse::returnPhase( HttpResponse& response, const config::Location* location )
 {
 	if (location->directives_set.find("return") == location->directives_set.end())
 		return WBSRV_OK;
 
-	returnResponse(response, location->return_list[i]);
-	return WBSRV_NG;
+	returnResponse(response, location->return_list[0]);
+	return WBSRV_ERR;
 }
 
 void	HttpResponse::returnResponse( HttpResponse& response, const config::Return& return_directive )
@@ -445,21 +484,21 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 
 	if (code == config::Return::kCodeUnset)
 	{
-		response.headers_["Location"] = url;
 		response.status_code_ = 302;
+		response.headers_["Location"] = url;
 		response.headers_["Content-Type"] = "text/html"; // ここでやるべきか
 	}
 	else if (301 <= code && code <= 8)
 	{
-		response.headers_["Location"] = url;
 		response.status_code_ = code;
+		response.headers_["Location"] = url;
 		response.headers_["Content-Type"] = "text/html";
 	}
 	else
 	{
-		response.body_ = url;
 		response.status_code_ = code;
 		response.headers_["Content-Type"] = "text/plain";
+		response.body_ = url;
 	}
 }
 
@@ -471,17 +510,17 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 
 //try_files: ファイルの存在を確認し、存在すればそのファイルを提供し、存在しなければ指定されたファイルまたはURIに対して再度処理が行われる可能性があります。
 
-void	HttpResponse::internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri )
-{
-	// status_codeはerror_pageからのリダイレクトの場合変更する可能性がある
-	if (!redirect_uri.empty())
-	{
-		HttpRequest	redirect_request = request;
-		redirect_request.uri = redirect_uri;
-		prepareResponse(redirect_request, server, client_addr);
-	}
-
-	// methodは必ずＧＥＴになる?
-	prepareResponse(request, server, client_addr);
-}
-
+//void	HttpResponse::internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri )
+//{
+//	// status_codeはerror_pageからのリダイレクトの場合変更する可能性がある
+//	if (!redirect_uri.empty())
+//	{
+//		HttpRequest	redirect_request = request;
+//		redirect_request.uri = redirect_uri;
+//		prepareResponse(redirect_request, server, client_addr);
+//	}
+//
+//	// methodは必ずＧＥＴになる?
+//	prepareResponse(request, server, client_addr);
+//}
+//

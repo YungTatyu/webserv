@@ -41,9 +41,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 {
 	// response作成
 	HttpRequest request = connManager.getRequest( sockfd );
-	HttpResponse response( configHandler );
-
-	std::string response_str = response.generateResponse( request, connManager.getTiedServer(sockfd), sockfd );
+	std::string response_str = HttpResponse::generateResponse( request, connManager.getTiedServer(sockfd), sockfd, configHandler );
 
 	std::vector<char> vec( response_str.begin(), response_str.end()) ;
 	connManager.setResponse( sockfd, vec );

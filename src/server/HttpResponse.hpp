@@ -15,8 +15,8 @@ class HttpResponse
 		HttpResponse( const ConfigHandler& config_handler );
 
 		// member methods
-		std::string	generateResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
-		std::string	createStaticResponse();
+		static std::string	generateResponse( HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
+		static std::string	createResponse( const HttpResponse& response );
 
 	private:
 		// private variables
@@ -31,13 +31,15 @@ class HttpResponse
 
 		// utils methods
 		// 名前微妙
-		void	prepareResponse( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr );
 		static std::string	autoIndex( const std::string& directoryPath );
-		void	prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code );
-		void	internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri );
-		bool	returnPhase( HttpResponse& response, const config::Location* location )
-		void	returnResponse( HttpResponse& response, const config::Return& return_directive );
-		std::string	getCurrentGMTTime();
+		static std::string	getCurrentGMTTime();
+		static bool	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location);
+		static bool	returnPhase( HttpResponse& response, const config::Location* location );
+		static void	returnResponse( HttpResponse& response, const config::Return& return_directive );
+		//bool	contentHandler( HttpResponse& response, HttpRequest& request, config::Server& server, config::Location* location );
+		//void	prepareResponse( const HttpRequest& request, const config::Server& server, struct sockaddr_in client_addr );
+		//void	prepareErrorResponse( const HttpRequest& request, const config::Server& server, const config::Location* location, const struct sockaddr_in client_addr, const unsigned int code );
+		//void	internalRedirect( const HttpRequest& request, const config::Server& server, const struct sockaddr_in& client_addr, std::string redirect_uri );
 };
 
 
