@@ -8,6 +8,7 @@
 #include "HttpResponse.hpp"
 #include "FileUtils.hpp"
 #include <iostream>
+#include <fstream>
 
 class HttpResponseTest : public ::testing::Test {
 protected:
@@ -20,6 +21,9 @@ protected:
 		}
 		else if (static_cast<std::string>(test_info->name()) == "Return") {
 			file_path = "test/server/ResponseTestFiles/Return.conf";
+		}
+		else if (static_cast<std::string>(test_info->name()) == "ErrorPage") {
+			file_path = "test/server/ResponseTestFiles/ErrorPage.conf";
 		}
 		else {
 			config::Main	*config = new config::Main();
@@ -166,3 +170,80 @@ TEST_F(HttpResponseTest, Return)
 	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
 }
 
+TEST_F(HttpResponseTest, ErrorPage)
+{
+	// 共通初期化
+	// 疑似socket作成
+	int sock = 1;
+	// HttpRequest作成
+	HttpRequest	request;
+
+	request.method = "GET";
+	request.version = "HTTP/1.1";
+	request.headers["Host"] = "test_server";
+	request.parseState = HttpRequest::PARSE_COMPLETE;
+	// TiedServer 作成
+	struct TiedServer	tied_server = config_handler_.createTiedServer("127.0.0.1", 8001);
+	// 正解response
+	std::vector<std::string> correct_res;
+	std::string response;
+
+	// test case
+	// error_page code ... =response uri;
+	// 初期化
+	request.uri = "/nothing.html";
+	correct_res.push_back("HTTP/1.1 499");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/plain");
+	correct_res.push_back("Content-Length: 14");
+	std::ifstream	ifs("test/server/ResponseTestFiles/40x.html");
+	ASSERT_TRUE(ifs.is_open());
+	std::stringstream buffer;
+	buffer << ifs.rdbuf();
+	ifs.close();
+	correct_res.push_back(buffer.str());
+	// 関数適用
+	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
+
+
+	// error_page code ... uri; の場合
+	// 初期化
+	request.uri = "/bad-request/";
+	request.parseState = HttpRequest::PARSE_COMPLETE;
+	correct_res.clear();
+	correct_res.push_back("HTTP/1.1 400 Bad Rquest");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/html");
+	correct_res.push_back("Content-Length: 118");
+	ifs.clear();
+	ifs.open("test/server/ResponseTestFiles/internal_redirect.html");
+	ASSERT_TRUE(ifs.is_open());
+	buffer.clear();
+	buffer << ifs.rdbuf();
+	ifs.close();
+	correct_res.push_back(buffer.str());
+	// 関数適用
+	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
+/*
+	// 無限リダイレクトの場合
+	// 初期化
+	request.uri = "/permanently_internal_redirect/";
+	correct_res.clear();
+	correct_res.push_back("HTTP/1.1 ");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/plain");
+	correct_res.push_back("Content-Length: 14");
+	correct_res.push_back("");
+	// 関数適用
+	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
+*/
+}
