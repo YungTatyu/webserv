@@ -167,7 +167,7 @@ HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 	this->status_line_map_[415] = http_version + "415 Unsupported Media Type";
 	this->status_line_map_[416] = http_version + "416 Requested Range Not Satisfiable";
 	this->status_line_map_[417] = http_version + "417 Expectation Failed";
-	this->status_line_map_[418] = http_version + "418 unused";
+	this->status_line_map_[418] = http_version + "418 I'm a teapot";
 	this->status_line_map_[419] = http_version + "419 unused";
 	this->status_line_map_[420] = http_version + "420 unused";
 	this->status_line_map_[421] = http_version + "421 Misdirected Request";
@@ -326,12 +326,14 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 
 			// clientのip_addressを取る
 			// retry するか？
+			#ifdef GTEST
 			if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
 			{
 				std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 				state = END_PHASE;
 			}
 			else
+			#endif
 				state = SEARCH_LOCATION_PHASE;
 			break;
 		case SEARCH_LOCATION_PHASE:
@@ -384,7 +386,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case ERROR_PAGE_PHASE:
 			std::cout << "error page phase" << std::endl;
-			if (errorPagePhase(response, request, server, location) == WBSRV_ERR)
+			if (errorPagePhase(response, request, server, location) == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
 			else
 				state = LOG_PHASE;
@@ -399,6 +401,15 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 		}
 	}
 
+	std::cout << "header filter phase" << std::endl;
+	if (!response.body_.empty())
+	{
+		std::stringstream stream;
+		stream << response.body_.length();
+		response.headers_["Content-Length"] = stream.str();
+	}
+
+	std::cout << "create final response" << std::endl;
 	return createResponse(response);
 }
 
@@ -415,6 +426,7 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 {
 	std::string	url = return_directive.getUrl();
 	int	code = return_directive.getCode();
+	std::vector<int> redirect_code = {301, 302, 303, 307, 308};
 
 	if (code == config::Return::kCodeUnset)
 	{
@@ -422,7 +434,7 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 		response.headers_["Location"] = url;
 		response.headers_["Content-Type"] = "text/html"; // ここでやるべきか
 	}
-	else if (301 <= code && code <= 8)
+	else if (std::find(redirect_code.begin(), redirect_code.end(), code) != redirect_code.end())
 	{
 		response.status_code_ = code;
 		response.headers_["Location"] = url;
@@ -570,14 +582,15 @@ int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, 
 	return OK;
 }
 
-bool	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
+int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
 {
 	const config::ErrorPage* ep = response.config_handler_.searchErrorPage(server, location, response.status_code_);
 
 	if (!ep)
 	{
-		response.body_ = *default_error_page_map_[response.status_code_];
-		return WBSRV_OK;
+		if (response.body_.empty() && default_error_page_map_.find(response.status_code_) != default_error_page_map_.end())
+			response.body_ = *default_error_page_map_[response.status_code_];
+		return OK;
 	}
 
 	// error page process
@@ -585,7 +598,7 @@ bool	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request,
 	if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
 		response.status_code_ = tmp_code;
 	request.uri = ep->getUri();
-	return WBSRV_ERR;
+	return INTERNAL_REDIRECT;
 }
 
 //error_page: エラーページを指定するディレクティブ。指定されたエラーが発生した場合に、指定されたエラーページに対して再度処理が行われる可能性があります。

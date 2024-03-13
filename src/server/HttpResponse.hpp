@@ -40,7 +40,7 @@ class HttpResponse
 		static int	staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location );
 		static int	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on );
 		static int	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
-		static bool	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location);
+		static int	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location);
 		bool	isURL( const std::string uri ) const;
 };
 
