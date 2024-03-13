@@ -413,6 +413,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 		stream << response.body_.length();
 		response.headers_["Content-Length"] = stream.str();
 	}
+	response.headers_["Content-Type"] = detectContentTypeFromBody(response.body_);
 
 	std::cout << "create final response" << std::endl;
 	return createResponse(response);
@@ -611,6 +612,18 @@ int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, 
 //return: 特定の条件に基づいてレスポンスを生成し、クライアントに返すディレクティブ。return を使用して新しいURIにリダイレクトすることができます。
 
 //try_files: ファイルの存在を確認し、存在すればそのファイルを提供し、存在しなければ指定されたファイルまたはURIに対して再度処理が行われる可能性があります。
+
+std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)
+{
+	// ボディが空の場合はデフォルトのContent-Typeを返す
+	if (body.empty())
+		return "text/plain";
+
+	if (body.find("<html") == 0)
+		return "text/html";
+	else
+		return "text/plain";
+}
 
 bool	HttpResponse::isURL( const std::string uri ) const
 {
