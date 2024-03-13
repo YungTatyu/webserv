@@ -88,17 +88,17 @@ const static std::string webserv_error_429_page =
 "<html>\r\n<head><title>429 Too Many Requests</title></head>\r\n<body>\r\n<center><h1>429 Too Many Requests</h1></center>\r\n";
 
 const static std::string webserv_error_494_page =
-"<html>\r\n<head><title>400 Request Header Or Cookie Too Large</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>Request Header Or Cookie Too Large</center>\r\n";
+"<html>\r\n<head><title>494 Request Header Or Cookie Too Large</title></head>\r\n<body>\r\n<center><h1>494 Bad Request</h1></center>\r\n<center>Request Header Or Cookie Too Large</center>\r\n";
 
 
 const static std::string webserv_error_495_page =
-"<html>\r\n<head><title>400 The SSL certificate error</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>The SSL certificate error</center>\r\n";
+"<html>\r\n<head><title>495 The SSL certificate error</title></head>\r\n<body>\r\n<center><h1>495 Bad Request</h1></center>\r\n<center>The SSL certificate error</center>\r\n";
 
 const static std::string webserv_error_496_page =
-"<html>\r\n<head><title>400 No required SSL certificate was sent</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>No required SSL certificate was sent</center>\r\n";
+"<html>\r\n<head><title>496 No required SSL certificate was sent</title></head>\r\n<body>\r\n<center><h1>496 Bad Request</h1></center>\r\n<center>No required SSL certificate was sent</center>\r\n";
 
 const static std::string webserv_error_497_page =
-"<html>\r\n<head><title>400 The plain HTTP request was sent to HTTPS port</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<center>The plain HTTP request was sent to HTTPS port</center>\r\n";
+"<html>\r\n<head><title>497 The plain HTTP request was sent to HTTPS port</title></head>\r\n<body>\r\n<center><h1>497 Bad Request</h1></center>\r\n<center>The plain HTTP request was sent to HTTPS port</center>\r\n";
 
 
 const static std::string webserv_error_500_page =
@@ -287,7 +287,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 {
 	HttpResponse response(config_handler);
 	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find("Host")->second);
-	const config::Location*	location;
+	const config::Location*	location = NULL;
 	struct sockaddr_in client_addr;
 	socklen_t client_addrlen = sizeof(client_addr);
 	int ret;
@@ -315,7 +315,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			state = PRE_SEARCH_LOCATION_PHASE;
 			break;
 		case PRE_SEARCH_LOCATION_PHASE:
-			std::cout << "post search server phase" << std::endl;
+			std::cout << "pre search location phase" << std::endl;
 			// parse error
 			if (request.parseState == HttpRequest::PARSE_ERROR)
 			{
