@@ -16,7 +16,7 @@ const static std::string kINDEX = "index";
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 
-const static std::string http_version = "HTTP/1.1 ";
+const static std::string http_version = "HTTP/1.1";
 
 const static std::string webserv_error_301_page =
 "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n";
@@ -132,66 +132,66 @@ HttpResponse::HttpResponse( const ConfigHandler& config_handler )
 	this->headers_["Date"] = getCurrentGMTTime();
 
 		// status_line
-	this->status_line_map_[200] = http_version + "200 OK";
-	this->status_line_map_[201] = http_version + "201 Created";
-	this->status_line_map_[202] = http_version + "202 Accepted";
-	this->status_line_map_[203] = http_version + "203 Non-Authoritative Information";
-	this->status_line_map_[204] = http_version + "204 No Content";
-	this->status_line_map_[205] = http_version + "205 Reset Content";
-	this->status_line_map_[206] = http_version + "206 Partial Content";
-	this->status_line_map_[207] = http_version + "207 Multi-Status";
-	this->status_line_map_[300] = http_version + "300 Multiple Choices";
-	this->status_line_map_[301] = http_version + "301 Moved Permanently";
-	this->status_line_map_[302] = http_version + "302 Moved Temporarily";
-	this->status_line_map_[303] = http_version + "303 See Other";
-	this->status_line_map_[304] = http_version + "304 Not Modified";
+	this->status_line_map_[200] = "200 OK";
+	this->status_line_map_[201] = "201 Created";
+	this->status_line_map_[202] = "202 Accepted";
+	this->status_line_map_[203] = "203 Non-Authoritative Information";
+	this->status_line_map_[204] = "204 No Content";
+	this->status_line_map_[205] = "205 Reset Content";
+	this->status_line_map_[206] = "206 Partial Content";
+	this->status_line_map_[207] = "207 Multi-Status";
+	this->status_line_map_[300] = "300 Multiple Choices";
+	this->status_line_map_[301] = "301 Moved Permanently";
+	this->status_line_map_[302] = "302 Moved Temporarily";
+	this->status_line_map_[303] = "303 See Other";
+	this->status_line_map_[304] = "304 Not Modified";
 
-	this->status_line_map_[307] = http_version + "307 Temporary Redirect";
-	this->status_line_map_[308] = http_version + "308 Permanent Redirect";
+	this->status_line_map_[307] = "307 Temporary Redirect";
+	this->status_line_map_[308] = "308 Permanent Redirect";
 
-	this->status_line_map_[400] = http_version + "400 Bad Request";
-	this->status_line_map_[401] = http_version + "401 Unauthorized";
-	this->status_line_map_[402] = http_version + "402 Payment Required";
-	this->status_line_map_[403] = http_version + "403 Forbidden";
-	this->status_line_map_[404] = http_version + "404 Not Found";
-	this->status_line_map_[405] = http_version + "405 Not Allowed";
-	this->status_line_map_[406] = http_version + "406 Not Acceptable";
-	this->status_line_map_[407] = http_version + "407 Proxy Authentication Required";
-	this->status_line_map_[408] = http_version + "408 Request Time-out";
-	this->status_line_map_[409] = http_version + "409 Conflict";
-	this->status_line_map_[410] = http_version + "410 Gone";
-	this->status_line_map_[411] = http_version + "411 Length Required";
-	this->status_line_map_[412] = http_version + "412 Precondition Failed";
-	this->status_line_map_[413] = http_version + "413 Request Entity Too Large";
-	this->status_line_map_[414] = http_version + "414 Request-URI Too Large";
-	this->status_line_map_[415] = http_version + "415 Unsupported Media Type";
-	this->status_line_map_[416] = http_version + "416 Requested Range Not Satisfiable";
-	this->status_line_map_[417] = http_version + "417 Expectation Failed";
-	this->status_line_map_[418] = http_version + "418 I'm a teapot";
-	this->status_line_map_[419] = http_version + "419 unused";
-	this->status_line_map_[420] = http_version + "420 unused";
-	this->status_line_map_[421] = http_version + "421 Misdirected Request";
-	this->status_line_map_[422] = http_version + "422 Unprocessable Entity";
-	this->status_line_map_[423] = http_version + "423 Locked";
-	this->status_line_map_[424] = http_version + "424 Failed Dependency";
-	this->status_line_map_[425] = http_version + "425 unused";
-	this->status_line_map_[426] = http_version + "426 Upgrade Required";
-	this->status_line_map_[427] = http_version + "427 unused";
-	this->status_line_map_[428] = http_version + "428 Precondition Required";
-	this->status_line_map_[429] = http_version + "429 Too Many Requests";
-	this->status_line_map_[430] = http_version + "430";
+	this->status_line_map_[400] = "400 Bad Request";
+	this->status_line_map_[401] = "401 Unauthorized";
+	this->status_line_map_[402] = "402 Payment Required";
+	this->status_line_map_[403] = "403 Forbidden";
+	this->status_line_map_[404] = "404 Not Found";
+	this->status_line_map_[405] = "405 Not Allowed";
+	this->status_line_map_[406] = "406 Not Acceptable";
+	this->status_line_map_[407] = "407 Proxy Authentication Required";
+	this->status_line_map_[408] = "408 Request Time-out";
+	this->status_line_map_[409] = "409 Conflict";
+	this->status_line_map_[410] = "410 Gone";
+	this->status_line_map_[411] = "411 Length Required";
+	this->status_line_map_[412] = "412 Precondition Failed";
+	this->status_line_map_[413] = "413 Request Entity Too Large";
+	this->status_line_map_[414] = "414 Request-URI Too Large";
+	this->status_line_map_[415] = "415 Unsupported Media Type";
+	this->status_line_map_[416] = "416 Requested Range Not Satisfiable";
+	this->status_line_map_[417] = "417 Expectation Failed";
+	this->status_line_map_[418] = "418 I'm a teapot";
+	this->status_line_map_[419] = "419 unused";
+	this->status_line_map_[420] = "420 unused";
+	this->status_line_map_[421] = "421 Misdirected Request";
+	this->status_line_map_[422] = "422 Unprocessable Entity";
+	this->status_line_map_[423] = "423 Locked";
+	this->status_line_map_[424] = "424 Failed Dependency";
+	this->status_line_map_[425] = "425 unused";
+	this->status_line_map_[426] = "426 Upgrade Required";
+	this->status_line_map_[427] = "427 unused";
+	this->status_line_map_[428] = "428 Precondition Required";
+	this->status_line_map_[429] = "429 Too Many Requests";
+	this->status_line_map_[430] = "430";
 
-	this->status_line_map_[500] = http_version + "500 Internal Server Error";
-	this->status_line_map_[501] = http_version + "501 Not Implemented";
-	this->status_line_map_[502] = http_version + "502 Bad Gateway";
-	this->status_line_map_[503] = http_version + "503 Service Temporarily Unavailable";
-	this->status_line_map_[504] = http_version + "504 Gateway Time-out";
-	this->status_line_map_[505] = http_version + "505 HTTP Version Not Supported";
-	this->status_line_map_[506] = http_version + "506 Variant Also Negotiates";
-	this->status_line_map_[507] = http_version + "507 Insufficient Storage";
-	this->status_line_map_[508] = http_version + "508 unused";
-	this->status_line_map_[509] = http_version + "509 unused";
-	this->status_line_map_[510] = http_version + "510 Not Extended";
+	this->status_line_map_[500] = "500 Internal Server Error";
+	this->status_line_map_[501] = "501 Not Implemented";
+	this->status_line_map_[502] = "502 Bad Gateway";
+	this->status_line_map_[503] = "503 Service Temporarily Unavailable";
+	this->status_line_map_[504] = "504 Gateway Time-out";
+	this->status_line_map_[505] = "505 HTTP Version Not Supported";
+	this->status_line_map_[506] = "506 Variant Also Negotiates";
+	this->status_line_map_[507] = "507 Insufficient Storage";
+	this->status_line_map_[508] = "508 unused";
+	this->status_line_map_[509] = "509 unused";
+	this->status_line_map_[510] = "510 Not Extended";
 
 
 	// default error_page
@@ -266,9 +266,14 @@ std::string	HttpResponse::getCurrentGMTTime()
 std::string	HttpResponse::createResponse( const HttpResponse& response )
 {
 	std::stringstream res;
+	std::map<int, std::string>::iterator it = status_line_map_.find(response.status_code_);
 
 	// status line
-	res << status_line_map_[response.status_code_] << "\r\n";
+	res << http_version << " ";
+	if (it != status_line_map_.end())
+		res << status_line_map_[response.status_code_] << "\r\n";
+	else
+		res << response.status_code_ << "\r\n";
 
 	// headers
 	for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
@@ -348,7 +353,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case RETURN_PHASE:
 			std::cout << "return phase" << std::endl;
-			if (returnPhase(response, location) == WBSRV_ERR)
+			if (returnPhase(response, location) == REDIRECT)
 				state = ERROR_PAGE_PHASE;
 			else
 				state = ALLOW_PHASE;
@@ -413,13 +418,13 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 	return createResponse(response);
 }
 
-bool	HttpResponse::returnPhase( HttpResponse& response, const config::Location* location )
+int	HttpResponse::returnPhase( HttpResponse& response, const config::Location* location )
 {
-	if (location->directives_set.find("return") == location->directives_set.end())
-		return WBSRV_OK;
+	if (!location || location->directives_set.find("return") == location->directives_set.end())
+		return OK;
 
 	returnResponse(response, location->return_list[0]);
-	return WBSRV_ERR;
+	return REDIRECT;
 }
 
 void	HttpResponse::returnResponse( HttpResponse& response, const config::Return& return_directive )

@@ -34,7 +34,7 @@ class HttpResponse
 		// 名前微妙
 		static std::string	autoIndex( const std::string& directory_path );
 		static std::string	getCurrentGMTTime();
-		static bool	returnPhase( HttpResponse& response, const config::Location* location );
+		static int	returnPhase( HttpResponse& response, const config::Location* location );
 		static void	returnResponse( HttpResponse& response, const config::Return& return_directive );
 		static int	contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location );
 		static int	staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location );
