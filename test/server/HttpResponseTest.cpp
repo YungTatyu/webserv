@@ -195,8 +195,8 @@ TEST_F(HttpResponseTest, ErrorPage)
 	correct_res.push_back("HTTP/1.1 499");
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
-	correct_res.push_back("Content-Type: text/plain");
-	correct_res.push_back("Content-Length: 14");
+	correct_res.push_back("Content-Type: text/html");
+	correct_res.push_back("Content-Length: 258");
 	std::ifstream	ifs("test/server/ResponseTestFiles/40x.html");
 	ASSERT_TRUE(ifs.is_open());
 	std::stringstream buffer;
@@ -212,20 +212,20 @@ TEST_F(HttpResponseTest, ErrorPage)
 	// error_page code ... uri; の場合
 	// 初期化
 	request.uri = "/bad-request/";
-	request.parseState = HttpRequest::PARSE_COMPLETE;
+	request.parseState = HttpRequest::PARSE_ERROR;
 	correct_res.clear();
-	correct_res.push_back("HTTP/1.1 400 Bad Rquest");
+	correct_res.push_back("HTTP/1.1 400 Bad Request");
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 118");
+	correct_res.push_back("Content-Length: 274");
 	ifs.clear();
 	ifs.open("test/server/ResponseTestFiles/internal_redirect.html");
 	ASSERT_TRUE(ifs.is_open());
-	buffer.clear();
-	buffer << ifs.rdbuf();
+	std::stringstream buffer2;
+	buffer2 << ifs.rdbuf();
 	ifs.close();
-	correct_res.push_back(buffer.str());
+	correct_res.push_back(buffer2.str());
 	// 関数適用
 	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
 	// 結果確認
