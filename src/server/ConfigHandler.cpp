@@ -12,6 +12,7 @@ const static	std::string kDENY = "deny";
 const static	std::string kALIAS = "alias";
 const static	std::string kAUTOINDEX = "autoindex";
 const static	std::string kROOT = "root";
+const static	std::string kERROR_PAGE = "error_page";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -353,7 +354,7 @@ const config::Location*	ConfigHandler::searchLongestMatchLocationConfig( const c
 
 const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& server, const config::Location* location, const unsigned int code ) const
 {
-	if (location && !location->error_page_list.empty())
+	if (location && location->directives_set.find(kERROR_PAGE) != location->directives_set.end())
 	{
 		const std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
@@ -364,7 +365,7 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 			}
 		}
 	}
-	else if (!server.error_page_list.empty())
+	else if (server.directives_set.find(kERROR_PAGE) != server.directives_set.end())
 	{
 		const std::vector<config::ErrorPage>&	ep_list = server.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
@@ -375,7 +376,7 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 			}
 		}
 	}
-	else if (!this->config_->http.error_page_list.empty())
+	else if (this->config_->http.directives_set.find(kERROR_PAGE) != this->config_->http.directives_set.end())
 	{
 		const std::vector<config::ErrorPage>&	ep_list = this->config_->http.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
