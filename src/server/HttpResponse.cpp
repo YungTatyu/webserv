@@ -619,7 +619,7 @@ std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)
 	if (body.empty())
 		return "text/plain";
 
-	if (body.find("<html") == 0)
+	if (body.find("<html") != std::string::npos)
 		return "text/html";
 	else
 		return "text/plain";
