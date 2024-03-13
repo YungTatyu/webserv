@@ -134,7 +134,7 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 {
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
-	if (location != NULL && location->directives_set.find(kDENY) != location->directives_set.end())
+	if (location && location->directives_set.find(kDENY) != location->directives_set.end())
 	{
 		if (!limitLoop(location->allow_deny_list, client_addr.sin_addr.s_addr))
 			return false;
@@ -153,7 +153,7 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 
 	// ------ method の制限 ------
 	// location内にlimit_except contextあるか？
-	if (location->directives_set.find("limit_except") != location->directives_set.end())
+	if (location && location->directives_set.find("limit_except") != location->directives_set.end())
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
