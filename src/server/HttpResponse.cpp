@@ -521,7 +521,7 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
  * uriが'/'で終わっていなければ直接探しに行き、
  * そうでなければ、ディレクティブを順番に適用する。
  */
-int	HttpResponse::GETMethod( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
+int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
 {
 		// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
@@ -566,7 +566,7 @@ int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, 
 {
 
 	if (response.config_handler_.convertRequestMethod(request.method) == config::GET)
-		return GETMethod(response, request, server, location);
+		return staticHandler(response, request, server, location);
 	return OK;
 }
 
