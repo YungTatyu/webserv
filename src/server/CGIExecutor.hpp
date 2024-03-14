@@ -18,6 +18,10 @@ class CGIExecutor
 	public:
 		CGIExecutor();
 		~CGIExecutor();
+		void	executeCgi();
+		void	createCgiPath();
+		void	setMetaVariables();
+		pid_t	getCgiProcessId();
 };
 } // namespace cgi
 

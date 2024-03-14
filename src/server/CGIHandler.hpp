@@ -16,11 +16,10 @@ enum CGI_SOCKET
 
 class CGIHandler
 {
-	private:
-		CGIParser	cgi_parser;
-		CGIExecutor	cgi_executor;
-		int	sockets_[2];
 	public:
+		CGIParser	cgi_parser_;
+		CGIExecutor	cgi_executor_;
+		int	sockets_[2];
 		CGIHandler();
 		~CGIHandler();
 		static bool	isCgi(const std::string& cgi_path);

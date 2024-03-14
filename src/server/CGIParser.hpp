@@ -15,6 +15,8 @@ class CGIParser
 		CGIParser();
 		~CGIParser();
 		bool	parse();
+		const std::map<std::string, std::string>&	getHeaders() const;
+		const std::string&	getBody() const;
 };
 } // namespace cgi
 
