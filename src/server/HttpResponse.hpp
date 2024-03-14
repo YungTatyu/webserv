@@ -18,16 +18,17 @@ class HttpResponse
 		static std::string	generateResponse( HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
 		static std::string	createResponse( const HttpResponse& response );
 
-	private:
 		// private variables
 		std::string	root_path_;
+		std::string	cgi_status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string>	headers_;
 		std::string			body_;
 		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap
 		static std::map<int, const std::string*> default_error_page_map_; // defaultのerror pageを格納するmap
 
-		// private member objects
+	private:
+				// private member objects
 		const ConfigHandler	&config_handler_;
 
 		// utils methods
