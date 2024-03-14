@@ -418,7 +418,7 @@ std::string	ConfigHandler::searchRootPath( const config::Server& server, const c
 		if (location->directives_set.find(kALIAS) != location->directives_set.end())
 			return location->alias.getPath();
 	}
-	else if (server.directives_set.find(kROOT) != server.directives_set.end())
+	if (server.directives_set.find(kROOT) != server.directives_set.end())
 		return server.root.getPath();
 	else if (config_->http.directives_set.find(kROOT) != config_->http.directives_set.end())
 		return config_->http.root.getPath();
