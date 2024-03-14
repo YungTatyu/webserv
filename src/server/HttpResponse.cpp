@@ -331,7 +331,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 
 			// clientのip_addressを取る
 			// retry するか？
-			#ifdef GTEST
+			#ifndef GTEST
 			if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
 			{
 				std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
@@ -432,7 +432,6 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 {
 	std::string	url = return_directive.getUrl();
 	int	code = return_directive.getCode();
-	std::vector<int> redirect_code = {301, 302, 303, 307, 308};
 
 	if (code == config::Return::kCodeUnset)
 	{
@@ -440,7 +439,7 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 		response.headers_["Location"] = url;
 		response.headers_["Content-Type"] = "text/html"; // ここでやるべきか
 	}
-	else if (std::find(redirect_code.begin(), redirect_code.end(), code) != redirect_code.end())
+	else if (config::Return::isRedirectCode(code))
 	{
 		response.status_code_ = code;
 		response.headers_["Location"] = url;
