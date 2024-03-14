@@ -4,19 +4,20 @@
 #include <string>
 #include <map>
 
+#include "HttpResponse.hpp"
+
 namespace cgi
 {
 class CGIParser
 {
 	private:
-		std::map<std::string, std::string>	headers_;
-		std::string	body_;
+		std::map<std::string, std::string>	*headers_;
+		std::string	*body_;
 	public:
 		CGIParser();
 		~CGIParser();
-		bool	parse();
-		const std::map<std::string, std::string>&	getHeaders() const;
-		const std::string&	getBody() const;
+		void	init(HttpResponse& http_response);
+		bool	parse(HttpResponse& http_response);
 };
 } // namespace cgi
 

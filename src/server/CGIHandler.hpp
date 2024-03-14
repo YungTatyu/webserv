@@ -26,8 +26,9 @@ class CGIHandler
 		void	setMetaVariables();
 		void	setMessageBody();
 		void	createCgiProcess();
-		void	killCgiProcess();
 		void	callCgiExecutor();
+		void	callCgiParser();
+		void	killCgiProcess();
 };
 } // namespace cgi
 
