@@ -11,8 +11,11 @@ namespace cgi
 class CGIParser
 {
 	private:
+		// 以下のメンバ変数はHttpResponseのメンバ変数のポインタ
 		std::map<std::string, std::string>	*headers_;
 		std::string	*body_;
+		long	*status_code_;
+		std::string	*status_code_line_;
 	public:
 		CGIParser();
 		~CGIParser();
