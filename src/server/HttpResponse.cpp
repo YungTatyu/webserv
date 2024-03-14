@@ -376,6 +376,11 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 				response.status_code_ = 301;
 				state = ERROR_PAGE_PHASE;
 			}
+			else if (request.uri[request.uri.length() - 1] == '/' && !location)
+			{
+				response.status_code_ = 404;
+				state = ERROR_PAGE_PHASE;
+			}
 			else
 				state = CONTENT_PHASE;
 			break;
@@ -465,7 +470,7 @@ int	HttpResponse::TryFiles( HttpResponse& response, HttpRequest& request, const 
 
 	for (size_t i = 0; i < file_list.size(); i++)
 	{
-		std::string	full_path = response.root_path_ + file_list[i];
+		std::string	full_path = response.root_path_ + "/" + file_list[i];
 		if (FileUtils::wrapperAccess(full_path, F_OK, false) == 0 &&
 			FileUtils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
