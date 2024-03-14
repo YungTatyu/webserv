@@ -74,6 +74,4 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
-# テストビルド時のみGTESTを定義
-set_target_properties(${PROJECT_NAME}-googletest PROPERTIES COMPILE_DEFINITIONS_TESTS "GTEST=1")
 enable_testing()
