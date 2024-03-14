@@ -21,7 +21,7 @@ class HttpResponse
 	private:
 		// private variables
 		std::string	root_path_;
-		unsigned int		status_code_; // response生成するときにstatus_line_map_参照する
+		long	status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string>	headers_;
 		std::string			body_;
 		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap

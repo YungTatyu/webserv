@@ -600,7 +600,7 @@ int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, 
 	}
 
 	// error page process
-	int tmp_code;
+	long	tmp_code; // error_pageの=responseはlong_maxまで許容
 	if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset)
 		response.status_code_ = tmp_code;
 	request.uri = ep->getUri();
