@@ -312,14 +312,8 @@ TEST_F(HttpResponseTest, StaticHandler)
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 258");
-	ifs.clear();
-	ifs.open("test/server/ResponseTestFiles/testHtml/40x.html");
-	ASSERT_TRUE(ifs.is_open());
-	std::stringstream buffer2;
-	buffer2 << ifs.rdbuf();
-	ifs.close();
-	correct_res.push_back(buffer2.str());
+	correct_res.push_back("Content-Length: 100");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n");
 	// 関数適用
 	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
 	// 結果確認
@@ -327,7 +321,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 
 	// try_filesとaliasの組み合わせ
 	// 初期化
-	request.uri = "/hello/";
+	request.uri = "/alias/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 200 OK");
 	correct_res.push_back("Server: webserv/1");
@@ -348,7 +342,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 
 	// indexとtry_filesの組み合わせ
 	// 初期化
-	request.uri = "/good/";
+	request.uri = "/location-root/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 200 OK");
 	correct_res.push_back("Server: webserv/1");
@@ -369,9 +363,9 @@ TEST_F(HttpResponseTest, StaticHandler)
 
 	// try_filesのinternal redirect
 	// 初期化
-	request.uri = "/bye/";
+	request.uri = "/redirect/";
 	correct_res.clear();
-	correct_res.push_back("HTTP/1.1 403 Forbidden");
+	correct_res.push_back("HTTP/1.1 200 OK");
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
@@ -388,5 +382,24 @@ TEST_F(HttpResponseTest, StaticHandler)
 	// 結果確認
 	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
 
-
+	// try_filesの=code からerror_pageの場合
+	// 初期化
+	request.uri = "/code-error-page/";
+	correct_res.clear();
+	correct_res.push_back("HTTP/1.1 405 Not Allowed");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/html");
+	correct_res.push_back("Content-Length: 272");
+	ifs.clear();
+	ifs.open("test/server/ResponseTestFiles/testHtml/index.html");
+	ASSERT_TRUE(ifs.is_open());
+	std::stringstream buffer6;
+	buffer6 << ifs.rdbuf();
+	ifs.close();
+	correct_res.push_back(buffer6.str());
+	// 関数適用
+	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
 }
