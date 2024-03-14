@@ -2,6 +2,8 @@
 #define CGI_CGI_HANDLER_HPP
 
 #include <string>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "CGIParser.hpp"
 #include "CGIExecutor.hpp"
@@ -16,18 +18,18 @@ enum CGI_SOCKET
 
 class CGIHandler
 {
-	public:
+	private:
 		CGIParser	cgi_parser_;
 		CGIExecutor	cgi_executor_;
+		pid_t	cgi_process_id_;
+	public:
 		int	sockets_[2];
 		CGIHandler();
 		~CGIHandler();
 		static bool	isCgi(const std::string& cgi_path);
-		void	setMetaVariables();
-		void	setMessageBody();
 		void	createCgiProcess();
-		void	callCgiExecutor();
-		void	callCgiParser();
+		void	callCgiExecutor(const std::string& cgi_path, const HttpRequest& http_request, const int socket);
+		void	callCgiParser(HttpResponse& http_response);
 		void	killCgiProcess();
 };
 } // namespace cgi
