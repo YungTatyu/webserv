@@ -1,31 +1,36 @@
-#ifndef CGIHANDLER_HPP
-# define CGIHANDLER_HPP
+#ifndef CGI_CGI_HANDLER_HPP
+#define CGI_CGI_HANDLER_HPP
 
-# include <unistd.h>
-# include <string>
-# include <iostream>
-# include <vector>
-# include <stdlib.h>
-# include <sys/wait.h>
-# include <fcntl.h>
-# include <signal.h>
+#include <string>
+
+#include "CGIParser.hpp"
+#include "CGIExecutor.hpp"
+
+namespace cgi
+{
+enum CGI_SOCKET
+{
+	SOCKET_PARENT = 0,
+	SOCKET_CHILD = 1
+};
 
 class CGIHandler
 {
-	public:
-		static bool isCGI( std::string& requestURI );
-		static std::string executeCGI( std::string& uri, std::string& query );
-		static std::string getCommandPath( const std::string& command );
-		static std::vector<std::string> split( const std::string& s, char delimiter );
-
 	private:
+		CGIParser	cgi_parser;
+		CGIExecutor	cgi_executor;
+		int	sockets_[2];
+	public:
 		CGIHandler();
-		enum PipeEnds
-		{
-			READ = 0,
-			WRITE = 1
-		};
+		~CGIHandler();
+		static bool	isCgi(const std::string& cgi_path);
+		void	setMetaVariables();
+		void	setMessageBody();
+		void	createCgiProcess();
+		void	killCgiProcess();
+		void	callCgiExecutor();
 };
+} // namespace cgi
 
 #endif
 
