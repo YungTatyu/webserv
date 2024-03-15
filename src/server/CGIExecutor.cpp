@@ -1,6 +1,7 @@
 #include "CGIExecutor.hpp"
 
 #include <unistd.h>
+#include <cstdlib>
 
 cgi::CGIExecutor::CGIExecutor() {}
 
@@ -29,7 +30,7 @@ std::string cgi::CGIExecutor::searchCommandPath(const std::string& command) cons
 	{
 		std::string command_path = directories[i] + "/" + command;
 		if (access(command_path.c_str(), X_OK) == 0)
-		    return command_path;
+			return command_path;
 	}
 	return "";
 }
