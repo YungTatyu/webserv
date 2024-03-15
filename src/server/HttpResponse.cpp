@@ -412,13 +412,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 	}
 
 	std::cout << "header filter phase" << std::endl;
-	if (!response.body_.empty())
-	{
-		std::stringstream stream;
-		stream << response.body_.length();
-		response.headers_["Content-Length"] = stream.str();
-	}
-	response.headers_["Content-Type"] = detectContentTypeFromBody(response.body_);
+	headerFilterPhase(response);
 
 	std::cout << "create final response" << std::endl;
 	return createResponse(response);
@@ -616,6 +610,18 @@ int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, 
 //return: 特定の条件に基づいてレスポンスを生成し、クライアントに返すディレクティブ。return を使用して新しいURIにリダイレクトすることができます。
 
 //try_files: ファイルの存在を確認し、存在すればそのファイルを提供し、存在しなければ指定されたファイルまたはURIに対して再度処理が行われる可能性があります。
+
+void	HttpResponse::headerFilterPhase( HttpResponse& response )
+{
+	if (!response.body_.empty())
+	{
+		std::stringstream stream;
+		stream << response.body_.length();
+		response.headers_["Content-Length"] = stream.str();
+	}
+
+	response.headers_["Content-Type"] = detectContentTypeFromBody(response.body_);
+}
 
 std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)
 {

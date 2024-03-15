@@ -43,6 +43,7 @@ class HttpResponse
 		static int	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
 		static int	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location);
 		bool	isURL( const std::string uri ) const;
+		static void	headerFilterPhase( HttpResponse& response );
 		static std::string	detectContentTypeFromBody( const std::string& body );
 };
 
