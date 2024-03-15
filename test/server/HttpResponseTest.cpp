@@ -233,22 +233,22 @@ TEST_F(HttpResponseTest, ErrorPage)
 	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
 	// 結果確認
 	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
-/*
+
 	// 無限リダイレクトの場合
 	// 初期化
 	request.uri = "/permanently_internal_redirect/";
+	request.parseState = HttpRequest::PARSE_COMPLETE;
 	correct_res.clear();
-	correct_res.push_back("HTTP/1.1 ");
+	correct_res.push_back("HTTP/1.1 500 Internal Server Error");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
-	correct_res.push_back("Content-Type: text/plain");
-	correct_res.push_back("Content-Length: 14");
-	correct_res.push_back("");
+	correct_res.push_back("Connection: close");
+	correct_res.push_back("Content-Type: text/html");
+	correct_res.push_back("Content-Length: 124");
+	correct_res.push_back("<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n");
 	// 関数適用
 	response = HttpResponse::generateResponse(request, tied_server, sock, config_handler_);
 	// 結果確認
 	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, response));
-*/
 }
 
 TEST_F(HttpResponseTest, StaticHandler)

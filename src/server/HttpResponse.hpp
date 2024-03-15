@@ -39,7 +39,8 @@ class HttpResponse
 		static std::map<int, const std::string*> default_error_page_map_; // defaultのerror pageを格納するmap
 
 	private:
-				// private member objects
+				// private member
+		size_t	internal_redirect_cnt_;
 		const ConfigHandler	&config_handler_;
 
 		// utils methods

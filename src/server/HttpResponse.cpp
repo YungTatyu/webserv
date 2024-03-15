@@ -12,6 +12,7 @@ const static int INTERNAL_REDIRECT = 3;
 const static int ERROR_PAGE = 4;
 const static std::string kTRY_FILES = "try_files";
 const static std::string kINDEX = "index";
+const static size_t kMaxInternalRedirect = 10;
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -122,10 +123,8 @@ const static std::string webserv_error_505_page =
 const static std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
-
-
 HttpResponse::HttpResponse( const ConfigHandler& config_handler )
-	: status_code_(200), body_(""), config_handler_(config_handler)
+	: status_code_(200), body_(""), internal_redirect_cnt_(0), config_handler_(config_handler)
 {
 	this->headers_["Server"] = "webserv/1";
 	this->headers_["Connection"] = "keep-alive";
@@ -357,6 +356,15 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case SEARCH_LOCATION_PHASE:
 			std::cout << "search location phase" << std::endl;
+			if (response.internal_redirect_cnt_++ > kMaxInternalRedirect)
+			{
+				"too continuous internal redirect";
+				response.status_code_ = 500;
+				response.body_ = *default_error_page_map_[500];
+				response.headers_["Connection"] = "close";
+				state = END_PHASE;
+				break;
+			}
 			location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
 			state = POST_SEARCH_LOCATION_PHASE;
 			break;
@@ -459,7 +467,8 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 	else
 	{
 		response.status_code_ = code;
-		response.body_ = url;
+		if (!url.empty())
+			response.body_ = url;
 	}
 }
 
@@ -601,10 +610,10 @@ int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, 
 {
 	const config::ErrorPage* ep = response.config_handler_.searchErrorPage(server, location, response.status_code_);
 
+	if (response.body_.empty() && default_error_page_map_.find(response.status_code_) != default_error_page_map_.end())
+		response.body_ = *default_error_page_map_[response.status_code_];
 	if (!ep)
 	{
-		if (response.body_.empty() && default_error_page_map_.find(response.status_code_) != default_error_page_map_.end())
-			response.body_ = *default_error_page_map_[response.status_code_];
 		return OK;
 	}
 
