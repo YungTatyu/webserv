@@ -16,6 +16,8 @@ class CGIExecutor
 		std::vector<const char*>	argv_;
 		std::vector<const char*>	meta_vars_; // メタ変数(環境変数)
 		void	setMessageBody(const std::string& body) const;
+		std::vector<std::string>	split(const std::string& s, char delimiter) const;
+		std::string	searchCommandPath(const std::string& command) const;
 	public:
 		CGIExecutor();
 		~CGIExecutor();
