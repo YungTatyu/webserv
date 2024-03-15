@@ -22,15 +22,17 @@ class CGIHandler
 		CGIParser	cgi_parser_;
 		CGIExecutor	cgi_executor_;
 		pid_t	cgi_process_id_;
+		void	forkCgiProcess();
 	public:
 		int	sockets_[2];
 		CGIHandler();
 		~CGIHandler();
 		static bool	isCgi(const std::string& cgi_path);
-		void	createCgiProcess();
 		void	callCgiExecutor(const std::string& cgi_path, const HttpRequest& http_request, const int socket);
 		void	callCgiParser(HttpResponse& http_response);
-		void	killCgiProcess();
+		void	killCgiProcess() const;
+		const CGIParser&	getCgiParser() const;
+		const CGIExecutor&	getCgiExecutor() const;
 };
 } // namespace cgi
 
