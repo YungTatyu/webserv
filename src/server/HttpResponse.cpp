@@ -450,18 +450,15 @@ void	HttpResponse::returnResponse( HttpResponse& response, const config::Return&
 	{
 		response.status_code_ = 302;
 		response.headers_["Location"] = url;
-		response.headers_["Content-Type"] = "text/html"; // ここでやるべきか
 	}
 	else if (config::Return::isRedirectCode(code))
 	{
 		response.status_code_ = code;
 		response.headers_["Location"] = url;
-		response.headers_["Content-Type"] = "text/html";
 	}
 	else
 	{
 		response.status_code_ = code;
-		response.headers_["Content-Type"] = "text/plain";
 		response.body_ = url;
 	}
 }
