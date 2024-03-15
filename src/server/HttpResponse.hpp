@@ -45,6 +45,7 @@ class HttpResponse
 		bool	isURL( const std::string uri ) const;
 		static void	headerFilterPhase( HttpResponse& response );
 		static std::string	detectContentTypeFromBody( const std::string& body );
+		static std::string	transformLetter( const std::string& key_str );
 };
 
 
