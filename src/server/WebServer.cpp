@@ -88,7 +88,7 @@ void	WebServer::initializeConnManager()
 	)
 	{
 		this->connManager->setConnection(it->first);
-		this->connManager->setEvent(it->first, ConnectionData::READ);
+		this->connManager->setEvent(it->first, ConnectionData::EV_READ);
 	}
 }
 

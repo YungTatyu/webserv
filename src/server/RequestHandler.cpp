@@ -27,7 +27,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		HttpRequest request = HttpMessage::requestParser( requestData );
 		connManager.setRequest( sockfd, request );
 
-		connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
+		connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
 		return RequestHandler::UPDATE_WRITE;
 }
 
@@ -42,7 +42,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
 		return RequestHandler::NONE;
-	connManager.setEvent(sockfd, ConnectionData::READ); // readイベントに更新
+	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 	return RequestHandler::UPDATE_READ;
 }
 
