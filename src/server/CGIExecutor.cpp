@@ -7,6 +7,17 @@ cgi::CGIExecutor::CGIExecutor() {}
 
 cgi::CGIExecutor::~CGIExecutor() {}
 
+void	cgi::CGIExecutor::executeCgi(
+	const HttpRequest& http_request,
+	const std::string& cgi_path,
+	const int socket
+)
+{
+	(void)http_request;
+	(void)cgi_path;
+	(void)socket;
+}
+
 std::vector<std::string>	cgi::CGIExecutor::split(const std::string& s, char delimiter) const
 {
 	std::vector<std::string> tokens;

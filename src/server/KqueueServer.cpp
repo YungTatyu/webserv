@@ -56,7 +56,7 @@ bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 		it != connections.end();
 		++it)
 	{
-		const int	event_filter = it->second.event == ConnectionData::READ ? EVFILT_READ : EVFILT_WRITE;
+		const int	event_filter = it->second.event == ConnectionData::EV_READ ? EVFILT_READ : EVFILT_WRITE;
 		EV_SET(&event_list[i], it->first, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
 		++i;
 	}

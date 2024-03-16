@@ -10,8 +10,9 @@ class ConnectionData
 {
 	public:
 		enum EVENT {
-			READ,
-			WRITE,
+			EV_READ,
+			EV_WRITE,
+			EV_CGI_READ,
 		};
 		std::vector<char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<char> response;

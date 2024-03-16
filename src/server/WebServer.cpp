@@ -28,7 +28,7 @@ void WebServer::initializeServer()
 	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();
 	this->connManager->setConnection(listenfd);
-	this->connManager->setEvent(listenfd, ConnectionData::READ);
+	this->connManager->setEvent(listenfd, ConnectionData::EV_READ);
 }
 
 WebServer::~WebServer()

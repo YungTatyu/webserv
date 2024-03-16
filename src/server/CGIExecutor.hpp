@@ -21,7 +21,7 @@ class CGIExecutor
 	public:
 		CGIExecutor();
 		~CGIExecutor();
-		void	executeCgi(const HttpRequest& http_request);
+		void	executeCgi(const HttpRequest& http_request, const std::string& cgi_path, const int socket);
 		const std::string&	getCgiPath() const;
 		void	setCgiPath(const std::string& cgi_path);
 		const std::vector<const char*>&	getArgv() const;
