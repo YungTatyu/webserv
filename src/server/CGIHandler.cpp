@@ -19,17 +19,17 @@ cgi::CGIHandler::~CGIHandler() {}
  * 2. *.cig
  * 3. *.py
  * 
- * @param cgi_path 
+ * @param script_path 
  * @return true 
  * @return false 
  */
-bool cgi::CGIHandler::isCgi(const std::string& cgi_path)
+bool cgi::CGIHandler::isCgi(const std::string& script_path)
 {
 	return (
-		FileUtils::isExtensionFile(cgi_path, ".php")
-		|| FileUtils::isExtensionFile(cgi_path, ".cgi")
-		|| FileUtils::isExtensionFile(cgi_path, ".py")
-	) && FileUtils::isExecutable(cgi_path.c_str());
+		FileUtils::isExtensionFile(script_path, ".php")
+		|| FileUtils::isExtensionFile(script_path, ".cgi")
+		|| FileUtils::isExtensionFile(script_path, ".py")
+	) && FileUtils::isExecutable(script_path.c_str());
 }
 
 /**
@@ -40,7 +40,7 @@ bool cgi::CGIHandler::isCgi(const std::string& cgi_path)
  */
 bool	cgi::CGIHandler::forkCgiProcess(
 	const HttpRequest& http_request,
-	const std::string& cgi_path,
+	const std::string& script_path,
 	const int cli_socket,
 	ConnectionManager& conn_manager
 )
@@ -54,7 +54,7 @@ bool	cgi::CGIHandler::forkCgiProcess(
 	if (pid == 0)
 	{
 		close(this->sockets_[SOCKET_PARENT]);
-		this->cgi_executor_.executeCgi(http_request, cgi_path, this->sockets_[SOCKET_CHILD]);
+		this->cgi_executor_.executeCgiScript(http_request, script_path, this->sockets_[SOCKET_CHILD]);
 	}
 	this->cgi_process_id_ = pid;
 	close(this->sockets_[SOCKET_CHILD]);
@@ -65,7 +65,7 @@ bool	cgi::CGIHandler::forkCgiProcess(
 }
 
 void	cgi::CGIHandler::callCgiExecutor(
-	const std::string& cgi_path,
+	const std::string& script_path,
 	const HttpRequest& http_request,
 	const int cli_socket,
 	ConnectionManager& conn_manager
@@ -76,7 +76,7 @@ void	cgi::CGIHandler::callCgiExecutor(
 		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 		return;
 	}
-	forkCgiProcess(http_request, cgi_path, cli_socket, conn_manager);
+	forkCgiProcess(http_request, script_path, cli_socket, conn_manager);
 }
 
 const cgi::CGIParser&	cgi::CGIHandler::getCgiParser() const

@@ -25,7 +25,7 @@ class CGIHandler
 		pid_t	cgi_process_id_;
 		bool	forkCgiProcess(
 			const HttpRequest& http_request,
-			const std::string& cgi_path,
+			const std::string& script_path,
 			const int cli_socket,
 			ConnectionManager& conn_manager
 		);
@@ -33,9 +33,9 @@ class CGIHandler
 		int	sockets_[2];
 		CGIHandler();
 		~CGIHandler();
-		static bool	isCgi(const std::string& cgi_path);
+		static bool	isCgi(const std::string& script_path);
 		void	callCgiExecutor(
-			const std::string& cgi_path,
+			const std::string& script_path,
 			const HttpRequest& http_request,
 			const int cli_socket,
 			ConnectionManager& conn_manager

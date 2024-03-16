@@ -12,22 +12,23 @@ namespace cgi
 class CGIExecutor
 {
 	private:
-		std::string	cgi_path_;
+		std::string	script_path_;
 		std::vector<const char*>	argv_;
 		std::vector<const char*>	meta_vars_; // メタ変数(環境変数)
+		void	prepareCGIExecution(const HttpRequest& http_request, const std::string& script_path, const int socket);
+		void	createScriptPath(const std::string& script_path);
+		void	createArgv(const std::string& script_path);
+		void	createMetaVars(const HttpRequest& http_request);
 		void	setMessageBody(const std::string& body) const;
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
 		std::string	searchCommandPath(const std::string& command) const;
 	public:
 		CGIExecutor();
 		~CGIExecutor();
-		void	executeCgi(const HttpRequest& http_request, const std::string& cgi_path, const int socket);
+		void	executeCgiScript(const HttpRequest& http_request, const std::string& script_path, const int socket);
 		const std::string&	getCgiPath() const;
-		void	setCgiPath(const std::string& cgi_path);
 		const std::vector<const char*>&	getArgv() const;
-		void	setArgv(const std::string& argv);
 		const std::vector<const char*>&	getMetaVars() const;
-		void	setMetaVars(const HttpRequest& http_request);
 };
 } // namespace cgi
 
