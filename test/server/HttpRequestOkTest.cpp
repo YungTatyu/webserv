@@ -108,11 +108,8 @@ TEST(HttpRequest, OkTest6)
                              "5\r\n"
                              "hello"
                              "\r\n";
-    std::cout << "phase 1" << std::endl;
     HttpRequest test;
-    std::cout << "phase 2" << std::endl;
     HttpRequest::parseRequest(rawRequest, test);
-    std::cout << "phase 3" << std::endl;
 
     checkHttpRequestEqual(expect, test);
 }
