@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <cstdlib>
+#include <sstream>
 
 cgi::CGIExecutor::CGIExecutor() {}
 
@@ -19,7 +20,7 @@ void	cgi::CGIExecutor::executeCgiScript(
 	(void)socket;
 }
 
-void	cgi::CGIExecutor::prepareCGIExecution(
+void	cgi::CGIExecutor::prepareCgiExecution(
 	const HttpRequest& http_request,
 	const std::string& script_path,
 	const int socket
@@ -38,7 +39,7 @@ void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
 	if (!FileUtils::isExtensionFile(script_path, ".php"))
 		return;
 	// スクリプトがphpの場合は、phpのpathを探す必要がある
-	const std::string	path = searchCommandPath("php");
+	const std::string	path = createCommandPath("php");
 	if (path == "")
 		return;
 	this->script_path_ = path;
@@ -52,13 +53,23 @@ void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 	this->argv_.push_back(NULL);
 }
 
+void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
+{
+	(void)http_request;
+	this->meta_vars_.push_back("AUTH_TYPE="); // Authorizationをparseするロジックを実装しないため、値は空文字
+
+	// const std::string content_length = std::string("CONTENT_LENGTH=") + toStr(http_request.body.size());
+	// this->meta_vars_.push_back(content_length.c_str());
+	
+}
+
 
 std::vector<std::string>	cgi::CGIExecutor::split(const std::string& s, char delimiter) const
 {
 	std::vector<std::string> tokens;
 	std::string token;
-	std::istringstream tokenStream(s);
-	while (std::getline(tokenStream, token, delimiter))
+	std::istringstream is(s);
+	while (std::getline(is, token, delimiter))
 	{
 		token = token == "" ? "." : token;
 		tokens.push_back(token);
@@ -66,7 +77,7 @@ std::vector<std::string>	cgi::CGIExecutor::split(const std::string& s, char deli
 	return tokens;
 }
 
-std::string cgi::CGIExecutor::searchCommandPath(const std::string& command) const
+std::string cgi::CGIExecutor::createCommandPath(const std::string& command) const
 {
 	char* path = std::getenv("PATH");
 	if (path == NULL)

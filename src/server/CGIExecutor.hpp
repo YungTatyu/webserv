@@ -15,13 +15,15 @@ class CGIExecutor
 		std::string	script_path_;
 		std::vector<const char*>	argv_;
 		std::vector<const char*>	meta_vars_; // メタ変数(環境変数)
-		void	prepareCGIExecution(const HttpRequest& http_request, const std::string& script_path, const int socket);
+		void	prepareCgiExecution(const HttpRequest& http_request, const std::string& script_path, const int socket);
 		void	createScriptPath(const std::string& script_path);
 		void	createArgv(const std::string& script_path);
 		void	createMetaVars(const HttpRequest& http_request);
 		void	setMessageBody(const std::string& body) const;
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
-		std::string	searchCommandPath(const std::string& command) const;
+		std::string	createCommandPath(const std::string& command) const;
+		template<typename T>std::string	toStr(const T value) const;
+
 	public:
 		CGIExecutor();
 		~CGIExecutor();
@@ -30,6 +32,15 @@ class CGIExecutor
 		const std::vector<const char*>&	getArgv() const;
 		const std::vector<const char*>&	getMetaVars() const;
 };
+
+template<typename T>
+std::string	CGIExecutor::toStr(const T value) const
+{
+	std::stringstream	converter;
+	converter << value;
+	return converter.str();
+}
+
 } // namespace cgi
 
 #endif
