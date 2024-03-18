@@ -8,6 +8,8 @@
 # include "HttpRequest.hpp"
 # include "NetworkIOHandler.hpp"
 
+class ConfigHandler;
+
 // 大文字小文字を区別しない文字列比較関数
 struct CaseInsensitiveCompare
 {
