@@ -74,10 +74,10 @@ void HttpRequest::doParseChunked(std::string &rawRequest,
 				 HttpRequest &oldRequest)
 {
 	std::string byteSize = rawRequest.substr(0, rawRequest.find('\r'));
-	if (byteSize != "0")
-		oldRequest.parseState = HttpRequest::PARSE_INPROGRESS;
-	else
+	if (byteSize == "0")
 		oldRequest.parseState = HttpRequest::PARSE_COMPLETE;
+	else
+		oldRequest.parseState = HttpRequest::PARSE_INPROGRESS;
 	std::string chunkBody = rawRequest.substr(rawRequest.find('\n') + 1);
 	oldRequest.body += chunkBody.substr(0, chunkBody.find('\r'));
 }
