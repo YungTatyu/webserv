@@ -329,11 +329,11 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 	while (state != END_PHASE) {
 		switch (state) {
 		case START_PHASE:
-			std::cout << "start phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] start phase\n");
 			state = PRE_SEARCH_LOCATION_PHASE;
 			break;
 		case PRE_SEARCH_LOCATION_PHASE:
-			std::cout << "pre search location phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] pre search location phase\n");
 			// parse error
 			if (request.parseState == HttpRequest::PARSE_ERROR)
 			{
@@ -355,10 +355,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 				state = SEARCH_LOCATION_PHASE;
 			break;
 		case SEARCH_LOCATION_PHASE:
-			std::cout << "search location phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] search location phase\n");
 			if (response.internal_redirect_cnt_++ > kMaxInternalRedirect)
 			{
-				"too continuous internal redirect";
+				config_handler.writeErrorLog(server, location, "wevserb: [error] too continuous internal redirect\n");
 				response.status_code_ = 500;
 				response.body_ = *default_error_page_map_[500];
 				response.headers_["Connection"] = "close";
@@ -369,19 +369,19 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			state = POST_SEARCH_LOCATION_PHASE;
 			break;
 		case POST_SEARCH_LOCATION_PHASE:
-			std:: cout << "post search location phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] post search location phase\n");
 			response.root_path_ = response.config_handler_.searchRootPath(server, location);
 			state = RETURN_PHASE;
 			break;
 		case RETURN_PHASE:
-			std::cout << "return phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] return phase\n");
 			if (returnPhase(response, location) == REDIRECT)
 				state = ERROR_PAGE_PHASE;
 			else
 				state = ALLOW_PHASE;
 			break;
 		case ALLOW_PHASE:
-			std::cout << "allow phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] allow phase\n");
 			if (config_handler.allowRequest(server, location, request, client_addr) == WBSRV_ERR)
 			{
 				response.status_code_ = 403;
@@ -391,7 +391,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 				state = URI_CHECK_PHASE;
 			break;
 		case URI_CHECK_PHASE:
-			std::cout << "uri check phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] uri check phase\n");
 			// uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
 			if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
 			{
@@ -407,7 +407,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 				state = CONTENT_PHASE;
 			break;
 		case CONTENT_PHASE:
-			std::cout << "content phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] content phase\n");
 			ret = contentHandler(response, request, server, location);
 			if (ret == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
@@ -417,14 +417,15 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 				state = LOG_PHASE;
 			break;
 		case ERROR_PAGE_PHASE:
-			std::cout << "error page phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] error page phase\n");
 			if (errorPagePhase(response, request, server, location) == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
 			else
 				state = LOG_PHASE;
 			break;
 		case LOG_PHASE:
-			std::cout << "log phase" << std::endl;
+			config_handler.writeErrorLog(server, location, "wevserb: [debug] log phase\n");
+			config_handler.writeAccessLog(server, location, "write Client Access by access log format");
 			state = END_PHASE;
 			break;
 		default:
@@ -433,10 +434,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 		}
 	}
 
-	std::cout << "header filter phase" << std::endl;
+	config_handler.writeErrorLog(server, location, "wevserb: [debug] header filter\n");
 	headerFilterPhase(response);
 
-	std::cout << "create final response" << std::endl;
+	config_handler.writeErrorLog(server, location, "wevserb: [debug] create final response\n");
 	return createResponse(response);
 }
 

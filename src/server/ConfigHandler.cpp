@@ -173,7 +173,37 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	writeAccessLog(server, location, msg);
+/*
+	// access_logがどのコンテキスがあれば出力する
+	if (location && location->directives_set.find(kACCESS_FD) != location->directives_set.end())
+	{
+		for (size_t i = 0; i < location->access_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(location->access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}
+	else if (server.directives_set.find(kACCESS_FD) != server.directives_set.end())
+	{
+		for (size_t i = 0; i < server.access_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(server.access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}
+	else if (this->config_->http.directives_set.find(kACCESS_FD) != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}*/
+}
 
+void	ConfigHandler::writeAccessLog( const config::Server& server, const config::Location* location, const std::string& msg ) const
+{
 	// access_logがどのコンテキスがあれば出力する
 	if (location && location->directives_set.find(kACCESS_FD) != location->directives_set.end())
 	{
@@ -205,8 +235,45 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
-
+	writeErrorLog(server, location, msg);
+/*
 	// error_logがどのコンテキスがあれば出力する
+	if (location && location->directives_set.find(kERROR_FD) != location->directives_set.end())
+	{
+		for (size_t i = 0; i < location->error_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(location->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}
+	else if (server.directives_set.find(kERROR_FD) != server.directives_set.end())
+	{
+		for (size_t i = 0; i < server.error_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(server.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}
+	else if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}
+	else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
+		{
+			if (IOUtils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		}
+	}*/
+}
+
+void	ConfigHandler::writeErrorLog( const config::Server& server, const config::Location* location, const std::string& msg ) const
+{
 	if (location && location->directives_set.find(kERROR_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
