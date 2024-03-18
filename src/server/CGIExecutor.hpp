@@ -20,7 +20,7 @@ class CGIExecutor
 		void	createArgv(const std::string& script_path);
 		void	createMetaVars(const HttpRequest& http_request);
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
-		std::string	createCommandPath(const std::string& command) const;
+		std::string	searchCommandInPath(const std::string& command) const;
 		template<typename T>std::string	toStr(const T value) const;
 
 	public:
@@ -30,7 +30,7 @@ class CGIExecutor
 		const std::string&	getCgiPath() const;
 		const std::vector<const char*>&	getArgv() const;
 		const std::vector<const char*>&	getMetaVars() const;
-		void	setMessageBody(const std::string& body) const;
+		bool	redirectStdIOToSocket(const int socket) const;
 };
 
 template<typename T>

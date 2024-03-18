@@ -2,6 +2,7 @@
 #include "FileUtils.hpp"
 
 #include <unistd.h>
+#include <stdio.h>
 #include <cstdlib>
 #include <sstream>
 
@@ -15,9 +16,14 @@ void	cgi::CGIExecutor::executeCgiScript(
 	const int socket
 )
 {
-	(void)http_request;
-	(void)script_path;
-	(void)socket;
+	prepareCgiExecution(http_request, script_path, socket);
+	execve(
+		this->script_path_.c_str(),
+		const_cast<char *const *>(this->argv_.data()),
+		const_cast<char *const *>(this->meta_vars_.data())
+	);
+	std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	std::exit(EXIT_FAILURE);
 }
 
 void	cgi::CGIExecutor::prepareCgiExecution(
@@ -26,8 +32,8 @@ void	cgi::CGIExecutor::prepareCgiExecution(
 	const int socket
 )
 {
-	(void)socket;
-
+	if (redirectStdIOToSocket(socket))
+		std::exit(EXIT_FAILURE); // responseをどうする？ bad gatewayでいいのか
 	createScriptPath(script_path);
 	createArgv(script_path);
 	createMetaVars(http_request);
@@ -39,7 +45,7 @@ void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
 	if (!FileUtils::isExtensionFile(script_path, ".php"))
 		return;
 	// スクリプトがphpの場合は、phpのpathを探す必要がある
-	const std::string	path = createCommandPath("php");
+	const std::string	path = searchCommandInPath("php");
 	if (path == "")
 		return;
 	this->script_path_ = path;
@@ -60,7 +66,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 
 	// const std::string content_length = std::string("CONTENT_LENGTH=") + toStr(http_request.body.size());
 	// this->meta_vars_.push_back(content_length.c_str());
-	
+	this->meta_vars_.push_back(NULL);
 }
 
 std::vector<std::string>	cgi::CGIExecutor::split(const std::string& s, char delimiter) const
@@ -76,9 +82,9 @@ std::vector<std::string>	cgi::CGIExecutor::split(const std::string& s, char deli
 	return tokens;
 }
 
-std::string cgi::CGIExecutor::createCommandPath(const std::string& command) const
+std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) const
 {
-	char* path = std::getenv("PATH");
+	const char	*path = std::getenv("PATH");
 	if (path == NULL)
 		return "";
 	std::vector<std::string> directories = split(path, ':');
@@ -89,4 +95,24 @@ std::string cgi::CGIExecutor::createCommandPath(const std::string& command) cons
 			return command_path;
 	}
 	return "";
+}
+
+bool	cgi::CGIExecutor::redirectStdIOToSocket(const int socket) const
+{
+	if (dup2(socket, STDIN_FILENO) == -1)
+	{
+		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		close(socket);
+		return false;
+	}
+
+	if (dup2(socket, STDOUT_FILENO) == -1)
+	{
+		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		close(STDIN_FILENO);
+		close(socket);
+		return false;
+	}
+	close(socket);
+	return true;
 }
