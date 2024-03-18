@@ -35,8 +35,9 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 		connManager.setRequest( sockfd, connManager.getRequest(sockfd));
 
-		if ( connManager.getRequest(sockfd).parseState == HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
-			connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
+		if ( connManager.getRequest(sockfd).parseState != HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+			return RequestHandler::NONE;
+		connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
 		return RequestHandler::UPDATE_WRITE;
 }
 
