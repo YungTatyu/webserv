@@ -14,6 +14,7 @@
 */ 
 
 struct TiedServer;
+class ConfigHandler;
 
 /* Confファイルの設定値を取り出す */
 class ConfigHandler
