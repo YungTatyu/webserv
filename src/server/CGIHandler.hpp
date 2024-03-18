@@ -14,7 +14,9 @@ namespace cgi
 enum CGI_SOCKET
 {
 	SOCKET_PARENT = 0,
-	SOCKET_CHILD = 1
+	SOCKET_CHILD = 1,
+	SOCKET_READ = 0,
+	SOCKET_WRITE = 1,
 };
 
 class CGIHandler

@@ -19,7 +19,6 @@ class CGIExecutor
 		void	createScriptPath(const std::string& script_path);
 		void	createArgv(const std::string& script_path);
 		void	createMetaVars(const HttpRequest& http_request);
-		void	setMessageBody(const std::string& body) const;
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
 		std::string	createCommandPath(const std::string& command) const;
 		template<typename T>std::string	toStr(const T value) const;
@@ -31,6 +30,7 @@ class CGIExecutor
 		const std::string&	getCgiPath() const;
 		const std::vector<const char*>&	getArgv() const;
 		const std::vector<const char*>&	getMetaVars() const;
+		void	setMessageBody(const std::string& body) const;
 };
 
 template<typename T>

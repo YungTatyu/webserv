@@ -29,7 +29,7 @@ bool cgi::CGIHandler::isCgi(const std::string& script_path)
 		FileUtils::isExtensionFile(script_path, ".php")
 		|| FileUtils::isExtensionFile(script_path, ".cgi")
 		|| FileUtils::isExtensionFile(script_path, ".py")
-	) && FileUtils::isExecutable(script_path.c_str());
+	);
 }
 
 /**
@@ -58,8 +58,12 @@ bool	cgi::CGIHandler::forkCgiProcess(
 	}
 	this->cgi_process_id_ = pid;
 	close(this->sockets_[SOCKET_CHILD]);
+
 	// すでに登録されているクライアントソケットのREAD EVENTは削除する必要がある（特にkqueue server）
-	conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_READ);
+	// if (http_request.body != "") // bodyを標準入力にsetする必要がある場合
+	// 	conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_WRITE);
+	// else
+		conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_READ);
 	// timertreeにtimeoutを追加
 	return true;
 }
