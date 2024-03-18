@@ -52,7 +52,7 @@ std::string HttpMessage::autoIndex(const std::string& directoryPath)
 	buffer << "</body></html>";
 	return buffer.str();
 }
-
+/*
 std::string HttpMessage::createResponse(const std::string& body, const std::string& statusCode = "200 OK", const std::string& contentType = "text/html")
 {
 	std::stringstream response;
@@ -96,4 +96,4 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		}
 	}
 }
-
+*/

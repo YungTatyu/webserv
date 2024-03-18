@@ -16,6 +16,7 @@
 # include "Server.hpp"
 
 class ConfigHandler;
+class ConnectionManager;
 
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer

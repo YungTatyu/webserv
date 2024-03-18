@@ -24,8 +24,8 @@ class RequestHandler
 			UPDATE_CLOSE = -13
 		};
 		RequestHandler();
-		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
+		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
+		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 
 		typedef bool (*whichEvent)(const struct pollfd& pfd);

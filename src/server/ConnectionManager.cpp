@@ -1,4 +1,8 @@
 #include "ConnectionManager.hpp"
+#include "HttpResponse.hpp"
+
+std::map<int, std::string> HttpResponse::status_line_map_;
+std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 
 /* ConnectionManagerクラスの実装 */
 void ConnectionManager::setConnection( const int fd )
@@ -22,14 +26,14 @@ const std::vector<char>& ConnectionManager::getRawRequest( const int fd ) const
 	return connections_.at(fd).rawRequest;
 }
 
-void ConnectionManager::setResponse( const int fd, const std::vector<char>& response )
+void ConnectionManager::setFinalResponse( const int fd, const std::vector<char>& final_response )
 {
-	connections_.at(fd).response = response;
+	connections_.at(fd).final_response_ = final_response;
 }
 
-const std::vector<char>& ConnectionManager::getResponse( const int fd ) const
+const std::vector<char>& ConnectionManager::getFinalResponse( const int fd ) const
 {
-	return connections_.at(fd).response;
+	return connections_.at(fd).final_response_;
 }
 
 /**
@@ -62,6 +66,17 @@ const HttpRequest &ConnectionManager::getRequest( const int fd ) const
 {
 	return connections_.at(fd).request;
 }
+
+void ConnectionManager::setResponse( const int fd, const HttpResponse response )
+{
+	connections_[fd].response_ = response;
+}
+
+HttpRequest &ConnectionManager::getResponse( const int fd )
+{
+	return connections_.at(fd).response_;
+}
+
 
 void	ConnectionManager::setTiedServer( const int fd, const TiedServer* tied_server )
 {

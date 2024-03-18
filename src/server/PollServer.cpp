@@ -75,9 +75,9 @@ void	PollServer::callEventHandler(
 		// 発生したeventに対するhandlerを呼ぶ
 		// interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
 		if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
-			request_handler->handleReadEvent(*io_handler, *conn_manager, it->fd);
+			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, it->fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, it->fd);
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, it->fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
 			request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd);
 	}

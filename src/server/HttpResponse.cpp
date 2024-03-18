@@ -4,8 +4,6 @@
 #include <ctime>
 #include <iomanip>
 
-const static bool WBSRV_OK = true;
-const static bool WBSRV_ERR = false;
 const static int OK = 1;
 const static int REDIRECT = 2;
 const static int INTERNAL_REDIRECT = 3;
@@ -123,8 +121,8 @@ const static std::string webserv_error_505_page =
 const static std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
-HttpResponse::HttpResponse( const ConfigHandler& config_handler )
-	: status_code_(200), body_(""), internal_redirect_cnt_(0), config_handler_(config_handler)
+HttpResponse::HttpResponse()
+	: status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
 	this->headers_["Server"] = "webserv/1";
 	this->headers_["Connection"] = "keep-alive";
@@ -276,34 +274,41 @@ std::string	HttpResponse::transformLetter( const std::string& key_str )
 	return result;
 }
 
-std::string	HttpResponse::createResponse( const HttpResponse& response )
+std::vector<char>	HttpResponse::createResponse( const HttpResponse& response )
 {
-	std::stringstream res;
+	std::stringstream stream;
 	std::map<int, std::string>::iterator it = status_line_map_.find(response.status_code_);
 
 	// status line
-	res << http_version << " ";
+	stream << http_version << " ";
 	if (it != status_line_map_.end())
-		res << status_line_map_[response.status_code_] << "\r\n";
+		stream << status_line_map_[response.status_code_] << "\r\n";
 	else
-		res << response.status_code_ << "\r\n";
+		stream << response.status_code_ << "\r\n";
 
 	// headers
 	for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
 		it != response.headers_.end();
 		++it
 		)
-		res << transformLetter(it->first) << ": " << it->second << "\r\n";
-	res << "\r\n";
+		stream << transformLetter(it->first) << ": " << it->second << "\r\n";
+	stream << "\r\n";
 
 	// body
-	res << response.body_;
-	return res.str();
+	stream << response.body_;
+	std::vector<char> res(stream.str().begin(), stream.str().end());
+	return res;
 }
 
-std::string	HttpResponse::generateResponse( HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
+/*
+ * HttpResponseオブジェクトを生成し、send用のresponseを生成する
+ */
+std::vector<char>	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
 {
-	HttpResponse response(config_handler);
+	// chunkなどでparse途中の場合。
+	if (request.parseState == HttpRequest::PARSE_INPROGRESS)
+		return std::vector<char>();
+
 	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find("Host")->second);
 	const config::Location*	location = NULL;
 	struct sockaddr_in client_addr;
@@ -370,7 +375,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case POST_SEARCH_LOCATION_PHASE:
 			config_handler.writeErrorLog(server, location, "wevserb: [debug] post search location phase\n");
-			response.root_path_ = response.config_handler_.searchRootPath(server, location);
+			response.root_path_ = config_handler.searchRootPath(server, location);
 			state = RETURN_PHASE;
 			break;
 		case RETURN_PHASE:
@@ -382,7 +387,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case ALLOW_PHASE:
 			config_handler.writeErrorLog(server, location, "wevserb: [debug] allow phase\n");
-			if (config_handler.allowRequest(server, location, request, client_addr) == WBSRV_ERR)
+			if (config_handler.allowRequest(server, location, request, client_addr) == false)
 			{
 				response.status_code_ = 403;
 				state = ERROR_PAGE_PHASE;
@@ -408,7 +413,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case CONTENT_PHASE:
 			config_handler.writeErrorLog(server, location, "wevserb: [debug] content phase\n");
-			ret = contentHandler(response, request, server, location);
+			ret = contentHandler(response, request, server, location, config_handler);
 			if (ret == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
 			else if (ret == ERROR_PAGE)
@@ -418,7 +423,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, const struct T
 			break;
 		case ERROR_PAGE_PHASE:
 			config_handler.writeErrorLog(server, location, "wevserb: [debug] error page phase\n");
-			if (errorPagePhase(response, request, server, location) == INTERNAL_REDIRECT)
+			if (errorPagePhase(response, request, server, location, config_handler) == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
 			else
 				state = LOG_PHASE;
@@ -558,7 +563,7 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
  * uriが'/'で終わっていなければ直接探しに行き、
  * そうでなければ、ディレクティブを順番に適用する。
  */
-int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
+int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
 		// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
@@ -579,7 +584,7 @@ int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, c
 	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
 	 * 3つともなかったら上位のcontextで検索する
 	 */
-	bool	is_autoindex_on = response.config_handler_.isAutoIndexOn(server, location);
+	bool	is_autoindex_on = config_handler.isAutoIndexOn(server, location);
 
 	// location context
 	if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
@@ -595,21 +600,21 @@ int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, c
 
 	// http context
 	// httpはデフォルトをみればいい？
-	//if (response.config_handler_.config_->http.directives_set.find(kINDEX) != response.config_handler_.config_->http.directives_set.end())
-		return Index(response, request, response.config_handler_.config_->http.index_list, is_autoindex_on);
+	//if (config_handler.config_->http.directives_set.find(kINDEX) != config_handler.config_->http.directives_set.end())
+		return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on);
 }
 
-int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
+int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
 {
 
-	if (response.config_handler_.convertRequestMethod(request.method) == config::GET)
-		return staticHandler(response, request, server, location);
+	if (config_handler.convertRequestMethod(request.method) == config::GET)
+		return staticHandler(response, request, server, location, config_handler);
 	return OK;
 }
 
-int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location )
+int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
 {
-	const config::ErrorPage* ep = response.config_handler_.searchErrorPage(server, location, response.status_code_);
+	const config::ErrorPage* ep = config_handler.searchErrorPage(server, location, response.status_code_);
 
 	if (response.body_.empty() && default_error_page_map_.find(response.status_code_) != default_error_page_map_.end())
 		response.body_ = *default_error_page_map_[response.status_code_];

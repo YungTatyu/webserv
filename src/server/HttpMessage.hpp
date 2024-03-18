@@ -1,6 +1,7 @@
 #ifndef HTTP_MESSAGE_HPP
 # define HTTP_MESSAGE_HPP
 
+# include "HttpResponse.hpp"
 # include "HttpRequest.hpp"
 
 # include <string>
@@ -36,10 +37,10 @@ class HttpMessage
 		static std::string setQueryString( std::string& uri );
 		static std::string setScriptPath( std::string& uri );
 		static HttpRequest requestParser( std::string &rawRequest );
-		static std::string responseGenerater( HttpRequest &request );
+		//static std::string responseGenerater( HttpRequest &request );
 
-		static std::string autoIndex(const std::string& directoryPath);
-		static std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
+		//static std::string autoIndex(const std::string& directoryPath);
+		//static std::string createResponse(const std::string& body, const std::string& statusCode, const std::string& contentType);
 
 	private:
 		HttpMessage();

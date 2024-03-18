@@ -1,5 +1,5 @@
-#ifndef HTTP_RESPONSE_HPP
-# define HTTP_RESPONSE_HPP
+#ifndef HTTPRESPONSE_HPP
+# define HTTPRESPONSE_HPP
 
 # include <string>
 # include <map>
@@ -23,13 +23,13 @@ class HttpResponse
 {
 	public:
 		// initializer
-		HttpResponse( const ConfigHandler& config_handler );
+		HttpResponse();
 
 		// member methods
-		static std::string	generateResponse( HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
-		static std::string	createResponse( const HttpResponse& response );
+		static std::vector<char>	generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
+		static std::vector<char>	createResponse( const HttpResponse& response );
 
-		// private variables
+		// public variables
 		std::string	root_path_;
 		std::string	cgi_status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
@@ -41,7 +41,6 @@ class HttpResponse
 	private:
 				// private member
 		size_t	internal_redirect_cnt_;
-		const ConfigHandler	&config_handler_;
 
 		// utils methods
 		// 名前微妙
@@ -49,11 +48,11 @@ class HttpResponse
 		static std::string	getCurrentGMTTime();
 		static int	returnPhase( HttpResponse& response, const config::Location* location );
 		static void	returnResponse( HttpResponse& response, const config::Return& return_directive );
-		static int	contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location );
-		static int	staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location );
+		static int	contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
+		static int	staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
 		static int	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on );
 		static int	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
-		static int	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location);
+		static int	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
 		bool	isURL( const std::string uri ) const;
 		static void	headerFilterPhase( HttpResponse& response );
 		static std::string	detectContentTypeFromBody( const std::string& body );

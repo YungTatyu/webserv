@@ -6,6 +6,9 @@
 #include "ConfigHandler.hpp"
 #include "LogFd.hpp"
 
+//std::map<int, std::string> HttpResponse::status_line_map_;
+//std::map<int, const std::string*> HttpResponse::default_error_page_map_;
+
 int main(int ac, char *av[])
 {
 	if (ac != 2)

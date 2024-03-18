@@ -100,9 +100,9 @@ void	KqueueServer::callEventHandler(
 	{
 		int	status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].ident);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].ident);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, active_events[i].ident);
+			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].ident);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].ident);
 		
