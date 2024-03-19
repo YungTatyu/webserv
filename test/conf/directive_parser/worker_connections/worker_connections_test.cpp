@@ -13,7 +13,7 @@ const std::string	kWorkerConnections = "worker_connections";
 
 TEST(WorkerConnectionsTest, max)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/worker_connections/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/worker_connections/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -26,7 +26,7 @@ TEST(WorkerConnectionsTest, max)
 
 TEST(WorkerConnectionsTest, random)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/worker_connections/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/worker_connections/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -39,7 +39,7 @@ TEST(WorkerConnectionsTest, random)
 
 TEST(WorkerConnectionsTest, min)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/worker_connections/3.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/worker_connections/3.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -54,7 +54,7 @@ TEST(WorkerConnectionsTest, min)
 
 TEST(WorkerConnectionsTest, notFound) {
 		
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

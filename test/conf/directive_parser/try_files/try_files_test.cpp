@@ -39,7 +39,7 @@ const std::string	kTryFiles = "try_files";
 
 TEST(TryFilesTest, allContext)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/try_files/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/try_files/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -70,7 +70,7 @@ TEST(TryFilesTest, allContext)
 
 TEST(TryFilesTest, notFound) {
 		
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

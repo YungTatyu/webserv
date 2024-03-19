@@ -39,7 +39,7 @@ const std::string	kListen = "listen";
 
 TEST(ListenTest, allContext)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/listen/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/listen/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -57,7 +57,7 @@ TEST(ListenTest, allContext)
 
 TEST(ListenTest, notFound) {
 		
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

@@ -4,6 +4,7 @@
 #include "Main.hpp"
 #include "WebServer.hpp"
 #include "ConfigHandler.hpp"
+#include "LogFd.hpp"
 
 int main(int ac, char *av[])
 {
@@ -13,12 +14,13 @@ int main(int ac, char *av[])
 		return 1;
 	}
 
-	const config::Main *config = config::init_config(av[1]);
+	const config::Main *config = config::initConfig(av[1]);
 	if (config == NULL)
 		return 1;
 
 	WebServer server = WebServer(config);
 	server.run();
+	config::terminateLogFds(config);
 	delete config;
 	return 0;
 }
