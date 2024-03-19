@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "HttpRequest.hpp"
 
+/* --------------  request line error test -------------- */
+
 TEST(HttpRequest, ErrorTest1)
 {
     //test method invalid
@@ -122,8 +124,74 @@ TEST(HttpRequest, ErrorTest12)
     EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
+TEST(HttpRequest, ErrorTest13)
+{
+    //test format error (version is not uppercase, (version is case-sensitive))
+    std::string rawRequest = "GET / http/1.1\r\n" "\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* --------------  request line error test end -------------- */
+
+/* --------------  header field error test -------------- */
+
+TEST(HttpRequest, ErrorTest14)
+{
+    //test: no Host header field (Host header filed is necessary)
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest15)
+{
+    //test: duplicate header filed (header name should be unique)
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "Host: example.com\r\nHost: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest16)
+{
+    //test: duplicate header filed (header name should be unique with case insensitive)
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "Host: example.com\r\nHOST: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest17)
+{
+    //test: duplicate header filed (header name should be unique with case insensitive)
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "Host: example.com\r\nHOST: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest18)
+{
+    //test: format error (header filed shold be headername(no space):(one or multiple spaces)value(one or multiple spaces) 
+    //ヘッダーネームの後には空白があってはならない.すぐにコロン.
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "Host :example.com\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* --------------  header field error test end -------------- */
+
+//重複するヘッダーがあったらどうするんだっけ -> error (caseinsensitive)
+//Hostヘッダーフィールドがなければエラー
 //Content-Lengthと実際のボディのサイズが正しいかとか？
-//重複するヘッダーがあったらどうするんだっけ
-//リクエストラインでは何がエラー？
-//ヘッダーでは何がエラー？
 //chunkだと？
