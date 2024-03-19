@@ -26,8 +26,8 @@ class HttpResponse
 		HttpResponse();
 
 		// member methods
-		static std::vector<char>	generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
-		static std::vector<char>	createResponse( const HttpResponse& response );
+		static std::string	generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
+		static std::string	createResponse( const HttpResponse& response );
 
 		// public variables
 		std::string	root_path_;

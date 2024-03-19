@@ -274,7 +274,7 @@ std::string	HttpResponse::transformLetter( const std::string& key_str )
 	return result;
 }
 
-std::vector<char>	HttpResponse::createResponse( const HttpResponse& response )
+std::string	HttpResponse::createResponse( const HttpResponse& response )
 {
 	std::stringstream stream;
 	std::map<int, std::string>::iterator it = status_line_map_.find(response.status_code_);
@@ -296,18 +296,17 @@ std::vector<char>	HttpResponse::createResponse( const HttpResponse& response )
 
 	// body
 	stream << response.body_;
-	std::vector<char> res(stream.str().begin(), stream.str().end());
-	return res;
+	return stream.str();
 }
 
 /*
  * HttpResponseオブジェクトを生成し、send用のresponseを生成する
  */
-std::vector<char>	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
+std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
 {
 	// chunkなどでparse途中の場合。
 	if (request.parseState == HttpRequest::PARSE_INPROGRESS)
-		return std::vector<char>();
+		return std::string();
 
 	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find("Host")->second);
 	const config::Location*	location = NULL;
