@@ -386,9 +386,15 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			break;
 		case ALLOW_PHASE:
 			config_handler.writeErrorLog(server, location, "wevserb: [debug] allow phase\n");
-			if (config_handler.allowRequest(server, location, request, client_addr) == false)
+			ret = config_handler.allowRequest(server, location, request, client_addr);
+			if (ret == ConfigHandler::ACCESS_DENY)
 			{
 				response.status_code_ = 403;
+				state = ERROR_PAGE_PHASE;
+			}
+			else if (ret == ConfigHandler::METHOD_DENY)
+			{
+				response.status_code_ = 405;
 				state = ERROR_PAGE_PHASE;
 			}
 			else

@@ -28,7 +28,7 @@ class ConfigHandler
 
 		// method
 		// とりあえずipv4だけ想定
-		bool	allowRequest( const config::Server& server,
+		int	allowRequest( const config::Server& server,
 							const config::Location* location,
 							const HttpRequest& request,
 							struct sockaddr_in client_addr ) const;
@@ -67,6 +67,11 @@ class ConfigHandler
 		std::string	searchRootPath( const config::Server& server, const config::Location* location ) const;
 		bool	isAutoIndexOn( const config::Server& server, const config::Location* location ) const;
 		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
+
+	// const variable
+	static const int	ACCESS_ALLOW = 1;
+	static const int	ACCESS_DENY = 0;
+	static const int	METHOD_DENY = -1;
 
 	private:
 		// utils

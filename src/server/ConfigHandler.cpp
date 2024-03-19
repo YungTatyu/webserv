@@ -5,16 +5,17 @@
 #include <cstring>
 #include <cerrno>
 
-const static	std::string kACCESS_FD = "access_fd";
-const static	std::string kERROR_FD = "error_fd";
-const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
-const static	std::string kSEND_TIMEOUT = "send_timeout";
-const static	std::string kUSERID_EXPIRES = "userid_expires";
-const static	std::string kDENY = "deny";
-const static	std::string kALIAS = "alias";
-const static	std::string kAUTOINDEX = "autoindex";
-const static	std::string kROOT = "root";
-const static	std::string kERROR_PAGE = "error_page";
+const static std::string	kACCESS_FD = "access_fd";
+const static std::string	 kERROR_FD = "error_fd";
+const static std::string	kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static std::string	kSEND_TIMEOUT = "send_timeout";
+const static std::string	kUSERID_EXPIRES = "userid_expires";
+const static std::string	kDENY = "deny";
+const static std::string	kALIAS = "alias";
+const static std::string	kAUTOINDEX = "autoindex";
+const static std::string	kROOT = "root";
+const static std::string	kERROR_PAGE = "error_page";
+const static std::string	kLimitExcept = "limit_except";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -132,42 +133,42 @@ config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& m
 		return config::DELETE;
 }
 
-bool	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
+int	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
 {
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
 	if (location && location->directives_set.find(kDENY) != location->directives_set.end())
 	{
 		if (!limitLoop(location->allow_deny_list, client_addr.sin_addr.s_addr))
-			return false;
+			return ACCESS_DENY;
 	}
 	else if (server.directives_set.find(kDENY) != server.directives_set.end())
 	{
 		if (!limitLoop(server.allow_deny_list, client_addr.sin_addr.s_addr))
-			return false;
+			return ACCESS_DENY;
 	}
 	else if (this->config_->http.directives_set.find(kDENY) != this->config_->http.directives_set.end())
 	{
 		if (!limitLoop(this->config_->http.allow_deny_list, client_addr.sin_addr.s_addr))
-			return false;
+			return ACCESS_DENY;
 	}
 
 
 	// ------ method の制限 ------
 	// location内にlimit_except contextあるか？
-	if (location && location->directives_set.find("limit_except") != location->directives_set.end())
+	if (location && location->directives_set.find(kLimitExcept) != location->directives_set.end())
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
 		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
-				return false;
+				return METHOD_DENY;
 		}
 	}
 
 	// 問題なければtrue
-	return true;
+	return ACCESS_ALLOW;
 }
 
 // 最終的なlocationで記録
