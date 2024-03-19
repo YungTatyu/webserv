@@ -21,28 +21,28 @@ protected:
 		std::string		file_path;
 		const testing::TestInfo*	test_info = testing::UnitTest::GetInstance()->current_test_info();
 		if (static_cast<std::string>(test_info->name()) == "allowRequest") {
-			file_path = "test/server/conf_files/allowRequest_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/allowRequest_test.conf";
 		}
 		/*else if (static_cast<std::string>(test_info->name()) == "searchFile") {
-			file_path = "test/server/conf_files/searchFile_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/searchFile_test.conf";
 		}*/
 		else if (static_cast<std::string>(test_info->name()) == "searchKeepaliveTimeout") {
-			file_path = "test/server/conf_files/searchKeepaliveTimeout_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/searchKeepaliveTimeout_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "searchSendTimeout") {
-file_path = "test/server/conf_files/searchSendTimeout_test.conf";
+file_path = "test/server/ConfigHandlerTestFiles/searchSendTimeout_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "searchUseridExpires") {
-			file_path = "test/server/conf_files/searchUseridExpires_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/searchUseridExpires_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "writeAcsLog") {
-			file_path = "test/server/conf_files/writeAcsLog_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/writeAcsLog_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "writeErrLog") {
-			file_path = "test/server/conf_files/writeErrLog_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/writeErrLog_test.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "createTiedServer") {
-			file_path = "test/server/conf_files/createTiedServer_test.conf";
+			file_path = "test/server/ConfigHandlerTestFiles/createTiedServer_test.conf";
 		}
 		else {
 			config::Main	*config = new config::Main();

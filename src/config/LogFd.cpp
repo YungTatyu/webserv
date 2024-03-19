@@ -96,7 +96,7 @@ bool	config::initAcsLogFds( config::Main& config )
 			std::cerr << "webserv: [emerg] realpath() \"" << "." <<"\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
-		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return false;
@@ -139,7 +139,7 @@ bool	config::initErrLogFds( config::Main& config )
 			return false;
 		}
 
-		int tmp_fd = FileUtils::wrapperOpen(absolute_path + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+		int tmp_fd = FileUtils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return false;
