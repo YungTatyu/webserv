@@ -27,20 +27,16 @@ class CGIHandler
 		pid_t	cgi_process_id_;
 		bool	forkCgiProcess(
 			const HttpRequest& http_request,
-			const std::string& script_path,
-			const int cli_socket,
-			ConnectionManager& conn_manager
+			const std::string& script_path
 		);
 	public:
 		int	sockets_[2];
 		CGIHandler();
 		~CGIHandler();
 		static bool	isCgi(const std::string& script_path);
-		void	callCgiExecutor(
+		bool	callCgiExecutor(
 			const std::string& script_path,
-			const HttpRequest& http_request,
-			const int cli_socket,
-			ConnectionManager& conn_manager
+			const HttpRequest& http_request
 		);
 		void	callCgiParser(HttpResponse& http_response);
 		void	killCgiProcess() const;

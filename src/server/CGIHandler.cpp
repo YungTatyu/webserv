@@ -40,9 +40,7 @@ bool cgi::CGIHandler::isCgi(const std::string& script_path)
  */
 bool	cgi::CGIHandler::forkCgiProcess(
 	const HttpRequest& http_request,
-	const std::string& script_path,
-	const int cli_socket,
-	ConnectionManager& conn_manager
+	const std::string& script_path
 )
 {
 	pid_t	pid = fork();
@@ -63,24 +61,22 @@ bool	cgi::CGIHandler::forkCgiProcess(
 	// if (http_request.body != "") // bodyを標準入力にsetする必要がある場合
 	// 	conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_WRITE);
 	// else
-		conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_READ);
+	// 	conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_READ);
 	// timertreeにtimeoutを追加
 	return true;
 }
 
-void	cgi::CGIHandler::callCgiExecutor(
+bool	cgi::CGIHandler::callCgiExecutor(
 	const std::string& script_path,
-	const HttpRequest& http_request,
-	const int cli_socket,
-	ConnectionManager& conn_manager
+	const HttpRequest& http_request
 )
 {
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
 	{
 		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
-		return;
+		return false;
 	}
-	forkCgiProcess(http_request, script_path, cli_socket, conn_manager);
+	return forkCgiProcess(http_request, script_path);
 }
 
 const cgi::CGIParser&	cgi::CGIHandler::getCgiParser() const

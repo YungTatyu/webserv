@@ -97,6 +97,16 @@ std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) co
 	return "";
 }
 
+/**
+ * @brief socketを標準入力と標準出力に複製する
+ * 
+ * 標準入力からはbodyを受け取る
+ * 標準出力はcgiスクリプトのresponseを書き込む
+ * 
+ * @param socket 
+ * @return true 
+ * @return false 
+ */
 bool	cgi::CGIExecutor::redirectStdIOToSocket(const int socket) const
 {
 	if (dup2(socket, STDIN_FILENO) == -1)
