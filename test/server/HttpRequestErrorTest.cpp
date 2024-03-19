@@ -199,9 +199,17 @@ TEST(HttpRequest, ErrorTest19)
     EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
+TEST(HttpRequest, ErrorTest20)
+{
+    //test: format error (header name should not start with space)
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "Host: example.com\r\n New: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
 /* --------------  header field error test end -------------- */
 
-//重複するヘッダーがあったらどうするんだっけ -> error (caseinsensitive)
-//Hostヘッダーフィールドがなければエラー
 //Content-Lengthと実際のボディのサイズが正しいかとか？
 //chunkだと？
