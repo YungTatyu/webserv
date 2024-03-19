@@ -1,8 +1,5 @@
 #include "ConnectionManager.hpp"
-#include "HttpResponse.hpp"
 
-std::map<int, std::string> HttpResponse::status_line_map_;
-std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 
 /* ConnectionManagerクラスの実装 */
 void ConnectionManager::setConnection( const int fd )
@@ -72,7 +69,7 @@ void ConnectionManager::setResponse( const int fd, const HttpResponse response )
 	connections_[fd].response_ = response;
 }
 
-HttpRequest &ConnectionManager::getResponse( const int fd )
+HttpResponse &ConnectionManager::getResponse( const int fd )
 {
 	return connections_.at(fd).response_;
 }

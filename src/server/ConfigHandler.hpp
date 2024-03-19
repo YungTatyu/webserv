@@ -1,11 +1,11 @@
-#ifndef CONFIG_HANDLER_HPP
-#define CONFIG_HANDLER_HPP
+#ifndef CONFIGHANDLER_HPP
+#define CONFIGHANDLER_HPP
 
 # include "HttpRequest.hpp"
 # include "Main.hpp"
-# include "NetworkIOHandler.hpp"
 
 # include <map>
+# include <stdint.h>
 
 /**
  * ConfigHandler 方針
@@ -14,7 +14,6 @@
 */ 
 
 struct TiedServer;
-class ConfigHandler;
 
 /* Confファイルの設定値を取り出す */
 class ConfigHandler

@@ -4,11 +4,10 @@
 # include <vector>
 # include <map>
 
-# include "HttpMessage.hpp"
-//# include "HttpResponse.hpp"
+# include "HttpRequest.hpp"
+# include "HttpResponse.hpp"
 
 struct TiedServer;
-class HttpResponse;
 
 class ConnectionData
 {

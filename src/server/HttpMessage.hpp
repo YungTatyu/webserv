@@ -1,7 +1,6 @@
 #ifndef HTTP_MESSAGE_HPP
 # define HTTP_MESSAGE_HPP
 
-# include "HttpResponse.hpp"
 # include "HttpRequest.hpp"
 
 # include <string>

@@ -30,28 +30,28 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	return requestline;
 }
 
-std::string HttpMessage::autoIndex(const std::string& directoryPath)
-{
-	std::vector<std::string> contents = FileUtils::getDirectoryContents(directoryPath);
-	std::stringstream buffer;
-	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
-	buffer << "<body><h1>Directory listing for " << directoryPath << "</h1>";
-	buffer << "<hr>";
-	buffer << "<ul>";
-
-	for (std::vector<std::string>::iterator it = contents.begin(); it != contents.end(); ++it)
-	{
-		buffer << "<li><a href='" << directoryPath;
-		if (!directoryPath.empty() && directoryPath[directoryPath.size() - 1] != '/')
-		    buffer << "/";
-		buffer << *it << "'>" << *it << "</a></li>";
-	}
-
-	buffer << "</ul>";
-	buffer << "<hr>";
-	buffer << "</body></html>";
-	return buffer.str();
-}
+//std::string HttpMessage::autoIndex(const std::string& directoryPath)
+//{
+//	std::vector<std::string> contents = FileUtils::getDirectoryContents(directoryPath);
+//	std::stringstream buffer;
+//	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
+//	buffer << "<body><h1>Directory listing for " << directoryPath << "</h1>";
+//	buffer << "<hr>";
+//	buffer << "<ul>";
+//
+//	for (std::vector<std::string>::iterator it = contents.begin(); it != contents.end(); ++it)
+//	{
+//		buffer << "<li><a href='" << directoryPath;
+//		if (!directoryPath.empty() && directoryPath[directoryPath.size() - 1] != '/')
+//		    buffer << "/";
+//		buffer << *it << "'>" << *it << "</a></li>";
+//	}
+//
+//	buffer << "</ul>";
+//	buffer << "<hr>";
+//	buffer << "</body></html>";
+//	return buffer.str();
+//}
 /*
 std::string HttpMessage::createResponse(const std::string& body, const std::string& statusCode = "200 OK", const std::string& contentType = "text/html")
 {
