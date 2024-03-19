@@ -235,5 +235,48 @@ TEST(HttpRequest, ErrorTest22)
 
 /* -------------- query string error test end -------------- */
 
-//Content-Lengthと実際のボディのサイズが正しいかとか？
+/* -------------- uri decode error test -------------- */
+
+TEST(HttpRequest, ErrorTest23)
+{
+    //test: format error (encoded string should be %(digit)(digit)) %の後に一つ足りない。
+    std::string rawRequest = "GET /Hello%2World HTTP/1.1\r\n" "Host: example.com\r\n New: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest24)
+{
+    //test: format error (encoded string should be %(digit)(digit)) %のあとに二つ足りない。
+    std::string rawRequest = "GET /Hello%World HTTP/1.1\r\n" "Host: example.com\r\n New: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest25)
+{
+    //test: format error (encoded string should be %(hexdigit)(hexdigit))
+    std::string rawRequest = "GET /Hello%ahWorld HTTP/1.1\r\n" "Host: example.com\r\n New: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest26)
+{
+    //test: format error (encoded string should be %(hexdigit)(hexdigit))
+    std::string rawRequest = "GET /Hello%aHWorld HTTP/1.1\r\n" "Host: example.com\r\n New: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* -------------- uri decode error test end -------------- */
+
 //chunkだと？
