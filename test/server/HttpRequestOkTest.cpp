@@ -201,6 +201,66 @@ TEST(HttpRequest, OkTest9)
     checkHttpRequestEqual(expect, test);
 }
 
+TEST(HttpRequest, OkTest10)
+{
+    //testcase: POSTをパースできるか
+    std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
+    HttpRequest expect(config::POST, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+
+    //test
+    std::string rawRequest = "POST / HTTP/1.1\r\n" "Host: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, OkTest11)
+{
+    //testcase: HEADをパースできるか.
+    std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
+    HttpRequest expect(config::HEAD, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+
+    //test
+    std::string rawRequest = "HEAD / HTTP/1.1\r\n" "Host: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, OkTest12)
+{
+    //testcase: HEADをパースできるか.
+    std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
+    HttpRequest expect(config::HEAD, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+
+    //test
+    std::string rawRequest = "HEAD / HTTP/1.1\r\n" "Host: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, OkTest13)
+{
+    //testcase: DELETEをパースできるか.
+    std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
+    HttpRequest expect(config::DELETE, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+
+    //test
+    std::string rawRequest = "DELETE / HTTP/1.1\r\n" "Host: aa\r\n";
+    HttpRequest test;
+    HttpRequest::parseRequest(rawRequest, test);
+
+    checkHttpRequestEqual(expect, test);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
