@@ -16,12 +16,13 @@ void checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
 
 TEST(HttpRequest, OkTest1)
 {
-    //testcase: リクエストラインだけ
+    //testcase: リクエストラインだけ -> Hostヘッダーは無いとエラーなので追加.
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
     //test
-    std::string rawRequest = "GET / HTTP/1.1\r\n" "\r\n";
+    std::string rawRequest = "GET / HTTP/1.1\r\n" "Host: aa\r\n";
     HttpRequest test;
     HttpRequest::parseRequest(rawRequest, test);
 
@@ -33,12 +34,12 @@ TEST(HttpRequest, OkTest2)
     //testcase: header fieldが一対ある時
     //testcase: bodyもある
     std::map<std::string, std::string> headers;
-    headers["name1"] = "value1";
+    headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "this is body", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET / HTTP/1.1\r\n"
-                             "name1:value1\r\n"
+                             "Host: aa\r\n"
                              "\r\n"
                              "this is body";
     HttpRequest test;
@@ -51,12 +52,14 @@ TEST(HttpRequest, OkTest3)
 {
     //testcase: header fieldが複数ある時
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     headers["name1"] = "value1";
     headers["name2"] = "value2";
     HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
     //test
     std::string rawRequest = "GET / HTTP/1.1\r\n"
+                             "Host:aa\r\n"
                              "name1:value1\r\n"
                              "name2:value2\r\n"
                              "\r\n";
@@ -70,10 +73,11 @@ TEST(HttpRequest, OkTest4)
 {
     //testcase: query stringが単体
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "query1=value1", "", HttpRequest::PARSE_COMPLETE);
 
     //test
-    std::string rawRequest = "GET /html?query1=value1 HTTP/1.1\r\n" "\r\n";
+    std::string rawRequest = "GET /html?query1=value1 HTTP/1.1\r\n" "Host: aa\r\n";
     HttpRequest test;
     HttpRequest::parseRequest(rawRequest, test);
 
@@ -84,10 +88,11 @@ TEST(HttpRequest, OkTest5)
 {
     //testcase: query stringが複数ある時
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "query1=value1&query2=value2", "", HttpRequest::PARSE_COMPLETE);
 
     //test
-    std::string rawRequest = "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n" "\r\n";
+    std::string rawRequest = "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n" "Host: aa\r\n";
     HttpRequest test;
     HttpRequest::parseRequest(rawRequest, test);
 
@@ -98,11 +103,13 @@ TEST(HttpRequest, OkTest6)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
+                             "Host: aa\r\n"
                              "Transfer-Encoding: chunked\r\n"
                              "\r\n"
                              "5\r\n"
@@ -118,11 +125,13 @@ TEST(HttpRequest, OkTest7)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
+                             "Host: aa\r\n"
                              "Transfer-Encoding: chunked\r\n"
                              "\r\n"
                              "5\r\n"
@@ -145,11 +154,13 @@ TEST(HttpRequest, OkTest8)
 {
     //testcase: chunked first
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
 
     //test
     std::string rawRequest = "GET /html HTTP/1.1\r\n"
+                             "Host: aa\r\n"
                              "Transfer-Encoding: chunked\r\n"
                              "\r\n"
                              "5\r\n"
@@ -179,10 +190,11 @@ TEST(HttpRequest, OkTest9)
 {
     //testcase: encoded url
     std::map<std::string, std::string> headers;
+    headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/Hello World!", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
     //test
-    std::string rawRequest = "GET /Hello%20World%21 HTTP/1.1\r\n" "\r\n";
+    std::string rawRequest = "GET /Hello%20World%21 HTTP/1.1\r\n" "Host: aa\r\n";
     HttpRequest test;
     HttpRequest::parseRequest(rawRequest, test);
 
