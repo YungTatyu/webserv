@@ -66,6 +66,37 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 
 	// const std::string content_length = std::string("CONTENT_LENGTH=") + toStr(http_request.body.size());
 	// this->meta_vars_.push_back(content_length.c_str());
+
+	// std::string	content_type = "CONTENT_TYPE=";
+	// if (http_request.find("content-type") != std::string::npos) // not case-censitive
+	// 	content_type += http_request["content-type"];
+	// this->meta_vars_.push_back(content_type.c_str());
+
+	this->meta_vars_.push_back("GATEWAY_INTERFACE=CGI/1.1");
+	this->meta_vars_.push_back("PATH_INFO="); // pathinfoを渡せない設計になっている
+	this->meta_vars_.push_back("PATH_TRANSLATED="); // pathinfoと同じ
+
+	const std::string	query_string = std::string("QUERY_STRING=") + http_request.query;
+	this->meta_vars_.push_back(query_string.c_str()); // pathinfoと同じ
+
+	const std::string	remote_addr = "REMOTE_ADDR="; // client addressをvalueにsetする
+	this->meta_vars_.push_back(remote_addr.c_str());
+
+
+	std::string	remote_host = std::string("REMOTE_HOST="); 
+	// if (http_request.find("host") != std::string::npos) // not case-censitive
+	// 	content_type += http_request["host"];
+	// this->meta_vars_.push_back(remote_host.c_str());
+
+	const std::string	method = std::string("REQUEST_METHOD=") + http_request.method;
+	this->meta_vars_.push_back(method.c_str());
+
+	const std::string	script_name = std::string("SCRIPT_NAME=") + http_request.uri;
+	this->meta_vars_.push_back(script_name.c_str());
+
+
+
+
 	this->meta_vars_.push_back(NULL);
 }
 
