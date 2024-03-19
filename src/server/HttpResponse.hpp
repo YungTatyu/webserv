@@ -11,7 +11,7 @@
 // 大文字小文字を区別しない文字列比較関数
 struct CaseInsensitiveCompare
 {
-	bool operator()(std::string lhs, std::string rhs)
+	bool operator()(std::string lhs, std::string rhs) const
 	{
 		std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
 		std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
