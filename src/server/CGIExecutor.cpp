@@ -61,14 +61,13 @@ void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 
 void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 {
-	(void)http_request;
 	this->meta_vars_.push_back("AUTH_TYPE="); // Authorizationをparseするロジックを実装しないため、値は空文字
 
-	// const std::string content_length = std::string("CONTENT_LENGTH=") + toStr(http_request.body.size());
-	// this->meta_vars_.push_back(content_length.c_str());
+	const std::string content_length = std::string("CONTENT_LENGTH=") + toStr(http_request.body.size());
+	this->meta_vars_.push_back(content_length.c_str());
 
 	// std::string	content_type = "CONTENT_TYPE=";
-	// if (http_request.find("content-type") != std::string::npos) // not case-censitive
+	// if (http_request.find("content-type") != std::string::npos) //TODO: not case-censitive
 	// 	content_type += http_request["content-type"];
 	// this->meta_vars_.push_back(content_type.c_str());
 
@@ -84,7 +83,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 
 
 	std::string	remote_host = std::string("REMOTE_HOST="); 
-	// if (http_request.find("host") != std::string::npos) // not case-censitive
+	// if (http_request.find("host") != std::string::npos) //TODO: not case-censitive
 	// 	content_type += http_request["host"];
 	// this->meta_vars_.push_back(remote_host.c_str());
 
@@ -94,8 +93,16 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 	const std::string	script_name = std::string("SCRIPT_NAME=") + http_request.uri;
 	this->meta_vars_.push_back(script_name.c_str());
 
+	const std::string	server_name = std::string("SERVER_NAME=") + http_request.headers.at("host");//TODO: not case sencitive
+	this->meta_vars_.push_back(server_name.c_str());
 
+	const std::string	server_port = std::string("SERVER_PORT="); // TODO:
+	this->meta_vars_.push_back(server_port.c_str());
 
+	const std::string	server_protocol = std::string("SERVER_PROTOCOL=") + http_request.version;
+	this->meta_vars_.push_back(server_protocol.c_str());
+
+	this->meta_vars_.push_back("SERVER_SOFTWARE=webserv/1.0");
 
 	this->meta_vars_.push_back(NULL);
 }
