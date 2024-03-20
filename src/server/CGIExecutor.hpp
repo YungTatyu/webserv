@@ -26,7 +26,7 @@ class CGIExecutor
 		CGIExecutor();
 		~CGIExecutor();
 		void	executeCgiScript(const HttpRequest& http_request, const std::string& script_path, const int socket);
-		const std::string&	getCgiPath() const;
+		const std::string&	getScriptPath() const;
 		const std::vector<const char*>&	getArgv() const;
 		const std::vector<const char*>&	getMetaVars() const;
 		bool	redirectStdIOToSocket(const int socket) const;

@@ -82,9 +82,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 	this->meta_vars_.push_back(remote_addr.c_str());
 
 
-	std::string	remote_host = std::string("REMOTE_HOST="); 
-	// if (http_request.find("host") != std::string::npos) //TODO: not case-censitive
-	// 	content_type += http_request["host"];
+	std::string	remote_host = std::string("REMOTE_HOST="); // client host name
 	// this->meta_vars_.push_back(remote_host.c_str());
 
 	const std::string	method = std::string("REQUEST_METHOD=") + http_request.method;
@@ -163,4 +161,19 @@ bool	cgi::CGIExecutor::redirectStdIOToSocket(const int socket) const
 	}
 	close(socket);
 	return true;
+}
+
+const std::string&	cgi::CGIExecutor::getScriptPath() const
+{
+	return this->script_path_;
+}
+
+const std::vector<const char*>&	cgi::CGIExecutor::getArgv() const
+{
+	return this->argv_;
+}
+
+const std::vector<const char*>&	cgi::CGIExecutor::getMetaVars() const
+{
+	return this->meta_vars_;
 }
