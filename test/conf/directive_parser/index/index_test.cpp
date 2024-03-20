@@ -24,7 +24,7 @@ const std::string	kIndex = "index";
 
 TEST(indexTest, allContext)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/index/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/index/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -48,7 +48,7 @@ TEST(indexTest, allContext)
 }
 
 TEST(indexTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

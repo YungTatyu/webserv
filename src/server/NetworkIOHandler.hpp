@@ -20,7 +20,11 @@ class ConfigHandler;
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer
 {
-	std::vector<config::Server*>	servers_;
+	std::vector<const config::Server*>	servers_;
+	const std::string addr_;
+	const unsigned int port_;
+
+	TiedServer( const std::string addr, const unsigned int port ) : addr_(addr), port_(port) {}
 };
 
 /* クライアントとデータの送受信を行う */
@@ -30,7 +34,7 @@ class NetworkIOHandler
 		void setupSocket( ConfigHandler *configHandler );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
-		void acceptConnection( ConnectionManager& connManager );
+		int acceptConnection( ConnectionManager& connManager );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		int getListenfd();
 

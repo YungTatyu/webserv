@@ -73,7 +73,7 @@ ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const in
 	return totalSent;
 }
 
-void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
+int NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 {
 	int connfd;
 	struct sockaddr_in cliaddr;
@@ -91,6 +91,7 @@ void NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	char clientIp[INET_ADDRSTRLEN];
 	inet_ntop(AF_INET, &cliaddr.sin_addr, clientIp, INET_ADDRSTRLEN);
 	std::cout << "> New client connected from IP: " << clientIp << std::endl;
+	return connfd;
 }
 
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int cli_sock )

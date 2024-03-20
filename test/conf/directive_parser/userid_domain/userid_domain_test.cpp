@@ -13,7 +13,7 @@ const std::string	kUseridDomain = "userid_domain";
 
 TEST(useridDomainTest, allContext)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/userid_domain/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/userid_domain/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -36,7 +36,7 @@ TEST(useridDomainTest, allContext)
 
 TEST(useridDomainTest, notFound) {
 		
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

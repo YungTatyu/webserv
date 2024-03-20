@@ -2,7 +2,7 @@
 #include "CGIHandler.hpp"
 #include "FileUtils.hpp"
 
-std::string HttpRequest::setQueryString( std::string& uri )
+std::string HttpMessage::setQueryString( std::string& uri )
 {
 	std::size_t pos = uri.find("?");
 	if ( pos != std::string::npos )
@@ -10,7 +10,7 @@ std::string HttpRequest::setQueryString( std::string& uri )
 	return "";
 }
 
-std::string HttpRequest::setScriptPath( std::string& uri )
+std::string HttpMessage::setScriptPath( std::string& uri )
 {
 	return uri.substr(0, uri.find("?"));
 }
@@ -24,8 +24,8 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	iss.str( rawRequest );
 	iss >> requestline.method >> uriAndPath >> requestline.version;
 
-	requestline.uri = HttpRequest::setScriptPath(uriAndPath);
-	requestline.query = HttpRequest::setQueryString(uriAndPath);
+	requestline.uri = HttpMessage::setScriptPath(uriAndPath);
+	requestline.queries["f1"] = HttpMessage::setQueryString(uriAndPath);
 
 	return requestline;
 }
@@ -87,7 +87,7 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		if ( ifile )
 		{
 			if ( CGIHandler::isCGI( request.uri ) )
-				return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.query ) );
+				return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.queries["f1"] ) );
 			return HttpMessage::createResponse( FileUtils::readFile(request.uri) );
 		}
 		else

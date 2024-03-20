@@ -1,6 +1,8 @@
 #ifndef HTTP_MESSAGE_HPP
 # define HTTP_MESSAGE_HPP
 
+# include "HttpRequest.hpp"
+
 # include <string>
 # include <sstream>
 # include <iostream>
@@ -8,29 +10,31 @@
 # include <dirent.h>
 # include <sys/stat.h>
 
-class HttpRequest
-{
-	public:
-		static std::string setQueryString( std::string& uri );
-		static std::string setScriptPath( std::string& uri );
+//class HttpRequest
+//{
+//	public:
+//		static std::string setQueryString( std::string& uri );
+//		static std::string setScriptPath( std::string& uri );
+//
+//		std::string method;
+//		std::string uri;
+//		std::string version;
+//		std::string query;
+//	// header, body
+//};
 
-		std::string method;
-		std::string uri;
-		std::string version;
-		std::string query;
-	// header, body
-};
-
-struct HttpResponse
-{
-	std::string status;
-	std::string body;
-	// header
-};
+//struct HttpResponse
+//{
+//	std::string status;
+//	std::string body;
+//	// header
+//};
 
 class HttpMessage
 {
 	public:
+		static std::string setQueryString( std::string& uri );
+		static std::string setScriptPath( std::string& uri );
 		static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 

@@ -17,26 +17,26 @@ TEST(ConfigTest, no_file)
 {
 	std::string filePath = "";
 
-	EXPECT_FALSE(config::init_config(filePath));
+	EXPECT_FALSE(config::initConfig(filePath));
 }
 
 TEST(ConfigTest, is_dir)
 {
-	std::string filePath = "test/conf/confFile/dir.conf";
+	std::string filePath = "test/conf/LexerTestFiles/dir.conf";
 
-	EXPECT_FALSE(config::init_config(filePath));
+	EXPECT_FALSE(config::initConfig(filePath));
 }
 
 TEST(ConfigTest, inaccessible_file)
 {
-	std::string filePath = "test/conf/confFile/inaccessible.conf";
+	std::string filePath = "test/conf/LexerTestFiles/inaccessible.conf";
 
-	EXPECT_FALSE(config::init_config(filePath));
+	EXPECT_FALSE(config::initConfig(filePath));
 }
 
 TEST(LexerTokenizeTest, empty_file)
 {
-	std::string filePath= "test/conf/confFile/empty.conf";
+	std::string filePath= "test/conf/LexerTestFiles/empty.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -46,7 +46,7 @@ TEST(LexerTokenizeTest, empty_file)
 
 TEST(LexerTokenizeTest, one_directive)
 {
-	std::string filePath= "test/conf/confFile/lexer1.conf";
+	std::string filePath= "test/conf/LexerTestFiles/lexer1.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -60,7 +60,7 @@ TEST(LexerTokenizeTest, one_directive)
 
 TEST(LexerTokenizeTest, events_context)
 {
-	std::string filePath= "test/conf/confFile/lexer2.conf";
+	std::string filePath= "test/conf/LexerTestFiles/lexer2.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -79,7 +79,7 @@ TEST(LexerTokenizeTest, events_context)
 
 TEST(LexerTokenizeTest, http_context)
 {
-	std::string filePath= "test/conf/confFile/lexer3.conf";
+	std::string filePath= "test/conf/LexerTestFiles/lexer3.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -117,7 +117,7 @@ TEST(LexerTokenizeTest, http_context)
 
 TEST(LexerTokenizeTest, comment_skip)
 {
-	std::string filePath= "test/conf/confFile/comment.conf";
+	std::string filePath= "test/conf/LexerTestFiles/comment.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -151,7 +151,7 @@ TEST(LexerTokenizeTest, comment_skip)
 
 TEST(LexerTokenizeTest, only_comment)
 {
-	std::string filePath= "test/conf/confFile/only_comment.conf";
+	std::string filePath= "test/conf/LexerTestFiles/only_comment.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -161,7 +161,7 @@ TEST(LexerTokenizeTest, only_comment)
 
 TEST(LexerTokenizeTest, quote_file)
 {
-	std::string filePath= "test/conf/confFile/quote.conf";
+	std::string filePath= "test/conf/LexerTestFiles/quote.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -194,7 +194,7 @@ TEST(LexerTokenizeTest, quote_file)
 
 TEST(LexerTokenizeTest, continuous_quote)
 {
-	std::string filePath= "test/conf/confFile/continuous_quote.conf";
+	std::string filePath= "test/conf/LexerTestFiles/continuous_quote.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -211,7 +211,7 @@ TEST(LexerTokenizeTest, continuous_quote)
 
 TEST(LexerTokenizeTest, single_in_double_quote)
 {
-	std::string filePath= "test/conf/confFile/single_in_double_quote.conf";
+	std::string filePath= "test/conf/LexerTestFiles/single_in_double_quote.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
@@ -227,7 +227,7 @@ TEST(LexerTokenizeTest, single_in_double_quote)
 
 TEST(LexerTokenizeTest, double_in_single_quote)
 {
-	std::string filePath= "test/conf/confFile/double_in_single_quote.conf";
+	std::string filePath= "test/conf/LexerTestFiles/double_in_single_quote.conf";
 	config::Lexer	lexer(filePath);
 
 	lexer.tokenize();
