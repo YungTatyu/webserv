@@ -25,7 +25,7 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 	iss >> requestline.method >> uriAndPath >> requestline.version;
 
 	requestline.uri = HttpMessage::setScriptPath(uriAndPath);
-	requestline.queries["f1"] = HttpMessage::setQueryString(uriAndPath);
+	// requestline.queries["f1"] = HttpMessage::setQueryString(uriAndPath);
 
 	return requestline;
 }

@@ -76,7 +76,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 	this->meta_vars_.push_back("PATH_INFO="); // pathinfoを渡せない設計になっている
 	this->meta_vars_.push_back("PATH_TRANSLATED="); // pathinfoと同じ
 
-	const std::string	query_string = std::string("QUERY_STRING=") + http_request.query;
+	const std::string	query_string = std::string("QUERY_STRING=") + http_request.queries;
 	this->meta_vars_.push_back(query_string.c_str()); // pathinfoと同じ
 
 	const std::string	remote_addr = "REMOTE_ADDR="; // client addressをvalueにsetする
