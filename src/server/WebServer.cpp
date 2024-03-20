@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <utility>
+#include "LogFd.hpp"
 
 /* WebServerクラスの実装 */
 WebServer::WebServer( const config::Main* config )
@@ -95,6 +96,7 @@ void	WebServer::initializeConnManager()
 WebServer::~WebServer()
 {
 	// close( this->connManager->getConnection() ); // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
+	config::terminateLogFds(this->configHandler->config_);
 	delete this->configHandler->config_;
 	delete this->ioHandler;
 	delete this->requestHandler;

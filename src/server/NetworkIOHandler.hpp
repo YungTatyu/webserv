@@ -23,10 +23,10 @@ class ConfigHandler;
 struct TiedServer
 {
 	std::vector<const config::Server*>	servers_;
-	const std::string	address_;
-	const unsigned int	port_;
-	TiedServer(const std::string &address, const unsigned int port) :
-		address_(address), port_(port) {}
+	const std::string address_;
+	const unsigned int port_;
+
+	TiedServer( const std::string address, const unsigned int port ) : address_(address), port_(port) {}
 };
 
 /* クライアントとデータの送受信を行う */

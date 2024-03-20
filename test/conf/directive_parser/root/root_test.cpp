@@ -12,7 +12,7 @@ const std::string	kRoot = "root";
 
 TEST(RootTest, allContext)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/root/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/root/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -33,7 +33,7 @@ TEST(RootTest, allContext)
 }
 
 TEST(RootTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
