@@ -50,6 +50,8 @@ struct Server
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
 	UseridService	userid_service;
+	std::vector<int>	access_fd_list;
+	std::vector<int>	error_fd_list;
 };
 } // namespace config
 

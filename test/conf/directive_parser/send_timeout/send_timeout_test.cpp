@@ -27,7 +27,7 @@ void	test_st_value(const std::vector<config::Location> &list, const std::vector<
 
 TEST(sendTimeoutTest, max)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/send_timeout/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/send_timeout/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -55,7 +55,7 @@ TEST(sendTimeoutTest, max)
 
 TEST(SendTimeoutTest, zero)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/send_timeout/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/send_timeout/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -76,7 +76,7 @@ TEST(SendTimeoutTest, zero)
 
 TEST(SendTimeoutTest, random)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/send_timeout/3.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/send_timeout/3.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -101,7 +101,7 @@ TEST(SendTimeoutTest, random)
 }
 
 TEST(SendTimeoutTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

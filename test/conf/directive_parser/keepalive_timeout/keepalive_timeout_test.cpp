@@ -26,7 +26,7 @@ void	test_value(const std::vector<config::Location> &list, const std::vector<uns
 
 TEST(KeepaliveTimeoutTest, max)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/keepalive_timeout/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/keepalive_timeout/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -54,7 +54,7 @@ TEST(KeepaliveTimeoutTest, max)
 
 TEST(KeepaliveTimeoutTest, zero)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/keepalive_timeout/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/keepalive_timeout/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -75,7 +75,7 @@ TEST(KeepaliveTimeoutTest, zero)
 
 TEST(KeepaliveTimeoutTest, random)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/keepalive_timeout/3.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/keepalive_timeout/3.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -96,7 +96,7 @@ TEST(KeepaliveTimeoutTest, random)
 
 
 TEST(KeepaliveTimeoutTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
