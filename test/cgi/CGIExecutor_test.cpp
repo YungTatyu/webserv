@@ -8,6 +8,8 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 typedef std::map<std::string, std::string> string_map;
 
@@ -37,24 +39,41 @@ namespace test
 		return request;
 	}
 
-	void	testCgiOutput(const std::string actual, const std::string expect)
+	std::string	readCgiResponse(cgi::CGIHandler& cgi_handler)
 	{
+		std::string	response;
+		const size_t	buffer_size = 1024;
+		ssize_t	total_read_bytes = 0;
+	
+		while (true)
+		{
+			char	buffer[buffer_size + 1];
+			ssize_t	bytes = recv(cgi_handler.sockets_[cgi::SOCKET_PARENT], buffer, buffer_size, 0);
+			buffer[buffer_size] = '\0';
+			response += buffer;
+			if (bytes == -1)
+				std::cerr << "recv :" << std::strerror(errno) << "\n";
+			if (bytes < buffer_size)
+				break;
+			total_read_bytes += bytes;
+		}
+		return response;
+	}
+
+	void	testCgiOutput(
+		cgi::CGIHandler& cgi_handler,
+		const std::string& cgi_path,
+		const HttpRequest& http_request,
+		const std::string expect
+	)
+	{
+		cgi_handler.callCgiExecutor(cgi_path, http_request);
+		close(cgi_handler.sockets_[cgi::SOCKET_CHILD]);
+		const std::string actual = test::readCgiResponse(cgi_handler);
+
 		EXPECT_EQ(actual, expect);
 	}
 
-	std::string	captureStdout(
-		cgi::CGIHandler& cgi_handler,
-		const std::string& cgi_path,
-		const HttpRequest& http_request
-	)
-	{
-		testing::internal::CaptureStdout();
-		cgi_handler.callCgiExecutor(cgi_path, http_request);
-		std::string	stdout_ = testing::internal::GetCapturedStdout();
-		return stdout_;
-	}
-
-	// void	testMetaVars(const std::vector<string_map> &test_results)
 	void	testMetaVars(const std::vector<std::pair<std::string, std::string> > &test_results)
 	{
 		for (std::vector<std::pair<std::string, std::string> >::const_iterator it = test_results.begin();
@@ -97,7 +116,7 @@ TEST(cgi_executor, meta_vars)
 	);
 
 	const std::vector<const char*>	meta_vars = cgi_handler.getCgiExecutor().getMetaVars();
-	std::vector<std::pair<std::string, std::string>> result = {
+	test::testMetaVars({
 		{test::searchMetaVar(meta_vars, "AUTH_TYPE"), "AUTH_TYPE="}, // AUTH_TYPE
 		{test::searchMetaVar(meta_vars, "CONTENT_LENGTH"), (std::string("CONTENT_LENGTH=") + std::to_string(request.body.size()))}, // CONTENT_LENGTH
 		{test::searchMetaVar(meta_vars, "CONTENT_TYPE"), "CONTENT_TYPE=text"}, // CONTENT_TYPE
@@ -113,9 +132,7 @@ TEST(cgi_executor, meta_vars)
 		{test::searchMetaVar(meta_vars, "SERVER_PORT"), "SERVER_PORT="}, // SERVER_PORT
 		{test::searchMetaVar(meta_vars, "SERVER_PROTOCOL"), "SERVER_PROTOCOL=HTTP/1.1"}, // SERVER_PROTOCOL
 		{test::searchMetaVar(meta_vars, "SERVER_SOFTWARE"), "SERVER_SOFTWARE=webserv/1.0"} // SERVER_SOFTWARE
-	};
-
-	test::testMetaVars(result);
+	});
 }
 
 TEST(cgi_executor, document_response)
@@ -134,13 +151,12 @@ TEST(cgi_executor, document_response)
 		}
 	);
 
-	cgi_handler.callCgiExecutor("test/cgi/cgi_files/executor/document_response.py", request);
-	const std::string actual = test::captureStdout(cgi_handler,
-		"test/cgi/cgi_files/executor/document_response.py",
-		request
-	);
-
 	const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
 	const std::string expect = request.body != "" ? (expect_header + request.body) : expect_header;
-	test::testCgiOutput(actual, expect);
+	test::testCgiOutput(
+		cgi_handler,
+		"test/cgi/cgi_files/executor/document_response.py",
+		request,
+		expect
+	);
 }
