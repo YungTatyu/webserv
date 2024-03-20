@@ -18,7 +18,7 @@ const static std::string	LIMIT_EXCEPT = "limit_except";
 
 TEST(mainParserTest, allContexts)
 {
-	const config::Main	*config = config::init_config("test/conf/conf_files/valid/12.conf");
+	const config::Main	*config = config::initConfig("test/conf/conf_files/valid/12.conf");
 	const config::Http	&http = config->http;
 	const config::Events	&events = config->events;
 	const std::vector<config::Server>	&server_list = http.server_list;

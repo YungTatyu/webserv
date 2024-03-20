@@ -29,11 +29,8 @@ class HttpRequest
 		std::string method;
 		std::string uri;
 		std::string version;
-		// mac環境で以下stringのmapが原因でcrashするので一旦コメントアウトしました
-		// mapの中の処理がcrashしているみたいです
-		// 原因はわかりませんでした
-		// std::map<std::string, std::string> headers;
-		// std::map<std::string, std::string> queries;
+		std::map<std::string, std::string> headers;
+		std::map<std::string, std::string> queries;
 		std::string body;
 
 		ParseState parseState;

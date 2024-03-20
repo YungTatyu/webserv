@@ -14,7 +14,7 @@ const long	kLongMax = std::numeric_limits<long>::max();
 
 TEST(clientMaxBodySizeTest, longMax)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/client_max_body_size/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/client_max_body_size/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -27,7 +27,7 @@ TEST(clientMaxBodySizeTest, longMax)
 
 TEST(clientMaxBodySizeTest, longMaxKilo)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/client_max_body_size/3.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/client_max_body_size/3.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -40,7 +40,7 @@ TEST(clientMaxBodySizeTest, longMaxKilo)
 
 TEST(clientMaxBodySizeTest, longMaxMega)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/client_max_body_size/4.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/client_max_body_size/4.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -54,7 +54,7 @@ TEST(clientMaxBodySizeTest, longMaxMega)
 
 TEST(clientMaxBodySizeTest, zero)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/client_max_body_size/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/client_max_body_size/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -67,7 +67,7 @@ TEST(clientMaxBodySizeTest, zero)
 
 
 TEST(clientMaxBodySizeTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
