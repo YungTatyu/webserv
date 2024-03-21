@@ -185,3 +185,28 @@ TEST(cgi_executor, document_response)
 		expect
 	);
 }
+
+TEST(cgi_executor, local_redirect_res)
+{
+	cgi::CGIHandler	cgi_handler;
+	HttpRequest	request = test::initRequest(
+		"GET",
+		"/path/uri/",
+		"HTTP/1.1",
+		"one=1&two=2&three=3",
+		"",
+		{
+			{"Host", "tt"},
+			{"content-type", "text"},
+			{"CONTENT_LENGTH", "10"}
+		}
+	);
+
+	const std::string expect = "Location: /\r\n\r\n";
+	test::testCgiOutput(
+		cgi_handler,
+		"test/cgi/cgi_files/executor/local_redirect_res.php",
+		request,
+		expect
+	);
+}

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 const static char	*kPhpExtension = ".php";
 const static char	*kPhp = "php";
@@ -56,16 +58,16 @@ void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
 
 void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 {
-	const std::string::size_type	n = script_path.rfind("/");
-	const std::string	cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
-	if (FileUtils::isExtensionFile(cgi_script, kPhpExtension))
+	if (FileUtils::isExtensionFile(script_path, kPhpExtension))
 	{
 		this->argv_.push_back(kPhp);
-		std::cerr << "argv:" << kPhp << "\n";
+		this->argv_.push_back(script_path.c_str());
+		this->argv_.push_back(NULL);
+		return;
 	}
+	const std::string::size_type	n = script_path.rfind("/");
+	const std::string	cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
 	this->argv_.push_back(cgi_script.c_str());
-	std::cerr << "argv:" << cgi_script << "\n";
-
 	this->argv_.push_back(NULL);
 }
 
@@ -128,6 +130,14 @@ std::vector<std::string>	cgi::CGIExecutor::split(const std::string& s, char deli
 	return tokens;
 }
 
+bool	cgi::CGIExecutor::isExecutableFile(const std::string& path) const
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) != 0)
+		return false;
+	return S_ISREG(statbuf.st_mode) && access(path.c_str(), X_OK) == 0;
+}
+
 std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) const
 {
 	const char	*path = std::getenv("PATH");
@@ -137,7 +147,7 @@ std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) co
 	for (size_t i = 0; i < directories.size(); ++i)
 	{
 		std::string command_path = directories[i] + "/" + command;
-		if (!FileUtils::isDirectory(command_path) && access(command_path.c_str(), X_OK) == 0)
+		if (isExecutableFile(command_path))
 			return command_path;
 	}
 	return "";

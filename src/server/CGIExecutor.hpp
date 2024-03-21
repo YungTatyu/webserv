@@ -21,6 +21,7 @@ class CGIExecutor
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
 		std::string	searchCommandInPath(const std::string& command) const;
 		template<typename T>std::string	toStr(const T value) const;
+		bool	isExecutableFile(const std::string& path) const;
 
 	public:
 		CGIExecutor();
