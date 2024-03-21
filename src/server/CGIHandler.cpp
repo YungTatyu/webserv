@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <signal.h>
+#include <cstring>
+#include <cerrno>
 
 cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1) {}
 
@@ -46,7 +48,7 @@ bool	cgi::CGIHandler::forkCgiProcess(
 	pid_t	pid = fork();
 	if (pid == -1)
 	{
-		std::cerr << "webserv: [emerg] fork() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		std::cerr << "webserv: [emerg] fork() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		return false;
 	}
 	if (pid == 0)
@@ -73,7 +75,7 @@ bool	cgi::CGIHandler::callCgiExecutor(
 {
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
 	{
-		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		return false;
 	}
 	return forkCgiProcess(http_request, script_path);
@@ -101,5 +103,5 @@ const pid_t&	cgi::CGIHandler::getCgiProcessId() const
 void	cgi::CGIHandler::killCgiProcess() const
 {
 	if (kill(this->cgi_process_id_, SIGINT) == -1)
-		std::cerr << "webserv: [emerg] kill() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		std::cerr << "webserv: [emerg] kill() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 }

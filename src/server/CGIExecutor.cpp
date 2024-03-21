@@ -2,8 +2,6 @@
 #include "FileUtils.hpp"
 
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
