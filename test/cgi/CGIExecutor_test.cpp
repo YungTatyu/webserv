@@ -164,16 +164,8 @@ TEST(cgi_executor, document_response)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET",
-		"/path/uri/",
-		"HTTP/1.1",
-		"one=1&two=2&three=3",
-		"",
-		{
-			{"Host", "tt"},
-			{"content-type", "text"},
-			{"CONTENT_LENGTH", "10"}
-		}
+		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		{{"Host", "tt"}}
 	);
 
 	const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
@@ -190,22 +182,49 @@ TEST(cgi_executor, local_redirect_res)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET",
-		"/path/uri/",
-		"HTTP/1.1",
-		"one=1&two=2&three=3",
-		"",
-		{
-			{"Host", "tt"},
-			{"content-type", "text"},
-			{"CONTENT_LENGTH", "10"}
-		}
+		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		{{"Host", "tt"}}
 	);
 
 	const std::string expect = "Location: /\r\n\r\n";
 	test::testCgiOutput(
 		cgi_handler,
 		"test/cgi/cgi_files/executor/local_redirect_res.php",
+		request,
+		expect
+	);
+}
+
+TEST(cgi_executor, client_redirect_res)
+{
+	cgi::CGIHandler	cgi_handler;
+	HttpRequest	request = test::initRequest(
+		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		{{"Host", "tt"}}
+	);
+
+	const std::string expect = "Location: https://www.google.com/\r\nMETHOD: GET\r\nSERVER_NAME: tachu\r\n\r\n";
+	test::testCgiOutput(
+		cgi_handler,
+		"test/cgi/cgi_files/executor/client_redirect_res.cgi",
+		request,
+		expect
+	);
+}
+
+TEST(cgi_executor, client_redirect_res_doc)
+{
+	cgi::CGIHandler	cgi_handler;
+	HttpRequest	request = test::initRequest(
+		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		{{"Host", "tt"}}
+	);
+
+	const std::string expect_header = "Location: /\r\nStatus: 301\r\nContent-Type: text/html\r\n\r\n";
+	const std::string expect = expect_header + "<h1>cgi response</h1><h2>client-redirdoc-response<h2>\n";
+	test::testCgiOutput(
+		cgi_handler,
+		"test/cgi/cgi_files/executor/client_redirect_res_doc.cgi",
 		request,
 		expect
 	);
