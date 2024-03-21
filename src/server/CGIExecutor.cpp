@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
+#include <cstring>
+#include <cerrno>
 #include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
