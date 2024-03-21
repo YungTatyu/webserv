@@ -28,7 +28,7 @@ void	cgi::CGIExecutor::executeCgiScript(
 		const_cast<char *const*>(this->argv_.data()),
 		const_cast<char *const*>(this->meta_vars_.data())
 	);
-	std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+	std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 	std::exit(EXIT_FAILURE);
 }
 
@@ -171,7 +171,7 @@ bool	cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& http_request, co
 	{
 		if (dup2(socket, STDIN_FILENO) == -1)
 		{
-			std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 			close(socket);
 			return false;
 		}
@@ -179,7 +179,7 @@ bool	cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& http_request, co
 
 	if (dup2(socket, STDOUT_FILENO) == -1)
 	{
-		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		close(STDIN_FILENO);
 		close(socket);
 		return false;
