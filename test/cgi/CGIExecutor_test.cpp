@@ -10,8 +10,10 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 
 typedef std::map<std::string, std::string> string_map;
+typedef std::pair<std::string, std::string> string_pair;
 
 namespace test
 {
@@ -32,7 +34,7 @@ namespace test
 		request.queries = queries;
 		request.body = body;
 
-		std::for_each(headers.begin(), headers.end(), [&request](const std::pair<std::string, std::string> header){
+		std::for_each(headers.begin(), headers.end(), [&request](const string_pair header){
 			request.headers.insert(std::make_pair(header.first, header.second));
 		});
 
@@ -60,6 +62,16 @@ namespace test
 		return response;
 	}
 
+	int	waitProcess(pid_t pid)
+	{
+		int	status;
+		if (waitpid(pid, &status, 0) == -1)
+			std::cerr << "waitpid() " << std::strerror(errno) << "\n";
+		if (WIFEXITED(status))
+			return WEXITSTATUS(status);
+		return -1;
+	}
+
 	void	testCgiOutput(
 		cgi::CGIHandler& cgi_handler,
 		const std::string& cgi_path,
@@ -68,15 +80,15 @@ namespace test
 	)
 	{
 		cgi_handler.callCgiExecutor(cgi_path, http_request);
-		close(cgi_handler.sockets_[cgi::SOCKET_CHILD]);
+		waitProcess(cgi_handler.getCgiProcessId());
 		const std::string actual = test::readCgiResponse(cgi_handler);
 
 		EXPECT_EQ(actual, expect);
 	}
 
-	void	testMetaVars(const std::vector<std::pair<std::string, std::string> > &test_results)
+	void	testMetaVars(const std::vector<string_pair> &test_results)
 	{
-		for (std::vector<std::pair<std::string, std::string> >::const_iterator it = test_results.begin();
+		for (std::vector<string_pair>::const_iterator it = test_results.begin();
 			it != test_results.end();
 			++it
 		)

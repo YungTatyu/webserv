@@ -89,6 +89,11 @@ const cgi::CGIExecutor&	cgi::CGIHandler::getCgiExecutor() const
 	return this->cgi_executor_;
 }
 
+const pid_t&	cgi::CGIHandler::getCgiProcessId() const
+{
+	return this->cgi_process_id_;
+}
+
 /**
  * @brief timeout eventが発生した場合、cgi processをkillする
  * 

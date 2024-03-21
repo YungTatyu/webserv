@@ -22,8 +22,8 @@ void	cgi::CGIExecutor::executeCgiScript(
 	prepareCgiExecution(http_request, script_path, socket);
 	execve(
 		this->script_path_.c_str(),
-		const_cast<char *const *>(this->argv_.data()),
-		const_cast<char *const *>(this->meta_vars_.data())
+		const_cast<char *const*>(this->argv_.data()),
+		const_cast<char *const*>(this->meta_vars_.data())
 	);
 	std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 	std::exit(EXIT_FAILURE);
@@ -35,7 +35,7 @@ void	cgi::CGIExecutor::prepareCgiExecution(
 	const int socket
 )
 {
-	if (redirectStdIOToSocket(socket))
+	if (!redirectStdIOToSocket(http_request, socket))
 		std::exit(EXIT_FAILURE); // responseをどうする？ bad gatewayでいいのか
 	createScriptPath(script_path);
 	createArgv(script_path);
@@ -59,8 +59,13 @@ void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 	const std::string::size_type	n = script_path.rfind("/");
 	const std::string	cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
 	if (FileUtils::isExtensionFile(cgi_script, kPhpExtension))
+	{
 		this->argv_.push_back(kPhp);
+		std::cerr << "argv:" << kPhp << "\n";
+	}
 	this->argv_.push_back(cgi_script.c_str());
+	std::cerr << "argv:" << cgi_script << "\n";
+
 	this->argv_.push_back(NULL);
 }
 
@@ -148,13 +153,17 @@ std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) co
  * @return true 
  * @return false 
  */
-bool	cgi::CGIExecutor::redirectStdIOToSocket(const int socket) const
+bool	cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& http_request, const int socket) const
 {
-	if (dup2(socket, STDIN_FILENO) == -1)
+	// bodyが存在する場合は、標準入力にbodyをセットする必要がある
+	if (!http_request.body.empty())
 	{
-		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
-		close(socket);
-		return false;
+		if (dup2(socket, STDIN_FILENO) == -1)
+		{
+			std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			close(socket);
+			return false;
+		}
 	}
 
 	if (dup2(socket, STDOUT_FILENO) == -1)

@@ -29,7 +29,7 @@ class CGIExecutor
 		const std::string&	getScriptPath() const;
 		const std::vector<const char*>&	getArgv() const;
 		const std::vector<const char*>&	getMetaVars() const;
-		bool	redirectStdIOToSocket(const int socket) const;
+		bool	redirectStdIOToSocket(const HttpRequest& http_request, const int socket) const;
 };
 
 template<typename T>
