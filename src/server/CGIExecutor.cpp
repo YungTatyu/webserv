@@ -101,8 +101,8 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 	const std::string	script_name = std::string("SCRIPT_NAME=") + http_request.uri;
 	this->meta_vars_.push_back(script_name.c_str());
 
-	const std::string	server_name = std::string("SERVER_NAME=") + http_request.headers.at("host");//TODO: not case sencitive
-	this->meta_vars_.push_back(server_name.c_str());
+	// const std::string	server_name = std::string("SERVER_NAME=") + http_request.headers.at("host");//TODO: not case sencitive
+	// this->meta_vars_.push_back(server_name.c_str());
 
 	const std::string	server_port = std::string("SERVER_PORT="); // TODO:
 	this->meta_vars_.push_back(server_port.c_str());

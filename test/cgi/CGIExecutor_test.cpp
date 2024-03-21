@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include "IOUtils.hpp"
 
 typedef std::map<std::string, std::string> string_map;
 typedef std::pair<std::string, std::string> string_pair;
@@ -51,15 +52,23 @@ namespace test
 		{
 			char	buffer[buffer_size + 1];
 			ssize_t	bytes = recv(cgi_handler.sockets_[cgi::SOCKET_PARENT], buffer, buffer_size, 0);
-			buffer[buffer_size] = '\0';
-			response += buffer;
 			if (bytes == -1)
-				std::cerr << "recv :" << std::strerror(errno) << "\n";
+			{
+				std::cerr << "recv() " << std::strerror(errno) << "\n";
+				return "";	
+			}
+			buffer[bytes] = '\0';
+			response += buffer;
 			if (bytes < buffer_size)
 				break;
 			total_read_bytes += bytes;
 		}
 		return response;
+	}
+
+	void	sendBody(const std::string& body, const int socket)
+	{
+		IOUtils::wrapperWrite(socket, body);
 	}
 
 	int	waitProcess(pid_t pid)
@@ -80,7 +89,11 @@ namespace test
 	)
 	{
 		cgi_handler.callCgiExecutor(cgi_path, http_request);
-		waitProcess(cgi_handler.getCgiProcessId());
+		if (!http_request.body.empty())
+		{
+			sendBody(http_request.body, cgi_handler.sockets_[cgi::SOCKET_PARENT]);
+		// 	waitProcess(cgi_handler.getCgiProcessId());
+		}
 		const std::string actual = test::readCgiResponse(cgi_handler);
 
 		EXPECT_EQ(actual, expect);
@@ -155,7 +168,7 @@ TEST(cgi_executor, document_response)
 		"/path/uri/",
 		"HTTP/1.1",
 		"one=1&two=2&three=3",
-		"this is body\n",
+		"",
 		{
 			{"Host", "tt"},
 			{"content-type", "text"},
@@ -164,7 +177,7 @@ TEST(cgi_executor, document_response)
 	);
 
 	const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
-	const std::string expect = request.body != "" ? (expect_header + request.body) : expect_header;
+	const std::string expect = !request.body.empty() ? (expect_header + request.body) : expect_header;
 	test::testCgiOutput(
 		cgi_handler,
 		"test/cgi/cgi_files/executor/document_response.py",
