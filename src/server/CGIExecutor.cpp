@@ -6,6 +6,9 @@
 #include <cstdlib>
 #include <sstream>
 
+const static char	*kPhpExtension = ".php";
+const static char	*kPhp = "php";
+
 cgi::CGIExecutor::CGIExecutor() {}
 
 cgi::CGIExecutor::~CGIExecutor() {}
@@ -42,10 +45,10 @@ void	cgi::CGIExecutor::prepareCgiExecution(
 void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
 {
 	this->script_path_ = script_path;
-	if (!FileUtils::isExtensionFile(script_path, ".php"))
+	if (!FileUtils::isExtensionFile(script_path, kPhpExtension))
 		return;
 	// スクリプトがphpの場合は、phpのpathを探す必要がある
-	const std::string	path = searchCommandInPath("php");
+	const std::string	path = searchCommandInPath(kPhp);
 	if (path == "")
 		return;
 	this->script_path_ = path;
@@ -55,6 +58,8 @@ void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 {
 	const std::string::size_type	n = script_path.rfind("/");
 	const std::string	cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
+	if (FileUtils::isExtensionFile(cgi_script, kPhpExtension))
+		this->argv_.push_back(kPhp);
 	this->argv_.push_back(cgi_script.c_str());
 	this->argv_.push_back(NULL);
 }
