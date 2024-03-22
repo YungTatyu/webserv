@@ -166,23 +166,22 @@ std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) co
  */
 bool	cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& http_request, const int socket) const
 {
+	if (dup2(socket, STDOUT_FILENO) == -1)
+	{
+		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
+		close(socket);
+		return false;
+	}
 	// bodyが存在する場合は、標準入力にbodyをセットする必要がある
 	if (!http_request.body.empty())
 	{
 		if (dup2(socket, STDIN_FILENO) == -1)
 		{
 			std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
+			close(STDOUT_FILENO);
 			close(socket);
 			return false;
 		}
-	}
-
-	if (dup2(socket, STDOUT_FILENO) == -1)
-	{
-		std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
-		close(STDIN_FILENO);
-		close(socket);
-		return false;
 	}
 	close(socket);
 	return true;
