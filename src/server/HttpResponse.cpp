@@ -333,11 +333,11 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 	while (state != END_PHASE) {
 		switch (state) {
 		case START_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] start phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] start phase\n");
 			state = PRE_SEARCH_LOCATION_PHASE;
 			break;
 		case PRE_SEARCH_LOCATION_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] pre search location phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] pre search location phase\n");
 			// parse error
 			if (request.parseState == HttpRequest::PARSE_ERROR)
 			{
@@ -359,10 +359,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 				state = SEARCH_LOCATION_PHASE;
 			break;
 		case SEARCH_LOCATION_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] search location phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] search location phase\n");
 			if (response.internal_redirect_cnt_++ > kMaxInternalRedirect)
 			{
-				config_handler.writeErrorLog(server, location, "wevserb: [error] too continuous internal redirect\n");
+				config_handler.writeErrorLog(server, location, "webserv: [error] too continuous internal redirect\n");
 				response.status_code_ = 500;
 				response.body_ = *default_error_page_map_[500];
 				response.headers_["Connection"] = "close";
@@ -373,19 +373,19 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			state = POST_SEARCH_LOCATION_PHASE;
 			break;
 		case POST_SEARCH_LOCATION_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] post search location phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] post search location phase\n");
 			response.root_path_ = config_handler.searchRootPath(server, location);
 			state = RETURN_PHASE;
 			break;
 		case RETURN_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] return phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] return phase\n");
 			if (returnPhase(response, location) == REDIRECT)
 				state = ERROR_PAGE_PHASE;
 			else
 				state = ALLOW_PHASE;
 			break;
 		case ALLOW_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] allow phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] allow phase\n");
 			ret = config_handler.allowRequest(server, location, request, client_addr);
 			if (ret == ConfigHandler::ACCESS_DENY)
 			{
@@ -401,7 +401,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 				state = URI_CHECK_PHASE;
 			break;
 		case URI_CHECK_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] uri check phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] uri check phase\n");
 			// uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
 			if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
 			{
@@ -417,7 +417,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 				state = CONTENT_PHASE;
 			break;
 		case CONTENT_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] content phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] content phase\n");
 			ret = contentHandler(response, request, server, location, config_handler);
 			if (ret == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
@@ -427,14 +427,14 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 				state = LOG_PHASE;
 			break;
 		case ERROR_PAGE_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] error page phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] error page phase\n");
 			if (errorPagePhase(response, request, server, location, config_handler) == INTERNAL_REDIRECT)
 				state = SEARCH_LOCATION_PHASE;
 			else
 				state = LOG_PHASE;
 			break;
 		case LOG_PHASE:
-			config_handler.writeErrorLog(server, location, "wevserb: [debug] log phase\n");
+			config_handler.writeErrorLog(server, location, "webserv: [debug] log phase\n");
 			config_handler.writeAccessLog(server, location, "write Client Access by access log format");
 			state = END_PHASE;
 			break;
@@ -444,10 +444,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 		}
 	}
 
-	config_handler.writeErrorLog(server, location, "wevserb: [debug] header filter\n");
+	config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
 	headerFilterPhase(response);
 
-	config_handler.writeErrorLog(server, location, "wevserb: [debug] create final response\n");
+	config_handler.writeErrorLog(server, location, "webserv: [debug] create final response\n");
 	return createResponse(response);
 }
 
