@@ -1,6 +1,6 @@
 #include "EpollServer.hpp"
 
-#if defind(EPOLL_AVAILABLE)
+#if defined(EPOLL_AVAILABLE)
 
 EpollServer::EpollServer() {}
 
@@ -25,13 +25,13 @@ bool	EpollServer::initEpollServer()
 	return true;
 }
 
-bool	EpollServer::initEpollEvent(const std::map<int, ConnectionData> &connections)
+bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData> &connections )
 {
 	// epoll_event listの作成
 	return true;
 }
 
-int	EpollServer::waitForEvent( ConnectionManager* conn_manager, IactiveEventManager* event_manager)
+int	EpollServer::waitForEvent( ConnectionManager* conn_manager, IactiveEventManager* event_manager )
 {
 	// ここでタイムアウトを設定する必要があるならば、
 	// epoll_pwait2()を使うことで、timespec型のtimeout値を指定できる。

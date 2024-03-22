@@ -22,24 +22,28 @@ void	EpollActiveEventManager:: setActiveEventsNum( const int num )
 
 void	EpollActiveEventManager::addEvent( const void *event )
 {
+	(void)event;
 }
 
 void	EpollActiveEventManager::clearAllEvents()
 {
 }
 
-bool	EpollActiveEventManager::isReadEvent( const void *event)
+bool	EpollActiveEventManager::isReadEvent( const void *event )
 {
+	(void)event;
 	return true;
 }
 
-bool	EpollActiveEventManager::isWriteEvent( const void *event)
+bool	EpollActiveEventManager::isWriteEvent( const void *event )
 {
+	(void)event;
 	return true;
 }
 
-bool	EpollActiveEventManager::isErrorEvent( const void *event)
+bool	EpollActiveEventManager::isErrorEvent( const void *event )
 {
+	(void)event;
 	return true;
 }
 
