@@ -20,6 +20,9 @@ void WebServer::initializeServer()
 	#if defined(KQUEUE_AVAILABLE)
 	this->server = new KqueueServer();
 	this->eventManager = new KqueueActiveEventManager();
+	#elif defined(EPOLL_AVAILABLE)
+	this->server = new EpollServer();
+	this->eventManager = new EpollActiveEventManager();
 	#else
 	this->server = new PollServer();
 	this->eventManager = new PollActiveEventManager();
