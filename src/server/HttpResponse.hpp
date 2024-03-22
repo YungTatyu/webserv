@@ -17,10 +17,10 @@ class HttpResponse
 		// member methods
 		static void	prepareResponse( const HttpRequest& request, const struct TiedServer& tied_servers, const int client_sock );
 		static std::string	createStaticResponse();
-
+		std::string	cgi_status_code_line_;
+		long	status_code_; // response生成するときにstatus_line_map_参照する
 	private:
 		// private variables
-		unsigned int		status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string>	headers_;
 		std::string			body_;
 		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap
