@@ -58,7 +58,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 
 ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
-	std::vector<char> response = connManager.getFinalResponse( cli_sock );
+	std::vector<unsigned char> response = connManager.getFinalResponse( cli_sock );
 	size_t totalSent = 0;
 	size_t resSize = response.size();
 	const size_t chunkSize = 1024;

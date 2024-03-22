@@ -23,12 +23,12 @@ const std::vector<char>& ConnectionManager::getRawRequest( const int fd ) const
 	return connections_.at(fd).rawRequest;
 }
 
-void ConnectionManager::setFinalResponse( const int fd, const std::vector<char>& final_response )
+void ConnectionManager::setFinalResponse( const int fd, const std::vector<unsigned char>& final_response )
 {
 	connections_.at(fd).final_response_ = final_response;
 }
 
-const std::vector<char>& ConnectionManager::getFinalResponse( const int fd ) const
+const std::vector<unsigned char>& ConnectionManager::getFinalResponse( const int fd ) const
 {
 	return connections_.at(fd).final_response_;
 }

@@ -35,7 +35,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 		std::string	final_response = HttpResponse::generateResponse( request, connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
 		if (!final_response.empty())
-			connManager.setFinalResponse( sockfd, std::vector<char> (final_response.begin(), final_response.end()));
+			connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
 		connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
 		return RequestHandler::UPDATE_WRITE;
