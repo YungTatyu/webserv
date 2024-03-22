@@ -41,6 +41,7 @@ class HttpResponse
 	private:
 				// private member
 		size_t	internal_redirect_cnt_;
+		static const size_t kMaxInternalRedirect = 10;
 
 		// utils methods
 		// 名前微妙
