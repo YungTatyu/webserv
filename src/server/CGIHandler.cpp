@@ -18,7 +18,7 @@ cgi::CGIHandler::~CGIHandler() {}
  * @brief cgi実行fileか
  * cgi実行ファイルの拡張子
  * 1. *.php
- * 2. *.cig
+ * 2. *.cgi
  * 3. *.py
  * 
  * @param script_path 
