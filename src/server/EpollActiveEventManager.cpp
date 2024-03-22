@@ -1,6 +1,7 @@
 #include "EpollActiveEventManager.hpp"
-#include <sys/epoll.h>
+
 #if defined(EPOLL_AVAILABLE)
+#include <sys/epoll.h>
 
 EpollActiveEventManager::EpollActiveEventManager() {}
 

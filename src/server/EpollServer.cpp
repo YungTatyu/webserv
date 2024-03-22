@@ -1,12 +1,12 @@
 #include "ConnectionManager.hpp"
 #include "NetworkIOHandler.hpp"
 #include "RequestHandler.hpp"
-#include <sys/epoll.h>
 #include <cstring>
 
 #if defined(EPOLL_AVAILABLE)
 #include "EpollServer.hpp"
 #include "EpollActiveEventManager.hpp"
+#include <sys/epoll.h>
 
 EpollServer::EpollServer() {}
 
