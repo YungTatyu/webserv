@@ -23,7 +23,7 @@ TEST(cgi_executor, status_error1)
 	HttpResponse	response;
 	cgi::CGIParser	parser(response);
 
-	EXPECT_FALSE(parser.parse(response, "status: OK\r\nstatus: 200 OK\r\n\r\n"));
+	EXPECT_FALSE(parser.parse(response, "status: OK\r\n\r\n"));
 }
 
 TEST(cgi_executor, status_error2)
@@ -36,7 +36,7 @@ TEST(cgi_executor, status_error2)
 	 */
 	for (int i = -100; i < 100; i++)
 	{
-		EXPECT_FALSE(parser.parse(response, "status: OK\r\nstatus: 200 OK\r\n\r\n"));
+		EXPECT_FALSE(parser.parse(response, std::string("status:") + std::to_string(i) + "OK\r\n\r\n"));
 	}
 }
 
