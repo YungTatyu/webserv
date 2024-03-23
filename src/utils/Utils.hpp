@@ -1,5 +1,5 @@
-#ifndef FILEUTILS_HPP
-# define FILEUTILS_HPP
+#ifndef UTILS_HPP
+# define UTILS_HPP
 
 # include <string>
 # include <sstream>
@@ -7,9 +7,10 @@
 # include <fstream>
 # include <dirent.h>
 # include <sys/stat.h>
+# include <sys/types.h>
 # include <vector>
 
-namespace FileUtils
+namespace Utils
 {
 	int wrapperOpen(const std::string path, int flags, mode_t modes );
 	int wrapperAccess( const std::string path, int modes, bool err_log );
@@ -20,6 +21,7 @@ namespace FileUtils
 	std::vector<std::string> getDirectoryContents( const std::string& directoryPath );
 	bool isExecutable( const char* filename );
 	bool isPHPExtension( const std::string& filename );
+	ssize_t wrapperWrite( const int fd, const std::string& msg );
 }
 
 #endif

@@ -6,7 +6,7 @@
 #include "ConfigHandler.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <fstream>
 

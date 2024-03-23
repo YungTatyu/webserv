@@ -28,8 +28,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
 	src/server/HttpResponse.cpp
-	src/utils/FileUtils.cpp
-	src/utils/IOUtils.cpp
+	src/utils/Utils.cpp
 
 	# test files
 	test/server/config_handler_test.cpp

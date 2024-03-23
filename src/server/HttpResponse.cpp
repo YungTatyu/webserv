@@ -1,5 +1,5 @@
 #include "HttpResponse.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 #include "string.h"
 #include <ctime>
 #include <iomanip>
@@ -402,7 +402,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 		case URI_CHECK_PHASE:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] uri check phase\n");
 			// uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-			if (request.uri[request.uri.length() - 1] != '/' && FileUtils::isDirectory(server.root.getPath() + request.uri))
+			if (request.uri[request.uri.length() - 1] != '/' && Utils::isDirectory(server.root.getPath() + request.uri))
 			{
 				response.status_code_ = 301;
 				state = ERROR_PAGE_PHASE;
@@ -495,10 +495,10 @@ int	HttpResponse::TryFiles( HttpResponse& response, HttpRequest& request, const 
 	for (size_t i = 0; i < file_list.size(); i++)
 	{
 		std::string	full_path = response.root_path_ + file_list[i];
-		if (FileUtils::wrapperAccess(full_path, F_OK, false) == 0 &&
-			FileUtils::wrapperAccess(full_path, R_OK, false) == 0)
+		if (Utils::wrapperAccess(full_path, F_OK, false) == 0 &&
+			Utils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
-			response.body_ = FileUtils::readFile(full_path);
+			response.body_ = Utils::readFile(full_path);
 			return OK;
 		}
 	}
@@ -518,7 +518,7 @@ int	HttpResponse::TryFiles( HttpResponse& response, HttpRequest& request, const 
 
 std::string HttpResponse::autoIndex( const std::string& directory_path )
 {
-	std::vector<std::string> contents = FileUtils::getDirectoryContents(directory_path);
+	std::vector<std::string> contents = Utils::getDirectoryContents(directory_path);
 	std::stringstream buffer;
 	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
 	buffer << "<body><h1>Directory listing for " << directory_path << "</h1>";
@@ -545,10 +545,10 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
 	for (size_t i = 0; i < index_list.size(); i++)
 	{
 		std::string	full_path = directory_path + index_list[i].getFile();
-		if (FileUtils::wrapperAccess(full_path, F_OK, false) == 0 ||
-			FileUtils::wrapperAccess(full_path, R_OK, false) == 0)
+		if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
+			Utils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
-			response.body_ = FileUtils::readFile(full_path);
+			response.body_ = Utils::readFile(full_path);
 			return OK;
 		}
 	}
@@ -573,13 +573,13 @@ int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, c
 	if (request.uri[request.uri.length() - 1] != '/')
 	{
 		std::string full_path = response.root_path_ + request.uri;
-		if (FileUtils::wrapperAccess(full_path, F_OK, false) != 0 ||
-			FileUtils::wrapperAccess(full_path, R_OK, false) != 0)
+		if (Utils::wrapperAccess(full_path, F_OK, false) != 0 ||
+			Utils::wrapperAccess(full_path, R_OK, false) != 0)
 		{
 			response.status_code_ = 404;
 			return ERROR_PAGE;
 		}
-		response.body_ = FileUtils::readFile(full_path);
+		response.body_ = Utils::readFile(full_path);
 		return OK;
 	}
 

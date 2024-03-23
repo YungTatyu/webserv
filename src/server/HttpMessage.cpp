@@ -1,6 +1,6 @@
 #include "HttpMessage.hpp"
 #include "CGIHandler.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 
 std::string HttpMessage::setQueryString( std::string& uri )
 {
@@ -32,7 +32,7 @@ HttpRequest HttpMessage::requestParser( std::string &rawRequest )
 
 //std::string HttpMessage::autoIndex(const std::string& directoryPath)
 //{
-//	std::vector<std::string> contents = FileUtils::getDirectoryContents(directoryPath);
+//	std::vector<std::string> contents = Utils::getDirectoryContents(directoryPath);
 //	std::stringstream buffer;
 //	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
 //	buffer << "<body><h1>Directory listing for " << directoryPath << "</h1>";
@@ -68,13 +68,13 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 {	
 	request.uri = std::string(".") + request.uri;
 
-	if ( FileUtils::isDirectory(request.uri) )
+	if ( Utils::isDirectory(request.uri) )
 	{
 		std::string indexPath = request.uri + "/index.html";
 		std::ifstream ifile( indexPath.c_str() );
 		if ( ifile )
 		{
-			return HttpMessage::createResponse( FileUtils::readFile(indexPath) );
+			return HttpMessage::createResponse( Utils::readFile(indexPath) );
 		}
 		else
 		{
@@ -88,11 +88,11 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		{
 			if ( CGIHandler::isCGI( request.uri ) )
 				return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.queries["f1"] ) );
-			return HttpMessage::createResponse( FileUtils::readFile(request.uri) );
+			return HttpMessage::createResponse( Utils::readFile(request.uri) );
 		}
 		else
 		{
-			return HttpMessage::createResponse( FileUtils::readFile("html/404.html"), "404 Not Found" );
+			return HttpMessage::createResponse( Utils::readFile("html/404.html"), "404 Not Found" );
 		}
 	}
 }

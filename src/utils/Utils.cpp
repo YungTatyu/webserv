@@ -1,4 +1,4 @@
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 #include <dirent.h>
 #include <fcntl.h>
 #include <string.h>
@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <sys/param.h>
 
-int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
+const static size_t WriteSize = 1024;
+
+int	Utils::wrapperOpen( const std::string path, int flags, mode_t modes )
 {
 	int fd = open(path.c_str(), flags, modes);
 	if (fd == -1)
@@ -16,7 +18,7 @@ int	FileUtils::wrapperOpen( const std::string path, int flags, mode_t modes )
 	return fd;
 }
 
-int	FileUtils::wrapperAccess( const std::string path, int modes, bool err_log )
+int	Utils::wrapperAccess( const std::string path, int modes, bool err_log )
 {
 	int ret = access(path.c_str(), modes);
 	if (ret == -1 && err_log)
@@ -26,7 +28,7 @@ int	FileUtils::wrapperAccess( const std::string path, int modes, bool err_log )
 	return ret;
 }
 
-bool	FileUtils::wrapperRealpath( const std::string path, std::string& absolute_path )
+bool	Utils::wrapperRealpath( const std::string path, std::string& absolute_path )
 {
 	char	tmp_path[MAXPATHLEN];
 	if (realpath(path.c_str(), tmp_path) == NULL)
@@ -38,7 +40,7 @@ bool	FileUtils::wrapperRealpath( const std::string path, std::string& absolute_p
 	return true;
 }
 
-bool FileUtils::isFile( const std::string& path )
+bool Utils::isFile( const std::string& path )
 {
 	struct stat statbuf;
 	if ( stat(path.c_str(), &statbuf) != 0 )
@@ -49,7 +51,7 @@ bool FileUtils::isFile( const std::string& path )
 	return S_ISREG(statbuf.st_mode);
 }
 
-bool FileUtils::isDirectory( const std::string& path )
+bool Utils::isDirectory( const std::string& path )
 {
 	struct stat statbuf;
 	if ( stat(path.c_str(), &statbuf) != 0 )
@@ -60,7 +62,7 @@ bool FileUtils::isDirectory( const std::string& path )
 	return S_ISDIR(statbuf.st_mode);
 }
 
-std::string FileUtils::readFile( const std::string& filePath )
+std::string Utils::readFile( const std::string& filePath )
 {
 	std::ifstream file(filePath.c_str());
 	std::stringstream buffer;
@@ -68,7 +70,7 @@ std::string FileUtils::readFile( const std::string& filePath )
 	return buffer.str();
 }
 
-std::vector<std::string> FileUtils::getDirectoryContents( const std::string& directoryPath )
+std::vector<std::string> Utils::getDirectoryContents( const std::string& directoryPath )
 {
 	std::vector<std::string> contents;
 	DIR* dir = opendir(directoryPath.c_str());
@@ -80,7 +82,7 @@ std::vector<std::string> FileUtils::getDirectoryContents( const std::string& dir
 			std::string filename = entry->d_name;
 			if (filename != "." && filename != "..")
 			{
-				if (FileUtils::isDirectory(directoryPath + "/" + filename))
+				if (Utils::isDirectory(directoryPath + "/" + filename))
 					filename += "/";
 				contents.push_back(filename);
 			}
@@ -90,7 +92,7 @@ std::vector<std::string> FileUtils::getDirectoryContents( const std::string& dir
 	return contents;
 }
 
-bool FileUtils::isExecutable( const char* filename )
+bool Utils::isExecutable( const char* filename )
 {
 	struct stat sbuf;
 	if ( stat(filename, &sbuf) < 0 )
@@ -98,11 +100,30 @@ bool FileUtils::isExecutable( const char* filename )
 	return S_ISREG(sbuf.st_mode) && (S_IXUSR & sbuf.st_mode);
 }
 
-bool FileUtils::isPHPExtension( const std::string& filename )
+bool Utils::isPHPExtension( const std::string& filename )
 {
 	std::string phpExt = ".php";
 	if ( filename.length() < phpExt.length() )
 		return false;
 	return std::equal( phpExt.begin(), phpExt.end(), filename.end() - phpExt.length() );
+}
+
+ssize_t	Utils::wrapperWrite( const int fd, const std::string& msg )
+{
+	size_t	msg_size = msg.size();
+	size_t	written_bytes = 0;
+
+	while ( written_bytes < msg_size )
+	{
+		size_t write_size = std::min(WriteSize, msg_size - written_bytes);
+		std::string chunk = msg.substr(written_bytes, write_size);
+
+		ssize_t ret = write(fd, chunk.c_str(), chunk.size());
+		if (ret == -1)
+			return -1;
+
+		written_bytes += ret;
+	}
+	return written_bytes;
 }
 

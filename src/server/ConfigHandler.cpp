@@ -1,5 +1,5 @@
 #include "ConfigHandler.hpp"
-#include "IOUtils.hpp"
+#include "Utils.hpp"
 #include "NetworkIOHandler.hpp"
 #include <sys/socket.h>
 #include <cstring>
@@ -186,7 +186,7 @@ void	ConfigHandler::writeAccessLog( const config::Server& server, const config::
 	{
 		for (size_t i = 0; i < location->access_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(location->access_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(location->access_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -194,7 +194,7 @@ void	ConfigHandler::writeAccessLog( const config::Server& server, const config::
 	{
 		for (size_t i = 0; i < server.access_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(server.access_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(server.access_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -202,7 +202,7 @@ void	ConfigHandler::writeAccessLog( const config::Server& server, const config::
 	{
 		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -221,7 +221,7 @@ void	ConfigHandler::writeErrorLog( const config::Server& server, const config::L
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(location->error_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(location->error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -229,7 +229,7 @@ void	ConfigHandler::writeErrorLog( const config::Server& server, const config::L
 	{
 		for (size_t i = 0; i < server.error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(server.error_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(server.error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -237,7 +237,7 @@ void	ConfigHandler::writeErrorLog( const config::Server& server, const config::L
 	{
 		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
@@ -245,7 +245,7 @@ void	ConfigHandler::writeErrorLog( const config::Server& server, const config::L
 	{
 		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
+			if (Utils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
 				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}

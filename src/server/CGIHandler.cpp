@@ -1,5 +1,5 @@
 #include "CGIHandler.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 #include "SysCallWrapper.hpp"
 #include <cstdlib>
 
@@ -7,7 +7,7 @@
 // or ./a.out
 bool CGIHandler::isCGI( std::string& requestURI )
 {
-	return FileUtils::isPHPExtension(requestURI) || FileUtils::isExecutable(requestURI.c_str());
+	return Utils::isPHPExtension(requestURI) || Utils::isExecutable(requestURI.c_str());
 }
 
 std::vector<std::string> CGIHandler::split(const std::string& s, char delimiter)
@@ -63,7 +63,7 @@ std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
 		std::string env = "QUERY_STRING=" + query;
 		char *environ[] = {const_cast<char *>(env.c_str()), NULL};
 
-		if ( FileUtils::isPHPExtension(uri) )
+		if ( Utils::isPHPExtension(uri) )
 		{
 			char *cmd[] = {const_cast<char *>("php"), const_cast<char *>(uri.c_str()), NULL};
 			execve( CGIHandler::getCommandPath("php").c_str(), cmd, environ );
