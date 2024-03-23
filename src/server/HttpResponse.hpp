@@ -7,17 +7,7 @@
 # include "ConfigHandler.hpp"
 # include "HttpRequest.hpp"
 # include "NetworkIOHandler.hpp"
-
-// 大文字小文字を区別しない文字列比較関数
-struct CaseInsensitiveCompare
-{
-	bool operator()(std::string lhs, std::string rhs) const
-	{
-		std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
-		std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
-		return lhs < rhs;
-	}
-};
+# include "Utils.hpp"
 
 class HttpResponse
 {
@@ -33,7 +23,7 @@ class HttpResponse
 		std::string	root_path_;
 		std::string	cgi_status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
-		std::map<std::string, std::string, CaseInsensitiveCompare>	headers_;
+		std::map<std::string, std::string, Utils::CaseInsensitiveCompare>	headers_;
 		std::string			body_;
 		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap
 		static std::map<int, const std::string*> default_error_page_map_; // defaultのerror pageを格納するmap
