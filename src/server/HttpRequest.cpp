@@ -146,6 +146,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest,
 			newRequest.method = config::DELETE;
 			break;
 		}
+		break;
 	default:
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
