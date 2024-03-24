@@ -153,3 +153,57 @@ TEST(cgi_parser, cl_ok3)
 	EXPECT_TRUE(parser.parse(response, "CONTENT-LENGTH:0\r\nstatus: 200 OK\r\n\r\n"));
 	test::expectHeader(response, "0", "content-length");
 }
+
+// ++++++++++++++++++++++++++++++ Content-type test ++++++++++++++++++++++++++++++
+TEST(cgi_parser, error_ct_invalid_value)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser(response);
+
+	EXPECT_FALSE(parser.parse(response, "status: 200\r\ncontent-length: 10\r\ncontent-type:test test\r\n\r\n"));
+}
+
+TEST(cgi_parser, ct_ok1)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser(response);
+
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\ncontent-type:123 \r\n\r\n"));
+	test::expectHeader(response, "123", "content-Type");
+}
+
+TEST(cgi_parser, ct_ok2)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser(response);
+
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type:   text \r\n\r\n"));
+	test::expectHeader(response, "text", "content-Type");
+}
+
+TEST(cgi_parser, ct_ok3)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser(response);
+
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type:\r\n\r\n"));
+	test::expectHeader(response, "", "CONTENT-TYPE");
+}
+
+TEST(cgi_parser, ct_ok4)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser(response);
+
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type\r\n\r\n"));
+	test::expectHeader(response, "", "CONTENT-TYPE");
+}
+
+TEST(cgi_parser, ct_ok5)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser(response);
+
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nCONTENT-TYPE: test/html\r\n\r\n"));
+	test::expectHeader(response, "text", "content-type");
+}
