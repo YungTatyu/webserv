@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+#include "LimitExcept.hpp"
 
 HttpRequest::HttpRequest(const unsigned int method, const std::string &uri,
 			 const std::string &version,
@@ -138,6 +139,11 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest,
 			break;
 		}
 		return HttpRequest::PARSE_ERROR;
+	case 6:
+		if (method == "DELETE") {
+			newRequest.method = config::DELETE;
+			break;
+		}
 	default:
 		return HttpRequest::PARSE_ERROR; // 501 Not Implemented (SHOULD)
 		break;
