@@ -225,6 +225,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest,
 
 	state = sw_start;
 	size_t i = 0;
+	if (rawRequest.empty()) return HttpRequest::PARSE_ERROR;
 	while (state != sw_end && i < rawRequest.size()) {
 		switch (state) {
 		case sw_start:
