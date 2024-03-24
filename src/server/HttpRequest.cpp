@@ -49,6 +49,8 @@ HttpRequest HttpRequest::doParseRequest(std::string &rawRequest)
 		case sw_headers:
 			newRequest.parseState =
 			    HttpRequest::parseHeaders(rawRequest, newRequest);
+			if (newRequest.parseState == HttpRequest::PARSE_ERROR)
+				return newRequest;
 			if (newRequest.headers.find("Transfer-Encoding") !=
 			    newRequest.headers.end())
 				state = sw_chunked;
@@ -350,6 +352,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest,
 			break;
 		}
 	}
+	if (newRequest.headers.find("Host") == newRequest.headers.end())
+		return HttpRequest::PARSE_ERROR;
 	rawRequest = rawRequest.substr(i);
 	return HttpRequest::PARSE_HEADER_DONE;
 }
