@@ -25,7 +25,7 @@ class HttpRequest
 		PARSE_ERROR
 	};
 
-	HttpRequest(const unsigned int method = config::UNKNOWN,
+	HttpRequest(const config::REQUEST_METHOD &method = config::UNKNOWN,
 		    const std::string &uri = "",
 		    const std::string &version = "",
 		    const std::map<std::string, std::string> &headers =
@@ -43,7 +43,7 @@ class HttpRequest
 	static void doParseChunked(std::string &rawRequest,
 				   HttpRequest &request);
 
-	unsigned int method;
+	config::REQUEST_METHOD method;
 	std::string uri; // スキーマ、ポートは？？
 	std::string version;
 	std::map<std::string, std::string>

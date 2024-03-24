@@ -1,7 +1,7 @@
 #include "HttpRequest.hpp"
 #include "LimitExcept.hpp"
 
-HttpRequest::HttpRequest(const unsigned int method, const std::string &uri,
+HttpRequest::HttpRequest(const config::REQUEST_METHOD& method, const std::string &uri,
 			 const std::string &version,
 			 const std::map<std::string, std::string> &headers,
 			 const std::string &queries, const std::string &body,
