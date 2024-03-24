@@ -29,8 +29,8 @@ class EpollServer : public IServer
 		int	epfd_; // epoll instance
 		bool	initEpollServer();
 		bool	initEpollEvent( const std::map<int, ConnectionData> &connections );
-		int	addNewEvent( const int fd, const int event_filter );
-		int	updateEvent( struct epoll_event &old_event, const int event_filter );
+		int	addNewEvent( const int fd, const uint32_t event_filter );
+		int	updateEvent( struct epoll_event &old_event, const uint32_t event_filter );
 		int	deleteEvent( struct epoll_event &old_event );
 };
 

@@ -144,7 +144,7 @@ void	EpollServer::callEventHandler(
 
 }
 
-int	EpollServer::addNewEvent( const int fd, const int event_filter )
+int	EpollServer::addNewEvent( const int fd, const uint32_t event_filter )
 {
 	struct epoll_event	new_event;
 	new_event.events = event_filter;
@@ -152,7 +152,7 @@ int	EpollServer::addNewEvent( const int fd, const int event_filter )
 	return epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
 }
 
-int	EpollServer::updateEvent( struct epoll_event &old_event, const int event_filter )
+int	EpollServer::updateEvent( struct epoll_event &old_event, const uint32_t event_filter )
 {
 	old_event.events = event_filter;
 	return epoll_ctl(this->epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
