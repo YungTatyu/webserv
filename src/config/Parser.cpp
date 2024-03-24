@@ -930,7 +930,7 @@ bool	config::Parser::parseRoot()
 		std::set<std::string>	&location_directives = this->config_.http.server_list.back().location_list.back().directives_set;
 		if (location_directives.find(kALIAS) != location_directives.end())
 		{
-			std::cerr << "webserv: [emerg] \"root\" directive is duplicate, \"alias\" directive was specified earlier in in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			std::cerr << "webserv: [emerg] \"root\" directive is duplicate, \"alias\" directive was specified earlier in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;
 		}
 		this->config_.http.server_list.back().location_list.back().root.setPath(path);
@@ -1613,7 +1613,7 @@ bool	config::Parser::parseAlias()
 	std::set<std::string>	&location_directives = this->config_.http.server_list.back().location_list.back().directives_set;
 	if (location_directives.find(kROOT) != location_directives.end())
 	{
-		std::cerr << "webserv: [emerg] \"alias\" directive is duplicate, \"root\" directive was specified earlier in in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+		std::cerr << "webserv: [emerg] \"alias\" directive is duplicate, \"root\" directive was specified earlier in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 		return false;
 	}
 
