@@ -159,23 +159,25 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest,
 HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest,
 					      HttpRequest &newRequest)
 {
-	/*
 	enum parseUriPhase {
 		sw_start,
-		sw_uriBeforeSlash,
+		sw_slash_before_uri,
 		sw_schema,
 		sw_almost_end,
 		sw_end
 	} state;
 
 	state = sw_start;
-	ここでステートマシンを実装する
-	while (state != sw_end) {
+	size_t i = 0;
+	while (state != sw_end && i < rawRequest.size()) {
 		switch (state) {
 		case sw_start:
-			state = sw_uriBeforeSlash;
+			state = sw_slash_before_uri;
 			break;
-		case sw_uriBeforeSlash:
+		case sw_slash_before_uri:
+			if (rawRequest[i] != '/')
+				return HttpRequest::PARSE_ERROR;
+			++i;
 			state = sw_schema;
 			break;
 		case sw_schema:
@@ -188,7 +190,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest,
 			break;
 		}
 	}
-	*/
+
 	std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
 	tmp = urlDecode(tmp);
 	newRequest.uri = tmp.substr(0, tmp.find('?'));
@@ -196,6 +198,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest,
 	if (qindex != std::string::npos)
 		newRequest.queries = tmp.substr(tmp.find('?') + 1);
 	rawRequest = rawRequest.substr(rawRequest.find(' ') + 1);
+
 	return HttpRequest::PARSE_URI_DONE;
 }
 
