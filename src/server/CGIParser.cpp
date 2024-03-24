@@ -55,7 +55,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		sw_name,
 		sw_colon,
 		sw_nl,
-		sw_space_before_value,
 		sw_value,
 		sw_dup_value,
 		sw_space_after_value,
@@ -81,6 +80,8 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		switch (state)
 		{
 		case sw_start:
+			cur_name.clear();
+			cur_value.clear();
 			switch (ch)
 			{
 			case '\r':
@@ -112,7 +113,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 					state = sw_error;
 					break;
 				}
-				++cri_;
+				state = sw_colon;
 				break;
 			case '\r':
 				next_state = sw_end;
@@ -136,22 +137,61 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			}
 			break;
 
+		case sw_colon:
+			++cri_;
+			state = sw_value;
+			break;
+
+		case sw_value:
+			switch (ch)
+			{
+			case '\r':
+				++cri_;
+				next_state = sw_nl;
+				state = sw_start;
+				break;
+			case '\n':
+				state = sw_header_almost_done;
+				break;
+			default:
+				if (std::isspace(ch))
+				{
+					++cri_;
+					break;
+				}
+				cur_value += ch;
+				break;
+			}
+		
+		case sw_dup_value:
+			switch (ch)
+			{
+			case '\r':
+				next_state = sw_start;
+				state = sw_nl;
+				break;
+			case '\n':
+				state = sw_start;
+				break;
+			default:
+				break;
+			}
+			++cri_;
+
 		case sw_header_almost_done:
 			switch (ch)
 			{
 			case '\r':
 				state = sw_header_done;
+				++cri_;
 				break;
 			case '\n':
-				state = sw_end;
+				state = sw_header_done;
 				break;
 			default:
 				state = sw_error;
 				break;
 			}
-			if (!cur_name.empty())
-				this->headers_->insert(std::make_pair(cur_name, cur_value));
-
 			break;
 		
 		case sw_header_done:
@@ -160,7 +200,10 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_error;
 				break;
 			}
-			state = sw_end;
+			if (!cur_name.empty())
+				this->headers_->insert(std::make_pair(cur_name, cur_value));
+			++cri_;
+			state = sw_start;
 			break;
 
 		case sw_nl:
@@ -174,6 +217,9 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 
 		case sw_end:
+			break;
+
+		default:
 			break;
 		}
 
