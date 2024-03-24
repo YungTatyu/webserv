@@ -1,4 +1,5 @@
 #include "RequestHandler.hpp"
+#include "HttpResponse.hpp"
 #include "HttpMessage.hpp"
 #include <sys/types.h>
 #include <algorithm>
@@ -10,7 +11,7 @@ RequestHandler::RequestHandler()
 	// this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
 }
 
-int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
 		if (sockfd == ioHandler.getListenfd())
@@ -32,19 +33,16 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		HttpRequest request = HttpMessage::requestParser( requestData );
 		connManager.setRequest( sockfd, request );
 
+		std::string	final_response = HttpResponse::generateResponse( request, connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
+		if (!final_response.empty())
+			connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
+
 		connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
 		return RequestHandler::UPDATE_WRITE;
 }
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
-	// response作成
-	HttpRequest request = connManager.getRequest( sockfd );
-	std::string response = HttpMessage::responseGenerater( request );
-
-	std::vector<char> vec( response.begin(), response.end()) ;
-	connManager.setResponse( sockfd, vec );
-
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
 		return RequestHandler::NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新

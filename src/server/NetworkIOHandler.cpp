@@ -1,4 +1,5 @@
 #include "NetworkIOHandler.hpp"
+#include "ConnectionManager.hpp"
 
 /* NetworkIOHandlerクラスの実装 */
 void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
@@ -57,7 +58,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 
 ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
-	std::vector<char> response = connManager.getResponse( cli_sock );
+	std::vector<unsigned char> response = connManager.getFinalResponse( cli_sock );
 	size_t totalSent = 0;
 	size_t resSize = response.size();
 	const size_t chunkSize = 1024;
@@ -86,6 +87,7 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	// 新規クライントfdを追加
 	connManager.setConnection( connfd );
 	connManager.setEvent( connfd, ConnectionData::EV_READ );
+	connManager.setTiedServer( connfd, &this->listenfd_map_[listenfd_]);
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

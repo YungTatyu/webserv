@@ -21,12 +21,14 @@ class KqueueServer : public IServer
 		void	eventLoop(ConnectionManager* conn_manager,
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
-							RequestHandler* request_handler);
+							RequestHandler* request_handler,
+							ConfigHandler* config_handler);
 		int	waitForEvent(ConnectionManager* conn_manager, IActiveEventManager *event_manager);
 		void	callEventHandler(ConnectionManager* conn_manager,
 									IActiveEventManager* event_manager,
 									NetworkIOHandler* io_handler,
-									RequestHandler* request_handler);
+									RequestHandler* request_handler,
+									ConfigHandler* config_handler);
 	private:
 		int	kq_; // kqueue fd
 		bool	initKqueueServer();

@@ -4,6 +4,7 @@
 #include "Parser.hpp"
 #include "ConfigHandler.hpp"
 #include "LogFd.hpp"
+#include "NetworkIOHandler.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>

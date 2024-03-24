@@ -1,5 +1,5 @@
 #include "CGIExecutor.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 
 #include <unistd.h>
 #include <cstdlib>
@@ -48,7 +48,7 @@ void	cgi::CGIExecutor::prepareCgiExecution(
 void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
 {
 	this->script_path_ = script_path;
-	if (!FileUtils::isExtensionFile(script_path, kPhpExtension))
+	if (!Utils::isExtensionFile(script_path, kPhpExtension))
 		return;
 	// スクリプトがphpの場合は、phpのpathを探す必要がある
 	const std::string	path = searchCommandInPath(kPhp);
@@ -59,7 +59,7 @@ void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
 
 void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 {
-	if (FileUtils::isExtensionFile(script_path, kPhpExtension))
+	if (Utils::isExtensionFile(script_path, kPhpExtension))
 	{
 		this->argv_.push_back(kPhp);
 		this->argv_.push_back(script_path.c_str());

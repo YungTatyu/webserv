@@ -1,5 +1,5 @@
 #include "LogFd.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -38,10 +38,10 @@ int	config::addAcsFdList ( std::set<std::string>& directives_set, const std::vec
 		tmp_path = access_log_list[i].getFile();
 		// ファイルはあるが、write権限がない時ときは飛ばす
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
-		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
+		if (Utils::wrapperAccess(tmp_path, F_OK, false) == 0 && Utils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
 		// openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+		tmp_fd = Utils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return -1;
@@ -66,9 +66,9 @@ int	config::addErrFdList ( std::set<std::string>& directives_set, const std::vec
 		tmp_path = error_log_list[i].getFile();
 		// ファイルはあるが、write権限がない時ときは飛ばす
 		// ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
-		if (FileUtils::wrapperAccess(tmp_path, F_OK, false) == 0 && FileUtils::wrapperAccess(tmp_path, W_OK, false) == -1)
+		if (Utils::wrapperAccess(tmp_path, F_OK, false) == 0 && Utils::wrapperAccess(tmp_path, W_OK, false) == -1)
 			continue;
-		tmp_fd = FileUtils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+		tmp_fd = Utils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return -1;
@@ -91,12 +91,12 @@ bool	config::initAcsLogFds( config::Main& config )
 	else if (ret == 0)
 	{
 		std::string	absolute_path;
-		if (!FileUtils::wrapperRealpath(".", absolute_path))
+		if (!Utils::wrapperRealpath(".", absolute_path))
 		{
 			std::cerr << "webserv: [emerg] realpath() \"" << "." <<"\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
-		int tmp_fd = FileUtils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+		int tmp_fd = Utils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return false;
@@ -133,13 +133,13 @@ bool	config::initErrLogFds( config::Main& config )
 	else if (ret == 0)
 	{
 		std::string	absolute_path;
-		if (!FileUtils::wrapperRealpath(".", absolute_path))
+		if (!Utils::wrapperRealpath(".", absolute_path))
 		{
 			std::cerr << "webserv: [emerg] realpath() \"" << "." << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 			return false;
 		}
 
-		int tmp_fd = FileUtils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+		int tmp_fd = Utils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_), O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (tmp_fd == -1)
 		{
 			return false;

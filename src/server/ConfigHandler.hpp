@@ -1,11 +1,11 @@
-#ifndef CONFIG_HANDLER_HPP
-#define CONFIG_HANDLER_HPP
+#ifndef CONFIGHANDLER_HPP
+#define CONFIGHANDLER_HPP
 
 # include "HttpRequest.hpp"
 # include "Main.hpp"
-# include "NetworkIOHandler.hpp"
 
 # include <map>
+# include <stdint.h>
 
 /**
  * ConfigHandler 方針
@@ -28,21 +28,24 @@ class ConfigHandler
 
 		// method
 		// とりあえずipv4だけ想定
-		bool	allowRequest( const config::Server& server,
+		int	allowRequest( const config::Server& server,
 							const config::Location* location,
 							const HttpRequest& request,
 							struct sockaddr_in client_addr ) const;
-		// ちょっと保留
-		const std::string	searchFile( const struct config::Server& server,
-										const HttpRequest& request ) const;
 		// log出力
 		void	writeAcsLog( const struct TiedServer& tied_servers,
 							const std::string& server_name,
 							const std::string& uri,
 							const std::string& msg ) const;
+		void	writeAccessLog( const config::Server& server,
+							const config::Location* location,
+							const std::string& msg ) const;
 		void	writeErrLog( const struct TiedServer& tied_servers,
 							const std::string& server_name,
 							const std::string& uri,
+							const std::string& msg ) const;
+		void	writeErrorLog( const config::Server& server,
+							const config::Location* location,
 							const std::string& msg ) const;
 		// timeout値の取得
 		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& tied_servers,
@@ -61,6 +64,14 @@ class ConfigHandler
 														const unsigned int code ) const;
 		const config::Server&	searchServerConfig( const struct TiedServer& tied_servers, const std::string& server_name ) const;
 		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
+		std::string	searchRootPath( const config::Server& server, const config::Location* location ) const;
+		bool	isAutoIndexOn( const config::Server& server, const config::Location* location ) const;
+		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
+
+	// const variable
+	static const int	ACCESS_ALLOW = 1;
+	static const int	ACCESS_DENY = 0;
+	static const int	METHOD_DENY = -1;
 
 	private:
 		// utils
@@ -68,7 +79,6 @@ class ConfigHandler
 		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
 		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
 		uint32_t	StrToIPAddress( const std::string& ip ) const;
-		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
 
 	public:
 		int		getServPort();

@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
-#include "IOUtils.hpp"
+#include "Utils.hpp"
 
 typedef std::map<std::string, std::string> string_map;
 typedef std::pair<std::string, std::string> string_pair;
@@ -68,7 +68,7 @@ namespace test
 
 	void	sendBody(const std::string& body, const int socket)
 	{
-		IOUtils::wrapperWrite(socket, body);
+		Utils::wrapperWrite(socket, body);
 	}
 
 	int	waitProcess(pid_t pid)
