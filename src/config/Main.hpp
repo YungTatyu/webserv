@@ -17,6 +17,7 @@ struct Main
 	std::vector<ErrorLog>	error_log_list;
 	Events	events;
 	Http	http;
+	std::vector<int>	error_fd_list;
 };
 
 } // namespace config 

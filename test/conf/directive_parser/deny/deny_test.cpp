@@ -12,7 +12,7 @@ const std::string	kDeny = "deny";
 
 TEST(DenyTest, ipv4)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/deny/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/deny/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -56,7 +56,7 @@ TEST(DenyTest, ipv4)
 
 TEST(DenyTest, ipv6)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/deny/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/deny/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -121,7 +121,7 @@ TEST(DenyTest, ipv6)
 
 
 TEST(DenyTest, notFound) {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

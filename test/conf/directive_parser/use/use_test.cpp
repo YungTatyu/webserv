@@ -13,7 +13,7 @@ const std::string	kUse = "use";
 
 TEST(UseTest, select)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/use/1.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/use/1.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -26,7 +26,7 @@ TEST(UseTest, select)
 
 TEST(UseTest, poll)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/use/2.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/use/2.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;
@@ -39,7 +39,7 @@ TEST(UseTest, poll)
 
 TEST(UseTest, kqueue)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/use/3.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/use/3.conf");
 
 	// 環境によって挙動が変わる
 	#if defined(KQUEUE_AVAILABLE)
@@ -59,7 +59,7 @@ TEST(UseTest, kqueue)
 
 TEST(UseTest, epoll)
 {
-	const config::Main	*config = config::init_config("test/conf/directive_parser/use/4.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/use/4.conf");
 
 	// 環境によって挙動が変わる
 	#if defined(__linux__)
@@ -79,7 +79,7 @@ TEST(UseTest, epoll)
 
 TEST(UseTest, notFound) {
 		
-	const config::Main	*config = config::init_config("test/conf/directive_parser/only_context.conf");
+	const config::Main	*config = config::initConfig("test/conf/directive_parser/only_context.conf");
 	ASSERT_NE(config, nullptr);
 
 	const config::Http	&http = config->http;

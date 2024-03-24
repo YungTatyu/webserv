@@ -1,6 +1,8 @@
 #ifndef HTTP_MESSAGE_HPP
 # define HTTP_MESSAGE_HPP
 
+# include "HttpRequest.hpp"
+
 # include <string>
 # include <sstream>
 # include <iostream>
@@ -21,20 +23,22 @@
 // 	// header, body
 // };
 
-//struct HttpResponse
+//class HttpRequest
 //{
-//	std::string status;
-//	std::string body;
-//	// header
-//};
+//	public:
+//		static std::string setQueryString( std::string& uri );
+//		static std::string setScriptPath( std::string& uri );
 //
-
-#include "HttpRequest.hpp"
+//		std::string method;
+//		std::string uri;
+//		std::string version;
+//		std::string query;
+//	// header, body
+//};
 
 class HttpMessage
 {
 	public:
-		// static HttpRequest requestParser( std::string &rawRequest );
 		static std::string responseGenerater( HttpRequest &request );
 
 		static std::string autoIndex(const std::string& directoryPath);
