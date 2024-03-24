@@ -1,5 +1,9 @@
 #include "CGIParser.hpp"
 
+#include <cctype>
+#include <utility>
+#include <functional>
+
 cgi::CGIParser::CGIParser() :
 	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), cri_(0) {}
 
@@ -50,6 +54,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		sw_error,
 		sw_name,
 		sw_colon,
+		sw_nl,
 		sw_space_before_value,
 		sw_value,
 		sw_dup_value,
@@ -64,8 +69,10 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		this->state_ = PARSE_ERROR;
 		return;
 	}
+
 	cri_ = 0;
 	PARSE_HEADER_PHASE	state = sw_start;
+	PARSE_HEADER_PHASE	next_state; // stateがsw_nl用の変数: \nの後にsetするstateを格納する
 	std::string	cur_name;
 	std::string	cur_value;
 	while (state != sw_end)
@@ -77,27 +84,101 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			switch (ch)
 			{
 			case '\r':
+				next_state = sw_end;
+				state = sw_nl;
+				++cri_;
 				break;
 			case '\n':
-				state = sw_name;
+				++cri_;
+				state = sw_end;
 				break;
 			default:
-				this->state_ = PARSE_ERROR;
-				return;
+				if (std::isspace(ch))
+				{
+					state = sw_error;
+					break;
+				}
+				state = sw_name;
 				break;
 			}
-			++cri_;
 			break;
 		
 		case sw_name:
+			switch (ch)
+			{
+			case ':':
+				if (cur_name.empty())
+				{
+					state = sw_error;
+					break;
+				}
+				++cri_;
+				break;
+			case '\r':
+				next_state = sw_end;
+				state = sw_nl;
+				++cri_;
+				break;
+			case '\n':
+				state = sw_end;
+				++cri_;
+				break;
+			default:
+				// 記号で始まるheaderはerrorにする
+				if ((cur_name.empty() && !std::isalnum(ch))
+					|| !std::isprint(ch))
+				{
+					state = sw_error;
+					break;
+				}
+				cur_name += ch;
+				break;
+			}
+			break;
+
+		case sw_header_almost_done:
+			switch (ch)
+			{
+			case '\r':
+				state = sw_header_done;
+				break;
+			case '\n':
+				state = sw_end;
+				break;
+			default:
+				state = sw_error;
+				break;
+			}
+			if (!cur_name.empty())
+				this->headers_->insert(std::make_pair(cur_name, cur_value));
+
+			break;
 		
-		default:
+		case sw_header_done:
+			if (ch != '\n')
+			{
+				state = sw_error;
+				break;
+			}
+			state = sw_end;
+			break;
+
+		case sw_nl:
+			if (ch != '\n')
+			{
+				state = sw_error;
+				break;
+			}
+			state = next_state;
+			++cri_;
+			break;
+
+		case sw_end:
 			break;
 		}
 
-		++cri_;
 		if (state == sw_error || 
-			(cri_ >= response.size() && (state != sw_end || state != sw_start))
+			(cri_ >= response.size() && (state != sw_end && state != sw_start))
 		)
 		{
 			this->state_ = PARSE_ERROR;
