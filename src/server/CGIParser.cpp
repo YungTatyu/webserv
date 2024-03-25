@@ -6,6 +6,8 @@
 #include <sstream>
 #include <limits>
 
+const static char	*kContentLength = "content-length";
+
 cgi::CGIParser::CGIParser() :
 	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), cri_(0) {}
 
@@ -75,7 +77,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		return;
 	}
 
-	const static char	*kContentLength = "content-length";
 	const static char	*kStatus = "status";
 	const static char	*kContentType = "content-type";
 	cri_ = 0;
@@ -392,6 +393,26 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 	const string_map_case_insensitive::iterator it = this->headers_->find(kContentType);
 	if (it != this->headers_->end() && this->headers_->at(kContentType) == "")
 		this->headers_->erase(it);
+
+	this->state_ = PARSE_HEADER_DONE;
+}
+
+void	cgi::CGIParser::parseBody(const std::string& response)
+{
+	// content lengthが設定されている場合は、bodyの長さを調節する
+	if (this->headers_->find(kContentLength) != this->headers_->end())
+	{
+		const std::string& content_length = this->headers_->at(kContentLength);
+		std::istringstream	iss(content_length);
+		size_t	length;
+		iss >> length;
+
+		*(this->body_) = response.substr(cri_, length);
+		this->state_ = PARSE_BODY_DONE;
+		return;
+	}
+	*(this->body_) = response.substr(cri_);
+	this->state_ = PARSE_BODY_DONE;
 }
 
 /**
