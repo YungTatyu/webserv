@@ -9,6 +9,8 @@
 #include "Utils.hpp"
 #include <iostream>
 #include <fstream>
+#include <sys/socket.h>
+#include <unistd.h>
 
 class HttpResponseTest : public ::testing::Test {
 protected:
@@ -36,6 +38,13 @@ protected:
 
 		const config::Main*	config = config::initConfig(file_path);
 		config_handler_.loadConfiguration(config);
+
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockfd) == -1)
+		{
+			perror("socketpair");
+			delete config;
+			GTEST_SKIP();
+		}
 	}
 
 	void TearDown() override {
@@ -46,6 +55,7 @@ protected:
 
 	ConfigHandler	config_handler_;
 	HttpRequest	request_;
+	int	sockfd[2];
 };
 
 namespace test {
@@ -68,7 +78,7 @@ bool	CORRECT_RESPONSE( const std::vector<std::string>& correct_res, const std::s
 TEST_F(HttpResponseTest, ParseError)
 {
 	// 初期化
-	int sock = 1;
+	int sock = this->sockfd[0];
 	HttpResponse	response;
 	// 正解のレスポンスを初期化 なぜかdefault_errorpage_map_が型エラーになったのでここでは直書き
 	std::vector<std::string> correct_res;
@@ -98,7 +108,7 @@ TEST_F(HttpResponseTest, Return)
 {
 	// 共通初期化
 	// 疑似socket作成
-	int sock = 1;
+	int sock = this->sockfd[0];
 	// HttpRequest作成
 	HttpRequest	request;
 
@@ -182,7 +192,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 {
 	// 共通初期化
 	// 疑似socket作成
-	int sock = 1;
+	int sock = this->sockfd[0];
 	// HttpRequest作成
 	HttpRequest	request;
 
@@ -263,7 +273,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 {
 	// 共通初期化
 	// 疑似socket作成
-	int sock = 1;
+	int sock = this->sockfd[0];
 	// HttpRequest作成
 	HttpRequest	request;
 
