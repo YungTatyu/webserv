@@ -4,6 +4,7 @@
 #include <utility>
 #include <functional>
 #include <sstream>
+#include <limits>
 
 cgi::CGIParser::CGIParser() :
 	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), cri_(0) {}
@@ -61,7 +62,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		sw_status_code,
 		sw_status_reason_phrase,
 		sw_cl_value, // content-length
-		sw_ct_value, // content-type
 		sw_dup_value,
 		sw_space_after_value,
 		sw_header_almost_done,
@@ -165,14 +165,10 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				next_state = sw_status_code;
 				break;
 			}
-			if (name_lowercase == kContentType)
-			{
-				state = sw_ct_value;
-				break;
-			}
 			if (name_lowercase == kContentLength)
 			{
-				state = sw_cl_value;
+				state = sw_space_before_value;
+				next_state = sw_cl_value;
 				break;
 			}
 
@@ -278,12 +274,58 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			}
 			break;
 
-		case sw_ct_value:
-
+		case sw_cl_value:
+			switch (ch)
+			{
+			case '\r':
+			case '\n':
+				if (!isValidContentLength(cur_value))
+				{
+					state = sw_error;
+					break;
+				}
+				state = sw_header_almost_done;
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				cur_value += ch;
+				break;
+			case ' ':
+				if (!isValidContentLength(cur_value))
+				{
+					state = sw_error;
+					break;
+				}
+				state = sw_space_after_value;
+				break;
+			default:
+				state = sw_error;
+				break;
+			}
 			break;
 
-		case sw_cl_value:
-
+		case sw_space_after_value:
+			switch (ch)
+			{
+			case '\r':
+			case '\n':
+				state = sw_header_almost_done;
+				break;
+			case ' ':
+				++cri_;
+				break;
+			default:
+				state = sw_error;
+				break;
+			}
 			break;
 
 		case sw_header_almost_done:
@@ -393,4 +435,15 @@ void	cgi::CGIParser::setStatusCode(const std::string& value)
 		return;
 	}
 	*(this->status_code_line_) = value;
+}
+
+bool	cgi::CGIParser::isValidContentLength(std::string cl) const
+{
+	unsigned long	length;
+	std::istringstream iss(cl);
+	iss >> length;
+
+	if (iss.fail())
+		return false;
+	return length > static_cast<unsigned long>(std::numeric_limits<long>::max());
 }
