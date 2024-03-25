@@ -126,3 +126,8 @@ ssize_t	Utils::wrapperWrite( const int fd, const std::string& msg )
 	return written_bytes;
 }
 
+std::string	Utils::toLower(std::string str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+	return str;
+}

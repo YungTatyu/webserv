@@ -34,6 +34,7 @@ std::vector<std::string> getDirectoryContents( const std::string& directoryPath 
 bool isExecutable( const char* filename );
 bool isExtensionFile(const std::string& filename, const std::string& extension);
 ssize_t wrapperWrite( const int fd, const std::string& msg );
+std::string	toLower(std::string str);
 }
 
 #endif

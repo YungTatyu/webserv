@@ -3,6 +3,7 @@
 #include <cctype>
 #include <utility>
 #include <functional>
+#include <sstream>
 
 cgi::CGIParser::CGIParser() :
 	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), cri_(0) {}
@@ -56,6 +57,11 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		sw_colon,
 		sw_nl,
 		sw_value,
+		sw_space_before_value,
+		sw_status_code,
+		sw_status_reason_phrase,
+		sw_cl_value, // content-length
+		sw_ct_value, // content-type
 		sw_dup_value,
 		sw_space_after_value,
 		sw_header_almost_done,
@@ -69,6 +75,9 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		return;
 	}
 
+	const static char	*kContentLength = "content-length";
+	const static char	*kStatus = "status";
+	const static char	*kContentType = "content-type";
 	cri_ = 0;
 	PARSE_HEADER_PHASE	state = sw_start;
 	PARSE_HEADER_PHASE	next_state; // stateがsw_nl用の変数: \nの後にsetするstateを格納する
@@ -138,8 +147,49 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 
 		case sw_colon:
+		{
 			++cri_;
+			/**
+			 * headerが重複している場合は、syntaxを見ない
+			 * 一番初めに設定されたheaderの値が適応される
+			 */
+			if (this->headers_->find(cur_name) != this->headers_->end())
+			{
+				state = sw_dup_value;
+				break;
+			}
+			const std::string	name_lowercase = Utils::toLower(cur_name);
+			if (name_lowercase == kStatus)
+			{
+				state = sw_space_before_value;
+				next_state = sw_status_code;
+				break;
+			}
+			if (name_lowercase == kContentType)
+			{
+				state = sw_ct_value;
+				break;
+			}
+			if (name_lowercase == kContentLength)
+			{
+				state = sw_cl_value;
+				break;
+			}
+
 			state = sw_value;
+			break;
+		}
+
+		case sw_space_before_value:
+			switch (ch)
+			{
+			case ' ':
+				break;
+			default:
+				state = next_state;
+				break;
+			}
+			++cri_;
 			break;
 
 		case sw_value:
@@ -177,6 +227,64 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			}
 			++cri_;
+			break;
+
+		case sw_status_code:
+			switch (ch)
+			{
+			case '\r':
+			case '\n':
+				if (!isValidStatusCode(cur_value))
+				{
+					state = sw_error;
+					break;
+				}
+				state = sw_header_almost_done;
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				cur_value += ch;
+				++cri_;
+				break;
+			default:
+				if (!isValidStatusCode(cur_value))
+				{
+					state = sw_error;
+					break;
+				}
+				state = sw_status_reason_phrase;
+				break;
+			}
+			break;
+		
+		case sw_status_reason_phrase:
+			switch (ch)
+			{
+			case '\r':
+			case '\n':
+				state = sw_header_almost_done;
+				break;
+			default:
+				cur_value += ch;
+				break;
+			}
+			break;
+
+		case sw_ct_value:
+
+			break;
+
+		case sw_cl_value:
+
+			break;
 
 		case sw_header_almost_done:
 			switch (ch)
@@ -200,7 +308,13 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_error;
 				break;
 			}
-			if (!cur_name.empty())
+			// statusがsetされていない場合
+			if (cur_name == kStatus && (*(this->status_code_) == 0 && *(this->status_code_line_) == ""))
+			{
+				setStatusCode(cur_value);
+				*(this->status_code_line_) = cur_value;
+			}
+			else if (!cur_name.empty())
 				this->headers_->insert(std::make_pair(cur_name, cur_value));
 			++cri_;
 			state = sw_start;
@@ -233,8 +347,50 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 	}
 
 	// Content-Typeが空の場合は、responseのheaderに追加しない
-	const static char	*kContentType = "Content-Type";
 	const string_map_case_insensitive::iterator it = this->headers_->find(kContentType);
 	if (it != this->headers_->end() && this->headers_->at(kContentType) == "")
 		this->headers_->erase(it);
+}
+
+/**
+ * @brief status codeは100以上である必要がある
+ * 
+ * @param status_code 
+ * @return true 
+ * @return false 
+ */
+bool	cgi::CGIParser::isValidStatusCode(const std::string& status_code) const
+{
+	// status code <= 100
+	if (status_code.size() < 3)
+		return false;
+	std::istringstream	iss(status_code.substr(0, 3));
+	int	num;
+	iss >> num;
+	if (iss.fail())
+		return false;
+	return num >= 100;
+}
+
+void	cgi::CGIParser::setStatusCode(const std::string& value)
+{
+	size_t	i = 0;
+	while (i < value.size())
+	{
+		const unsigned char	ch = value[i];
+		if (!std::isdigit(ch))
+			break;
+		i++;
+	}
+	// status codeのみの場合
+	// ex: 200, 999など
+	if (i == value.size() && i < 4)
+	{
+		std::istringstream	iss(value);
+		long status;
+		iss >> status;
+		*(this->status_code_) = status;
+		return;
+	}
+	*(this->status_code_line_) = value;
 }
