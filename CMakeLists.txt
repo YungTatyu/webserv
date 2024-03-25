@@ -66,6 +66,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
 	test/conf/init_log_test.cpp
 	test/cgi/CGIExecutor_test.cpp
+	test/cgi/CGIParser_test.cpp
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE

@@ -42,6 +42,8 @@ bool	cgi::CGIParser::parse(
 		case PARSE_BODY_DONE:
 			this->state_ = PARSE_COMPLETE;
 			break;
+		default:
+			break;
 		}
 
 		if (this->state_ == PARSE_ERROR)
