@@ -17,16 +17,33 @@ void WebServer::initializeServer()
 	this->requestHandler = new RequestHandler();
 	this->connManager = new ConnectionManager();
 
-	#if defined(KQUEUE_AVAILABLE)
-	this->server = new KqueueServer();
-	this->eventManager = new KqueueActiveEventManager();
-	#elif defined(EPOLL_AVAILABLE)
-	this->server = new EpollServer();
-	this->eventManager = new EpollActiveEventManager();
-	#else
-	this->server = new PollServer();
-	this->eventManager = new PollActiveEventManager();
-	#endif
+	config::CONNECTION_METHOD	method = this->configHandler->config_->events.use.getConnectionMethod();
+	switch (method) {
+		#if defined(KQUEUE_AVAILABLE)
+		case config::KQUEUE:
+			this->server = new KqueueServer();
+			this->eventManager = new KqueueActiveEventManager();
+			break;
+		#endif
+		#if defined(EPOLL_AVAILABLE)
+		case config::EPOLL:
+			this->server = new EpollServer();
+			this->eventManager = new EpollActiveEventManager();
+			break;
+		#endif
+		case config::POLL:
+			this->server = new PollServer();
+			this->eventManager = new PollActiveEventManager();
+			break;
+		case config::SELECT:
+			this->server = new SelectServer();
+			this->eventManager = new SelectActiveEventManager();
+			break;
+		default:
+			this->server = new PollServer();
+			this->eventManager = new PollActiveEventManager();
+			break;
+	}
 
 	// listening socketを監視するリストに追加
 	const int listenfd = this->ioHandler->getListenfd();
