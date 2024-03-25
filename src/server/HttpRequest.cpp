@@ -100,7 +100,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest,
 	state = sw_method_start;
 	size_t i = 0;
 	while (state != sw_method_end && i < rawRequest.size()) {
-		char ch = rawRequest[i];
+		unsigned char ch = rawRequest[i];
 		switch (state) {
 		case sw_method_start:
 			method += ch;
@@ -283,7 +283,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest,
 	state = sw_start;
 	size_t i = 0;
 	while (state != sw_end && i < rawRequest.size()) {
-		char ch = rawRequest[i];
+		unsigned char ch = rawRequest[i];
 		switch (state) {
 		case sw_start:
 			if (ch == '\r') {
@@ -374,7 +374,7 @@ std::string HttpRequest::urlDecode(const std::string &encoded)
 		if (encoded[i] == '%' && i + 2 < encoded.size()) {
 			int hexValue = std::strtol(
 			    encoded.substr(i + 1, 2).c_str(), NULL, 16);
-			decoded += static_cast<char>(hexValue);
+			decoded += static_cast<unsigned char>(hexValue);
 			i += 2;
 		} else {
 			decoded += encoded[i];
