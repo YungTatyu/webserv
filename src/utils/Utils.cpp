@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <sys/param.h>
 
-const static size_t WriteSize = 1024;
 
 int	Utils::wrapperOpen( const std::string path, int flags, mode_t modes )
 {
@@ -112,6 +111,7 @@ ssize_t	Utils::wrapperWrite( const int fd, const std::string& msg )
 {
 	size_t	msg_size = msg.size();
 	size_t	written_bytes = 0;
+	const size_t WriteSize = 1024;
 
 	while ( written_bytes < msg_size )
 	{
