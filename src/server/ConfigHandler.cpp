@@ -153,7 +153,7 @@ bool	ConfigHandler::allowRequest( const config::Server& server, const config::Lo
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
-		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
+		if (location->limit_except.excepted_methods.find(request.method) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
 				return false;

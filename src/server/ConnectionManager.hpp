@@ -13,7 +13,7 @@ class ConnectionData
 			READ,
 			WRITE,
 		};
-		std::vector<char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
+		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<char> response;
 		EVENT event;
 		HttpRequest	request;
@@ -32,7 +32,7 @@ class ConnectionManager
 		void setEvent( const int fd, const ConnectionData::EVENT event );
 		ConnectionData::EVENT getEvent( const int fd ) const;
 		void setRequest( const int fd, const HttpRequest request );
-		const HttpRequest &getRequest( const int fd ) const;
+		HttpRequest &getRequest( const int fd );
 		const std::map<int, ConnectionData> &getConnections() const;
 	private:
 		std::map<int, class ConnectionData> connections_;
