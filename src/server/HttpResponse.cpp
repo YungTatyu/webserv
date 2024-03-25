@@ -516,7 +516,7 @@ int	HttpResponse::TryFiles( HttpResponse& response, HttpRequest& request, const 
 
 std::string HttpResponse::autoIndex( const std::string& directory_path )
 {
-	std::vector<std::string> contents = Utils::getDirectoryContents(directory_path);
+	std::vector<std::string> contents = Utils::createDirectoryContents(directory_path);
 	std::stringstream buffer;
 	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
 	buffer << "<body><h1>Directory listing for " << directory_path << "</h1>";

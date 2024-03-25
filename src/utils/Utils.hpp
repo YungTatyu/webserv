@@ -30,7 +30,7 @@ bool	wrapperRealpath( const std::string path, std::string& absolute_path );
 bool isFile( const std::string& path );
 bool isDirectory( const std::string& path );
 std::string readFile( const std::string& filePath );
-std::vector<std::string> getDirectoryContents( const std::string& directoryPath );
+std::vector<std::string> createDirectoryContents( const std::string& directoryPath );
 bool isExecutable( const char* filename );
 bool isPHPExtension( const std::string& filename );
 ssize_t wrapperWrite( const int fd, const std::string& msg );

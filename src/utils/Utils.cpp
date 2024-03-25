@@ -69,7 +69,7 @@ std::string Utils::readFile( const std::string& filePath )
 	return buffer.str();
 }
 
-std::vector<std::string> Utils::getDirectoryContents( const std::string& directoryPath )
+std::vector<std::string> Utils::createDirectoryContents( const std::string& directoryPath )
 {
 	std::vector<std::string> contents;
 	DIR* dir = opendir(directoryPath.c_str());
