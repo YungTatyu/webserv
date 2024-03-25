@@ -347,14 +347,12 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 
 			// clientのip_addressを取る
 			// retry するか？
-			#ifdef PRODUCTION
 			if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0)
 			{
 				std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
 				state = END_PHASE;
 			}
 			else
-			#endif
 				state = SEARCH_LOCATION_PHASE;
 			break;
 		case SEARCH_LOCATION_PHASE:
