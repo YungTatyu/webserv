@@ -205,8 +205,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			{
 			case '\r':
 			case '\n':
-				// next_state = sw_start;
-				// state = sw_nl;
 				state = sw_header_almost_done;
 				break;
 			default:
@@ -338,12 +336,13 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		
 		case sw_header_done:
 		{
-			const string_map_case_insensitive::const_iterator	it = this->headers_->find(cur_name);
 			if (ch != '\n')
 			{
 				state = sw_error;
 				break;
 			}
+
+			const string_map_case_insensitive::const_iterator	it = this->headers_->find(cur_name);
 			if (cur_name == kContentLength && it == this->headers_->end() && cur_value.empty())
 			{
 				state = sw_error;
@@ -386,7 +385,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		}
 	}
 
-	// Content-Typeが空の場合は、responseのheaderに追加しない
+	// Content-Typeが空の場合は、responseのheaderから削除する
 	const string_map_case_insensitive::iterator it = this->headers_->find(kContentType);
 	if (it != this->headers_->end() && this->headers_->at(kContentType).empty())
 		eraseHeader(kContentType);
