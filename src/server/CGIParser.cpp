@@ -422,7 +422,6 @@ void	cgi::CGIParser::parseBody(const std::string& response)
  */
 bool	cgi::CGIParser::isValidStatusCode(const std::string& status_code) const
 {
-	// status code <= 100
 	if (status_code.size() < 3)
 		return false;
 	std::istringstream	iss(status_code.substr(0, 3));
@@ -444,7 +443,7 @@ void	cgi::CGIParser::setStatusCode(const std::string& value)
 		i++;
 	}
 	std::string	tmp = value;
-	// status code移行がspaceのみの場合は、status codeの値のみを保持する
+	// status code以降がspaceのみの場合は、status codeの値のみを保持する
 	tmp.erase(std::remove_if(tmp.begin(), tmp.end(), Utils::isSpace), tmp.end());
 	// status codeのみの場合
 	// ex: 200, 999など
