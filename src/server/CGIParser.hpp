@@ -35,6 +35,7 @@ class CGIParser
 		bool	isValidStatusCode(const std::string& status_code) const;
 		bool	isValidContentLength(std::string cl) const;
 		void	setStatusCode(const std::string& value);
+		void	eraseHeader(const std::string& header);
 	public:
 		CGIParser();
 		~CGIParser();
