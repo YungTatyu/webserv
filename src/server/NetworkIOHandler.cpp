@@ -23,6 +23,8 @@ void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
 		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
 		SysCallWrapper::Listen( this->listenfd_, configHandler->getListenQ() );
 
+		this->listenfd_map_[this->listenfd_] = configHandler->createTiedServer("127.0.0.1", configHandler->getServPort());
+
 		std::cout << "Server running on port " << configHandler->getServPort() << std::endl;
 
 	}

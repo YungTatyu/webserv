@@ -26,6 +26,17 @@ struct TiedServer
 
 	TiedServer() : addr_("127.0.0.1"), port_(80) {};
 	TiedServer( const std::string addr, const unsigned int port ) : addr_(addr), port_(port) {}
+
+	TiedServer&	operator=( const TiedServer& other )
+	{
+		if (this != &other)
+		{
+			this->servers_ = other.servers_;
+			//this->addr_ = other.addr_;
+			//this->port_ = other.port_;
+		}
+		return *this;
+	}
 };
 
 /* クライアントとデータの送受信を行う */
