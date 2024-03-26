@@ -98,11 +98,9 @@ bool FileUtils::isExecutable( const char* filename )
 	return S_ISREG(sbuf.st_mode) && (S_IXUSR & sbuf.st_mode);
 }
 
-bool FileUtils::isPHPExtension( const std::string& filename )
+bool FileUtils::isExtensionFile(const std::string& filename, const std::string& extension)
 {
-	std::string phpExt = ".php";
-	if ( filename.length() < phpExt.length() )
+	if ( filename.length() < extension.length() )
 		return false;
-	return std::equal( phpExt.begin(), phpExt.end(), filename.end() - phpExt.length() );
+	return std::equal( extension.begin(), extension.end(), filename.end() - extension.length() );
 }
-
