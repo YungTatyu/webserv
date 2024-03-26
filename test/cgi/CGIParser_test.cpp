@@ -102,7 +102,7 @@ TEST(cgi_parser, status_ok3)
 	cgi::CGIParser	parser;
 
 	EXPECT_TRUE(parser.parse(response, "status:    1000000000000000000000000000000000000000000000      random    \r\nstatus: OK\r\n\r\n", cgi::PARSE_BEFORE));
-	test::expectStatusLine(response, {0, "1000000000000000000000000000000000000000000000      random"});
+	test::expectStatusLine(response, {0, "1000000000000000000000000000000000000000000000      random    "});
 }
 
 // ++++++++++++++++++++++++++++++ content-length test ++++++++++++++++++++++++++++++

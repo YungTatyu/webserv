@@ -156,7 +156,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 
 		case sw_colon:
 		{
-			// std::cerr << "sw_colon\n";
+			std::cerr << "sw_colon\n";
 			++cri_;
 			/**
 			 * headerが重複している場合は、syntaxを見ない
@@ -168,6 +168,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			}
 			const std::string	name_lowercase = Utils::toLower(cur_name);
+			// std::cerr << "lowername:" << name_lowercase << "--\n";
 			if (name_lowercase == kStatus)
 			{
 				state = sw_space_before_value;
@@ -285,10 +286,10 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				++cri_;
 				break;
 			}
-			std::cerr << "status:" << cur_value << "\n";
 			break;
 
 		case sw_cl_value:
+			// std::cerr << "sw_cl_value\n";
 			switch (ch)
 			{
 			case '\r':
@@ -362,6 +363,11 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		case sw_header_done:
 			// std::cerr << "sw_header_done\n";
 			if (ch != '\n')
+			{
+				state = sw_error;
+				break;
+			}
+			if (cur_name == kContentLength && cur_value.empty())
 			{
 				state = sw_error;
 				break;
@@ -488,7 +494,7 @@ bool	cgi::CGIParser::isValidContentLength(std::string cl) const
 
 	if (iss.fail())
 		return false;
-	return length > static_cast<unsigned long>(std::numeric_limits<long>::max());
+	return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
 }
 
 void	cgi::CGIParser::eraseHeader(const std::string& header)
