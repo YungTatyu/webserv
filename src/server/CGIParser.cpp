@@ -92,6 +92,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		switch (state)
 		{
 		case sw_start:
+			std::cerr << "sw_start\n";
 			cur_name.clear();
 			cur_value.clear();
 			switch (ch)
@@ -117,6 +118,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_name:
+			std::cerr << "sw_name\n";
 			switch (ch)
 			{
 			case ':':
@@ -128,13 +130,8 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_colon;
 				break;
 			case '\r':
-				next_state = sw_end;
-				state = sw_nl;
-				++cri_;
-				break;
 			case '\n':
-				state = sw_end;
-				++cri_;
+				state = sw_header_almost_done;
 				break;
 			default:
 				// 記号で始まるheaderはerrorにする
@@ -145,12 +142,15 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 					break;
 				}
 				cur_name += ch;
+				++cri_;
 				break;
 			}
+			std::cerr << "cur_name:" << cur_name << "\n";
 			break;
 
 		case sw_colon:
 		{
+			std::cerr << "sw_colon\n";
 			++cri_;
 			/**
 			 * headerが重複している場合は、syntaxを見ない
@@ -180,40 +180,40 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		}
 
 		case sw_space_before_value:
+			std::cerr << "sw_space_before_value\n";
 			switch (ch)
 			{
 			case ' ':
+				++cri_;
 				break;
 			default:
 				state = next_state;
 				break;
 			}
-			++cri_;
 			break;
 
 		case sw_value:
+			std::cerr << "sw_value\n";
 			switch (ch)
 			{
 			case '\r':
-				++cri_;
-				next_state = sw_nl;
-				state = sw_start;
-				break;
 			case '\n':
 				state = sw_header_almost_done;
 				break;
 			default:
-				if (std::isspace(ch))
+				if (cur_value.empty() && ch == ' ')
 				{
 					++cri_;
 					break;
 				}
 				cur_value += ch;
+				++cri_;
 				break;
 			}
 			break;
 		
 		case sw_dup_value:
+			std::cerr << "sw_dup_value\n";
 			switch (ch)
 			{
 			case '\r':
@@ -230,6 +230,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 
 		case sw_status_code:
+			std::cerr << "sw_status_code\n";
 			switch (ch)
 			{
 			case '\r':
@@ -266,6 +267,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_status_reason_phrase:
+			std::cerr << "sw_status_reason_phrase\n";
 			switch (ch)
 			{
 			case '\r':
@@ -274,6 +276,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			default:
 				cur_value += ch;
+				++cri_;
 				break;
 			}
 			break;
@@ -301,6 +304,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			case '8':
 			case '9':
 				cur_value += ch;
+				++cri_;
 				break;
 			case ' ':
 				if (!isValidContentLength(cur_value))
@@ -349,6 +353,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_header_done:
+			std::cerr << "sw_header_done\n";
 			if (ch != '\n')
 			{
 				state = sw_error;
@@ -367,6 +372,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 
 		case sw_nl:
+			std::cerr << "sw_nl\n";
 			if (ch != '\n')
 			{
 				state = sw_error;
@@ -377,6 +383,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 
 		case sw_end:
+			std::cerr << "parsed:" << cur_name << ", " << cur_value << "\n";
 			break;
 
 		default:
