@@ -181,7 +181,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				next_state = sw_cl_value;
 				break;
 			}
-
 			state = sw_value;
 			break;
 		}

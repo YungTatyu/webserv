@@ -146,14 +146,6 @@ TEST(cgi_parser, error_cl_too_large_length)
 	EXPECT_FALSE(parser.parse(response, "status: 200\r\ncontent-length:  9223372036854775808\r\n\r\n", cgi::PARSE_BEFORE));
 }
 
-TEST(cgi_parser, error_cl_duplicate)
-{
-	HttpResponse	response;
-	cgi::CGIParser	parser;
-
-	EXPECT_FALSE(parser.parse(response, "status: 200\r\ncontent-length:  9223372036854775807\r\ncontent-length:1\r\n\r\n", cgi::PARSE_BEFORE));
-}
-
 TEST(cgi_parser, cl_ok1)
 {
 	HttpResponse	response;
@@ -181,22 +173,23 @@ TEST(cgi_parser, cl_ok3)
 	test::expectHeader(response, "0", "content-length", true);
 }
 
-// ++++++++++++++++++++++++++++++ Content-type test ++++++++++++++++++++++++++++++
-TEST(cgi_parser, error_ct_invalid_value)
+TEST(cgi_parser, cl_ok4_duplicate)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_FALSE(parser.parse(response, "status: 200\r\ncontent-length: 10\r\ncontent-type:test test\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_TRUE(parser.parse(response, "status: 200\r\ncontent-length:  9223372036854775807   \r\ncontent-length:1\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeader(response, "9223372036854775807", "content-length", true);
 }
 
+// ++++++++++++++++++++++++++++++ Content-type test ++++++++++++++++++++++++++++++
 TEST(cgi_parser, ct_ok1)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
 	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\ncontent-type:123 \r\n\r\n", cgi::PARSE_BEFORE));
-	test::expectHeader(response, "123", "content-Type", true);
+	test::expectHeader(response, "123 ", "content-Type", true);
 }
 
 TEST(cgi_parser, ct_ok2)
@@ -205,7 +198,7 @@ TEST(cgi_parser, ct_ok2)
 	cgi::CGIParser	parser;
 
 	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type:   text \r\n\r\n", cgi::PARSE_BEFORE));
-	test::expectHeader(response, "text", "content-Type", true);
+	test::expectHeader(response, "text ", "content-Type", true);
 }
 
 TEST(cgi_parser, ct_ok3)
@@ -231,8 +224,18 @@ TEST(cgi_parser, ct_ok5)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nCONTENT-TYPE: test/html\r\n\r\n", cgi::PARSE_BEFORE));
-	test::expectHeader(response, "text", "content-type", true);
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nCONTENT-TYPE:     test/html\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeader(response, "test/html", "content-type", true);
+}
+
+TEST(cgi_parser, ct_ok6)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	EXPECT_TRUE(parser.parse(response, "status: 200\r\ncontent-length: 10\r\ncontent-type:test test  \r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeader(response, "test test  ", "content-Type", true);
+
 }
 
 // ++++++++++++++++++++++++++++++ other fields test ++++++++++++++++++++++++++++++
