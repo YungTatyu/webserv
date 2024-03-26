@@ -156,7 +156,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 
 		case sw_colon:
 		{
-			std::cerr << "sw_colon\n";
+			// std::cerr << "sw_colon\n";
 			++cri_;
 			/**
 			 * headerが重複している場合は、syntaxを見ない
@@ -181,7 +181,8 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				next_state = sw_cl_value;
 				break;
 			}
-			state = sw_value;
+			state = sw_space_before_value;
+			next_state = sw_value;
 			break;
 		}
 
@@ -207,11 +208,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_header_almost_done;
 				break;
 			default:
-				if (cur_value.empty() && ch == ' ')
-				{
-					++cri_;
-					break;
-				}
 				cur_value += ch;
 				++cri_;
 				break;

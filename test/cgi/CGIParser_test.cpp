@@ -36,18 +36,9 @@ namespace test
 	void	expectHeaders(const HttpResponse& response, const std::vector<string_pair>& test_results)
 	{
 		const cgi::string_map_case_insensitive& headers = response.headers_;
-		// for (std::vector<string_pair>::const_iterator it = test_results.begin();
-		// 	it != test_results.end();
-		// 	++it
-		// )
-		// {
-		// 	auto hit = headers.find(it->first);
-		// 	ASSERT_TRUE(hit != headers.end());
-		// 	EXPECT_EQ(*hit, it->second);
-		// }
-		for (const auto& pair : test_results)
+		for (const string_pair& pair : test_results)
 		{
-			auto hit = headers.find(pair.first);
+			cgi::string_map_case_insensitive::const_iterator hit = headers.find(pair.first);
 			ASSERT_TRUE(hit != headers.end());
 			EXPECT_EQ(hit->second, pair.second);
 		}
@@ -247,11 +238,11 @@ TEST(cgi_parser, other_ok1)
 	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type: test/html\r\nlocation: \r\ntt\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectHeaders(response,
 	{
-		{"Status", "200 OK"},
 		{"Content-Type", "test/html"},
 		{"Location", ""},
 		{"tt", ""}
 	});
+	test::expectStatusLine(response, {0, "200 OK"});
 }
 
 TEST(cgi_parser, other_ok2)
@@ -262,11 +253,11 @@ TEST(cgi_parser, other_ok2)
 	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type: test/html\r\nlOcAtIoN\r\ntest:\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectHeaders(response,
 	{
-		{"Status", "200 OK"},
 		{"Content-Type", "test/html"},
 		{"Location", ""},
 		{"test", ""}
 	});
+	test::expectStatusLine(response, {0, "200 OK"});
 }
 
 TEST(cgi_parser, other_ok3)
@@ -277,11 +268,11 @@ TEST(cgi_parser, other_ok3)
 	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type: test/html\r\nLocation: /path/to\r\ntest: test \r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectHeaders(response,
 	{
-		{"Status", "200 OK"},
 		{"Content-Type", "test/html"},
 		{"Location", "/path/to"},
-		{"test", "test"}
+		{"test", "test "}
 	});
+	test::expectStatusLine(response, {0, "200 OK"});
 }
 
 TEST(cgi_parser, other_ok4)
@@ -292,10 +283,10 @@ TEST(cgi_parser, other_ok4)
 	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type: test/html\r\nLocation: /path/to/\ntest: what it  isss   \nyay: , oh yeah   \n\n", cgi::PARSE_BEFORE));
 	test::expectHeaders(response,
 	{
-		{"Status", "200 OK"},
 		{"Content-Type", "test/html"},
 		{"Location", "/path/to/"},
-		{"test", "what it  isss"},
-		{"yay", "oh yeah"},
+		{"test", "what it  isss   "},
+		{"yay", ", oh yeah   "},
 	});
+	test::expectStatusLine(response, {0, "200 OK"});
 }
