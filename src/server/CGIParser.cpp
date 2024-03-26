@@ -66,7 +66,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		sw_error,
 		sw_name,
 		sw_colon,
-		sw_nl,
 		sw_value,
 		sw_space_before_value,
 		sw_status_code,
@@ -76,6 +75,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		sw_space_after_value,
 		sw_header_almost_done,
 		sw_header_done,
+		sw_almost_end,
 		sw_end
 	};
 
@@ -89,7 +89,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 	const static char	*kContentType = "content-type";
 	cri_ = 0;
 	PARSE_HEADER_PHASE	state = sw_start;
-	PARSE_HEADER_PHASE	next_state; // stateがsw_nl用の変数: \nの後にsetするstateを格納する
 	std::string	cur_name;
 	std::string	cur_value;
 	while (state != sw_end)
@@ -98,19 +97,16 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		switch (state)
 		{
 		case sw_start:
-			// std::cerr << "sw_start\n";
 			cur_name.clear();
 			cur_value.clear();
 			switch (ch)
 			{
 			case '\r':
-				next_state = sw_end;
-				state = sw_nl;
+				state = sw_almost_end;
 				++cri_;
 				break;
 			case '\n':
-				++cri_;
-				state = sw_end;
+				state = sw_almost_end;
 				break;
 			default:
 				if (std::isspace(ch))
@@ -124,7 +120,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_name:
-			// std::cerr << "sw_name\n";
 			switch (ch)
 			{
 			case ':':
@@ -151,12 +146,10 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				++cri_;
 				break;
 			}
-			// std::cerr << "cur_name:" << cur_name << "\n";
 			break;
 
 		case sw_colon:
 		{
-			// std::cerr << "sw_colon\n";
 			++cri_;
 			/**
 			 * headerが重複している場合は、syntaxを見ない
@@ -167,40 +160,33 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_dup_value;
 				break;
 			}
-			const std::string	name_lowercase = Utils::toLower(cur_name);
-			// std::cerr << "lowername:" << name_lowercase << "--\n";
-			if (name_lowercase == kStatus)
-			{
-				state = sw_space_before_value;
-				next_state = sw_status_code;
-				break;
-			}
-			if (name_lowercase == kContentLength)
-			{
-				state = sw_space_before_value;
-				next_state = sw_cl_value;
-				break;
-			}
 			state = sw_space_before_value;
-			next_state = sw_value;
 			break;
 		}
 
 		case sw_space_before_value:
-			// std::cerr << "sw_space_before_value\n";
-			switch (ch)
+		{
+			if (ch == ' ')
 			{
-			case ' ':
 				++cri_;
 				break;
-			default:
-				state = next_state;
+			}
+			const std::string	name_lowercase = Utils::toLower(cur_name);
+			if (name_lowercase == kStatus)
+			{
+				state = sw_status_code;
 				break;
 			}
+			if (name_lowercase == kContentLength)
+			{
+				state = sw_cl_value;
+				break;
+			}
+			state = sw_value;
 			break;
+		}
 
 		case sw_value:
-			// std::cerr << "sw_value\n";
 			switch (ch)
 			{
 			case '\r':
@@ -215,24 +201,21 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_dup_value:
-			// std::cerr << "sw_dup_value\n";
 			switch (ch)
 			{
 			case '\r':
-				next_state = sw_start;
-				state = sw_nl;
-				break;
 			case '\n':
-				state = sw_start;
+				// next_state = sw_start;
+				// state = sw_nl;
+				state = sw_header_almost_done;
 				break;
 			default:
+				++cri_;
 				break;
 			}
-			++cri_;
 			break;
 
 		case sw_status_code:
-			// std::cerr << "sw_status_code\n";
 			switch (ch)
 			{
 			case '\r':
@@ -269,7 +252,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_status_reason_phrase:
-			// std::cerr << "sw_status_reason_phrase\n";
 			switch (ch)
 			{
 			case '\r':
@@ -284,7 +266,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 
 		case sw_cl_value:
-			// std::cerr << "sw_cl_value\n";
 			switch (ch)
 			{
 			case '\r':
@@ -356,45 +337,43 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			break;
 		
 		case sw_header_done:
-			// std::cerr << "sw_header_done\n";
+		{
+			const string_map_case_insensitive::const_iterator	it = this->headers_->find(cur_name);
 			if (ch != '\n')
 			{
 				state = sw_error;
 				break;
 			}
-			if (cur_name == kContentLength && cur_value.empty())
+			if (cur_name == kContentLength && it == this->headers_->end() && cur_value.empty())
 			{
 				state = sw_error;
 				break;
 			}
-			// statusがsetされていない場合
-			if (cur_name == kStatus && this->headers_->find(kStatus) == this->headers_->end())
+			// headerが重複している場合は、一番初めのものが適応される
+			if (cur_name == kStatus && it == this->headers_->end())
 			{
 				setStatusCode(cur_value);
 				this->headers_->insert(std::make_pair(cur_name, cur_value));
 			}
-			else if (!cur_name.empty())
+			else if (!cur_name.empty() && it == this->headers_->end())
 				this->headers_->insert(std::make_pair(cur_name, cur_value));
 			++cri_;
 			state = sw_start;
 			break;
+		}
 
-		case sw_nl:
-			// std::cerr << "sw_nl\n";
+		case sw_almost_end:
 			if (ch != '\n')
 			{
 				state = sw_error;
 				break;
 			}
-			state = next_state;
 			++cri_;
+			state = sw_end;
 			break;
 
 		case sw_end:
-			// std::cerr << "parsed:" << cur_name << ", " << cur_value << "\n";
-			break;
-
-		default:
+		case sw_error:
 			break;
 		}
 
