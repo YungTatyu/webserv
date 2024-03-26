@@ -26,7 +26,7 @@ class CGIHandler
 		CGIExecutor	cgi_executor_;
 		pid_t	cgi_process_id_;
 		bool	forkCgiProcess(
-			const HttpRequest& http_request,
+			const HttpRequest& request,
 			const std::string& script_path
 		);
 	public:
@@ -36,9 +36,9 @@ class CGIHandler
 		static bool	isCgi(const std::string& script_path);
 		bool	callCgiExecutor(
 			const std::string& script_path,
-			const HttpRequest& http_request
+			const HttpRequest& request
 		);
-		void	callCgiParser(HttpResponse& http_response);
+		void	callCgiParser(HttpResponse& response);
 		void	killCgiProcess() const;
 		const CGIParser&	getCgiParser() const;
 		const CGIExecutor&	getCgiExecutor() const;
