@@ -211,6 +211,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				cur_value += ch;
 				break;
 			}
+			break;
 		
 		case sw_dup_value:
 			switch (ch)
@@ -393,7 +394,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 
 	// Content-Typeが空の場合は、responseのheaderに追加しない
 	const string_map_case_insensitive::iterator it = this->headers_->find(kContentType);
-	if (it != this->headers_->end() && this->headers_->at(kContentType) == "")
+	if (it != this->headers_->end() && this->headers_->at(kContentType).empty())
 		this->headers_->erase(it);
 
 	this->state_ = PARSE_HEADER_DONE;
