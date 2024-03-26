@@ -290,3 +290,19 @@ TEST(cgi_parser, other_ok4)
 	});
 	test::expectStatusLine(response, {0, "200 OK"});
 }
+
+TEST(cgi_parser, other_ok5)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	EXPECT_TRUE(parser.parse(response, "status: 999 this is 999   \r\nContent-Type:test/html     \r\nLocation: /    \r\nContent-Length: 127   \r\nStatus:  wrong status\r\nContent-Type:   dup ct  	\r\nlocation: /dup/path  \r\nContent-Length:   wrong cl	\r\nextra:  extra value\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeaders(response,
+	{
+		{"Content-Type", "test/html     "},
+		{"Location", "/    "},
+		{"Content-Length", "127"},
+		{"extra", "extra value"}
+	});
+	test::expectStatusLine(response, {0, "999 this is 999   "});
+}
