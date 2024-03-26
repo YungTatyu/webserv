@@ -43,6 +43,20 @@ namespace test
 			EXPECT_EQ(hit->second, pair.second);
 		}
 	}
+
+	void	expectBody(
+		const HttpResponse& response, 
+		const std::string& body,
+		const ssize_t content_length = -1
+	)
+	{
+		if (content_length == -1)
+		{
+			EXPECT_EQ(response.body_, body);
+			return;
+		}
+		EXPECT_EQ(response.body_, body.substr(0, content_length));
+	}
 } // namespace test
 
 
@@ -305,4 +319,26 @@ TEST(cgi_parser, other_ok5)
 		{"extra", "extra value"}
 	});
 	test::expectStatusLine(response, {0, "999 this is 999   "});
+}
+
+TEST(cgi_parser, body_no_content_length)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	const std::string	header = "content-length: 10\r\n\r\n";
+	const std::string	body = " this is body message   ";
+	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+	test::expectBody(response, body, 10);
+}
+
+TEST(cgi_parser, body_with_content_length)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	const std::string	header = "\r\n";
+	const std::string	body = "   this is body message     ";
+	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+	test::expectBody(response, body);
 }
