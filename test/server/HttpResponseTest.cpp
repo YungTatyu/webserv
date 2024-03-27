@@ -30,6 +30,9 @@ protected:
 		else if (static_cast<std::string>(test_info->name()) == "StaticHandler") {
 			file_path = "test/server/ResponseTestFiles/staticHandler.conf";
 		}
+		else if (static_cast<std::string>(test_info->name()) == "autoIndex") {
+			file_path = "test/server/ResponseTestFiles/autoIndex.conf";
+		}
 		else {
 			config::Main	*config = new config::Main();
 			config_handler_.loadConfiguration(config);
@@ -427,4 +430,92 @@ TEST_F(HttpResponseTest, StaticHandler)
 	final_response = HttpResponse::generateResponse(request, response7, tied_server, sock, config_handler_);
 	// 結果確認
 	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, final_response));
+}
+
+TEST_F(HttpResponseTest, autoIndex)
+{
+	// 共通初期化
+	// 疑似socket作成
+	int sock = this->sockfd[0];
+	// HttpRequest作成
+	HttpRequest	request;
+
+	request.method = "GET";
+	request.version = "HTTP/1.1";
+	request.headers["Host"] = "first_server";
+	request.parseState = HttpRequest::PARSE_COMPLETE;
+	// TiedServer 作成
+	struct TiedServer	tied_server = config_handler_.createTiedServer("127.0.0.1", 8001);
+	// 正解response
+	std::vector<std::string> correct_res;
+	std::string final_response;
+
+	// test case 1
+	// http contextのautoindex off, location contextのautoindex on
+	HttpResponse	response1;
+	request.uri = "/";
+	correct_res.push_back("HTTP/1.1 200 OK");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/html");
+	//correct_res.push_back("Content-Length: 750");
+	//correct_res.push_back("Transfer-Encording: chunked");
+	correct_res.push_back("autoindex の出力");
+	// 関数適用
+	final_response = HttpResponse::generateResponse(request, response1, tied_server, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, final_response));
+
+	// test case 2
+	// http off, location ディレクティブなし
+	HttpResponse	response2;
+	request.uri = "/no-autoindex/";
+	correct_res.push_back("HTTP/1.1 404 Not Found");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/html");
+	correct_res.push_back("Content-Length: 100");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n");
+	// 関数適用
+	final_response = HttpResponse::generateResponse(request, response2, tied_server, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, final_response));
+
+	// second_server
+	request.headers["Host"] = "first_server";
+	struct TiedServer	tied_server2 = config_handler_.createTiedServer("127.0.0.1", 8002);
+
+
+	// test case 3
+	// http contextのautoindex off, server contextのautoindex on, location context 中身無し。
+	HttpResponse	response3;
+	request.uri = "/";
+	correct_res.push_back("HTTP/1.1 200 OK");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/html");
+	//correct_res.push_back("Content-Length: 100");
+	//correct_res.push_back("Transfer-Encoding: chunked");
+	correct_res.push_back("autoindex の出力");
+	// 関数適用
+	final_response = HttpResponse::generateResponse(request, response3, tied_server2, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, final_response));
+
+	// test case 4
+	// 直近autoindex on, locationの directory 存在しない
+	HttpResponse	response4;
+	request.uri = "/nothing-directory/";
+	correct_res.push_back("HTTP/1.1 404 Not Found");
+	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Content-Type: text/html");
+	correct_res.push_back("Content-Length: 100");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n");
+	// 関数適用
+	final_response = HttpResponse::generateResponse(request, response4, tied_server2, sock, config_handler_);
+	// 結果確認
+	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, final_response));
+
+
 }
