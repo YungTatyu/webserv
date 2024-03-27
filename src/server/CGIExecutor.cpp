@@ -81,6 +81,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
 
 	const std::string content_length = std::string("CONTENT_LENGTH=") + toStr(request.body.size());
 	this->meta_vars_.push_back(content_length.c_str());
+	std::cerr << "congtent-length mv:" << content_length << "---\n";
 
 	std::string	content_type = "CONTENT_TYPE=";
 	if (request.headers.find(kContentType) != request.headers.end())
@@ -106,8 +107,8 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
 	const std::string	script_name = std::string("SCRIPT_NAME=") + request.uri;
 	this->meta_vars_.push_back(script_name.c_str());
 
-	const std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
-	this->meta_vars_.push_back(server_name.c_str());
+	// const std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
+	// this->meta_vars_.push_back(server_name.c_str());
 
 	const std::string	server_port = std::string("SERVER_PORT="); // TODO: clientがアクセスしたport番号
 	this->meta_vars_.push_back(server_port.c_str());

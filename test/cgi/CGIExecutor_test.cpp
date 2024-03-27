@@ -68,6 +68,7 @@ namespace test
 
 	void	sendBody(const std::string& body, const int socket)
 	{
+		std::cerr << "body:" << body << "\n";
 		Utils::wrapperWrite(socket, body);
 	}
 
@@ -229,6 +230,26 @@ TEST(cgi_executor, client_redirect_res_doc)
 		expect
 	);
 }
+
+TEST(cgi_executor, body)
+{
+	cgi::CGIHandler	cgi_handler;
+	HttpRequest	request = test::initRequest(
+		"POST", "/path/uri/", "HTTP/1.1", "",
+		"<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n",
+		{{"Host", "tt"}}
+	);
+
+	const std::string expect_header = "Status: 200\r\nContent-Type: text/html\r\n\r\n";
+	const std::string expect = expect_header + "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n";
+	test::testCgiOutput(
+		cgi_handler,
+		"test/cgi/cgi_files/executor/body.py",
+		request,
+		expect
+	);
+}
+
 
 TEST(cgi_executor, meta_vars)
 {
