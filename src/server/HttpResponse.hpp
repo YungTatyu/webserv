@@ -35,13 +35,13 @@ class HttpResponse
 
 		// utils methods
 		// 名前微妙
-		static std::string	autoIndex( const std::string& directory_path );
+		static std::string	autoIndex( const std::string& directory_path, const std::string& index_dir );
 		static std::string	getCurrentGMTTime();
 		static int	returnPhase( HttpResponse& response, const config::Location* location );
 		static void	returnResponse( HttpResponse& response, const config::Return& return_directive );
 		static int	contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
 		static int	staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
-		static int	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on );
+		static int	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on, const std::string& index_dir );
 		static int	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
 		static int	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
 		bool	isURL( const std::string uri ) const;

@@ -514,30 +514,53 @@ int	HttpResponse::TryFiles( HttpResponse& response, HttpRequest& request, const 
 	}
 }
 
-std::string HttpResponse::autoIndex( const std::string& directory_path )
+std::string HttpResponse::autoIndex( const std::string& directory_path, const std::string& index_dir )
 {
 	std::vector<std::string> contents = Utils::createDirectoryContents(directory_path);
 	std::stringstream buffer;
-	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Directory listing for</title></head>";
-	buffer << "<body><h1>Directory listing for " << directory_path << "</h1>";
+	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " << index_dir << "</title></head>\r\n";
+	buffer << "<body><h1>Index of " << index_dir << "</h1>";
 	buffer << "<hr>";
-	buffer << "<ul>";
+	buffer << "<pre>";
 
 	for (std::vector<std::string>::iterator it = contents.begin(); it != contents.end(); ++it)
 	{
-		buffer << "<li><a href='" << directory_path;
+		buffer << "<a href='" << directory_path;
 		if (!directory_path.empty() && directory_path[directory_path.size() - 1] != '/')
 		    buffer << "/";
-		buffer << *it << "'>" << *it << "</a></li>";
+		buffer << *it << "'>" << *it << "</a>";
+
+		struct stat file;
+		if (!stat(directory_path.c_str(), &file))
+		{
+			// ロケール依存の出力なので検討必要
+			struct tm last_modify_time;
+			localtime_r(&file.st_mtime, &last_modify_time);
+			char date[1024];
+			std::strftime(date, sizeof(date), "%d-%b-%Y %H:%M", &last_modify_time);
+			// file 最終修正時刻
+			buffer << std::right << std::setw(50) << date;
+			if (Utils::isFile(directory_path))
+			{
+				// ファイルバイト数
+				buffer << std::right << std::setw(5) << file.st_size;
+			}
+			else
+			{
+				buffer << std::right << std::setw(5) << "-";
+			}
+		}
+
+		buffer << "\n";
 	}
 
-	buffer << "</ul>";
+	buffer << "</pre>";
 	buffer << "<hr>";
 	buffer << "</body></html>";
 	return buffer.str();
 }
 
-int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on )
+int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on, const std::string& index_dir )
 {
 	std::string	directory_path = response.root_path_ + request.uri;
 	for (size_t i = 0; i < index_list.size(); i++)
@@ -553,7 +576,7 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
 
 	if (is_autoindex_on)
 	{
-		response.body_ = autoIndex(directory_path);
+		response.body_ = autoIndex(directory_path, index_dir);
 		return OK;
 	}
 	// offなら403
@@ -592,18 +615,18 @@ int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, c
 	if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
 		return TryFiles(response, request, location->try_files);
 	else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
-		return Index(response, request, location->index_list, is_autoindex_on);
+		return Index(response, request, location->index_list, is_autoindex_on, location->uri);
 
 	// server context
 	if (server.directives_set.find(kTRY_FILES) != server.directives_set.end())
 		return TryFiles(response, request, server.try_files);
 	else if (server.directives_set.find(kINDEX) != server.directives_set.end())
-		return Index(response, request, server.index_list, is_autoindex_on);
+		return Index(response, request, server.index_list, is_autoindex_on, "/");
 
 	// http context
 	// httpはデフォルトをみればいい？
 	//if (config_handler.config_->http.directives_set.find(kINDEX) != config_handler.config_->http.directives_set.end())
-		return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on);
+		return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on, "/");
 }
 
 int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
