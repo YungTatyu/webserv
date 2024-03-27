@@ -518,8 +518,17 @@ std::string HttpResponse::autoIndex( const std::string& directory_path, const st
 {
 	std::vector<std::string> contents = Utils::createDirectoryContents(directory_path);
 	std::stringstream buffer;
-	buffer << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " << index_dir << "</title></head>\r\n";
-	buffer << "<body><h1>Index of " << index_dir << "</h1>";
+	buffer << "<!DOCTYPE html>";
+	buffer << "<html>";
+	buffer << "<head>";
+	buffer << "<meta charset=\"utf-8\"><title>Index of " << index_dir << "</title>";
+	// css
+	buffer << "<style>";
+	buffer << ".right-align {position: absolute;right: 0;}"; // 親要素の中での位置を右寄せにする。
+	buffer << "</style>";
+	buffer << "</head>\r\n";
+	buffer << "<body>";
+	buffer << "<h1>Index of " << index_dir << "</h1>";
 	buffer << "<hr>";
 	buffer << "<pre>";
 
@@ -530,28 +539,38 @@ std::string HttpResponse::autoIndex( const std::string& directory_path, const st
 		    buffer << "/";
 		buffer << *it << "'>" << *it << "</a>";
 
-		struct stat file;
-		if (!stat(directory_path.c_str(), &file))
+		struct stat	file_stat;
+		std::string	full_path = directory_path + *it;
+		if (*it != "../" && stat(full_path.c_str(), &file_stat) == 0)
 		{
-			// ロケール依存の出力なので検討必要
+			buffer << "<span class=\"right-align\">";
+			// file 最終修正時刻
 			struct tm last_modify_time;
-			localtime_r(&file.st_mtime, &last_modify_time);
+			localtime_r(&file_stat.st_mtime, &last_modify_time);
 			char date[1024];
 			std::strftime(date, sizeof(date), "%d-%b-%Y %H:%M", &last_modify_time);
-			// file 最終修正時刻
-			buffer << std::right << std::setw(50) << date;
-			if (Utils::isFile(directory_path))
+			buffer << date;
+
+			// ファイルバイト数
+			std::string	space;
+			if (S_ISREG(file_stat.st_mode))
 			{
-				// ファイルバイト数
-				buffer << std::right << std::setw(5) << file.st_size;
+				std::stringstream	ss;
+				ss << file_stat.st_size;
+				for (size_t i = 0; i < 15 - ss.str().length() + 1; i++)
+					space += " ";
+				buffer << space << file_stat.st_size << "  ";
 			}
 			else
 			{
-				buffer << std::right << std::setw(5) << "-";
+				for (size_t i = 0; i < 15; i++)
+					space += " ";
+				buffer << space << "-" << "  ";
 			}
+			buffer << "</span>";
 		}
 
-		buffer << "\n";
+		buffer << "\r\n";
 	}
 
 	buffer << "</pre>";
