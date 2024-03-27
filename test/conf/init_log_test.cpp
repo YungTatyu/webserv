@@ -38,7 +38,7 @@ protected:
 
 		// 絶対pathを取得
 		//std::string	absolute_path;
-		//absolute_path = FileUtils::deriveAbsolutePath(file_path);
+		//absolute_path = Utils::deriveAbsolutePath(file_path);
 		//if (absolute_path == "")
 		//	GTEST_SKIP();
 

@@ -8,7 +8,8 @@ void	PollServer::eventLoop(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	for ( ; ; )
@@ -16,7 +17,7 @@ void	PollServer::eventLoop(
 		waitForEvent(conn_manager, event_manager);
 
 		// 発生したイベントをhandleする
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
 
 		// 発生したすべてのイベントを削除
 		event_manager->clearAllEvents();
@@ -58,7 +59,8 @@ void	PollServer::callEventHandler(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	const std::vector<pollfd> *active_events =
@@ -73,7 +75,7 @@ void	PollServer::callEventHandler(
 		// 発生したeventに対するhandlerを呼ぶ
 		// interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
 		if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
-			request_handler->handleReadEvent(*io_handler, *conn_manager, it->fd);
+			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, it->fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
 			request_handler->handleWriteEvent(*io_handler, *conn_manager, it->fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
@@ -94,7 +96,7 @@ std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, Conn
 	{
 		struct pollfd	pollfd;
 		pollfd.fd = it->first;
-		pollfd.events = it->second.event == ConnectionData::READ ? POLLIN : POLLOUT;
+		pollfd.events = it->second.event == ConnectionData::EV_READ ? POLLIN : POLLOUT;
 		pollfd.revents = 0;
 		list.push_back(pollfd);
 	}

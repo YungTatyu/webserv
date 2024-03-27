@@ -3,11 +3,10 @@
 import os
 
 def	main():
-      print("Content-type: text/html\r\nStatus: 200 OK\r\n\r\n", end="")
+      print("content-type: text/html\r\nStatus: 200 OK\r\n\r\n", end="")
       method = os.environ.get("METHOD")
-      if method == "POST":
-            body = input()
-            print(input, end="")
+      # body = input()
+      # print(body, end="")
 
 
 if __name__ == "__main__":

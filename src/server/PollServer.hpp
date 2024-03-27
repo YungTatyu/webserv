@@ -15,12 +15,14 @@ class PollServer : public IServer
 		void	eventLoop(ConnectionManager* conn_manager,
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
-							RequestHandler* request_handler);
+							RequestHandler* request_handler,
+							ConfigHandler* config_handler);
 		int	waitForEvent(ConnectionManager* conn_manager, IActiveEventManager *event_manager);
 		void	callEventHandler(ConnectionManager* conn_manager,
 									IActiveEventManager* event_manager,
 									NetworkIOHandler* io_handler,
-									RequestHandler* request_handler);
+									RequestHandler* request_handler,
+									ConfigHandler* config_handler);
 	private:
 		void	addActiveEvents(const std::vector<struct pollfd> &pollfds,
 								ConnectionManager* conn_manager,
