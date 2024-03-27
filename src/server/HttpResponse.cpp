@@ -525,7 +525,7 @@ std::string HttpResponse::autoIndex( const std::string& directory_path, const st
 
 	for (std::vector<std::string>::iterator it = contents.begin(); it != contents.end(); ++it)
 	{
-		buffer << "<a href='" << directory_path;
+		buffer << "<a href='";
 		if (!directory_path.empty() && directory_path[directory_path.size() - 1] != '/')
 		    buffer << "/";
 		buffer << *it << "'>" << *it << "</a>";
