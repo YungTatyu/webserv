@@ -30,7 +30,7 @@ class HttpRequest
 		std::string uri;
 		std::string version;
 		std::map<std::string, std::string> headers;
-		std::map<std::string, std::string> queries;
+		std::string queries;
 		std::string body;
 
 		ParseState parseState;

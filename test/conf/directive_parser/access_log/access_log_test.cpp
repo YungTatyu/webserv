@@ -12,7 +12,7 @@
 #include "Parser.hpp"
 #include "Main.hpp"
 #include "directives_test.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 
 
 namespace test
@@ -38,15 +38,15 @@ config::Main	*initConfigTest( const std::string& file_path )
 	}
 
 	// file_path が存在するかどうか
-	if (FileUtils::wrapperAccess(absolute_path, F_OK, true) == -1)
+	if (Utils::wrapperAccess(absolute_path, F_OK, true) == -1)
 		return NULL;
 
 	// file_path の読み取り権限があるかどうか
-	if (FileUtils::wrapperAccess(absolute_path, R_OK, true) == -1)
+	if (Utils::wrapperAccess(absolute_path, R_OK, true) == -1)
 		return NULL;
 
 	// file_path がファイルかどうか確認する。
-	if (!FileUtils::isFile(absolute_path))
+	if (!Utils::isFile(absolute_path))
 	{
 		std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
 		return NULL;

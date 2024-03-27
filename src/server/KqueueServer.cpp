@@ -14,7 +14,8 @@ void	KqueueServer::eventLoop(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	if (!initKqueueServer())
@@ -26,7 +27,7 @@ void	KqueueServer::eventLoop(
 		waitForEvent(conn_manager, event_manager);
 
 		// 発生したイベントをhandleする
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
 
 		// 発生したすべてのイベントを削除
 		event_manager->clearAllEvents();
@@ -56,7 +57,7 @@ bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 		it != connections.end();
 		++it)
 	{
-		const int	event_filter = it->second.event == ConnectionData::READ ? EVFILT_READ : EVFILT_WRITE;
+		const int	event_filter = it->second.event == ConnectionData::EV_READ ? EVFILT_READ : EVFILT_WRITE;
 		EV_SET(&event_list[i], it->first, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
 		++i;
 	}
@@ -86,7 +87,8 @@ void	KqueueServer::callEventHandler(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	std::vector<struct kevent>	*active_events_ptr =
@@ -98,7 +100,7 @@ void	KqueueServer::callEventHandler(
 	{
 		int	status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].ident);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].ident);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].ident);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
