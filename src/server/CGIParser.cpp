@@ -377,7 +377,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		}
 
 		if (state == sw_error || 
-			(cri_ >= response.size() && (state != sw_end && state != sw_start))
+			(cri_ >= response.size() && state != sw_end)
 		)
 		{
 			this->state_ = PARSE_ERROR;
