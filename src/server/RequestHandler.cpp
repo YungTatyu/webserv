@@ -27,8 +27,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			connManager.removeConnection( sockfd );
 			return RequestHandler::UPDATE_CLOSE;
 		}
-		const std::vector<char>& context = connManager.getRawRequest( sockfd );
-		std::string requestData = context.data();
+		const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
+		std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
 
 		// HttpRequest request = HttpMessage::requestParser( requestData );
 		HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );

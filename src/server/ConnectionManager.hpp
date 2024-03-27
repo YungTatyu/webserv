@@ -25,8 +25,8 @@ class ConnectionManager
 	public:
 		void setConnection( const int fd );
 		void removeConnection( const int fd );
-		void setRawRequest( const int fd, const std::vector<char>& rawRequest );
-		const std::vector<char>& getRawRequest( const int fd ) const;
+		void setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
+		const std::vector<unsigned char>& getRawRequest( const int fd ) const;
 		void setResponse( const int fd, const std::vector<char>& response );
 		const std::vector<char>& getResponse( const int fd ) const;
 		void setEvent( const int fd, const ConnectionData::EVENT event );

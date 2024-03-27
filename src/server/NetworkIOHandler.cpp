@@ -36,7 +36,7 @@ void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
 
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int cli_sock )
 {
-	std::vector<char> buffer( bufferSize_ );
+	std::vector<unsigned char> buffer( bufferSize_ );
 	ssize_t totalBytesRead = 0;
 
 	while ( 1 )
