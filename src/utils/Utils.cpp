@@ -73,21 +73,25 @@ std::vector<std::string> Utils::createDirectoryContents( const std::string& dire
 {
 	std::vector<std::string> contents;
 	DIR* dir = opendir(directoryPath.c_str());
-	if (dir != NULL)
+	// error出力？
+	if (dir == NULL)
+		return contents;
+	struct dirent* entry;
+
+	contents.push_back("../");
+
+	while ((entry = readdir(dir)) != NULL)
 	{
-		struct dirent* entry;
-		while ((entry = readdir(dir)) != NULL)
+		std::string filename = entry->d_name;
+		if (filename != "." && filename != "..")
 		{
-			std::string filename = entry->d_name;
-			if (filename != "." && filename != "..")
-			{
-				if (Utils::isDirectory(directoryPath + "/" + filename))
-					filename += "/";
-				contents.push_back(filename);
-			}
+			if (Utils::isDirectory(directoryPath + "/" + filename))
+				filename += "/";
+			contents.push_back(filename);
 		}
-		closedir(dir);
 	}
+	closedir(dir);
+
 	return contents;
 }
 
