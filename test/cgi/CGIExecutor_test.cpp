@@ -244,8 +244,8 @@ TEST(cgi_executor, body)
 	const std::string expect = expect_header + "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n";
 	test::testCgiOutput(
 		cgi_handler,
-		// "test/cgi/cgi_files/executor/body.py",
-		"test/cgi/cgi_files/executor/body.cgi",
+		"test/cgi/cgi_files/executor/body.py",
+		// "test/cgi/cgi_files/executor/body.cgi",
 		request,
 		expect
 	);
