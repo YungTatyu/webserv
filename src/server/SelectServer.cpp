@@ -48,11 +48,11 @@ int	SelectServer::addSocketToSets(const std::map<int, ConnectionData> &connectio
 		const ConnectionData	&connection = it->second;
 		switch (connection.event)
 		{
-		case ConnectionData::READ:
+		case ConnectionData::EV_READ:
 			FD_SET(fd, &(this->read_set_));
 			break;
 		
-		case ConnectionData::WRITE:
+		case ConnectionData::EV_WRITE:
 			FD_SET(fd, &(this->write_set_));
 			break;
 

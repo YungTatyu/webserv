@@ -34,8 +34,6 @@ class RequestHandler
 			ConnectionManager &connManager,
 			const int sockfd
 		);
-		// key: eventを判別する関数 value: そのイベントのhandler
-		std::map<whichEvent, eventHandler> handler_map;
 };
 
 #endif
