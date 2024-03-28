@@ -131,3 +131,21 @@ ssize_t	Utils::wrapperWrite( const int fd, const std::string& msg )
 	return written_bytes;
 }
 
+const std::string	Utils::ipToStr( const uint32_t ip )
+{
+	std::stringstream	ss;
+
+	#if defined(__LITTLE_ENDIAN__)
+	ss << ((ip >> 24) & 0xFF) << '.'  // 第1オクテット
+		<< ((ip >> 16) & 0xFF) << '.' // 第2オクテット
+		<< ((ip >> 8) & 0xFF) << '.'  // 第3オクテット
+		<< (ip & 0xFF);               // 第4オクテット
+	#else
+	ss << (ip & 0xFF) << '.'  // 第1オクテット
+		<< ((ip >> 8) & 0xFF) << '.' // 第2オクテット
+		<< ((ip >> 16) & 0xFF) << '.'  // 第3オクテット
+		<< ((ip >> 24) & 0xFF);               // 第4オクテット
+	#endif
+	return ss.str();
+}
+
