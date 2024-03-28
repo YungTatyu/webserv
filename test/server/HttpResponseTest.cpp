@@ -164,10 +164,10 @@ TEST_F(HttpResponseTest, Return)
 	correct_res.push_back("HTTP/1.1 307 Temporary Redirect");
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
-	correct_res.push_back("Content-Length: 118");
+	correct_res.push_back("Content-Length: 168");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Location: http://127.0.0.1:7000/code-url.html");
-	correct_res.push_back("<html>\r\n<head><title>307 Temporary Redirect</title></head>\r\n<body>\r\n<center><h1>307 Temporary Redirect</h1></center>\r\n");
+	correct_res.push_back("<html>\r\n<head><title>307 Temporary Redirect</title></head>\r\n<body>\r\n<center><h1>307 Temporary Redirect</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response3, tied_server, sock, config_handler_);
 	// 結果確認
@@ -181,10 +181,10 @@ TEST_F(HttpResponseTest, Return)
 	correct_res.push_back("HTTP/1.1 302 Moved Temporarily");
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
-	correct_res.push_back("Content-Length: 92");
+	correct_res.push_back("Content-Length: 142");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Location: http://127.0.0.1:7000/url.html");
-	correct_res.push_back("<html>\r\n<head><title>302 Found</title></head>\r\n<body>\r\n<center><h1>302 Found</h1></center>\r\n");
+	correct_res.push_back("<html>\r\n<head><title>302 Found</title></head>\r\n<body>\r\n<center><h1>302 Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response4, tied_server, sock, config_handler_);
 	// 結果確認
@@ -264,8 +264,8 @@ TEST_F(HttpResponseTest, ErrorPage)
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 124");
-	correct_res.push_back("<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n");
+	correct_res.push_back("Content-Length: 174");
+	correct_res.push_back("<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response3, tied_server, sock, config_handler_);
 	// 結果確認
@@ -320,8 +320,8 @@ TEST_F(HttpResponseTest, StaticHandler)
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 116");
-	correct_res.push_back("<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n");
+	correct_res.push_back("Content-Length: 166");
+	correct_res.push_back("<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response2, tied_server, sock, config_handler_);
 	// 結果確認
@@ -336,8 +336,8 @@ TEST_F(HttpResponseTest, StaticHandler)
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 100");
-	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n");
+	correct_res.push_back("Content-Length: 150");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response3, tied_server, sock, config_handler_);
 	// 結果確認
@@ -473,8 +473,8 @@ TEST_F(HttpResponseTest, autoIndex)
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 100");
-	correct_res.push_back("<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n");
+	correct_res.push_back("Content-Length: 150");
+	correct_res.push_back("<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response2, tied_server, sock, config_handler_);
 	// 結果確認
@@ -509,8 +509,8 @@ TEST_F(HttpResponseTest, autoIndex)
 	correct_res.push_back("Server: webserv/1");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 100");
-	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n");
+	correct_res.push_back("Content-Length: 150");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response4, tied_server2, sock, config_handler_);
 	// 結果確認
