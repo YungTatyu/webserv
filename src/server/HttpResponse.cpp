@@ -364,7 +364,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			{
 				config_handler.writeErrorLog(server, location, "webserv: [error] too continuous internal redirect\n");
 				response.status_code_ = 500;
-				response.body_ = *default_error_page_map_[500];
+				response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
 				response.headers_["Connection"] = "close";
 				state = END_PHASE;
 				break;
