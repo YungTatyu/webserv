@@ -15,12 +15,19 @@ class HttpResponse
 		// initializer
 		HttpResponse();
 
+		// enum
+		enum ServType {
+			STATIC,
+			DYNAMIC
+		};
+
 		// member methods
 		static std::string	generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
 		static std::string	createResponse( const HttpResponse& response );
 
 		// public variables
 		std::string	root_path_;
+		ServType	serv_type_;
 		std::string	cgi_status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string, Utils::CaseInsensitiveCompare>	headers_;

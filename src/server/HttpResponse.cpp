@@ -121,7 +121,7 @@ static const std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse()
-	: status_code_(200), body_(""), internal_redirect_cnt_(0)
+	: serv_type_(HttpResponse::STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
 	this->headers_["Server"] = "webserv/1";
 	this->headers_["Connection"] = "keep-alive";
@@ -442,7 +442,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 	}
 
 	config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
-	headerFilterPhase(response);
+	if (response.serv_type_ == HttpResponse::STATIC)
+	{
+		headerFilterPhase(response);
+	}
 
 	config_handler.writeErrorLog(server, location, "webserv: [debug] create final response\n");
 	return createResponse(response);
@@ -620,6 +623,7 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
  */
 int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
+	response.serv_type_ = HttpResponse::STATIC;
 	// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
 	{
