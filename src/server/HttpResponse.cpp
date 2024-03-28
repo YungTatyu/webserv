@@ -517,6 +517,10 @@ int	HttpResponse::TryFiles( HttpResponse& response, HttpRequest& request, const 
 std::string HttpResponse::autoIndex( const std::string& directory_path, const std::string& index_dir )
 {
 	std::vector<std::string> contents = Utils::createDirectoryContents(directory_path);
+	// もしディレクトリが存在しなければ空文字を返す。
+	if (contents.empty())
+		return std::string("");
+
 	std::stringstream buffer;
 	buffer << "<!DOCTYPE html>";
 	buffer << "<html>";
@@ -596,9 +600,16 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
 	if (is_autoindex_on)
 	{
 		response.body_ = autoIndex(directory_path, index_dir);
+		// autoindexでディレクトリが見つからなかったら404エラー
+		if (response.body_.empty())
+		{
+			response.status_code_ = 404;
+			return ERROR_PAGE;
+		}
 		return OK;
 	}
-	// offなら403
+
+	// autoindex offなら403
 	response.status_code_ = 403;
 	return ERROR_PAGE;
 }
@@ -609,7 +620,7 @@ int HttpResponse::Index( HttpResponse& response, HttpRequest& request, const std
  */
 int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
-		// request uriが/で終わっていなければ直接ファイルを探しに行く。
+	// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
 	{
 		std::string full_path = response.root_path_ + request.uri;
@@ -629,23 +640,27 @@ int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, c
 	 * 3つともなかったら上位のcontextで検索する
 	 */
 	bool	is_autoindex_on = config_handler.isAutoIndexOn(server, location);
+	std::string	index_dir;
+	if (location)
+		index_dir = location->uri;
+	else
+		index_dir = "/";
 
 	// location context
 	if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
 		return TryFiles(response, request, location->try_files);
 	else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
-		return Index(response, request, location->index_list, is_autoindex_on, location->uri);
+		return Index(response, request, location->index_list, is_autoindex_on, index_dir);
 
 	// server context
 	if (server.directives_set.find(kTRY_FILES) != server.directives_set.end())
 		return TryFiles(response, request, server.try_files);
 	else if (server.directives_set.find(kINDEX) != server.directives_set.end())
-		return Index(response, request, server.index_list, is_autoindex_on, "/");
+		return Index(response, request, server.index_list, is_autoindex_on, index_dir);
 
-	// http context
-	// httpはデフォルトをみればいい？
-	//if (config_handler.config_->http.directives_set.find(kINDEX) != config_handler.config_->http.directives_set.end())
-		return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on, "/");
+	// http contextにindexディレクティブがあればその設定値をみるし、
+	// なくとも、デフォルトのindexディレクティブを見る
+	return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on, index_dir);
 }
 
 int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
@@ -674,12 +689,6 @@ int	HttpResponse::errorPagePhase( HttpResponse& response, HttpRequest& request, 
 	request.uri = ep->getUri();
 	return INTERNAL_REDIRECT;
 }
-
-//error_page: エラーページを指定するディレクティブ。指定されたエラーが発生した場合に、指定されたエラーページに対して再度処理が行われる可能性があります。
-
-//return: 特定の条件に基づいてレスポンスを生成し、クライアントに返すディレクティブ。return を使用して新しいURIにリダイレクトすることができます。
-
-//try_files: ファイルの存在を確認し、存在すればそのファイルを提供し、存在しなければ指定されたファイルまたはURIに対して再度処理が行われる可能性があります。
 
 void	HttpResponse::headerFilterPhase( HttpResponse& response )
 {
