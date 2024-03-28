@@ -51,7 +51,6 @@ class HttpResponse
 		static int	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on, const std::string& index_dir );
 		static int	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
 		static int	errorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
-		bool	isURL( const std::string uri ) const;
 		static void	headerFilterPhase( HttpResponse& response );
 		static std::string	detectContentTypeFromBody( const std::string& body );
 		static std::string	transformLetter( const std::string& key_str );

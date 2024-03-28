@@ -721,13 +721,3 @@ std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)
 		return "text/plain";
 }
 
-bool	HttpResponse::isURL( const std::string uri ) const
-{
-	const std::string	http = "http://";
-	const std::string	https = "https://";
-	if (uri.substr(0, http.length()) != http &&
-		uri.substr(0, https.length()) != https)
-		return true;
-	return false;
-}
-
