@@ -309,9 +309,9 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 
 	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find("Host")->second);
 	const config::Location*	location = NULL;
-	struct sockaddr_in client_addr;
-	socklen_t client_addrlen = sizeof(client_addr);
-	int ret;
+	struct sockaddr_in	client_addr;
+	socklen_t	client_addrlen = sizeof(client_addr);
+	int	ret;
 
 	enum PrepareResponsePhase {
 		START_PHASE = 0,
@@ -432,7 +432,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			break;
 		case LOG_PHASE:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] log phase\n");
-			config_handler.writeAccessLog(server, location, "write Client Access by access log format");
+			config_handler.writeAccessLog(server, location, config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, request));
 			state = END_PHASE;
 			break;
 		default:
