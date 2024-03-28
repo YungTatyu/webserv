@@ -35,7 +35,22 @@ std::string CGIHandler::getCommandPath( const std::string& command )
 	return "";
 }
 
-std::string CGIHandler::executeCGI( std::string& uri, std::string& query )
+cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1) {}
+
+cgi::CGIHandler::~CGIHandler() {}
+
+/**
+ * @brief cgi実行fileか
+ * cgi実行ファイルの拡張子
+ * 1. *.php
+ * 2. *.cig
+ * 3. *.py
+ * 
+ * @param cgi_path 
+ * @return true 
+ * @return false 
+ */
+bool cgi::CGIHandler::isCgi(const std::string& cgi_path)
 {
 	int pipefd[2];
 	std::string buffer;
