@@ -36,6 +36,7 @@ bool	isExecutable( const char* filename );
 bool	isPHPExtension( const std::string& filename );
 ssize_t	wrapperWrite( const int fd, const std::string& msg );
 const std::string	ipToStr( const uint32_t ip );
+uint32_t	StrToIPAddress( const std::string& ip);
 }
 
 #endif

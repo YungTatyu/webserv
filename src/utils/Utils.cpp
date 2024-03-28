@@ -149,3 +149,29 @@ const std::string	Utils::ipToStr( const uint32_t ip )
 	return ss.str();
 }
 
+uint32_t	Utils::StrToIPAddress( const std::string& ip)
+{
+	std::istringstream iss(ip);
+	std::string segment;
+	std::vector<std::string> segments;
+
+	// "." で分割
+	while (std::getline(iss, segment, '.')) {
+		segments.push_back(segment);
+	}
+
+	uint32_t	result = 0;
+
+	for (int i = 0; i < 4; i++)
+	{
+		iss.clear();
+		iss.str(segments[i]);
+		int value;
+		iss >> value;
+
+		result = (result << 8) | value;
+	}
+
+	return result;
+}
+

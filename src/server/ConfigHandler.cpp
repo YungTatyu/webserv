@@ -43,32 +43,6 @@ int ConfigHandler::getListenQ()
 	return this->listenQ_;
 }
 
-uint32_t	ConfigHandler::StrToIPAddress( const std::string& ip) const
-{
-	std::istringstream iss(ip);
-	std::string segment;
-	std::vector<std::string> segments;
-
-	// "." で分割
-	while (std::getline(iss, segment, '.')) {
-		segments.push_back(segment);
-	}
-
-	uint32_t	result = 0;
-
-	for (int i = 0; i < 4; i++)
-	{
-		iss.clear();
-		iss.str(segments[i]);
-		int value;
-		iss >> value;
-
-		result = (result << 8) | value;
-	}
-
-	return htonl(result);
-}
-
 bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr ) const
 {
 	if (ip_addr_str == "all")
@@ -80,7 +54,7 @@ bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32
 	std::getline(iss, ip, '/');
 	std::getline(iss, mask);
 
-	uint32_t			conf_addr = StrToIPAddress(ip);
+	uint32_t			conf_addr = Utils::StrToIPAddress(ip);
 	uint32_t			mask_val = 0xFFFFFFFF;
 
 	// サブネットマスクが指定されている場合
