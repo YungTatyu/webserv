@@ -1,14 +1,23 @@
 #include "ConfigHandler.hpp"
-#include "IOUtils.hpp"
+#include "Utils.hpp"
+#include "NetworkIOHandler.hpp"
 #include <sys/socket.h>
 #include <cstring>
+#include <cerrno>
+#include <iomanip>
+#include <ctime>
 
-const static	std::string kACCESS_FD = "access_fd";
-const static	std::string kERROR_FD = "error_fd";
-const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
-const static	std::string kSEND_TIMEOUT = "send_timeout";
-const static	std::string kUSERID_EXPIRES = "userid_expires";
-const static	std::string kDENY = "deny";
+const static std::string	kACCESS_FD = "access_fd";
+const static std::string	 kERROR_FD = "error_fd";
+const static std::string	kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static std::string	kSEND_TIMEOUT = "send_timeout";
+const static std::string	kUSERID_EXPIRES = "userid_expires";
+const static std::string	kDENY = "deny";
+const static std::string	kALIAS = "alias";
+const static std::string	kAUTOINDEX = "autoindex";
+const static std::string	kROOT = "root";
+const static std::string	kERROR_PAGE = "error_page";
+const static std::string	kLimitExcept = "limit_except";
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
@@ -34,32 +43,6 @@ int ConfigHandler::getListenQ()
 	return this->listenQ_;
 }
 
-uint32_t	ConfigHandler::StrToIPAddress( const std::string& ip) const
-{
-	std::istringstream iss(ip);
-	std::string segment;
-	std::vector<std::string> segments;
-
-	// "." で分割
-	while (std::getline(iss, segment, '.')) {
-		segments.push_back(segment);
-	}
-
-	uint32_t	result = 0;
-
-	for (int i = 0; i < 4; i++)
-	{
-		iss.clear();
-		iss.str(segments[i]);
-		int value;
-		iss >> value;
-
-		result = (result << 8) | value;
-	}
-
-	return htonl(result);
-}
-
 bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr ) const
 {
 	if (ip_addr_str == "all")
@@ -71,7 +54,7 @@ bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32
 	std::getline(iss, ip, '/');
 	std::getline(iss, mask);
 
-	uint32_t			conf_addr = StrToIPAddress(ip);
+	uint32_t			conf_addr = Utils::StrToIPAddress(ip);
 	uint32_t			mask_val = 0xFFFFFFFF;
 
 	// サブネットマスクが指定されている場合
@@ -126,67 +109,42 @@ config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& m
 		return config::DELETE;
 }
 
-bool	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
+int	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
 {
 	// ------ access の制限 ------
 	// configからアドレス制限ディレクトリのあるcontext探す
-	if (location != NULL && location->directives_set.find(kDENY) != location->directives_set.end())
+	if (location && location->directives_set.find(kDENY) != location->directives_set.end())
 	{
 		if (!limitLoop(location->allow_deny_list, client_addr.sin_addr.s_addr))
-			return false;
+			return ACCESS_DENY;
 	}
 	else if (server.directives_set.find(kDENY) != server.directives_set.end())
 	{
 		if (!limitLoop(server.allow_deny_list, client_addr.sin_addr.s_addr))
-			return false;
+			return ACCESS_DENY;
 	}
 	else if (this->config_->http.directives_set.find(kDENY) != this->config_->http.directives_set.end())
 	{
 		if (!limitLoop(this->config_->http.allow_deny_list, client_addr.sin_addr.s_addr))
-			return false;
+			return ACCESS_DENY;
 	}
 
 
 	// ------ method の制限 ------
 	// location内にlimit_except contextあるか？
-	if (location->directives_set.find("limit_except") != location->directives_set.end())
+	if (location && location->directives_set.find(kLimitExcept) != location->directives_set.end())
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
 		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
-				return false;
+				return METHOD_DENY;
 		}
 	}
 
 	// 問題なければtrue
-	return true;
-}
-
-/** request 処理の順番
- * 1. parse error 400 Bad Request
- * 2. access restrict 403 Invalid Access
- * 3. no location / no file 404 Not Found
- */
-
-const std::string	ConfigHandler::searchFile( const struct config::Server& server, const HttpRequest& request ) const
-{
-	(void)server;
-	(void)request;
-	return "";
-	//if (FileUtils::isDirectory(server.root.getPath() + request.uri))
-	//	return searchErrorPage(301);
-
-	/* ~ try_filesとindex/autoindexのファイル検索 ~
-	 * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
-	 * index/autoindex はrequestのuriにindexのファイル名を足して探す
-	 * 3つともなかったら上位のcontextで検索する
-	 */
-
-	// try_filesとindex/autoindexをuriが属するcontextから探して返す。見つからなければ403エラー
-
-	// request uriがそもそもrootディレクティブになければ404 Not Found
+	return ACCESS_ALLOW;
 }
 
 // 最終的なlocationで記録
@@ -194,30 +152,34 @@ void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const st
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	writeAccessLog(server, location, msg);
+}
 
+void	ConfigHandler::writeAccessLog( const config::Server& server, const config::Location* location, const std::string& msg ) const
+{
 	// access_logがどのコンテキスがあれば出力する
 	if (location && location->directives_set.find(kACCESS_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->access_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(location->access_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(location->access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (server.directives_set.find(kACCESS_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.access_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(server.access_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(server.access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (this->config_->http.directives_set.find(kACCESS_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 }
@@ -226,38 +188,41 @@ void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const st
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
+	writeErrorLog(server, location, msg);
+}
 
-	// error_logがどのコンテキスがあれば出力する
+void	ConfigHandler::writeErrorLog( const config::Server& server, const config::Location* location, const std::string& msg ) const
+{
 	if (location && location->directives_set.find(kERROR_FD) != location->directives_set.end())
 	{
 		for (size_t i = 0; i < location->error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(location->error_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(location->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (server.directives_set.find(kERROR_FD) != server.directives_set.end())
 	{
 		for (size_t i = 0; i < server.error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(server.error_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(server.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 	else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end())
 	{
 		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
 		{
-			if (IOUtils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
-				std::cerr << "webserv: [error] write() failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+			if (Utils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		}
 	}
 }
@@ -375,7 +340,7 @@ const config::Location*	ConfigHandler::searchLongestMatchLocationConfig( const c
 
 const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& server, const config::Location* location, const unsigned int code ) const
 {
-	if (location && !location->error_page_list.empty())
+	if (location && location->directives_set.find(kERROR_PAGE) != location->directives_set.end())
 	{
 		const std::vector<config::ErrorPage>&	ep_list = location->error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
@@ -386,7 +351,7 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 			}
 		}
 	}
-	else if (!server.error_page_list.empty())
+	else if (server.directives_set.find(kERROR_PAGE) != server.directives_set.end())
 	{
 		const std::vector<config::ErrorPage>&	ep_list = server.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
@@ -397,7 +362,7 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 			}
 		}
 	}
-	else if (!this->config_->http.error_page_list.empty())
+	else if (this->config_->http.directives_set.find(kERROR_PAGE) != this->config_->http.directives_set.end())
 	{
 		const std::vector<config::ErrorPage>&	ep_list = this->config_->http.error_page_list;
 		for (size_t i = 0; i < ep_list.size(); i++)
@@ -430,3 +395,90 @@ const struct TiedServer	ConfigHandler::createTiedServer( const std::string addr,
 	return tied_server;
 }
 
+std::string	ConfigHandler::searchRootPath( const config::Server& server, const config::Location* location ) const
+{
+	if (location)
+	{
+		if (location->directives_set.find(kROOT) != location->directives_set.end())
+			return location->root.getPath();
+		if (location->directives_set.find(kALIAS) != location->directives_set.end())
+			return location->alias.getPath();
+	}
+	if (server.directives_set.find(kROOT) != server.directives_set.end())
+		return server.root.getPath();
+	else if (config_->http.directives_set.find(kROOT) != config_->http.directives_set.end())
+		return config_->http.root.getPath();
+	// これいるか？上のやつと一緒でいいのでは？
+	return config::Root::kDefaultPath_;
+}
+
+
+bool	ConfigHandler::isAutoIndexOn( const config::Server& server, const config::Location* location ) const
+{
+	if (location && location->directives_set.find(kAUTOINDEX) != location->directives_set.end() && location->autoindex.getIsAutoindexOn())
+			return true;
+	else if (server.directives_set.find(kAUTOINDEX) != server.directives_set.end() && server.autoindex.getIsAutoindexOn())
+			return true;
+	else if (config_->http.directives_set.find(kAUTOINDEX) != config_->http.directives_set.end() && config_->http.autoindex.getIsAutoindexOn())
+			return true;
+	return false;
+}
+
+const std::string	getCurrentTimeLogFormat()
+{
+	std::time_t	currentTime = std::time(NULL);
+	std::tm	*gmTime = std::gmtime(&currentTime);
+
+	const char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+	std::ostringstream	oss;
+	oss << days[gmTime->tm_wday] << "/"
+		<< months[gmTime->tm_mon] << "/"
+		<< 1900 + gmTime->tm_year << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_hour << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_min << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_sec
+		<< " GMT";
+
+	return oss.str();
+}
+
+const std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const
+{
+	std::stringstream	ss;
+
+	std::string	requestMethod, requestUrl, userAgent;
+/*
+	switch (request.method) {
+		case config::LimitExcept::GET:
+			requestMethod = "GET";
+			break;
+		case config::LimitExcept::POST:
+			requestMethod = "POST";
+			break;
+		case config::LimitExcept::DELETE:
+			requestMethod = "DELETE";
+			break;
+		case config::LimitExcept::HEAD:
+			requestMethod = "HEAD";
+			break;
+		default:
+			requestMethod = "NONE";
+			break;
+	}
+*/
+	// HttpRequest mergeしたら変更
+	requestMethod = request.method;
+	// URLの表示をするかどうか？
+	requestUrl = "-";
+	std::map<std::string, std::string>::const_iterator	it = request.headers.find("User-Agent");
+	if (it != request.headers.end())
+		userAgent = it->second;
+	else
+		userAgent = "-";
+
+	ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeLogFormat() << "] \"" << request.method << " " << request.uri << " HTTP/1.1\" " << status << " \"" << requestUrl << "\" \"" << userAgent << "\"" << std::endl;
+
+	return ss.str();
+}

@@ -17,12 +17,14 @@ class SelectServer : public IServer
 		void	eventLoop(ConnectionManager* conn_manager,
 								IActiveEventManager* event_manager,
 								NetworkIOHandler* io_handler,
-								RequestHandler* request_handler);
+								RequestHandler* request_handler,
+								ConfigHandler* config_handler);
 		int	waitForEvent(ConnectionManager* conn_manager, IActiveEventManager *event_manager);
 		void	callEventHandler(ConnectionManager* conn_manager,
 										IActiveEventManager* event_manager,
 										NetworkIOHandler* io_handler,
-										RequestHandler* request_handler);
+										RequestHandler* request_handler,
+										ConfigHandler* config_handler);
 		int	addSocketToSets(const std::map<int, ConnectionData> &connections);
 		void	addActiveEvents(const std::map<int, ConnectionData> &connections, IActiveEventManager *event_manager);
 		fd_set	read_set_;

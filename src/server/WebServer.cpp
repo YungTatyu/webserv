@@ -44,5 +44,5 @@ WebServer::~WebServer()
 
 void	WebServer::run()
 {
-	this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler);
+	this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler, this->configHandler);
 }

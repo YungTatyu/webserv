@@ -23,17 +23,20 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/Parser.cpp
 	src/config/LogFd.cpp
 	src/server/CGIHandler.cpp
+	src/server/CGIParser.cpp
+	src/server/CGIExecutor.cpp
 	src/server/ConfigHandler.cpp
 	src/server/HttpMessage.cpp 
 	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
-	src/utils/FileUtils.cpp
-	src/utils/IOUtils.cpp
+	src/server/HttpResponse.cpp
+	src/utils/Utils.cpp
 
 	# test files
 	test/server/config_handler_test.cpp
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
+	test/server/HttpResponseTest.cpp
 	test/conf/confLexerTest.cpp 
 	test/conf/directives_test.cpp 
 	test/conf/main_parser_test.cpp 

@@ -1,9 +1,7 @@
 #include "CGIHandler.hpp"
-#include "FileUtils.hpp"
+#include "Utils.hpp"
 #include "SysCallWrapper.hpp"
 #include <cstdlib>
-
-
 cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1) {}
 
 cgi::CGIHandler::~CGIHandler() {}
@@ -22,9 +20,9 @@ cgi::CGIHandler::~CGIHandler() {}
 bool cgi::CGIHandler::isCgi(const std::string& cgi_path)
 {
 	return (
-		FileUtils::isExtensionFile(cgi_path, ".php")
-		|| FileUtils::isExtensionFile(cgi_path, ".cgi")
-		|| FileUtils::isExtensionFile(cgi_path, ".py")
-	) && FileUtils::isExecutable(cgi_path.c_str());
+		Utils::isExtensionFile(cgi_path, ".php")
+		|| Utils::isExtensionFile(cgi_path, ".cgi")
+		|| Utils::isExtensionFile(cgi_path, ".py")
+	) && Utils::isExecutable(cgi_path.c_str());
 }
 

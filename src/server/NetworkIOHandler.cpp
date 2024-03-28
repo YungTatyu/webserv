@@ -1,4 +1,5 @@
 #include "NetworkIOHandler.hpp"
+#include "ConnectionManager.hpp"
 
 /* NetworkIOHandlerクラスの実装 */
 void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
@@ -21,6 +22,8 @@ void NetworkIOHandler::setupSocket( ConfigHandler *configHandler )
 
 		SysCallWrapper::Bind( this->listenfd_, (struct sockaddr *) &servaddr, sizeof(servaddr) );
 		SysCallWrapper::Listen( this->listenfd_, configHandler->getListenQ() );
+
+		this->listenfd_map_[this->listenfd_] = configHandler->createTiedServer("127.0.0.1", configHandler->getServPort());
 
 		std::cout << "Server running on port " << configHandler->getServPort() << std::endl;
 
@@ -57,7 +60,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 
 ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
-	std::vector<char> response = connManager.getResponse( cli_sock );
+	std::vector<unsigned char> response = connManager.getFinalResponse( cli_sock );
 	size_t totalSent = 0;
 	size_t resSize = response.size();
 	const size_t chunkSize = 1024;
@@ -86,6 +89,7 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager )
 	// 新規クライントfdを追加
 	connManager.setConnection( connfd );
 	connManager.setEvent( connfd, ConnectionData::READ );
+	connManager.setTiedServer( connfd, &this->listenfd_map_[listenfd_]);
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];
