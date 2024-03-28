@@ -2,7 +2,6 @@
 #include "Utils.hpp"
 #include "SysCallWrapper.hpp"
 #include <cstdlib>
-
 cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1) {}
 
 cgi::CGIHandler::~CGIHandler() {}
