@@ -5,10 +5,8 @@
 
 #if defined(EPOLL_AVAILABLE)
 
-# include <sys/epoll.h>
-# include <vector>
-
 # include "IActiveEventManager.hpp"
+# include <vector>
 
 class EpollActiveEventManager : public IActiveEventManager
 {
