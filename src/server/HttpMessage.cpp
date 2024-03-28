@@ -86,9 +86,9 @@ std::string HttpMessage::responseGenerater( HttpRequest &request )
 		std::ifstream ifile( request.uri.c_str() );
 		if ( ifile )
 		{
-			if ( CGIHandler::isCGI( request.uri ) )
-				return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.queries["f1"] ) );
-			return HttpMessage::createResponse( Utils::readFile(request.uri) );
+			// if ( CGIHandler::isCGI( request.uri ) )
+			// 	return HttpMessage::createResponse( CGIHandler::executeCGI( request.uri, request.query ) );
+			return HttpMessage::createResponse( FileUtils::readFile(request.uri) );
 		}
 		else
 		{
