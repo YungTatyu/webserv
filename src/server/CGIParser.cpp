@@ -10,7 +10,7 @@
 const static char	*kContentLength = "content-length";
 
 cgi::CGIParser::CGIParser() :
-	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), cri_(0) {}
+	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), ri_(0) {}
 
 cgi::CGIParser::~CGIParser() {}
 
@@ -87,13 +87,13 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 
 	const static char	*kStatus = "status";
 	const static char	*kContentType = "content-type";
-	cri_ = 0;
+	ri_ = 0;
 	PARSE_HEADER_PHASE	state = sw_start;
 	std::string	cur_name;
 	std::string	cur_value;
 	while (state != sw_end)
 	{
-		const unsigned char	ch = response[cri_];
+		const unsigned char	ch = response[ri_];
 		switch (state)
 		{
 		case sw_start:
@@ -103,7 +103,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			{
 			case '\r':
 				state = sw_almost_end;
-				++cri_;
+				++ri_;
 				break;
 			case '\n':
 				state = sw_almost_end;
@@ -143,14 +143,14 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 					break;
 				}
 				cur_name += ch;
-				++cri_;
+				++ri_;
 				break;
 			}
 			break;
 
 		case sw_colon:
 		{
-			++cri_;
+			++ri_;
 			/**
 			 * headerが重複している場合は、syntaxを見ない
 			 * 一番初めに設定されたheaderの値が適応される
@@ -168,7 +168,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		{
 			if (ch == ' ')
 			{
-				++cri_;
+				++ri_;
 				break;
 			}
 			const std::string	name_lowercase = Utils::toLower(cur_name);
@@ -195,7 +195,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			default:
 				cur_value += ch;
-				++cri_;
+				++ri_;
 				break;
 			}
 			break;
@@ -208,7 +208,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_header_almost_done;
 				break;
 			default:
-				++cri_;
+				++ri_;
 				break;
 			}
 			break;
@@ -236,7 +236,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			case '8':
 			case '9':
 				cur_value += ch;
-				++cri_;
+				++ri_;
 				break;
 			default:
 				if (!isValidStatusCode(cur_value))
@@ -258,7 +258,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			default:
 				cur_value += ch;
-				++cri_;
+				++ri_;
 				break;
 			}
 			break;
@@ -286,7 +286,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			case '8':
 			case '9':
 				cur_value += ch;
-				++cri_;
+				++ri_;
 				break;
 			case ' ':
 				if (!isValidContentLength(cur_value))
@@ -310,7 +310,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_header_almost_done;
 				break;
 			case ' ':
-				++cri_;
+				++ri_;
 				break;
 			default:
 				state = sw_error;
@@ -323,7 +323,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			{
 			case '\r':
 				state = sw_header_done;
-				++cri_;
+				++ri_;
 				break;
 			case '\n':
 				state = sw_header_done;
@@ -356,7 +356,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			}
 			else if (!cur_name.empty() && it == this->headers_->end())
 				this->headers_->insert(std::make_pair(cur_name, cur_value));
-			++cri_;
+			++ri_;
 			state = sw_start;
 			break;
 		}
@@ -367,7 +367,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				state = sw_error;
 				break;
 			}
-			++cri_;
+			++ri_;
 			state = sw_end;
 			break;
 
@@ -377,7 +377,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		}
 
 		if (state == sw_error || 
-			(cri_ >= response.size() && state != sw_end)
+			(ri_ >= response.size() && state != sw_end)
 		)
 		{
 			this->state_ = PARSE_ERROR;
@@ -405,11 +405,11 @@ void	cgi::CGIParser::parseBody(const std::string& response)
 		size_t	length;
 		iss >> length;
 
-		*(this->body_) = response.substr(cri_, length);
+		*(this->body_) = response.substr(ri_, length);
 		this->state_ = PARSE_BODY_DONE;
 		return;
 	}
-	*(this->body_) = response.substr(cri_);
+	*(this->body_) = response.substr(ri_);
 	this->state_ = PARSE_BODY_DONE;
 }
 
