@@ -19,7 +19,8 @@ void	EpollServer::eventLoop(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	if (!initEpollServer())
@@ -33,7 +34,7 @@ void	EpollServer::eventLoop(
 		waitForEvent(conn_manager, event_manager);
 
 		// 発生したイベントをhandle
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
 
 		// 発生したすべてのイベントを削除
 		event_manager->clearAllEvents();
@@ -95,7 +96,8 @@ void	EpollServer::callEventHandler(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	// event handling
@@ -108,7 +110,7 @@ void	EpollServer::callEventHandler(
 	{
 		int	status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, active_events[i].data.fd);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].data.fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].data.fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
