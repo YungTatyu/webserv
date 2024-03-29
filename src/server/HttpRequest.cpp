@@ -107,7 +107,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest,
 			state = sw_method_mid;
 			break;
 		case sw_method_mid:
-			if (std::isalpha(static_cast<unsigned char>(ch))) {
+			if (std::isalpha(ch)) {
 				method += ch;
 			} else if (ch == ' ') {
 				state = sw_method_almost_end;
