@@ -22,7 +22,8 @@ class HttpRequest
 		PARSE_VERSION_DONE,
 		PARSE_HEADER_DONE,
 		PARSE_BODY_DONE,
-		PARSE_ERROR
+		PARSE_ERROR,
+		PARSE_VERSION_ERROR
 	};
 
 	HttpRequest(const config::REQUEST_METHOD &method = config::UNKNOWN,

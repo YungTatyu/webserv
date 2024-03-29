@@ -210,7 +210,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest,
 {
 	newRequest.version = rawRequest.substr(0, rawRequest.find('\r'));
 	if (newRequest.version != "HTTP/1.1")
-		return HttpRequest::PARSE_ERROR;
+		return HttpRequest::PARSE_VERSION_ERROR;
 	rawRequest = rawRequest.substr(rawRequest.find('\n') + 1);
 	return HttpRequest::PARSE_VERSION_DONE;
 }
