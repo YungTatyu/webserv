@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include "Utils.hpp"
+#include <cstring>
 
 typedef std::map<std::string, std::string> string_map;
 typedef std::pair<std::string, std::string> string_pair;
