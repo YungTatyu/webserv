@@ -288,6 +288,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest,
 		case sw_start:
 			if (ch == '\r') {
 				++i;
+				if (rawRequest[i] != '\n') return HttpRequest::PARSE_ERROR;
 				break;
 			}
 			if (ch == '\n') {
