@@ -97,16 +97,16 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 	return true;
 }
 
-config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& method_str ) const
+const std::string	ConfigHandler::convertRequestMethod( config::REQUEST_METHOD method ) const
 {
-	if (method_str == "GET")
-		return config::GET;
-	else if (method_str == "HEAD")
-		return config::HEAD;
-	else if (method_str == "POST")
-		return config::POST;
+	if (method == config::GET)
+		return "GET";
+	else if (method == config::HEAD)
+		return "HEAD";
+	else if (method == config::POST)
+		return "POST";
 	else
-		return config::DELETE;
+		return "DELETE";
 }
 
 int	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
@@ -136,7 +136,7 @@ int	ConfigHandler::allowRequest( const config::Server& server, const config::Loc
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
-		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
+		if (location->limit_except.excepted_methods.find(request.method) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
 				return METHOD_DENY;
@@ -449,27 +449,9 @@ const std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long 
 	std::stringstream	ss;
 
 	std::string	requestMethod, requestUrl, userAgent;
-/*
-	switch (request.method) {
-		case config::LimitExcept::GET:
-			requestMethod = "GET";
-			break;
-		case config::LimitExcept::POST:
-			requestMethod = "POST";
-			break;
-		case config::LimitExcept::DELETE:
-			requestMethod = "DELETE";
-			break;
-		case config::LimitExcept::HEAD:
-			requestMethod = "HEAD";
-			break;
-		default:
-			requestMethod = "NONE";
-			break;
-	}
-*/
-	// HttpRequest mergeしたら変更
-	requestMethod = request.method;
+
+	requestMethod = ConfigHandler::convertRequestMethod(request.method);
+
 	// URLの表示をするかどうか？
 	requestUrl = "-";
 	std::map<std::string, std::string>::const_iterator	it = request.headers.find("User-Agent");

@@ -26,7 +26,6 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/CGIParser.cpp
 	src/server/CGIExecutor.cpp
 	src/server/ConfigHandler.cpp
-	src/server/HttpMessage.cpp 
 	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
 	src/server/HttpResponse.cpp

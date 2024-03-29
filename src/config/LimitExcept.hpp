@@ -13,6 +13,7 @@ namespace config
 {
 enum REQUEST_METHOD
 {
+	UNKNOWN,
 	GET,
 	HEAD,
 	POST,
