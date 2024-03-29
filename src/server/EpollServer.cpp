@@ -55,22 +55,16 @@ bool	EpollServer::initEpollServer()
 
 bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData> &connections )
 {
-	// epoll_event listの作成
-	std::vector<struct epoll_event>	event_list(connections.size()); //監視したいevent
-
-	size_t	i = 0;
+	// 監視したいイベントを追加
 	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it)
 	{
-		event_list[i].events = it->second.event == ConnectionData::READ ? EPOLLIN : EPOLLOUT;
-		event_list[i].data.fd = it->first;
-		++i;
-	}
+		struct epoll_event	ep;
+		ep.events = it->second.event == ConnectionData::READ ? EPOLLIN : EPOLLOUT;
+		ep.data.fd = it->first;
 
-	for (i = 0 ; i < event_list.size(); ++i)
-	{
-		if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, event_list[i].data.fd, &event_list[i]) == -1)
+		if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1)
 		{
 			std::cerr << "webserv: [emerg] epoll_ctl (" << errno << ":"<< strerror(errno) << ")\n";
 			return false;
