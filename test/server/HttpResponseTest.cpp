@@ -12,6 +12,16 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+/*
+ * ===== HttpResponseTest 方針 =====
+ *
+ *
+ * テストごとに、requestとconfigファイルと想定するresponseを用意する
+ * generateResponse関数を適用して、出力が想定通りか確認する。
+ *
+ */
+
+
 class HttpResponseTest : public ::testing::Test {
 protected:
     // 各TESTの前に呼び出されるセットアップメソッド
