@@ -39,7 +39,7 @@ void	cgi::CGIExecutor::prepareCgiExecution(
 )
 {
 	if (!redirectStdIOToSocket(request, socket))
-		std::exit(EXIT_FAILURE); // responseをどうする？ bad gatewayでいいのか
+		std::exit(EXIT_FAILURE);
 	createScriptPath(script_path);
 	createArgv(script_path);
 	createMetaVars(request);
