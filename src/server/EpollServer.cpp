@@ -61,7 +61,7 @@ bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData> &connectio
 		++it)
 	{
 		struct epoll_event	ep;
-		ep.events = it->second.event == ConnectionData::READ ? EPOLLIN : EPOLLOUT;
+		ep.events = it->second.event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
 		ep.data.fd = it->first;
 
 		if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1)
