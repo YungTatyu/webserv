@@ -22,13 +22,33 @@ void WebServer::initializeServer()
 	this->connManager = new ConnectionManager();
 	initializeConnManager();
 
-	#if defined(KQUEUE_AVAILABLE)
-	this->server = new KqueueServer();
-	this->eventManager = new KqueueActiveEventManager();
-	#else
-	this->server = new PollServer();
-	this->eventManager = new PollActiveEventManager();
-	#endif
+	config::CONNECTION_METHOD	method = this->configHandler->config_->events.use.getConnectionMethod();
+	switch (method) {
+		#if defined(KQUEUE_AVAILABLE)
+		case config::KQUEUE:
+			this->server = new KqueueServer();
+			this->eventManager = new KqueueActiveEventManager();
+			break;
+		case config::EPOLL:
+			break;
+		#endif
+		#if defined(EPOLL_AVAILABLE)
+		case config::KQUEUE:
+			break;
+		case config::EPOLL:
+			this->server = new EpollServer();
+			this->eventManager = new EpollActiveEventManager();
+			break;
+		#endif
+		case config::POLL:
+			this->server = new PollServer();
+			this->eventManager = new PollActiveEventManager();
+			break;
+		case config::SELECT:
+			this->server = new SelectServer();
+			this->eventManager = new SelectActiveEventManager();
+			break;
+	}
 }
 
 void	WebServer::initializeListenSocket(

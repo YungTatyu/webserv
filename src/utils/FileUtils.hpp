@@ -19,7 +19,7 @@ namespace FileUtils
 	std::string readFile( const std::string& filePath );
 	std::vector<std::string> getDirectoryContents( const std::string& directoryPath );
 	bool isExecutable( const char* filename );
-	bool isPHPExtension( const std::string& filename );
+	bool isExtensionFile( const std::string& filename, const std::string& extension );
 }
 
 #endif

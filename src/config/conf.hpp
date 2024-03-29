@@ -5,6 +5,10 @@
 #define KQUEUE_AVAILABLE
 #endif
 
+#if defined(__linux__)
+#define EPOLL_AVAILABLE
+#endif
+
 # include <string>
 
 namespace config
