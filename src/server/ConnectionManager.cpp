@@ -1,4 +1,12 @@
 #include "ConnectionManager.hpp"
+#include <unistd.h>
+
+ConnectionManager::ConnectionManager() {}
+
+ConnectionManager::~ConnectionManager()
+{
+	closeAllConnections();
+}
 
 /* ConnectionManagerクラスの実装 */
 void ConnectionManager::setConnection( const int fd )
@@ -61,4 +69,16 @@ void ConnectionManager::setRequest( const int fd, const HttpRequest request )
 const HttpRequest &ConnectionManager::getRequest( const int fd ) const
 {
 	return connections_.at(fd).request;
+}
+
+void	ConnectionManager::closeAllConnections()
+{
+	for (std::map<int, ConnectionData>::iterator it = this->connections_.begin();
+		it != this->connections_.end();
+		++it
+	)
+	{
+		close(it->first);
+	}
+	this->connections_.clear();
 }

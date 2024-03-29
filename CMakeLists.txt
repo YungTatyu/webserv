@@ -23,6 +23,8 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/Parser.cpp
 	src/config/LogFd.cpp
 	src/server/CGIHandler.cpp
+	src/server/CGIParser.cpp
+	src/server/CGIExecutor.cpp
 	src/server/ConfigHandler.cpp
 	src/server/HttpMessage.cpp 
 	src/server/HttpRequest.cpp

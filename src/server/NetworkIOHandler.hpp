@@ -15,32 +15,38 @@
 # include "SysCallWrapper.hpp"
 # include "Server.hpp"
 
+#include <string>
+
 class ConfigHandler;
 
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer
 {
 	std::vector<const config::Server*>	servers_;
-	const std::string addr_;
+	const std::string address_;
 	const unsigned int port_;
 
-	TiedServer( const std::string addr, const unsigned int port ) : addr_(addr), port_(port) {}
+	TiedServer( const std::string address, const unsigned int port ) : address_(address), port_(port) {}
 };
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler
 {
 	public:
-		void setupSocket( ConfigHandler *configHandler );
+		NetworkIOHandler();
+		~NetworkIOHandler();
+		int setupSocket( const std::string address, const unsigned int port );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
-		int acceptConnection( ConnectionManager& connManager );
+		int acceptConnection( ConnectionManager& connManager, const int listen_fd );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
-		int getListenfd();
+		void	closeAllListenSockets();
+		const std::map<int, TiedServer>& getListenfdMap();
+		void	addVServer(const int listen_fd, const TiedServer server);
+		bool	isListenSocket(const int listen_fd) const;
 
 	private:
-		int listenfd_; // リスニングソケットを管理
-		std::map<int, struct TiedServer> listenfd_map_; // リスニングソケットとそれに紐づくserver configを管理
+		std::map<int, TiedServer> listenfd_map_; // リスニングソケットとそれに紐づくserver configを管理
 		static const size_t bufferSize_ = 1024;
 };
 

@@ -118,7 +118,7 @@ bool	WRITE_ACCURATE( std::string file_path, const std::string& msg ) {
 bool	sameTiedServer(const struct TiedServer& tied1, const struct TiedServer& tied2)
 {
 	return (tied1.servers_.size() == tied2.servers_.size() &&
-		tied1.addr_ == tied2.addr_ &&
+		tied1.address_ == tied2.address_ &&
 		tied1.port_ == tied2.port_);
 }
 
