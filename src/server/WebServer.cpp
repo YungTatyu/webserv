@@ -24,8 +24,12 @@ void WebServer::initializeServer()
 			this->server = new KqueueServer();
 			this->eventManager = new KqueueActiveEventManager();
 			break;
+		case config::EPOLL:
+			break;
 		#endif
 		#if defined(EPOLL_AVAILABLE)
+		case config::KQUEUE:
+			break;
 		case config::EPOLL:
 			this->server = new EpollServer();
 			this->eventManager = new EpollActiveEventManager();
@@ -38,10 +42,6 @@ void WebServer::initializeServer()
 		case config::SELECT:
 			this->server = new SelectServer();
 			this->eventManager = new SelectActiveEventManager();
-			break;
-		default:
-			this->server = new PollServer();
-			this->eventManager = new PollActiveEventManager();
 			break;
 	}
 
