@@ -1,5 +1,7 @@
 #include "CGIExecutor.hpp"
 #include "Utils.hpp"
+#include "ConfigHandler.hpp"
+#include "LimitExcept.hpp"
 
 #include <unistd.h>
 #include <cstdlib>
@@ -98,7 +100,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& http_request)
 	std::string	remote_host = std::string("REMOTE_HOST="); // client host name
 	// this->meta_vars_.push_back(remote_host.c_str());
 
-	const std::string	method = std::string("REQUEST_METHOD=") + http_request.method;
+	const std::string	method = std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(http_request.method);
 	this->meta_vars_.push_back(method.c_str());
 
 	const std::string	script_name = std::string("SCRIPT_NAME=") + http_request.uri;

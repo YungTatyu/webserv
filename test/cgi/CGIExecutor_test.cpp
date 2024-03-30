@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include "Utils.hpp"
+#include "LimitExcept.hpp"
 
 typedef std::map<std::string, std::string> string_map;
 typedef std::pair<std::string, std::string> string_pair;
@@ -19,7 +20,7 @@ typedef std::pair<std::string, std::string> string_pair;
 namespace test
 {
 	HttpRequest	initRequest(
-		const std::string& method,
+		const config::REQUEST_METHOD method,
 		const std::string& uri,
 		const std::string& version,
 		const std::string& queries,
@@ -128,7 +129,7 @@ namespace test
 // {
 // 	cgi::CGIHandler	cgi_handler;
 // 	HttpRequest	request = test::initRequest(
-// 		"GET",
+// 		config::REQUEST_METHOD::GET,
 // 		"/path/uri/",
 // 		"HTTP/1.1",
 // 		"one=1&two=2&three=3",
@@ -164,7 +165,7 @@ TEST(cgi_executor, document_response)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "",
 		{{"Host", "tt"}}
 	);
 
@@ -182,7 +183,7 @@ TEST(cgi_executor, local_redirect_res)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "",
 		{{"Host", "tt"}}
 	);
 
@@ -199,7 +200,7 @@ TEST(cgi_executor, client_redirect_res)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "",
 		{{"Host", "tt"}}
 	);
 
@@ -216,7 +217,7 @@ TEST(cgi_executor, client_redirect_res_doc)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET", "/path/uri/", "HTTP/1.1", "", "",
+		config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "",
 		{{"Host", "tt"}}
 	);
 
@@ -234,7 +235,7 @@ TEST(cgi_executor, meta_vars)
 {
 	cgi::CGIHandler	cgi_handler;
 	HttpRequest	request = test::initRequest(
-		"GET",
+		config::REQUEST_METHOD::GET,
 		"/path/uri/",
 		"HTTP/1.1",
 		"one=1&two=2&three=3",

@@ -20,13 +20,13 @@ void ConnectionManager::removeConnection( const int fd )
 	connections_.erase( fd );
 }
 
-void ConnectionManager::setRawRequest( const int fd, const std::vector<char>& rawRequest )
+void ConnectionManager::setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
 {
 	connections_[fd].rawRequest = rawRequest;
 }
 
 
-const std::vector<char>& ConnectionManager::getRawRequest( const int fd ) const
+const std::vector<unsigned char>& ConnectionManager::getRawRequest( const int fd ) const
 {
 	return connections_.at(fd).rawRequest;
 }
@@ -67,7 +67,7 @@ void ConnectionManager::setRequest( const int fd, const HttpRequest request )
 	connections_[fd].request = request;
 }
 
-const HttpRequest &ConnectionManager::getRequest( const int fd ) const
+HttpRequest &ConnectionManager::getRequest( const int fd )
 {
 	return connections_.at(fd).request;
 }

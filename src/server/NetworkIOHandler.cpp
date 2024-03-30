@@ -54,7 +54,7 @@ void	NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server)
 
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int cli_sock )
 {
-	std::vector<char> buffer( bufferSize_ );
+	std::vector<unsigned char> buffer( bufferSize_ );
 	ssize_t totalBytesRead = 0;
 
 	while ( 1 )

@@ -79,7 +79,7 @@ TEST_F(HttpResponseTest, ParseError)
 	// HttpRequest作成
 	HttpRequest	request;
 
-	request.method = "GET";
+	request.method = config::REQUEST_METHOD::GET;
 	request.headers["Host"] = "test_server";
 	request.uri = "/";
 	request.version = "HTTP/1.1";
@@ -102,7 +102,7 @@ TEST_F(HttpResponseTest, Return)
 	// HttpRequest作成
 	HttpRequest	request;
 
-	request.method = "GET";
+	request.method = config::REQUEST_METHOD::GET;
 	request.version = "HTTP/1.1";
 	request.headers["Host"] = "test_server";
 	request.parseState = HttpRequest::PARSE_COMPLETE;
@@ -186,7 +186,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 	// HttpRequest作成
 	HttpRequest	request;
 
-	request.method = "GET";
+	request.method = config::REQUEST_METHOD::GET;
 	request.version = "HTTP/1.1";
 	request.headers["Host"] = "test_server";
 	request.parseState = HttpRequest::PARSE_COMPLETE;
@@ -267,7 +267,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	// HttpRequest作成
 	HttpRequest	request;
 
-	request.method = "GET";
+	request.method = config::REQUEST_METHOD::GET;
 	request.version = "HTTP/1.1";
 	request.headers["Host"] = "test_server";
 	request.parseState = HttpRequest::PARSE_COMPLETE;

@@ -1,6 +1,5 @@
 #include "RequestHandler.hpp"
 #include "HttpResponse.hpp"
-#include "HttpMessage.hpp"
 #include <sys/types.h>
 #include <algorithm>
 
@@ -23,12 +22,18 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			connManager.removeConnection( sockfd );
 			return RequestHandler::UPDATE_CLOSE;
 		}
-		const std::vector<char>& context = connManager.getRawRequest( sockfd );
-		std::string requestData = context.data();
-		HttpRequest request = HttpMessage::requestParser( requestData );
-		connManager.setRequest( sockfd, request );
+		const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
+		std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
 
-		std::string	final_response = HttpResponse::generateResponse( request, connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
+		HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
+
+		if (connManager.getRequest(sockfd).parseState == HttpRequest::PARSE_ERROR)
+		{
+		}
+		else if ( connManager.getRequest(sockfd).parseState != HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+			return RequestHandler::NONE;
+
+		std::string	final_response = HttpResponse::generateResponse( connManager.getRequest(sockfd), connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
 		if (!final_response.empty())
 			connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
