@@ -10,11 +10,13 @@
 # include "SelectActiveEventManager.hpp"
 # include "PollActiveEventManager.hpp"
 # include "KqueueActiveEventManager.hpp"
+# include "EpollActiveEventManager.hpp"
 
 # include "IServer.hpp"
 # include "SelectServer.hpp"
 # include "PollServer.hpp"
 # include "KqueueServer.hpp"
+# include "EpollServer.hpp"
 
 class WebServer
 {
@@ -30,6 +32,10 @@ class WebServer
 		IServer *server;
 		ConfigHandler *configHandler;
 		void initializeServer();
+		void initializeVServers();
+		void	initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
+										const std::string address, const unsigned int port);
+		void	initializeConnManager();
 };
 
 #endif

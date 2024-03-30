@@ -1,4 +1,12 @@
 #include "ConnectionManager.hpp"
+#include <unistd.h>
+
+ConnectionManager::ConnectionManager() {}
+
+ConnectionManager::~ConnectionManager()
+{
+	closeAllConnections();
+}
 
 
 /* ConnectionManagerクラスの実装 */
@@ -85,3 +93,14 @@ const TiedServer&	ConnectionManager::getTiedServer( const int fd ) const
 	return *connections_.at(fd).tied_server_;
 }
 
+void	ConnectionManager::closeAllConnections()
+{
+	for (std::map<int, ConnectionData>::iterator it = this->connections_.begin();
+		it != this->connections_.end();
+		++it
+	)
+	{
+		close(it->first);
+	}
+	this->connections_.clear();
+}

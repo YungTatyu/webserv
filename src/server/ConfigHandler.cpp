@@ -323,7 +323,7 @@ const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer
 			const config::Listen& tmp_listen = tied_servers.servers_[si]->listen_list[li];
 			if (tmp_listen.getIsDefaultServer() &&
 				tied_servers.port_ == tmp_listen.getport() &&
-				tied_servers.addr_ == tmp_listen.getAddress())
+				tied_servers.address_ == tmp_listen.getAddress())
 			{
 				default_server = tied_servers.servers_[si];
 			}

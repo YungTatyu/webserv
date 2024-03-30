@@ -30,6 +30,8 @@ class ConnectionData
 class ConnectionManager
 {
 	public:
+		ConnectionManager();
+		~ConnectionManager();
 		void setConnection( const int fd );
 		void removeConnection( const int fd );
 		void setRawRequest( const int fd, const std::vector<char>& rawRequest );
@@ -45,8 +47,9 @@ class ConnectionManager
 		const std::map<int, ConnectionData> &getConnections() const;
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
+		void	closeAllConnections();
 	private:
-		std::map<int, class ConnectionData> connections_;
+		std::map<int, ConnectionData> connections_;
 
 };
 
