@@ -95,7 +95,8 @@ void	EpollServer::callEventHandler(
 	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
-	RequestHandler* request_handler
+	RequestHandler* request_handler,
+	ConfigHandler* config_handler
 )
 {
 	// event handling
