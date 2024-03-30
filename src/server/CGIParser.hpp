@@ -29,7 +29,7 @@ class CGIParser
 		std::string	*body_;
 		long	*status_code_;
 		std::string	*status_code_line_;
-		size_t	cri_; // cgi response index
+		size_t	ri_; // cgi response index
 		void	parseHeaders(const std::string& cgi_response);
 		void	parseBody(const std::string& cgi_response);
 		bool	isValidStatusCode(const std::string& status_code) const;

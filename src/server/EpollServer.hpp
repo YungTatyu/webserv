@@ -3,12 +3,11 @@
 
 #if defined(EPOLL_AVAILABLE)
 
-# include "ConnectionManager.hpp"
-# include "NetworkIOHandler.hpp"
-# include "RequestHandler.hpp"
-# include "SelectActiveEventManager.hpp"
 # include "IServer.hpp"
 
+class ConnectionManager;
+class NetworkIOHandler;
+class RequestHandler;
 
 class EpollServer : public IServer
 {
@@ -18,21 +17,23 @@ class EpollServer : public IServer
 		void	eventLoop( ConnectionManager* conn_manager,
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
-							RequestHandler* request_handler );
+							RequestHandler* request_handler,
+							ConfigHandler* config_handler);
 		int	waitForEvent( ConnectionManager* conn_manager, IActiveEventManager *event_manager );
 		void	callEventHandler( ConnectionManager* conn_manager,
 								IActiveEventManager* event_manager,
 								NetworkIOHandler* io_handler,
-								RequestHandler* request_handler );
+								RequestHandler* request_handler,
+								ConfigHandler* config_handler);
 		int	addSocketToSets( const std::map<int, ConnectionData> &connections );
 		void	addActiveEvents( const std::map<int, ConnectionData> &connections, IActiveEventManager *event_manager );
 	private:
 		int	epfd_; // epoll instance
 		bool	initEpollServer();
-		bool	initEpollEvent();
-		int	updateEvent();
-		int	deleteEvent();
-		int	addNewEvent();
+		bool	initEpollEvent( const std::map<int, ConnectionData> &connections );
+		int	addNewEvent( const int fd, const uint32_t event_filter );
+		int	updateEvent( struct epoll_event &old_event, const uint32_t event_filter );
+		int	deleteEvent( struct epoll_event &old_event );
 };
 
 #endif

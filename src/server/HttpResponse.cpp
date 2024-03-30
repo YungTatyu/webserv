@@ -611,7 +611,7 @@ int	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, c
 int	HttpResponse::contentHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
 {
 
-	if (config_handler.convertRequestMethod(request.method) == config::GET)
+	if (request.method == config::GET)
 		return staticHandler(response, request, server, location, config_handler);
 	return OK;
 }

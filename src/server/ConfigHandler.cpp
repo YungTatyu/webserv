@@ -123,14 +123,16 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 
 config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& method_str ) const
 {
+	config::REQUEST_METHOD	method = config::UNKNOWN;
 	if (method_str == "GET")
-		return config::GET;
+		method = config::GET;
 	else if (method_str == "HEAD")
-		return config::HEAD;
+		method = config::HEAD;
 	else if (method_str == "POST")
-		return config::POST;
-	else
-		return config::DELETE;
+		method = config::POST;
+	else if (method_str == "DELETE")
+		method = config::DELETE;
+	return method;
 }
 
 int	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
@@ -160,7 +162,7 @@ int	ConfigHandler::allowRequest( const config::Server& server, const config::Loc
 	{
 		// 制限されたメソッドでなければ、スルー
 		// HttpRequestでLIMIT_EXCEPTのenum使ってほしい
-		if (location->limit_except.excepted_methods.find(convertRequestMethod(request.method)) == location->limit_except.excepted_methods.end())
+		if (location->limit_except.excepted_methods.find(request.method) == location->limit_except.excepted_methods.end())
 		{
 			if (!limitLoop(location->limit_except.allow_deny_list, client_addr.sin_addr.s_addr))
 				return METHOD_DENY;
@@ -323,7 +325,7 @@ const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer
 			const config::Listen& tmp_listen = tied_servers.servers_[si]->listen_list[li];
 			if (tmp_listen.getIsDefaultServer() &&
 				tied_servers.port_ == tmp_listen.getport() &&
-				tied_servers.addr_ == tmp_listen.getAddress())
+				tied_servers.address_ == tmp_listen.getAddress())
 			{
 				default_server = tied_servers.servers_[si];
 			}
