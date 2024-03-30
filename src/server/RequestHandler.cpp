@@ -3,19 +3,14 @@
 #include <sys/types.h>
 #include <algorithm>
 
-RequestHandler::RequestHandler()
-{
-	// this->handler_map[IActiveEventManager::isReadEvent] = &RequestHandler::handleReadEvent;
-	// this->handler_map[ActiveEventManager::isWriteEvent] = &RequestHandler::handleWriteEvent;
-	// this->handler_map[ActiveEventManager::isErrorEvent] = &RequestHandler::handleErrorEvent;
-}
+RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
-		if (sockfd == ioHandler.getListenfd())
+		if (ioHandler.isListenSocket(sockfd))
 		{
-			return ioHandler.acceptConnection(connManager);
+			return ioHandler.acceptConnection(connManager, sockfd);
 		}
 		// クライアントソケットへのリクエスト（既存コネクション）
 		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
@@ -42,7 +37,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		if (!final_response.empty())
 			connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
-		connManager.setEvent( sockfd, ConnectionData::WRITE ); // writeイベントに更新
+		connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
 		return RequestHandler::UPDATE_WRITE;
 }
 
@@ -50,7 +45,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 {
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
 		return RequestHandler::NONE;
-	connManager.setEvent(sockfd, ConnectionData::READ); // readイベントに更新
+	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 	return RequestHandler::UPDATE_READ;
 }
 

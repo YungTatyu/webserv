@@ -14,6 +14,8 @@
 # include "SysCallWrapper.hpp"
 # include "Server.hpp"
 
+#include <string>
+
 class ConfigHandler;
 class ConnectionManager;
 
@@ -43,16 +45,20 @@ struct TiedServer
 class NetworkIOHandler
 {
 	public:
-		void setupSocket( ConfigHandler *configHandler );
+		NetworkIOHandler();
+		~NetworkIOHandler();
+		int	setupSocket( const std::string address, const unsigned int port );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
-		int acceptConnection( ConnectionManager& connManager );
+		int acceptConnection( ConnectionManager& connManager, const int listen_fd );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
-		int getListenfd();
+		void	closeAllListenSockets();
+		const std::map<int, TiedServer>& getListenfdMap();
+		void	addVServer(const int listen_fd, const TiedServer server);
+		bool	isListenSocket(const int listen_fd) const;
 
 	private:
-		int listenfd_; // リスニングソケットを管理
-		std::map<int, struct TiedServer> listenfd_map_; // リスニングソケットとそれに紐づくserver configを管理
+		std::map<int, TiedServer> listenfd_map_; // リスニングソケットとそれに紐づくserver configを管理
 		static const size_t bufferSize_ = 1024;
 };
 

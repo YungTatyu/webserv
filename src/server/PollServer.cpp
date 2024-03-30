@@ -96,7 +96,7 @@ std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, Conn
 	{
 		struct pollfd	pollfd;
 		pollfd.fd = it->first;
-		pollfd.events = it->second.event == ConnectionData::READ ? POLLIN : POLLOUT;
+		pollfd.events = it->second.event == ConnectionData::EV_READ ? POLLIN : POLLOUT;
 		pollfd.revents = 0;
 		list.push_back(pollfd);
 	}
