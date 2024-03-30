@@ -37,3 +37,4 @@ logs
 *tmp*
 .vscode
 .DS_Store
+*.cgi
