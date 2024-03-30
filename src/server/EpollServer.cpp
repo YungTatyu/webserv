@@ -20,7 +20,7 @@ void	EpollServer::eventLoop(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler)
+	ConfigHandler* config_handler
 )
 {
 	if (!initEpollServer())
