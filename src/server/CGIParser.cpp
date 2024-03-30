@@ -434,14 +434,6 @@ bool	cgi::CGIParser::isValidStatusCode(const std::string& status_code) const
 
 void	cgi::CGIParser::setStatusCode(const std::string& value)
 {
-	size_t	i = 0;
-	while (i < value.size())
-	{
-		const unsigned char	ch = value[i];
-		if (!std::isdigit(ch))
-			break;
-		i++;
-	}
 	std::string	tmp = value;
 	// status code以降がspaceのみの場合は、status codeの値のみを保持する
 	tmp.erase(std::remove_if(tmp.begin(), tmp.end(), Utils::isSpace), tmp.end());
