@@ -264,7 +264,7 @@ std::string	HttpResponse::transformLetter( const std::string& key_str )
 	std::string result = key_str;
 	std::transform(result.begin(), result.end(), result.begin(), ::tolower);
 
-	if (!result.empty())
+	if (result.empty())
 		return result;
 
 	result[0] = std::toupper(result[0]);
