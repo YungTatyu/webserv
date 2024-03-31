@@ -263,13 +263,14 @@ std::string	HttpResponse::transformLetter( const std::string& key_str )
 {
 	std::string result = key_str;
 	std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+
 	if (!result.empty())
-	{
-		result[0] = std::toupper(result[0]);
-		for (size_t i = 1; i < result.size(); i++)
-			if (result[i - 1] == '-')
-				result[i] = std::toupper(result[i]);
-	}
+		return result;
+
+	result[0] = std::toupper(result[0]);
+	for (size_t i = 1; i < result.size(); i++)
+		if (result[i - 1] == '-')
+			result[i] = std::toupper(result[i]);
 	return result;
 }
 
