@@ -97,18 +97,6 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 	return true;
 }
 
-const std::string	ConfigHandler::convertRequestMethod( config::REQUEST_METHOD method ) const
-{
-	if (method == config::GET)
-		return "GET";
-	else if (method == config::HEAD)
-		return "HEAD";
-	else if (method == config::POST)
-		return "POST";
-	else
-		return "DELETE";
-}
-
 int	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
 {
 	// ------ access の制限 ------
@@ -450,7 +438,7 @@ const std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long 
 
 	std::string	requestMethod, requestUrl, userAgent;
 
-	requestMethod = ConfigHandler::convertRequestMethod(request.method);
+	requestMethod = config::LimitExcept::MethodToStr(request.method);
 
 	// URLの表示をするかどうか？
 	requestUrl = "-";

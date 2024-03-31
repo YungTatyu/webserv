@@ -66,7 +66,6 @@ class ConfigHandler
 		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 		std::string	searchRootPath( const config::Server& server, const config::Location* location ) const;
 		bool	isAutoIndexOn( const config::Server& server, const config::Location* location ) const;
-		const std::string	convertRequestMethod( config::REQUEST_METHOD method ) const;
 		const std::string	createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const;
 
 	// const variable

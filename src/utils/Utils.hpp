@@ -37,6 +37,8 @@ bool	isExtensionFile( const std::string& filename, const std::string& extension 
 ssize_t	wrapperWrite( const int fd, const std::string& msg );
 std::string	ipToStr( const uint32_t ip );
 uint32_t	StrToIPAddress( const std::string& ip);
+std::string	toLower(std::string str);
+bool	isSpace(const unsigned char ch);
 }
 
 #endif
