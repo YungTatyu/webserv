@@ -26,13 +26,15 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/CGIParser.cpp
 	src/server/CGIExecutor.cpp
 	src/server/ConfigHandler.cpp
-	src/server/HttpMessage.cpp 
 	src/server/HttpRequest.cpp
 	src/server/SysCallWrapper.cpp
+	src/server/CGIHandler.cpp
+	src/server/CGIParser.cpp
+	src/server/CGIExecutor.cpp
+	src/server/HttpResponse.cpp
 	src/server/Timer.cpp
 	src/server/TimerTree.cpp
-	src/utils/FileUtils.cpp
-	src/utils/IOUtils.cpp
+	src/utils/Utils.cpp
 	
 	# test files
 	#test/server/config_handler_test.cpp
@@ -40,6 +42,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/config_handler_test.cpp
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
+	test/server/HttpResponseTest.cpp
 	test/conf/confLexerTest.cpp 
 	test/conf/directives_test.cpp 
 	test/conf/main_parser_test.cpp 
@@ -67,6 +70,8 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/userid_service/userid_service_test.cpp
 	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
 	test/conf/init_log_test.cpp
+	test/cgi/CGIExecutor_test.cpp
+	test/cgi/CGIParser_test.cpp
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
