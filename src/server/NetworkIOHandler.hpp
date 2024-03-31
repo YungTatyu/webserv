@@ -13,6 +13,7 @@
 # include <fcntl.h>
 # include "SysCallWrapper.hpp"
 # include "Server.hpp"
+# include "Listen.hpp"
 
 #include <string>
 
@@ -26,7 +27,7 @@ struct TiedServer
 	const std::string addr_;
 	const unsigned int port_;
 
-	TiedServer() : addr_("127.0.0.1"), port_(80) {};
+	TiedServer() : addr_(config::Listen::kDefaultAddress_), port_(config::Listen::kDefaultPort_) {};
 	TiedServer( const std::string addr, const unsigned int port ) : addr_(addr), port_(port) {}
 
 	TiedServer&	operator=( const TiedServer& other )
