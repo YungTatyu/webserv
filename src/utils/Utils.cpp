@@ -130,7 +130,7 @@ ssize_t	Utils::wrapperWrite( const int fd, const std::string& msg )
 	return written_bytes;
 }
 
-const std::string	Utils::ipToStr( const uint32_t ip )
+std::string	Utils::ipToStr( const uint32_t ip )
 {
 	std::stringstream	ss;
 
