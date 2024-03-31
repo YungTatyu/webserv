@@ -27,11 +27,8 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/CGIExecutor.cpp
 	src/server/ConfigHandler.cpp
 	src/server/HttpRequest.cpp
-	src/server/SysCallWrapper.cpp
-	src/server/CGIHandler.cpp
-	src/server/CGIParser.cpp
-	src/server/CGIExecutor.cpp
 	src/server/HttpResponse.cpp
+	src/server/SysCallWrapper.cpp
 	src/server/Timer.cpp
 	src/server/TimerTree.cpp
 	src/utils/Utils.cpp

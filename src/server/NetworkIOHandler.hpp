@@ -13,6 +13,7 @@
 # include <fcntl.h>
 # include "SysCallWrapper.hpp"
 # include "Server.hpp"
+# include "Listen.hpp"
 
 #include <string>
 
@@ -23,10 +24,22 @@ class ConnectionManager;
 struct TiedServer
 {
 	std::vector<const config::Server*>	servers_;
-	const std::string address_;
+	const std::string addr_;
 	const unsigned int port_;
 
-	TiedServer( const std::string address, const unsigned int port ) : address_(address), port_(port) {}
+	TiedServer() : addr_(config::Listen::kDefaultAddress_), port_(config::Listen::kDefaultPort_) {};
+	TiedServer( const std::string addr, const unsigned int port ) : addr_(addr), port_(port) {}
+
+	TiedServer&	operator=( const TiedServer& other )
+	{
+		if (this != &other)
+		{
+			this->servers_ = other.servers_;
+			//this->addr_ = other.addr_;
+			//this->port_ = other.port_;
+		}
+		return *this;
+	}
 };
 
 /* クライアントとデータの送受信を行う */
@@ -35,7 +48,7 @@ class NetworkIOHandler
 	public:
 		NetworkIOHandler();
 		~NetworkIOHandler();
-		int setupSocket( const std::string address, const unsigned int port );
+		int	setupSocket( const std::string address, const unsigned int port );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
 		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
 		int acceptConnection( ConnectionManager& connManager, const int listen_fd );

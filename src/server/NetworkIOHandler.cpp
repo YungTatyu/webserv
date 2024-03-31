@@ -35,6 +35,7 @@ int NetworkIOHandler::setupSocket( const std::string address, const unsigned int
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons( port );
 
+		// 失敗したとき？
 		SysCallWrapper::Bind( listen_fd, (struct sockaddr *) &servaddr, sizeof(servaddr) );
 		SysCallWrapper::Listen( listen_fd, SOMAXCONN );
 
@@ -104,6 +105,7 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager, const in
 	// 新規クライントfdを追加
 	connManager.setConnection( connfd );
 	connManager.setEvent( connfd, ConnectionData::EV_READ );
+	connManager.setTiedServer( connfd, &this->listenfd_map_[listen_fd]);
 
 	// show ip address of newly connected client.
 	char clientIp[INET_ADDRSTRLEN];

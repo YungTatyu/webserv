@@ -5,6 +5,7 @@
 #include "ConfigHandler.hpp"
 #include "LogFd.hpp"
 #include "NetworkIOHandler.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -119,7 +120,7 @@ bool	WRITE_ACCURATE( std::string file_path, const std::string& msg ) {
 bool	sameTiedServer(const struct TiedServer& tied1, const struct TiedServer& tied2)
 {
 	return (tied1.servers_.size() == tied2.servers_.size() &&
-		tied1.address_ == tied2.address_ &&
+		tied1.addr_ == tied2.addr_ &&
 		tied1.port_ == tied2.port_);
 }
 
@@ -138,22 +139,22 @@ TEST_F(ConfigHandlerTest, allowRequest)
 	struct sockaddr_in	cli_addr1;
 	std::memset(&cli_addr1, 0, sizeof(cli_addr1)); // ゼロで初期化
 	cli_addr1.sin_family = AF_INET; // IPv4
-	inet_pton(AF_INET, "192.168.0.1", &(cli_addr1.sin_addr));
+	cli_addr1.sin_addr.s_addr = Utils::StrToIPAddress("192.168.0.1");
 
 	struct sockaddr_in	cli_addr2;
 	std::memset(&cli_addr2, 0, sizeof(cli_addr2)); // ゼロで初期化
 	cli_addr2.sin_family = AF_INET; // IPv4
-	inet_pton(AF_INET, "192.168.0.2", &(cli_addr2.sin_addr));
+	cli_addr2.sin_addr.s_addr = Utils::StrToIPAddress("192.168.0.2");
 
 	struct sockaddr_in	cli_addr3;
 	std::memset(&cli_addr3, 0, sizeof(cli_addr3)); // ゼロで初期化
 	cli_addr3.sin_family = AF_INET; // IPv4
-	inet_pton(AF_INET, "192.168.0.3", &(cli_addr3.sin_addr));
+	cli_addr3.sin_addr.s_addr = Utils::StrToIPAddress("192.168.0.3");
 
 	struct sockaddr_in	cli_addr4;
 	std::memset(&cli_addr4, 0, sizeof(cli_addr4)); // ゼロで初期化
 	cli_addr4.sin_family = AF_INET; // IPv4
-	inet_pton(AF_INET, "192.168.0.4", &(cli_addr4.sin_addr));
+	cli_addr4.sin_addr.s_addr = Utils::StrToIPAddress("192.168.0.4");
 
 
 	request.headers["Host"] = "first_server";

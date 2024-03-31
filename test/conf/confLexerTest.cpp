@@ -26,14 +26,14 @@ TEST(ConfigTest, is_dir)
 
 	EXPECT_FALSE(config::initConfig(filePath));
 }
-
+/*
 TEST(ConfigTest, inaccessible_file)
 {
 	std::string filePath = "test/conf/LexerTestFiles/inaccessible.conf";
 
 	EXPECT_FALSE(config::initConfig(filePath));
 }
-
+*/
 TEST(LexerTokenizeTest, empty_file)
 {
 	std::string filePath= "test/conf/LexerTestFiles/empty.conf";

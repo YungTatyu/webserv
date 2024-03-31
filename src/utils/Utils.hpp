@@ -10,13 +10,14 @@
 # include <sys/types.h>
 # include <vector>
 # include <algorithm>
+# include <stdint.h>
 
 namespace Utils
 {
 // 大文字小文字を区別しない文字列比較関数
 struct CaseInsensitiveCompare
 {
-	bool operator()(std::string lhs, std::string rhs) const
+	bool	operator()(std::string lhs, std::string rhs) const
 	{
 		std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
 		std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
@@ -24,16 +25,18 @@ struct CaseInsensitiveCompare
 	}
 };
 
-int wrapperOpen(const std::string path, int flags, mode_t modes );
-int wrapperAccess( const std::string path, int modes, bool err_log );
+int	wrapperOpen(const std::string path, int flags, mode_t modes );
+int	wrapperAccess( const std::string path, int modes, bool err_log );
 bool	wrapperRealpath( const std::string path, std::string& absolute_path );
-bool isFile( const std::string& path );
-bool isDirectory( const std::string& path );
-std::string readFile( const std::string& filePath );
-std::vector<std::string> getDirectoryContents( const std::string& directoryPath );
-bool isExecutable( const char* filename );
-bool isExtensionFile(const std::string& filename, const std::string& extension);
-ssize_t wrapperWrite( const int fd, const std::string& msg );
+bool	isFile( const std::string& path );
+bool	isDirectory( const std::string& path );
+std::string	readFile( const std::string& filePath );
+std::vector<std::string>	createDirectoryContents( const std::string& directoryPath );
+bool	isExecutable( const char* filename );
+bool	isExtensionFile( const std::string& filename, const std::string& extension );
+ssize_t	wrapperWrite( const int fd, const std::string& msg );
+std::string	ipToStr( const uint32_t ip );
+uint32_t	StrToIPAddress( const std::string& ip);
 std::string	toLower(std::string str);
 bool	isSpace(const unsigned char ch);
 }

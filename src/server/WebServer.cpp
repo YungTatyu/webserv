@@ -61,8 +61,7 @@ void	WebServer::initializeListenSocket(
 	if (ip_address_set.find(new_pair) == ip_address_set.end()) // すでに作成したlisten socketは作成しない
 	{
 		const int listen_fd = this->ioHandler->setupSocket(address, port);
-		// TODO: std::vector<config::Server*>	servers_　に値を格納する関数を呼ぶ
-		this->ioHandler->addVServer(listen_fd, TiedServer(address, port));
+		this->ioHandler->addVServer(listen_fd, configHandler->createTiedServer(address, port));
 	}
 	ip_address_set.insert(std::make_pair(address, port));
 }

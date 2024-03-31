@@ -66,7 +66,7 @@ class ConfigHandler
 		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 		std::string	searchRootPath( const config::Server& server, const config::Location* location ) const;
 		bool	isAutoIndexOn( const config::Server& server, const config::Location* location ) const;
-		config::REQUEST_METHOD	convertRequestMethod( const std::string& method_str ) const;
+		const std::string	createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const;
 
 	// const variable
 	static const int	ACCESS_ALLOW = 1;
@@ -78,7 +78,6 @@ class ConfigHandler
 		// 必要なメソッド追加
 		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
 		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
-		uint32_t	StrToIPAddress( const std::string& ip ) const;
 
 	public:
 		int		getServPort();

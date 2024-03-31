@@ -4,6 +4,8 @@
 #include <sys/socket.h>
 #include <cstring>
 #include <cerrno>
+#include <iomanip>
+#include <ctime>
 
 const static std::string	kACCESS_FD = "access_fd";
 const static std::string	 kERROR_FD = "error_fd";
@@ -41,32 +43,6 @@ int ConfigHandler::getListenQ()
 	return this->listenQ_;
 }
 
-uint32_t	ConfigHandler::StrToIPAddress( const std::string& ip) const
-{
-	std::istringstream iss(ip);
-	std::string segment;
-	std::vector<std::string> segments;
-
-	// "." で分割
-	while (std::getline(iss, segment, '.')) {
-		segments.push_back(segment);
-	}
-
-	uint32_t	result = 0;
-
-	for (int i = 0; i < 4; i++)
-	{
-		iss.clear();
-		iss.str(segments[i]);
-		int value;
-		iss >> value;
-
-		result = (result << 8) | value;
-	}
-
-	return htonl(result);
-}
-
 bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr ) const
 {
 	if (ip_addr_str == "all")
@@ -78,7 +54,7 @@ bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32
 	std::getline(iss, ip, '/');
 	std::getline(iss, mask);
 
-	uint32_t			conf_addr = StrToIPAddress(ip);
+	uint32_t			conf_addr = Utils::StrToIPAddress(ip);
 	uint32_t			mask_val = 0xFFFFFFFF;
 
 	// サブネットマスクが指定されている場合
@@ -119,20 +95,6 @@ bool	ConfigHandler::limitLoop( const std::vector<config::AllowDeny>& allow_deny_
 	}
 
 	return true;
-}
-
-config::REQUEST_METHOD	ConfigHandler::convertRequestMethod( const std::string& method_str ) const
-{
-	config::REQUEST_METHOD	method = config::UNKNOWN;
-	if (method_str == "GET")
-		method = config::GET;
-	else if (method_str == "HEAD")
-		method = config::HEAD;
-	else if (method_str == "POST")
-		method = config::POST;
-	else if (method_str == "DELETE")
-		method = config::DELETE;
-	return method;
 }
 
 int	ConfigHandler::allowRequest( const config::Server& server, const config::Location* location, const HttpRequest& request, struct sockaddr_in client_addr ) const
@@ -325,7 +287,7 @@ const config::Server&	ConfigHandler::searchServerConfig( const struct TiedServer
 			const config::Listen& tmp_listen = tied_servers.servers_[si]->listen_list[li];
 			if (tmp_listen.getIsDefaultServer() &&
 				tied_servers.port_ == tmp_listen.getport() &&
-				tied_servers.address_ == tmp_listen.getAddress())
+				tied_servers.addr_ == tmp_listen.getAddress())
 			{
 				default_server = tied_servers.servers_[si];
 			}
@@ -450,3 +412,43 @@ bool	ConfigHandler::isAutoIndexOn( const config::Server& server, const config::L
 	return false;
 }
 
+const std::string	getCurrentTimeLogFormat()
+{
+	std::time_t	currentTime = std::time(NULL);
+	std::tm	*gmTime = std::gmtime(&currentTime);
+
+	const char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+	std::ostringstream	oss;
+	oss << days[gmTime->tm_wday] << "/"
+		<< months[gmTime->tm_mon] << "/"
+		<< 1900 + gmTime->tm_year << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_hour << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_min << ":"
+		<< std::setfill('0') << std::setw(2) << gmTime->tm_sec
+		<< " GMT";
+
+	return oss.str();
+}
+
+const std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const
+{
+	std::stringstream	ss;
+
+	std::string	requestMethod, requestUrl, userAgent;
+
+	requestMethod = config::LimitExcept::MethodToStr(request.method);
+
+	// URLの表示をするかどうか？
+	requestUrl = "-";
+	std::map<std::string, std::string>::const_iterator	it = request.headers.find("User-Agent");
+	if (it != request.headers.end())
+		userAgent = it->second;
+	else
+		userAgent = "-";
+
+	ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeLogFormat() << "] \"" << request.method << " " << request.uri << " HTTP/1.1\" " << status << " \"" << requestUrl << "\" \"" << userAgent << "\"" << std::endl;
+
+	return ss.str();
+}
