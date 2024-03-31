@@ -41,7 +41,7 @@ bool cgi::CGIHandler::isCgi(const std::string& script_path)
  * @return false 
  */
 bool	cgi::CGIHandler::forkCgiProcess(
-	const HttpRequest& http_request,
+	const HttpRequest& request,
 	const std::string& script_path
 )
 {
@@ -54,13 +54,13 @@ bool	cgi::CGIHandler::forkCgiProcess(
 	if (pid == 0)
 	{
 		close(this->sockets_[SOCKET_PARENT]);
-		this->cgi_executor_.executeCgiScript(http_request, script_path, this->sockets_[SOCKET_CHILD]);
+		this->cgi_executor_.executeCgiScript(request, script_path, this->sockets_[SOCKET_CHILD]);
 	}
 	this->cgi_process_id_ = pid;
 	close(this->sockets_[SOCKET_CHILD]);
 
 	// すでに登録されているクライアントソケットのREAD EVENTは削除する必要がある（特にkqueue server）
-	// if (http_request.body != "") // bodyを標準入力にsetする必要がある場合
+	// if (request.body != "") // bodyを標準入力にsetする必要がある場合
 	// 	conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_WRITE);
 	// else
 	// 	conn_manager.setEvent(cli_socket, ConnectionData::EV_CGI_READ);
@@ -70,7 +70,7 @@ bool	cgi::CGIHandler::forkCgiProcess(
 
 bool	cgi::CGIHandler::callCgiExecutor(
 	const std::string& script_path,
-	const HttpRequest& http_request
+	const HttpRequest& request
 )
 {
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
@@ -78,7 +78,7 @@ bool	cgi::CGIHandler::callCgiExecutor(
 		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		return false;
 	}
-	return forkCgiProcess(http_request, script_path);
+	return forkCgiProcess(request, script_path);
 }
 
 const cgi::CGIParser&	cgi::CGIHandler::getCgiParser() const

@@ -132,7 +132,7 @@ std::string	Utils::toLower(std::string str)
 	return str;
 }
 
-bool	Utils::isSpace(unsigned char ch)
+bool	Utils::isSpace(const unsigned char ch)
 {
 	return ch == ' ';
 }

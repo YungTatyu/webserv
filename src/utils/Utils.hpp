@@ -35,7 +35,7 @@ bool isExecutable( const char* filename );
 bool isExtensionFile(const std::string& filename, const std::string& extension);
 ssize_t wrapperWrite( const int fd, const std::string& msg );
 std::string	toLower(std::string str);
-bool	isSpace(unsigned char ch);
+bool	isSpace(const unsigned char ch);
 }
 
 #endif

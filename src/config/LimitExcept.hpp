@@ -46,7 +46,7 @@ struct LimitExcept
 			re = "DELETE";
 			break;
 		case UNKNOWN:
-			re = "";
+			break;
 		}
 		return re;
 	}

@@ -10,6 +10,7 @@ OBJS_DIR			= obj
 DEPS_DIR			= dep
 BUILD_DIR			= build
 CONF_DIR			= conf
+TEST_CGI_DIR		= test/cgi/cgi_files/executor
 
 # ソースファイルの拡張子
 SRC_EXT = cpp
@@ -49,6 +50,7 @@ clean:
 	$(RM) $(OBJS_DIR) $(DEPS_DIR) $(BUILD_DIR)
 
 fclean: clean
+	$(MAKE) fclean -C $(TEST_CGI_DIR)
 	$(RM) $(NAME)
 
 re: fclean all
@@ -56,6 +58,7 @@ re: fclean all
 TEST_FILTER ?= '*'
 
 test:
+	$(MAKE) -C $(TEST_CGI_DIR)
 	@mkdir -p logs/
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)

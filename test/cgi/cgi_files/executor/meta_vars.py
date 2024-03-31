@@ -5,7 +5,7 @@ import os
 def	printEnvVar(env_name):
       env_value = os.environ.get(env_name)
       if env_value is None:
-             env_value = ""
+             env_value = "not found"
       print("<h2>" + env_name + "=" + env_value + "</h2>", end="")
 
 def	main():
