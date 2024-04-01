@@ -136,7 +136,7 @@ int	ConfigHandler::allowRequest( const config::Server& server, const config::Loc
 }
 
 // 最終的なlocationで記録
-void	ConfigHandler::writeAcsLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
+void	ConfigHandler::writeAccessLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
@@ -172,7 +172,7 @@ void	ConfigHandler::writeAccessLog( const config::Server& server, const config::
 	}
 }
 
-void	ConfigHandler::writeErrLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
+void	ConfigHandler::writeErrorLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
 	const config::Location*	location = searchLongestMatchLocationConfig(server, uri);
@@ -448,7 +448,7 @@ const std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long 
 	else
 		userAgent = "-";
 
-	ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeLogFormat() << "] \"" << request.method << " " << request.uri << " HTTP/1.1\" " << status << " \"" << requestUrl << "\" \"" << userAgent << "\"" << std::endl;
+	ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeLogFormat() << "] \"" << requestMethod << " " << request.uri << " HTTP/1.1\" " << status << " \"" << requestUrl << "\" \"" << userAgent << "\"" << std::endl;
 
 	return ss.str();
 }
