@@ -32,6 +32,7 @@ HttpRequest HttpRequest::doParseRequest(std::string &rawRequest)
 		sw_end
 	} state;
 
+
 	HttpRequest newRequest;
 	state = sw_start;
 	while (state != sw_end) {
@@ -228,7 +229,8 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest,
 
 	state = sw_start;
 	size_t i = 0;
-	if (rawRequest.empty()) return HttpRequest::PARSE_ERROR;
+	if (rawRequest.empty())
+		return HttpRequest::PARSE_ERROR;
 	while (state != sw_end && i < rawRequest.size()) {
 		switch (state) {
 		case sw_start:
@@ -321,7 +323,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest,
 				++i;
 			break;
 		case sw_value:
-			if (!std::isalnum(ch)) {
+			if (!std::isprint(ch) && ch < 128) {
 				newRequest.headers[cur_name] = cur_value;
 				cur_name = "";
 				cur_value = "";
