@@ -54,15 +54,15 @@ bool	EpollServer::initEpollServer()
 	return true;
 }
 
-bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData&> &connections )
+bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData*> &connections )
 {
 	// 監視したいイベントを追加
-	for (std::map<int, ConnectionData&>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it)
 	{
 		struct epoll_event	ep;
-		ep.events = it->second.event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
+		ep.events = it->second->event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
 		ep.data.fd = it->first;
 
 		if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1)

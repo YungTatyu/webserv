@@ -48,12 +48,12 @@ class ConnectionManager
 		HttpRequest &getRequest( const int fd );
 		void setResponse( const int fd, const HttpResponse response );
 		HttpResponse &getResponse( const int fd );
-		const std::map<int, ConnectionData&> &getConnections() const;
+		const std::map<int, ConnectionData*> &getConnections() const;
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
 		void	closeAllConnections();
 	private:
-		std::map<int, ConnectionData&> connections_;
+		std::map<int, ConnectionData*> connections_;
 };
 
 #endif

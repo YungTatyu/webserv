@@ -89,13 +89,13 @@ void	PollServer::callEventHandler(
  * @param connections : すべてのクライアントソケットとそれにひもづくデータ
  * @return std::vector<struct pollfd>
  */
-std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, ConnectionData&> &connections)
+std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, ConnectionData*> &connections)
 {
 	std::vector<struct pollfd>	list;
-	for (std::map<int, ConnectionData&>::const_iterator it = connections.begin(); it != connections.end(); ++it)
+	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end(); ++it)
 	{
 		struct pollfd	pollfd;
-		switch (it->second.event)
+		switch (it->second->event)
 		{
 		case ConnectionData::EV_WAIT_CGI_RES:
 			continue;
