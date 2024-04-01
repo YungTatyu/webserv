@@ -45,7 +45,7 @@ bool	KqueueServer::initKqueueServer()
 	return true;
 }
 
-bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
+bool	KqueueServer::initKevents(const std::map<int, ConnectionData&> &connections)
 {
 	std::vector<struct kevent>	event_list;// 監視したいevent
 
@@ -53,7 +53,7 @@ bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 	event_list.resize(connections.size());
 
 	size_t	i = 0;
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData&>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it)
 	{
@@ -98,7 +98,7 @@ void	KqueueServer::callEventHandler(
 	// 発生したイベントの数だけloopする
 	for (int i = 0; i < event_manager->getActiveEventsNum(); ++i)
 	{
-		int	status = RequestHandler::NONE;
+		int	status = RequestHandler::UPDATE_NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].ident);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))

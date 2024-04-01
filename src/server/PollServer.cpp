@@ -89,14 +89,26 @@ void	PollServer::callEventHandler(
  * @param connections : すべてのクライアントソケットとそれにひもづくデータ
  * @return std::vector<struct pollfd>
  */
-std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, ConnectionData> &connections)
+std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, ConnectionData&> &connections)
 {
 	std::vector<struct pollfd>	list;
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin(); it != connections.end(); ++it)
+	for (std::map<int, ConnectionData&>::const_iterator it = connections.begin(); it != connections.end(); ++it)
 	{
 		struct pollfd	pollfd;
+		switch (it->second.event)
+		{
+		case ConnectionData::EV_WAIT_CGI_RES:
+			continue;
+		case ConnectionData::EV_READ:
+		case ConnectionData::EV_CGI_READ:
+			pollfd.events = POLLIN;
+			break;
+		case ConnectionData::EV_WRITE:
+		case ConnectionData::EV_CGI_WRITE:
+			pollfd.events = POLLOUT;
+			break;
+		}
 		pollfd.fd = it->first;
-		pollfd.events = it->second.event == ConnectionData::EV_READ ? POLLIN : POLLOUT;
 		pollfd.revents = 0;
 		list.push_back(pollfd);
 	}

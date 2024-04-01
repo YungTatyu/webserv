@@ -7,7 +7,6 @@
 
 #include "CGIParser.hpp"
 #include "CGIExecutor.hpp"
-#include "ConnectionManager.hpp"
 
 namespace cgi
 {

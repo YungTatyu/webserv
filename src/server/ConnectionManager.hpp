@@ -6,8 +6,10 @@
 
 # include "HttpRequest.hpp"
 # include "HttpResponse.hpp"
+# include "CGIHandler.hpp"
 
 struct TiedServer;
+class CGIHandler;
 
 class ConnectionData
 {
@@ -16,13 +18,15 @@ class ConnectionData
 			EV_READ,
 			EV_WRITE,
 			EV_CGI_READ,
-			EV_CGI_WRITE
+			EV_CGI_WRITE,
+			EV_WAIT_CGI_RES, // 監視イベントから一時的に除外する
 		};
 		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<unsigned char> final_response_;
 		EVENT event;
 		HttpRequest request;
 		HttpResponse response_;
+		cgi::CGIHandler cgi_handler_;
 		const TiedServer* tied_server_;
 };
 
@@ -33,7 +37,7 @@ class ConnectionManager
 		ConnectionManager();
 		~ConnectionManager();
 		void setConnection( const int fd );
-		void removeConnection( const int fd );
+		void removeConnection( const int fd, const bool del );
 		void setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		const std::vector<unsigned char>& getRawRequest( const int fd ) const;
 		void setFinalResponse( const int fd, const std::vector<unsigned char>& final_response );
@@ -44,13 +48,12 @@ class ConnectionManager
 		HttpRequest &getRequest( const int fd );
 		void setResponse( const int fd, const HttpResponse response );
 		HttpResponse &getResponse( const int fd );
-		const std::map<int, ConnectionData> &getConnections() const;
+		const std::map<int, ConnectionData&> &getConnections() const;
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
 		void	closeAllConnections();
 	private:
-		std::map<int, ConnectionData> connections_;
-
+		std::map<int, ConnectionData&> connections_;
 };
 
 #endif

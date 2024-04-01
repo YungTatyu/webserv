@@ -34,13 +34,13 @@ int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 	return re;
 }
 
-int	SelectServer::addSocketToSets(const std::map<int, ConnectionData> &connections)
+int	SelectServer::addSocketToSets(const std::map<int, ConnectionData&> &connections)
 {
 	int	max_fd = 0;
 	FD_ZERO(&(this->read_set_));
 	FD_ZERO(&(this->write_set_));
 
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData&>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it
 	)
@@ -66,11 +66,11 @@ int	SelectServer::addSocketToSets(const std::map<int, ConnectionData> &connectio
 }
 
 void	SelectServer::addActiveEvents(
-	const std::map<int, ConnectionData> &connections,
+	const std::map<int, ConnectionData&> &connections,
 	IActiveEventManager *event_manager
 )
 {
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData&>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it
 	)

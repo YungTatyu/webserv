@@ -27,7 +27,7 @@ class PollServer : public IServer
 		void	addActiveEvents(const std::vector<struct pollfd> &pollfds,
 								ConnectionManager* conn_manager,
 								IActiveEventManager* event_manager);
-		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData> &connections);
+		std::vector<struct pollfd>	convertToPollfds(const std::map<int, ConnectionData&> &connections);
 };
 
 #endif

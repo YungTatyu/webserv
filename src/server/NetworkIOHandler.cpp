@@ -130,7 +130,7 @@ bool	NetworkIOHandler::isListenSocket(const int listen_fd) const
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int cli_sock )
 {
 	close( cli_sock );
-	connManager.removeConnection( cli_sock );
+	connManager.removeConnection( cli_sock, false );
 	printf("%s\n", "< Client disconnected.");
 }
 
