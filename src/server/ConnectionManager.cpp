@@ -17,6 +17,7 @@ ConnectionManager::~ConnectionManager()
 void ConnectionManager::setConnection( const int fd )
 {
 	connections_[fd] = new ConnectionData();
+	std::cerr << "new connection:" << fd << "\n";
 }
 
 /**
@@ -45,7 +46,10 @@ void ConnectionManager::setCgiConnection( const int cli_sock, const ConnectionDa
 void ConnectionManager::removeConnection( const int fd, const bool cgi )
 {
 	if (!cgi)
-		delete &(connections_.at(fd));
+	{
+		std::cerr << "delete connection:" << fd << "\n";
+		delete connections_.at(fd);
+	}
 	connections_.erase( fd );
 }
 

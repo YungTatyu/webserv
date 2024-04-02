@@ -57,7 +57,10 @@ int RequestHandler::handleCgiReadEvent(
 	if (re > 0)
 		connManager.addCgiResponse(sockfd, buffer);
 	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
+	{
+		ioHandler.closeConnection(connManager, sockfd);
 		return UPDATE_WRITE;
+	}
 	return UPDATE_NONE;
 }
 
@@ -98,7 +101,6 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
 	ioHandler.closeConnection( connManager, sockfd );
-	connManager.removeConnection( sockfd, false );
 	return RequestHandler::UPDATE_CLOSE;
 }
 
