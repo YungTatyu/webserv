@@ -24,9 +24,9 @@ void	PollServer::eventLoop(
 	}
 }
 
-int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
+int	PollServer::waitForEvent(ConnectionManager *conn_manager, IActiveEventManager *event_manager)
 {
-	std::vector<pollfd> pollfds = convertToPollfds(conn_manager->getConnections());
+	std::vector<pollfd> pollfds = convertToPollfds(*conn_manager);
 
 	// TODO: error起きたときどうしようか? 一定数retry? serverはdownしたらダメな気がする
 	int re = poll(pollfds.data(), pollfds.size(), -1);
@@ -89,16 +89,27 @@ void	PollServer::callEventHandler(
  * @param connections : すべてのクライアントソケットとそれにひもづくデータ
  * @return std::vector<struct pollfd>
  */
-std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, ConnectionData*> &connections)
+std::vector<struct pollfd>	PollServer::convertToPollfds(const ConnectionManager &conn_manager)
 {
 	std::vector<struct pollfd>	list;
+	const std::map<int, ConnectionData*> &connections = conn_manager.getConnections();
 	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end(); ++it)
 	{
 		struct pollfd	pollfd;
 		switch (it->second->event)
 		{
-		case ConnectionData::EV_WAIT_CGI_RES:
-			continue;
+		case ConnectionData::EV_CGI_READ:
+		case ConnectionData::EV_CGI_WRITE:
+			// cgi eventの時は、クライアントsocketはイベント登録しない
+			if (!conn_manager.isCgiSocket(it->first))
+				continue;
+			break;
+		default:
+			break;
+		}
+		pollfd.fd = it->first;
+		switch (it->second->event)
+		{
 		case ConnectionData::EV_READ:
 		case ConnectionData::EV_CGI_READ:
 			pollfd.events = POLLIN;
@@ -108,7 +119,6 @@ std::vector<struct pollfd>	PollServer::convertToPollfds(const std::map<int, Conn
 			pollfd.events = POLLOUT;
 			break;
 		}
-		pollfd.fd = it->first;
 		pollfd.revents = 0;
 		list.push_back(pollfd);
 	}

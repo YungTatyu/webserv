@@ -131,3 +131,9 @@ void	ConnectionManager::closeAllConnections()
 	}
 	this->connections_.clear();
 }
+
+bool	ConnectionManager::isCgiSocket( const int fd ) const
+{
+	const int	cgi_sock = this->connections_.at(fd)->cgi_handler_.sockets_[cgi::SOCKET_PARENT];
+	return fd == cgi_sock;
+}

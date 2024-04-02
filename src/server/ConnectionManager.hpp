@@ -19,7 +19,6 @@ class ConnectionData
 			EV_WRITE,
 			EV_CGI_READ,
 			EV_CGI_WRITE,
-			EV_WAIT_CGI_RES, // 監視イベントから一時的に除外する
 		};
 		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<unsigned char> final_response_;
@@ -53,6 +52,7 @@ class ConnectionManager
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
 		void	closeAllConnections();
+		bool	isCgiSocket( const int fd ) const;
 	private:
 		std::map<int, ConnectionData*> connections_;
 };
