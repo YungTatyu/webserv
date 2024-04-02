@@ -112,15 +112,29 @@ void	KqueueServer::callEventHandler(
 		case RequestHandler::UPDATE_READ:
 			updateEvent(active_events[i], EVFILT_READ);
 			break;
-
 		case RequestHandler::UPDATE_WRITE:
 			updateEvent(active_events[i], EVFILT_WRITE);
 			break;
-
 		case RequestHandler::UPDATE_CLOSE:
 			deleteEvent(active_events[i]);
 			break;
-
+		case RequestHandler::UPDATE_CGI_READ:
+			if (conn_manager->isCgiSocket(active_events[i].ident))
+				updateEvent(active_events[i], EVFILT_READ);
+			else
+			{
+				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
+				deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+				addNewEvent(cgi_handler.sockets_[cgi::SOCKET_PARENT], EVFILT_READ);
+			}
+			break;
+		case RequestHandler::UPDATE_CGI_WRITE:
+		{
+			const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
+			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+			addNewEvent(cgi_handler.sockets_[cgi::SOCKET_PARENT], EVFILT_WRITE);
+			break;
+		}
 		default:
 			if (status >= 0) // fdだったら
 				addNewEvent(status, EVFILT_READ);

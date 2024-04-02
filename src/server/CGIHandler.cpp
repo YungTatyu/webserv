@@ -10,7 +10,10 @@
 #include <cstring>
 #include <cerrno>
 
-cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1) {}
+cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1)
+{
+	resetSockets();
+}
 
 cgi::CGIHandler::~CGIHandler() {}
 
@@ -104,4 +107,14 @@ void	cgi::CGIHandler::killCgiProcess() const
 {
 	if (kill(this->cgi_process_id_, SIGINT) == -1)
 		std::cerr << "webserv: [emerg] kill() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
+}
+
+/**
+ * @brief socketの値と被らないように初期化する
+ * 
+ */
+void	cgi::CGIHandler::resetSockets()
+{
+	this->sockets_[0] = -2;
+	this->sockets_[1] = -2;
 }

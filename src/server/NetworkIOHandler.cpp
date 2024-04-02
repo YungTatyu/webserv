@@ -133,6 +133,8 @@ void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const in
 {
 	close( cli_sock );
 	bool	cgi = connManager.isCgiSocket(cli_sock);
+	if (cgi)
+		connManager.resetCgiSockets(cli_sock);
 	connManager.removeConnection( cli_sock, cgi );
 	std::cerr << "client disconnected\n";
 }

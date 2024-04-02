@@ -59,6 +59,7 @@ class ConnectionManager
 		size_t	getSentBytes( const int fd ) const;
 		void	addSentBytes( const int fd, size_t bytes );
 		void	resetSentBytes( const int fd );
+		void	resetCgiSockets( const int fd );
 		void	closeAllConnections();
 		bool	isCgiSocket( const int fd ) const;
 	private:

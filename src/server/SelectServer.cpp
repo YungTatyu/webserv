@@ -46,8 +46,19 @@ int	SelectServer::addSocketToSets(const ConnectionManager& conn_manager)
 		++it
 	)
 	{
-		const int	fd = it->first;
 		const ConnectionData	&connection = *(it->second);
+		const int	fd = it->first;
+		switch (connection.event)
+		{
+		case ConnectionData::EV_CGI_READ:
+		case ConnectionData::EV_CGI_WRITE:
+			// cgi eventの時は、クライアントsocketはイベント登録しない
+			if (!conn_manager.isCgiSocket(fd))
+				continue;
+			break;
+		default:
+			break;
+		}
 		switch (connection.event)
 		{
 		case ConnectionData::EV_READ:

@@ -42,6 +42,7 @@ class CGIHandler
 		const CGIParser&	getCgiParser() const;
 		const CGIExecutor&	getCgiExecutor() const;
 		const pid_t&	getCgiProcessId() const;
+		void	resetSockets();
 };
 } // namespace cgi
 

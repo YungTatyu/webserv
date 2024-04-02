@@ -156,6 +156,10 @@ void	ConnectionManager::resetSentBytes( const int fd )
 	connections_.at(fd)->sent_bytes_ = 0;
 }
 
+void	ConnectionManager::resetCgiSockets( const int fd )
+{
+	connections_.at(fd)->cgi_handler_.resetSockets();
+}
 
 void	ConnectionManager::closeAllConnections()
 {
