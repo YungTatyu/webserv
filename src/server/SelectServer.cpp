@@ -23,9 +23,9 @@ void	SelectServer::eventLoop(
 	}
 }
 
-int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
+int	SelectServer::waitForEvent(ConnectionManager *conn_manager, IActiveEventManager *event_manager)
 {
-	const int max_fd = addSocketToSets(conn_manager->getConnections());
+	const int max_fd = addSocketToSets(*conn_manager);
 	// TODO: select serverではマクロFD_SETSIZE以上のfdを監視できない
 	// TODO: error処理どうするべきか、retryする？
 	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, NULL);
@@ -34,8 +34,9 @@ int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 	return re;
 }
 
-int	SelectServer::addSocketToSets(const std::map<int, ConnectionData*> &connections)
+int	SelectServer::addSocketToSets(const ConnectionManager& conn_manager)
 {
+	const std::map<int, ConnectionData*>&	connections = conn_manager.getConnections();
 	int	max_fd = 0;
 	FD_ZERO(&(this->read_set_));
 	FD_ZERO(&(this->write_set_));
@@ -50,14 +51,12 @@ int	SelectServer::addSocketToSets(const std::map<int, ConnectionData*> &connecti
 		switch (connection.event)
 		{
 		case ConnectionData::EV_READ:
+		case ConnectionData::EV_CGI_READ:
 			FD_SET(fd, &(this->read_set_));
 			break;
-		
 		case ConnectionData::EV_WRITE:
+		case ConnectionData::EV_CGI_WRITE:
 			FD_SET(fd, &(this->write_set_));
-			break;
-
-		default:
 			break;
 		}
 		max_fd = std::max(max_fd, fd);
