@@ -100,6 +100,8 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager, const in
 
 	client = sizeof(cliaddr);
 	connfd = SysCallWrapper::Accept( listen_fd, (struct sockaddr *) &cliaddr, &client );
+	if (connfd == -1)
+		return connfd;
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 	// 新規クライントfdを追加

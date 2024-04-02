@@ -1,5 +1,6 @@
 #include "ConnectionManager.hpp"
 #include <unistd.h>
+#include <algorithm>
 
 ConnectionManager::ConnectionManager() {}
 
@@ -109,6 +110,18 @@ HttpResponse &ConnectionManager::getResponse( const int fd )
 	return connections_.at(fd)->response_;
 }
 
+void	ConnectionManager::addCgiResponse( const int fd, const std::vector<unsigned char>& v )
+{
+	std::vector<unsigned char>&	cgi_response = this->connections_.at(fd)->cgi_response_;
+	cgi_response.resize(cgi_response.size() + v.size());
+	std::copy(v.begin(), v.end(), std::back_inserter(cgi_response));
+}
+
+const std::vector<unsigned char>&	ConnectionManager::getCgiResponse( const int fd ) const
+{
+	return this->connections_.at(fd)->cgi_response_;
+}
+
 void	ConnectionManager::setTiedServer( const int fd, const TiedServer* tied_server )
 {
 	connections_[fd]->tied_server_ = tied_server;
@@ -116,7 +129,12 @@ void	ConnectionManager::setTiedServer( const int fd, const TiedServer* tied_serv
 
 const TiedServer&	ConnectionManager::getTiedServer( const int fd ) const
 {
-	return *connections_.at(fd)->tied_server_;
+	return *(connections_.at(fd)->tied_server_);
+}
+
+const cgi::CGIHandler& ConnectionManager::getCgiHandler( const int fd ) const
+{
+	return connections_.at(fd)->cgi_handler_;
 }
 
 void	ConnectionManager::closeAllConnections()

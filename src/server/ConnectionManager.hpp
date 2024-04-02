@@ -22,6 +22,7 @@ class ConnectionData
 		};
 		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<unsigned char> final_response_;
+		std::vector<unsigned char> cgi_response_;
 		EVENT event;
 		HttpRequest request;
 		HttpResponse response_;
@@ -48,9 +49,12 @@ class ConnectionManager
 		HttpRequest &getRequest( const int fd );
 		void setResponse( const int fd, const HttpResponse response );
 		HttpResponse &getResponse( const int fd );
+		void	addCgiResponse( const int fd, const std::vector<unsigned char>& v );
+		const std::vector<unsigned char>&	getCgiResponse( const int fd ) const;
 		const std::map<int, ConnectionData*> &getConnections() const;
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
+		const cgi::CGIHandler& getCgiHandler( const int fd ) const;
 		void	closeAllConnections();
 		bool	isCgiSocket( const int fd ) const;
 	private:
