@@ -23,6 +23,7 @@ class ConnectionData
 		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<unsigned char> final_response_;
 		std::vector<unsigned char> cgi_response_;
+		size_t	sent_bytes_; // responseやcgi bodyをsendする際に送信したbyte数を記録する
 		EVENT event;
 		HttpRequest request;
 		HttpResponse response_;
@@ -55,6 +56,9 @@ class ConnectionManager
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
 		const cgi::CGIHandler& getCgiHandler( const int fd ) const;
+		size_t	getSentBytes( const int fd ) const;
+		void	addSentBytes( const int fd, size_t bytes );
+		void	resetSentBytes( const int fd );
 		void	closeAllConnections();
 		bool	isCgiSocket( const int fd ) const;
 	private:

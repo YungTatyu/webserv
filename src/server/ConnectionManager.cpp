@@ -137,6 +137,22 @@ const cgi::CGIHandler& ConnectionManager::getCgiHandler( const int fd ) const
 	return connections_.at(fd)->cgi_handler_;
 }
 
+size_t	ConnectionManager::getSentBytes( const int fd ) const
+{
+	return connections_.at(fd)->sent_bytes_;
+}
+
+void	ConnectionManager::addSentBytes( const int fd, size_t bytes )
+{
+	connections_.at(fd)->sent_bytes_ += bytes;
+}
+
+void	ConnectionManager::resetSentBytes( const int fd )
+{
+	connections_.at(fd)->sent_bytes_ = 0;
+}
+
+
 void	ConnectionManager::closeAllConnections()
 {
 	for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
