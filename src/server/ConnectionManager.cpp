@@ -8,10 +8,29 @@ ConnectionManager::~ConnectionManager()
 	closeAllConnections();
 }
 
-/* ConnectionManagerクラスの実装 */
+/**
+ * @brief client or listen socketを登録する
+ * 
+ * @param fd 
+ */
 void ConnectionManager::setConnection( const int fd )
 {
 	connections_[fd] = new ConnectionData();
+}
+
+/**
+ * @brief cgiのsocketを登録する
+ * 
+ * @param cli_sock cgiのsocketに紐づいているクライアントのソケット
+ * @param event 
+ */
+void ConnectionManager::setCgiConnection( const int cli_sock, const ConnectionData::EVENT event )
+{
+	ConnectionData	*cd = this->connections_.at(cli_sock); 
+	const int	cgi_sock = cd->cgi_handler_.sockets_[cgi::SOCKET_PARENT];
+	this->connections_.insert(std::make_pair(cgi_sock, cd));
+	// cgi のイベントに更新
+	this->connections_.at(cli_sock)->event = event;
 }
 
 /**
