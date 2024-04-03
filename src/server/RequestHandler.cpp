@@ -50,14 +50,8 @@ int RequestHandler::handleCgiReadEvent(
 	const int sockfd
 )
 {
-	const size_t buffer_size = 1024;
+	ioHandler.receiveCgiResponse(connManager, sockfd);
 	const cgi::CGIHandler	cgi_handler = connManager.getCgiHandler(sockfd);
-	// TODO: ioHandler: recv()の処理を関数化したい
-	(void)ioHandler;
-	std::vector<unsigned char>	buffer(buffer_size);
-	ssize_t re = recv(sockfd, buffer.data(), buffer_size, 0);
-	if (re > 0)
-		connManager.addCgiResponse(sockfd, buffer);
 	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
 	{
 		connManager.setEvent(sockfd, ConnectionData::EV_WRITE);
@@ -79,19 +73,10 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
 int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
-	const size_t buffer_size = 1024;
-	const std::string	body = connManager.getRequest(sockfd).body;
-	const size_t	sent_bytes = connManager.getSentBytes(sockfd);
-	const size_t	rest = body.size() - sent_bytes;
-	const cgi::CGIHandler	cgi_handler = connManager.getCgiHandler(sockfd);
-
-	(void)ioHandler;
-	// TODO: sendの処理をまとめられるなら、
-	ssize_t	re = send(sockfd, &body.c_str()[sent_bytes], std::min(buffer_size, rest), 0);
-
-	if (re > 0)
-		connManager.addSentBytes(sockfd, re);
+	ssize_t	re = ioHandler.sendRequestBody(connManager, sockfd);
 	
+	const std::string	body = connManager.getRequest(sockfd).body;
+	const cgi::CGIHandler	cgi_handler = connManager.getCgiHandler(sockfd);
 	if (connManager.getSentBytes(sockfd) == body.size() || // bodyを全て送ったら
 		(re == -1 && cgiProcessExited(cgi_handler.getCgiProcessId()))) // cgi processがすでに死んでいたら
 	{
