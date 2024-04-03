@@ -39,7 +39,7 @@ class ConnectionManager
 		~ConnectionManager();
 		void setConnection( const int fd );
 		void setCgiConnection( const int cli_sock, const ConnectionData::EVENT event );
-		void removeConnection( const int fd, const bool del );
+		void removeConnection( const int fd, const bool cgi );
 		void setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		const std::vector<unsigned char>& getRawRequest( const int fd ) const;
 		void setFinalResponse( const int fd, const std::vector<unsigned char>& final_response );
@@ -60,6 +60,7 @@ class ConnectionManager
 		void	addSentBytes( const int fd, size_t bytes );
 		void	resetSentBytes( const int fd );
 		void	resetCgiSockets( const int fd );
+		void	clearConnectionData( const int fd );
 		void	closeAllConnections();
 		bool	isCgiSocket( const int fd ) const;
 	private:

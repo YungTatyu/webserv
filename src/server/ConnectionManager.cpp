@@ -162,6 +162,22 @@ void	ConnectionManager::resetCgiSockets( const int fd )
 	connections_.at(fd)->cgi_handler_.resetSockets();
 }
 
+void	ConnectionManager::clearConnectionData( const int fd )
+{
+	ConnectionData	*cd = this->connections_.at(fd);
+	cd->rawRequest.clear();
+	cd->final_response_.clear();
+	cd->cgi_response_.clear();
+	resetCgiSockets(fd);
+	resetSentBytes(fd);
+}
+
+bool	ConnectionManager::isCgiSocket( const int fd ) const
+{
+	const int	cgi_sock = this->connections_.at(fd)->cgi_handler_.getCgiSocket();
+	return fd == cgi_sock;
+}
+
 void	ConnectionManager::closeAllConnections()
 {
 	for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
@@ -173,10 +189,4 @@ void	ConnectionManager::closeAllConnections()
 		delete it->second;
 	}
 	this->connections_.clear();
-}
-
-bool	ConnectionManager::isCgiSocket( const int fd ) const
-{
-	const int	cgi_sock = this->connections_.at(fd)->cgi_handler_.getCgiSocket();
-	return fd == cgi_sock;
 }
