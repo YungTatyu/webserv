@@ -47,6 +47,7 @@ class ConfigHandler
 		void	writeErrorLog( const config::Server& server,
 							const config::Location* location,
 							const std::string& msg ) const;
+		void	writeErrorLog( const std::string& msg ) const
 		// timeout値の取得
 		const config::Time&	searchKeepaliveTimeout( const struct TiedServer& tied_servers,
 													const std::string& server_name,

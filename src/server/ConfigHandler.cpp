@@ -172,6 +172,29 @@ void	ConfigHandler::writeAccessLog( const config::Server& server, const config::
 	}
 }
 
+void	ConfigHandler::writeErrorLog( const std::string& msg ) const
+{
+	// http conterxtにerror_logディレクティブがあれば出力
+	if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end())
+	{
+		for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++)
+		{
+			if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
+		}
+	}
+	else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end())
+	{
+		// main contextにerror_logディレクティブがなくてもデフォルトに出力する
+		// fdがopenできずに追加できていない可能性があるので、一応条件文で確認している。
+		for (size_t i = 0; i < this->config_->error_fd_list.size(); i++)
+		{
+			if (Utils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
+				std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
+		}
+	}
+}
+
 void	ConfigHandler::writeErrorLog( const struct TiedServer& tied_servers, const std::string& server_name, const std::string& uri, const std::string& msg ) const
 {
 	const config::Server&	server = searchServerConfig(tied_servers, server_name);
