@@ -80,9 +80,9 @@ int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionMa
 				timeout_reason = "sending response to client.";
 				break;
 		}
-		std::cout << "webserv: [info] client timed out while " << timeout_reason << std::endl;
+		configHandler.writeErrorLog("webserv: [info] client timed out while " + timeout_reason + "\n");
 		// これはconnManager.removeConnectonでやるべき？
-		std::cout << "webserv: [debug] close http connection: " << client_fd << std::endl;
+		configHandler.writeErrorLog("webserv: [debug] close http connection: " + client_fd + "\n");
 
 		// timer tree から削除
 		std::multiset<Timer>::iterator next = it;
