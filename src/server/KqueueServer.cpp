@@ -113,6 +113,7 @@ void	KqueueServer::callEventHandler(
 			updateEvent(active_events[i], EVFILT_READ);
 			break;
 		case RequestHandler::UPDATE_WRITE:
+		{
 			if (conn_manager->isCgiSocket(active_events[i].ident))
 			{
 				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
@@ -122,8 +123,9 @@ void	KqueueServer::callEventHandler(
 			else
 				updateEvent(active_events[i], EVFILT_WRITE);
 			break;
+		}
 		case RequestHandler::UPDATE_CLOSE:
-			deleteEvent(active_events[i]);
+			// deleteEvent(active_events[i]);
 			break;
 		case RequestHandler::UPDATE_CGI_READ:
 			if (conn_manager->isCgiSocket(active_events[i].ident))
@@ -158,11 +160,9 @@ void	KqueueServer::callEventHandler(
  */
 int	KqueueServer::updateEvent(struct kevent &old_event, const int event_filter)
 {
-	struct kevent	update;
-
+	const int	fd = old_event.ident;
 	deleteEvent(old_event);
-	EV_SET(&update, old_event.ident, event_filter, EV_ADD|EV_ENABLE, old_event.fflags, old_event.data, old_event.udata);
-	return kevent(this->kq_, &update, 1, NULL, 0, NULL);
+	return addNewEvent(fd, event_filter);
 }
 
 /**
@@ -173,14 +173,16 @@ int	KqueueServer::updateEvent(struct kevent &old_event, const int event_filter)
 int	KqueueServer::deleteEvent(struct kevent &event)
 {
 	EV_SET(&event, event.ident, event.filter, EV_DELETE, event.fflags, event.data, event.udata);
-	return kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	return re;
 }
 
 int	KqueueServer::addNewEvent(const int fd, const int event_filter)
 {
 	struct kevent	event;
 	EV_SET(&event, fd, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
-	return kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	return re;
 }
 
 #endif
