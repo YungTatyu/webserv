@@ -55,3 +55,39 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	connManager.removeConnection( sockfd );
 	return RequestHandler::UPDATE_CLOSE;
 }
+
+int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler)
+{
+	// timeoutしていない最初のイテレータを取得
+	Timer	current_time(0, Timer.getCurrentTime());
+	std::multiset<Timer>::iterator upper_bound = time_tree.upper_bound(current_time);
+
+	// timeout している接続をすべて削除
+	for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(),
+		it != upper_bound;
+		;
+		)
+	{
+		int client_fd = it.getFd();
+		connManager.removeConnection(client_fd);
+		// timeoutの種類によってログ出力変える
+		std::string	timeout_reason;
+		switch (it.type_) {
+			case TM_KEEPALIVE:
+				timeout_reason = "waiting for client request.";
+				break;
+			case TM_SEND:
+				timeout_reason = "sending response to client.";
+				break;
+		}
+		std::cout << "webserv: [info] client timed out while " << timeout_reason << std::endl;
+		// これはconnManager.removeConnectonでやるべき？
+		std::cout << "webserv: [debug] close http connection: " << client_fd << std::endl;
+
+		// timer tree から削除
+		std::multiset<Timer>::iterator next = it;
+		next++;
+		timer_tree.deleteTimer(client_fd);
+		it = next;
+	}
+}

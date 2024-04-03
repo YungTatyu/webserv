@@ -27,6 +27,7 @@ class RequestHandler
 		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		int handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler);
 
 		typedef bool (*whichEvent)(const struct pollfd& pfd);
 		typedef void (RequestHandler::*eventHandler)(
