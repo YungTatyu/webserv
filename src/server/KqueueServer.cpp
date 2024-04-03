@@ -125,7 +125,7 @@ void	KqueueServer::callEventHandler(
 			break;
 		}
 		case RequestHandler::UPDATE_CLOSE:
-			// deleteEvent(active_events[i]);
+			deleteEvent(active_events[i]); // socketをcloseした後だから呼ばなくてもいい
 			break;
 		case RequestHandler::UPDATE_CGI_READ:
 			if (conn_manager->isCgiSocket(active_events[i].ident))
@@ -158,7 +158,7 @@ void	KqueueServer::callEventHandler(
  * @param event 
  * @param event_filter 
  */
-int	KqueueServer::updateEvent(struct kevent &old_event, const int event_filter)
+int	KqueueServer::updateEvent(struct kevent &old_event, const short event_filter)
 {
 	const int	fd = old_event.ident;
 	deleteEvent(old_event);
@@ -177,7 +177,7 @@ int	KqueueServer::deleteEvent(struct kevent &event)
 	return re;
 }
 
-int	KqueueServer::addNewEvent(const int fd, const int event_filter)
+int	KqueueServer::addNewEvent(const int fd, const short event_filter)
 {
 	struct kevent	event;
 	EV_SET(&event, fd, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);

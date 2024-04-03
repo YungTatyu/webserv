@@ -33,9 +33,9 @@ class KqueueServer : public IServer
 		int	kq_; // kqueue fd
 		bool	initKqueueServer();
 		bool	initKevents(const std::map<int, ConnectionData*> &connections);
-		int	updateEvent(struct kevent &event, const int event_filter);
+		int	updateEvent(struct kevent &event, const short event_filter);
 		int	deleteEvent(struct kevent &event);
-		int	addNewEvent(const int fd, const int event_filter);
+		int	addNewEvent(const int fd, const short event_filter);
 };
 
 #endif
