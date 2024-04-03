@@ -28,10 +28,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 	HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
 
-	if (connManager.getRequest(sockfd).parseState == HttpRequest::PARSE_ERROR)
-	{
-	}
-	else if ( connManager.getRequest(sockfd).parseState != HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+	HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
+	if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
 		return RequestHandler::UPDATE_NONE;
 
 	// TODO: cgi read event / cgi write eventに更新する際は、返り値で返す必要がある
