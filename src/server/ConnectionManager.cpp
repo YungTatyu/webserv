@@ -170,7 +170,7 @@ void	ConnectionManager::closeAllConnections()
 	)
 	{
 		close(it->first);
-		delete &(it->second);
+		delete it->second;
 	}
 	this->connections_.clear();
 }
