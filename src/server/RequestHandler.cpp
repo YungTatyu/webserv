@@ -2,6 +2,8 @@
 #include "HttpResponse.hpp"
 #include <sys/types.h>
 #include <algorithm>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 
