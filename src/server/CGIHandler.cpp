@@ -94,9 +94,24 @@ const cgi::CGIExecutor&	cgi::CGIHandler::getCgiExecutor() const
 	return this->cgi_executor_;
 }
 
-const pid_t&	cgi::CGIHandler::getCgiProcessId() const
+pid_t	cgi::CGIHandler::getCgiProcessId() const
 {
 	return this->cgi_process_id_;
+}
+
+int	cgi::CGIHandler::getCliSocket() const
+{
+	return this->cli_socket_;
+}
+
+void	cgi::CGIHandler::setCliSocket(const int socket)
+{
+	this->cli_socket_ = socket;
+}
+
+int	cgi::CGIHandler::getCgiSocket() const
+{
+	return this->sockets_[SOCKET_PARENT];
 }
 
 /**

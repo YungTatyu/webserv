@@ -29,7 +29,8 @@ void ConnectionManager::setConnection( const int fd )
 void ConnectionManager::setCgiConnection( const int cli_sock, const ConnectionData::EVENT event )
 {
 	ConnectionData	*cd = this->connections_.at(cli_sock); 
-	const int	cgi_sock = cd->cgi_handler_.sockets_[cgi::SOCKET_PARENT];
+	cd->cgi_handler_.setCliSocket(cli_sock);
+	const int	cgi_sock = cd->cgi_handler_.getCgiSocket();
 	this->connections_.insert(std::make_pair(cgi_sock, cd));
 	// cgi のイベントに更新
 	this->connections_.at(cli_sock)->event = event;
@@ -176,6 +177,6 @@ void	ConnectionManager::closeAllConnections()
 
 bool	ConnectionManager::isCgiSocket( const int fd ) const
 {
-	const int	cgi_sock = this->connections_.at(fd)->cgi_handler_.sockets_[cgi::SOCKET_PARENT];
+	const int	cgi_sock = this->connections_.at(fd)->cgi_handler_.getCgiSocket();
 	return fd == cgi_sock;
 }

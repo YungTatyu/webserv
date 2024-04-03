@@ -113,7 +113,14 @@ void	KqueueServer::callEventHandler(
 			updateEvent(active_events[i], EVFILT_READ);
 			break;
 		case RequestHandler::UPDATE_WRITE:
-			updateEvent(active_events[i], EVFILT_WRITE);
+			if (conn_manager->isCgiSocket(active_events[i].ident))
+			{
+				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
+				deleteEvent(active_events[i]); // cgi socketを監視から削除する
+				addNewEvent(cgi_handler.getCliSocket(), EVFILT_WRITE);
+			}
+			else
+				updateEvent(active_events[i], EVFILT_WRITE);
 			break;
 		case RequestHandler::UPDATE_CLOSE:
 			deleteEvent(active_events[i]);
@@ -125,14 +132,14 @@ void	KqueueServer::callEventHandler(
 			{
 				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
 				deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
-				addNewEvent(cgi_handler.sockets_[cgi::SOCKET_PARENT], EVFILT_READ);
+				addNewEvent(cgi_handler.getCgiSocket(), EVFILT_READ);
 			}
 			break;
 		case RequestHandler::UPDATE_CGI_WRITE:
 		{
 			const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
 			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
-			addNewEvent(cgi_handler.sockets_[cgi::SOCKET_PARENT], EVFILT_WRITE);
+			addNewEvent(cgi_handler.getCgiSocket(), EVFILT_WRITE);
 			break;
 		}
 		default:

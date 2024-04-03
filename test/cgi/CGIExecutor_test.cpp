@@ -53,7 +53,7 @@ namespace test
 		while (true)
 		{
 			char	buffer[buffer_size + 1];
-			ssize_t	bytes = recv(cgi_handler.sockets_[cgi::SOCKET_PARENT], buffer, buffer_size, 0);
+			ssize_t	bytes = recv(cgi_handler.getCgiSocket(), buffer, buffer_size, 0);
 			if (bytes == -1)
 			{
 				std::cerr << "recv() " << std::strerror(errno) << "\n";
@@ -93,7 +93,7 @@ namespace test
 		cgi_handler.callCgiExecutor(cgi_path, http_request);
 		if (!http_request.body.empty())
 		{
-			sendBody(http_request.body, cgi_handler.sockets_[cgi::SOCKET_PARENT]);
+			sendBody(http_request.body, cgi_handler.getCgiSocket());
 		// 	waitProcess(cgi_handler.getCgiProcessId());
 		}
 		const std::string actual = test::readCgiResponse(cgi_handler);
