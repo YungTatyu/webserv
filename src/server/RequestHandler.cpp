@@ -60,10 +60,11 @@ int RequestHandler::handleCgiReadEvent(
 		connManager.addCgiResponse(sockfd, buffer);
 	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
 	{
+		connManager.setEvent(sockfd, ConnectionData::EV_WRITE);
 		ioHandler.closeConnection(connManager, sockfd);
-		return UPDATE_WRITE;
+		return RequestHandler::UPDATE_WRITE;
 	}
-	return UPDATE_NONE;
+	return RequestHandler::UPDATE_NONE;
 }
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
@@ -95,9 +96,10 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
 		(re == -1 && cgiProcessExited(cgi_handler.getCgiProcessId()))) // cgi processがすでに死んでいたら
 	{
 		connManager.resetSentBytes(sockfd);
-		return UPDATE_CGI_READ;
+		connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+		return RequestHandler::UPDATE_CGI_READ;
 	}
-	return UPDATE_NONE;
+	return RequestHandler::UPDATE_NONE;
 }
 
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
