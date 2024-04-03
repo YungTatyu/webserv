@@ -19,9 +19,9 @@ g_test_passed=0
 g_test_failed=0
 
 function	runServer {
+	./webserv $1 > /dev/null 2>&1 &
 	# エラー出力する場合
-	# ./webserv $1 > /dev/null 2>&1 &
-	./webserv $1 > /dev/null &
+	# ./webserv $1 > /dev/null &
 	readonly WEBSERV_PID=$!
 }
 
@@ -56,9 +56,10 @@ readonly root="test/server/test_files/server_res_test"
 runServer "${root}/server_res_test.conf"
 
 assert "${root}/static/" "200"
+assert "${root}/nonexist" "404"
+
+printLog
 
 # サーバープロセスを終了
 kill $WEBSERV_PID
-
-printLog
 

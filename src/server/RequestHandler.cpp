@@ -42,7 +42,6 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
 	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
-	connManager.clearConnectionData(sockfd);
 	return RequestHandler::UPDATE_WRITE;
 }
 
@@ -70,7 +69,8 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
 		return RequestHandler::UPDATE_NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
-	// TODO: 
+	// connection dataを削除
+	connManager.clearConnectionData(sockfd);
 	return RequestHandler::UPDATE_READ;
 }
 
