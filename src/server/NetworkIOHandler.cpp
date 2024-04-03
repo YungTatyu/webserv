@@ -56,21 +56,18 @@ void	NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server)
 int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int cli_sock )
 {
 	std::vector<unsigned char> buffer( bufferSize_ );
-	ssize_t totalBytesRead = 0;
 
-	while ( 1 )
-	{
-		ssize_t re = recv( cli_sock, buffer.data() + totalBytesRead, bufferSize_, 0 );
-		if ( re == 0 && totalBytesRead == 0 ) //クライアントとのコネクションが閉じた時。
-		   return 0;
-		else if ( re == -1 && totalBytesRead == 0 ) //ソケットが使用不可、またはエラー。
-		   return -1;
-		else if ( re != bufferSize_ ) //クライアントからのリクエストを読み終えた時。
-		   break ;
-		totalBytesRead += re;
-		buffer.resize( buffer.size() + bufferSize_ );
-	}
-	connManager.setRawRequest( cli_sock, buffer );
+       ssize_t re = recv( cli_sock, buffer.data(), bufferSize_, 0 );
+       if ( re == 0 ) //クライアントとのコネクションが閉じた時。
+               return 0;
+       else if ( re == -1 ) //ソケットが使用不可、またはエラー。
+               return -1;
+
+       connManager.addRawRequest( cli_sock, buffer );
+
+       if ( re == bufferSize_ ) // bufferSize_分だけ読んだ時。次のループで残りを読む。 ちょうどrecvでbuffersize分読んだ時はどうなる？？（次readイベント発生し 可能性）
+               return 2;
+
 	return 1;
 }
 

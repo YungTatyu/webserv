@@ -25,6 +25,10 @@ void ConnectionManager::setRawRequest( const int fd, const std::vector<unsigned 
 	connections_[fd].rawRequest = rawRequest;
 }
 
+void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
+{
+       connections_[fd].rawRequest.insert(connections_[fd].rawRequest.end(), rawRequest.begin(), rawRequest.end());
+}
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest( const int fd ) const
 {
