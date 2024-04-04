@@ -9,27 +9,32 @@ void	PollServer::eventLoop(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	for ( ; ; )
 	{
-		waitForEvent(conn_manager, event_manager);
+		waitForEvent(conn_manager, event_manager, timer_tree);
 
 		// 発生したイベントをhandleする
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
 
 		// 発生したすべてのイベントを削除
 		event_manager->clearAllEvents();
 	}
 }
 
-int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
+int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree)
 {
+	(void)timer_tree;
 	std::vector<pollfd> pollfds = convertToPollfds(conn_manager->getConnections());
 
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
+
 	// TODO: error起きたときどうしようか? 一定数retry? serverはdownしたらダメな気がする
-	int re = poll(pollfds.data(), pollfds.size(), -1);
+	int re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
 
 	// 発生したイベントをActiveEventManagerにすべて追加
 	addActiveEvents(pollfds, conn_manager, event_manager);
@@ -60,11 +65,22 @@ void	PollServer::callEventHandler(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	const std::vector<pollfd> *active_events =
 		static_cast<const std::vector<pollfd>*>(event_manager->getActiveEvents());
+
+		// TimeoutEvent発生
+	if (event_manager->getActiveEventsNum() == 0)
+	{
+		request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+		return;
+	}
+
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
 
 	// 発生したイベントの数だけloopする
 	for (std::vector<pollfd>::const_iterator it = active_events->begin();
@@ -74,12 +90,42 @@ void	PollServer::callEventHandler(
 	{
 		// 発生したeventに対するhandlerを呼ぶ
 		// interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
+		int status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
-			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, it->fd);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, it->fd, *timer_tree);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, it->fd);
+			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, it->fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
-			request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd);
+			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd, *timer_tree);
+
+		// kqueueで監視しているイベント情報を更新
+		config::Time timeout;
+		switch (status)
+		{
+		case RequestHandler::UPDATE_WRITE:
+			// keep-alive timeout 追加
+			timeout = config_handler->searchKeepaliveTimeout(
+						conn_manager->getTiedServer(it->fd),
+						conn_manager->getRequest(it->fd).headers["Host"],
+						conn_manager->getRequest(it->fd).uri
+						);
+			if (timeout.isNoTime())
+			{
+				// keepaliveが無効なので接続を閉じる
+				io_handler->closeConnection(*conn_manager, it->fd);
+			}
+			else
+			{
+				timer_tree->addTimer(Timer(
+									it->fd,
+									timeout
+									));
+			}
+			break;
+
+		default:
+			break;
+		}
 	}
 }
 

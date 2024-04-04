@@ -10,25 +10,29 @@ void	SelectServer::eventLoop(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	for ( ; ; )
 	{
-		waitForEvent(conn_manager, event_manager);
+		waitForEvent(conn_manager, event_manager, timer_tree);
 
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
 
 		event_manager->clearAllEvents();
 	}
 }
 
-int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager)
+int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree)
 {
 	const int max_fd = addSocketToSets(conn_manager->getConnections());
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
 	// TODO: select serverではマクロFD_SETSIZE以上のfdを監視できない
 	// TODO: error処理どうするべきか、retryする？
-	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, NULL);
+	struct timeval	tv = timer_tree->findTimeval();
+	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, &tv);
 	addActiveEvents(conn_manager->getConnections(), event_manager);
 
 	return re;
@@ -94,18 +98,60 @@ void	SelectServer::callEventHandler(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	const std::vector<SelectEvent> *active_events_ptr =
 		static_cast<std::vector<SelectEvent>*>(event_manager->getActiveEvents());
 	const std::vector<SelectEvent> active_events = *active_events_ptr;
 
+		// TimeoutEvent発生
+	if (event_manager->getActiveEventsNum() == 0)
+	{
+		request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+		return;
+	}
+
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
+
 	for (size_t i = 0; i < active_events.size(); ++i)
 	{
+		int status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
-			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].fd_);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].fd_, *timer_tree);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].fd_);
+			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].fd_);
+
+		// kqueueで監視しているイベント情報を更新
+		config::Time timeout;
+		switch (status)
+		{
+		case RequestHandler::UPDATE_WRITE:
+			// keep-alive timeout 追加
+			timeout = config_handler->searchKeepaliveTimeout(
+						conn_manager->getTiedServer(active_events[i].fd_),
+						conn_manager->getRequest(active_events[i].fd_).headers["Host"],
+						conn_manager->getRequest(active_events[i].fd_).uri
+						);
+			if (timeout.isNoTime())
+			{
+				// keepaliveが無効なので接続を閉じる
+				io_handler->closeConnection(*conn_manager, active_events[i].fd_);
+			}
+			else
+			{
+				timer_tree->addTimer(Timer(
+									active_events[i].fd_,
+									timeout
+									));
+			}
+			break;
+
+		default:
+			break;
+		}
 	}
+
 }
