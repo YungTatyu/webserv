@@ -32,12 +32,13 @@ function	assert {
 	g_total_test=$(bc <<< "$g_total_test + 1")
 	g_test_index=$(bc <<< "$g_test_index + 1")
 
-	local	uri=$1;
+	local	uri=$1
 	local	request="localhost:4242/${uri}"
 	printf "[  test$g_test_index  ]\n${request}: "
 
+	# responseのtimeoutを1秒に設定 --max-time
 	local	actual=$(curl -s -o /dev/null -w "%{http_code}" $request --max-time 1)
-	local	expect=$2;
+	local	expect=$2
 	if [ "$actual" == "$expect" ]
 	then
 		printf "\033[32mpassed\033[0m\n\n"
@@ -55,6 +56,11 @@ function	printLog {
 	printf "[========]    ${g_total_test} tests ran\n"
 	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
 	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
+
+	if [ $g_test_failed -ne 0 ]
+	then
+		exit 1
+	fi
 }
 
 function	runTest {
