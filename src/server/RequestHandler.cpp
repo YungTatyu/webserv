@@ -33,10 +33,10 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 	HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
 	if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
 		return RequestHandler::UPDATE_NONE;
-	return generateResponse(connManager, configHandler, sockfd);
+	return handleResponse(connManager, configHandler, sockfd);
 }
 
-int	RequestHandler::generateResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
 {
 	// TODO: cgi read event, cgi write eventに更新する際は、返り値で返す必要がある
 	// HttpResponseで呼ぶ？
@@ -63,7 +63,7 @@ int RequestHandler::handleCgiReadEvent(
 		const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
 		connManager.callCgiParser(sockfd, connManager.getResponse(sockfd),
 			std::string(reinterpret_cast<const char*>(v.data())));
-		int re = generateResponse(connManager, configHandler, sockfd);
+		int re = handleResponse(connManager, configHandler, sockfd);
 		ioHandler.closeConnection(connManager, sockfd);
 		return re;
 	}

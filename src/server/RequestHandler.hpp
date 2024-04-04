@@ -35,7 +35,7 @@ class RequestHandler
 	
 	private:
 		bool cgiProcessExited(const pid_t process_id) const;
-		int	generateResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
+		int	handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 };
 
 #endif
