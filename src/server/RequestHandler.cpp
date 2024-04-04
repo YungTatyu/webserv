@@ -5,13 +5,17 @@
 
 RequestHandler::RequestHandler() {}
 
-int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd, TimerTree &timer_tree)
 {
 		// リスニングソケットへの新規リクエスト
 		if (ioHandler.isListenSocket(sockfd))
 		{
 			return ioHandler.acceptConnection(connManager, sockfd);
 		}
+
+		// keepalive_timeout消す。
+		timer_tree.deleteTimer(sockfd);
+
 		// クライアントソケットへのリクエスト（既存コネクション）
 		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
 		if (re == -1) //ソケット使用不可。
@@ -49,29 +53,33 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	return RequestHandler::UPDATE_READ;
 }
 
-int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd, TimerTree &timer_tree)
 {
 	ioHandler.closeConnection( connManager, sockfd );
 	connManager.removeConnection( sockfd );
+	timer_tree.deleteTimer(sockfd);
 	return RequestHandler::UPDATE_CLOSE;
 }
 
-int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler)
+int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree)
 {
+	configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
 	// timeoutしていない最初のイテレータを取得
-	Timer	current_time(0, Timer.getCurrentTime());
-	std::multiset<Timer>::iterator upper_bound = time_tree.upper_bound(current_time);
+	Timer	current_time(0, Timer::getCurrentTime());
+	std::multiset<Timer>::iterator upper_bound = timer_tree.getTimerTree().upper_bound(current_time);
 
+	Timer::updateCurrentTime();
 	// timeout している接続をすべて削除
-	for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(),
+	for (std::multiset<Timer>::iterator it = timer_tree.getTimerTree().begin();
 		it != upper_bound;
-		;
 		)
 	{
-		int client_fd = it.getFd();
-		connManager.removeConnection(client_fd);
+		int client_fd = it->getFd();
+		ioHandler.closeConnection(connManager, client_fd);
 		// timeoutの種類によってログ出力変える
-		std::string	timeout_reason;
+		std::string	timeout_reason = "waiting for client request.";
+		configHandler.writeErrorLog("webserv: [info] client timed out while " + timeout_reason + "\n");
+		/*
 		switch (it.type_) {
 			case TM_KEEPALIVE:
 				timeout_reason = "waiting for client request.";
@@ -83,6 +91,7 @@ int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionMa
 		configHandler.writeErrorLog("webserv: [info] client timed out while " + timeout_reason + "\n");
 		// これはconnManager.removeConnectonでやるべき？
 		configHandler.writeErrorLog("webserv: [debug] close http connection: " + client_fd + "\n");
+		*/
 
 		// timer tree から削除
 		std::multiset<Timer>::iterator next = it;
@@ -90,4 +99,5 @@ int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionMa
 		timer_tree.deleteTimer(client_fd);
 		it = next;
 	}
+	return 0;
 }

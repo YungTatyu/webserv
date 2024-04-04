@@ -7,6 +7,7 @@
 # include <iostream>
 # include "ConnectionManager.hpp"
 # include "NetworkIOHandler.hpp"
+# include "TimerTree.hpp"
 
 /* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */
 class RequestHandler
@@ -24,10 +25,10 @@ class RequestHandler
 			UPDATE_CLOSE = -13
 		};
 		RequestHandler();
-		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
+		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd, TimerTree& timer_tree);
 		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		int handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler);
+		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd, TimerTree &timer_tree);
+		int handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree);
 
 		typedef bool (*whichEvent)(const struct pollfd& pfd);
 		typedef void (RequestHandler::*eventHandler)(
