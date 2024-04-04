@@ -27,11 +27,12 @@ function	runServer {
 
 function	assert {
 	g_test_index=$(bc <<< "$g_test_index + 1")
-	
-	printf "[  test$g_test_index  ]: "
 
 	local	uri=$1;
-	local	actual=$(curl -s -o /dev/null -w "%{http_code}" localhost:4242/${uri} --max-time 1)
+	local	request=localhost:4242/${uri}	
+	printf "[  test$g_test_index  ]\n${request}: "
+
+	local	actual=$(curl -s -o /dev/null -w "%{http_code}" $request --max-time 1)
 	local	expect=$2;
 	if [ "$actual" == "$expect" ]
 	then
@@ -55,7 +56,7 @@ function	printLog {
 readonly root="test/server/test_files/server_res_test"
 runServer "${root}/server_res_test.conf"
 
-assert "${root}/static/" "200"
+assert "${root}/static/index.html" "200"
 assert "${root}/nonexist" "404"
 
 printLog
