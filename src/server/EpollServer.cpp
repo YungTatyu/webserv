@@ -20,7 +20,8 @@ void	EpollServer::eventLoop(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	if (!initEpollServer())
@@ -31,10 +32,10 @@ void	EpollServer::eventLoop(
 
 	for ( ; ; )
 	{
-		waitForEvent(conn_manager, event_manager);
+		waitForEvent(conn_manager, event_manager, timer_tree);
 
 		// 発生したイベントをhandle
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
 
 		// 発生したすべてのイベントを削除
 		event_manager->clearAllEvents();
@@ -75,7 +76,7 @@ bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData> &connectio
 	return true;
 }
 
-int	EpollServer::waitForEvent( ConnectionManager* conn_manager, IActiveEventManager* event_manager )
+int	EpollServer::waitForEvent( ConnectionManager* conn_manager, IActiveEventManager* event_manager, TimerTree *timer_tree )
 {
 	// ここでタイムアウトを設定する必要があるならば、
 	// epoll_pwait2()を使うことで、timespec型のtimeout値を指定できる。
@@ -87,7 +88,9 @@ int	EpollServer::waitForEvent( ConnectionManager* conn_manager, IActiveEventMana
 
 	active_events->resize(conn_manager->getConnections().size());
 
-	int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), -1);
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
+	int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
 	event_manager->setActiveEventsNum(size);
 	return size;
 }
@@ -97,7 +100,8 @@ void	EpollServer::callEventHandler(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	// event handling
@@ -105,22 +109,42 @@ void	EpollServer::callEventHandler(
 		static_cast<std::vector<struct epoll_event>*>(event_manager->getActiveEvents());
 	std::vector<struct epoll_event>	&active_events = *active_events_ptr;
 
+	// TimeoutEvent発生
+	if (event_manager->getActiveEventsNum() == 0)
+	{
+		request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+		return;
+	}
+
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
+
 	// 発生したイベントの数だけloopする
 	for (int i = 0; i < event_manager->getActiveEventsNum(); ++i)
 	{
 		int	status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].data.fd);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].data.fd, *timer_tree);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].data.fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].data.fd);
+			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].data.fd, *timer_tree);
 		
 		// kqueueで監視しているイベント情報を更新
 		switch (status)
 		{
 		case RequestHandler::UPDATE_READ:
 			updateEvent(active_events[i], EPOLLIN);
+			// keep-alive timeout 追加
+			timer_tree->addTimer(Timer(
+				active_events[i].data.fd,
+				config_handler->searchKeepaliveTimeout(
+					conn_manager->getTiedServer(active_events[i].data.fd),
+					conn_manager->getRequest(active_events[i].data.fd).headers["Host"],
+					conn_manager->getRequest(active_events[i].data.fd).uri
+					)
+				)
+			);
 			break;
 
 		case RequestHandler::UPDATE_WRITE:
