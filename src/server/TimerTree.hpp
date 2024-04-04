@@ -17,8 +17,19 @@ class TimerTree
 		void	addTimer(const Timer &timer);
 		void	deleteTimer(const int fd);
 		int	findTimer() const;
+		struct timeval	findTimeval() const;
+		struct timespec	findTimespec() const;
 		const std::multiset<Timer>	&getTimerTree() const;
 		const std::set<int>	&getFdSet() const;
 };
 
 #endif
+
+/* Timerを設定・更新するタイミング
+ * KeepAliveTimeout: ReadEventに変えるとき。
+ *
+ *
+ * Timerを消すタイミング
+ * KeepAliveTimeout: receiveする前、handleErrorEvent
+ *
+ */
