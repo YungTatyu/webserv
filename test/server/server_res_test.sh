@@ -19,9 +19,9 @@ g_test_passed=0
 g_test_failed=0
 
 function	runServer {
-	./webserv $1 > /dev/null 2>&1 &
+	$webserv_path $1 > /dev/null 2>&1 &
 	# エラー出力する場合
-	# ./webserv $1 > /dev/null &
+	# $webserv_path $1 > /dev/null &
 	readonly WEBSERV_PID=$!
 }
 
@@ -53,14 +53,18 @@ function	printLog {
 	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
 }
 
-readonly root="test/server/test_files/server_res_test"
-runServer "${root}/server_res_test.conf"
+function	runTest {
+	local	root="test/server/test_files/server_res_test"
+	local	conf=$1
+	runServer "${root}/${conf}"
 
-assert "${root}/static/index.html" "200"
-assert "${root}/nonexist" "404"
+	assert "${root}/static/index.html" "200"
+	assert "${root}/nonexist" "404"
+
+	# サーバープロセスを終了
+	kill $WEBSERV_PID > /dev/null 2>&1
+}
+
+runTest "server_res_test.conf"
 
 printLog
-
-# サーバープロセスを終了
-kill $WEBSERV_PID
-
