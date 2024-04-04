@@ -64,7 +64,7 @@ function	printLog {
 }
 
 function	runTest {
-	local	root="test/server/test_files/server_res_test"
+	local	root="test/integration_test/test_files/server_res_test"
 	local	conf=$1
 	local	server_name=$2
 	g_test_index=0
