@@ -127,6 +127,12 @@ const std::vector<unsigned char>&	ConnectionManager::getCgiResponse( const int f
 	return this->connections_.at(fd)->cgi_response_;
 }
 
+bool	ConnectionManager::callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response)
+{
+	return this->connections_.at(fd)->cgi_handler_.callCgiParser(response, cgi_response);
+}
+
+
 void	ConnectionManager::setTiedServer( const int fd, const TiedServer* tied_server )
 {
 	connections_[fd]->tied_server_ = tied_server;

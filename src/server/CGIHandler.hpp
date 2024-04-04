@@ -38,7 +38,7 @@ class CGIHandler
 			const std::string& script_path,
 			const HttpRequest& request
 		);
-		void	callCgiParser(HttpResponse& response);
+		bool	callCgiParser(HttpResponse& response, const std::string& cgi_response);
 		void	killCgiProcess() const;
 		const CGIParser&	getCgiParser() const;
 		const CGIExecutor&	getCgiExecutor() const;

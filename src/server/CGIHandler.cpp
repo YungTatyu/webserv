@@ -84,6 +84,11 @@ bool	cgi::CGIHandler::callCgiExecutor(
 	return forkCgiProcess(request, script_path);
 }
 
+bool	cgi::CGIHandler::callCgiParser(HttpResponse& response, const std::string& cgi_response)
+{
+	return this->cgi_parser_.parse(response, cgi_response, cgi::PARSE_BEFORE);
+}
+
 const cgi::CGIParser&	cgi::CGIHandler::getCgiParser() const
 {
 	return this->cgi_parser_;

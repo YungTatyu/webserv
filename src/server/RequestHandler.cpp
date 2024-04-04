@@ -12,7 +12,7 @@ RequestHandler::RequestHandler() {}
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
 {
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
-		return handleCgiReadEvent(ioHandler, connManager, sockfd);
+		return handleCgiReadEvent(ioHandler, connManager, configHandler, sockfd);
 	// リスニングソケットへの新規リクエスト
 	if (ioHandler.isListenSocket(sockfd))
 		return ioHandler.acceptConnection(connManager, sockfd);
@@ -33,7 +33,11 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 	HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
 	if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
 		return RequestHandler::UPDATE_NONE;
+	return generateResponse(connManager, configHandler, sockfd);
+}
 
+int	RequestHandler::generateResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+{
 	// TODO: cgi read event, cgi write eventに更新する際は、返り値で返す必要がある
 	// HttpResponseで呼ぶ？
 	// bodyが存在する場合は、cgiにbodyを送る必要がある
@@ -48,16 +52,20 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 int RequestHandler::handleCgiReadEvent(
 	NetworkIOHandler &ioHandler,
 	ConnectionManager &connManager,
+	ConfigHandler& configHandler,
 	const int sockfd
 )
 {
 	ioHandler.receiveCgiResponse(connManager, sockfd);
-	const cgi::CGIHandler	cgi_handler = connManager.getCgiHandler(sockfd);
+	const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
 	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
 	{
-		connManager.setEvent(sockfd, ConnectionData::EV_WRITE);
+		const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
+		connManager.callCgiParser(sockfd, connManager.getResponse(sockfd),
+			std::string(reinterpret_cast<const char*>(v.data())));
+		int re = generateResponse(connManager, configHandler, sockfd);
 		ioHandler.closeConnection(connManager, sockfd);
-		return RequestHandler::UPDATE_WRITE;
+		return re;
 	}
 	return RequestHandler::UPDATE_NONE;
 }

@@ -29,12 +29,13 @@ class RequestHandler
 		RequestHandler();
 		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		int handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		int handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 		int handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
 	
 	private:
 		bool cgiProcessExited(const pid_t process_id) const;
+		int	generateResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 };
 
 #endif
