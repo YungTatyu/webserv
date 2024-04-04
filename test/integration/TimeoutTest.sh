@@ -102,7 +102,7 @@ function	runTest {
 }
 
 runTest "keepalive_timeout.conf" "kqueue or epoll" # kqueue or epoll
-#runTest "keepalive_timeout_select.conf" "select" # select
-#runTest "keepalive_timeout_poll.conf" "poll" # poll
+runTest "keepalive_timeout_select.conf" "select" # select
+runTest "keepalive_timeout_poll.conf" "poll" # poll
 
 printLog
