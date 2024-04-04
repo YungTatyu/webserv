@@ -16,14 +16,15 @@ class IServer
 								IActiveEventManager* event_manager,
 								NetworkIOHandler* io_handler,
 								RequestHandler* request_handler,
-								ConfigHandler* config_handler) = 0;
-		virtual int	waitForEvent(ConnectionManager* conn_manager, IActiveEventManager *event_manager, TimerTree &timer_tree) = 0;
+								ConfigHandler* config_handler,
+								TimerTree* timer_tree) = 0;
+		virtual int	waitForEvent(ConnectionManager* conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree) = 0;
 		virtual void	callEventHandler(ConnectionManager* conn_manager,
 										IActiveEventManager* event_manager,
 										NetworkIOHandler* io_handler,
 										RequestHandler* request_handler,
 										ConfigHandler* config_handler,
-										TimerTree& timer_tree) = 0;
+										TimerTree* timer_tree) = 0;
 };
 
 #endif
