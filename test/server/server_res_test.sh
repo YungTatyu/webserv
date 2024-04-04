@@ -7,25 +7,28 @@ readonly test_name="server response test"
 
 if [ -e $webserv_path ]
 then
-	printf "|------------------ $test_name start ------------------|\n\n"
+	printf "|------------------ $test_name start ------------------|\n"
 else
 	echo "${webserv_path}: command not found"
 	echo "run \"make\" first to test"
 	exit 1
 fi
 
+g_total_test=0
 g_test_index=0
 g_test_passed=0
 g_test_failed=0
 
 function	runServer {
+	# sleep 1
 	$webserv_path $1 > /dev/null 2>&1 &
 	# エラー出力する場合
 	# $webserv_path $1 > /dev/null &
-	readonly WEBSERV_PID=$!
+	WEBSERV_PID=$!
 }
 
 function	assert {
+	g_total_test=$(bc <<< "$g_total_test + 1")
 	g_test_index=$(bc <<< "$g_test_index + 1")
 
 	local	uri=$1;
@@ -47,8 +50,8 @@ function	assert {
 }
 
 function	printLog {
-	printf "|------------------ $test_name results ------------------|\n"
-	printf "[========]    ${g_test_index} tests ran\n"
+	printf "\n|------------------ $test_name results ------------------|\n"
+	printf "[========]    ${g_total_test} tests ran\n"
 	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
 	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
 }
@@ -56,15 +59,20 @@ function	printLog {
 function	runTest {
 	local	root="test/server/test_files/server_res_test"
 	local	conf=$1
+	local	server_name=$2
 	runServer "${root}/${conf}"
 
+	printf "\n\033[32m<<< ${server_name} server test >>>\033[0m\n"
 	assert "${root}/static/index.html" "200"
 	assert "${root}/nonexist" "404"
 
+	g_test_index=0
 	# サーバープロセスを終了
 	kill $WEBSERV_PID > /dev/null 2>&1
 }
 
-runTest "server_res_test.conf"
+runTest "server_res_test.conf" "kqueue or epoll" # kqueue or epoll
+runTest "server_res_test_select.conf" "select" # select
+runTest "server_res_test_poll.conf" "poll" # poll
 
 printLog
