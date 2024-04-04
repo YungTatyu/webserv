@@ -102,9 +102,9 @@ void	KqueueServer::callEventHandler(
 	std::vector<struct kevent>	&active_events = *active_events_ptr;
 
 	// TimeoutEvent発生
-	if (event_manager->getActiveEventNum() == 0)
+	if (event_manager->getActiveEventsNum() == 0)
 	{
-		event_manager->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+		request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
 		return;
 	}
 
@@ -123,6 +123,7 @@ void	KqueueServer::callEventHandler(
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].ident, *timer_tree);
 		
 		// kqueueで監視しているイベント情報を更新
+		config::Time timeout;
 		switch (status)
 		{
 		case RequestHandler::UPDATE_READ:
