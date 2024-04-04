@@ -60,13 +60,15 @@ function	runTest {
 	local	root="test/server/test_files/server_res_test"
 	local	conf=$1
 	local	server_name=$2
-	runServer "${root}/${conf}"
+	g_test_index=0
 
+	runServer "${root}/${conf}"
 	printf "\n\033[32m<<< ${server_name} server test >>>\033[0m\n"
+
+	# 以下にテストを追加
 	assert "${root}/static/index.html" "200"
 	assert "${root}/nonexist" "404"
 
-	g_test_index=0
 	# サーバープロセスを終了
 	kill $WEBSERV_PID > /dev/null 2>&1
 }
