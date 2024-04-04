@@ -131,20 +131,30 @@ void	EpollServer::callEventHandler(
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].data.fd, *timer_tree);
 		
 		// kqueueで監視しているイベント情報を更新
+		config::Time timeout;
 		switch (status)
 		{
 		case RequestHandler::UPDATE_READ:
-			updateEvent(active_events[i], EPOLLIN);
 			// keep-alive timeout 追加
-			timer_tree->addTimer(Timer(
-				active_events[i].data.fd,
-				config_handler->searchKeepaliveTimeout(
-					conn_manager->getTiedServer(active_events[i].data.fd),
-					conn_manager->getRequest(active_events[i].data.fd).headers["Host"],
-					conn_manager->getRequest(active_events[i].data.fd).uri
-					)
-				)
-			);
+			timeout = config_handler->searchKeepaliveTimeout(
+						conn_manager->getTiedServer(active_events[i].data.fd),
+						conn_manager->getRequest(active_events[i].data.fd).headers["Host"],
+						conn_manager->getRequest(active_events[i].data.fd).uri
+						);
+			if (timeout.isNoTime())
+			{
+				// keepaliveが無効なので接続を閉じる
+				deleteEvent(active_events[i]);
+				io_handler->closeConnection(*conn_manager, active_events[i].data.fd);
+			}
+			else
+			{
+				updateEvent(active_events[i], EPOLLIN);
+				timer_tree->addTimer(Timer(
+									active_events[i].data.fd,
+									timeout
+									));
+			}
 			break;
 
 		case RequestHandler::UPDATE_WRITE:
