@@ -147,7 +147,7 @@ size_t	ConnectionManager::getSentBytes( const int fd ) const
 	return connections_.at(fd)->sent_bytes_;
 }
 
-void	ConnectionManager::addSentBytes( const int fd, size_t bytes )
+void	ConnectionManager::addSentBytes( const int fd, const size_t bytes )
 {
 	connections_.at(fd)->sent_bytes_ += bytes;
 }

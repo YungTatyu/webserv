@@ -57,7 +57,7 @@ class ConnectionManager
 		const TiedServer& getTiedServer( const int fd ) const;
 		const cgi::CGIHandler& getCgiHandler( const int fd ) const;
 		size_t	getSentBytes( const int fd ) const;
-		void	addSentBytes( const int fd, size_t bytes );
+		void	addSentBytes( const int fd, const size_t bytes );
 		void	resetSentBytes( const int fd );
 		void	resetCgiSockets( const int fd );
 		void	clearConnectionData( const int fd );

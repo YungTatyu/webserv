@@ -24,15 +24,16 @@ function	runServer {
 	$webserv_path $1 > /dev/null 2>&1 &
 	# エラー出力する場合
 	# $webserv_path $1 > /dev/null &
-	WEBSERV_PID=$!
+	webserv_pid=$!
 }
 
+# responseのstatusをテスト
 function	assert {
 	g_total_test=$(bc <<< "$g_total_test + 1")
 	g_test_index=$(bc <<< "$g_test_index + 1")
 
 	local	uri=$1;
-	local	request=localhost:4242/${uri}	
+	local	request="localhost:4242/${uri}"
 	printf "[  test$g_test_index  ]\n${request}: "
 
 	local	actual=$(curl -s -o /dev/null -w "%{http_code}" $request --max-time 1)
@@ -70,7 +71,7 @@ function	runTest {
 	assert "${root}/nonexist" "404"
 
 	# サーバープロセスを終了
-	kill $WEBSERV_PID > /dev/null 2>&1
+	kill $webserv_pid > /dev/null 2>&1
 }
 
 runTest "server_res_test.conf" "kqueue or epoll" # kqueue or epoll
