@@ -3,7 +3,7 @@
 
 HttpRequest::HttpRequest(const config::REQUEST_METHOD& method, const std::string &uri,
 			 const std::string &version,
-			 const std::map<std::string, std::string> &headers,
+			 const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers,
 			 const std::string &queries, const std::string &body,
 			 const ParseState parseState)
     : method(method), uri(uri), version(version), headers(headers),
