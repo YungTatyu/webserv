@@ -97,11 +97,12 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const int cli_
 	const static std::string	query_string = std::string("QUERY_STRING=") + request.queries;
 	this->meta_vars_.push_back(query_string.c_str()); // pathinfoと同じ
 
-	const static std::string	remote_addr = std::string("REMOTE_ADDR=") + Utils::socketToStrIPAddress(cli_sock);
+	const std::string	ip_address = Utils::socketToStrIPAddress(cli_sock);
+	const static std::string	remote_addr = std::string("REMOTE_ADDR=") + ip_address;
 	this->meta_vars_.push_back(remote_addr.c_str());
 
-	static std::string	remote_host = std::string("REMOTE_HOST="); // client host name
-	this->meta_vars_.push_back(remote_host.c_str()); // TODO: client host nameを取得
+	static std::string	remote_host = std::string("REMOTE_HOST=") + ip_address; // client host nameは取得できないので、ip address
+	this->meta_vars_.push_back(remote_host.c_str());
 
 	const std::string	method = std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method);
 	this->meta_vars_.push_back(method.c_str());

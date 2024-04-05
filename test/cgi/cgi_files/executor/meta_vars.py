@@ -19,12 +19,12 @@ def	main():
             "PATH_INFO",
             "PATH_TRANSLATED",
             "QUERY_STRING",
-            "REMOTE_ADDR",
-            "REMOTE_HOST",
+       #      "REMOTE_ADDR",
+       #      "REMOTE_HOST",
             "REQUEST_METHOD",
             "SCRIPT_NAME",
             "SERVER_NAME",
-            "SERVER_PORT",
+       #      "SERVER_PORT",
             "SERVER_PROTOCOL",
             "SERVER_SOFTWARE"
      ]
