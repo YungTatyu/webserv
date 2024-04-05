@@ -68,6 +68,7 @@ struct timeval	TimerTree::findTimeval() const
 	{
 		tv.tv_sec = -1;
 		tv.tv_usec = -1;
+		return tv;
 	}
 
 	// この時点ですでにtimeoutになっている場合は、3msをtimeoutの値として設定する
@@ -89,6 +90,7 @@ struct timespec	TimerTree::findTimespec() const
 	{
 		ts.tv_sec = -1;
 		ts.tv_nsec = -1;
+		return ts;
 	}
 
 	// この時点ですでにtimeoutになっている場合は、3msをtimeoutの値として設定する
