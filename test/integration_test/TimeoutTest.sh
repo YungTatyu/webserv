@@ -4,6 +4,7 @@
 readonly script_dir_path=$(dirname "$0")
 readonly webserv_path="${script_dir_path}/../../webserv"
 readonly test_name="Timeout Test"
+readonly OS=$(uname -s)
 
 if [ -e $webserv_path ]
 then
@@ -33,7 +34,9 @@ function	assert {
 
 	local	uri=$1;
 	local	expect_sec=$2
-	local	request=localhost:4242${uri}
+	local	host="localhost"
+	local	port=4242
+	local	request=$host:$port${uri}
 	printf "[  test$g_test_index  ]\n${request}: "
 
 	# http request作成
@@ -45,22 +48,33 @@ EOT
 )
 
 	# telnetセッション開始
-	exec 3<>/dev/tcp/localhost/4242
-	if [ $? -ne 0 ]; then
-		echo "Failed to connect to $server_host:$server_port"
+	local start_time
+	local end_time
+	case "$OS" in
+	Linux)
+		exec 3<>/dev/tcp/$host/$port
+		if [ $? -ne 0 ]; then
+			printf "\033[31mfailed to connect to $host:$port\n\033[0m" >&2
+			exit 1
+		fi
+
+		# timeout時間を計測
+		start_time=$(date +%s%N)
+		echo "$request" >3
+		while read -r line <&3; do
+			:  # 何もしない
+		done
+		end_time=$(date +%s%N)
+
+		# telnetセッションを終了
+		exec 3>&-
+		;;
+
+	*)
+		printf "\033[31mNot supported os: $OS\n\033[0m" >&2
 		exit 1
-	fi
-
-	# timeout時間を計測
-	local	start_time=$(date +%s%N)
-	echo "$request" >&3
-	while read -r line <&3; do
-		:  # 何もしない
-	done
-	local	end_time=$(date +%s%N)
-
-	# telnetセッションを終了
-	exec 3>&-
+		;;
+	esac
 
 	# keepalive timeout を計算
 	local	actual_nanosec=$((end_time - start_time))
