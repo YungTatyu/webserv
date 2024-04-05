@@ -60,7 +60,7 @@ EOT
 
 		# timeout時間を計測
 		start_time=$(date +%s%N)
-		echo "$request" >3
+		echo "$request" >&3
 		while read -r line <&3; do
 			:  # 何もしない
 		done
