@@ -5,7 +5,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/param.h>
-
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 int	Utils::wrapperOpen( const std::string path, int flags, mode_t modes )
 {
@@ -128,6 +129,24 @@ ssize_t	Utils::wrapperWrite( const int fd, const std::string& msg )
 		written_bytes += ret;
 	}
 	return written_bytes;
+}
+
+/**
+ * @brief socketからipアドレスの文字列を作成する
+ * 
+ * @param sock 
+ * @return std::string 
+ */
+std::string	Utils::socketToStrIPAddress( const int sock )
+{
+	struct sockaddr_in addr;
+	socklen_t	client_addrlen = sizeof(addr);
+	if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1)
+	{
+		std::cerr << "webserv: [emerge] getsockname() \"" << sock << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+		return "";
+	}
+	return ipToStr(addr.sin_addr.s_addr);
 }
 
 std::string	Utils::ipToStr( const uint32_t ip )

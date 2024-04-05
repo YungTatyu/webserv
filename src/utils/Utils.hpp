@@ -35,6 +35,7 @@ std::vector<std::string>	createDirectoryContents( const std::string& directoryPa
 bool	isExecutable( const char* filename );
 bool	isExtensionFile( const std::string& filename, const std::string& extension );
 ssize_t	wrapperWrite( const int fd, const std::string& msg );
+std::string	socketToStrIPAddress( const int sock );
 std::string	ipToStr( const uint32_t ip );
 uint32_t	StrToIPAddress( const std::string& ip);
 std::string	toLower(std::string str);
