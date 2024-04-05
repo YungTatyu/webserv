@@ -54,7 +54,7 @@ bool	cgi::CGIHandler::forkCgiProcess(
 	if (pid == 0)
 	{
 		close(this->sockets_[SOCKET_PARENT]);
-		this->cgi_executor_.executeCgiScript(request, script_path, this->sockets_[SOCKET_CHILD]);
+		this->cgi_executor_.executeCgiScript(request, script_path, this->sockets_[SOCKET_CHILD], this->cli_socket_);
 	}
 	this->cgi_process_id_ = pid;
 	close(this->sockets_[SOCKET_CHILD]);

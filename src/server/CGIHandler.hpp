@@ -7,7 +7,6 @@
 
 #include "CGIParser.hpp"
 #include "CGIExecutor.hpp"
-#include "ConnectionManager.hpp"
 
 namespace cgi
 {
@@ -24,6 +23,7 @@ class CGIHandler
 	private:
 		CGIParser	cgi_parser_;
 		CGIExecutor	cgi_executor_;
+		int	cli_socket_; // cgiが紐づくクライアント
 		pid_t	cgi_process_id_;
 		bool	forkCgiProcess(
 			const HttpRequest& request,

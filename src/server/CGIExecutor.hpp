@@ -14,10 +14,10 @@ class CGIExecutor
 		std::string	script_path_;
 		std::vector<const char*>	argv_;
 		std::vector<const char*>	meta_vars_; // メタ変数(環境変数)
-		void	prepareCgiExecution(const HttpRequest& request, const std::string& script_path, const int socket);
+		void	prepareCgiExecution(const HttpRequest& request, const std::string& script_path, const int cgi_sock, const int cli_sock);
 		void	createScriptPath(const std::string& script_path);
 		void	createArgv(const std::string& script_path);
-		void	createMetaVars(const HttpRequest& request);
+		void	createMetaVars(const HttpRequest& request, const int cli_sock);
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
 		std::string	searchCommandInPath(const std::string& command) const;
 		template<typename T>std::string	toStr(const T value) const;
@@ -26,7 +26,7 @@ class CGIExecutor
 	public:
 		CGIExecutor();
 		~CGIExecutor();
-		void	executeCgiScript(const HttpRequest& request, const std::string& script_path, const int socket);
+		void	executeCgiScript(const HttpRequest& request, const std::string& script_path, const int cgi_sock, const int cli_sock);
 		const std::string&	getScriptPath() const;
 		const std::vector<const char*>&	getArgv() const;
 		const std::vector<const char*>&	getMetaVars() const;

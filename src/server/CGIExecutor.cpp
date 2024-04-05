@@ -21,10 +21,11 @@ cgi::CGIExecutor::~CGIExecutor() {}
 void	cgi::CGIExecutor::executeCgiScript(
 	const HttpRequest& request,
 	const std::string& script_path,
-	const int socket
+	const int cgi_sock,
+	const int cli_sock
 )
 {
-	prepareCgiExecution(request, script_path, socket);
+	prepareCgiExecution(request, script_path, cgi_sock, cli_sock);
 	execve(
 		this->script_path_.c_str(),
 		const_cast<char *const*>(this->argv_.data()),
@@ -37,14 +38,15 @@ void	cgi::CGIExecutor::executeCgiScript(
 void	cgi::CGIExecutor::prepareCgiExecution(
 	const HttpRequest& request,
 	const std::string& script_path,
-	const int socket
+	const int cgi_sock,
+	const int cli_sock
 )
 {
-	if (!redirectStdIOToSocket(request, socket))
+	if (!redirectStdIOToSocket(request, cgi_sock))
 		std::exit(EXIT_FAILURE);
 	createScriptPath(script_path);
 	createArgv(script_path);
-	createMetaVars(request);
+	createMetaVars(request, cli_sock);
 }
 
 void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
@@ -74,7 +76,7 @@ void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 	this->argv_.push_back(NULL);
 }
 
-void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
+void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const int cli_sock)
 {
 	const static char	*kContentType = "content-type";
 
@@ -95,7 +97,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
 	const static std::string	query_string = std::string("QUERY_STRING=") + request.queries;
 	this->meta_vars_.push_back(query_string.c_str()); // pathinfoと同じ
 
-	const static std::string	remote_addr = "REMOTE_ADDR="; // client addressをvalueにsetする
+	const static std::string	remote_addr = std::string("REMOTE_ADDR=") + Utils::socketToStrIPAddress(cli_sock);
 	this->meta_vars_.push_back(remote_addr.c_str());
 
 	static std::string	remote_host = std::string("REMOTE_HOST="); // client host name

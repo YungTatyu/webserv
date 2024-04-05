@@ -6,8 +6,10 @@
 
 # include "HttpRequest.hpp"
 # include "HttpResponse.hpp"
+# include "CGIHandler.hpp"
 
 struct TiedServer;
+class CGIHandler;
 
 class ConnectionData
 {
@@ -23,6 +25,7 @@ class ConnectionData
 		EVENT event;
 		HttpRequest request;
 		HttpResponse response_;
+		cgi::CGIHandler cgi_handler_;
 		const TiedServer* tied_server_;
 };
 
