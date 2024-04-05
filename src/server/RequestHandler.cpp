@@ -10,7 +10,22 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		// リスニングソケットへの新規リクエスト
 		if (ioHandler.isListenSocket(sockfd))
 		{
-			return ioHandler.acceptConnection(connManager, sockfd);
+			int	accept_sock = ioHandler.acceptConnection(connManager, sockfd);
+			// timeout追加
+			config::Time	timeout;
+			// この時点ではどのサーバーに属すかも決まっていないので、http コンテキストの値を適用する
+			// ただし0に指定されていた場合無限に接続することになるので、
+			// keepalive_timeoutではなく、何かデフォルトの時間を適用してもいいかもしれない。
+			//timeout = configHandler.config_->http.keepalive_timeout.getTime();
+			timeout = config::Time(5000);
+			if (!timeout.isNoTime())
+			{
+				timerTree.addTimer(Timer(
+										accept_sock,
+										timeout
+									));
+			}
+			return accept_sock;
 		}
 
 		// keepalive_timeout消す。
