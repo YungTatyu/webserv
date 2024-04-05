@@ -32,7 +32,10 @@ int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 	// TODO: select serverではマクロFD_SETSIZE以上のfdを監視できない
 	// TODO: error処理どうするべきか、retryする？
 	struct timeval	tv = timer_tree->findTimeval();
-	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, &tv);
+	struct timeval	*tvp = &tv;
+	if (tv.tv_sec == -1 && tv.tv_usec == -1)
+		tvp = NULL;
+	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
 	addActiveEvents(conn_manager->getConnections(), event_manager);
 
 	return re;
