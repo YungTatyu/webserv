@@ -46,7 +46,10 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
-	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
+	int re = ioHandler.sendResponse( connManager, sockfd );
+	if (re == -1) // send error, retry later
+		return RequestHandler::NONE;
+	if (re == -2) // send not complete, send remainder later
 		return RequestHandler::NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 	return RequestHandler::UPDATE_READ;

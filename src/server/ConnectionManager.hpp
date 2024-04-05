@@ -21,6 +21,7 @@ class ConnectionData
 		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<unsigned char> final_response_;
 		EVENT event;
+		size_t sent_bytes_;
 		HttpRequest request;
 		HttpResponse response_;
 		const TiedServer* tied_server_;
@@ -34,6 +35,7 @@ class ConnectionManager
 		~ConnectionManager();
 		void setConnection( const int fd );
 		void removeConnection( const int fd );
+		ConnectionData& getConnection( const int fd );
 		void setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		void addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		const std::vector<unsigned char>& getRawRequest( const int fd ) const;

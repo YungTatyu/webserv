@@ -20,6 +20,11 @@ void ConnectionManager::removeConnection( const int fd )
 	connections_.erase( fd );
 }
 
+ConnectionData& ConnectionManager::getConnection( const int fd )
+{
+	return connections_.at(fd);
+}
+
 void ConnectionManager::setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
 {
 	connections_[fd].rawRequest = rawRequest;

@@ -74,19 +74,18 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
 	std::vector<unsigned char> response = connManager.getFinalResponse( cli_sock );
-	size_t totalSent = 0;
 	size_t resSize = response.size();
 	const size_t chunkSize = 1024;
 
-	while ( totalSent < resSize )
-	{
-		size_t currentChunkSize = std::min(chunkSize, resSize - totalSent);
-		int sent = send(cli_sock, response.data() + totalSent, currentChunkSize, 0);
-		if (sent == -1)
-			return -1;
-		totalSent += sent;
-	}
-	return totalSent;
+	size_t sentBytes = connManager.getConnection(cli_sock).sent_bytes_;
+	size_t currentChunkSize = std::min(chunkSize, resSize - sentBytes);
+	int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, 0);
+	if (sent == -1)
+		return -1;
+	connManager.getConnection(cli_sock).sent_bytes_ += sent;
+	if (connManager.getConnection(cli_sock).sent_bytes_ != resSize)
+		return -2;
+	return 0;
 }
 
 int NetworkIOHandler::acceptConnection( ConnectionManager& connManager, const int listen_fd )
