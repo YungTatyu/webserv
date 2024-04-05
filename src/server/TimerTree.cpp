@@ -99,7 +99,7 @@ struct timespec	TimerTree::findTimespec() const
 	ts.tv_sec = timeout_raw >= static_cast<unsigned long>(std::numeric_limits<int>::max()) ?
 		std::numeric_limits<int>::max() / 1000 : static_cast<int>(timeout_raw) / 1000;
 	ts.tv_nsec = timeout_raw >= static_cast<unsigned long>(std::numeric_limits<int>::max()) ?
-		(std::numeric_limits<int>::max() % 1000) * 1000 : (static_cast<int>(timeout_raw) % 1000) * 1000000;
+		(std::numeric_limits<int>::max() % 1000) * 1000000 : (static_cast<int>(timeout_raw) % 1000) * 1000000;
 	return ts;
 }
 
