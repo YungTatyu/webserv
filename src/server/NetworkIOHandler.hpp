@@ -50,7 +50,7 @@ class NetworkIOHandler
 		~NetworkIOHandler();
 		int	setupSocket( const std::string address, const unsigned int port );
 		int receiveRequest( ConnectionManager& connManager, const int cli_sock );
-		ssize_t sendResponse( ConnectionManager& connManager, const int cli_sock );
+		int sendResponse( ConnectionManager& connManager, const int cli_sock );
 		int acceptConnection( ConnectionManager& connManager, const int listen_fd );
 		void closeConnection( ConnectionManager& connManager, const int cli_sock );
 		void	closeAllListenSockets();
