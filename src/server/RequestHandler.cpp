@@ -52,10 +52,16 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 
 	// keep-alive timeout 追加
+	std::map<std::string, std::string>::iterator it = connManager.getRequest(sockfd).headers.find("Host");
 	config::Time	timeout;
+	std::string host_name;
+	if (it == connManager.getRequest(sockfd).headers.end())
+		host_name = "_";
+	else
+		host_name = it->second;
 	timeout = configHandler.searchKeepaliveTimeout(
 					connManager.getTiedServer(sockfd),
-					connManager.getRequest(sockfd).headers["Host"],
+					host_name,
 					connManager.getRequest(sockfd).uri
 				);
 	if (!timeout.isNoTime())
