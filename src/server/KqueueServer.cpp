@@ -82,8 +82,11 @@ int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 	// 現在時刻を更新
 	Timer::updateCurrentTime();
 	// TODO: error処理どうするか？ server downさせる？
-	struct timespec ts = timer_tree->findTimespec();
-	int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), &ts);
+	struct timespec	ts = timer_tree->findTimespec();
+	struct timespec	*tsp = &ts;
+	if (ts.tv_sec == -1 && ts.tv_nsec == -1)
+		tsp = NULL;
+	int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), tsp);
 	event_manager->setActiveEventsNum(re);
 	return re;
 }
