@@ -82,7 +82,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const int cli_
 
 	this->meta_vars_.push_back("AUTH_TYPE="); // Authorizationをparseするロジックを実装しないため、値は空文字
 
-	const static std::string content_length = std::string("CONTENT_LENGTH=") + toStr(request.body.size());
+	const static std::string content_length = std::string("CONTENT_LENGTH=") + Utils::toStr(request.body.size());
 	this->meta_vars_.push_back(content_length.c_str());
 
 	static std::string	content_type = "CONTENT_TYPE=";
@@ -112,7 +112,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const int cli_
 	const static std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
 	this->meta_vars_.push_back(server_name.c_str());
 
-	const static std::string	server_port = std::string("SERVER_PORT="); // TODO: clientがアクセスしたport番号
+	const static std::string	server_port = std::string("SERVER_PORT=") + Utils::toStr(Utils::resolveConnectedPort(cli_sock)); 
 	this->meta_vars_.push_back(server_port.c_str());
 
 	const static std::string	server_protocol = std::string("SERVER_PROTOCOL=") + request.version;

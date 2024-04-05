@@ -20,7 +20,6 @@ class CGIExecutor
 		void	createMetaVars(const HttpRequest& request, const int cli_sock);
 		std::vector<std::string>	split(const std::string& s, char delimiter) const;
 		std::string	searchCommandInPath(const std::string& command) const;
-		template<typename T>std::string	toStr(const T value) const;
 		bool	isExecutableFile(const std::string& path) const;
 
 	public:
@@ -32,15 +31,6 @@ class CGIExecutor
 		const std::vector<const char*>&	getMetaVars() const;
 		bool	redirectStdIOToSocket(const HttpRequest& request, const int socket) const;
 };
-
-template<typename T>
-std::string	CGIExecutor::toStr(const T value) const
-{
-	std::stringstream	converter;
-	converter << value;
-	return converter.str();
-}
-
 } // namespace cgi
 
 #endif
