@@ -5,7 +5,7 @@
 
 RequestHandler::RequestHandler() {}
 
-int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd, TimerTree &timer_tree)
+int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, TimerTree &timerTree, const int sockfd)
 {
 		// リスニングソケットへの新規リクエスト
 		if (ioHandler.isListenSocket(sockfd))
@@ -14,7 +14,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		}
 
 		// keepalive_timeout消す。
-		timer_tree.deleteTimer(sockfd);
+		timerTree.deleteTimer(sockfd);
 
 		// クライアントソケットへのリクエスト（既存コネクション）
 		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
@@ -45,11 +45,27 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		return RequestHandler::UPDATE_WRITE;
 }
 
-int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
 {
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
 		return RequestHandler::NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
+
+	// keep-alive timeout 追加
+	config::Time	timeout;
+	timeout = configHandler.searchKeepaliveTimeout(
+					connManager.getTiedServer(sockfd),
+					connManager.getRequest(sockfd).headers["Host"],
+					connManager.getRequest(sockfd).uri
+				);
+	if (!timeout.isNoTime())
+	{
+		timerTree.addTimer(Timer(
+								sockfd,
+								timeout
+							));
+	}
+
 	return RequestHandler::UPDATE_READ;
 }
 

@@ -92,35 +92,19 @@ void	PollServer::callEventHandler(
 		// interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
 		int status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, it->fd, *timer_tree);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
-			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, it->fd);
+			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd, *timer_tree);
 
 		// kqueueで監視しているイベント情報を更新
-		config::Time timeout;
 		switch (status)
 		{
 		case RequestHandler::UPDATE_WRITE:
-			// keep-alive timeout 追加
-			timeout = config_handler->searchKeepaliveTimeout(
-						conn_manager->getTiedServer(it->fd),
-						conn_manager->getRequest(it->fd).headers["Host"],
-						conn_manager->getRequest(it->fd).uri
-						);
-			if (timeout.isNoTime())
-			{
-				// keepaliveが無効なので接続を閉じる
+			// keepaliveが無効なので接続を閉じる
+			if (!timer_tree->timerExists(it->fd))
 				io_handler->closeConnection(*conn_manager, it->fd);
-			}
-			else
-			{
-				timer_tree->addTimer(Timer(
-									it->fd,
-									timeout
-									));
-			}
 			break;
 
 		default:

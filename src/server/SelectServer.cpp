@@ -120,33 +120,18 @@ void	SelectServer::callEventHandler(
 	{
 		int status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].fd_, *timer_tree);
+			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].fd_);
+			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 
 		// kqueueで監視しているイベント情報を更新
 		config::Time timeout;
 		switch (status)
 		{
 		case RequestHandler::UPDATE_WRITE:
-			// keep-alive timeout 追加
-			timeout = config_handler->searchKeepaliveTimeout(
-						conn_manager->getTiedServer(active_events[i].fd_),
-						conn_manager->getRequest(active_events[i].fd_).headers["Host"],
-						conn_manager->getRequest(active_events[i].fd_).uri
-						);
-			if (timeout.isNoTime())
-			{
-				// keepaliveが無効なので接続を閉じる
+			// keepaliveが無効なので接続を閉じる
+			if (!timer_tree->timerExists(active_events[i].fd_))
 				io_handler->closeConnection(*conn_manager, active_events[i].fd_);
-			}
-			else
-			{
-				timer_tree->addTimer(Timer(
-									active_events[i].fd_,
-									timeout
-									));
-			}
 			break;
 
 		default:
