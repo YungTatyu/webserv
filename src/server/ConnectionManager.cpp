@@ -25,11 +25,6 @@ ConnectionData& ConnectionManager::getConnection( const int fd )
 	return connections_.at(fd);
 }
 
-void ConnectionManager::setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
-{
-	connections_[fd].rawRequest = rawRequest;
-}
-
 void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
 {
        connections_[fd].rawRequest.insert(connections_[fd].rawRequest.end(), rawRequest.begin(), rawRequest.end());

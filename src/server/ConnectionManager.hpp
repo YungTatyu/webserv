@@ -36,7 +36,6 @@ class ConnectionManager
 		void setConnection( const int fd );
 		void removeConnection( const int fd );
 		ConnectionData& getConnection( const int fd );
-		void setRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		void addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		const std::vector<unsigned char>& getRawRequest( const int fd ) const;
 		void setFinalResponse( const int fd, const std::vector<unsigned char>& final_response );

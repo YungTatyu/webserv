@@ -23,7 +23,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			return RequestHandler::UPDATE_CLOSE;
 		}
                if (re == 2) // buffer分以降を読む
-                       return RequestHandler::UPDATE_READ;
+                       return RequestHandler::NONE;
 
 		const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
 		std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
