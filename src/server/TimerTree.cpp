@@ -109,13 +109,5 @@ const std::set<int>	&TimerTree::getFdSet() const
 
 bool	TimerTree::timerExists(const int fd) const
 {
-	for (std::multiset<Timer>::iterator it = this->timer_tree_.begin();
-		it != this->timer_tree_.end();
-		++it
-	)
-	{
-		if(it->getFd() == fd)
-			return true;
-	}
-	return false;
+	return this->fd_set_.find(fd) != this->fd_set_.end();
 }
