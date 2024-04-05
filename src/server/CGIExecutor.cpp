@@ -107,8 +107,8 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
 	const static std::string	script_name = std::string("SCRIPT_NAME=") + request.uri;
 	this->meta_vars_.push_back(script_name.c_str());
 
-	// const static std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
-	// this->meta_vars_.push_back(server_name.c_str());
+	const static std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
+	this->meta_vars_.push_back(server_name.c_str());
 
 	const static std::string	server_port = std::string("SERVER_PORT="); // TODO: clientがアクセスしたport番号
 	this->meta_vars_.push_back(server_port.c_str());
