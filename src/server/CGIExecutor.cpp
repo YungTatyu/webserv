@@ -104,7 +104,7 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const int cli_
 	static std::string	remote_host = std::string("REMOTE_HOST=") + ip_address; // client host nameは取得できないので、ip address
 	this->meta_vars_.push_back(remote_host.c_str());
 
-	const std::string	method = std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method);
+	const static std::string	method = std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method);
 	this->meta_vars_.push_back(method.c_str());
 
 	const static std::string	script_name = std::string("SCRIPT_NAME=") + request.uri;
