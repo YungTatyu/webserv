@@ -86,7 +86,7 @@ function	printLog {
 }
 
 function	runTest {
-	local	root="test/integration/test_files/TimeoutTestFiles"
+	local	root="test/integration_test/test_files/TimeoutTestFiles"
 	local	conf=$1
 	local	server_name=$2
 	runServer "${root}/${conf}"
