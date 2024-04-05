@@ -73,7 +73,6 @@ bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 
 int	KqueueServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree)
 {
-	(void)timer_tree;
 	std::vector<struct kevent>	*active_events =
 		static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
 
