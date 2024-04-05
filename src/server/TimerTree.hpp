@@ -21,6 +21,7 @@ class TimerTree
 		struct timespec	findTimespec() const;
 		const std::multiset<Timer>	&getTimerTree() const;
 		const std::set<int>	&getFdSet() const;
+		bool	timerExists(const int fd) const;
 };
 
 #endif
