@@ -51,7 +51,7 @@ void	KqueueActiveEventManager::clearAllEvents()
 bool	KqueueActiveEventManager::isReadEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return (kq_e->filter & EVFILT_READ) && !isErrorEvent(event);
+	return (kq_e->filter == EVFILT_READ) && !isErrorEvent(event);
 }
 
 /**
@@ -64,7 +64,7 @@ bool	KqueueActiveEventManager::isReadEvent(const void *event)
 bool	KqueueActiveEventManager::isWriteEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return (kq_e->filter & EVFILT_WRITE) && !isErrorEvent(event);
+	return (kq_e->filter == EVFILT_WRITE) && !isErrorEvent(event);
 }
 
 /**
@@ -77,7 +77,7 @@ bool	KqueueActiveEventManager::isWriteEvent(const void *event)
 bool	KqueueActiveEventManager::isErrorEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return (kq_e->flags & EV_EOF) || (kq_e->flags & EV_ERROR);
+	return (kq_e->flags == EV_EOF) || (kq_e->flags & EV_ERROR);
 }
 
 #endif
