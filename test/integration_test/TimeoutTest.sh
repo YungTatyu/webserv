@@ -34,13 +34,14 @@ function	assert {
 
 	local	uri=$1;
 	local	expect_sec=$2
+	local	scheme="http"
 	local	host="localhost"
 	local	port=4242
-	local	request=$host:$port${uri}
-	printf "[  test$g_test_index  ]\n${request}: "
+	local	url=$scheme://$host:$port${uri}
+	printf "[  test$g_test_index  ]\n${url}: "
 
 	# http request作成
-	request=$(cat <<EOT
+	local	request=$(cat <<EOT
 GET ${uri} HTTP/1.1
 Host: _
 
