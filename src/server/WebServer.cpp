@@ -13,34 +13,6 @@ WebServer::WebServer( const config::Main* config )
 	this->initializeServer();
 }
 
-std::string	ConnectionMethodToStr(const config::CONNECTION_METHOD method)
-{
-	std::string	ret;
-	switch (method) {
-		#if defined(KQUEUE_AVAILABLE)
-		case config::KQUEUE:
-			ret = "kqueue";
-			break;
-		case config::EPOLL:
-			break;
-		#endif
-		#if defined(EPOLL_AVAILABLE)
-		case config::KQUEUE:
-			break;
-		case config::EPOLL:
-			ret = "epoll";
-			break;
-		#endif
-		case config::POLL:
-			ret = "poll";
-			break;
-		case config::SELECT:
-			ret = "select";
-			break;
-	}
-	return ret;
-}
-
 void WebServer::initializeServer()
 {
 	this->ioHandler = new NetworkIOHandler();
@@ -77,7 +49,7 @@ void WebServer::initializeServer()
 			this->eventManager = new SelectActiveEventManager();
 			break;
 	}
-	configHandler->writeErrorLog("webserv: [debug] use " + ConnectionMethodToStr(method) + "\n");
+	configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");
 
 	this->timerTree = new TimerTree();
 }
