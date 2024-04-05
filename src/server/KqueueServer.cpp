@@ -123,7 +123,6 @@ void	KqueueServer::callEventHandler(
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].ident, *timer_tree);
 
 		// kqueueで監視しているイベント情報を更新
-		config::Time timeout;
 		switch (status)
 		{
 		case RequestHandler::UPDATE_READ:
