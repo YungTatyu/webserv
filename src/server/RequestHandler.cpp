@@ -77,7 +77,7 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	return RequestHandler::UPDATE_CLOSE;
 }
 
-int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree)
+void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree)
 {
 	configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
 	// timeoutしていない最初のイテレータを取得
@@ -115,5 +115,4 @@ int RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionMa
 		timer_tree.deleteTimer(client_fd);
 		it = next;
 	}
-	return 0;
 }
