@@ -7,7 +7,6 @@
 
 #include "CGIParser.hpp"
 #include "CGIExecutor.hpp"
-#include "ConnectionManager.hpp"
 
 namespace cgi
 {
@@ -25,6 +24,7 @@ class CGIHandler
 		CGIParser	cgi_parser_;
 		CGIExecutor	cgi_executor_;
 		pid_t	cgi_process_id_;
+		int	cli_socket_; // cgiが紐づくクライアント
 		bool	forkCgiProcess(
 			const HttpRequest& request,
 			const std::string& script_path
@@ -38,11 +38,15 @@ class CGIHandler
 			const std::string& script_path,
 			const HttpRequest& request
 		);
-		void	callCgiParser(HttpResponse& response);
+		bool	callCgiParser(HttpResponse& response, const std::string& cgi_response);
 		void	killCgiProcess() const;
 		const CGIParser&	getCgiParser() const;
 		const CGIExecutor&	getCgiExecutor() const;
-		const pid_t&	getCgiProcessId() const;
+		pid_t	getCgiProcessId() const;
+		int	getCliSocket() const;
+		void	setCliSocket(const int socket);
+		int	getCgiSocket() const;
+		void	resetSockets();
 };
 } // namespace cgi
 

@@ -45,7 +45,7 @@ bool	KqueueServer::initKqueueServer()
 	return true;
 }
 
-bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
+bool	KqueueServer::initKevents(const std::map<int, ConnectionData*> &connections)
 {
 	std::vector<struct kevent>	event_list;// 監視したいevent
 
@@ -53,11 +53,11 @@ bool	KqueueServer::initKevents(const std::map<int, ConnectionData> &connections)
 	event_list.resize(connections.size());
 
 	size_t	i = 0;
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it)
 	{
-		const int	event_filter = it->second.event == ConnectionData::EV_READ ? EVFILT_READ : EVFILT_WRITE;
+		const int	event_filter = it->second->event == ConnectionData::EV_READ ? EVFILT_READ : EVFILT_WRITE;
 		EV_SET(&event_list[i], it->first, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
 		++i;
 	}
@@ -98,7 +98,7 @@ void	KqueueServer::callEventHandler(
 	// 発生したイベントの数だけloopする
 	for (int i = 0; i < event_manager->getActiveEventsNum(); ++i)
 	{
-		int	status = RequestHandler::NONE;
+		int	status = RequestHandler::UPDATE_NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].ident);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
@@ -112,15 +112,38 @@ void	KqueueServer::callEventHandler(
 		case RequestHandler::UPDATE_READ:
 			updateEvent(active_events[i], EVFILT_READ);
 			break;
-
 		case RequestHandler::UPDATE_WRITE:
-			updateEvent(active_events[i], EVFILT_WRITE);
+		{
+			if (conn_manager->isCgiSocket(active_events[i].ident))
+			{
+				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
+				deleteEvent(active_events[i]); // cgi socketを監視から削除する
+				addNewEvent(cgi_handler.getCliSocket(), EVFILT_WRITE);
+			}
+			else
+				updateEvent(active_events[i], EVFILT_WRITE);
 			break;
-
+		}
 		case RequestHandler::UPDATE_CLOSE:
-			deleteEvent(active_events[i]);
+			deleteEvent(active_events[i]); // socketをcloseした後だから呼ばなくてもいい
 			break;
-
+		case RequestHandler::UPDATE_CGI_READ:
+			if (conn_manager->isCgiSocket(active_events[i].ident))
+				updateEvent(active_events[i], EVFILT_READ);
+			else
+			{
+				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
+				deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+				addNewEvent(cgi_handler.getCgiSocket(), EVFILT_READ);
+			}
+			break;
+		case RequestHandler::UPDATE_CGI_WRITE:
+		{
+			const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
+			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+			addNewEvent(cgi_handler.getCgiSocket(), EVFILT_WRITE);
+			break;
+		}
 		default:
 			if (status >= 0) // fdだったら
 				addNewEvent(status, EVFILT_READ);
@@ -135,13 +158,11 @@ void	KqueueServer::callEventHandler(
  * @param event 
  * @param event_filter 
  */
-int	KqueueServer::updateEvent(struct kevent &old_event, const int event_filter)
+int	KqueueServer::updateEvent(struct kevent &old_event, const short event_filter)
 {
-	struct kevent	update;
-
+	const int	fd = old_event.ident;
 	deleteEvent(old_event);
-	EV_SET(&update, old_event.ident, event_filter, EV_ADD|EV_ENABLE, old_event.fflags, old_event.data, old_event.udata);
-	return kevent(this->kq_, &update, 1, NULL, 0, NULL);
+	return addNewEvent(fd, event_filter);
 }
 
 /**
@@ -152,14 +173,16 @@ int	KqueueServer::updateEvent(struct kevent &old_event, const int event_filter)
 int	KqueueServer::deleteEvent(struct kevent &event)
 {
 	EV_SET(&event, event.ident, event.filter, EV_DELETE, event.fflags, event.data, event.udata);
-	return kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	return re;
 }
 
-int	KqueueServer::addNewEvent(const int fd, const int event_filter)
+int	KqueueServer::addNewEvent(const int fd, const short event_filter)
 {
 	struct kevent	event;
 	EV_SET(&event, fd, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
-	return kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	return re;
 }
 
 #endif

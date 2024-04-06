@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <utility>
+#include <algorithm>
 
 NetworkIOHandler::NetworkIOHandler() {}
 
@@ -74,6 +75,17 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 	return 1;
 }
 
+ssize_t NetworkIOHandler::receiveCgiResponse( ConnectionManager& connManager, const int sock )
+{
+	const static size_t buffer_size = 1024;
+	std::vector<unsigned char>	buffer(buffer_size);
+
+	ssize_t re = recv(sock, buffer.data(), buffer_size, 0);
+	if (re > 0)
+		connManager.addCgiResponse(sock, buffer);
+	return re;
+}
+
 ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
 	std::vector<unsigned char> response = connManager.getFinalResponse( cli_sock );
@@ -92,6 +104,19 @@ ssize_t NetworkIOHandler::sendResponse( ConnectionManager &connManager, const in
 	return totalSent;
 }
 
+ssize_t NetworkIOHandler::sendRequestBody( ConnectionManager& connManager, const int sock )
+{
+	const static size_t buffer_size = 1024;
+	const std::string	body = connManager.getRequest(sock).body;
+	const size_t	sent_bytes = connManager.getSentBytes(sock);
+	const size_t	rest = body.size() - sent_bytes;
+
+	ssize_t	re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), 0);
+	if (re > 0)
+		connManager.addSentBytes(sock, re);
+	return re;
+}
+
 int NetworkIOHandler::acceptConnection( ConnectionManager& connManager, const int listen_fd )
 {
 	int connfd;
@@ -100,6 +125,8 @@ int NetworkIOHandler::acceptConnection( ConnectionManager& connManager, const in
 
 	client = sizeof(cliaddr);
 	connfd = SysCallWrapper::Accept( listen_fd, (struct sockaddr *) &cliaddr, &client );
+	if (connfd == -1)
+		return connfd;
 	fcntl( connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC );
 
 	// 新規クライントfdを追加
@@ -130,8 +157,11 @@ bool	NetworkIOHandler::isListenSocket(const int listen_fd) const
 void NetworkIOHandler::closeConnection( ConnectionManager& connManager, const int cli_sock )
 {
 	close( cli_sock );
-	connManager.removeConnection( cli_sock );
-	printf("%s\n", "< Client disconnected.");
+	bool	cgi = connManager.isCgiSocket(cli_sock);
+	if (cgi)
+		connManager.resetCgiSockets(cli_sock);
+	connManager.removeConnection( cli_sock, cgi );
+	std::cerr << "client disconnected\n";
 }
 
 const std::map<int, TiedServer>&	NetworkIOHandler::getListenfdMap()

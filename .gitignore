@@ -38,3 +38,4 @@ logs
 .vscode
 .DS_Store
 *.cgi
+*.log
