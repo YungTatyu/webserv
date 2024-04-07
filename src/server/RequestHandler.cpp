@@ -78,7 +78,13 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 					host_name,
 					connManager.getRequest(sockfd).uri
 				);
-	if (!timeout.isNoTime())
+	if (timeout.isNoTime())
+	{
+		// keepaliveが無効なので接続を閉じる
+		ioHandler.closeConnection(connManager, sockfd);
+		return UPDATE_CLOSE;
+	}
+	else
 	{
 		timerTree.addTimer(
 			Timer(sockfd, timeout)

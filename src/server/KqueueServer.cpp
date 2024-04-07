@@ -128,17 +128,7 @@ void	KqueueServer::callEventHandler(
 		switch (status)
 		{
 		case RequestHandler::UPDATE_READ:
-			if (!timer_tree->timerExists(active_events[i].ident))
-			{
-				// keepaliveが無効なので接続を閉じる
-				deleteEvent(active_events[i]);
-				io_handler->closeConnection(*conn_manager, active_events[i].ident);
-			}
-			else
-			{
-				updateEvent(active_events[i], EVFILT_READ);
-			}
-
+			updateEvent(active_events[i], EVFILT_READ);
 			break;
 
 		case RequestHandler::UPDATE_WRITE:

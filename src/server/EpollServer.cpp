@@ -134,16 +134,7 @@ void	EpollServer::callEventHandler(
 		switch (status)
 		{
 		case RequestHandler::UPDATE_READ:
-			// keepaliveが無効なので接続を閉じる
-			if (!timer_tree->timerExists(active_events[i].data.fd))
-			{
-				deleteEvent(active_events[i]);
-				io_handler->closeConnection(*conn_manager, active_events[i].data.fd);
-			}
-			else
-			{
-				updateEvent(active_events[i], EPOLLIN);
-			}
+			updateEvent(active_events[i], EPOLLIN);
 			break;
 
 		case RequestHandler::UPDATE_WRITE:

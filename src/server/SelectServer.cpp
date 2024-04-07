@@ -121,25 +121,11 @@ void	SelectServer::callEventHandler(
 
 	for (size_t i = 0; i < active_events.size(); ++i)
 	{
-		int status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
+			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 
-		// kqueueで監視しているイベント情報を更新
-		config::Time timeout;
-		switch (status)
-		{
-		case RequestHandler::UPDATE_WRITE:
-			// keepaliveが無効なので接続を閉じる
-			if (!timer_tree->timerExists(active_events[i].fd_))
-				io_handler->closeConnection(*conn_manager, active_events[i].fd_);
-			break;
-
-		default:
-			break;
-		}
 	}
 
 }

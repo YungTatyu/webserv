@@ -89,26 +89,13 @@ void	PollServer::callEventHandler(
 	{
 		// 発生したeventに対するhandlerを呼ぶ
 		// interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
-		int status = RequestHandler::NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
-			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
+			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
-			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
-			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd, *timer_tree);
+			request_handler->handleErrorEvent(*io_handler, *conn_manager, it->fd, *timer_tree);
 
-		// kqueueで監視しているイベント情報を更新
-		switch (status)
-		{
-		case RequestHandler::UPDATE_WRITE:
-			// keepaliveが無効なので接続を閉じる
-			if (!timer_tree->timerExists(it->fd))
-				io_handler->closeConnection(*conn_manager, it->fd);
-			break;
-
-		default:
-			break;
-		}
 	}
 }
 
