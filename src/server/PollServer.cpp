@@ -27,7 +27,6 @@ void	PollServer::eventLoop(
 
 int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree)
 {
-	(void)timer_tree;
 	std::vector<pollfd> pollfds = convertToPollfds(conn_manager->getConnections());
 
 	// 現在時刻を更新
