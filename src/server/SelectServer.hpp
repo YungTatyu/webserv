@@ -27,8 +27,8 @@ class SelectServer : public IServer
 										RequestHandler* request_handler,
 										ConfigHandler* config_handler,
 										TimerTree* timer_tree);
-		int	addSocketToSets(const std::map<int, ConnectionData> &connections);
-		void	addActiveEvents(const std::map<int, ConnectionData> &connections, IActiveEventManager *event_manager);
+		int	addSocketToSets(const ConnectionManager& conn_manager);
+		void	addActiveEvents(const std::map<int, ConnectionData*> &connections, IActiveEventManager *event_manager);
 		fd_set	read_set_;
 		fd_set	write_set_;
 };

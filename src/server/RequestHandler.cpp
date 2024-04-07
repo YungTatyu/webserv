@@ -2,67 +2,100 @@
 #include "HttpResponse.hpp"
 #include <sys/types.h>
 #include <algorithm>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, TimerTree &timerTree, const int sockfd)
 {
-		// リスニングソケットへの新規リクエスト
-		if (ioHandler.isListenSocket(sockfd))
+	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
+		return handleCgiReadEvent(ioHandler, connManager, configHandler, sockfd);
+	// リスニングソケットへの新規リクエスト
+	if (ioHandler.isListenSocket(sockfd))
+	{
+		int	accept_sock = ioHandler.acceptConnection(connManager, sockfd);
+		// timeout追加
+		config::Time	timeout;
+		// この時点ではどのサーバーに属すかも決まっていないので、http コンテキストの値を適用する
+		// ただし0に指定されていた場合無限に接続することになるので、
+		// keepalive_timeoutではなく、何かデフォルトの時間を適用してもいいかもしれない。
+		//timeout = configHandler.config_->http.keepalive_timeout.getTime();
+		timeout = config::Time(5000);
+		if (!timeout.isNoTime())
 		{
-			int	accept_sock = ioHandler.acceptConnection(connManager, sockfd);
-			// timeout追加
-			config::Time	timeout;
-			// この時点ではどのサーバーに属すかも決まっていないので、http コンテキストの値を適用する
-			// ただし0に指定されていた場合無限に接続することになるので、
-			// keepalive_timeoutではなく、何かデフォルトの時間を適用してもいいかもしれない。
-			//timeout = configHandler.config_->http.keepalive_timeout.getTime();
-			timeout = config::Time(5000);
-			if (!timeout.isNoTime())
-			{
-				timerTree.addTimer(
-					Timer(accept_sock, timeout)
-				);
-			}
-			return accept_sock;
+			timerTree.addTimer(
+				Timer(accept_sock, timeout)
+			);
 		}
+		return accept_sock;
+	}
 
-		// keepalive_timeout消す。
-		timerTree.deleteTimer(sockfd);
+	// keepalive_timeout消す。
+	timerTree.deleteTimer(sockfd);
 
-		// クライアントソケットへのリクエスト（既存コネクション）
-		ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
-		if (re == -1) //ソケット使用不可。
-			return RequestHandler::NONE;
-		if (re == 0) // クライアントが接続を閉じる
-		{
-			ioHandler.closeConnection( connManager, sockfd );
-			connManager.removeConnection( sockfd );
-			return RequestHandler::UPDATE_CLOSE;
-		}
-		const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
-		std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
+	// クライアントソケットへのリクエスト（既存コネクション）
+	ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
+	if (re == -1) //ソケット使用不可。
+		return RequestHandler::UPDATE_NONE;
+	if (re == 0) // クライアントが接続を閉じる
+	{
+		ioHandler.closeConnection( connManager, sockfd );
+		return RequestHandler::UPDATE_CLOSE;
+	}
+	const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
+	std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
 
-		HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
+	HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
 
-		if (connManager.getRequest(sockfd).parseState == HttpRequest::PARSE_ERROR)
-		{
-		}
-		else if ( connManager.getRequest(sockfd).parseState != HttpRequest::PARSE_COMPLETE) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
-			return RequestHandler::NONE;
+	HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
+	if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+		return RequestHandler::UPDATE_NONE;
+	return handleResponse(connManager, configHandler, sockfd);
+}
 
-		std::string	final_response = HttpResponse::generateResponse( connManager.getRequest(sockfd), connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
-		if (!final_response.empty())
-			connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
+int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+{
+	// TODO: cgi read event, cgi write eventに更新する際は、返り値で返す必要がある
+	// HttpResponseで呼ぶ？
+	// bodyが存在する場合は、cgiにbodyを送る必要がある
+	std::string	final_response = HttpResponse::generateResponse( connManager.getRequest(sockfd), connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
+	if (!final_response.empty())
+		connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
-		connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
-		return RequestHandler::UPDATE_WRITE;
+	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
+	return RequestHandler::UPDATE_WRITE;
+}
+
+int RequestHandler::handleCgiReadEvent(
+	NetworkIOHandler &ioHandler,
+	ConnectionManager &connManager,
+	ConfigHandler& configHandler,
+	const int sockfd
+)
+{
+	ioHandler.receiveCgiResponse(connManager, sockfd);
+	const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
+	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
+	{
+		const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
+		connManager.callCgiParser(sockfd, connManager.getResponse(sockfd),
+			std::string(reinterpret_cast<const char*>(v.data())));
+		int re = handleResponse(connManager, configHandler, sockfd);
+		ioHandler.closeConnection(connManager, sockfd);
+		return re;
+	}
+	return RequestHandler::UPDATE_NONE;
 }
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
 {
+	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
+		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
-		return RequestHandler::NONE;
+		return RequestHandler::UPDATE_NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 
 	// keep-alive timeout 追加
@@ -91,16 +124,34 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 		);
 	}
 
+	// connection dataを削除
+	connManager.clearConnectionData(sockfd);
 	return RequestHandler::UPDATE_READ;
 }
 
-int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd, TimerTree &timer_tree)
+int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
+{
+	ssize_t	re = ioHandler.sendRequestBody(connManager, sockfd);
+	
+	const std::string	body = connManager.getRequest(sockfd).body;
+	const cgi::CGIHandler	cgi_handler = connManager.getCgiHandler(sockfd);
+	if (connManager.getSentBytes(sockfd) == body.size() || // bodyを全て送ったら
+		(re == -1 && cgiProcessExited(cgi_handler.getCgiProcessId()))) // cgi processがすでに死んでいたら
+	{
+		connManager.resetSentBytes(sockfd);
+		connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+		return RequestHandler::UPDATE_CGI_READ;
+	}
+	return RequestHandler::UPDATE_NONE;
+}
+
+int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, const int sockfd)
 {
 	ioHandler.closeConnection( connManager, sockfd );
-	connManager.removeConnection( sockfd );
-	timer_tree.deleteTimer(sockfd);
+	timerTree.deleteTimer( sockfd );
 	return RequestHandler::UPDATE_CLOSE;
 }
+
 
 void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree)
 {
@@ -140,4 +191,21 @@ void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
 		timer_tree.deleteTimer(client_fd);
 		it = next;
 	}
+}
+
+/**
+ * @brief cgi processが生きているか確認
+ * 
+ * @param process_id 
+ * @return true cgi processが終了している
+ * @return false 
+ */
+bool	RequestHandler::cgiProcessExited(const pid_t process_id) const
+{
+	int status;
+	pid_t re = waitpid(process_id, &status, WNOHANG);
+	// errorまたはprocessが終了していない
+	if (re == 0 || re == -1)
+		return false;
+	return true;
 }

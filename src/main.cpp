@@ -19,6 +19,6 @@ int main(int ac, char *av[])
 
 	WebServer server = WebServer(config);
 	server.run();
-	return 0;
+	return 1;
 }
 

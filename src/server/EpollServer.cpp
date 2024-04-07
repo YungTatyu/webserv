@@ -55,15 +55,15 @@ bool	EpollServer::initEpollServer()
 	return true;
 }
 
-bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData> &connections )
+bool	EpollServer::initEpollEvent( const std::map<int, ConnectionData*> &connections )
 {
 	// 監視したいイベントを追加
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it)
 	{
 		struct epoll_event	ep;
-		ep.events = it->second.event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
+		ep.events = it->second->event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
 		ep.data.fd = it->first;
 
 		if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1)
@@ -122,13 +122,13 @@ void	EpollServer::callEventHandler(
 	// 発生したイベントの数だけloopする
 	for (int i = 0; i < event_manager->getActiveEventsNum(); ++i)
 	{
-		int	status = RequestHandler::NONE;
+		int	status = RequestHandler::UPDATE_NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].data.fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].data.fd);
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, active_events[i].data.fd, *timer_tree);
+			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].data.fd);
 		
 		// epoll_fdで監視しているイベント情報を更新
 		switch (status)

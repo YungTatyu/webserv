@@ -26,7 +26,7 @@ void	SelectServer::eventLoop(
 
 int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree)
 {
-	const int max_fd = addSocketToSets(conn_manager->getConnections());
+	const int max_fd = addSocketToSets(*conn_manager);
 	// 現在時刻を更新
 	Timer::updateCurrentTime();
 	// TODO: select serverではマクロFD_SETSIZE以上のfdを監視できない
@@ -41,30 +41,40 @@ int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManag
 	return re;
 }
 
-int	SelectServer::addSocketToSets(const std::map<int, ConnectionData> &connections)
+int	SelectServer::addSocketToSets(const ConnectionManager& conn_manager)
 {
+	const std::map<int, ConnectionData*>&	connections = conn_manager.getConnections();
 	int	max_fd = 0;
 	FD_ZERO(&(this->read_set_));
 	FD_ZERO(&(this->write_set_));
 
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it
 	)
 	{
+		const ConnectionData	&connection = *(it->second);
 		const int	fd = it->first;
-		const ConnectionData	&connection = it->second;
+		switch (connection.event)
+		{
+		case ConnectionData::EV_CGI_READ:
+		case ConnectionData::EV_CGI_WRITE:
+			// cgi eventの時は、クライアントsocketはイベント登録しない
+			if (!conn_manager.isCgiSocket(fd))
+				continue;
+			break;
+		default:
+			break;
+		}
 		switch (connection.event)
 		{
 		case ConnectionData::EV_READ:
+		case ConnectionData::EV_CGI_READ:
 			FD_SET(fd, &(this->read_set_));
 			break;
-		
 		case ConnectionData::EV_WRITE:
+		case ConnectionData::EV_CGI_WRITE:
 			FD_SET(fd, &(this->write_set_));
-			break;
-
-		default:
 			break;
 		}
 		max_fd = std::max(max_fd, fd);
@@ -73,11 +83,11 @@ int	SelectServer::addSocketToSets(const std::map<int, ConnectionData> &connectio
 }
 
 void	SelectServer::addActiveEvents(
-	const std::map<int, ConnectionData> &connections,
+	const std::map<int, ConnectionData*> &connections,
 	IActiveEventManager *event_manager
 )
 {
-	for (std::map<int, ConnectionData>::const_iterator it = connections.begin();
+	for (std::map<int, ConnectionData*>::const_iterator it = connections.begin();
 		it != connections.end();
 		++it
 	)
@@ -124,6 +134,8 @@ void	SelectServer::callEventHandler(
 		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
 			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
+		else if (event_manager->isErrorEvent(static_cast<const void*>(&active_events[i])))
 			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 
 	}

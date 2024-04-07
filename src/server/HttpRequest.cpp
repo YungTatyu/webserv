@@ -323,7 +323,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest,
 				++i;
 			break;
 		case sw_value:
-			if (!std::isprint(ch) && ch < 128) {
+			//if (!std::isprint(ch) && ch < 128) {
+			if (ch == '\r' || ch == '\n') { // TODO: logic考える必要あり
 				newRequest.headers[cur_name] = cur_value;
 				cur_name = "";
 				cur_value = "";
