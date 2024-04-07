@@ -22,14 +22,16 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		// この時点ではどのサーバーに属すかも決まっていないので、http コンテキストの値を適用する
 		// ただし0に指定されていた場合無限に接続することになるので、
 		// keepalive_timeoutではなく、何かデフォルトの時間を適用してもいいかもしれない。
-		//timeout = configHandler.config_->http.keepalive_timeout.getTime();
-		timeout = config::Time(5000);
-		if (!timeout.isNoTime())
+		//timeout = config::Time(5000);
+		timeout = configHandler.config_->http.keepalive_timeout.getTime();
+		if (timeout.isNoTime())
 		{
-			timerTree.addTimer(
-				Timer(accept_sock, timeout)
-			);
+			ioHandler.closeConnection(connManager, accept_sock);
+			return UPDATE_NONE;
 		}
+		timerTree.addTimer(
+			Timer(accept_sock, timeout)
+		);
 		return accept_sock;
 	}
 
