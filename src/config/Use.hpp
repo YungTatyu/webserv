@@ -34,20 +34,12 @@ class Use
 		{
 			std::string	ret;
 			switch (method) {
-				#if defined(KQUEUE_AVAILABLE)
 				case config::KQUEUE:
 					ret = "kqueue";
 					break;
 				case config::EPOLL:
-					break;
-				#endif
-				#if defined(EPOLL_AVAILABLE)
-				case config::KQUEUE:
-					break;
-				case config::EPOLL:
 					ret = "epoll";
 					break;
-				#endif
 				case config::POLL:
 					ret = "poll";
 					break;
