@@ -20,10 +20,9 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			timeout = config::Time(5000);
 			if (!timeout.isNoTime())
 			{
-				timerTree.addTimer(Timer(
-										accept_sock,
-										timeout
-									));
+				timerTree.addTimer(
+					Timer(accept_sock, timeout)
+				);
 			}
 			return accept_sock;
 		}
@@ -81,10 +80,9 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 				);
 	if (!timeout.isNoTime())
 	{
-		timerTree.addTimer(Timer(
-								sockfd,
-								timeout
-							));
+		timerTree.addTimer(
+			Timer(sockfd, timeout)
+		);
 	}
 
 	return RequestHandler::UPDATE_READ;
