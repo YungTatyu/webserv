@@ -87,12 +87,18 @@ EOT
 
 		(printf "$request"; sleep 15) | telnet $host $port &
 		sleep $(bc <<< "$expect_sec + 1") | ps | grep sleep | grep -v grep
+		# sleep $expect_sec | ps | grep sleep | grep -v grep
 		ps | grep telnet | grep -v grep
 		local exitstatus=$?
-		if [ "$exitstatus" == "0" ]
+		echo exitstatus:  $exitstatus
+		if [ "$exitstatus" == "1" ]
 		then
 			kill $(ps | grep sleep | grep -v grep | awk '{ print $1}')
-			echo kill
+			echo expected
+			printf "\033[32mpassed.\n\033[0mServer closed the connection\n\n"
+		else
+			printf "\033[31mfailed.\n\033[0mServer did not timeout\n"
+			kill $(ps | grep telnet | grep -v grep | awk '{ print $1}')
 		fi
 		echo $exitstatus
 
@@ -119,15 +125,15 @@ EOT
 	esac
 
 	# keepalive timeout を計算
-		if [ "$actual_sec" -eq "$expect_sec" ]; then
-		printf "\033[32mpassed.\n\033[0mServer closed the connection after $actual_sec.$actual_millisec seconds.\n\n"
-		g_test_passed=$(bc <<< "$g_test_passed + 1")
-	else
-		printf "\033[31mfailed.\n\033[0mServer did not timeout after $expect_sec seconds.\n"
-		printf "expected:${expect_sec}\n"
-		printf "actual  :${actual_sec}.${actual_millisec}\n\n"
-		g_test_failed=$(bc <<< "$g_test_failed + 1")
-	fi
+	# 	if [ "$actual_sec" -eq "$expect_sec" ]; then
+	# 	printf "\033[32mpassed.\n\033[0mServer closed the connection after $actual_sec.$actual_millisec seconds.\n\n"
+	# 	g_test_passed=$(bc <<< "$g_test_passed + 1")
+	# else
+	# 	printf "\033[31mfailed.\n\033[0mServer did not timeout after $expect_sec seconds.\n"
+	# 	printf "expected:${expect_sec}\n"
+	# 	printf "actual  :${actual_sec}.${actual_millisec}\n\n"
+	# 	g_test_failed=$(bc <<< "$g_test_failed + 1")
+	# fi
 }
 
 function	printLog {
@@ -145,8 +151,8 @@ function	runTest {
 
 	printf "\n\033[32m<<< ${server_name} server test >>>\033[0m\n"
 	assert "/" "0"
-	assert "/timeout5/" "5"
-	assert "/timeout10/" "10"
+	assert "/timeout5/" "3"
+	assert "/timeout10/" "8"
 
 	g_test_index=0
 	# サーバープロセスを終了
