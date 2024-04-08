@@ -100,10 +100,18 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
 		return RequestHandler::UPDATE_NONE;
-	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
+
+	// Connectionヘッダーを見てcloseならコネクションを閉じる
+	std::map<std::string, std::string>::iterator	it = connManager.getResponse(sockfd).headers_.find("Connection");
+	if (it != connManager.getResponse(sockfd).headers_.end()
+		&& it->second == "close")
+	{
+		ioHandler.closeConnection(connManager, sockfd);
+		return UPDATE_CLOSE;
+	}
 
 	// keep-alive timeout 追加
-	std::map<std::string, std::string>::iterator it = connManager.getRequest(sockfd).headers.find("Host");
+	it = connManager.getRequest(sockfd).headers.find("Host");
 	config::Time	timeout;
 	std::string host_name;
 	if (it == connManager.getRequest(sockfd).headers.end())
@@ -128,6 +136,8 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 		);
 	}
 
+	// readイベントに更新
+	connManager.setEvent(sockfd, ConnectionData::EV_READ);
 	// connection dataを削除
 	connManager.clearConnectionData(sockfd);
 	return RequestHandler::UPDATE_READ;
