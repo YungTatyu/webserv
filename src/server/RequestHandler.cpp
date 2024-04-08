@@ -17,6 +17,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 	if (ioHandler.isListenSocket(sockfd))
 	{
 		int	accept_sock = ioHandler.acceptConnection(connManager, sockfd);
+		if (accept_sock == -1)
+			return accept_sock;
 		// timeout追加
 		config::Time	timeout;
 		// この時点ではどのサーバーに属すかも決まっていないので、http コンテキストの値を適用する
