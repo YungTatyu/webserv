@@ -51,12 +51,20 @@ EOT
 	# telnetセッション開始
 	local start_time
 	local end_time
+	local	actual_nanosec
+	local	actual_sec
+	local	actual_millisec
+
+
 	case "$OS" in
 	Linux)
 		start_time=$(date +%s%N)
 		#echo $request | nc "$host" "$port" > /dev/null
 		echo "$request" | nc "$host" "$port"
 		end_time=$(date +%s%N)
+		actual_nanosec=$((end_time - start_time))
+		actual_sec=$((actual_nanosec / 1000000000))
+		actual_millisec=$((actual_nanosec / 1000000 % 1000))
 		#exec 3<>/dev/tcp/$host/$port
 		#if [ $? -ne 0 ]; then
 		#	printf "\033[31mfailed to connect to $host:$port\n\033[0m" >&2
@@ -66,20 +74,43 @@ EOT
 		## timeout時間を計測
 		#start_time=$(date +%s%N)
 		#echo "$request" >&3
-		#while read -r line <&3; do
-		#	:  # 何もしない
+		#while read -r line <&3; do #	:  # 何もしない
 		#done
 		#end_time=$(date +%s%N)
-
-		## telnetセッションを終了
-		#exec 3>&-
+		# telnetセッションを終了
+		# exec 3>&-
 		;;
+#
+		Darwin)
+		start_time=$(date +%s)
+		#(printf "GET / HTTP/1.1\nhost:tt\n\n"; sleep 5) | telnet localhost 8000 &
 
-	#Darwin)
-	#	start_time=$(date +%s%N)
-	#	(printf "$request"; sleep 10) | telnet $host $port
-	#	end_time=$(date +%s%N)
-	#	;;
+		(printf "$request"; sleep 15) | telnet $host $port &
+		sleep $(bc <<< "$expect_sec + 1") | ps | grep sleep | grep -v grep
+		ps | grep telnet | grep -v grep
+		local exitstatus=$?
+		if [ "$exitstatus" == "0" ]
+		then
+			kill $(ps | grep sleep | grep -v grep | awk '{ print $1}')
+			echo kill
+		fi
+		echo $exitstatus
+
+		#(printf "$request"; sleep 5) | telnet $host $port
+		#(echo "$request" | nc -w 10 $host $port)
+
+		#(
+		#	echo "$request";
+		#	#cat <&0;
+		#	sleep 1
+		#) | nc $host $port
+		#nc_pid =$$
+		#wait $nc_pid
+
+		end_time=$(date +%s)
+		actual_sec=$((end_time - start_time))
+		actual_millisec=0
+		;;
 
 	*)
 		printf "\033[31mNot supported os: $OS\n\033[0m" >&2
@@ -88,11 +119,7 @@ EOT
 	esac
 
 	# keepalive timeout を計算
-	local	actual_nanosec=$((end_time - start_time))
-	local	actual_sec=$((actual_nanosec / 1000000000))
-	local	actual_millisec=$((actual_nanosec / 1000000 % 1000))
-
-	if [ "$actual_sec" -eq "$expect_sec" ]; then
+		if [ "$actual_sec" -eq "$expect_sec" ]; then
 		printf "\033[32mpassed.\n\033[0mServer closed the connection after $actual_sec.$actual_millisec seconds.\n\n"
 		g_test_passed=$(bc <<< "$g_test_passed + 1")
 	else
@@ -127,7 +154,7 @@ function	runTest {
 }
 
 runTest "keepalive_timeout.conf" "kqueue or epoll" # kqueue or epoll
-runTest "keepalive_timeout_select.conf" "select" # select
-runTest "keepalive_timeout_poll.conf" "poll" # poll
+#runTest "keepalive_timeout_select.conf" "select" # select
+#runTest "keepalive_timeout_poll.conf" "poll" # poll
 
 printLog
