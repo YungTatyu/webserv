@@ -35,8 +35,8 @@ function	assert {
 	local	uri=$1;
 	local	expect_sec=$2
 	local	scheme="http"
-	local	host="localhost"
-	local	port=4242
+	local	host="127.0.0.1"
+	local	port="4242"
 	local	url=$scheme://$host:$port${uri}
 	printf "[  test$g_test_index  ]\n${url}: "
 
@@ -51,31 +51,38 @@ EOT
 	# telnetセッション開始
 	local start_time
 	local end_time
-	case "$OS" in
-	Linux)
-		exec 3<>/dev/tcp/$host/$port
-		if [ $? -ne 0 ]; then
-			printf "\033[31mfailed to connect to $host:$port\n\033[0m" >&2
-			exit 1
-		fi
+	#case "$OS" in
+	#Linux)
+	#	exec 3<>/dev/tcp/$host/$port
+	#	if [ $? -ne 0 ]; then
+	#		printf "\033[31mfailed to connect to $host:$port\n\033[0m" >&2
+	#		exit 1
+	#	fi
 
-		# timeout時間を計測
+	#	# timeout時間を計測
+	#	start_time=$(date +%s%N)
+	#	echo "$request" >&3
+	#	while read -r line <&3; do
+	#		:  # 何もしない
+	#	done
+	#	end_time=$(date +%s%N)
+
+	#	# telnetセッションを終了
+	#	exec 3>&-
+	#	;;
+
+	#Darwin)
 		start_time=$(date +%s%N)
-		echo "$request" >&3
-		while read -r line <&3; do
-			:  # 何もしない
-		done
+		echo "$request" | nc "$host" "$port"
+		#(printf "$request" && sleep 1) | telnet $host $port
 		end_time=$(date +%s%N)
+	#	;;
 
-		# telnetセッションを終了
-		exec 3>&-
-		;;
-
-	*)
-		printf "\033[31mNot supported os: $OS\n\033[0m" >&2
-		exit 1
-		;;
-	esac
+	#*)
+	#	printf "\033[31mNot supported os: $OS\n\033[0m" >&2
+	#	exit 1
+	#	;;
+	#esac
 
 	# keepalive timeout を計算
 	local	actual_nanosec=$((end_time - start_time))
