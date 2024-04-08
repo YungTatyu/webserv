@@ -34,6 +34,7 @@ function	assert {
 
 	local	uri=$1;
 	local	expect_sec=$2
+	local	expect_result=$3
 	local	scheme="http"
 	local	host="127.0.0.1"
 	local	port="4242"
@@ -48,44 +49,31 @@ Host: _
 EOT
 )
 
-	#case "$OS" in
-	#Linux)
-	#	start_time=$(date +%s%N)
-	#	#echo $request | nc "$host" "$port" > /dev/null
-	#	echo "$request" | nc "$host" "$port"
-	#	end_time=$(date +%s%N)
-	#	actual_nanosec=$((end_time - start_time))
-	#	actual_sec=$((actual_nanosec / 1000000000))
-	#	actual_millisec=$((actual_nanosec / 1000000 % 1000))
-	#	#exec 3<>/dev/tcp/$host/$port
-	#	#if [ $? -ne 0 ]; then
-	#	#	printf "\033[31mfailed to connect to $host:$port\n\033[0m" >&2
-	#	#	exit 1
-	#	#fi
+	(printf "$request"; sleep $(bc <<< "$expect_sec + 5")) | telnet $host $port > /dev/null 2>&1 &
 
-	#	## timeout時間を計測
-	#	#start_time=$(date +%s%N)
-	#	#echo "$request" >&3
-	#	#while read -r line <&3; do #	:  # 何もしない
-	#	#done
-	#	#end_time=$(date +%s%N)
-	#	# telnetセッションを終了
-	#	# exec 3>&-
-	#	;;
-
-	(printf "$request"; sleep 15) | telnet $host $port > /dev/null 2>/dev/null &
+	# telnetがタイムアウトして1秒以内の誤差であればTRUE
 	sleep $(bc <<< "$expect_sec + 1") | ps | grep sleep | grep -v grep > /dev/null
 	ps | grep telnet | grep -v grep > /dev/null
 	local exitstatus=$?
-	if [ "$exitstatus" == "1" ]
-	then
+
+	if [ "$exitstatus" == "1" ]; then # telnetが正常にタイムアウト
 		kill $(ps | grep sleep | grep -v grep | awk '{ print $1}') > /dev/null
-		printf "\033[32mpassed.\n\033[0mServer closed the connection\n\n"
-		g_test_passed=$(bc <<< "$g_test_passed + 1")
-	else
-		printf "\033[31mfailed.\n\033[0mServer did not timeout\n"
-		kill $(ps | grep telnet | grep -v grep | awk '{ print $1}') > /dev/null
-		g_test_failed=$(bc <<< "$g_test_failed + 1")
+		if [ "$expect_result" = "true" ]; then
+			printf "\033[32mpassed.\n\033[0mServer closed the connection\n\n"
+			g_test_passed=$(bc <<< "$g_test_passed + 1")
+		else
+			printf "\033[31mfailed.\n\033[0mServer did not timeout\n"
+			g_test_failed=$(bc <<< "$g_test_failed + 1")
+		fi
+	else # telnetが正常にタイムアウトする前にsleepが終了
+		if [ "$expect_result" = "true" ]; then
+			printf "\033[31mfailed.\n\033[0mServer did not timeout\n"
+			g_test_failed=$(bc <<< "$g_test_failed + 1")
+		else
+			printf "\033[32mpassed.\n\033[0mServer closed the connection\n\n"
+			g_test_passed=$(bc <<< "$g_test_passed + 1")
+		fi
+		kill $(ps | grep telnet | grep -v grep | awk '{ print $1}') > /dev/null 2>&1
 	fi
 }
 
@@ -103,9 +91,11 @@ function	runTest {
 	runServer "${root}/${conf}"
 
 	printf "\n\033[32m<<< ${server_name} server test >>>\033[0m\n"
-	assert "/" "0"
-	assert "/timeout5/" "5"
-	assert "/timeout10/" "10"
+	assert "/" "0" "true"
+	assert "/timeout5/" "5" "true"
+	assert "/timeout10/" "10" "true"
+	assert "/timeout5/" "3" "false"
+	assert "/timeout10/" "8" "false"
 
 	g_test_index=0
 	# サーバープロセスを終了

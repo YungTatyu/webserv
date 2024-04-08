@@ -20,12 +20,11 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		if (accept_sock == -1)
 			return accept_sock;
 		// timeout追加
+		// client_header_timeout directiveの値をセットする
+		// 本サーバーではデフォルト値として30秒にセットする
 		config::Time	timeout;
-		// この時点ではどのサーバーに属すかも決まっていないので、http コンテキストの値を適用する
-		// ただし0に指定されていた場合無限に接続することになるので、
-		// keepalive_timeoutではなく、何かデフォルトの時間を適用してもいいかもしれない。
-		//timeout = config::Time(5000);
-		timeout = configHandler.config_->http.keepalive_timeout.getTime();
+		// ToDo: 本来client_header_timeoutだが、現状では定数
+		timeout = config::Time(60 * config::Time::seconds);
 		if (timeout.isNoTime())
 		{
 			ioHandler.closeConnection(connManager, accept_sock);
