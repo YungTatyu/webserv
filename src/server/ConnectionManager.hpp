@@ -38,7 +38,7 @@ class ConnectionManager
 		ConnectionManager();
 		~ConnectionManager();
 		void setConnection( const int fd );
-		ConnectionData& getConnection( const int fd );
+		ConnectionData* getConnection( const int fd );
 		void addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
 		void setCgiConnection( const int cli_sock, const ConnectionData::EVENT event );
 		void removeConnection( const int fd, const bool cgi );

@@ -72,19 +72,30 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 	return 1;
 }
 
+ssize_t NetworkIOHandler::receiveCgiResponse( ConnectionManager& connManager, const int sock )
+{
+	const static size_t buffer_size = 1024;
+	std::vector<unsigned char>	buffer(buffer_size);
+
+	ssize_t re = recv(sock, buffer.data(), buffer_size, 0);
+	if (re > 0)
+		connManager.addCgiResponse(sock, buffer);
+	return re;
+}
+
 int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )
 {
 	std::vector<unsigned char> response = connManager.getFinalResponse( cli_sock );
 	size_t resSize = response.size();
 	const size_t chunkSize = 1024;
 
-	size_t sentBytes = connManager.getConnection(cli_sock).sent_bytes_;
+	size_t sentBytes = connManager.getConnection(cli_sock)->sent_bytes_;
 	size_t currentChunkSize = std::min(chunkSize, resSize - sentBytes);
 	int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, 0);
 	if (sent == -1)
 		return -1;
-	connManager.getConnection(cli_sock).sent_bytes_ += sent;
-	if (connManager.getConnection(cli_sock).sent_bytes_ != resSize)
+	connManager.getConnection(cli_sock)->sent_bytes_ += sent;
+	if (connManager.getConnection(cli_sock)->sent_bytes_ != resSize)
 		return -2;
 	return 0;
 }

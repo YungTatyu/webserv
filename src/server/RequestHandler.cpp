@@ -74,18 +74,13 @@ int RequestHandler::handleCgiReadEvent(
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
 {
-<<<<<<< HEAD
-	int re = ioHandler.sendResponse( connManager, sockfd );
-	if (re == -1) // send error, retry later
-		return RequestHandler::NONE;
-	if (re == -2) // send not complete, send remainder later
-		return RequestHandler::NONE;
-=======
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
-	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
+	int re = ioHandler.sendResponse( connManager, sockfd );
+	if (re == -1) // send error, retry later
 		return RequestHandler::UPDATE_NONE;
->>>>>>> origin
+	if (re == -2) // send not complete, send remainder later
+		return RequestHandler::UPDATE_NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 	// connection dataを削除
 	connManager.clearConnectionData(sockfd);

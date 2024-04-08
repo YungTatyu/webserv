@@ -54,14 +54,14 @@ void ConnectionManager::removeConnection( const int fd, const bool cgi )
 	connections_.erase( fd );
 }
 
-ConnectionData& ConnectionManager::getConnection( const int fd )
+ConnectionData* ConnectionManager::getConnection( const int fd )
 {
 	return connections_.at(fd);
 }
 
 void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
 {
-       connections_[fd].rawRequest.insert(connections_[fd].rawRequest.end(), rawRequest.begin(), rawRequest.end());
+       connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(), rawRequest.end());
 }
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest( const int fd ) const
