@@ -6,8 +6,10 @@
 
 # include "HttpRequest.hpp"
 # include "HttpResponse.hpp"
+# include "CGIHandler.hpp"
 
 struct TiedServer;
+class CGIHandler;
 
 class ConnectionData
 {
@@ -16,14 +18,16 @@ class ConnectionData
 			EV_READ,
 			EV_WRITE,
 			EV_CGI_READ,
-			EV_CGI_WRITE
+			EV_CGI_WRITE,
 		};
 		std::vector<unsigned char> rawRequest; // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
 		std::vector<unsigned char> final_response_;
+		std::vector<unsigned char> cgi_response_;
+		size_t	sent_bytes_; // responseやcgi bodyをsendする際に送信したbyte数を記録する
 		EVENT event;
-		size_t sent_bytes_;
 		HttpRequest request;
 		HttpResponse response_;
+		cgi::CGIHandler cgi_handler_;
 		const TiedServer* tied_server_;
 };
 
@@ -34,9 +38,10 @@ class ConnectionManager
 		ConnectionManager();
 		~ConnectionManager();
 		void setConnection( const int fd );
-		void removeConnection( const int fd );
 		ConnectionData& getConnection( const int fd );
 		void addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
+		void setCgiConnection( const int cli_sock, const ConnectionData::EVENT event );
+		void removeConnection( const int fd, const bool cgi );
 		const std::vector<unsigned char>& getRawRequest( const int fd ) const;
 		void setFinalResponse( const int fd, const std::vector<unsigned char>& final_response );
 		const std::vector<unsigned char>& getFinalResponse( const int fd ) const;
@@ -46,13 +51,22 @@ class ConnectionManager
 		HttpRequest &getRequest( const int fd );
 		void setResponse( const int fd, const HttpResponse response );
 		HttpResponse &getResponse( const int fd );
-		const std::map<int, ConnectionData> &getConnections() const;
+		void	addCgiResponse( const int fd, const std::vector<unsigned char>& v );
+		const std::vector<unsigned char>&	getCgiResponse( const int fd ) const;
+		const std::map<int, ConnectionData*> &getConnections() const;
 		void setTiedServer( const int fd, const TiedServer* tied_server );
 		const TiedServer& getTiedServer( const int fd ) const;
+		const cgi::CGIHandler& getCgiHandler( const int fd ) const;
+		size_t	getSentBytes( const int fd ) const;
+		void	addSentBytes( const int fd, const size_t bytes );
+		bool	callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response);
+		void	resetSentBytes( const int fd );
+		void	resetCgiSockets( const int fd );
+		void	clearConnectionData( const int fd );
 		void	closeAllConnections();
+		bool	isCgiSocket( const int fd ) const;
 	private:
-		std::map<int, ConnectionData> connections_;
-
+		std::map<int, ConnectionData*> connections_;
 };
 
 #endif
