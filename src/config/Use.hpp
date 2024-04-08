@@ -44,8 +44,8 @@ class Use
 					ret = "poll";
 					break;
 				case config::SELECT:
-				ret = "select";
-				break;
+					ret = "select";
+					break;
 			}
 			return ret;
 		}
