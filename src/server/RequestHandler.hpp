@@ -35,13 +35,6 @@ class RequestHandler
 		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, const int sockfd);
 		void handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree);
 
-		typedef bool (*whichEvent)(const struct pollfd& pfd);
-		typedef void (RequestHandler::*eventHandler)(
-			NetworkIOHandler &ioHandler,
-			ConnectionManager &connManager,
-			const int sockfd
-		);
-	
 	private:
 		bool cgiProcessExited(const pid_t process_id) const;
 		int	handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
