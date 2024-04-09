@@ -25,6 +25,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		ioHandler.closeConnection( connManager, sockfd );
 		return RequestHandler::UPDATE_CLOSE;
 	}
+	if (re == 2) // buffer分以降を読む
+	       return RequestHandler::UPDATE_NONE;
 	const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
 	std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
 
@@ -74,7 +76,10 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 {
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
-	if (ioHandler.sendResponse( connManager, sockfd ) == -1)
+	int re = ioHandler.sendResponse( connManager, sockfd );
+	if (re == -1) // send error, retry later
+		return RequestHandler::UPDATE_NONE;
+	if (re == -2) // send not complete, send remainder later
 		return RequestHandler::UPDATE_NONE;
 	connManager.setEvent(sockfd, ConnectionData::EV_READ); // readイベントに更新
 	// connection dataを削除
