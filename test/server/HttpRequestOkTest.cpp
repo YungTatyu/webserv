@@ -17,7 +17,7 @@ void checkHttpRequestEqual(HttpRequest expect, HttpRequest test)
 TEST(HttpRequest, OkTest1)
 {
     //testcase: リクエストラインだけ -> Hostヘッダーは無いとエラーなので追加.
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -33,7 +33,7 @@ TEST(HttpRequest, OkTest2)
 {
     //testcase: header fieldが一対ある時
     //testcase: bodyもある
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "this is body", HttpRequest::PARSE_COMPLETE);
 
@@ -51,7 +51,7 @@ TEST(HttpRequest, OkTest2)
 TEST(HttpRequest, OkTest3)
 {
     //testcase: header fieldが複数ある時
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     headers["name1"] = "value1";
     headers["name2"] = "value2";
@@ -72,7 +72,7 @@ TEST(HttpRequest, OkTest3)
 TEST(HttpRequest, OkTest4)
 {
     //testcase: query stringが単体
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "query1=value1", "", HttpRequest::PARSE_COMPLETE);
 
@@ -87,7 +87,7 @@ TEST(HttpRequest, OkTest4)
 TEST(HttpRequest, OkTest5)
 {
     //testcase: query stringが複数ある時
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "query1=value1&query2=value2", "", HttpRequest::PARSE_COMPLETE);
 
@@ -102,7 +102,7 @@ TEST(HttpRequest, OkTest5)
 TEST(HttpRequest, OkTest6)
 {
     //testcase: chunked first
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
@@ -124,7 +124,7 @@ TEST(HttpRequest, OkTest6)
 TEST(HttpRequest, OkTest7)
 {
     //testcase: chunked first
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
@@ -153,7 +153,7 @@ TEST(HttpRequest, OkTest7)
 TEST(HttpRequest, OkTest8)
 {
     //testcase: chunked first
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     headers["Transfer-Encoding"] = "chunked";
     HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
@@ -189,7 +189,7 @@ TEST(HttpRequest, OkTest8)
 TEST(HttpRequest, OkTest9)
 {
     //testcase: encoded url
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::GET, "/Hello World!", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -204,7 +204,7 @@ TEST(HttpRequest, OkTest9)
 TEST(HttpRequest, OkTest10)
 {
     //testcase: POSTをパースできるか
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::POST, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -219,7 +219,7 @@ TEST(HttpRequest, OkTest10)
 TEST(HttpRequest, OkTest11)
 {
     //testcase: HEADをパースできるか.
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::HEAD, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -234,7 +234,7 @@ TEST(HttpRequest, OkTest11)
 TEST(HttpRequest, OkTest12)
 {
     //testcase: HEADをパースできるか.
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::HEAD, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -249,7 +249,7 @@ TEST(HttpRequest, OkTest12)
 TEST(HttpRequest, OkTest13)
 {
     //testcase: DELETEをパースできるか.
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
     headers["Host"] = "aa";
     HttpRequest expect(config::DELETE, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 

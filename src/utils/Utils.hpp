@@ -11,6 +11,7 @@
 # include <vector>
 # include <algorithm>
 # include <stdint.h>
+#include <netinet/in.h>
 
 namespace Utils
 {
@@ -35,10 +36,22 @@ std::vector<std::string>	createDirectoryContents( const std::string& directoryPa
 bool	isExecutable( const char* filename );
 bool	isExtensionFile( const std::string& filename, const std::string& extension );
 ssize_t	wrapperWrite( const int fd, const std::string& msg );
+bool	wrapperGetsockname(struct sockaddr_in& addr, const int sock);
+std::string	socketToStrIPAddress( const int sock );
 std::string	ipToStr( const uint32_t ip );
 uint32_t	StrToIPAddress( const std::string& ip);
+int	resolveConnectedPort(const int sock);
 std::string	toLower(std::string str);
 bool	isSpace(const unsigned char ch);
+template<typename T>std::string	toStr(const T value);
+}
+
+template<typename T>
+std::string	Utils::toStr(const T value)
+{
+	std::stringstream	converter;
+	converter << value;
+	return converter.str();
 }
 
 #endif

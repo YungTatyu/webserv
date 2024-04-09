@@ -2,6 +2,7 @@
 #include <gtest/gtest-param-test.h>
 
 #include "CGIHandler.hpp"
+#include "ConnectionManager.hpp"
 
 #include <vector>
 #include <map>
@@ -11,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <netinet/in.h>
 #include "Utils.hpp"
 #include <cstring>
 #include "LimitExcept.hpp"
@@ -219,8 +221,8 @@ TEST(cgi_executor, body)
 
 TEST(cgi_executor, meta_vars)
 {
-	cgi::CGIHandler	cgi_handler;
-	HttpRequest	request = test::initRequest(
+	ConnectionData	cd;
+	cd.request = test::initRequest(
 		config::REQUEST_METHOD::GET,
 		"/path/uri/",
 		"HTTP/1.1",
@@ -236,25 +238,25 @@ TEST(cgi_executor, meta_vars)
 	const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
 	const std::string expect = expect_header + "<h1>env vars list</h1>"
 		+ "<h2>AUTH_TYPE=</h2>"
-		+ "<h2>CONTENT_LENGTH=" + std::to_string(request.body.size()) + "</h2>"
-		+ "<h2>CONTENT_TYPE=text</h2>"
+		+ "<h2>CONTENT_LENGTH=" + std::to_string(cd.request.body.size()) + "</h2>"
+		+ "<h2>CONTENT_TYPE=text/html</h2>"
 		+ "<h2>GATEWAY_INTERFACE=CGI/1.1</h2>"
 		+ "<h2>PATH_INFO=</h2>"
 		+ "<h2>PATH_TRANSLATED=</h2>"
 		+ "<h2>QUERY_STRING=one=1&two=2&three=3</h2>"
-		+ "<h2>REMOTE_ADDR=client address</h2>"
-		+ "<h2>REMOTE_HOST=client address</h2>"
+		// + "<h2>REMOTE_ADDR=127.0.0.1</h2>" テスト不可のため、別のテストを追加
+		// + "<h2>REMOTE_HOST=127.0.0.1</h2>" テスト不可のため、別のテストを追加
 		+ "<h2>REQUEST_METHOD=GET</h2>"
 		+ "<h2>SCRIPT_NAME=/path/uri/</h2>"
 		+ "<h2>SERVER_NAME=tt</h2>"
-		+ "<h2>SERVER_PORT=</h2>"
+		// + "<h2>SERVER_PORT=4242</h2>" テスト不可のため、別のテストを追加
 		+ "<h2>SERVER_PROTOCOL=HTTP/1.1</h2>"
 		+ "<h2>SERVER_SOFTWARE=webserv/1.0</h2>"
 	;
 	test::testCgiOutput(
-		cgi_handler,
+		cd.cgi_handler_,
 		"test/cgi/cgi_files/executor/meta_vars.py",
-		request,
+		cd.request,
 		expect
 	);
 }
