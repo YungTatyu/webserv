@@ -25,11 +25,6 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		config::Time	timeout;
 		// ToDo: 本来client_header_timeoutだが、現状では定数
 		timeout = config::Time(60 * config::Time::seconds);
-		if (timeout.isNoTime())
-		{
-			ioHandler.closeConnection(connManager, accept_sock);
-			return UPDATE_NONE;
-		}
 		timerTree.addTimer(
 			Timer(accept_sock, timeout)
 		);
@@ -110,6 +105,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	}
 
 	// keep-alive timeout 追加
+	// 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
 	it = connManager.getRequest(sockfd).headers.find("Host");
 	config::Time	timeout;
 	std::string host_name;
@@ -128,12 +124,10 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 		ioHandler.closeConnection(connManager, sockfd);
 		return UPDATE_CLOSE;
 	}
-	else
-	{
-		timerTree.addTimer(
-			Timer(sockfd, timeout)
-		);
-	}
+
+	timerTree.addTimer(
+		Timer(sockfd, timeout)
+	);
 
 	// readイベントに更新
 	connManager.setEvent(sockfd, ConnectionData::EV_READ);
