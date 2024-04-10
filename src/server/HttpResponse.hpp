@@ -16,9 +16,10 @@ class HttpResponse
 		HttpResponse();
 
 		// enum
-		enum ServType {
-			STATIC,
-			DYNAMIC
+		enum RES_STATE {
+			RES_CREATING_STATIC,
+			RES_EXECUTE_CGI,
+			RES_PARSED_CGI
 		};
 
 		enum ResponsePhase {
@@ -32,6 +33,7 @@ class HttpResponse
 			sw_content_phase,
 			sw_error_page_phase,
 			sw_log_phase,
+			sw_cgi_phase,
 			sw_end_phase
 		};
 
@@ -41,7 +43,7 @@ class HttpResponse
 
 		// public variables
 		std::string	root_path_;
-		ServType	serv_type_;
+		RES_STATE	state_;
 		std::string	cgi_status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string, Utils::CaseInsensitiveCompare>	headers_;
@@ -54,6 +56,7 @@ class HttpResponse
 		size_t	internal_redirect_cnt_;
 		static const size_t kMaxInternalRedirect = 10;
 
+		static std::string	createCgiResponse( const HttpResponse& response );
 		// handle phase methods
 		static ResponsePhase	handlePreSearchLocationPhase( const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock, struct sockaddr_in& client_addr );
 		static ResponsePhase	handleSearchLocationPhase( HttpResponse& response, const HttpRequest& request, const config::Server& server, const config::Location** location, const ConfigHandler& config_handler );
