@@ -14,7 +14,7 @@ std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 static const std::string http_version = "HTTP/1.1";
 
 static const std::string webserv_error_page_tail =
-"<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n";
+"<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n";
 
 static const std::string webserv_error_301_page =
 "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n";
@@ -123,7 +123,7 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
 	: serv_type_(HttpResponse::STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
-	this->headers_["Server"] = "webserv/1";
+	this->headers_["Server"] = "webserv/1.0";
 	this->headers_["Date"] = getCurrentGMTTime();
 
 		// status_line
