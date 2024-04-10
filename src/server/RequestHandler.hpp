@@ -7,6 +7,7 @@
 # include <iostream>
 # include "ConnectionManager.hpp"
 # include "NetworkIOHandler.hpp"
+# include "TimerTree.hpp"
 
 /* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */
 class RequestHandler
@@ -27,12 +28,13 @@ class RequestHandler
 			UPDATE_CLOSE = -16 // connectionを切る
 		};
 		RequestHandler();
-		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
-		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
+		int handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
 		int handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 		int handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
-	
+		int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, const int sockfd);
+		void handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree);
+
 	private:
 		bool cgiProcessExited(const pid_t process_id) const;
 		int	handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);

@@ -124,7 +124,6 @@ HttpResponse::HttpResponse()
 	: serv_type_(HttpResponse::STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
 	this->headers_["Server"] = "webserv/1";
-	this->headers_["Connection"] = "keep-alive";
 	this->headers_["Date"] = getCurrentGMTTime();
 
 		// status_line
@@ -714,6 +713,12 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response )
 	}
 
 	response.headers_["Content-Type"] = detectContentTypeFromBody(response.body_);
+
+	if (400 <= response.status_code_
+		&& response.status_code_ < 500)
+		response.headers_["Connection"] = "close";
+	else
+		response.headers_["Connection"] = "keep-alive";
 }
 
 std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)

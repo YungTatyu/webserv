@@ -31,6 +31,7 @@ class WebServer
 		IActiveEventManager *eventManager;
 		IServer *server;
 		ConfigHandler *configHandler;
+		TimerTree *timerTree;
 		void initializeServer();
 		void initializeVServers();
 		void	initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,

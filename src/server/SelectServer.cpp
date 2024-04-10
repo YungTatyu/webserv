@@ -10,25 +10,32 @@ void	SelectServer::eventLoop(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	for ( ; ; )
 	{
-		waitForEvent(conn_manager, event_manager);
+		waitForEvent(conn_manager, event_manager, timer_tree);
 
-		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler);
+		callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
 
 		event_manager->clearAllEvents();
 	}
 }
 
-int	SelectServer::waitForEvent(ConnectionManager *conn_manager, IActiveEventManager *event_manager)
+int	SelectServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree)
 {
 	const int max_fd = addSocketToSets(*conn_manager);
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
 	// TODO: select serverではマクロFD_SETSIZE以上のfdを監視できない
 	// TODO: error処理どうするべきか、retryする？
-	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, NULL);
+	struct timeval	tv = timer_tree->findTimeval();
+	struct timeval	*tvp = &tv;
+	if (tv.tv_sec == -1 && tv.tv_usec == -1)
+		tvp = NULL;
+	int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
 	addActiveEvents(conn_manager->getConnections(), event_manager);
 
 	return re;
@@ -104,18 +111,33 @@ void	SelectServer::callEventHandler(
 	IActiveEventManager* event_manager,
 	NetworkIOHandler* io_handler,
 	RequestHandler* request_handler,
-	ConfigHandler* config_handler
+	ConfigHandler* config_handler,
+	TimerTree* timer_tree
 )
 {
 	const std::vector<SelectEvent> *active_events_ptr =
 		static_cast<std::vector<SelectEvent>*>(event_manager->getActiveEvents());
 	const std::vector<SelectEvent> active_events = *active_events_ptr;
 
+		// TimeoutEvent発生
+	if (event_manager->getActiveEventsNum() == 0)
+	{
+		request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+		return;
+	}
+
+	// 現在時刻を更新
+	Timer::updateCurrentTime();
+
 	for (size_t i = 0; i < active_events.size(); ++i)
 	{
 		if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
-			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, active_events[i].fd_);
+			request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-			request_handler->handleWriteEvent(*io_handler, *conn_manager, active_events[i].fd_);
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
+		else if (event_manager->isErrorEvent(static_cast<const void*>(&active_events[i])))
+			request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].fd_);
+
 	}
+
 }

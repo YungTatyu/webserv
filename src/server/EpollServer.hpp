@@ -18,15 +18,17 @@ class EpollServer : public IServer
 							IActiveEventManager* event_manager,
 							NetworkIOHandler* io_handler,
 							RequestHandler* request_handler,
-							ConfigHandler* config_handler );
-		int	waitForEvent( ConnectionManager* conn_manager, IActiveEventManager *event_manager );
+							ConfigHandler* config_handler,
+							TimerTree* timer_tree );
+		int	waitForEvent( ConnectionManager* conn_manager, IActiveEventManager *event_manager, TimerTree *timer_tree );
 		void	callEventHandler( ConnectionManager* conn_manager,
 								IActiveEventManager* event_manager,
 								NetworkIOHandler* io_handler,
 								RequestHandler* request_handler,
-								ConfigHandler* config_handler );
-		int	addSocketToSets( const std::map<int, ConnectionData*> &connections );
-		void	addActiveEvents( const std::map<int, ConnectionData*> &connections, IActiveEventManager *event_manager );
+								ConfigHandler* config_handler,
+								TimerTree* timer_tree );
+		int	addSocketToSets( const std::map<int, ConnectionData> &connections );
+		void	addActiveEvents( const std::map<int, ConnectionData> &connections, IActiveEventManager *event_manager );
 	private:
 		int	epfd_; // epoll instance
 		bool	initEpollServer();

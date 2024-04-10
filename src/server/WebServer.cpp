@@ -49,6 +49,9 @@ void WebServer::initializeServer()
 			this->eventManager = new SelectActiveEventManager();
 			break;
 	}
+	configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");
+
+	this->timerTree = new TimerTree();
 }
 
 void	WebServer::initializeListenSocket(
@@ -114,8 +117,10 @@ void	WebServer::initializeConnManager()
 
 WebServer::~WebServer()
 {
+	this->configHandler->writeErrorLog("webserv: [debug] Close webserv.\n\n");
 	// close( this->connManager->getConnection() ); // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
 	config::terminateLogFds(this->configHandler->config_);
+	delete this->timerTree;
 	delete this->configHandler->config_;
 	delete this->ioHandler;
 	delete this->requestHandler;
@@ -126,5 +131,5 @@ WebServer::~WebServer()
 
 void	WebServer::run()
 {
-	this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler, this->configHandler);
+	this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler, this->configHandler, this->timerTree);
 }

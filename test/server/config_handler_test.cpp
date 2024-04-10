@@ -355,21 +355,21 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	tied_server_1.servers_.push_back(&config_handler_.config_->http.server_list[0]);
 	// offというファイルに書き込むのではなく、どこにも書き込まない
 	msg = "aiueo";
-	config_handler_.writeAcsLog(tied_server_1,
+	config_handler_.writeAccessLog(tied_server_1,
 							"first_server",
 							"/",
 							msg);
 
 	// ロケーションブロックで指定されたところへ出力
 	msg = "kakikukeko";
-	config_handler_.writeAcsLog(tied_server_1,
+	config_handler_.writeAccessLog(tied_server_1,
 							"first_server",
 							"/hello/",
 							msg);
 
 	// 親ブロックで指定されたファイルに出力
 	msg = "sashisuseso";
-	config_handler_.writeAcsLog(tied_server_1,
+	config_handler_.writeAccessLog(tied_server_1,
 							"first_server",
 							"/goodnight/",
 							msg);
@@ -379,7 +379,7 @@ TEST_F(ConfigHandlerTest, writeAcsLog)
 	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// 親の親ブロックで指定されたファイルに出力
 	msg = "tachitsuteto";
-	config_handler_.writeAcsLog(tied_server_2,
+	config_handler_.writeAccessLog(tied_server_2,
 							"second_server",
 							"/",
 							msg);
@@ -424,14 +424,14 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	// ログオフ
 	file = "/dev/null";
 	msg = "aiueo\n";
-	config_handler_.writeErrLog( tied_server_1,
+	config_handler_.writeErrorLog( tied_server_1,
 							"first_server",
 							"/",
 							msg);
 
 	// location.logに出力
 	msg = "kakikukeko\n";
-	config_handler_.writeErrLog(tied_server_1,
+	config_handler_.writeErrorLog(tied_server_1,
 							"first_server",
 							"/hello/",
 							msg);
@@ -441,14 +441,14 @@ TEST_F(ConfigHandlerTest, writeErrLog)
 	tied_server_2.servers_.push_back(&config_handler_.config_->http.server_list[1]);
 	// default fileに出力
 	msg = "sashisuseso\n";
-	config_handler_.writeErrLog(tied_server_2,
+	config_handler_.writeErrorLog(tied_server_2,
 							"second_server",
 							"/",
 							msg);
 
 	// default fileに出力し、ファイル内容が追加されるかテスト
 	msg = "tachitsuteto\n";
-	config_handler_.writeErrLog(tied_server_2,
+	config_handler_.writeErrorLog(tied_server_2,
 								"second_server",
 								"/",
 								msg);
