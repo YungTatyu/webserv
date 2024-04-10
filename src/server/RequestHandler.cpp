@@ -101,21 +101,20 @@ int RequestHandler::handleCgiReadEvent(
 {
 	ioHandler.receiveCgiResponse(connManager, sockfd);
 	const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
-	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
-	{
-		const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
-		HttpResponse	&response = connManager.getResponse(sockfd);
-		bool parse_suc = connManager.callCgiParser(sockfd, response,
-			std::string(reinterpret_cast<const char*>(v.data())));
-		if (parse_suc)
-			response.state_ = HttpResponse::RES_PARSED_CGI;
-		else
-			response.state_ = HttpResponse::RES_CGI_ERROR;
-		int re = handleResponse(connManager, configHandler, sockfd);
-		ioHandler.closeConnection(connManager, sockfd); // delete cgi event
-		return re;
-	}
-	return RequestHandler::UPDATE_NONE;
+	if (!cgiProcessExited(cgi_handler.getCgiProcessId()))
+		return RequestHandler::UPDATE_NONE;
+
+	const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
+	HttpResponse	&response = connManager.getResponse(sockfd);
+	bool parse_suc = connManager.callCgiParser(sockfd, response,
+		std::string(reinterpret_cast<const char*>(v.data())));
+	if (parse_suc)
+		response.state_ = HttpResponse::RES_PARSED_CGI;
+	else
+		response.state_ = HttpResponse::RES_CGI_ERROR;
+	int re = handleResponse(connManager, configHandler, sockfd);
+	ioHandler.closeConnection(connManager, sockfd); // delete cgi event
+	return re;
 }
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
