@@ -19,7 +19,8 @@ class HttpResponse
 		enum RES_STATE {
 			RES_CREATING_STATIC,
 			RES_EXECUTE_CGI,
-			RES_PARSED_CGI
+			RES_PARSED_CGI,
+			RES_CGI_ERROR
 		};
 
 		enum ResponsePhase {
@@ -30,6 +31,7 @@ class HttpResponse
 			sw_return_phase,
 			sw_allow_phase,
 			sw_uri_check_phase,
+			sw_search_res_file_phase,
 			sw_content_phase,
 			sw_error_page_phase,
 			sw_log_phase,
@@ -39,10 +41,10 @@ class HttpResponse
 
 		// member methods
 		static std::string	generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler );
-		static std::string	createResponse( const HttpResponse& response );
 
 		// public variables
 		std::string	root_path_;
+		std::string	res_file_path_;
 		RES_STATE	state_;
 		std::string	cgi_status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
@@ -56,14 +58,15 @@ class HttpResponse
 		size_t	internal_redirect_cnt_;
 		static const size_t kMaxInternalRedirect = 10;
 
-		static std::string	createCgiResponse( const HttpResponse& response );
+		static std::string	createResponse( const HttpResponse& response );
 		// handle phase methods
 		static ResponsePhase	handlePreSearchLocationPhase( const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock, struct sockaddr_in& client_addr );
 		static ResponsePhase	handleSearchLocationPhase( HttpResponse& response, const HttpRequest& request, const config::Server& server, const config::Location** location, const ConfigHandler& config_handler );
 		static ResponsePhase	handleAllowPhase( HttpResponse& response, const HttpRequest& request, const config::Server& server, const config::Location* location, struct sockaddr_in client_addr, const ConfigHandler& config_handler );
 		static ResponsePhase	handleReturnPhase( HttpResponse& response, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
 		static ResponsePhase	handleUriCheckPhase( HttpResponse& response, const HttpRequest& request, const config::Server& server, const config::Location* location );
-		static ResponsePhase	handleContentPhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
+		static ResponsePhase	handleSearchResFilePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
+		static ResponsePhase	handleContentPhase( HttpResponse& response );
 		static ResponsePhase	handleErrorPagePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler );
 
 		// 名前微妙
@@ -71,7 +74,7 @@ class HttpResponse
 		static std::string	getCurrentGMTTime();
 		static ResponsePhase	returnPhase( HttpResponse& response, const config::Location* location );
 		static void	prepareReturn( HttpResponse& response, const config::Return& return_directive );
-		static ResponsePhase	staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
+		static ResponsePhase	searchResPath( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
 		static ResponsePhase	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on, const std::string& index_dir );
 		static ResponsePhase	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
 		static void	headerFilterPhase( HttpResponse& response );

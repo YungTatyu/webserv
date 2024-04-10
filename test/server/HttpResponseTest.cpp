@@ -38,7 +38,7 @@ protected:
 			file_path = "test/server/ResponseTestFiles/ErrorPage.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "StaticHandler") {
-			file_path = "test/server/ResponseTestFiles/staticHandler.conf";
+			file_path = "test/server/ResponseTestFiles/searchResPath.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "autoIndex") {
 			file_path = "test/server/ResponseTestFiles/autoIndex.conf";

@@ -1,6 +1,7 @@
 #include "HttpResponse.hpp"
 #include "Utils.hpp"
-#include "string.h"
+#include "CGIHandler.hpp"
+#include <cstring>
 #include <ctime>
 #include <iomanip>
 
@@ -121,7 +122,7 @@ static const std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse()
-	: state_(HttpResponse::RES_CREATING_STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
+	: root_path_(""), res_file_path_(""), state_(HttpResponse::RES_CREATING_STATIC), cgi_status_code_line_(""), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
 	this->headers_["Server"] = "webserv/1.0";
 	this->headers_["Date"] = getCurrentGMTTime();
@@ -317,15 +318,17 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 	struct sockaddr_in	client_addr;
 
 	enum ResponsePhase	phase = sw_start_phase;
+	if (response.state_ == RES_PARSED_CGI)
+		phase = sw_end_phase;
+	else if (response.state_ == RES_CGI_ERROR)
+	{
+		phase = sw_error_page_phase;
+		response.status_code_ = 502; // bad gate error
+	}
 
 	while (phase != sw_end_phase) {
 		switch (phase) {
 		case sw_start_phase:
-			if (response.state_ == RES_PARSED_CGI)
-			{
-				phase = sw_end_phase;
-				break;
-			}
 			config_handler.writeErrorLog(server, location, "webserv: [debug] start phase\n");
 			phase = sw_pre_search_location_phase;
 			break;
@@ -356,9 +359,13 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			config_handler.writeErrorLog(server, location, "webserv: [debug] uri check phase\n");
 			phase = handleUriCheckPhase(response, request, server, location);
 			break;
+		case sw_search_res_file_phase:
+			config_handler.writeErrorLog(server, location, "webserv: [debug] search response file phase\n");
+			phase = handleSearchResFilePhase(response, request, server, location, config_handler);
+			break;
 		case sw_content_phase:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] content phase\n");
-			phase = handleContentPhase(response, request, server, location, config_handler);
+			phase = handleContentPhase(response);
 			break;
 		case sw_error_page_phase:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] error page phase\n");
@@ -366,6 +373,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			break;
 		case sw_log_phase:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] log phase\n");
+			//  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
 			config_handler.writeAccessLog(server, location, config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, request));
 			phase = sw_end_phase;
 			break;
@@ -487,8 +495,7 @@ HttpResponse::ResponsePhase	HttpResponse::handleUriCheckPhase( HttpResponse& res
 		response.status_code_ = 404;
 		return sw_error_page_phase;
 	}
-	else
-		return sw_content_phase;
+	return sw_search_res_file_phase;
 }
 
 /* try_files
@@ -507,8 +514,8 @@ HttpResponse::ResponsePhase	HttpResponse::TryFiles( HttpResponse& response, Http
 		if (Utils::wrapperAccess(full_path, F_OK, false) == 0 &&
 			Utils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
-			response.body_ = Utils::readFile(full_path);
-			return sw_log_phase;
+			response.res_file_path_ = full_path;
+			return sw_content_phase;
 		}
 	}
 
@@ -615,8 +622,9 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
 		if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
 			Utils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
-			response.body_ = Utils::readFile(full_path);
-			return sw_log_phase;
+			response.res_file_path_ = full_path;
+			return sw_content_phase;
+			// return sw_log_phase;
 		}
 	}
 
@@ -641,7 +649,7 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
  * uriが'/'で終わっていなければ直接探しに行き、
  * そうでなければ、ディレクティブを順番に適用する。
  */
-HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
+HttpResponse::ResponsePhase	HttpResponse::searchResPath( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
 	response.state_ = HttpResponse::RES_CREATING_STATIC;
 	// request uriが/で終わっていなければ直接ファイルを探しに行く。
@@ -654,8 +662,8 @@ HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response,
 			response.status_code_ = 404;
 			return sw_error_page_phase;
 		}
-		response.body_ = Utils::readFile(full_path);
-		return sw_log_phase;
+		response.res_file_path_ = full_path;
+		return sw_content_phase;
 	}
 
 	/* ~ try_filesとindex/autoindexのファイル検索 ~
@@ -687,11 +695,22 @@ HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response,
 	return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on, index_dir);
 }
 
-HttpResponse::ResponsePhase	HttpResponse::handleContentPhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
+/**
+ * respone fileのpathをさがす
+*/
+HttpResponse::ResponsePhase	HttpResponse::handleSearchResFilePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
 {
+	return searchResPath(response, request, server, location, config_handler);
+}
 
-	if (request.method == config::GET)
-		return staticHandler(response, request, server, location, config_handler);
+HttpResponse::ResponsePhase	HttpResponse::handleContentPhase( HttpResponse& response )
+{
+	if (cgi::CGIHandler::isCgi(response.res_file_path_))
+	{
+		response.state_ = RES_EXECUTE_CGI;
+		return sw_log_phase;
+	}
+	response.body_ = Utils::readFile(response.res_file_path_);
 	return sw_log_phase;
 }
 
