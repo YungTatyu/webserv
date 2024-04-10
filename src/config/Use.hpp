@@ -30,6 +30,25 @@ class Use
 		~Use() {}
 		CONNECTION_METHOD	getConnectionMethod() const { return this->connection_method_; }
 		void	setConnectionMethod(const CONNECTION_METHOD connection_method) { this->connection_method_ = connection_method; }
+		static std::string	ConnectionMethodToStr(const config::CONNECTION_METHOD method)
+		{
+			std::string	ret;
+			switch (method) {
+				case config::KQUEUE:
+					ret = "kqueue";
+					break;
+				case config::EPOLL:
+					ret = "epoll";
+					break;
+				case config::POLL:
+					ret = "poll";
+					break;
+				case config::SELECT:
+					ret = "select";
+					break;
+			}
+			return ret;
+		}
 		const static unsigned int	kType_ = CONF_EVENTS|CONF_TAKE1|CONF_UNIQUE;
 };
 } // namespace config

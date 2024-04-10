@@ -1,5 +1,6 @@
 #include "TimerTree.hpp"
 
+#include <sys/time.h>
 #include <limits>
 
 TimerTree::TimerTree() {}
@@ -58,6 +59,43 @@ int	TimerTree::findTimer() const
 	return timeout;
 }
 
+struct timeval	TimerTree::findTimeval() const
+{
+	struct timeval	tv;
+	const std::multiset<Timer>::iterator it = this->timer_tree_.begin();
+	// timerがない場合は、-1: timeoutなし
+	if (it == this->timer_tree_.end())
+	{
+		tv.tv_sec = -1;
+		tv.tv_usec = -1;
+		return tv;
+	}
+
+	const int timeout_raw = TimerTree::findTimer();
+
+	tv.tv_sec = timeout_raw / 1000;
+	tv.tv_usec = (timeout_raw % 1000) * 1000;
+	return tv;
+}
+
+struct timespec	TimerTree::findTimespec() const
+{
+	struct timespec	ts;
+	const std::multiset<Timer>::iterator it = this->timer_tree_.begin();
+	// timerがない場合は、-1: timeoutなし
+	if (it == this->timer_tree_.end())
+	{
+		ts.tv_sec = -1;
+		ts.tv_nsec = -1;
+		return ts;
+	}
+
+	const int timeout_raw = TimerTree::findTimer();
+	ts.tv_sec = timeout_raw / 1000;
+	ts.tv_nsec = (timeout_raw % 1000) * 1000000;
+	return ts;
+}
+
 const std::multiset<Timer>	&TimerTree::getTimerTree() const
 {
 	return this->timer_tree_;
@@ -66,4 +104,10 @@ const std::multiset<Timer>	&TimerTree::getTimerTree() const
 const std::set<int>	&TimerTree::getFdSet() const
 {
 	return this->fd_set_;
+}
+
+
+bool	TimerTree::timerExists(const int fd) const
+{
+	return this->fd_set_.find(fd) != this->fd_set_.end();
 }
