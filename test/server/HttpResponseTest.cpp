@@ -103,7 +103,7 @@ TEST_F(HttpResponseTest, ParseError)
 	std::vector<std::string> correct_res;
 	correct_res.push_back("400 Bad Request");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("<html>\r\n<head><title>400 Bad Request</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n");
 	// HttpRequest作成
 	HttpRequest	request;
@@ -148,7 +148,7 @@ TEST_F(HttpResponseTest, Return)
 	request.uri = "/code/";
 	correct_res.push_back("HTTP/1.1 418 I'm a teapot");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response1, tied_server, sock, config_handler_);
 	// 結果確認
@@ -163,7 +163,7 @@ TEST_F(HttpResponseTest, Return)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 404 Not Found");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/plain");
 	correct_res.push_back("Content-Length: 14");
 	correct_res.push_back("custom message");
@@ -232,7 +232,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 	request.uri = "/nothing.html";
 	correct_res.push_back("HTTP/1.1 499");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 258");
 	std::ifstream	ifs("test/server/ResponseTestFiles/testHtml/40x.html");
@@ -255,7 +255,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 400 Bad Request");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 274");
 	ifs.clear();
@@ -278,7 +278,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 500 Internal Server Error");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: close");
+	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 174");
 	correct_res.push_back("<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
@@ -350,7 +350,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 404 Not Found");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 150");
 	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
@@ -432,7 +432,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 405 Not Allowed");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 272");
 	ifs.clear();
@@ -487,7 +487,7 @@ TEST_F(HttpResponseTest, autoIndex)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 403 Forbidden");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 150");
 	correct_res.push_back("<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
@@ -523,7 +523,7 @@ TEST_F(HttpResponseTest, autoIndex)
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 404 Not Found");
 	correct_res.push_back("Server: webserv/1");
-	correct_res.push_back("Connection: keep-alive");
+	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 150");
 	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");

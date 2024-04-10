@@ -404,7 +404,6 @@ HttpResponse::ResponsePhase	HttpResponse::handleSearchLocationPhase( HttpRespons
 		config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
 		response.status_code_ = 500;
 		response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
-		response.headers_["Connection"] = "close";
 		return sw_end_phase;
 	}
 	*location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
