@@ -280,12 +280,17 @@ std::string	HttpResponse::createResponse( const HttpResponse& response )
 
 	// status line
 	stream << http_version << " ";
-	if (it != status_line_map_.end())
+	if (response.state_ == RES_PARSED_CGI && !response.cgi_status_code_line_.empty())
+		stream << response.cgi_status_code_line_ << "\r\n";
+	else if (it != status_line_map_.end())
 		stream << status_line_map_[response.status_code_] << "\r\n";
 	else
 		stream << response.status_code_ << "\r\n";
 
 	// headers
+	// cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
+	//　ex) Content-Type　Content-Length　は文字が整形される
+	//　Locationなどは整形されない ex) loCAtion
 	for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
 		it != response.headers_.end();
 		++it

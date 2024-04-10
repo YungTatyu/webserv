@@ -96,7 +96,6 @@ int	RequestHandler::executeCgi(ConnectionManager &connManager, ConfigHandler& co
 	return RequestHandler::UPDATE_CGI_WRITE;
 }
 
-
 int RequestHandler::handleCgiReadEvent(
 	NetworkIOHandler &ioHandler,
 	ConnectionManager &connManager,
