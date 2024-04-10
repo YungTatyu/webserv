@@ -104,7 +104,7 @@ TEST_F(HttpResponseTest, ParseError)
 	correct_res.push_back("400 Bad Request");
 	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
-	correct_res.push_back("<html>\r\n<head><title>400 Bad Request</title></head>\r\n<body>\r\n<center><h1>400git checkout --theirs Bad Request</h1></center>\r\n");
+	correct_res.push_back("<html>\r\n<head><title>400 Bad Request</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n");
 	// HttpRequest作成
 	HttpRequest	request;
 
