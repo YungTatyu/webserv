@@ -2,6 +2,7 @@
 #define HTTPREQUEST_HPP
 
 #include "LimitExcept.hpp"
+#include "Utils.hpp"
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
@@ -29,8 +30,8 @@ class HttpRequest
 	HttpRequest(const config::REQUEST_METHOD &method = config::UNKNOWN,
 		    const std::string &uri = "",
 		    const std::string &version = "",
-		    const std::map<std::string, std::string> &headers =
-			std::map<std::string, std::string>(),
+		    const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers =
+			std::map<std::string, std::string, Utils::CaseInsensitiveCompare>(),
 		    const std::string &queries = "",
 		    const std::string &body = "",
 		    const ParseState parseState = PARSE_BEFORE);
@@ -47,9 +48,7 @@ class HttpRequest
 	config::REQUEST_METHOD method;
 	std::string uri; // スキーマ、ポートは？？
 	std::string version;
-	std::map<std::string, std::string>
-	    headers; // hashにするためには、unordered_mapを使った方がいい。mapは赤黒木なので計算量logN.hashは最悪O(N)だけど基本O(1).
-		     // -> が、C++11では使えなかった。
+	std::map<std::string, std::string, Utils::CaseInsensitiveCompare>	headers;
 	std::string
 	    queries; // mapでもっていたが、子プロセスにQUERY_STRINGとして渡すからstringの方が良さげ。
 	std::string body;

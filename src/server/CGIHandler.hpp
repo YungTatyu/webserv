@@ -23,6 +23,7 @@ class CGIHandler
 	private:
 		CGIParser	cgi_parser_;
 		CGIExecutor	cgi_executor_;
+		int	cli_socket_; // cgiが紐づくクライアント
 		pid_t	cgi_process_id_;
 		int	cli_socket_; // cgiが紐づくクライアント
 		bool	forkCgiProcess(

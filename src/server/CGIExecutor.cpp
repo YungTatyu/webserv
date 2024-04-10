@@ -21,10 +21,11 @@ cgi::CGIExecutor::~CGIExecutor() {}
 void	cgi::CGIExecutor::executeCgiScript(
 	const HttpRequest& request,
 	const std::string& script_path,
-	const int socket
+	const int cgi_sock,
+	const int cli_sock
 )
 {
-	prepareCgiExecution(request, script_path, socket);
+	prepareCgiExecution(request, script_path, cgi_sock, cli_sock);
 	execve(
 		this->script_path_.c_str(),
 		const_cast<char *const*>(this->argv_.data()),
@@ -37,14 +38,15 @@ void	cgi::CGIExecutor::executeCgiScript(
 void	cgi::CGIExecutor::prepareCgiExecution(
 	const HttpRequest& request,
 	const std::string& script_path,
-	const int socket
+	const int cgi_sock,
+	const int cli_sock
 )
 {
-	if (!redirectStdIOToSocket(request, socket))
+	if (!redirectStdIOToSocket(request, cgi_sock))
 		std::exit(EXIT_FAILURE);
 	createScriptPath(script_path);
 	createArgv(script_path);
-	createMetaVars(request);
+	createMetaVars(request, cli_sock);
 }
 
 void	cgi::CGIExecutor::createScriptPath(const std::string& script_path)
@@ -74,13 +76,13 @@ void	cgi::CGIExecutor::createArgv(const std::string& script_path)
 	this->argv_.push_back(NULL);
 }
 
-void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
+void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const int cli_sock)
 {
 	const static char	*kContentType = "content-type";
 
 	this->meta_vars_.push_back("AUTH_TYPE="); // Authorizationをparseするロジックを実装しないため、値は空文字
 
-	const static std::string content_length = std::string("CONTENT_LENGTH=") + toStr(request.body.size());
+	const static std::string content_length = std::string("CONTENT_LENGTH=") + Utils::toStr(request.body.size());
 	this->meta_vars_.push_back(content_length.c_str());
 
 	static std::string	content_type = "CONTENT_TYPE=";
@@ -95,22 +97,23 @@ void	cgi::CGIExecutor::createMetaVars(const HttpRequest& request)
 	const static std::string	query_string = std::string("QUERY_STRING=") + request.queries;
 	this->meta_vars_.push_back(query_string.c_str()); // pathinfoと同じ
 
-	const static std::string	remote_addr = "REMOTE_ADDR="; // client addressをvalueにsetする
+	const std::string	ip_address = Utils::socketToStrIPAddress(cli_sock);
+	const static std::string	remote_addr = std::string("REMOTE_ADDR=") + ip_address;
 	this->meta_vars_.push_back(remote_addr.c_str());
 
-	static std::string	remote_host = std::string("REMOTE_HOST="); // client host name
-	this->meta_vars_.push_back(remote_host.c_str()); // TODO: client host nameを取得
+	static std::string	remote_host = std::string("REMOTE_HOST=") + ip_address; // client host nameは取得できないので、ip address
+	this->meta_vars_.push_back(remote_host.c_str());
 
-	const std::string	method = std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method);
+	const static std::string	method = std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method);
 	this->meta_vars_.push_back(method.c_str());
 
 	const static std::string	script_name = std::string("SCRIPT_NAME=") + request.uri;
 	this->meta_vars_.push_back(script_name.c_str());
 
-	// const static std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
-	// this->meta_vars_.push_back(server_name.c_str());
+	const static std::string	server_name = std::string("SERVER_NAME=") + request.headers.at("host");
+	this->meta_vars_.push_back(server_name.c_str());
 
-	const static std::string	server_port = std::string("SERVER_PORT="); // TODO: clientがアクセスしたport番号
+	const static std::string	server_port = std::string("SERVER_PORT=") + Utils::toStr(Utils::resolveConnectedPort(cli_sock)); 
 	this->meta_vars_.push_back(server_port.c_str());
 
 	const static std::string	server_protocol = std::string("SERVER_PROTOCOL=") + request.version;
