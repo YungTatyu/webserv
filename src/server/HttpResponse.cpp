@@ -121,7 +121,7 @@ static const std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse()
-	: serv_type_(HttpResponse::STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
+	: state_(HttpResponse::RES_CREATING_STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
 	this->headers_["Server"] = "webserv/1.0";
 	this->headers_["Date"] = getCurrentGMTTime();
@@ -316,6 +316,11 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 	while (phase != sw_end_phase) {
 		switch (phase) {
 		case sw_start_phase:
+			if (response.state_ == RES_PARSED_CGI)
+			{
+				phase = sw_end_phase;
+				break;
+			}
 			config_handler.writeErrorLog(server, location, "webserv: [debug] start phase\n");
 			phase = sw_pre_search_location_phase;
 			break;
@@ -365,8 +370,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 		}
 	}
 
+	if (response.state_ == RES_EXECUTE_CGI)
+		return "";
 	config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
-	if (response.serv_type_ == HttpResponse::STATIC)
+	if (response.state_ == HttpResponse::RES_CREATING_STATIC)
 	{
 		headerFilterPhase(response);
 	}
@@ -632,7 +639,7 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
  */
 HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
-	response.serv_type_ = HttpResponse::STATIC;
+	response.state_ = HttpResponse::RES_CREATING_STATIC;
 	// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
 	{

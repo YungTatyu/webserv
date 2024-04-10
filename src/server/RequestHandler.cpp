@@ -61,9 +61,30 @@ int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
 	// TODO: cgi read event, cgi write eventに更新する際は、返り値で返す必要がある
 	// HttpResponseで呼ぶ？
 	// bodyが存在する場合は、cgiにbodyを送る必要がある
-	std::string	final_response = HttpResponse::generateResponse( connManager.getRequest(sockfd), connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
-	if (!final_response.empty())
-		connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
+	HttpRequest	&request = connManager.getRequest(sockfd);
+	HttpResponse	&response = connManager.getResponse(sockfd);
+	std::string	final_response = HttpResponse::generateResponse( request, response, connManager.getTiedServer(sockfd), sockfd, configHandler );
+
+	if (response.state_ == HttpResponse::RES_EXECUTE_CGI)
+	{
+		// TODO: cgi絶対パスを取得
+		bool	re = connManager.callCgiExecutor(sockfd, "cgi path", request);
+		if (!re)
+		{
+			// TODO：bad gate errorをかえす
+			return RequestHandler::UPDATE_WRITE;
+		}
+		// bodyが空なら、bodyをsendしない
+		if (request.body.empty())
+		{
+			connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+			return RequestHandler::UPDATE_CGI_READ;
+		}
+		connManager.setEvent(sockfd, ConnectionData::EV_CGI_WRITE);
+		return RequestHandler::UPDATE_CGI_WRITE;
+	}
+
+	connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
 	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
 	return RequestHandler::UPDATE_WRITE;
