@@ -9,6 +9,26 @@
 
 RequestHandler::RequestHandler() {}
 
+bool	isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler)
+{
+	return connManager.getConnections().size() >= configHandler.config_->events.worker_connections.getWorkerConnections();
+}
+
+void	deleteOldTimerConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree)
+{
+	int	oldest_sock = timerTree.getTimerTree().begin()->getFd();
+	// もしCGIソケットなら紐づくclientソケットも削除
+	if (connManager.isCgiSocket(oldest_sock))
+	{
+		connManager.getCgiHandler(oldest_sock).killCgiProcess();
+		int tied_sock = connManager.getCgiHandler(oldest_sock).getCliSocket();
+		ioHandler.closeConnection(connManager, tied_sock);
+		timerTree.deleteTimer(tied_sock);
+	}
+	timerTree.deleteTimer(oldest_sock);
+	ioHandler.closeConnection(connManager, oldest_sock);
+}
+
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
 {
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
@@ -29,20 +49,9 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		);
 
 		// worker_connections確認
-		if (connManager.getConnections().size() >= configHandler.config_->events.worker_connections.getWorkerConnections())
-		{
-			int	oldest_sock = timerTree.getTimerTree().begin()->getFd();
-			// もしCGIソケットなら紐づくclientソケットも削除
-			if (connManager.isCgiSocket(oldest_sock))
-			{
-				connManager.getCgiHandler(oldest_sock).killCgiProcess();
-				int tied_sock = connManager.getCgiHandler(oldest_sock).getCliSocket();
-				ioHandler.closeConnection(connManager, tied_sock);
-				timerTree.deleteTimer(tied_sock);
-			}
-			timerTree.deleteTimer(oldest_sock);
-			ioHandler.closeConnection(connManager, oldest_sock);
-		}
+		if (isOverWorkerConnections(connManager, configHandler))
+			deleteOldTimerConnection(ioHandler, connManager, timerTree);
+
 		return accept_sock;
 	}
 
