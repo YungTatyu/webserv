@@ -25,7 +25,6 @@ class CGIHandler
 		CGIExecutor	cgi_executor_;
 		int	cli_socket_; // cgiが紐づくクライアント
 		pid_t	cgi_process_id_;
-		int	cli_socket_; // cgiが紐づくクライアント
 		bool	forkCgiProcess(
 			const HttpRequest& request,
 			const std::string& script_path
