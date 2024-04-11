@@ -28,7 +28,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 		// worker_connections確認
 		if (isOverWorkerConnections(connManager, configHandler))
-			deleteTimerAndConnection(ioHandler, connManager, timerTree, timerTree.getTimerTree().begin()->getFd());
+			this->deleteTimerAndConnection(ioHandler, connManager, timerTree, timerTree.getTimerTree().begin()->getFd());
 
 		return accept_sock;
 	}
@@ -152,7 +152,7 @@ void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
 		std::multiset<Timer>::iterator next = it;
 		next++;
 		// timer tree から削除
-		deleteTimerAndConnection(ioHandler, connManager, timerTree, it->getFd());
+		this->deleteTimerAndConnection(ioHandler, connManager, timerTree, it->getFd());
 		// timeoutの種類によってログ出力変える
 		//std::string	timeout_reason = "waiting for client request.";
 		configHandler.writeErrorLog("webserv: [info] client timed out\n");
