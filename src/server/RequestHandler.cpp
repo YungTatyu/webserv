@@ -20,8 +20,16 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		if (accept_sock == -1)
 			return accept_sock;
 
+		// timeout追加
+		config::Time	timeout;
+		// ToDo: 本来client_header_timeoutだが、現状では定数
+		timeout = config::Time(60 * config::Time::seconds);
+		timerTree.addTimer(
+			Timer(accept_sock, timeout)
+		);
+
 		// worker_connections確認
-		if (connManager.getConnections().size() > configHandler.config_->events.worker_connections.getWorkerConnections())
+		if (connManager.getConnections().size() >= configHandler.config_->events.worker_connections.getWorkerConnections())
 		{
 			int	oldest_sock = timerTree.getTimerTree().begin()->getFd();
 			// もしCGIソケットなら紐づくclientソケットも削除
@@ -34,13 +42,6 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			timerTree.deleteTimer(oldest_sock);
 			ioHandler.closeConnection(connManager, oldest_sock);
 		}
-		// timeout追加
-		config::Time	timeout;
-		// ToDo: 本来client_header_timeoutだが、現状では定数
-		timeout = config::Time(60 * config::Time::seconds);
-		timerTree.addTimer(
-			Timer(accept_sock, timeout)
-		);
 		return accept_sock;
 	}
 
