@@ -9,7 +9,7 @@
 
 RequestHandler::RequestHandler() {}
 
-int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler& configHandler, TimerTree &timerTree, const int sockfd)
+int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
 {
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
 		return handleCgiReadEvent(ioHandler, connManager, configHandler, sockfd);
@@ -19,9 +19,22 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		int	accept_sock = ioHandler.acceptConnection(connManager, sockfd);
 		if (accept_sock == -1)
 			return accept_sock;
+
+		// worker_connections確認
+		if (connManager.getConnections().size() > configHandler.config_->events.worker_connections.getWorkerConnections())
+		{
+			int	oldest_sock = timerTree.getTimerTree().begin()->getFd();
+			// もしCGIソケットなら紐づくclientソケットも削除
+			if (connManager.isCgiSocket(oldest_sock))
+			{
+				int tied_sock = connManager.getCgiHandler(oldest_sock).getCliSocket();
+				ioHandler.closeConnection(connManager, tied_sock);
+				timerTree.deleteTimer(tied_sock);
+			}
+			timerTree.deleteTimer(oldest_sock);
+			ioHandler.closeConnection(connManager, oldest_sock);
+		}
 		// timeout追加
-		// client_header_timeout directiveの値をセットする
-		// 本サーバーではデフォルト値として30秒にセットする
 		config::Time	timeout;
 		// ToDo: 本来client_header_timeoutだが、現状では定数
 		timeout = config::Time(60 * config::Time::seconds);
@@ -178,8 +191,15 @@ void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
 		it != upper_bound;
 		)
 	{
-		int client_fd = it->getFd();
-		ioHandler.closeConnection(connManager, client_fd);
+		int client_sock = it->getFd();
+		if (connManager.isCgiSocket(client_sock))
+		{
+			int tied_sock = connManager.getCgiHandler(client_sock).getCliSocket();
+			ioHandler.closeConnection(connManager, tied_sock);
+			// ToDo: client socketとcgiソケットが同時にセットされるか？
+			timer_tree.deleteTimer(tied_sock);
+		}
+		ioHandler.closeConnection(connManager, client_sock);
 		// timeoutの種類によってログ出力変える
 		std::string	timeout_reason = "waiting for client request.";
 		configHandler.writeErrorLog("webserv: [info] client timed out while " + timeout_reason + "\n");
@@ -200,7 +220,7 @@ void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
 		// timer tree から削除
 		std::multiset<Timer>::iterator next = it;
 		next++;
-		timer_tree.deleteTimer(client_fd);
+		timer_tree.deleteTimer(client_sock);
 		it = next;
 	}
 }
