@@ -8,7 +8,6 @@
 #include <sys/resource.h>
 
 bool	isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler);
-void	deleteOldTimerConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree);
 
 RequestHandler::RequestHandler() {}
 
@@ -29,7 +28,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 		// worker_connections確認
 		if (isOverWorkerConnections(connManager, configHandler))
-			deleteOldTimerConnection(ioHandler, connManager, timerTree);
+			deleteTimerAndConnection(ioHandler, connManager, timerTree, timerTree.getTimerTree().begin()->getFd());
 
 		return accept_sock;
 	}
@@ -137,50 +136,26 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
 }
 
 
-void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timer_tree)
+void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree)
 {
 	configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
 	// timeoutしていない最初のイテレータを取得
 	Timer	current_time(-1, Timer::getCurrentTime());
-	std::multiset<Timer>::iterator upper_bound = timer_tree.getTimerTree().upper_bound(current_time);
+	std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
 
 	Timer::updateCurrentTime();
 	// timeout している接続をすべて削除
-	for (std::multiset<Timer>::iterator it = timer_tree.getTimerTree().begin();
+	for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin();
 		it != upper_bound;
 		)
 	{
-		int client_sock = it->getFd();
-		if (connManager.isCgiSocket(client_sock))
-		{
-			connManager.getCgiHandler(client_sock).killCgiProcess();
-			int tied_sock = connManager.getCgiHandler(client_sock).getCliSocket();
-			ioHandler.closeConnection(connManager, tied_sock);
-			// ToDo: client socketとcgiソケットが同時にセットされるか？
-			timer_tree.deleteTimer(tied_sock);
-		}
-		ioHandler.closeConnection(connManager, client_sock);
-		// timeoutの種類によってログ出力変える
-		std::string	timeout_reason = "waiting for client request.";
-		configHandler.writeErrorLog("webserv: [info] client timed out while " + timeout_reason + "\n");
-		/*
-		switch (it.type_) {
-			case TM_KEEPALIVE:
-				timeout_reason = "waiting for client request.";
-				break;
-			case TM_SEND:
-				timeout_reason = "sending response to client.";
-				break;
-		}
-		configHandler.writeErrorLog("webserv: [info] client timed out while " + timeout_reason + "\n");
-		// これはconnManager.removeConnectonでやるべき？
-		configHandler.writeErrorLog("webserv: [debug] close http connection: " + client_fd + "\n");
-		*/
-
-		// timer tree から削除
 		std::multiset<Timer>::iterator next = it;
 		next++;
-		timer_tree.deleteTimer(client_sock);
+		// timer tree から削除
+		deleteTimerAndConnection(ioHandler, connManager, timerTree, it->getFd());
+		// timeoutの種類によってログ出力変える
+		//std::string	timeout_reason = "waiting for client request.";
+		configHandler.writeErrorLog("webserv: [info] client timed out\n");
 		it = next;
 	}
 }
@@ -268,22 +243,22 @@ bool	RequestHandler::addTimerSafely(NetworkIOHandler &ioHandler, ConnectionManag
 	return true;
 }
 
+void	RequestHandler::deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, int socket)
+{
+	// もしCGIソケットなら紐づくclientソケットも削除
+	if (connManager.isCgiSocket(socket))
+	{
+		connManager.getCgiHandler(socket).killCgiProcess();
+		int tied_sock = connManager.getCgiHandler(socket).getCliSocket();
+		ioHandler.closeConnection(connManager, tied_sock);
+		timerTree.deleteTimer(tied_sock);
+	}
+	timerTree.deleteTimer(socket);
+	ioHandler.closeConnection(connManager, socket);
+}
+
 bool	isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler)
 {
 	return connManager.getConnections().size() >= configHandler.config_->events.worker_connections.getWorkerConnections();
 }
 
-void	deleteOldTimerConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree)
-{
-	int	oldest_sock = timerTree.getTimerTree().begin()->getFd();
-	// もしCGIソケットなら紐づくclientソケットも削除
-	if (connManager.isCgiSocket(oldest_sock))
-	{
-		connManager.getCgiHandler(oldest_sock).killCgiProcess();
-		int tied_sock = connManager.getCgiHandler(oldest_sock).getCliSocket();
-		ioHandler.closeConnection(connManager, tied_sock);
-		timerTree.deleteTimer(tied_sock);
-	}
-	timerTree.deleteTimer(oldest_sock);
-	ioHandler.closeConnection(connManager, oldest_sock);
-}
