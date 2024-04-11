@@ -35,6 +35,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			// もしCGIソケットなら紐づくclientソケットも削除
 			if (connManager.isCgiSocket(oldest_sock))
 			{
+				connManager.getCgiHandler(oldest_sock).killCgiProcess();
 				int tied_sock = connManager.getCgiHandler(oldest_sock).getCliSocket();
 				ioHandler.closeConnection(connManager, tied_sock);
 				timerTree.deleteTimer(tied_sock);
@@ -195,6 +196,7 @@ void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
 		int client_sock = it->getFd();
 		if (connManager.isCgiSocket(client_sock))
 		{
+			connManager.getCgiHandler(client_sock).killCgiProcess();
 			int tied_sock = connManager.getCgiHandler(client_sock).getCliSocket();
 			ioHandler.closeConnection(connManager, tied_sock);
 			// ToDo: client socketとcgiソケットが同時にセットされるか？
