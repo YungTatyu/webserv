@@ -1,8 +1,8 @@
 #include "WebServer.hpp"
+#include "LogFd.hpp"
 
 #include <vector>
 #include <utility>
-#include "LogFd.hpp"
 
 /* WebServerクラスの実装 */
 WebServer::WebServer( const config::Main* config )
@@ -11,6 +11,20 @@ WebServer::WebServer( const config::Main* config )
 
 	this->configHandler->loadConfiguration(config);
 	this->initializeServer();
+	if (this->ioHandler->getListenfdMap().size() >= this->configHandler->config_->events.worker_connections.getWorkerConnections())
+	{
+		std::cout << "webserv: [emerg] " << this->configHandler->config_->events.worker_connections.getWorkerConnections() << " worker_connections are not enough for " << this->ioHandler->getListenfdMap().size() << " listening sockets" << std::endl;
+		delete this->timerTree;
+		config::terminateLogFds(this->configHandler->config_);
+		delete this->configHandler->config_;
+		delete this->configHandler;
+		delete this->ioHandler;
+		delete this->requestHandler;
+		delete this->connManager;
+		delete this->eventManager;
+		delete this->server;
+		throw std::exception();
+	}
 }
 
 void WebServer::initializeServer()
@@ -52,6 +66,7 @@ void WebServer::initializeServer()
 	configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");
 
 	this->timerTree = new TimerTree();
+
 }
 
 void	WebServer::initializeListenSocket(
@@ -122,11 +137,12 @@ WebServer::~WebServer()
 	config::terminateLogFds(this->configHandler->config_);
 	delete this->timerTree;
 	delete this->configHandler->config_;
+	delete this->configHandler;
 	delete this->ioHandler;
 	delete this->requestHandler;
 	delete this->connManager;
-	delete this->configHandler;
 	delete this->eventManager;
+	delete this->server;
 }
 
 void	WebServer::run()
