@@ -1493,15 +1493,25 @@ bool	config::Parser::parseListen()
 	if (this->tokens_[ti_ + 1].type_ != config::TK_SEMICOLON)
 	{
 		ti_++;
+		tmp_listen.setPort(port);
 
 		if (this->tokens_[ti_].value_ == "default_server")
-			tmp_listen.setIsDefaultServer(true);
+		{
+			if (isDuplicateDefaultServer(tmp_listen))
+			{
+				std::cerr << "webserv: [emerg] a duplicate default server for " << this->tokens_[ti_ - 1].value_ << " in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+				return false;
+			}
+			else
+			{
+				tmp_listen.setIsDefaultServer(true);
+			}
+		}
 		else
 		{
 			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return false;
+			return true;
 		}
-		tmp_listen.setPort(port);
 	}
 
 	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
@@ -1509,6 +1519,27 @@ bool	config::Parser::parseListen()
 
 	ti_ += 2;
 	return true;
+}
+
+bool	config::Parser::isDuplicateDefaultServer(const config::Listen& this_listen)
+{
+	std::vector<config::Server>&	server_list = this->config_.http.server_list;
+
+	for (size_t si = 0; si < server_list.size(); si++)
+	{
+		for (size_t li = 0; li < server_list[si].listen_list.size(); li++)
+		{
+			config::Listen&	another_listen = server_list[si].listen_list[li];
+			if (another_listen.getIsDefaultServer()
+				&& another_listen.getAddress() == this_listen.getAddress()
+				&& another_listen.getport() == this_listen.getport())
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 bool	config::Parser::parseServerName()
