@@ -23,8 +23,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			return accept_sock;
 
 		// timeout追加
-		// ToDo: 本来client_header_timeoutだが、現状では定数
-		this->addTimerSafely(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::REQUEST_TIMEOUT);
+		// ToDo: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
+		this->addTimerSafely(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
 
 		// worker_connections確認
 		if (isOverWorkerConnections(connManager, configHandler))
@@ -102,7 +102,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	if (re == -2) // send not complete, send remainder later
 		return RequestHandler::UPDATE_NONE;
 
-	if (!this->addTimerSafely(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::KEEPALIVE_TIMEOUT))
+	if (!this->addTimerSafely(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE))
 		return UPDATE_CLOSE;
 
 	// readイベントに更新
@@ -202,7 +202,7 @@ bool	RequestHandler::addTimerSafely(NetworkIOHandler &ioHandler, ConnectionManag
 
 	// timeout時間セット
 	switch (type) {
-	case Timer::KEEPALIVE_TIMEOUT:
+	case Timer::TMO_KEEPALIVE:
 		timeout = configHandler.searchKeepaliveTimeout(
 					connManager.getTiedServer(sockfd),
 					host_name,
@@ -210,26 +210,23 @@ bool	RequestHandler::addTimerSafely(NetworkIOHandler &ioHandler, ConnectionManag
 				);
 		break;
 
-	case Timer::REQUEST_TIMEOUT:
+	case Timer::TMO_CLI_REQUEST:
+		// ToDo: ディレクティブ作る
 		timeout = config::Time(60 * config::Time::seconds);
 		break;
 
-	case Timer::SEND_TIMEOUT:
+	case Timer::TMO_SEND:
 		timeout = configHandler.searchSendTimeout(
 					connManager.getTiedServer(sockfd),
 					host_name,
 					connManager.getRequest(sockfd).uri
 				);
 		break;
-
-	default:
-		timeout = config::Time(60 * config::Time::seconds);
-		break;
 	}
 
 	// keepaliveが無効なので接続を閉じる
 	// ToDo: keepalive以外のtimeoutが0だったら？
-	if (type == Timer::KEEPALIVE_TIMEOUT
+	if (type == Timer::TMO_KEEPALIVE
 		&& timeout.isNoTime())
 	{
 		ioHandler.closeConnection(connManager, sockfd);
