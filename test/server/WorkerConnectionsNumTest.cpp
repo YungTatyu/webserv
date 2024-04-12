@@ -37,6 +37,7 @@ protected:
 
 TEST_F(WorkerConnectionsNumTest, OK)
 {
+	// test_file: "test/server/WorkerConnectionsNumTestFiles/OK.conf";
 	testing::internal::CaptureStdout();
 	ASSERT_NO_THROW(WebServer(this->config_));
 	testing::internal::GetCapturedStdout();
@@ -44,6 +45,7 @@ TEST_F(WorkerConnectionsNumTest, OK)
 
 TEST_F(WorkerConnectionsNumTest, ERROR_EQ_MAX)
 {
+	// test_file: "test/server/WorkerConnectionsNumTestFiles/ERROR_EQ_MAX.conf";
 	testing::internal::CaptureStdout();
 	try
 	{
@@ -59,6 +61,7 @@ TEST_F(WorkerConnectionsNumTest, ERROR_EQ_MAX)
 
 TEST_F(WorkerConnectionsNumTest, ERROR_MORE_THAN_MAX)
 {
+	// test_file: "test/server/WorkerConnectionsNumTestFiles/ERROR_MORE_THAN_MAX.conf";
 	testing::internal::CaptureStdout();
 	try
 	{
