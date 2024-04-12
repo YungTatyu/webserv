@@ -27,7 +27,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
 
 		// worker_connections確認
-		if (isOverWorkerConnections(connManager, configHandler))
+		if (this->isOverWorkerConnections(connManager, configHandler))
 			this->deleteTimerAndConnection(ioHandler, connManager, timerTree, timerTree.getTimerTree().begin()->getFd());
 
 		return accept_sock;
@@ -261,7 +261,7 @@ void	RequestHandler::deleteTimerAndConnection(NetworkIOHandler &ioHandler, Conne
 	ioHandler.closeConnection(connManager, socket);
 }
 
-bool	isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler)
+bool	RequestHandler::isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler)
 {
 	return connManager.getConnections().size() >= configHandler.config_->events.worker_connections.getWorkerConnections();
 }
