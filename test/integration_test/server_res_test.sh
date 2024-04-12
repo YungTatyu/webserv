@@ -3,6 +3,7 @@
 # init
 readonly SCRIPT_DIR_PATH=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR_PATH}/../../webserv"
+readonly SV_RES_DYNAMIC_PATH="${SCRIPT_DIR_PATH}/test_files/server_res_test/dynamic"
 readonly TEST_NAME="server response test"
 
 g_total_test=0
@@ -14,10 +15,15 @@ function	init {
 	if [ -e $WEBSERV_PATH ]; then
 		printf "|------------------ $TEST_NAME start ------------------|\n"
 	else
-		echo "${WEBSERV_PATH}: command not found"
-		echo "run \"make\" first to test"
+		printErr "${WEBSERV_PATH}: command not found"
+		printErr "run \"make\" first to test"
 		exit 1
 	fi
+	make -C ${SV_RES_DYNAMIC_PATH} > /dev/null
+}
+
+function	printErr {
+	printf "${*}\n" >&2
 }
 
 function	runServer {
@@ -40,14 +46,13 @@ function	assert {
 	# responseのtimeoutを1秒に設定 --max-time
 	local	actual=$(curl -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
 	local	expect=$2
-	if [ "${actual}" == "${expect}" ]
-	then
+	if [ "${actual}" == "${expect}" ]; then
 		printf "\033[32mpassed\033[0m\n\n"
 		((++g_test_passed))
 	else
-		printf "\033[31mfailed\n\033[0m"
-		printf "expected:${expect}---\n"
-		printf "actual  :${actual}---\n\n"
+		printErr "\033[31mfailed\n\033[0m"
+		printErr "expected:${expect}---"
+		printErr "actual  :${actual}---\n"
 		((++g_test_failed))
 	fi
 }
@@ -83,6 +88,8 @@ function	main {
 	runTest "server_res_test_poll.conf" "poll" # poll
 
 	printLog
+
+	make fclean -C ${SV_RES_DYNAMIC_PATH} > /dev/null
 
 	if [ $g_test_failed -ne 0 ]; then
 		return 1

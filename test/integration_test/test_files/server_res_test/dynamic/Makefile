@@ -13,7 +13,7 @@ $(NAME_CRRD):
 $(NAME_CRR):
 	$(CC) -o $@ client_redirect_res.c
 
-fclean: clean
+fclean:
 	$(RM) $(NAME_CRRD) $(NAME_CRR)
 
 re: fclean all
