@@ -26,9 +26,16 @@ function	printErr {
 	printf "${*}\n" >&2
 }
 
+function	printLog {
+	printf "\n|------------------ $TEST_NAME results ------------------|\n"
+	printf "[========]    ${g_total_test} tests ran\n"
+	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
+	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
+}
+
 function	runServer {
 	# sleep 1
-	$WEBSERV_PATH $1 > /dev/null 2>&1 &
+	$WEBSERV_PATH $1 > /dev/null 2>& &
 	# エラー出力する場合
 	# $WEBSERV_PATH $1 > /dev/null &
 	webserv_pid=$!
@@ -57,13 +64,6 @@ function	assert {
 	fi
 }
 
-function	printLog {
-	printf "\n|------------------ $TEST_NAME results ------------------|\n"
-	printf "[========]    ${g_total_test} tests ran\n"
-	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
-	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
-}
-
 function	runTest {
 	local	root="test/integration_test/test_files/server_res_test"
 	local	conf=$1
@@ -76,6 +76,11 @@ function	runTest {
 	# 以下にテストを追加
 	assert "${root}/static/index.html" "200"
 	assert "${root}/nonexist" "404"
+	assert "${root}/dynamic/document_response.py" "200"
+	assert "${root}/dynamic/local_redirecit_res.py" "302"
+	assert "${root}/dynamic/client_redirect_res.cgi" "302"
+	assert "${root}/dynamic/client_redirect_res_doc.cgi" "302"
+	assert "${root}/dynamic/body_res.py" "200"
 
 	# サーバープロセスを終了
 	kill $webserv_pid > /dev/null 2>&1
@@ -98,4 +103,4 @@ function	main {
 	return 0
 }
 
-main
+main "$@"
