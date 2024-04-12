@@ -24,7 +24,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 		// timeout追加
 		// ToDo: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
-		this->addTimerSafely(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
+		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
 
 		// worker_connections確認
 		if (isOverWorkerConnections(connManager, configHandler))
@@ -102,7 +102,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	if (re == -2) // send not complete, send remainder later
 		return RequestHandler::UPDATE_NONE;
 
-	if (!this->addTimerSafely(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE))
+	if (!this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE))
 		return UPDATE_CLOSE;
 
 	// readイベントに更新
@@ -177,7 +177,14 @@ bool	RequestHandler::cgiProcessExited(const pid_t process_id) const
 	return true;
 }
 
-bool	RequestHandler::addTimerSafely(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type)
+/**
+ * @brief TimerTypeと直前のresponseのヘッダーに従ってtimeout値を取得し、TimerTreeにtimerを追加する。
+ *
+ * @param NetworkIOHandler, ConnectionManager, ConfigHandler, TimerTree, socket, TimeoutType
+ * @return true: timerを追加
+ * @return false: 'Connections: close'、またはkeepaliveが無効の場合
+ */
+bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type)
 {
 	config::Time	timeout;
 
