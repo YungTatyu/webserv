@@ -7,8 +7,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-bool	isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler);
-
 RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
