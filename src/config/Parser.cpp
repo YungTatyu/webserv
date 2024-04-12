@@ -1493,25 +1493,19 @@ bool	config::Parser::parseListen()
 	if (this->tokens_[ti_ + 1].type_ != config::TK_SEMICOLON)
 	{
 		ti_++;
-		tmp_listen.setPort(port);
+		//tmp_listen.setPort(port);
 
-		if (this->tokens_[ti_].value_ == "default_server")
-		{
-			if (isDuplicateDefaultServer(tmp_listen))
-			{
-				std::cerr << "webserv: [emerg] a duplicate default server for " << this->tokens_[ti_ - 1].value_ << " in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-				return false;
-			}
-			else
-			{
-				tmp_listen.setIsDefaultServer(true);
-			}
-		}
-		else
+		if (this->tokens_[ti_].value_ != "default_server")
 		{
 			std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return true;
+			return false;
 		}
+		if (isDuplicateDefaultServer(tmp_listen))
+		{
+			std::cerr << "webserv: [emerg] a duplicate default server for " << this->tokens_[ti_ - 1].value_ << " in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+			return false;
+		}
+		tmp_listen.setIsDefaultServer(true);
 	}
 
 	this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
