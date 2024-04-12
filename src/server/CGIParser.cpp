@@ -8,6 +8,7 @@
 #include <algorithm>
 
 const static char	*kContentLength = "content-length";
+const static char	*kStatus = "status";
 
 cgi::CGIParser::CGIParser() :
 	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), ri_(0) {}
@@ -85,7 +86,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		return;
 	}
 
-	const static char	*kStatus = "status";
 	const static char	*kContentType = "content-type";
 	ri_ = 0;
 	PARSE_HEADER_PHASE	state = sw_start;
@@ -389,8 +389,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 	const string_map_case_insensitive::iterator it = this->headers_->find(kContentType);
 	if (it != this->headers_->end() && this->headers_->at(kContentType).empty())
 		eraseHeader(kContentType);
-	// statusはheaderから削除する
-	eraseHeader(kStatus);
+	finalizeStatusCode();
 
 	this->state_ = PARSE_HEADER_DONE;
 }
@@ -448,6 +447,26 @@ void	cgi::CGIParser::setStatusCode(const std::string& value)
 		return;
 	}
 	*(this->status_code_line_) = value;
+}
+
+/**
+ * @brief status codeが設定されていない場合は、設定する
+ * 
+ * headerにlocationが存在する場合：302
+ * それ以外：200
+ * 
+ */
+void	cgi::CGIParser::finalizeStatusCode()
+{
+	// statusのみ違うメンバ変数で管理しているので、削除する
+	if (this->headers_->find(kStatus) != this->headers_->end())
+		return eraseHeader(kStatus);
+	if (this->headers_->find("location") != this->headers_->end())
+	{
+		*(this->status_code_) = 302;
+		return;
+	}
+	*(this->status_code_) = 200;
 }
 
 bool	cgi::CGIParser::isValidContentLength(std::string cl) const

@@ -110,6 +110,37 @@ TEST(cgi_parser, status_ok3)
 	test::expectStatusLine(response, {0, "1000000000000000000000000000000000000000000000      random    "});
 }
 
+TEST(cgi_parser, status_no_status)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	EXPECT_TRUE(parser.parse(response, "Content-Type:test/html     \r\nLocation: /    \r\nContent-Length: 127   \r\nContent-Type:   dup ct  	\r\nlocation: /dup/path  \r\nContent-Length:   wrong cl	\r\nextra:  extra value\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeaders(response,
+	{
+		{"Content-Type", "test/html     "},
+		{"Location", "/    "},
+		{"Content-Length", "127"},
+		{"extra", "extra value"}
+	});
+	test::expectStatusLine(response, {302, ""});
+}
+
+TEST(cgi_parser, status_no_status_no_location)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	EXPECT_TRUE(parser.parse(response, "Content-Type:test/html     \r\nContent-Length: 127   \r\nContent-Type:   dup ct  	\r\nContent-Length:   wrong cl	\r\nextra:  extra value\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeaders(response,
+	{
+		{"Content-Type", "test/html     "},
+		{"Content-Length", "127"},
+		{"extra", "extra value"}
+	});
+	test::expectStatusLine(response, {200, ""});
+}
+
 // ++++++++++++++++++++++++++++++ content-length test ++++++++++++++++++++++++++++++
 TEST(cgi_parser, error_cl_no_value)
 {
