@@ -95,10 +95,19 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 	int re = ioHandler.sendResponse( connManager, sockfd );
-	if (re == -1) // send error, retry later
+
+	// send_timeout削除
+	timerTree.deleteTimer(sockfd);
+
+	/* -1: send error, retry later
+	 * -2: send not complete, send remainder later
+	 */
+	if (re == -1 || re == -2)
+	{
+		// send_timeout追加
+		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
 		return RequestHandler::UPDATE_NONE;
-	if (re == -2) // send not complete, send remainder later
-		return RequestHandler::UPDATE_NONE;
+	}
 
 	if (!this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE))
 		return UPDATE_CLOSE;
@@ -185,14 +194,18 @@ bool	RequestHandler::cgiProcessExited(const pid_t process_id) const
 bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type)
 {
 	config::Time	timeout;
+	std::map<std::string, std::string>::iterator	it; 
 
 	// Connectionヘッダーを見てcloseならコネクションを閉じる
-	std::map<std::string, std::string>::iterator	it = connManager.getResponse(sockfd).headers_.find("Connection");
-	if (it != connManager.getResponse(sockfd).headers_.end()
-		&& it->second == "close")
+	if (type == Timer::TMO_KEEPALIVE)
 	{
-		ioHandler.closeConnection(connManager, sockfd);
-		return false;
+		it = connManager.getResponse(sockfd).headers_.find("Connection");
+		if (it != connManager.getResponse(sockfd).headers_.end()
+			&& it->second == "close")
+		{
+			ioHandler.closeConnection(connManager, sockfd);
+			return false;
+		}
 	}
 
 	// Hostヘッダーがあるか確認
