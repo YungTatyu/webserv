@@ -78,6 +78,7 @@ class Parser
 		long	retErrorPageOptNumIfValid();
 		REQUEST_METHOD	convertToRequestMethod(const std::string &method) const;
 		std::string	toUpper(std::string) const;
+		bool	isDuplicateDefaultServer(const config::Listen& this_listen);
 		Parser();
 		void	operator=(const Parser &other);
 	public:
