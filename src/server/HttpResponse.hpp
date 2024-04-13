@@ -35,7 +35,6 @@ class HttpResponse
 			sw_content_phase,
 			sw_error_page_phase,
 			sw_log_phase,
-			sw_cgi_phase,
 			sw_end_phase
 		};
 

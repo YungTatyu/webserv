@@ -624,7 +624,6 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
 		{
 			response.res_file_path_ = full_path;
 			return sw_content_phase;
-			// return sw_log_phase;
 		}
 	}
 
@@ -651,7 +650,6 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
  */
 HttpResponse::ResponsePhase	HttpResponse::searchResPath( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
-	response.state_ = HttpResponse::RES_CREATING_STATIC;
 	// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
 	{
