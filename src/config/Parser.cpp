@@ -706,12 +706,7 @@ bool	config::Parser::parseWorkerConnections()
 	// 値が正の数かつLONG_MAX以内でなければエラー
 	if (iss >> value)
 	{
-		if (0 == value || value == 1) // 本当はserver側で弾く
-		{
-			std::cerr << "webserv: [emerg] \"" << value << "\" worker_connections are not enough for 1 listening sockets" << std::endl;
-			return false;
-		}
-		else if (value < 0)
+		if (value < 0)
 		{
 			std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti_].value_ << "\" in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
 			return false;

@@ -26,11 +26,23 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/CGIParser.cpp
 	src/server/CGIExecutor.cpp
 	src/server/ConfigHandler.cpp
+	src/server/ConnectionManager.cpp
 	src/server/HttpRequest.cpp
 	src/server/HttpResponse.cpp
+	src/server/NetworkIOHandler.cpp
+	src/server/RequestHandler.cpp
 	src/server/SysCallWrapper.cpp
 	src/server/Timer.cpp
 	src/server/TimerTree.cpp
+	src/server/EpollActiveEventManager.cpp
+	src/server/EpollServer.cpp
+	src/server/PollActiveEventManager.cpp
+	src/server/PollServer.cpp
+	src/server/KqueueActiveEventManager.cpp
+	src/server/KqueueServer.cpp
+	src/server/SelectActiveEventManager.cpp
+	src/server/SelectServer.cpp
+	src/server/WebServer.cpp
 	src/utils/Utils.cpp
 	
 	# test files
@@ -40,6 +52,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
 	test/server/HttpResponseTest.cpp
+	test/server/WorkerConnectionsNumTest.cpp
 	test/conf/confLexerTest.cpp 
 	test/conf/directives_test.cpp 
 	test/conf/main_parser_test.cpp 

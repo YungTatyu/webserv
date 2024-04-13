@@ -1,8 +1,8 @@
 #include "WebServer.hpp"
+#include "LogFd.hpp"
 
 #include <vector>
 #include <utility>
-#include "LogFd.hpp"
 
 /* WebServerクラスの実装 */
 WebServer::WebServer( const config::Main* config )
@@ -11,6 +11,13 @@ WebServer::WebServer( const config::Main* config )
 
 	this->configHandler->loadConfiguration(config);
 	this->initializeServer();
+	if (this->ioHandler->getListenfdMap().size() >= this->configHandler->config_->events.worker_connections.getWorkerConnections())
+	{
+		std::stringstream	ss;
+		ss << "webserv: [emerg] " << this->configHandler->config_->events.worker_connections.getWorkerConnections() << " worker_connections are not enough for " << this->ioHandler->getListenfdMap().size() << " listening sockets";
+		this->deleteObjects();
+		throw std::runtime_error(ss.str());
+	}
 }
 
 void WebServer::initializeServer()
@@ -52,6 +59,7 @@ void WebServer::initializeServer()
 	configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");
 
 	this->timerTree = new TimerTree();
+
 }
 
 void	WebServer::initializeListenSocket(
@@ -119,14 +127,20 @@ WebServer::~WebServer()
 {
 	this->configHandler->writeErrorLog("webserv: [debug] Close webserv.\n\n");
 	// close( this->connManager->getConnection() ); // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
+	this->deleteObjects();
+}
+
+void	WebServer::deleteObjects()
+{
 	config::terminateLogFds(this->configHandler->config_);
 	delete this->timerTree;
 	delete this->configHandler->config_;
+	delete this->configHandler;
 	delete this->ioHandler;
 	delete this->requestHandler;
 	delete this->connManager;
-	delete this->configHandler;
 	delete this->eventManager;
+	delete this->server;
 }
 
 void	WebServer::run()

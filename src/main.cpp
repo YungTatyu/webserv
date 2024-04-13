@@ -17,8 +17,13 @@ int main(int ac, char *av[])
 	if (config == NULL)
 		return 1;
 
-	WebServer server = WebServer(config);
-	server.run();
+	try {
+		WebServer server = WebServer(config);
+		server.run();
+	}
+	catch (const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+	}
 	return 1;
 }
 
