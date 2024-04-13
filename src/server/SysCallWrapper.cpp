@@ -93,16 +93,10 @@ int SysCallWrapper::Dup2(int fildes, int fildes2)
 	return re;
 }
 
-/**
- * @brief F_SETFDでfdにflagをセットする
- * 
- * @param fd 
- * @param flags setしたいflag
- * @return int 
- */
-int	SysCallWrapper::Fcntl(int fd, int flags)
+int	SysCallWrapper::Fcntl(int fd, int cmd, int flags)
 {
-	int re = fcntl(fd, F_SETFD, flags);
+	// TODO: close-on-execをセットするなら、F_SETFDを使わないといけなさそう（subjectで使用不可のフラグ）
+	int re = fcntl(fd, cmd, flags);
 	if (re == -1)
 		std::cerr << "webserv: [emerg] fcntl (" << errno << ":"<< std::strerror(errno) << ")\n";
 	return re;

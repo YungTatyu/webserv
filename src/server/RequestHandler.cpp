@@ -110,7 +110,7 @@ int RequestHandler::handleCgiReadEvent(
 	HttpResponse	&response = connManager.getResponse(sockfd);
 	std::string res(reinterpret_cast<const char*>(v.data()), v.size());
 	bool parse_suc = connManager.callCgiParser(sockfd, response, res);
-	response.state_ = parse_suc == true ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
+	response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
 	int re = handleResponse(connManager, configHandler, sockfd);
 	ioHandler.closeConnection(connManager, sockfd); // delete cgi event
 	return re;

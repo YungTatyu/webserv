@@ -1,4 +1,5 @@
 #include "Utils.hpp"
+#include "SysCallWrapper.hpp"
 #include <dirent.h>
 #include <fcntl.h>
 #include <string.h>
@@ -237,4 +238,20 @@ bool	Utils::compareIgnoreCase(std::string lhs, std::string rhs)
 	std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
 	std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
 	return lhs == rhs;
+}
+
+/**
+ * @brief fdに以下を設定する
+ * 
+ * 1: non-blocking
+ * 2: exec()実行直前にfdをcloseする
+ * 
+ * @param fd 
+ * @return int 
+ */
+int	Utils::setNonBlockingCloExec(const int fd)
+{
+	SysCallWrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
+	// 以下はサブジェクトで使えないフラグ使用
+	return SysCallWrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
 }
