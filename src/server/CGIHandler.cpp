@@ -10,7 +10,7 @@
 #include <cstring>
 #include <cerrno>
 
-cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1)
+cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1), cli_socket_(-1)
 {
 	resetSockets();
 }
@@ -66,9 +66,11 @@ bool	cgi::CGIHandler::forkCgiProcess(
 
 bool	cgi::CGIHandler::callCgiExecutor(
 	const std::string& script_path,
-	const HttpRequest& request
+	const HttpRequest& request,
+	const int cli_sock
 )
 {
+	this->cli_socket_ = cli_sock;
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
 	{
 		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;

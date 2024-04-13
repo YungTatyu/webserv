@@ -122,9 +122,7 @@ HttpResponse &ConnectionManager::getResponse( const int fd )
 
 void	ConnectionManager::addCgiResponse( const int fd, const std::vector<unsigned char>& v )
 {
-	std::vector<unsigned char>&	cgi_response = this->connections_.at(fd)->cgi_response_;
-	cgi_response.resize(cgi_response.size() + v.size());
-	std::copy(v.begin(), v.end(), std::back_inserter(cgi_response));
+  connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(), v.end());
 }
 
 const std::vector<unsigned char>&	ConnectionManager::getCgiResponse( const int fd ) const
@@ -134,7 +132,7 @@ const std::vector<unsigned char>&	ConnectionManager::getCgiResponse( const int f
 
 bool	ConnectionManager::callCgiExecutor(const int fd, const std::string& script_path, const HttpRequest& request)
 {
-	return this->connections_.at(fd)->cgi_handler_.callCgiExecutor(script_path, request);
+	return this->connections_.at(fd)->cgi_handler_.callCgiExecutor(script_path, request, fd);
 }
 
 bool	ConnectionManager::callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response)

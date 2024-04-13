@@ -92,7 +92,7 @@ namespace test
 		const std::string expect
 	)
 	{
-		cgi_handler.callCgiExecutor(cgi_path, http_request);
+		cgi_handler.callCgiExecutor(cgi_path, http_request, 0);
 		if (!http_request.body.empty())
 		{
 			sendBody(http_request.body, cgi_handler.getCgiSocket());

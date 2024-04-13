@@ -35,7 +35,7 @@ function	printLog {
 
 function	runServer {
 	# sleep 1
-	$WEBSERV_PATH $1 > /dev/null 2>& &
+	$WEBSERV_PATH $1 > /dev/null 2>&1 &
 	# エラー出力する場合
 	# $WEBSERV_PATH $1 > /dev/null &
 	webserv_pid=$!

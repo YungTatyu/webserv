@@ -27,7 +27,6 @@ class PollServer : public IServer
 									TimerTree* timer_tree);
 	private:
 		void	addActiveEvents(const std::vector<struct pollfd> &pollfds,
-								ConnectionManager* conn_manager,
 								IActiveEventManager* event_manager);
 		std::vector<struct pollfd>	convertToPollfds(const ConnectionManager &conn_manager);
 };

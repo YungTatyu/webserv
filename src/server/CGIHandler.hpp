@@ -36,7 +36,8 @@ class CGIHandler
 		static bool	isCgi(const std::string& script_path);
 		bool	callCgiExecutor(
 			const std::string& script_path,
-			const HttpRequest& request
+			const HttpRequest& request,
+			const int cli_sock
 		);
 		bool	callCgiParser(HttpResponse& response, const std::string& cgi_response);
 		void	killCgiProcess() const;

@@ -349,7 +349,8 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			}
 			// headerが重複している場合は、一番初めのものが適応される
-			if (cur_name == kStatus && it == this->headers_->end())
+			const std::string	name_lowercase = Utils::toLower(cur_name);
+			if (name_lowercase == kStatus && it == this->headers_->end())
 			{
 				setStatusCode(cur_value);
 				this->headers_->insert(std::make_pair(cur_name, cur_value));
