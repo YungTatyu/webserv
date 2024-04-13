@@ -172,12 +172,12 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 				break;
 			}
 			const std::string	name_lowercase = Utils::toLower(cur_name);
-			if (name_lowercase == kStatus)
+			if (Utils::compareIgnoreCase(cur_name, kStatus))
 			{
 				state = sw_status_code;
 				break;
 			}
-			if (name_lowercase == kContentLength)
+			if (Utils::compareIgnoreCase(cur_name, kContentLength))
 			{
 				state = sw_cl_value;
 				break;
@@ -343,14 +343,13 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			}
 
 			const string_map_case_insensitive::const_iterator	it = this->headers_->find(cur_name);
-			if (cur_name == kContentLength && it == this->headers_->end() && cur_value.empty())
+			if (Utils::compareIgnoreCase(cur_name, kContentLength) && it == this->headers_->end() && cur_value.empty())
 			{
 				state = sw_error;
 				break;
 			}
 			// headerが重複している場合は、一番初めのものが適応される
-			const std::string	name_lowercase = Utils::toLower(cur_name);
-			if (name_lowercase == kStatus && it == this->headers_->end())
+			if (Utils::compareIgnoreCase(cur_name, kStatus) && it == this->headers_->end())
 			{
 				setStatusCode(cur_value);
 				this->headers_->insert(std::make_pair(cur_name, cur_value));

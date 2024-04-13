@@ -223,3 +223,18 @@ bool	Utils::isSpace(const unsigned char ch)
 {
 	return ch == ' ';
 }
+
+/**
+ * @brief 文字列の大文字小文字の差異を無視して、比較する
+ * 
+ * @param lhs 
+ * @param rhs 
+ * @return true 
+ * @return false 
+ */
+bool	Utils::compareIgnoreCase(std::string lhs, std::string rhs)
+{
+	std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
+	std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
+	return lhs == rhs;
+}
