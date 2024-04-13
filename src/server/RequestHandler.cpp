@@ -100,11 +100,12 @@ int RequestHandler::handleCgiReadEvent(
 )
 {
 	int	bytes = ioHandler.receiveCgiResponse(connManager, sockfd);
+	// std::cerr << "read bytes=" << bytes << "\n";
 	if (bytes == -1 || bytes == 2) // recv errorまたはbuffer size分recv
 		return RequestHandler::UPDATE_NONE;
-	const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
-	if (!cgiProcessExited(cgi_handler.getCgiProcessId()))
-		return RequestHandler::UPDATE_NONE;
+	// const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
+	// if (!cgiProcessExited(cgi_handler.getCgiProcessId()))
+	// 	return RequestHandler::UPDATE_NONE;
 
 	const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
 	HttpResponse	&response = connManager.getResponse(sockfd);
