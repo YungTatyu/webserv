@@ -29,7 +29,6 @@ void ConnectionManager::setConnection( const int fd )
 void ConnectionManager::setCgiConnection( const int cli_sock, const ConnectionData::EVENT event )
 {
 	ConnectionData	*cd = this->connections_.at(cli_sock); 
-	cd->cgi_handler_.setCliSocket(cli_sock);
 	const int	cgi_sock = cd->cgi_handler_.getCgiSocket();
 	this->connections_.insert(std::make_pair(cgi_sock, cd));
 	// cgi のイベントに更新

@@ -34,7 +34,6 @@ function	printLog {
 }
 
 function	runServer {
-	# sleep 1
 	$WEBSERV_PATH $1 > /dev/null 2>&1 &
 	# エラー出力する場合
 	# $WEBSERV_PATH $1 > /dev/null &
@@ -73,11 +72,12 @@ function	runTest {
 	runServer "${root}/${conf}"
 	printf "\n\033[32m<<< ${server_name} server test >>>\033[0m\n"
 
+	sleep 1
 	# 以下にテストを追加
 	assert "${root}/static/index.html" "200"
 	assert "${root}/nonexist" "404"
 	assert "${root}/dynamic/document_response.py" "200"
-	assert "${root}/dynamic/local_redirecit_res.py" "302"
+	assert "${root}/dynamic/local_redirect_res.py" "302"
 	assert "${root}/dynamic/client_redirect_res.cgi" "302"
 	assert "${root}/dynamic/client_redirect_res_doc.cgi" "302"
 	assert "${root}/dynamic/body_res.py" "200"
