@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <cstring>
+#include <cerrno>
 
 int SysCallWrapper::Socket( int domain, int type, int protocol )
 {
