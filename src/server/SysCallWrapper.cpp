@@ -1,5 +1,8 @@
 #include "SysCallWrapper.hpp"
 #include <cstdlib>
+#include <fcntl.h>
+#include <iostream>
+#include <cstring>
 
 int SysCallWrapper::Socket( int domain, int type, int protocol )
 {
@@ -86,5 +89,20 @@ int SysCallWrapper::Dup2(int fildes, int fildes2)
 		perror( "dup2" );
 		std::exit( EXIT_FAILURE );
 	}
+	return re;
+}
+
+/**
+ * @brief F_SETFDでfdにflagをセットする
+ * 
+ * @param fd 
+ * @param flags setしたいflag
+ * @return int 
+ */
+int	SysCallWrapper::Fcntl(int fd, int flags)
+{
+	int re = fcntl(fd, F_SETFD, flags);
+	if (re == -1)
+		std::cerr << "webserv: [emerg] fcntl (" << errno << ":"<< std::strerror(errno) << ")\n";
 	return re;
 }

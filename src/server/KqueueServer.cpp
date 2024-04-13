@@ -124,6 +124,7 @@ void	KqueueServer::callEventHandler(
 		const bool	is_cgi_sock = conn_manager->isCgiSocket(active_events[i].ident);
 		const int	cli_sock = cgi_handler.getCliSocket(); // cgi socketの場合に使用する
 
+		// TODO: kqueueはeofもevnetとして感知できるので、最適化の余地あり
 		int	status = RequestHandler::UPDATE_NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].ident);

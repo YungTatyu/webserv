@@ -76,6 +76,8 @@ bool	cgi::CGIHandler::callCgiExecutor(
 		std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << std::strerror(errno) << ")" << std::endl;
 		return false;
 	}
+	SysCallWrapper::Fcntl(this->sockets_[SOCKET_PARENT], O_NONBLOCK);
+	SysCallWrapper::Fcntl(this->sockets_[SOCKET_CHILD], FD_CLOEXEC);
 	return forkCgiProcess(request, script_path);
 }
 
