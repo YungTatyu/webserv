@@ -6,6 +6,10 @@ readonly WEBSERV_PATH="${SCRIPT_DIR_PATH}/../../webserv"
 readonly SV_RES_DYNAMIC_PATH="${SCRIPT_DIR_PATH}/test_files/server_res_test/dynamic"
 readonly TEST_NAME="server response test"
 
+readonly WHITE="\033[0m"
+readonly GREEN="\033[32m"
+readonly RED="\033[31m"
+
 g_total_test=0
 g_test_index=0
 g_test_passed=0
@@ -29,8 +33,8 @@ function	printErr {
 function	printLog {
 	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
 	printf "[========]    ${g_total_test} tests ran\n"
-	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
-	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
+	printf "[ ${GREEN}PASSED${WHITE} ]    ${g_test_passed} tests\n"
+	printf "[ ${RED}FAILED${WHITE} ]    ${g_test_failed} tests\n"
 }
 
 function	runServer {
@@ -54,10 +58,10 @@ function	assert {
 	local	actual=$(curl -X ${method} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
 	local	expect=$2
 	if [ "${actual}" == "${expect}" ]; then
-		printf "\033[32mpassed\033[0m\n\n"
+		printf "${GREEN}passed${WHITE}\n\n"
 		((++g_test_passed))
 	else
-		printErr "\033[31mfailed\n\033[0m"
+		printErr "${RED}failed\n${WHITE}"
 		printErr "expected:${expect}---"
 		printErr "actual  :${actual}---\n"
 		((++g_test_failed))
@@ -71,7 +75,7 @@ function	runTest {
 	g_test_index=0
 
 	runServer "${root}/${conf}"
-	printf "\n\033[32m<<< ${server_name} server test >>>\033[0m\n"
+	printf "\n${GREEN}<<< ${server_name} server test >>>${WHITE}\n"
 
 	sleep 1
 	# 以下にテストを追加
