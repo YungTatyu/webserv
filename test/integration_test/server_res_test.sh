@@ -10,7 +10,7 @@ readonly WHITE="\033[0m"
 readonly GREEN="\033[32m"
 readonly RED="\033[31m"
 
-g_total_test=0
+g_test_cnt=0
 g_test_index=0
 g_test_passed=0
 g_test_failed=0
@@ -23,7 +23,16 @@ function	init {
 		printErr "run \"make\" first to test"
 		exit 1
 	fi
+	trap signalHandler HUP INT QUIT ABRT KILL TERM
 	make -C ${SV_RES_DYNAMIC_PATH} > /dev/null
+}
+
+# signal受信時に実行
+function	signalHandler {
+	printErr "\n${TEST_NAME} interrupted: Signal received."
+	kill ${webserv_pid}
+	make fclean -C ${SV_RES_DYNAMIC_PATH} > /dev/null
+	exit 1
 }
 
 function	printErr {
@@ -32,7 +41,7 @@ function	printErr {
 
 function	printLog {
 	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
-	printf "[========]    ${g_total_test} tests ran\n"
+	printf "[========]    ${g_test_cnt} tests ran\n"
 	printf "[ ${GREEN}PASSED${WHITE} ]    ${g_test_passed} tests\n"
 	printf "[ ${RED}FAILED${WHITE} ]    ${g_test_failed} tests\n"
 }
@@ -42,11 +51,12 @@ function	runServer {
 	# エラー出力する場合
 	# $WEBSERV_PATH $1 > /dev/null &
 	webserv_pid=$!
+	sleep 1
 }
 
 # responseのstatusをテスト
 function	assert {
-	((++g_total_test))
+	((++g_test_cnt))
 	((++g_test_index))
 
 	local	uri=$1
@@ -77,7 +87,6 @@ function	runTest {
 	runServer "${root}/${conf}"
 	printf "\n${GREEN}<<< ${server_name} server test >>>${WHITE}\n"
 
-	sleep 1
 	# 以下にテストを追加
 	assert "${root}/static/index.html" "200" "GET"
 	assert "${root}/nonexist" "404" "GET"
