@@ -292,6 +292,10 @@ std::string	HttpResponse::createResponse( const HttpResponse& response )
 	// cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
 	//　ex) Content-Type　Content-Length　は文字が整形される
 	//　Locationなどは整形されない ex) loCAtion
+
+	// TODO: 以下の場合に、responseをchunkしたい
+	// headerに Content-Lengthがない場合（主にcgiレスポンス）
+	// headerに responseが長い場合、例えばbuffer size以上
 	for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
 		it != response.headers_.end();
 		++it

@@ -204,6 +204,7 @@ int	KqueueServer::addNewEvent(const int fd, const short event_filter)
 	struct kevent	event;
 	EV_SET(&event, fd, event_filter, EV_ADD|EV_ENABLE, 0, 0, 0);
 	int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
+	// TODO: errorのとき、再トライ？
 	if (re == -1)
 		std::cerr << "webserv: [emerg] kevent (" << errno << ":"<< strerror(errno) << ")\n";
 	return re;

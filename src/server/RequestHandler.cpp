@@ -99,8 +99,8 @@ int RequestHandler::handleCgiReadEvent(
 	const int sockfd
 )
 {
-	int	bytes = ioHandler.receiveCgiResponse(connManager, sockfd);
-	if (bytes == -1 || bytes == 2) // recv errorまたはbuffer size分recv
+	int	re = ioHandler.receiveCgiResponse(connManager, sockfd);
+	if (re == -1 || re == 2) // recv errorまたはbuffer size分recv
 		return RequestHandler::UPDATE_NONE;
 	const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
 	if (!cgiProcessExited(cgi_handler.getCgiProcessId()))
@@ -111,7 +111,7 @@ int RequestHandler::handleCgiReadEvent(
 	std::string res(reinterpret_cast<const char*>(v.data()), v.size());
 	bool parse_suc = connManager.callCgiParser(sockfd, response, res);
 	response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
-	int re = handleResponse(connManager, configHandler, sockfd);
+	re = handleResponse(connManager, configHandler, sockfd);
 	ioHandler.closeConnection(connManager, sockfd); // delete cgi event
 	return re;
 }
