@@ -251,7 +251,10 @@ bool	Utils::compareIgnoreCase(std::string lhs, std::string rhs)
  */
 int	Utils::setNonBlockingCloExec(const int fd)
 {
-	SysCallWrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
+	int nonblock = SysCallWrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
 	// 以下はサブジェクトで使えないフラグ使用
-	return SysCallWrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
+	int closex = SysCallWrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
+	if (nonblock == -1 || closex == -1)
+		return -1;
+	return closex;
 }
