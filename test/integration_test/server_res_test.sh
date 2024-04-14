@@ -72,8 +72,8 @@ function	assert {
 		((++g_test_passed))
 	else
 		printErr "${RED}failed\n${WHITE}"
-		printErr "expected:${expect}---"
-		printErr "actual  :${actual}---\n"
+		printErr "expected: \"${expect}\""
+		printErr "actual  : \"${actual}\"\n"
 		((++g_test_failed))
 	fi
 }
