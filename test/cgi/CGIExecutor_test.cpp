@@ -13,8 +13,9 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
-#include "Utils.hpp"
 #include <cstring>
+#include <cerrno>
+#include "Utils.hpp"
 #include "LimitExcept.hpp"
 
 typedef std::map<std::string, std::string> string_map;
@@ -72,7 +73,22 @@ namespace test
 
 	void	sendBody(const std::string& body, const int socket)
 	{
-		Utils::wrapperWrite(socket, body);
+		size_t	sent_bytes = 0;
+		const size_t buffersize = 1024;
+
+		while (sent_bytes < body.size())
+		{
+			size_t size = std::min(buffersize, body.size() - sent_bytes);
+			std::string chunk = body.substr(sent_bytes, size);
+
+			ssize_t ret = send(socket, chunk.c_str(), chunk.size(), 0);
+			if (ret == -1)
+			{
+				std::cerr << "send() " << std::strerror(errno) << "\n";
+				return;
+			}
+			sent_bytes += ret;
+		}
 	}
 
 	int	waitProcess(pid_t pid)

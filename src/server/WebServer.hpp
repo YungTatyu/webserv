@@ -37,6 +37,7 @@ class WebServer
 		void	initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
 										const std::string address, const unsigned int port);
 		void	initializeConnManager();
+		void	deleteObjects();
 };
 
 #endif

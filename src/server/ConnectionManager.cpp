@@ -17,7 +17,7 @@ ConnectionManager::~ConnectionManager()
 void ConnectionManager::setConnection( const int fd )
 {
 	connections_[fd] = new ConnectionData();
-	std::cerr << "new connection:" << fd << "\n";
+	std::cout << "new connection:" << fd << "\n";
 }
 
 /**

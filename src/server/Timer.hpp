@@ -23,6 +23,11 @@ class Timer
 		void	setTimeout(const config::Time &time);
 		static unsigned long	getCurrentTime();
 		static void	updateCurrentTime();
+		enum TimeoutType {
+			TMO_KEEPALIVE,
+			TMO_CLI_REQUEST,
+			TMO_SEND,
+		};
 };
 
 #endif
