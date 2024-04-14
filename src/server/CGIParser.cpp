@@ -165,13 +165,11 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		}
 
 		case sw_space_before_value:
-		{
 			if (ch == ' ')
 			{
 				++ri_;
 				break;
 			}
-			const std::string	name_lowercase = Utils::toLower(cur_name);
 			if (Utils::compareIgnoreCase(cur_name, kStatus))
 			{
 				state = sw_status_code;
@@ -184,7 +182,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			}
 			state = sw_value;
 			break;
-		}
 
 		case sw_value:
 			switch (ch)
