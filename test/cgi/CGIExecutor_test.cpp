@@ -47,7 +47,7 @@ namespace test
 		return request;
 	}
 
-	std::string	readCgiResponse(cgi::CGIHandler& cgi_handler)
+	std::string	recvCgiResponse(cgi::CGIHandler& cgi_handler)
 	{
 		std::string	response;
 		const size_t	buffer_size = 1024;
@@ -110,11 +110,9 @@ namespace test
 	{
 		cgi_handler.callCgiExecutor(cgi_path, http_request, 0);
 		if (!http_request.body.empty())
-		{
 			sendBody(http_request.body, cgi_handler.getCgiSocket());
-		// 	waitProcess(cgi_handler.getCgiProcessId());
-		}
-		const std::string actual = test::readCgiResponse(cgi_handler);
+		waitProcess(cgi_handler.getCgiProcessId());
+		const std::string actual = test::recvCgiResponse(cgi_handler);
 
 		EXPECT_EQ(actual, expect);
 	}
