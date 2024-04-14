@@ -12,8 +12,8 @@ g_test_passed=0
 g_test_failed=0
 
 function	init {
-	if [ -e $WEBSERV_PATH ]; then
-		printf "|------------------ $TEST_NAME start ------------------|\n"
+	if [ -e ${WEBSERV_PATH} ]; then
+		printf "|------------------ ${TEST_NAME} start ------------------|\n"
 	else
 		printErr "${WEBSERV_PATH}: command not found"
 		printErr "run \"make\" first to test"
@@ -27,14 +27,14 @@ function	printErr {
 }
 
 function	printLog {
-	printf "\n|------------------ $TEST_NAME results ------------------|\n"
+	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
 	printf "[========]    ${g_total_test} tests ran\n"
 	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
 	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
 }
 
 function	runServer {
-	$WEBSERV_PATH $1 > /dev/null 2>&1 &
+	${WEBSERV_PATH} $1 > /dev/null 2>&1 &
 	# エラー出力する場合
 	# $WEBSERV_PATH $1 > /dev/null &
 	webserv_pid=$!
@@ -47,10 +47,11 @@ function	assert {
 
 	local	uri=$1
 	local	request="localhost:4242/${uri}"
-	printf "[  test$g_test_index  ]\n${request}: "
+	local	method=$3
+	printf "[  test${g_test_index}  ]\n${request}: "
 
 	# responseのtimeoutを1秒に設定 --max-time
-	local	actual=$(curl -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
+	local	actual=$(curl -X ${method} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
 	local	expect=$2
 	if [ "${actual}" == "${expect}" ]; then
 		printf "\033[32mpassed\033[0m\n\n"
@@ -74,16 +75,16 @@ function	runTest {
 
 	sleep 1
 	# 以下にテストを追加
-	assert "${root}/static/index.html" "200"
-	assert "${root}/nonexist" "404"
-	assert "${root}/dynamic/document_response.py" "200"
-	assert "${root}/dynamic/local_redirect_res.py" "302"
-	assert "${root}/dynamic/client_redirect_res.cgi" "302"
-	assert "${root}/dynamic/client_redirect_res_doc.cgi" "302"
-	assert "${root}/dynamic/body_res.py" "200"
+	assert "${root}/static/index.html" "200" "GET"
+	assert "${root}/nonexist" "404" "GET"
+	assert "${root}/dynamic/document_response.py" "200" "GET"
+	assert "${root}/dynamic/local_redirect_res.py" "302" "GET"
+	assert "${root}/dynamic/client_redirect_res.cgi" "302" "GET"
+	assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET"
+	assert "${root}/dynamic/body_res.py" "200" "GET"
 
 	# サーバープロセスを終了
-	kill $webserv_pid > /dev/null 2>&1
+	kill ${webserv_pid} > /dev/null 2>&1
 }
 
 function	main {
@@ -96,7 +97,7 @@ function	main {
 
 	make fclean -C ${SV_RES_DYNAMIC_PATH} > /dev/null
 
-	if [ $g_test_failed -ne 0 ]; then
+	if [ ${g_test_failed} -ne 0 ]; then
 		return 1
 	fi
 
