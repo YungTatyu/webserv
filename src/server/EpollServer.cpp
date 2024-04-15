@@ -138,7 +138,7 @@ void	EpollServer::callEventHandler(
 			break;
 
 		case RequestHandler::UPDATE_WRITE:
-			if (conn_manager->isCgiSocket(active_events[i].ident))
+			if (conn_manager->isCgiSocket(active_events[i].data.fd))
 			{
 				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
 				deleteEvent(active_events[i]); // cgi socketを監視から削除する
