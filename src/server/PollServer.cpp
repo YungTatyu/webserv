@@ -36,18 +36,16 @@ int	PollServer::waitForEvent(ConnectionManager*conn_manager, IActiveEventManager
 	int re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
 
 	// 発生したイベントをActiveEventManagerにすべて追加
-	addActiveEvents(pollfds, conn_manager, event_manager);
+	addActiveEvents(pollfds, event_manager);
 	return re;
 }
 
 void	PollServer::addActiveEvents(
 	const std::vector<pollfd> &pollfds,
-	ConnectionManager* conn_manager,
 	IActiveEventManager* event_manager
 )
 {
-	const size_t	size = conn_manager->getConnections().size();
-	for (size_t i = 0; i < size; ++i)
+	for (size_t i = 0; i < pollfds.size(); ++i)
 	{
 		const struct pollfd& cur_pfd = pollfds[i];
 		// イベントが発生していたら、active_eventに追加

@@ -8,6 +8,7 @@
 #include <algorithm>
 
 const static char	*kContentLength = "content-length";
+const static char	*kStatus = "status";
 
 cgi::CGIParser::CGIParser() :
 	headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), ri_(0) {}
@@ -85,7 +86,6 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		return;
 	}
 
-	const static char	*kStatus = "status";
 	const static char	*kContentType = "content-type";
 	ri_ = 0;
 	PARSE_HEADER_PHASE	state = sw_start;
@@ -165,26 +165,23 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 		}
 
 		case sw_space_before_value:
-		{
 			if (ch == ' ')
 			{
 				++ri_;
 				break;
 			}
-			const std::string	name_lowercase = Utils::toLower(cur_name);
-			if (name_lowercase == kStatus)
+			if (Utils::compareIgnoreCase(cur_name, kStatus))
 			{
 				state = sw_status_code;
 				break;
 			}
-			if (name_lowercase == kContentLength)
+			if (Utils::compareIgnoreCase(cur_name, kContentLength))
 			{
 				state = sw_cl_value;
 				break;
 			}
 			state = sw_value;
 			break;
-		}
 
 		case sw_value:
 			switch (ch)
@@ -343,13 +340,13 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 			}
 
 			const string_map_case_insensitive::const_iterator	it = this->headers_->find(cur_name);
-			if (cur_name == kContentLength && it == this->headers_->end() && cur_value.empty())
+			if (Utils::compareIgnoreCase(cur_name, kContentLength) && it == this->headers_->end() && cur_value.empty())
 			{
 				state = sw_error;
 				break;
 			}
 			// headerが重複している場合は、一番初めのものが適応される
-			if (cur_name == kStatus && it == this->headers_->end())
+			if (Utils::compareIgnoreCase(cur_name, kStatus) && it == this->headers_->end())
 			{
 				setStatusCode(cur_value);
 				this->headers_->insert(std::make_pair(cur_name, cur_value));
@@ -389,8 +386,7 @@ void	cgi::CGIParser::parseHeaders(const std::string& response)
 	const string_map_case_insensitive::iterator it = this->headers_->find(kContentType);
 	if (it != this->headers_->end() && this->headers_->at(kContentType).empty())
 		eraseHeader(kContentType);
-	// statusはheaderから削除する
-	eraseHeader(kStatus);
+	finalizeStatusCode();
 
 	this->state_ = PARSE_HEADER_DONE;
 }
@@ -448,6 +444,26 @@ void	cgi::CGIParser::setStatusCode(const std::string& value)
 		return;
 	}
 	*(this->status_code_line_) = value;
+}
+
+/**
+ * @brief status codeが設定されていない場合は、設定する
+ * 
+ * headerにlocationが存在する場合：302
+ * それ以外：200
+ * 
+ */
+void	cgi::CGIParser::finalizeStatusCode()
+{
+	// statusのみ違うメンバ変数で管理しているので、削除する
+	if (this->headers_->find(kStatus) != this->headers_->end())
+		return eraseHeader(kStatus);
+	if (this->headers_->find("location") != this->headers_->end())
+	{
+		*(this->status_code_) = 302;
+		return;
+	}
+	*(this->status_code_) = 200;
 }
 
 bool	cgi::CGIParser::isValidContentLength(std::string cl) const

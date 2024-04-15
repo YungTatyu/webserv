@@ -72,15 +72,20 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
 	return 1;
 }
 
-ssize_t NetworkIOHandler::receiveCgiResponse( ConnectionManager& connManager, const int sock )
+int NetworkIOHandler::receiveCgiResponse( ConnectionManager& connManager, const int sock )
 {
 	const static size_t buffer_size = 1024;
 	std::vector<unsigned char>	buffer(buffer_size);
 
 	ssize_t re = recv(sock, buffer.data(), buffer_size, 0);
-	if (re > 0)
-		connManager.addCgiResponse(sock, buffer);
-	return re;
+	if (re == 0) // cgi process died
+		return 0;
+	if (re == -1) // error
+		return -1;
+	connManager.addCgiResponse(sock, buffer);
+	if (re == buffer_size) // continue recv
+		return -2;
+	return 1;
 }
 
 int NetworkIOHandler::sendResponse( ConnectionManager &connManager, const int cli_sock )

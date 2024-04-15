@@ -25,6 +25,7 @@ class KqueueActiveEventManager : public IActiveEventManager
 		bool	isReadEvent(const void *event);
 		bool	isWriteEvent(const void *event);
 		bool	isErrorEvent(const void *event);
+		bool	isEofEvent(const void *event);
 	private:
 		std::vector<struct kevent> active_events_;
 		int active_events_num_;
