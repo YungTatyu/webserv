@@ -138,7 +138,14 @@ void	EpollServer::callEventHandler(
 			break;
 
 		case RequestHandler::UPDATE_WRITE:
-			updateEvent(active_events[i], EPOLLOUT);
+			if (conn_manager->isCgiSocket(active_events[i].ident))
+			{
+				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
+				deleteEvent(active_events[i]); // cgi socketを監視から削除する
+				addNewEvent(cgi_handler.getCliSocket(), EPOLLOUT);
+			}
+			else
+				updateEvent(active_events[i], EPOLLOUT);
 			break;
 
 		case RequestHandler::UPDATE_CLOSE:
