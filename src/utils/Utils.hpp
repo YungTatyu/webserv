@@ -43,6 +43,8 @@ uint32_t	StrToIPAddress( const std::string& ip);
 int	resolveConnectedPort(const int sock);
 std::string	toLower(std::string str);
 bool	isSpace(const unsigned char ch);
+bool	compareIgnoreCase(std::string lhs, std::string rhs);
+int	setNonBlockingCloExec(const int fd);
 template<typename T>std::string	toStr(const T value);
 }
 

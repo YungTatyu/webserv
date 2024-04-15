@@ -51,7 +51,7 @@ void	KqueueActiveEventManager::clearAllEvents()
 bool	KqueueActiveEventManager::isReadEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return (kq_e->filter == EVFILT_READ) && !isErrorEvent(event);
+	return kq_e->filter == EVFILT_READ && !isErrorEvent(event);
 }
 
 /**
@@ -64,11 +64,11 @@ bool	KqueueActiveEventManager::isReadEvent(const void *event)
 bool	KqueueActiveEventManager::isWriteEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return (kq_e->filter == EVFILT_WRITE) && !isErrorEvent(event);
+	return kq_e->filter == EVFILT_WRITE && !isErrorEvent(event);
 }
 
 /**
- * @brief ソケットが閉じられたもしくはエラーが発生した
+ * @brief エラーが発生した
  * 
  * @param event 
  * @return true 
@@ -77,7 +77,20 @@ bool	KqueueActiveEventManager::isWriteEvent(const void *event)
 bool	KqueueActiveEventManager::isErrorEvent(const void *event)
 {
 	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
-	return (kq_e->flags & EV_EOF) || (kq_e->flags & EV_ERROR);
+	return kq_e->flags & EV_ERROR;
+}
+
+/**
+ * @brief eofを感知した(ソケットが閉じられた)
+ * 
+ * @param event 
+ * @return true 
+ * @return false 
+ */
+bool	KqueueActiveEventManager::isEofEvent(const void *event)
+{
+	const struct kevent	*kq_e = static_cast<const struct kevent*>(event);
+	return kq_e->flags & EV_EOF;
 }
 
 #endif

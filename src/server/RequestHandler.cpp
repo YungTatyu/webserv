@@ -58,15 +58,38 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
 {
-	// TODO: cgi read event, cgi write eventに更新する際は、返り値で返す必要がある
-	// HttpResponseで呼ぶ？
-	// bodyが存在する場合は、cgiにbodyを送る必要がある
-	std::string	final_response = HttpResponse::generateResponse( connManager.getRequest(sockfd), connManager.getResponse(sockfd), connManager.getTiedServer(sockfd), sockfd, configHandler );
-	if (!final_response.empty())
-		connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
+	HttpRequest	&request = connManager.getRequest(sockfd);
+	HttpResponse	&response = connManager.getResponse(sockfd);
+	std::string	final_response = HttpResponse::generateResponse( request, response, connManager.getTiedServer(sockfd), sockfd, configHandler );
+
+	if (response.state_ == HttpResponse::RES_EXECUTE_CGI)
+		return handleCgi(connManager, configHandler, sockfd);
+	connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
 	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
 	return RequestHandler::UPDATE_WRITE;
+}
+
+int	RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+{
+	HttpRequest	&request = connManager.getRequest(sockfd);
+	HttpResponse	&response = connManager.getResponse(sockfd);
+
+	bool	re = connManager.callCgiExecutor(sockfd, response.res_file_path_, request);
+	if (!re)
+	{
+		connManager.resetCgiSockets(sockfd);
+		response.state_ = HttpResponse::RES_CGI_ERROR;
+		return handleResponse(connManager, configHandler, sockfd);
+	}
+	// bodyが空なら、bodyをsendしない
+	if (request.body.empty())
+	{
+		connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_READ);
+		return RequestHandler::UPDATE_CGI_READ;
+	}
+	connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_WRITE);
+	return RequestHandler::UPDATE_CGI_WRITE;
 }
 
 int RequestHandler::handleCgiReadEvent(
@@ -76,18 +99,21 @@ int RequestHandler::handleCgiReadEvent(
 	const int sockfd
 )
 {
-	ioHandler.receiveCgiResponse(connManager, sockfd);
+	int	re = ioHandler.receiveCgiResponse(connManager, sockfd);
+	if (re == -1 || re == 2) // recv errorまたはbuffer size分recv
+		return RequestHandler::UPDATE_NONE;
 	const cgi::CGIHandler&	cgi_handler = connManager.getCgiHandler(sockfd);
-	if (cgiProcessExited(cgi_handler.getCgiProcessId()))
-	{
-		const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
-		connManager.callCgiParser(sockfd, connManager.getResponse(sockfd),
-			std::string(reinterpret_cast<const char*>(v.data())));
-		int re = handleResponse(connManager, configHandler, sockfd);
-		ioHandler.closeConnection(connManager, sockfd);
-		return re;
-	}
-	return RequestHandler::UPDATE_NONE;
+	if (!cgiProcessExited(cgi_handler.getCgiProcessId()))
+		return RequestHandler::UPDATE_NONE;
+
+	const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
+	HttpResponse	&response = connManager.getResponse(sockfd);
+	std::string res(reinterpret_cast<const char*>(v.data()), v.size());
+	bool parse_suc = connManager.callCgiParser(sockfd, response, res);
+	response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
+	re = handleResponse(connManager, configHandler, sockfd);
+	ioHandler.closeConnection(connManager, sockfd); // delete cgi event
+	return re;
 }
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
@@ -170,6 +196,7 @@ bool	RequestHandler::cgiProcessExited(const pid_t process_id) const
 	int status;
 	pid_t re = waitpid(process_id, &status, WNOHANG);
 	// errorまたはprocessが終了していない
+	// TODO: errorのときの処理はあやしい
 	if (re == 0 || re == -1)
 		return false;
 	return true;
