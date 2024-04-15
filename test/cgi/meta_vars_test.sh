@@ -1,93 +1,121 @@
 #!/bin/bash
 
 # init
-readonly script_dir_path=$(dirname "$0")
-readonly webserv_path="${script_dir_path}/../../webserv"
-readonly test_name="meta vars test"
-
-if [ -e $webserv_path ]
-then
-	printf "|------------------ $test_name start ------------------|\n"
-else
-	echo "${webserv_path}: command not found"
-	echo "run \"make\" first to test"
-	exit 1
-fi
+readonly SCRIPT_DIR_PATH=$(dirname "$0")
+readonly WEBSERV_PATH="${SCRIPT_DIR_PATH}/../../webserv"
+readonly TEST_NAME="meta vars test"
 
 g_total_test=0
 g_test_index=0
 g_test_passed=0
 g_test_failed=0
 
-function	runServer {
-	$webserv_path $1 > /dev/null 2>&1 &
-	webserv_pid=$!
+function	init {
+	if [ -e ${WEBSERV_PATH} ]; then
+		printf "|------------------ ${TEST_NAME} start ------------------|\n"
+	else
+		printErr "${WEBSERV_PATH}: command not found"
+		printErr "run \"make\" first to test"
+		exit 1
+	fi
+	trap signalHandler HUP INT QUIT ABRT KILL TERM
 }
 
-# responseのstatusをテスト
+# signal受信時に実行
+function	signalHandler {
+	printErr "\n${TEST_NAME} interrupted: Signal received."
+	kill ${webserv_pid}
+	exit 1
+}
+
+function	printErr {
+	printf "${*}\n" >&2
+}
+
+function	printLog {
+	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
+	printf "[========]    ${g_test_cnt} tests ran\n"
+	printf "[ ${GREEN}PASSED${WHITE} ]    ${g_test_passed} tests\n"
+	printf "[ ${RED}FAILED${WHITE} ]    ${g_test_failed} tests\n"
+}
+
+function	runServer {
+	# ${WEBSERV_PATH} $1 > /dev/null 2>&1 &
+	# エラー出力する場合
+	${WEBSERV_PATH} $1 > /dev/null &
+	webserv_pid=$!
+	sleep 1
+}
+
 function	assert {
-	g_total_test=$(bc <<< "$g_total_test + 1")
-	g_test_index=$(bc <<< "$g_test_index + 1")
+	((++g_test_cnt))
+	((++g_test_index))
 
 	local	uri=$1
 	local	request="localhost:4242/${uri}"
-	printf "[  test$g_test_index  ]\n${request}: "
+	printf "[  test${g_test_index}  ]\n${request}: "
 
 	# responseのtimeoutを1秒に設定 --max-time
-	local	actual=$(curl -H "host: test" -H "content-type: text" -d "body message" $request --max-time 1 2>/dev/null)
+	# local	actual=$(curl -H "host: test" -H "content-type: text" ${request} --max-time 1 2>/dev/null)
+	local	actual=$(curl ${request})
+	# local	actual=$(curl -H "host: test" -H "content-type: text" ${request}  2>/dev/null)
 	local	expect=$2
-	if [ "$actual" == "$expect" ]
-	then
-		printf "\033[32mpassed\033[0m\n\n"
-		g_test_passed=$(bc <<< "$g_test_passed + 1")
+	if [ "${actual}" == "${expect}" ]; then
+		printf "${GREEN}passed${WHITE}\n\n"
+		((++g_test_passed))
 	else
-		printf "\033[31mfailed\n\033[0m"
-		printf "expected:${expect}---\n"
-		printf "actual  :${actual}---\n\n"
-		g_test_failed=$(bc <<< "$g_test_failed + 1")
+		printErr "${RED}failed\n${WHITE}"
+		printErr "expected: \"${expect}\""
+		printErr "actual  : \"${actual}\"\n"
+		((++g_test_failed))
 	fi
 }
 
 function	printLog {
-	printf "\n|------------------ $test_name results ------------------|\n"
-	printf "[========]    ${g_total_test} tests ran\n"
-	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
-	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
-
-	if [ $g_test_failed -ne 0 ]
-	then
-		exit 1
-	fi
+	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
+	printf "[========]    ${g_test_cnt} tests ran\n"
+	printf "[ ${GREEN}PASSED${WHITE} ]    ${g_test_passed} tests\n"
+	printf "[ ${RED}FAILED${WHITE} ]    ${g_test_failed} tests\n"
 }
 
-runServer "${root}/all_meta_vars.conf"
+function	main {
 
-root="test/cgi/cgi_files/executor"
-uri="${root}/all_meta_vars.py"
+	local root="test/cgi/cgi_files/executor"
+	local uri="${root}/all_meta_vars.py"
+	local meta_vars=(
+		"AUTH_TYPE=\n"
+		"CONTENT_LENGTH=12\n"
+		"CONTENT_TYPE=text\n"
+		"GATEWAY_INTERFACE=CGI/1.1\n"
+		"PATH_INFO=\n"
+		"PATH_TRANSLATED=\n"
+		"QUERY_STRING=key=value&test=vtest\n"
+		"REMOTE_ADDR=127.0.0.1\n"
+		"REMOTE_HOST=127.0.0.1\n"
+		"REQUEST_METHOD=GET\n"
+		"SCRIPT_NAME=${uri}\n"
+		"SERVER_NAME=test\n"
+		"SERVER_PORT=4242\n"
+		"SERVER_PROTOCOL=HTTP/1.1\n"
+		"SERVER_SOFTWARE=webserv/1.0\n"
+	)
+	local expect=$(printf "%s" "${meta_vars[@]}")
 
-meta_vars=(
-	"AUTH_TYPE=\n"
-	"CONTENT_LENGTH=12\n"
-	"CONTENT_TYPE=text\n"
-	"GATEWAY_INTERFACE=CGI/1.1\n"
-	"PATH_INFO=\n"
-	"PATH_TRANSLATED=\n"
-	"QUERY_STRING=key=value&test=vtest\n"
-	"REMOTE_ADDR=127.0.0.1\n"
-	"REMOTE_HOST=127.0.0.1\n"
-	"REQUEST_METHOD=GET\n"
-	"SCRIPT_NAME=${uri}\n"
-	"SERVER_NAME=test\n"
-	"SERVER_PORT=4242\n"
-	"SERVER_PROTOCOL=HTTP/1.1\n"
-	"SERVER_SOFTWARE=webserv/1.0\n"
-)
+	init
+	runServer "${root}/all_meta_vars.conf"
 
-expect=$(printf "%s" "${meta_vars[@]}")
+	# assert "${root}/${uri}" "${expect}"
+	assert "${uri}?key=value&test=vtest" "${expect}"
 
-assert "${root}/${uri}?key=value&test=vtest" "${expect}"
+	# サーバープロセスを終了
+	kill ${webserv_pid} > /dev/null 2>&1
+	printLog
 
-# サーバープロセスを終了
-kill $webserv_pid > /dev/null 2>&1
+	if [ ${g_test_failed} -ne 0 ]; then
+		return 1
+	fi
 
-printLog
+	return 0
+}
+
+main "$@"
