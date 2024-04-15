@@ -382,10 +382,11 @@ TEST(cgi_parser, body_no_content_length)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
-
 	const std::string	header = "content-length: 10\r\n\r\n";
 	const std::string	body = " this is body message   ";
+
 	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+	test::expectHeaders(response, {{"Content-Length", std::to_string(10)}});
 	test::expectBody(response, body, 10);
 }
 
@@ -393,10 +394,11 @@ TEST(cgi_parser, body_with_content_length)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
-
 	const std::string	header = "\r\n";
 	const std::string	body = "   this is body message     ";
+
 	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+	test::expectHeaders(response, {{"Content-Length", std::to_string(body.size())}});
 	test::expectBody(response, body);
 }
 
@@ -404,9 +406,10 @@ TEST(cgi_parser, no_body)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
-
 	const std::string	header = "content-length: 10\r\n\r\n";
+
 	EXPECT_TRUE(parser.parse(response, header, cgi::PARSE_BEFORE));
+	test::expectHeaders(response, {{"Content-Length", std::to_string(10)}});
 	test::expectBody(response, "", 10);
 }
 
@@ -414,9 +417,10 @@ TEST(cgi_parser, body_long_content_length)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
-
 	const std::string	header = "content-length: 9223372036854775807\r\n\r\n";
 	const std::string	body = " this is body message   ";
+
 	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+	test::expectHeaders(response, {{"Content-Length", std::to_string(9223372036854775807)}});
 	test::expectBody(response, body, 9223372036854775807);
 }
