@@ -145,6 +145,25 @@ void	EpollServer::callEventHandler(
 			deleteEvent(active_events[i]);
 			break;
 
+		case RequestHandler::UPDATE_CGI_READ:
+			if (conn_manager->isCgiSocket(active_events[i].data.fd))
+				updateEvent(active_events[i], EPOLLIN);
+			else
+			{
+				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
+				deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+				addNewEvent(cgi_handler.getCgiSocket(), EPOLLIN);
+			}
+			break;
+
+		case RequestHandler::UPDATE_CGI_WRITE:
+		{
+			const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
+			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+			addNewEvent(cgi_handler.getCgiSocket(), EPOLLOUT);
+			break;
+		}
+
 		default:
 			if (status >= 0) // fdだったら
 				addNewEvent(status, EPOLLIN);
