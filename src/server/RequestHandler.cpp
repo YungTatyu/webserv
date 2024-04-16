@@ -22,7 +22,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 		// timeout追加
 		// ToDo: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
-		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
+		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, accept_sock, Timer::TMO_CLI_REQUEST);
 
 		// worker_connections確認
 		if (this->isOverWorkerConnections(connManager, configHandler))
@@ -102,7 +102,8 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	/* -1: send error, retry later
 	 * -2: send not complete, send remainder later
 	 */
-	if (re == -1 || re == -2)
+	//if (re == -1 || re == -2)
+	if (re !=0)
 	{
 		// send_timeout追加
 		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
@@ -250,6 +251,8 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 		ioHandler.closeConnection(connManager, sockfd);
 		return false;
 	}
+
+	std::cout << "timer added: " << timeout.time_in_ms_ << std::endl;
 
 	timerTree.addTimer(
 		Timer(sockfd, timeout)
