@@ -102,8 +102,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 	/* -1: send error, retry later
 	 * -2: send not complete, send remainder later
 	 */
-	//if (re == -1 || re == -2)
-	if (re !=0)
+	if (re != 0)
 	{
 		// send_timeout追加
 		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
