@@ -25,19 +25,13 @@ int	main(int ac, char *av[])
 		exit (1);
 	}
 
-	int option_value = 5;
+	//SOCK_MIN_RCVBUFのようなマクロが見つかればそれに差し替える
+	int option_value = 1024; // 環境によって最小値はこれよりも大きいがそちらに合わせられるだけで問題はない。
 	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &option_value, sizeof(option_value)) == -1)
 	{
 		std::cerr << "Error: setsockopt:" << std::strerror(errno);
 		exit(1);
 	}
-	//struct linger lin;
-	//if (setsockopt(sockfd, SOL_SOCKET, SO_LINGER, &lin, sizeof(lin)) == -1)
-	//{
-	//	std::cerr << "Error: setsockopt:" << std::strerror(errno);
-	//	exit(1);
-	//}
-
 
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(struct sockaddr_in));
@@ -52,59 +46,62 @@ int	main(int ac, char *av[])
 		exit(1);
 	}
 
-	// 送信
-	char request[] = "GET /timeout10/ HTTP/1.1\r\nHost: _\r\n\r\n";
-	//char *request = av[3];
-	//std::vector<unsigned char>	request = static_cast<std::vector<unsigned char>>(av[3]);
-	//std::vector<unsigned char>	request;
-	//while (*data != '\0') {
-	//	request.push_back(static_cast<unsigned char>(*data));
-	//	++data;
+	// receive buf size取得
+	//int	buffer_size;
+	//socklen_t	buffer_size_length = sizeof(buffer_size);
+	//if (getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buffer_size, &buffer_size_length) < 0) {
+	//	std::cerr << "Error in getting socket options" << std::endl;
+	//	return 1;
 	//}
-	//std::cout << strlen(request) << std::endl;
-	send(sockfd, request, strlen(request), 0);
-	//send(sockfd, request.data(), request.size(), 0);
+
+	//std::cout << "Recv buffer size: " << buffer_size << " bytes" << std::endl;
+
+	// 送信
+	// 引数から受け取った文字列でrequestを送ると400エラーになってしまう。
+	//char *request = av[3];
+	char request[] = "GET /timeout10/ HTTP/1.1\r\nHost: _\r\n\r\n";
+	if (send(sockfd, request, strlen(request), 0) == 0)
+	{
+		std::cerr << "Error: recv:" << std::strerror(errno);
+		exit(1);
+	}
 	std::cout << "send: " << request << std::endl;
 
 	// 受信
-	char r_str[BUF_SIZE];
 	int ret;
-	//while (1)
-	//{
-		ret = recv(sockfd, r_str, BUF_SIZE, 0);
-		if (ret == 0)
-		{
-			exit(1);
-		}
-		std::cout << "accept: " << r_str << std::endl;
-		sleep(atoi(av[4]) + 1);
-	//}
-	if (send(sockfd, request, strlen(request), 0) == 0)
+	char r_str[BUF_SIZE];
+	ret = recv(sockfd, r_str, BUF_SIZE, 0);
+	if (ret == 0)
 	{
-		std::cout << "connection timeout." << std::endl;
+		std::cerr << "Error: recv:" << std::strerror(errno);
+		exit(1);
+	}
+	std::cout << "recv byte: " << ret << std::endl;
+	std::cout << "accept: " << r_str << std::endl;
+
+	// expect time + 1 秒待機
+	sleep(atoi(av[4]) + 1);
+
+	// 一度目のsendはserver側で接続がcloseされていても成功する
+	// close されている場合RESETパケットが送られる。
+	ret = send(sockfd, request, strlen(request), 0);
+	std::cout << "send byte: " << ret << std::endl;
+	// 2回目のsendはcloseされていればsendは失敗する。
+	ret = send(sockfd, request, strlen(request), 0);
+	std::cout << "send byte: " << ret << std::endl;
+	if (errno == ECONNRESET || errno == EPIPE)
+	{
+		std::cout << "connection timed out." << std::endl;
 		close(sockfd);
 		exit(1);
 	}
+	else
+		std::cout << "connection didn't timeout." << std::endl;
+	std::cout << "expect send byte: " << strlen(request) << std::endl;
+	std::cout << "send byte: " << ret << std::endl;
 
-	int err = 0;
-	socklen_t len = sizeof(err);
-	while (1)
-	{
-		sleep(5);
-		//if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &err, &len) != 0)
-		//{
-		//	std::cerr << "Error: getsockopt:" << std::strerror(errno);
-		//	return errno;
-		//}
-		////std::cout << "err: " << err << std::endl;
-		//if (err != 0)
-		//{
-		//	std::cout << "connection timeout." << std::endl;
-		//	close(sockfd);
-		//	exit(1);
-		//}
-	}
-
+	// send_timeoutで死ななかった場合は5秒だけ待ってcloseする
+	sleep(5);
 	close(sockfd);
 
 	return (0);
