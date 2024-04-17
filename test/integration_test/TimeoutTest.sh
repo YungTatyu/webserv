@@ -56,7 +56,7 @@ EOT
 	local telnet_running=$?
 
 	if [ "$telnet_running" -eq 1 ]; then
-		kill $(ps | grep "sleep" | grep -v grep | cut -d ' ' -f1) >/dev/null 2>&1
+		kill $(ps | grep "sleep" | grep -v grep | cut -d ' ' -f2) >/dev/null 2>&1
 		if [ "$expect_result" = "true" ]; then
 			printf "${GREEN}passed.${RESET}\nServer closed the connection\n\n"
 			((PASSED_TESTS++))
@@ -65,7 +65,7 @@ EOT
 			((FAILED_TESTS++))
 		fi
 	else # telnetが正常にタイムアウトする前にsleepが終了
-		kill $(ps | grep "telnet" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
+		kill $(ps | grep "telnet" | grep -v grep | cut -d ' ' -f2) > /dev/null 2>&1
 		if [ "$expect_result" = "true" ]; then
 			printf "${RED}failed.${RESET}\nServer did not timeout\n"
 			((FAILED_TESTS++))
