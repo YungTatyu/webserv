@@ -37,8 +37,8 @@ protected:
 		else if (static_cast<std::string>(test_info->name()) == "ErrorPage") {
 			file_path = "test/server/ResponseTestFiles/ErrorPage.conf";
 		}
-		else if (static_cast<std::string>(test_info->name()) == "StaticHandler") {
-			file_path = "test/server/ResponseTestFiles/staticHandler.conf";
+		else if (static_cast<std::string>(test_info->name()) == "SearchResPath") {
+			file_path = "test/server/ResponseTestFiles/searchResPath.conf";
 		}
 		else if (static_cast<std::string>(test_info->name()) == "autoIndex") {
 			file_path = "test/server/ResponseTestFiles/autoIndex.conf";
@@ -102,7 +102,7 @@ TEST_F(HttpResponseTest, ParseError)
 	// 正解のレスポンスを初期化 なぜかdefault_errorpage_map_が型エラーになったのでここでは直書き
 	std::vector<std::string> correct_res;
 	correct_res.push_back("400 Bad Request");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("<html>\r\n<head><title>400 Bad Request</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n");
 	// HttpRequest作成
@@ -147,7 +147,7 @@ TEST_F(HttpResponseTest, Return)
 	HttpResponse	response1;
 	request.uri = "/code/";
 	correct_res.push_back("HTTP/1.1 418 I'm a teapot");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response1, tied_server, sock, config_handler_);
@@ -162,7 +162,7 @@ TEST_F(HttpResponseTest, Return)
 	request.uri = "/code-text/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 404 Not Found");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/plain");
 	correct_res.push_back("Content-Length: 14");
@@ -178,12 +178,12 @@ TEST_F(HttpResponseTest, Return)
 	request.uri = "/code-url/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 307 Temporary Redirect");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
-	correct_res.push_back("Content-Length: 168");
+	correct_res.push_back("Content-Length: 170");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Location: http://127.0.0.1:7000/code-url.html");
-	correct_res.push_back("<html>\r\n<head><title>307 Temporary Redirect</title></head>\r\n<body>\r\n<center><h1>307 Temporary Redirect</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("<html>\r\n<head><title>307 Temporary Redirect</title></head>\r\n<body>\r\n<center><h1>307 Temporary Redirect</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response3, tied_server, sock, config_handler_);
 	// 結果確認
@@ -195,12 +195,12 @@ TEST_F(HttpResponseTest, Return)
 	request.uri = "/url/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 302 Moved Temporarily");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
-	correct_res.push_back("Content-Length: 142");
+	correct_res.push_back("Content-Length: 144");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Location: http://127.0.0.1:7000/url.html");
-	correct_res.push_back("<html>\r\n<head><title>302 Found</title></head>\r\n<body>\r\n<center><h1>302 Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("<html>\r\n<head><title>302 Found</title></head>\r\n<body>\r\n<center><h1>302 Found</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response4, tied_server, sock, config_handler_);
 	// 結果確認
@@ -231,7 +231,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 	HttpResponse	response1;
 	request.uri = "/nothing.html";
 	correct_res.push_back("HTTP/1.1 499");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 258");
@@ -254,7 +254,7 @@ TEST_F(HttpResponseTest, ErrorPage)
 	request.parseState = HttpRequest::PARSE_ERROR;
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 400 Bad Request");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 274");
@@ -277,18 +277,18 @@ TEST_F(HttpResponseTest, ErrorPage)
 	request.parseState = HttpRequest::PARSE_COMPLETE;
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 500 Internal Server Error");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 174");
-	correct_res.push_back("<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("Content-Length: 176");
+	correct_res.push_back("<html>\r\n<head><title>500 Internal Server Error</title></head>\r\n<body>\r\n<center><h1>500 Internal Server Error</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response3, tied_server, sock, config_handler_);
 	// 結果確認
 	ASSERT_TRUE(test::CORRECT_RESPONSE(correct_res, final_response));
 }
 
-TEST_F(HttpResponseTest, StaticHandler)
+TEST_F(HttpResponseTest, SearchResPath)
 {
 	// 共通初期化
 	// 疑似socket作成
@@ -312,7 +312,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	HttpResponse	response1;
 	request.uri = "/";
 	correct_res.push_back("HTTP/1.1 200 OK");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 272");
@@ -333,11 +333,11 @@ TEST_F(HttpResponseTest, StaticHandler)
 	request.uri = "/testHtml";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 301 Moved Permanently");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 166");
-	correct_res.push_back("<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("Content-Length: 168");
+	correct_res.push_back("<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response2, tied_server, sock, config_handler_);
 	// 結果確認
@@ -349,11 +349,11 @@ TEST_F(HttpResponseTest, StaticHandler)
 	request.uri = "/nothing/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 404 Not Found");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 150");
-	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("Content-Length: 152");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response3, tied_server, sock, config_handler_);
 	// 結果確認
@@ -365,7 +365,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	request.uri = "/alias/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 200 OK");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 286");
@@ -387,7 +387,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	request.uri = "/location-root/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 200 OK");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 272");
@@ -409,7 +409,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	HttpResponse	response6;
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 200 OK");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 274");
@@ -431,7 +431,7 @@ TEST_F(HttpResponseTest, StaticHandler)
 	request.uri = "/code-error-page/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 405 Not Allowed");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Content-Length: 272");
@@ -471,7 +471,7 @@ TEST_F(HttpResponseTest, autoIndex)
 	HttpResponse	response1;
 	request.uri = "/";
 	correct_res.push_back("HTTP/1.1 200 OK");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Index of");
@@ -486,11 +486,11 @@ TEST_F(HttpResponseTest, autoIndex)
 	request.uri = "/no-autoindex/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 403 Forbidden");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 150");
-	correct_res.push_back("<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("Content-Length: 152");
+	correct_res.push_back("<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response2, tied_server, sock, config_handler_);
 	// 結果確認
@@ -507,7 +507,7 @@ TEST_F(HttpResponseTest, autoIndex)
 	request.uri = "/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 200 OK");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: keep-alive");
 	correct_res.push_back("Content-Type: text/html");
 	correct_res.push_back("Index of");
@@ -522,11 +522,11 @@ TEST_F(HttpResponseTest, autoIndex)
 	request.uri = "/nothing-directory/";
 	correct_res.clear();
 	correct_res.push_back("HTTP/1.1 404 Not Found");
-	correct_res.push_back("Server: webserv/1");
+	correct_res.push_back("Server: webserv/1.0");
 	correct_res.push_back("Connection: close");
 	correct_res.push_back("Content-Type: text/html");
-	correct_res.push_back("Content-Length: 150");
-	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n");
+	correct_res.push_back("Content-Length: 152");
+	correct_res.push_back("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n");
 	// 関数適用
 	final_response = HttpResponse::generateResponse(request, response4, tied_server2, sock, config_handler_);
 	// 結果確認

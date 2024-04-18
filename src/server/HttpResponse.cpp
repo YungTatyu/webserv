@@ -1,6 +1,7 @@
 #include "HttpResponse.hpp"
 #include "Utils.hpp"
-#include "string.h"
+#include "CGIHandler.hpp"
+#include <cstring>
 #include <ctime>
 #include <iomanip>
 
@@ -14,7 +15,7 @@ std::map<int, const std::string*> HttpResponse::default_error_page_map_;
 static const std::string http_version = "HTTP/1.1";
 
 static const std::string webserv_error_page_tail =
-"<hr><center>webserv/1</center>\r\n</body>\r\n</html>\r\n";
+"<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n";
 
 static const std::string webserv_error_301_page =
 "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n";
@@ -121,9 +122,9 @@ static const std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse()
-	: serv_type_(HttpResponse::STATIC), status_code_(200), body_(""), internal_redirect_cnt_(0)
+	: root_path_(""), res_file_path_(""), state_(HttpResponse::RES_CREATING_STATIC), cgi_status_code_line_(""), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
-	this->headers_["Server"] = "webserv/1";
+	this->headers_["Server"] = "webserv/1.0";
 	this->headers_["Date"] = getCurrentGMTTime();
 
 		// status_line
@@ -280,12 +281,21 @@ std::string	HttpResponse::createResponse( const HttpResponse& response )
 
 	// status line
 	stream << http_version << " ";
-	if (it != status_line_map_.end())
+	if (response.state_ == RES_PARSED_CGI && !response.cgi_status_code_line_.empty())
+		stream << response.cgi_status_code_line_ << "\r\n";
+	else if (it != status_line_map_.end())
 		stream << status_line_map_[response.status_code_] << "\r\n";
 	else
 		stream << response.status_code_ << "\r\n";
 
 	// headers
+	// cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
+	//　ex) Content-Type　Content-Length　は文字が整形される
+	//　Locationなどは整形されない ex) loCAtion
+
+	// TODO: 以下の場合に、responseをchunkしたい
+	// headerに Content-Lengthがない場合（主にcgiレスポンス）
+	// headerに responseが長い場合、例えばbuffer size以上
 	for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
 		it != response.headers_.end();
 		++it
@@ -312,6 +322,13 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 	struct sockaddr_in	client_addr;
 
 	enum ResponsePhase	phase = sw_start_phase;
+	if (response.state_ == RES_PARSED_CGI)
+		phase = sw_end_phase;
+	else if (response.state_ == RES_CGI_ERROR)
+	{
+		phase = sw_error_page_phase;
+		response.status_code_ = 502; // bad gate error
+	}
 
 	while (phase != sw_end_phase) {
 		switch (phase) {
@@ -346,9 +363,13 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			config_handler.writeErrorLog(server, location, "webserv: [debug] uri check phase\n");
 			phase = handleUriCheckPhase(response, request, server, location);
 			break;
+		case sw_search_res_file_phase:
+			config_handler.writeErrorLog(server, location, "webserv: [debug] search response file phase\n");
+			phase = handleSearchResFilePhase(response, request, server, location, config_handler);
+			break;
 		case sw_content_phase:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] content phase\n");
-			phase = handleContentPhase(response, request, server, location, config_handler);
+			phase = handleContentPhase(response);
 			break;
 		case sw_error_page_phase:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] error page phase\n");
@@ -356,6 +377,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 			break;
 		case sw_log_phase:
 			config_handler.writeErrorLog(server, location, "webserv: [debug] log phase\n");
+			//  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
 			config_handler.writeAccessLog(server, location, config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, request));
 			phase = sw_end_phase;
 			break;
@@ -365,8 +387,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 		}
 	}
 
+	if (response.state_ == RES_EXECUTE_CGI)
+		return "";
 	config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
-	if (response.serv_type_ == HttpResponse::STATIC)
+	if (response.state_ == HttpResponse::RES_CREATING_STATIC)
 	{
 		headerFilterPhase(response);
 	}
@@ -475,8 +499,7 @@ HttpResponse::ResponsePhase	HttpResponse::handleUriCheckPhase( HttpResponse& res
 		response.status_code_ = 404;
 		return sw_error_page_phase;
 	}
-	else
-		return sw_content_phase;
+	return sw_search_res_file_phase;
 }
 
 /* try_files
@@ -495,8 +518,8 @@ HttpResponse::ResponsePhase	HttpResponse::TryFiles( HttpResponse& response, Http
 		if (Utils::wrapperAccess(full_path, F_OK, false) == 0 &&
 			Utils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
-			response.body_ = Utils::readFile(full_path);
-			return sw_log_phase;
+			response.res_file_path_ = full_path;
+			return sw_content_phase;
 		}
 	}
 
@@ -603,8 +626,8 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
 		if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
 			Utils::wrapperAccess(full_path, R_OK, false) == 0)
 		{
-			response.body_ = Utils::readFile(full_path);
-			return sw_log_phase;
+			response.res_file_path_ = full_path;
+			return sw_content_phase;
 		}
 	}
 
@@ -629,9 +652,8 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
  * uriが'/'で終わっていなければ直接探しに行き、
  * そうでなければ、ディレクティブを順番に適用する。
  */
-HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
+HttpResponse::ResponsePhase	HttpResponse::searchResPath( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
 {
-	response.serv_type_ = HttpResponse::STATIC;
 	// request uriが/で終わっていなければ直接ファイルを探しに行く。
 	if (request.uri[request.uri.length() - 1] != '/')
 	{
@@ -642,8 +664,8 @@ HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response,
 			response.status_code_ = 404;
 			return sw_error_page_phase;
 		}
-		response.body_ = Utils::readFile(full_path);
-		return sw_log_phase;
+		response.res_file_path_ = full_path;
+		return sw_content_phase;
 	}
 
 	/* ~ try_filesとindex/autoindexのファイル検索 ~
@@ -675,11 +697,22 @@ HttpResponse::ResponsePhase	HttpResponse::staticHandler( HttpResponse& response,
 	return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on, index_dir);
 }
 
-HttpResponse::ResponsePhase	HttpResponse::handleContentPhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
+/**
+ * respone fileのpathをさがす
+*/
+HttpResponse::ResponsePhase	HttpResponse::handleSearchResFilePhase( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler &config_handler )
 {
+	return searchResPath(response, request, server, location, config_handler);
+}
 
-	if (request.method == config::GET)
-		return staticHandler(response, request, server, location, config_handler);
+HttpResponse::ResponsePhase	HttpResponse::handleContentPhase( HttpResponse& response )
+{
+	if (cgi::CGIHandler::isCgi(response.res_file_path_))
+	{
+		response.state_ = RES_EXECUTE_CGI;
+		return sw_log_phase;
+	}
+	response.body_ = Utils::readFile(response.res_file_path_);
 	return sw_log_phase;
 }
 

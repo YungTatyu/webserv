@@ -1,5 +1,9 @@
 #include "SysCallWrapper.hpp"
 #include <cstdlib>
+#include <fcntl.h>
+#include <iostream>
+#include <cstring>
+#include <cerrno>
 
 int SysCallWrapper::Socket( int domain, int type, int protocol )
 {
@@ -86,5 +90,14 @@ int SysCallWrapper::Dup2(int fildes, int fildes2)
 		perror( "dup2" );
 		std::exit( EXIT_FAILURE );
 	}
+	return re;
+}
+
+int	SysCallWrapper::Fcntl(int fd, int cmd, int flags)
+{
+	// TODO: close-on-execをセットするなら、F_SETFDを使わないといけなさそう（subjectで使用不可のフラグ）
+	int re = fcntl(fd, cmd, flags);
+	if (re == -1)
+		std::cerr << "webserv: [emerg] fcntl (" << errno << ":"<< std::strerror(errno) << ")\n";
 	return re;
 }

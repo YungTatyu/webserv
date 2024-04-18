@@ -1,4 +1,5 @@
 #include "Utils.hpp"
+#include "SysCallWrapper.hpp"
 #include <dirent.h>
 #include <fcntl.h>
 #include <string.h>
@@ -222,4 +223,38 @@ std::string	Utils::toLower(std::string str)
 bool	Utils::isSpace(const unsigned char ch)
 {
 	return ch == ' ';
+}
+
+/**
+ * @brief 文字列の大文字小文字の差異を無視して、比較する
+ * 
+ * @param lhs 
+ * @param rhs 
+ * @return true 
+ * @return false 
+ */
+bool	Utils::compareIgnoreCase(std::string lhs, std::string rhs)
+{
+	std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
+	std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
+	return lhs == rhs;
+}
+
+/**
+ * @brief fdに以下を設定する
+ * 
+ * 1: non-blocking
+ * 2: exec()実行直前にfdをcloseする
+ * 
+ * @param fd 
+ * @return int 
+ */
+int	Utils::setNonBlockingCloExec(const int fd)
+{
+	int nonblock = SysCallWrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
+	// 以下はサブジェクトで使えないフラグ使用
+	int closex = SysCallWrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
+	if (nonblock == -1 || closex == -1)
+		return -1;
+	return closex;
 }

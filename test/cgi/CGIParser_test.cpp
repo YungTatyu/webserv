@@ -88,7 +88,7 @@ TEST(cgi_parser, status_ok1)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nstatus: 200 OK\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_TRUE(parser.parse(response, "Status: 200 OK\r\nstatus: 200 OK\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectStatusLine(response, {0, "200 OK"});
 }
 
@@ -97,7 +97,7 @@ TEST(cgi_parser, status_ok2)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_TRUE(parser.parse(response, "status:900    \r\nstatus: OK\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_TRUE(parser.parse(response, "status:900    \r\nStatus: OK\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectStatusLine(response, {900, ""});
 }
 
@@ -106,8 +106,39 @@ TEST(cgi_parser, status_ok3)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_TRUE(parser.parse(response, "status:    1000000000000000000000000000000000000000000000      random    \r\nstatus: OK\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_TRUE(parser.parse(response, "stATus:    1000000000000000000000000000000000000000000000      random    \r\nstatus: OK\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectStatusLine(response, {0, "1000000000000000000000000000000000000000000000      random    "});
+}
+
+TEST(cgi_parser, status_no_status)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	EXPECT_TRUE(parser.parse(response, "Content-Type:test/html     \r\nLocation: /    \r\nContent-Length: 127   \r\nContent-Type:   dup ct  	\r\nlocation: /dup/path  \r\nContent-Length:   wrong cl	\r\nextra:  extra value\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeaders(response,
+	{
+		{"Content-Type", "test/html     "},
+		{"Location", "/    "},
+		{"Content-Length", "127"},
+		{"extra", "extra value"}
+	});
+	test::expectStatusLine(response, {302, ""});
+}
+
+TEST(cgi_parser, status_no_status_no_location)
+{
+	HttpResponse	response;
+	cgi::CGIParser	parser;
+
+	EXPECT_TRUE(parser.parse(response, "Content-Type:test/html     \r\nContent-Length: 127   \r\nContent-Type:   dup ct  	\r\nContent-Length:   wrong cl	\r\nextra:  extra value\r\n\r\n", cgi::PARSE_BEFORE));
+	test::expectHeaders(response,
+	{
+		{"Content-Type", "test/html     "},
+		{"Content-Length", "127"},
+		{"extra", "extra value"}
+	});
+	test::expectStatusLine(response, {200, ""});
 }
 
 // ++++++++++++++++++++++++++++++ content-length test ++++++++++++++++++++++++++++++
@@ -124,7 +155,7 @@ TEST(cgi_parser, error_cl_semicolon)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_FALSE(parser.parse(response, "status: 200\r\ncontent-length:  \r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_FALSE(parser.parse(response, "status: 200\r\nContent-Length:  \r\n\r\n", cgi::PARSE_BEFORE));
 }
 
 TEST(cgi_parser, error_cl_char)
@@ -148,7 +179,7 @@ TEST(cgi_parser, error_cl_too_large_length)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_FALSE(parser.parse(response, "status: 200\r\ncontent-length:  9223372036854775808\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_FALSE(parser.parse(response, "status: 200\r\nContent-length:  9223372036854775808\r\n\r\n", cgi::PARSE_BEFORE));
 }
 
 TEST(cgi_parser, cl_ok1)
@@ -165,7 +196,7 @@ TEST(cgi_parser, cl_ok2)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_TRUE(parser.parse(response, "Content-Length:9223372036854775807\r\nstatus: 200 OK\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_TRUE(parser.parse(response, "Content-length:9223372036854775807\r\nstatus: 200 OK\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectHeader(response, "9223372036854775807", "content-length", true);
 }
 
@@ -220,7 +251,7 @@ TEST(cgi_parser, ct_ok4)
 	HttpResponse	response;
 	cgi::CGIParser	parser;
 
-	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-Type\r\n\r\n", cgi::PARSE_BEFORE));
+	EXPECT_TRUE(parser.parse(response, "status: 200 OK\r\nContent-type\r\n\r\n", cgi::PARSE_BEFORE));
 	test::expectHeader(response, "", "CONTENT-TYPE", false);
 }
 

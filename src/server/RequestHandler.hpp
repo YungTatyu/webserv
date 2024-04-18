@@ -24,8 +24,7 @@ class RequestHandler
 			UPDATE_WRITE = -12,
 			UPDATE_CGI_READ = -13,
 			UPDATE_CGI_WRITE = -14,
-			UPDATE_WAIT_CGI_RES = -15, // 一時的に監視イベントから削除
-			UPDATE_CLOSE = -16 // connectionを切る
+			UPDATE_CLOSE = -15
 		};
 		RequestHandler();
 		int handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
@@ -38,6 +37,7 @@ class RequestHandler
 	private:
 		bool cgiProcessExited(const pid_t process_id) const;
 		int	handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
+		int	handleCgi(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd);
 		bool	addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type);
 		void	deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, int socket);
 		bool	isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler);
