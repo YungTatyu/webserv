@@ -1,5 +1,5 @@
-NAME_TIMEOUT5			= client_timeout5
-NAME_TIMEOUT10			= client_timeout10
+NAME_TIMEOUT5			= timeout5
+NAME_TIMEOUT10			= timeout10
 CC					= gcc
 CXX					= c++
 CXXFLAGS			= -std=c++14
