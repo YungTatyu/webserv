@@ -64,7 +64,7 @@ int NetworkIOHandler::receiveRequest( ConnectionManager& connManager, const int 
        else if ( re == -1 ) //ソケットが使用不可、またはエラー。
                return -1;
 
-       connManager.addRawRequest( cli_sock, buffer );
+       connManager.addRawRequest( cli_sock, buffer, re );
 
        if ( re == bufferSize_ ) // bufferSize_分だけ読んだ時。次のループで残りを読む。 ちょうどrecvでbuffersize分読んだ時はどうなる？？（次readイベント発生し 可能性）
                return 2;
@@ -82,7 +82,7 @@ int NetworkIOHandler::receiveCgiResponse( ConnectionManager& connManager, const 
 		return 0;
 	if (re == -1) // error
 		return -1;
-	connManager.addCgiResponse(sock, buffer);
+	connManager.addCgiResponse(sock, buffer, re);
 	if (re == buffer_size) // continue recv
 		return -2;
 	return 1;

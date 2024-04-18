@@ -58,9 +58,9 @@ ConnectionData* ConnectionManager::getConnection( const int fd )
 	return connections_.at(fd);
 }
 
-void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest )
+void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest, const ssize_t read_bytes )
 {
-       connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(), rawRequest.end());
+       connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(), rawRequest.begin() + read_bytes);
 }
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest( const int fd ) const
@@ -119,9 +119,9 @@ HttpResponse &ConnectionManager::getResponse( const int fd )
 	return connections_.at(fd)->response_;
 }
 
-void	ConnectionManager::addCgiResponse( const int fd, const std::vector<unsigned char>& v )
+void	ConnectionManager::addCgiResponse( const int fd, const std::vector<unsigned char>& v, const ssize_t read_bytes )
 {
-	connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(), v.end());
+	connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(), v.begin() + read_bytes);
 }
 
 const std::vector<unsigned char>&	ConnectionManager::getCgiResponse( const int fd ) const

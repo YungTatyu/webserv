@@ -29,6 +29,7 @@ class ConnectionData
 		HttpResponse response_;
 		cgi::CGIHandler cgi_handler_;
 		const TiedServer* tied_server_;
+		ConnectionData() : sent_bytes_(0) {}
 };
 
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
@@ -39,7 +40,7 @@ class ConnectionManager
 		~ConnectionManager();
 		void setConnection( const int fd );
 		ConnectionData* getConnection( const int fd );
-		void addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest );
+		void addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest, const ssize_t read_bytes );
 		void setCgiConnection( const int cli_sock, const ConnectionData::EVENT event );
 		void removeConnection( const int fd, const bool cgi );
 		const std::vector<unsigned char>& getRawRequest( const int fd ) const;
@@ -51,7 +52,7 @@ class ConnectionManager
 		HttpRequest &getRequest( const int fd );
 		void setResponse( const int fd, const HttpResponse response );
 		HttpResponse &getResponse( const int fd );
-		void	addCgiResponse( const int fd, const std::vector<unsigned char>& v );
+		void	addCgiResponse( const int fd, const std::vector<unsigned char>& v, const ssize_t read_bytes );
 		const std::vector<unsigned char>&	getCgiResponse( const int fd ) const;
 		const std::map<int, ConnectionData*> &getConnections() const;
 		void setTiedServer( const int fd, const TiedServer* tied_server );
