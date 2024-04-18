@@ -24,7 +24,7 @@ def send_reqest(req_data):
     'content-type': req_data['content_type']
   }
   req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}?{req_data['query_string']}"
-  r = requests.get(req, headers=headers, data=req_data['body'])
+  r = requests.get(req, headers=headers, data=req_data['body'], timeout=0.5)
   return r
 
 def expect_status(response, expect):
@@ -57,8 +57,8 @@ def run_test(conf, req_data):
   PATH_WEBSERV = f"{CWD}/../../webserv"
 
   WEBSERV = run_server(PATH_WEBSERV, f"{ROOT}/{conf}")
-  res = send_reqest(req_data)
   try:
+      res = send_reqest(req_data)
       expect_status(res, 200)
       expect_body(res, req_data)
   finally:
