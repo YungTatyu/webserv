@@ -12,14 +12,21 @@ def printLog(passed, failed):
   print(f"{Fore.RED}[ FAILED ]{Style.RESET_ALL}    {failed} tests")
 
 def run_test(command):
-  result = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  result = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
   exit_status = result.wait()
+
+  output_bytes, _ = result.communicate()  # 標準エラー出力を取得
+  output = output_bytes.decode("utf-8")  # バイト列を文字列にデコード
+
+  if exit_status != 0:
+    print(f"output: \"{output}\"", file=sys.stderr)
   return exit_status
 
 def  main():
   CWD = os.path.dirname(os.path.abspath(__file__))
   test_cases = [
     f"{CWD}/integration_test/server_res_test.sh",
+    f"{CWD}/integration_test/TimeoutTest.sh",
     f"{CWD}/cgi/meta_vars_test.py"
   ]
 
@@ -27,7 +34,7 @@ def  main():
   passed_cnt = 0
   failed_cnt = 0
   for test in test_cases:
-    print(f"[ test{ti} ] {test}: ")
+    print(f"[ test{ti} ] {test}", end="\n")
     result = run_test(test)
     if result == 0:
       print(f"{Fore.GREEN}[ PASS ]{Style.RESET_ALL}", end="\n\n", flush=True)
