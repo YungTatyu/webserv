@@ -19,15 +19,38 @@ def run_server(webserv, conf):
     sys.exit(1)
 
 def send_reqest(req_data):
-  req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}"
-  r = requests.get(req)
+  headers = {
+    'host': req_data['host'],
+    'content-type': req_data['content_type']
+  }
+  req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}?{req_data['query_string']}"
+  r = requests.get(req, headers=headers, data=req_data['body'])
   return r
 
 def expect_status(response, expect):
   assert response.status_code == expect
 
 def expect_body(response, req_data):
-  assert response.status_code == 200
+  expect = (
+    f"AUTH_TYPE=\n"
+    f"CONTENT_LENGTH={len(req_data['body'])}\n"
+    f"CONTENT_TYPE={req_data['content_type']}\n"
+    f"GATEWAY_INTERFACE=CGI/1.1\n"
+    f"PATH_INFO=\n"
+    f"PATH_TRANSLATED=\n"
+    f"QUERY_STRING={req_data['query_string']}\n"
+    f"REMOTE_ADDR=127.0.0.1\n"
+    f"REMOTE_HOST=127.0.0.1\n"
+    # f"REQUEST_METHOD={req_data['method']}\n"
+    f"REQUEST_METHOD=GET\n"
+    f"SCRIPT_NAME=/{ROOT}/{req_data['cgi_file']}\n"
+    f"SERVER_NAME={req_data['host']}\n"
+    f"SERVER_PORT={req_data['port']}\n"
+    f"SERVER_PROTOCOL=HTTP/1.1\n"
+    f"SERVER_SOFTWARE=webserv/1.0\n"
+  )
+  # print(response.content)
+  assert response.text == expect
 
 def run_test(conf, req_data):
   CWD = os.path.dirname(os.path.abspath(__file__))
@@ -54,6 +77,7 @@ def test_all_meta_vars1(conf1):
     "host": "test",
     "content_type": "text",
     "body": "this is body message",
+    "query_string": "a=a&b=b&c=c",
     "port": 4242,
     "cgi_file": "all_meta_vars.py"
   })
