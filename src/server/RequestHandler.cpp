@@ -251,8 +251,6 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 		return false;
 	}
 
-	std::cout << "timer added: " << timeout.time_in_ms_ << std::endl;
-
 	timerTree.addTimer(
 		Timer(sockfd, timeout)
 	);
