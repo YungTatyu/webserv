@@ -70,8 +70,7 @@ int	main(int ac, char *av[])
 	std::cout << "accept: " << r_str << std::endl;
 
 	// send_timeout + 0.5秒待機
-	sleep(atoi(av[4]));
-	usleep(500000);
+	sleep(atoi(av[4]) + 0.5);
 
 	// 一度目のsendはserver側で接続がcloseされていても成功する
 	// close されている場合RESETパケットが送られる。
@@ -88,11 +87,9 @@ int	main(int ac, char *av[])
 	}
 	else
 		std::cout << "connection didn't timeout." << std::endl;
-	std::cout << "expect send byte: " << strlen(request) << std::endl;
-	std::cout << "send byte: " << ret << std::endl;
 
 	// send_timeoutで死ななかった場合は5秒だけ待ってcloseする
-	sleep(5);
+	sleep(10);
 	close(sockfd);
 
 	return (0);

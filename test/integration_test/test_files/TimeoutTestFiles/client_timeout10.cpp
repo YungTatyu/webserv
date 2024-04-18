@@ -46,16 +46,6 @@ int	main(int ac, char *av[])
 		exit(1);
 	}
 
-	// receive buf size取得
-	//int	buffer_size;
-	//socklen_t	buffer_size_length = sizeof(buffer_size);
-	//if (getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buffer_size, &buffer_size_length) < 0) {
-	//	std::cerr << "Error in getting socket options" << std::endl;
-	//	return 1;
-	//}
-
-	//std::cout << "Recv buffer size: " << buffer_size << " bytes" << std::endl;
-
 	// 送信
 	// 引数から受け取った文字列でrequestを送ると400エラーになってしまう。
 	//char *request = av[3];
@@ -79,8 +69,8 @@ int	main(int ac, char *av[])
 	std::cout << "recv byte: " << ret << std::endl;
 	std::cout << "accept: " << r_str << std::endl;
 
-	// expect time + 1 秒待機
-	sleep(atoi(av[4]) + 1);
+	// send_timeout + 0.5秒待機
+	sleep(atoi(av[4]) + 0.5);
 
 	// 一度目のsendはserver側で接続がcloseされていても成功する
 	// close されている場合RESETパケットが送られる。
@@ -97,11 +87,9 @@ int	main(int ac, char *av[])
 	}
 	else
 		std::cout << "connection didn't timeout." << std::endl;
-	std::cout << "expect send byte: " << strlen(request) << std::endl;
-	std::cout << "send byte: " << ret << std::endl;
 
 	// send_timeoutで死ななかった場合は5秒だけ待ってcloseする
-	sleep(5);
+	sleep(10);
 	close(sockfd);
 
 	return (0);
