@@ -24,7 +24,7 @@ def send_reqest(req_data):
     'content-type': req_data['content_type']
   }
   req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}?{req_data['query_string']}"
-  r = requests.get(req, headers=headers, data=req_data['body'], timeout=0.5)
+  r = requests.get(req, headers=headers, data=f"{req_data['body']}", timeout=0.5)
   return r
 
 def expect_status(response, expect):
@@ -49,7 +49,6 @@ def expect_body(response, req_data):
     f"SERVER_PROTOCOL=HTTP/1.1\n"
     f"SERVER_SOFTWARE=webserv/1.0\n"
   )
-  # print(response.content)
   assert response.text == expect
 
 def run_test(conf, req_data):
