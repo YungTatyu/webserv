@@ -54,6 +54,7 @@ function	runServer {
 	sleep 1
 }
 
+# responseのstatusをテスト
 function	assert {
 	((++g_test_cnt))
 	((++g_test_index))

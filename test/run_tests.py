@@ -26,8 +26,8 @@ def  main():
   CWD = os.path.dirname(os.path.abspath(__file__))
   test_cases = [
     f"{CWD}/integration_test/server_res_test.sh",
-    f"{CWD}/integration_test/TimeoutTest.sh",
-    f"{CWD}/cgi/meta_vars_test.py"
+    f"{CWD}/cgi/meta_vars_test.py",
+    f"{CWD}/integration_test/TimeoutTest.sh"
   ]
 
   ti = 0
