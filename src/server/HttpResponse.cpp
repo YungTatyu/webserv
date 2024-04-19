@@ -736,6 +736,7 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	const static char	*kConnection = "Connection";
 	const static char	*kKeepAlive = "keep-alive";
 	const static char	*kTransferEncoding = "Transfer-Encoding";
+	const static char	*kContentType = "Content-Type";
 
 	response.headers_["Server"] = "webserv/1.0";
 	response.headers_["Date"] = getCurrentGMTTime();
@@ -744,7 +745,8 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	if (response.headers_.find(kTransferEncoding) != response.headers_.end())
 		response.headers_.erase(kTransferEncoding);
 
-	response.headers_["Content-Type"] = detectContentTypeFromBody(response.body_);
+	if (response.headers_.find(kContentType) == response.headers_.end())
+		response.headers_[kContentType] = detectContentType(response.res_file_path_);
 
 	// requestエラーの場合は、接続を切る
 	if (time.isNoTime() || (400 <= response.status_code_
@@ -756,15 +758,18 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	response.headers_[kConnection] = kKeepAlive;
 }
 
-std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)
+std::string	HttpResponse::detectContentType(const std::string& res_file_path)
 {
-	// ボディが空の場合はデフォルトのContent-Typeを返す
-	if (body.empty())
-		return "text/plain";
+	const char	*kHtml = ".html";
+	const char	*kCss = ".css";
+	const char	*kJs = ".js";
 
-	if (body.find("<html") != std::string::npos)
+	if (Utils::isExtensionFile(res_file_path, kHtml))
 		return "text/html";
-	else
-		return "text/plain";
+	if (Utils::isExtensionFile(res_file_path, kCss))
+		return "text/css";
+	if (Utils::isExtensionFile(res_file_path, kJs))
+		return "text/javascript";
+	return "text/plain";
 }
 

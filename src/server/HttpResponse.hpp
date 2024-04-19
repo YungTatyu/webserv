@@ -77,7 +77,7 @@ class HttpResponse
 		static ResponsePhase	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on, const std::string& index_dir );
 		static ResponsePhase	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
 		static void	headerFilterPhase( HttpResponse& response, const config::Time& time );
-		static std::string	detectContentTypeFromBody( const std::string& body );
+		static std::string	detectContentType( const std::string& res_file_path );
 		static std::string	transformLetter( const std::string& key_str );
 };
 
