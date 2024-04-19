@@ -59,19 +59,30 @@ def run_test(conf, req_data):
     WEBSERV.kill()
 
 # テストの引数に渡される
-@pytest.mark.parametrize("conf1", [
+pytestmark = pytest.mark.parametrize("conf", [
     "server_res_test.conf",
     "server_res_test_poll.conf",
     "server_res_test_select.conf"
 ])
 # 関数名がtestで始まる関数がテスト実行時に呼ばれる
-def test_header1(conf1):
-  run_test(conf1, {
+def test_header1(conf):
+  run_test(conf, {
     "host": "test",
     "content_type": "text",
     "body": "this is body message",
     "query_string": "a=a&b=b&c=c",
     "port": 4242,
     "request": "static/index.html",
+    "Connection": KEEP_ALIVE,
+  })
+
+def test_header2(conf):
+  run_test(conf, {
+    "host": "test",
+    "content_type": "text",
+    "body": "",
+    "query_string": "",
+    "port": 4242,
+    "request": "dynamic/document_response.py",
     "Connection": KEEP_ALIVE,
   })
