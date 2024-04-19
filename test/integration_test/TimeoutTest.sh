@@ -1,27 +1,65 @@
 #!/bin/bash
 
-# init
+# init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
 readonly TEST_NAME="Timeout Test"
-readonly OS=$(uname -s)
-
-if [ ! -e $WEBSERV_PATH ]; then
-	echo "${WEBSERV_PATH}: command not found"
-	echo "run \"make\" first to test"
-	exit 1
-fi
-
 TOTAL_TESTS=0
 PASSED_TESTS=0
 FAILED_TESTS=0
-
+Scheme="http"
+Host="127.0.0.1"
+Port="4242"
 # script color
 GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
 
 # functions
+function	init {
+	printf "${GREEN}make webserv ......${RESET}\n\n"
+	make -j -C "${SCRIPT_DIR}/../../" > /dev/null
+	if [ -e ${WEBSERV_PATH} ]; then
+		printf "|------------------ ${TEST_NAME} start ------------------|\n"
+	else
+		printErr "${WEBSERV_PATH}: command not found"
+		printErr "run \"make\" first to test"
+		exit 1
+	fi
+	trap signalHandler HUP INT QUIT ABRT KILL TERM
+}
+
+function	clean {
+	local	color=$1
+	printf "${color}make fclean webserv.${RESET}\n"
+	make fclean -C "${SCRIPT_DIR}/../../" > /dev/null
+}
+
+function	Kill {
+	local	target_pid=$1
+	local	color=$2
+	kill ${target_pid} > /dev/null 2>&1
+	printErr "\n${color}kill webserv.${RESET}\n"
+}
+
+function	signalHandler {
+	printErr "\n\n${RED}${TEST_NAME} interrupted: Signal received.${RESET}"
+	Kill "${WEBSERV_PID}" "${RED}" 
+	clean "${RED}" 
+	exit 1
+}
+
+function	printLog {
+	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
+	printf "[========]    ${TOTAL_TESTS} tests ran\n"
+	printf "[ ${GREEN}PASSED${RESET} ]    ${PASSED_TESTS} tests\n"
+	printf "[ ${RED}FAILED${RESET} ]    ${FAILED_TESTS} tests\n"
+}
+
+function	printErr {
+	printf "${*}\n" >&2
+}
+
 function	runServer {
 	local conf=$1
 	$WEBSERV_PATH "$conf" > /dev/null 2>&1 &
@@ -34,10 +72,7 @@ function	assert {
 	local	uri=$1
 	local	expect_sec=$2
 	local	expect_result=$3
-	local	scheme="http"
-	local	host="127.0.0.1"
-	local	port="4242"
-	local	url="$scheme://$host:$port$uri"
+	local	url="${Scheme}://${Host}:${Port}${uri}"
 	local	request=$(cat <<EOT
 GET ${uri} HTTP/1.1
 Host: _
@@ -48,7 +83,7 @@ EOT
 	((TOTAL_TESTS++))
 	printf "[  test$TOTAL_TESTS  ]\n${url}: "
 
-	(printf "$request"; sleep $(bc <<< "$expect_sec + 5")) | telnet $host $port > /dev/null 2>&1 &
+	(printf "$request"; sleep $(bc <<< "$expect_sec + 5")) | telnet ${Host} ${Port} > /dev/null 2>&1 &
 
 	# telnetがタイムアウトして1秒以内の誤差であればTRUE
 	sleep $(bc <<< "$expect_sec + 1")
@@ -61,26 +96,19 @@ EOT
 			printf "${GREEN}passed.${RESET}\nServer closed the connection\n\n"
 			((PASSED_TESTS++))
 		else
-			printf "${RED}failed.${RESET}\nServer did not timeout\n"
+			printErr "${RED}failed.${RESET}\nServer did not timeout\n"
 			((FAILED_TESTS++))
 		fi
 	else # telnetが正常にタイムアウトする前にsleepが終了
 		kill $(ps | grep "telnet" | grep -v grep | cut -d ' ' -f2) > /dev/null 2>&1
 		if [ "$expect_result" = "true" ]; then
-			printf "${RED}failed.${RESET}\nServer did not timeout\n"
+			printErr "${RED}failed.${RESET}\nServer did not timeout\n"
 			((FAILED_TESTS++))
 		else
 			printf "${GREEN}passed.${RESET}\nServer closed the connection\n\n"
 			((PASSED_TESTS++))
 		fi
 	fi
-}
-
-function	printLog {
-	printf "\n|------------------ ${TEST_NAME} results ------------------|\n"
-	printf "[========]    ${TOTAL_TESTS} tests ran\n"
-	printf "[ ${GREEN}PASSED${RESET} ]    ${PASSED_TESTS} tests\n"
-	printf "[ ${RED}FAILED${RESET} ]    ${FAILED_TESTS} tests\n"
 }
 
 function	runTest {
@@ -97,13 +125,24 @@ function	runTest {
 	assert "/timeout10/" "8" "false"
 
 	# サーバープロセスを終了
-	kill $WEBSERV_PID > /dev/null 2>&1
+	Kill "${WEBSERV_PID}" "${GREEN}" 
 }
 
-printf "|------------------ ${TEST_NAME} start ------------------|\n"
+function	main {
+	init
 
-runTest "keepalive_timeout.conf" "kqueue or epoll" # kqueue or epoll
-runTest "keepalive_timeout_select.conf" "select" # select
-runTest "keepalive_timeout_poll.conf" "poll" # poll
+	runTest "keepalive_timeout.conf" "kqueue or epoll" # kqueue or epoll
+	runTest "keepalive_timeout_select.conf" "select" # select
+	runTest "keepalive_timeout_poll.conf" "poll" # poll
 
-printLog
+	printLog
+
+	clean "${GREEN}"
+
+	if [ ${FAILED_TESTS} -ne 0 ]; then
+		return 1
+	fi
+	return 0
+}
+
+main "$@"
