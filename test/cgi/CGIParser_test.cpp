@@ -36,6 +36,11 @@ namespace test
 	void	expectHeaders(const HttpResponse& response, const std::vector<string_pair>& test_results)
 	{
 		const cgi::string_map_case_insensitive& headers = response.headers_;
+		if (test_results.size() == 0)
+		{
+			EXPECT_TRUE(headers.size() == 0);
+			return;
+		}
 		for (const string_pair& pair : test_results)
 		{
 			cgi::string_map_case_insensitive::const_iterator hit = headers.find(pair.first);
@@ -378,7 +383,7 @@ TEST(cgi_parser, only_r)
 }
 
 // ++++++++++++++++++++++++++++++ body test ++++++++++++++++++++++++++++++
-TEST(cgi_parser, body_no_content_length)
+TEST(cgi_parser, body_with_content_length)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
@@ -390,7 +395,7 @@ TEST(cgi_parser, body_no_content_length)
 	test::expectBody(response, body, 10);
 }
 
-TEST(cgi_parser, body_with_content_length)
+TEST(cgi_parser, body_no_content_length)
 {
 	HttpResponse	response;
 	cgi::CGIParser	parser;
@@ -398,7 +403,7 @@ TEST(cgi_parser, body_with_content_length)
 	const std::string	body = "   this is body message     ";
 
 	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
-	test::expectHeaders(response, {{"Content-Length", std::to_string(body.size())}});
+	test::expectHeaders(response, {});
 	test::expectBody(response, body);
 }
 

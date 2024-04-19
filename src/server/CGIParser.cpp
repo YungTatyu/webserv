@@ -411,9 +411,6 @@ void	cgi::CGIParser::parseBody(const std::string& response)
 
 void	cgi::CGIParser::finishParsing()
 {
-	// content-lengthがヘッダーにない場合は、追加する
-	if (this->headers_->find(kContentLength) == this->headers_->end())
-		this->headers_->insert(std::make_pair(kContentLength, Utils::toStr(this->body_->size())));
 	this->state_ = PARSE_COMPLETE;
 }
 
