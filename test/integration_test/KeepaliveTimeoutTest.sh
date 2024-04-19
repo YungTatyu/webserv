@@ -39,7 +39,7 @@ function	Kill {
 	local	target_pid=$1
 	local	color=$2
 	kill ${target_pid} > /dev/null 2>&1
-	printErr "\n${color}kill webserv.${RESET}\n"
+	printErr "${color}kill webserv.${RESET}"
 }
 
 function	signalHandler {
@@ -96,13 +96,13 @@ EOT
 			printf "${GREEN}passed.${RESET}\nServer closed the connection\n\n"
 			((PASSED_TESTS++))
 		else
-			printErr "${RED}failed.${RESET}\nServer did not timeout\n"
+			printErr "${RED}failed.${RESET}\nServer did not timeout"
 			((FAILED_TESTS++))
 		fi
 	else # telnetが正常にタイムアウトする前にsleepが終了
 		kill $(ps | grep "telnet" | grep -v grep | cut -d ' ' -f2) > /dev/null 2>&1
 		if [ "$expect_result" = "true" ]; then
-			printErr "${RED}failed.${RESET}\nServer did not timeout\n"
+			printErr "${RED}failed.${RESET}\nServer did not timeout"
 			((FAILED_TESTS++))
 		else
 			printf "${GREEN}passed.${RESET}\nServer closed the connection\n\n"
@@ -125,7 +125,7 @@ function	runTest {
 	assert "/timeout10/" "8" "false"
 
 	# サーバープロセスを終了
-	Kill "${WEBSERV_PID}" "${GREEN}" 
+	kill "${WEBSERV_PID}"
 }
 
 function	main {
