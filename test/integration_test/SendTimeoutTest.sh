@@ -3,6 +3,7 @@
 # init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
+readonly CLIENT_TIMEOUT0_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout0"
 readonly CLIENT_TIMEOUT5_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout5"
 readonly CLIENT_TIMEOUT10_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout10"
 readonly TEST_NAME="SendTimeout Test"
@@ -149,7 +150,7 @@ function	runTest {
 	runServer "${root}/${conf}"
 
 	# テスト実行
-	#assert "/" "0" "true"
+	assert "/" "0" "false" "${CLIENT_TIMEOUT0_PATH}" "timeout0"
 	assert "/timeout5/" "5" "true" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
 	assert "/timeout10/" "10" "true" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
 	assert "/timeout5/" "3" "false" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
