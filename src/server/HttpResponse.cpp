@@ -124,10 +124,7 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
 	: root_path_(""), res_file_path_(""), state_(HttpResponse::RES_CREATING_STATIC), cgi_status_code_line_(""), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
-	this->headers_["Server"] = "webserv/1.0";
-	this->headers_["Date"] = getCurrentGMTTime();
-
-		// status_line
+	// status_line
 	this->status_line_map_[200] = "200 OK";
 	this->status_line_map_[201] = "201 Created";
 	this->status_line_map_[202] = "202 Accepted";
@@ -313,11 +310,12 @@ std::string	HttpResponse::createResponse( const HttpResponse& response )
  */
 std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
 {
+	const static char	*kHost = "Host";
 	// chunkなどでparse途中の場合。
 	if (request.parseState == HttpRequest::PARSE_INPROGRESS)
 		return std::string();
 
-	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find("Host")->second);
+	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find(kHost)->second);
 	const config::Location*	location = NULL;
 	struct sockaddr_in	client_addr;
 
@@ -390,10 +388,7 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
 	if (response.state_ == RES_EXECUTE_CGI)
 		return "";
 	config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
-	if (response.state_ == HttpResponse::RES_CREATING_STATIC)
-	{
-		headerFilterPhase(response);
-	}
+	headerFilterPhase(response, config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
 
 	config_handler.writeErrorLog(server, location, "webserv: [debug] create final response\n\n\n");
 	return createResponse(response);
@@ -735,22 +730,30 @@ HttpResponse::ResponsePhase	HttpResponse::handleErrorPagePhase( HttpResponse& re
 	return sw_search_location_phase;
 }
 
-void	HttpResponse::headerFilterPhase( HttpResponse& response )
+void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time& time )
 {
-	if (!response.body_.empty())
-	{
-		std::stringstream stream;
-		stream << response.body_.length();
-		response.headers_["Content-Length"] = stream.str();
-	}
+	const static char	*kClose = "close";
+	const static char	*kConnection = "Connection";
+	const static char	*kKeepAlive = "keep-alive";
+	const static char	*kTransferEncoding = "Transfer-Encoding";
+
+	response.headers_["Server"] = "webserv/1.0";
+	response.headers_["Date"] = getCurrentGMTTime();
+	response.headers_["Content-Length"] = Utils::toStr(response.body_.size());
+	// conetent-lengthで対応するので、Transfer-Encodingは削除する
+	if (response.headers_.find(kTransferEncoding) != response.headers_.end())
+		response.headers_.erase(kTransferEncoding);
 
 	response.headers_["Content-Type"] = detectContentTypeFromBody(response.body_);
 
-	if (400 <= response.status_code_
-		&& response.status_code_ < 500)
-		response.headers_["Connection"] = "close";
-	else
-		response.headers_["Connection"] = "keep-alive";
+	// requestエラーの場合は、接続を切る
+	if (time.isNoTime() || (400 <= response.status_code_
+		&& response.status_code_ < 500))
+	{
+		response.headers_[kConnection] = kClose;
+		return;
+	}
+	response.headers_[kConnection] = kKeepAlive;
 }
 
 std::string	HttpResponse::detectContentTypeFromBody(const std::string& body)
