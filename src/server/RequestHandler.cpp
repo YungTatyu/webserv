@@ -67,6 +67,8 @@ int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
 	connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
 	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
+	// sendtimeout 追加
+	this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
 	return RequestHandler::UPDATE_WRITE;
 }
 
