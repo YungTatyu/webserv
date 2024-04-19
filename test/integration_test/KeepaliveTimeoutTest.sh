@@ -3,7 +3,7 @@
 # init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
-readonly TEST_NAME="Timeout Test"
+readonly TEST_NAME="KeepaliveTimeout Test"
 TOTAL_TESTS=0
 PASSED_TESTS=0
 FAILED_TESTS=0
