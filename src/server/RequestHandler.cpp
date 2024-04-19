@@ -21,7 +21,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 			return accept_sock;
 
 		// timeout追加
-		// ToDo: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
+		// TODO: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
 		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, accept_sock, Timer::TMO_CLI_REQUEST);
 
 		// worker_connections確認
@@ -68,7 +68,7 @@ int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
 
 	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
 	// sendtimeout 追加
-	this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
+	this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE);
 	return RequestHandler::UPDATE_WRITE;
 }
 
@@ -218,7 +218,7 @@ bool	RequestHandler::cgiProcessExited(const pid_t process_id) const
  *
  * @param NetworkIOHandler, ConnectionManager, ConfigHandler, TimerTree, socket, TimeoutType
  * @return true: timerを追加
- * @return false: 'Connections: close'、またはkeepaliveが無効の場合
+ * @return false: 'Connections: closeの'場合
  */
 bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type)
 {
@@ -240,6 +240,7 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 	// Hostヘッダーがあるか確認
 	// 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
 	// このように探すdirectiveがほんとにこのクライアントが最後にアクセスしたコンテキストかは怪しい。
+	// TODO: 毎回設定値見に行くの計算量かかる？
 	it = connManager.getRequest(sockfd).headers.find("Host");
 	std::string host_name;
 	if (it == connManager.getRequest(sockfd).headers.end())
@@ -258,7 +259,7 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 		break;
 
 	case Timer::TMO_CLI_REQUEST:
-		// ToDo: ディレクティブ作る
+		// TODO: ディレクティブ作る
 		timeout = config::Time(60 * config::Time::seconds);
 		break;
 
@@ -271,18 +272,10 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 		break;
 	}
 
-	// keepaliveが無効なので接続を閉じる
-	// ToDo: keepalive以外のtimeoutが0だったら？
-	if (type == Timer::TMO_KEEPALIVE
-		&& timeout.isNoTime())
+	// 設定値が0ならばタイムアウトを設定しない
+	if (timeout.isNoTime())
 	{
-		ioHandler.closeConnection(connManager, sockfd);
-		return false;
-	}
-	if (type == Timer::TMO_SEND
-		&& timeout.isNoTime())
-	{
-		return false;
+		return true;
 	}
 
 	timerTree.addTimer(
