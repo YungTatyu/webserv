@@ -59,30 +59,47 @@ def run_test(conf, req_data):
     WEBSERV.kill()
 
 # テストの引数に渡される
-pytestmark = pytest.mark.parametrize("conf", [
+@pytest.mark.parametrize("conf", [
     "server_res_test.conf",
     "server_res_test_poll.conf",
     "server_res_test_select.conf"
 ])
 # 関数名がtestで始まる関数がテスト実行時に呼ばれる
-def test_header1(conf):
-  run_test(conf, {
-    "host": "test",
-    "content_type": "text",
-    "body": "this is body message",
-    "query_string": "a=a&b=b&c=c",
-    "port": 4242,
-    "request": "static/index.html",
-    "Connection": KEEP_ALIVE,
-  })
+class TestClass:
+  def test_header1(self, conf):
+    run_test(conf, {
+      "host": "test",
+      "content_type": "text",
+      "body": "this is body message",
+      "query_string": "a=a&b=b&c=c",
+      "port": 4242,
+      "request": "static/index.html",
+      "Connection": KEEP_ALIVE,
+    })
 
-def test_header2(conf):
-  run_test(conf, {
+  def test_header2(self, conf):
+    run_test(conf, {
+      "host": "test",
+      "content_type": "text",
+      "body": "",
+      "query_string": "",
+      "port": 4242,
+      "request": "dynamic/document_response.py",
+      "Connection": KEEP_ALIVE,
+    })
+
+@pytest.mark.parametrize("conf_keepalive", [
+    "server_res_no_keepalive_test.conf",
+    "server_res_no_keepalive_test_poll.conf",
+    "server_res_no_keepalive_test_select.conf"
+])
+def test_header3(conf_keepalive):
+  run_test(conf_keepalive, {
     "host": "test",
     "content_type": "text",
     "body": "",
     "query_string": "",
     "port": 4242,
-    "request": "dynamic/document_response.py",
-    "Connection": KEEP_ALIVE,
+    "request": "dynamic/body_res.py",
+    "Connection": CLOSE,
   })
