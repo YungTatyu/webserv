@@ -49,21 +49,15 @@ function	Kill {
 	local	target_pid=$2
 	local	color=$3
 	kill ${target_pid} > /dev/null 2>&1
-	printErr "${color}kill ${target_name}.${RESET}\n"
+	printErr "${color}kill ${target_name}.${RESET}"
 }
 
 function	signalHandler {
-	printErr "\n\n${RED}${TEST_NAME} interrupted: Signal received.${RESET}\n"
+	printErr "\n\n${RED}${TEST_NAME} interrupted: Signal received.${RESET}"
 	Kill "webserv" "${WEBSERV_PID}" "${RED}" 
 	Kill "client" "${CLIENT_PID}" "${RED}" 
 	clean "${RED}" 
 	exit 1
-}
-
-function	Sleep {
-	local	sleep_time=$1
-	printf "sleep ${sleep_time} seconds.\n"
-	sleep ${sleep_time}
 }
 
 function	printLog {
@@ -82,7 +76,7 @@ function	runServer {
 	${WEBSERV_PATH} "${conf}" > /dev/null 2>&1 &
 	# debug 出力する場合
 	#$WEBSERV_PATH "$conf" &
-	Sleep "1" "${GREEN}"
+	sleep 1
 	WEBSERV_PID=$!
 }
 
@@ -128,21 +122,21 @@ EOT
 			printf "${GREEN}passed.${RESET}\nServer closed the connection\n"
 			((PASSED_TESTS++))
 		else
-			printErr "${RED}failed.${RESET}\nServer closed the connection\n"
+			printErr "${RED}failed.${RESET}\nServer closed the connection"
 			((FAILED_TESTS++))
 		fi
 	else # clientが正常にタイムアウトする前にsleepが終了
 		kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
 		#kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1)
 		if [ "$expect_result" = "true" ]; then
-			printErr "${RED}failed.${RESET}\nServer did not timeout\n"
+			printErr "${RED}failed.${RESET}\nServer did not timeout"
 			((FAILED_TESTS++))
 		else
 			printf "${GREEN}passed.${RESET}\nServer did not timeout\n"
 			((PASSED_TESTS++))
 		fi
 	fi
-	Sleep "2" "${GREEN}"
+	sleep 2
 	printf "\n"
 }
 
@@ -162,7 +156,7 @@ function	runTest {
 	assert "/timeout10/" "8" "false" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
 
 	# サーバープロセスを終了
-	Kill "webserv" "${WEBSERV_PID}" "${GREEN}"
+	kill "${WEBSERV_PID}"
 }
 
 function	main {
@@ -174,7 +168,7 @@ function	main {
 
 	printLog
 
-	clean "${GREEN}"
+	clean "${RESET}"
 
 	if [ ${FAILED_TESTS} -ne 0 ]; then
 		return 1
