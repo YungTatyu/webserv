@@ -277,6 +277,11 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 		ioHandler.closeConnection(connManager, sockfd);
 		return false;
 	}
+	if (type == Timer::TMO_SEND
+		&& timeout.isNoTime())
+	{
+		return false;
+	}
 
 	timerTree.addTimer(
 		Timer(sockfd, timeout)
