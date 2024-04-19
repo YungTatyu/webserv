@@ -12,7 +12,7 @@ RequestHandler::RequestHandler() {}
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
 {
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
-		return handleCgiReadEvent(ioHandler, connManager, configHandler, sockfd);
+		return handleCgiReadEvent(ioHandler, connManager, configHandler, timerTree, sockfd);
 	// リスニングソケットへの新規リクエスト
 	if (ioHandler.isListenSocket(sockfd))
 	{
@@ -53,17 +53,22 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 	HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
 	if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR) // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
 		return RequestHandler::UPDATE_NONE;
-	return handleResponse(connManager, configHandler, sockfd);
+	return handleResponse(ioHandler, connManager, configHandler, timerTree, sockfd);
 }
 
-int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+int	RequestHandler::handleResponse(
+	NetworkIOHandler &ioHandler,
+	ConnectionManager &connManager,
+	ConfigHandler &configHandler,
+	TimerTree &timerTree,
+	const int sockfd)
 {
 	HttpRequest	&request = connManager.getRequest(sockfd);
 	HttpResponse	&response = connManager.getResponse(sockfd);
 	std::string	final_response = HttpResponse::generateResponse( request, response, connManager.getTiedServer(sockfd), sockfd, configHandler );
 
 	if (response.state_ == HttpResponse::RES_EXECUTE_CGI)
-		return handleCgi(connManager, configHandler, sockfd);
+		return handleCgi(ioHandler, connManager, configHandler, timerTree, sockfd);
 	connManager.setFinalResponse( sockfd, std::vector<unsigned char> (final_response.begin(), final_response.end()));
 
 	connManager.setEvent( sockfd, ConnectionData::EV_WRITE ); // writeイベントに更新
@@ -72,7 +77,12 @@ int	RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
 	return RequestHandler::UPDATE_WRITE;
 }
 
-int	RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler& configHandler, const int sockfd)
+int	RequestHandler::handleCgi(
+	NetworkIOHandler &ioHandler,
+	ConnectionManager &connManager,
+	ConfigHandler &configHandler,
+	TimerTree &timerTree,
+	const int sockfd)
 {
 	HttpRequest	&request = connManager.getRequest(sockfd);
 	HttpResponse	&response = connManager.getResponse(sockfd);
@@ -82,7 +92,7 @@ int	RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler& con
 	{
 		connManager.resetCgiSockets(sockfd);
 		response.state_ = HttpResponse::RES_CGI_ERROR;
-		return handleResponse(connManager, configHandler, sockfd);
+		return handleResponse(ioHandler, connManager, configHandler, timerTree, sockfd);
 	}
 	// bodyが空なら、bodyをsendしない
 	if (request.body.empty())
@@ -98,6 +108,7 @@ int RequestHandler::handleCgiReadEvent(
 	NetworkIOHandler &ioHandler,
 	ConnectionManager &connManager,
 	ConfigHandler& configHandler,
+	TimerTree& timerTree,
 	const int sockfd
 )
 {
@@ -113,12 +124,17 @@ int RequestHandler::handleCgiReadEvent(
 	std::string res(reinterpret_cast<const char*>(v.data()), v.size());
 	bool parse_suc = connManager.callCgiParser(sockfd, response, res);
 	response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
-	re = handleResponse(connManager, configHandler, sockfd);
+	re = handleResponse(ioHandler, connManager, configHandler, timerTree, sockfd);
 	ioHandler.closeConnection(connManager, sockfd); // delete cgi event
 	return re;
 }
 
-int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd)
+int RequestHandler::handleWriteEvent(
+	NetworkIOHandler &ioHandler,
+	ConnectionManager &connManager,
+	ConfigHandler &configHandler,
+	TimerTree &timerTree,
+	const int sockfd)
 {
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
