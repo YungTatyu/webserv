@@ -11,7 +11,7 @@ DEPS_DIR			= dep
 BUILD_DIR			= build
 CONF_DIR			= conf
 TEST_DIR			= test
-TEST_CGI_DIR		= test/cgi/cgi_files/executor
+TEST_CGI_DIR	= $(TEST_DIR)/cgi/cgi_files/executor
 
 # ソースファイルの拡張子
 SRC_EXT = cpp
