@@ -6,7 +6,7 @@
 # include <arpa/inet.h>
 # include <netinet/in.h>
 # include <stdio.h>
-# include <poll.h>
+# include <unistd.h>
 
 namespace SysCallWrapper
 {
@@ -16,7 +16,10 @@ namespace SysCallWrapper
 	int Listen(int socket, int backlog);
 	// int Accept(int socket, struct sockaddr *restrict address, socklen_t *restrict address_len); C++ではrestrictキーワードは使えないのでラッパーでは指定しない。
 	int Accept( int socket, struct sockaddr *address, socklen_t *address_len );
-	int Poll(struct pollfd fds[], nfds_t nfds, int timeout);
+	int Pipe(int fildes[2]);
+	pid_t Fork(void);
+	int Dup2(int fildes, int fildes2);
+	int	Fcntl(int fd, int cmd, int flags);
 }
 
 #endif

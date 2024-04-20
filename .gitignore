@@ -30,5 +30,12 @@
 *.exe
 *.out
 *.app
-.vscode
 webserv
+
+build
+logs
+*tmp*
+.vscode
+.DS_Store
+*.cgi
+*.log

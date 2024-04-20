@@ -1,28 +1,43 @@
-#ifndef Web_SERVER_HPP
-# define Web_SERVER_HPP
+#ifndef WEB_SERVER_HPP
+# define WEB_SERVER_HPP
 
 # include "ConnectionManager.hpp"
 # include "RequestHandler.hpp"
 # include "NetworkIOHandler.hpp"
-# include "ServerConfig.hpp"
-# include "EventManager.hpp"
 # include "SysCallWrapper.hpp"
-# include <algorithm>
+# include "ConfigHandler.hpp"
+# include "IActiveEventManager.hpp"
+# include "SelectActiveEventManager.hpp"
+# include "PollActiveEventManager.hpp"
+# include "KqueueActiveEventManager.hpp"
+# include "EpollActiveEventManager.hpp"
+
+# include "IServer.hpp"
+# include "SelectServer.hpp"
+# include "PollServer.hpp"
+# include "KqueueServer.hpp"
+# include "EpollServer.hpp"
 
 class WebServer
 {
 	public:
-		WebServer();
+		WebServer( const config::Main* config );
 		~WebServer();
-		void initializeServer();
-		void eventLoop();
-	
+		void run();
 	private:
 		NetworkIOHandler *ioHandler;
 		RequestHandler *requestHandler;
 		ConnectionManager *connManager;
-		EventManager *eventManager;
-		ServerConfig *serverConfig;
+		IActiveEventManager *eventManager;
+		IServer *server;
+		ConfigHandler *configHandler;
+		TimerTree *timerTree;
+		void initializeServer();
+		void initializeVServers();
+		void	initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
+										const std::string address, const unsigned int port);
+		void	initializeConnManager();
+		void	deleteObjects();
 };
 
 #endif

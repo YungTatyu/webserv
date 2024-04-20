@@ -1,4 +1,9 @@
 #include "SysCallWrapper.hpp"
+#include <cstdlib>
+#include <fcntl.h>
+#include <iostream>
+#include <cstring>
+#include <cerrno>
 
 int SysCallWrapper::Socket( int domain, int type, int protocol )
 {
@@ -57,13 +62,42 @@ int SysCallWrapper::Accept( int socket, struct sockaddr *address, socklen_t *add
 	return connfd;
 }
 
-int SysCallWrapper::Poll(struct pollfd fds[], nfds_t nfds, int timeout)
+int SysCallWrapper::Pipe(int fildes[2])
 {
-	int re = poll( fds, nfds, timeout );
+	int re = pipe( fildes );
 	if ( re == -1 )
 	{
-		perror( "poll" );
+		perror( "pipe" );
 	}
 	return re;
 }
 
+pid_t SysCallWrapper::Fork(void)
+{
+	int re = fork();
+	if ( re == -1 )
+	{
+		perror( "fork" );
+	}
+	return re;
+}
+
+int SysCallWrapper::Dup2(int fildes, int fildes2)
+{
+	int re = dup2(fildes, fildes2);
+	if ( re == -1 )
+	{
+		perror( "dup2" );
+		std::exit( EXIT_FAILURE );
+	}
+	return re;
+}
+
+int	SysCallWrapper::Fcntl(int fd, int cmd, int flags)
+{
+	// TODO: close-on-execをセットするなら、F_SETFDを使わないといけなさそう（subjectで使用不可のフラグ）
+	int re = fcntl(fd, cmd, flags);
+	if (re == -1)
+		std::cerr << "webserv: [emerg] fcntl (" << errno << ":"<< std::strerror(errno) << ")\n";
+	return re;
+}

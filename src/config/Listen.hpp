@@ -27,9 +27,9 @@ class Listen
 		const unsigned int	&getport() const { return this->port_; }
 		bool	getIsDefaultServer() const { return this->is_default_server_; }
 		void	setAddress(const std::string &address) { this->address_ = address; }
-		void	setport(const unsigned int &port) { this->port_ = port; }
+		void	setPort(const unsigned int &port) { this->port_ = port; }
 		void	setIsDefaultServer(const bool is_default_server) { this->is_default_server_ = is_default_server; }
-		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_TAKE12|CONF_NOT_UNIQUE;
+		const static unsigned int	kType_ = CONF_HTTP_SERVER|CONF_TAKE123|CONF_NOT_UNIQUE;
 };
 } // namespace config
 

@@ -10,12 +10,14 @@
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
-#include "Allow.hpp"
-#include "Deny.hpp"
+#include "AllowDeny.hpp"
 #include "Index.hpp"
+#include "Autoindex.hpp"
 #include "KeepaliveTimeout.hpp"
+#include "SendTimeout.hpp"
 #include "Listen.hpp"
 #include "Root.hpp"
+#include "SendTimeout.hpp"
 #include "ServerName.hpp"
 #include "TryFiles.hpp"
 #include "Userid.hpp"
@@ -34,19 +36,22 @@ struct Server
 	std::vector<AccessLog>	access_log_list;
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
-	std::vector<Allow>	allow_list;
-	std::vector<Deny>	deny_list;
+	std::vector<AllowDeny>	allow_deny_list;
 	std::vector<Index>	index_list;
 	std::vector<Listen>	listen_list;
+	Autoindex	autoindex;
 	KeepaliveTimeout	keepalive_timeout;
+	SendTimeout	send_timeout;
 	Root	root;
-	std::vector<ServerName>	server_name_list;
+	ServerName	server_name;
 	TryFiles	try_files;
 	Userid	userid;
 	UseridDomain	userid_domain;
 	UseridExpires	userid_expires;
 	UseridPath	userid_path;
-	UseridService	user_service;
+	UseridService	userid_service;
+	std::vector<int>	access_fd_list;
+	std::vector<int>	error_fd_list;
 };
 } // namespace config
 

@@ -1,10 +1,20 @@
 #ifndef CONF_HPP
 #define CONF_HPP
 
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#define KQUEUE_AVAILABLE
+#endif
+
+#if defined(__linux__)
+#define EPOLL_AVAILABLE
+#endif
+
 # include <string>
 
 namespace config
 {
+
+struct Main;
 
 /**
  *        AAAA  number of arguments
@@ -67,7 +77,7 @@ enum UNIQUE
 	CONF_NOT_UNIQUE = 0x00020000
 };
 
-bool	init_config(const std::string& file_path);
+Main	*initConfig( const std::string& file_path );
 
 } // namespace config
 
