@@ -34,8 +34,7 @@ jobs:
     - name: Check for changes
       id: format-changes
       run: |
-        git diff --exit-code
-        if [ $? -eq 0 ]; then
+        if [ $(git diff --exit-code) -eq 0 ]; then
           echo "CHANGED=false" >> "$GITHUB_OUTPUT"
         else
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
