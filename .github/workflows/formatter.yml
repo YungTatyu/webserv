@@ -7,9 +7,14 @@ jobs:
   format_code:
     runs-on: ubuntu-latest
 
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Install clang-format
       run: sudo apt-get install -y clang-format
@@ -17,7 +22,7 @@ jobs:
     - name: Format C++ code
       run: |
         make format
-    - name: Push
-      run: |
-        git commit -am ":recycle: format cpp code"
-        git push
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: :recycle: auto-format cpp code
+
