@@ -11,6 +11,7 @@ DEPS_DIR			= dep
 BUILD_DIR			= build
 CGI_DIR				= cgi
 CONF_DIR			= conf
+TEST_DIR			= test
 
 # ソースファイルの拡張子
 SRC_EXT = cpp
@@ -67,7 +68,7 @@ test:
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
 format:
-	find $(SRCS) -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
+	find $(SRCS_DIR) $(TEST_DIR) -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
 
 -include $(DEPS)
 
