@@ -122,6 +122,11 @@ void	EpollServer::callEventHandler(
 	// 発生したイベントの数だけloopする
 	for (int i = 0; i < event_manager->getActiveEventsNum(); ++i)
 	{
+
+		const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
+		const bool	is_cgi_sock = conn_manager->isCgiSocket(active_events[i].data.fd);
+		const int	cli_sock = cgi_handler.getCliSocket(); // cgi socketの場合に使用する
+
 		int	status = RequestHandler::UPDATE_NONE;
 		if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].data.fd);
@@ -138,14 +143,13 @@ void	EpollServer::callEventHandler(
 			break;
 
 		case RequestHandler::UPDATE_WRITE:
-			if (conn_manager->isCgiSocket(active_events[i].data.fd))
+			if (is_cgi_sock)
 			{
-				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
-				deleteEvent(active_events[i]); // cgi socketを監視から削除する
-				addNewEvent(cgi_handler.getCliSocket(), EPOLLOUT);
+				deleteEvent(active_events[i]); // cgi socketを監視から削除する: cgi socketをcloseした後だから呼ばなくてもいい
+				addNewEvent(cli_sock, EPOLLOUT);
+				break;
 			}
-			else
-				updateEvent(active_events[i], EPOLLOUT);
+			updateEvent(active_events[i], EPOLLOUT);
 			break;
 
 		case RequestHandler::UPDATE_CLOSE:
@@ -153,19 +157,17 @@ void	EpollServer::callEventHandler(
 			break;
 
 		case RequestHandler::UPDATE_CGI_READ:
-			if (conn_manager->isCgiSocket(active_events[i].data.fd))
-				updateEvent(active_events[i], EPOLLIN);
-			else
+			if (is_cgi_sock)
 			{
-				const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
-				deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
-				addNewEvent(cgi_handler.getCgiSocket(), EPOLLIN);
+				updateEvent(active_events[i], EPOLLIN);
+				break;
 			}
+			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
+			addNewEvent(cgi_handler.getCgiSocket(), EPOLLIN);
 			break;
 
 		case RequestHandler::UPDATE_CGI_WRITE:
 		{
-			const cgi::CGIHandler&	cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
 			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
 			addNewEvent(cgi_handler.getCgiSocket(), EPOLLOUT);
 			break;
