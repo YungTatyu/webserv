@@ -2,13 +2,13 @@ name: Format Code
 
 on:
   pull_request:
-    # types: [closed]
+    types: [closed]
 
 jobs:
   format_code:
     runs-on: ubuntu-latest
 
-    # if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     
     permissions:
       contents: write
