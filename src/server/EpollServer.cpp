@@ -167,11 +167,9 @@ void	EpollServer::callEventHandler(
 			break;
 
 		case RequestHandler::UPDATE_CGI_WRITE:
-		{
 			deleteEvent(active_events[i]); // client socketを監視から一時的に削除する
 			addNewEvent(cgi_handler.getCgiSocket(), EPOLLOUT);
 			break;
-		}
 
 		default:
 			if (status >= 0) // fdだったら
