@@ -2,11 +2,14 @@ name: Format C++ Code
 
 on:
   pull_request:
+    types: [closed]
 
 jobs:
   format_code:
     runs-on: ubuntu-latest
 
+    if: github.event.pull_request.merged == true
+    
     permissions:
       contents: write
 
@@ -20,7 +23,18 @@ jobs:
     - name: Format C++ code
       run: |
         make format
-    - uses: stefanzweifel/git-auto-commit-action@v5
+    - name: Check for changes
+      run: |
+        git diff --exit-code
+        if [ $? -eq 0 ]; then
+          echo -n ::set-output name=changed::false
+        else
+          echo -n ::set-output name=changed::true
+        fi
+
+    - name: Commit and push changes
+      if: steps.check_changes.outputs.changed == 'true'
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: ":recycle: auto-format cpp files"
+        commit_message: ":recycle: auto-format c++ code"
 
