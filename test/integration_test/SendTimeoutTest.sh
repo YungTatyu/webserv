@@ -1,5 +1,12 @@
 #!/bin/bash
 
+<< COMMENTOUT
+～～テスト概要～～
+1. テストするサーバーごとにwebservを実行する
+2. テストケースごとにclientを実行する。
+3. 想定sendtimeout時間分sleepし、client processがtimeoutされているかどうか確認する
+COMMENTOUT
+
 # init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
@@ -156,6 +163,7 @@ function	runTest {
 	assert "/timeout10/" "10" "true" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
 	assert "/timeout5/" "3" "false" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
 	assert "/timeout10/" "8" "false" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
+	# このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
 	assert "/no-recv/" "3" "false" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
 
 	# サーバープロセスを終了
