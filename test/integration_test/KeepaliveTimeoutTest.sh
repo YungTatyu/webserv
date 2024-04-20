@@ -1,5 +1,12 @@
 #!/bin/bash
 
+<< COMMENTOUT
+～～テスト概要～～
+1. テストするサーバーごとにwebservを実行する
+2. テストケースごとにtelnetを実行し、webservにリクエストを送る。
+3. 想定sendtimeout時間分sleepし、telnet processがtimeoutされているかどうか確認する
+COMMENTOUT
+
 # init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
