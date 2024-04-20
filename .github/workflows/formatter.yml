@@ -17,3 +17,7 @@ jobs:
     - name: Format C++ code
       run: |
         make format
+    - name: Push
+      run: |
+        git commit -am ":recycle: format cpp code"
+        git push
