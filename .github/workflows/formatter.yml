@@ -1,0 +1,19 @@
+name: Format C++ Code
+
+on:
+  pull_request:
+
+jobs:
+  format_code:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Install clang-format
+      run: sudo apt-get install -y clang-format
+
+    - name: Format C++ code
+      run: |
+        make format
