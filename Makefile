@@ -67,7 +67,7 @@ test:
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
 format:
-	find ./src -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
+	find $(SRCS) -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
 
 -include $(DEPS)
 

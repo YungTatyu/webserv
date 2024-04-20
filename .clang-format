@@ -1,6 +1,4 @@
-BasedOnStyle: LLVM
-IndentWidth: 8
-UseTab: Always
-BreakBeforeBraces: Linux
-AllowShortIfStatementsOnASingleLine: false
-IndentCaseLabels: false
+BasedOnStyle: Google 
+Language: Cpp
+ColumnLimit: 110 #一行が長い方が綺麗な場合もあるので入れた
+AllowShortEnumsOnASingleLine: false # enumの表示を一行にしなくない
