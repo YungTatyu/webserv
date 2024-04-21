@@ -12,6 +12,7 @@ class WorkerConnections
 	public:
 		WorkerConnections() : worker_connections_(this->kDefaultWorkerConnections_) {}
 		~WorkerConnections() {}
+		const static unsigned long	kSelectMaxConnections = 1024;
 		const static unsigned long	kDefaultWorkerConnections_ = 512;
 		const unsigned long	&getWorkerConnections() const { return this->worker_connections_; }
 		void	setWorkerConnections(const unsigned long &worker_connections) { this->worker_connections_ = worker_connections; }
