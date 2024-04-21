@@ -53,6 +53,7 @@ class Parser
 		bool	parseIndex();
 		bool	parseKeepaliveTimeout();
 		bool	parseListen();
+		bool	parseReceiveTimeout();
 		bool	parseReturn();
 		bool	parseRoot();
 		bool	parseSendTimeout();

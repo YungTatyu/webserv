@@ -15,6 +15,7 @@
 #include "ErrorLog.hpp"
 #include "Index.hpp"
 #include "KeepaliveTimeout.hpp"
+#include "ReceiveTimeout.hpp"
 #include "Root.hpp"
 #include "SendTimeout.hpp"
 #include "Userid.hpp"
@@ -38,6 +39,7 @@ struct Http
 	std::vector<ErrorLog>	error_log_list;
 	std::vector<ErrorPage>	error_page_list;
 	KeepaliveTimeout	keepalive_timeout;
+	ReceiveTimeout	receive_timeout;
 	SendTimeout	send_timeout;
 	std::vector<AllowDeny>	allow_deny_list;
 	Userid	userid;
