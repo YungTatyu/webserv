@@ -47,7 +47,7 @@ def run_test(conf, req_data):
   expects = {
     SERVER: "webserv/1.0",
     CONTENT_LENGTH: len(req_data),
-    CONNECTION: KEEP_ALIVE
+    CONNECTION: req_data['Connection']
   }
 
   WEBSERV = run_server(PATH_WEBSERV, f"{ROOT}/{conf}")
@@ -88,13 +88,24 @@ class TestClass:
       "Connection": KEEP_ALIVE,
     })
 
-@pytest.mark.parametrize("conf_keepalive", [
+  def test_header3(self, conf):
+    run_test(conf, {
+      "host": "test",
+      "content_type": "text",
+      "body": "",
+      "query_string": "",
+      "port": 4242,
+      "request": "static/not_found",
+      "Connection": KEEP_ALIVE,
+    })
+
+@pytest.mark.parametrize("conf_no_keepalive", [
     "server_res_no_keepalive_test.conf",
     "server_res_no_keepalive_test_poll.conf",
     "server_res_no_keepalive_test_select.conf"
 ])
-def test_header3(conf_keepalive):
-  run_test(conf_keepalive, {
+def test_header4(conf_no_keepalive):
+  run_test(conf_no_keepalive, {
     "host": "test",
     "content_type": "text",
     "body": "",
