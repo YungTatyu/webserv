@@ -17,7 +17,7 @@ namespace test
 	void	expectStatusLine(const HttpResponse& response, const std::pair<long, std::string>& expect)
 	{
 		EXPECT_EQ(response.status_code_, expect.first);
-		EXPECT_EQ(response.cgi_status_code_line_, expect.second);
+		EXPECT_EQ(response.status_code_line_, expect.second);
 	}
 
 	void	expectHeader(const HttpResponse& response, const std::string& expect, const std::string& header, bool found)

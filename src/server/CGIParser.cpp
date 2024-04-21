@@ -20,7 +20,7 @@ void	cgi::CGIParser::init(HttpResponse& http_response)
 	this->headers_ = &(http_response.headers_);
 	this->body_ = &(http_response.body_);
 	this->status_code_ = &(http_response.status_code_);
-	this->status_code_line_ = &(http_response.cgi_status_code_line_);
+	this->status_code_line_ = &(http_response.status_code_line_);
 
 	this->headers_->clear();
 	this->body_->clear();

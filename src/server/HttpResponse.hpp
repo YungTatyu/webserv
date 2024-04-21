@@ -45,7 +45,7 @@ class HttpResponse
 		std::string	root_path_;
 		std::string	res_file_path_;
 		RES_STATE	state_;
-		std::string	cgi_status_code_line_;
+		std::string	status_code_line_;
 		long	status_code_; // response生成するときにstatus_line_map_参照する
 		std::map<std::string, std::string, Utils::CaseInsensitiveCompare>	headers_;
 		std::string			body_;

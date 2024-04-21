@@ -8,6 +8,8 @@
 static const std::string kTRY_FILES = "try_files";
 static const std::string kINDEX = "index";
 static const std::string kRETURN = "return";
+static const char	*kContentType = "Content-Type";
+static const char	*kHtml = "text/html";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -122,7 +124,7 @@ static const std::string webserv_error_507_page =
 "<html>\r\n<head><title>507 Insufficient Storage</title></head>\r\n<body>\r\n<center><h1>507 Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse()
-	: root_path_(""), res_file_path_(""), state_(HttpResponse::RES_CREATING_STATIC), cgi_status_code_line_(""), status_code_(200), body_(""), internal_redirect_cnt_(0)
+	: root_path_(""), res_file_path_(""), state_(HttpResponse::RES_CREATING_STATIC), status_code_line_(""), status_code_(200), body_(""), internal_redirect_cnt_(0)
 {
 	// status_line
 	this->status_line_map_[200] = "200 OK";
@@ -274,16 +276,9 @@ std::string	HttpResponse::transformLetter( const std::string& key_str )
 std::string	HttpResponse::createResponse( const HttpResponse& response )
 {
 	std::stringstream stream;
-	std::map<int, std::string>::iterator it = status_line_map_.find(response.status_code_);
 
 	// status line
-	stream << http_version << " ";
-	if (response.state_ == RES_PARSED_CGI && !response.cgi_status_code_line_.empty())
-		stream << response.cgi_status_code_line_ << "\r\n";
-	else if (it != status_line_map_.end())
-		stream << status_line_map_[response.status_code_] << "\r\n";
-	else
-		stream << response.status_code_ << "\r\n";
+	stream << http_version << " " << response.status_code_line_ << "\r\n";
 
 	// headers
 	// cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
@@ -736,7 +731,7 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	const static char	*kConnection = "Connection";
 	const static char	*kKeepAlive = "keep-alive";
 	const static char	*kTransferEncoding = "Transfer-Encoding";
-	const static char	*kContentType = "Content-Type";
+	const std::map<int, std::string>::iterator default_status_line = status_line_map_.find(response.status_code_);
 
 	response.headers_["Server"] = "webserv/1.0";
 	response.headers_["Date"] = getCurrentGMTTime();
@@ -745,17 +740,25 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	if (response.headers_.find(kTransferEncoding) != response.headers_.end())
 		response.headers_.erase(kTransferEncoding);
 
-	if (response.headers_.find(kContentType) == response.headers_.end())
-		response.headers_[kContentType] = detectContentType(response.res_file_path_);
-
 	// requestエラーの場合は、接続を切る
 	if (time.isNoTime() || (400 <= response.status_code_
 		&& response.status_code_ < 500))
-	{
 		response.headers_[kConnection] = kClose;
+	else
+		response.headers_[kConnection] = kKeepAlive;
+
+	if (!response.status_code_line_.empty())
+		return;
+	if (default_status_line != status_line_map_.end())
+	{
+		response.status_code_line_ = default_status_line->second;
+		response.headers_[kContentType] = "text/html";
 		return;
 	}
-	response.headers_[kConnection] = kKeepAlive;
+	response.status_code_line_ = Utils::toStr(response.status_code_);
+	// staticのファイルの場合のみ、contetn-typeをつけてあげる
+	if (response.headers_.find(kContentType) == response.headers_.end())
+		response.headers_[kContentType] = detectContentType(response.res_file_path_);
 }
 
 std::string	HttpResponse::detectContentType(const std::string& res_file_path)
