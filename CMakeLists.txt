@@ -16,15 +16,16 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-googletest 
 	# src files
+	# src/config
 	src/config/Lexer.cpp
 	src/config/Parser.cpp
 	src/config/conf.cpp
-	src/config/Lexer.cpp
-	src/config/Parser.cpp
 	src/config/LogFd.cpp
+	# src/cgi
 	src/server/CGIHandler.cpp
 	src/server/CGIParser.cpp
 	src/server/CGIExecutor.cpp
+	# src/server
 	src/server/ConfigHandler.cpp
 	src/server/ConnectionManager.cpp
 	src/server/HttpRequest.cpp
@@ -46,7 +47,6 @@ add_executable(${PROJECT_NAME}-googletest
 	src/utils/Utils.cpp
 	
 	# test files
-	#test/server/config_handler_test.cpp
 	test/server/TimerTree_test.cpp
 	test/server/config_handler_test.cpp
 	test/server/HttpRequestErrorTest.cpp 
@@ -60,13 +60,14 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/alias/alias_test.cpp 
 	test/conf/directive_parser/autoindex/autoindex_test.cpp 
 	test/conf/directive_parser/allow/allow_test.cpp 
-	test/conf/directive_parser/deny/deny_test.cpp 
 	test/conf/directive_parser/client_max_body_size/client_max_body_size_test.cpp 
-	test/conf/directive_parser/index/index_test.cpp 
+	test/conf/directive_parser/deny/deny_test.cpp
 	test/conf/directive_parser/error_log/error_log_test.cpp 
 	test/conf/directive_parser/error_page/error_page_test.cpp 
+	test/conf/directive_parser/index/index_test.cpp
 	test/conf/directive_parser/keepalive_timeout/keepalive_timeout_test.cpp 
 	test/conf/directive_parser/listen/listen_test.cpp
+	test/conf/directive_parser/receive_timeout/receive_timeout_test.cpp
 	test/conf/directive_parser/return/return_test.cpp
 	test/conf/directive_parser/root/root_test.cpp
 	test/conf/directive_parser/send_timeout/send_timeout_test.cpp
