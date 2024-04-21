@@ -16,19 +16,19 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 	// リスニングソケットへの新規リクエスト
 	if (ioHandler.isListenSocket(sockfd))
 	{
-		int	accept_sock = ioHandler.acceptConnection(connManager, sockfd);
-		if (accept_sock == -1)
-			return accept_sock;
+		int	new_sock = ioHandler.acceptConnection(connManager, sockfd);
+		if (new_sock == -1)
+			return new_sock;
 
 		// timeout追加
 		// TODO: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
-		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, accept_sock, Timer::TMO_CLI_REQUEST);
+		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, new_sock, Timer::TMO_CLI_REQUEST);
 
 		// worker_connections確認
 		if (this->isOverWorkerConnections(connManager, configHandler))
 			this->deleteTimerAndConnection(ioHandler, connManager, timerTree, timerTree.getTimerTree().begin()->getFd());
 
-		return accept_sock;
+		return new_sock;
 	}
 
 	// keepalive_timeout消す。
