@@ -114,28 +114,28 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
 	this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
 
 	this->parser_map_[kACCESS_LOG] = &config::Parser::parseAccessLog;
-	this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
-	this->parser_map_[kUSE] = &config::Parser::parseUse;
-	this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
-	this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
-	this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
-	this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
-	this->parser_map_[kROOT] = &config::Parser::parseRoot;
-	this->parser_map_[kINDEX] = &config::Parser::parseIndex;
-	this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
-	this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
+	this->parser_map_[kALIAS] = &config::Parser::parseAlias;
 	this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
+	this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
+	this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
 	this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
+	this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
+	this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
+	this->parser_map_[kINDEX] = &config::Parser::parseIndex;
+	this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
 	this->parser_map_[kLISTEN] = &config::Parser::parseListen;
+	this->parser_map_[kROOT] = &config::Parser::parseRoot;
+	this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
+	this->parser_map_[kRETURN] = &config::Parser::parseReturn;
 	this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
 	this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
-	this->parser_map_[kALIAS] = &config::Parser::parseAlias;
-	this->parser_map_[kRETURN] = &config::Parser::parseReturn;
+	this->parser_map_[kUSE] = &config::Parser::parseUse;
 	this->parser_map_[kUSERID] = &config::Parser::parseUserid;
 	this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
 	this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
 	this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
 	this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
+	this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
 }
 
 config::Parser::~Parser() {}
@@ -783,8 +783,8 @@ long	config::Parser::parseTime()
 		if (iss >> unit)
 		{
 			if (unit != "ms" &&
-				unit != "m" &&
 				unit != "s" &&
+				unit != "m" &&
 				unit != "h" &&
 				unit != "d")
 			{
