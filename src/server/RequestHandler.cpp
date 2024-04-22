@@ -311,6 +311,6 @@ void RequestHandler::deleteTimerAndConnection(NetworkIOHandler &ioHandler, Conne
 }
 
 bool RequestHandler::isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler) {
-  return connManager.getConnections().size() >=
+  return (connManager.getConnections().size() - connManager.cgiSockNum()) >=
          configHandler.config_->events.worker_connections.getWorkerConnections();
 }
