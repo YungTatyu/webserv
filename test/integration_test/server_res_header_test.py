@@ -35,26 +35,27 @@ def send_reqest(req_data):
 
 def expect_headers_exist(response):
   expect_headers = [SERVER, DATE, CONTENT_LENGTH, CONNECTION]
-  print(response.headers)
-  assert all(response.headers.get(header) is not None for header in expect_headers)
+  for header in expect_headers:
+    assert response.headers.get(header) is not None
 
-def expect_header(actual, expect):
-  assert actual == expect
+def expect_headers(actual, expect):
+  for header, value in expect.items():
+    assert actual.headers.get(header) == value
 
 def run_test(conf, req_data):
   CWD = os.path.dirname(os.path.abspath(__file__))
   PATH_WEBSERV = f"{CWD}/../../webserv"
   expects = {
     SERVER: "webserv/1.0",
-    CONTENT_LENGTH: len(req_data),
-    CONNECTION: req_data['Connection']
+    CONTENT_LENGTH: len(req_data['body']), # bodyの修正が適応されれば、テスト通ります
+    CONNECTION: req_data[CONNECTION]
   }
 
   WEBSERV = run_server(PATH_WEBSERV, f"{ROOT}/{conf}")
   try:
       res = send_reqest(req_data)
       expect_headers_exist(res)
-      all(expect_header(res.headers.get(header), value) for header, value in expects.items())
+      expect_headers(res, expects)
   finally:
     WEBSERV.kill()
 
@@ -68,35 +69,38 @@ def run_test(conf, req_data):
 class TestClass:
   def test_header1(self, conf):
     run_test(conf, {
+       SERVER: "webserv/1.0",
       "host": "test",
       "content_type": "text",
       "body": "this is body message",
       "query_string": "a=a&b=b&c=c",
       "port": 4242,
       "request": "static/index.html",
-      "Connection": KEEP_ALIVE,
+      CONNECTION: KEEP_ALIVE,
     })
 
   def test_header2(self, conf):
     run_test(conf, {
+       SERVER: "webserv/1.0",
       "host": "test",
       "content_type": "text",
       "body": "",
       "query_string": "",
       "port": 4242,
       "request": "dynamic/document_response.py",
-      "Connection": KEEP_ALIVE,
+      CONNECTION: KEEP_ALIVE,
     })
 
   def test_header3(self, conf):
     run_test(conf, {
+       SERVER: "webserv/1.0",
       "host": "test",
       "content_type": "text",
       "body": "",
       "query_string": "",
       "port": 4242,
       "request": "static/not_found",
-      "Connection": KEEP_ALIVE,
+      CONNECTION: CLOSE,
     })
 
 @pytest.mark.parametrize("conf_no_keepalive", [
@@ -106,11 +110,12 @@ class TestClass:
 ])
 def test_header4(conf_no_keepalive):
   run_test(conf_no_keepalive, {
+    SERVER: "webserv/1.0",
     "host": "test",
     "content_type": "text",
     "body": "",
     "query_string": "",
     "port": 4242,
     "request": "dynamic/body_res.py",
-    "Connection": CLOSE,
+    CONNECTION: CLOSE,
   })
