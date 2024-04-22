@@ -65,6 +65,7 @@ class ConnectionManager {
   void clearConnectionData(const int fd);
   void closeAllConnections();
   bool isCgiSocket(const int fd) const;
+  size_t cgiSockNum() const;
 
  private:
   std::map<int, ConnectionData*> connections_;

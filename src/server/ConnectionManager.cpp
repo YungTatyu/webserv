@@ -154,3 +154,14 @@ void ConnectionManager::closeAllConnections() {
   }
   this->connections_.clear();
 }
+
+size_t ConnectionManager::cgiSockNum() const {
+  size_t cgi_sock_num = 0;
+  std::map<int, ConnectionData*>::const_iterator it = this->connections_.begin();
+
+  for (; it != this->connections_.end(); ++it)
+    if (this->isCgiSocket(it->first))
+       cgi_sock_num++;
+
+  return cgi_sock_num;
+}
