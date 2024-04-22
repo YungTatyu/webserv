@@ -232,7 +232,6 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id) const {
  * @return true: timerを追加
  * @return false: 'Connections: closeの'場合
  */
-<<<<<<< HEAD
 bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type)
 {
 	config::Time	timeout;
@@ -296,59 +295,6 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 	);
 
 	return true;
-=======
-bool RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                                    ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd,
-                                    enum Timer::TimeoutType type) {
-  config::Time timeout;
-
-  // Connectionヘッダーを見てcloseならコネクションを閉じる
-  std::map<std::string, std::string>::iterator it =
-      connManager.getResponse(sockfd).headers_.find("Connection");
-  if (it != connManager.getResponse(sockfd).headers_.end() && it->second == "close") {
-    ioHandler.closeConnection(connManager, sockfd);
-    return false;
-  }
-
-  // Hostヘッダーがあるか確認
-  // 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
-  // このように探すdirectiveがほんとにこのクライアントが最後にアクセスしたコンテキストかは怪しい。
-  it = connManager.getRequest(sockfd).headers.find("Host");
-  std::string host_name;
-  if (it == connManager.getRequest(sockfd).headers.end())
-    host_name = "_";
-  else
-    host_name = it->second;
-
-  // timeout時間セット
-  switch (type) {
-    case Timer::TMO_KEEPALIVE:
-      timeout = configHandler.searchKeepaliveTimeout(connManager.getTiedServer(sockfd), host_name,
-                                                     connManager.getRequest(sockfd).uri);
-      break;
-
-    case Timer::TMO_CLI_REQUEST:
-      // ToDo: ディレクティブ作る
-      timeout = config::Time(60 * config::Time::seconds);
-      break;
-
-    case Timer::TMO_SEND:
-      timeout = configHandler.searchSendTimeout(connManager.getTiedServer(sockfd), host_name,
-                                                connManager.getRequest(sockfd).uri);
-      break;
-  }
-
-  // keepaliveが無効なので接続を閉じる
-  // ToDo: keepalive以外のtimeoutが0だったら？
-  if (type == Timer::TMO_KEEPALIVE && timeout.isNoTime()) {
-    ioHandler.closeConnection(connManager, sockfd);
-    return false;
-  }
-
-  timerTree.addTimer(Timer(sockfd, timeout));
-
-  return true;
->>>>>>> main
 }
 
 void RequestHandler::deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
