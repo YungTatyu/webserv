@@ -18,7 +18,7 @@ def run_server(webserv, conf):
     print(f"{e}", file=sys.stderr)
     sys.exit(1)
 
-def send_reqest(req_data):
+def send_request(req_data):
   headers = {
     'host': req_data['host'],
     'content-type': req_data['content_type']
@@ -57,7 +57,7 @@ def run_test(conf, req_data):
 
   WEBSERV = run_server(PATH_WEBSERV, f"{ROOT}/{conf}")
   try:
-      res = send_reqest(req_data)
+      res = send_request(req_data)
       expect_status(res, 200)
       expect_body(res, req_data)
   finally:
