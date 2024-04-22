@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
 	test/server/HttpResponseTest.cpp
+	test/server/HttpResponse/error/error_page.cpp
 	test/server/WorkerConnectionsNumTest.cpp
 	test/conf/confLexerTest.cpp 
 	test/conf/directives_test.cpp 
@@ -90,6 +91,7 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	src/config
 	src/utils
 	test/conf
+	test/server/HttpResponse
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
