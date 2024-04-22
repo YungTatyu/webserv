@@ -11,6 +11,7 @@ static const std::string kRETURN = "return";
 static const char	*kContentType = "Content-Type";
 static const char	*kHtml = "text/html";
 static const char	*kTextPlain = "text/plain";
+static const char	*kDefaultPage = "defaut.html";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -419,6 +420,7 @@ HttpResponse::ResponsePhase	HttpResponse::handleSearchLocationPhase( HttpRespons
 		config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
 		response.status_code_ = 500;
 		response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
+		response.res_file_path_ = kDefaultPage;
 		return sw_end_phase;
 	}
 	*location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
@@ -465,10 +467,7 @@ void	HttpResponse::prepareReturn( HttpResponse& response, const config::Return& 
 	// textの場合
 	response.status_code_ = code;
 	if (!url.empty())
-	{
 		response.body_ = url;
-		response.headers_[kContentType] = kTextPlain;
-	}
 }
 
 HttpResponse::ResponsePhase	HttpResponse::handleReturnPhase( HttpResponse& response, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler )
@@ -635,6 +634,7 @@ HttpResponse::ResponsePhase	HttpResponse::Index( HttpResponse& response, HttpReq
 			response.status_code_ = 404;
 			return sw_error_page_phase;
 		}
+		response.res_file_path_ = kDefaultPage;
 		return sw_log_phase;
 	}
 
@@ -716,7 +716,10 @@ HttpResponse::ResponsePhase	HttpResponse::handleErrorPagePhase( HttpResponse& re
 	const config::ErrorPage* ep = config_handler.searchErrorPage(server, location, response.status_code_);
 
 	if (response.body_.empty() && default_error_page_map_.find(response.status_code_) != default_error_page_map_.end())
+	{
+		response.res_file_path_ = kDefaultPage;
 		response.body_ = *default_error_page_map_[response.status_code_] + webserv_error_page_tail;
+	}
 	if (!ep)
 	{
 		return sw_log_phase;
@@ -752,16 +755,17 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	else
 		response.headers_[kConnection] = kKeepAlive;
 
+	// cgiでstatus code lineの場合
 	if (!response.status_code_line_.empty())
 		return;
 	if (default_status_line != status_line_map_.end())
-	{
 		response.status_code_line_ = default_status_line->second;
-		response.headers_[kContentType] = kHtml;
-		return;
-	}
-	response.status_code_line_ = Utils::toStr(response.status_code_);
+	else
+		response.status_code_line_ = Utils::toStr(response.status_code_);
 	// staticのファイルの場合のみ、contetn-typeをつけてあげる
+	if (response.state_ != RES_CREATING_STATIC)
+		return;
+	
 	if (response.headers_.find(kContentType) == response.headers_.end())
 		response.headers_[kContentType] = detectContentType(response.res_file_path_);
 }
