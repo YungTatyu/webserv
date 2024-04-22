@@ -10,6 +10,7 @@ static const std::string kINDEX = "index";
 static const std::string kRETURN = "return";
 static const char	*kContentType = "Content-Type";
 static const char	*kHtml = "text/html";
+static const char	*kTextPlain = "text/plain";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -447,22 +448,26 @@ void	HttpResponse::prepareReturn( HttpResponse& response, const config::Return& 
 {
 	std::string	url = return_directive.getUrl();
 	int	code = return_directive.getCode();
+	const char	*kLocation = "Location";
 
 	if (code == config::Return::kCodeUnset)
 	{
 		response.status_code_ = 302;
-		response.headers_["Location"] = url;
+		response.headers_[kLocation] = url;
+		return;
 	}
-	else if (config::Return::isRedirectCode(code))
+	if (config::Return::isRedirectCode(code))
 	{
 		response.status_code_ = code;
-		response.headers_["Location"] = url;
+		response.headers_[kLocation] = url;
+		return;
 	}
-	else
+	// textの場合
+	response.status_code_ = code;
+	if (!url.empty())
 	{
-		response.status_code_ = code;
-		if (!url.empty())
-			response.body_ = url;
+		response.body_ = url;
+		response.headers_[kContentType] = kTextPlain;
 	}
 }
 
@@ -752,7 +757,7 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 	if (default_status_line != status_line_map_.end())
 	{
 		response.status_code_line_ = default_status_line->second;
-		response.headers_[kContentType] = "text/html";
+		response.headers_[kContentType] = kHtml;
 		return;
 	}
 	response.status_code_line_ = Utils::toStr(response.status_code_);
@@ -763,16 +768,16 @@ void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time
 
 std::string	HttpResponse::detectContentType(const std::string& res_file_path)
 {
-	const char	*kHtml = ".html";
-	const char	*kCss = ".css";
-	const char	*kJs = ".js";
+	const char	*kHtmlExt = ".html";
+	const char	*kCssExt = ".css";
+	const char	*kJsExt = ".js";
 
-	if (Utils::isExtensionFile(res_file_path, kHtml))
-		return "text/html";
-	if (Utils::isExtensionFile(res_file_path, kCss))
+	if (Utils::isExtensionFile(res_file_path, kHtmlExt))
+		return kHtml;
+	if (Utils::isExtensionFile(res_file_path, kCssExt))
 		return "text/css";
-	if (Utils::isExtensionFile(res_file_path, kJs))
+	if (Utils::isExtensionFile(res_file_path, kJsExt))
 		return "text/javascript";
-	return "text/plain";
+	return kTextPlain;
 }
 
