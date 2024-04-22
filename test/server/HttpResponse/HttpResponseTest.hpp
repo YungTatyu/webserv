@@ -52,7 +52,6 @@ public:
 		ASSERT_NE(this->config_handler_.config_, nullptr);
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
 			FAIL() << "socketpair(): " << std::strerror(errno);
-
 	}
 
 	// void	initConfigHandler(const std::vector<ip_address_pair> &ip_addresses) {
@@ -62,23 +61,19 @@ public:
 		// 	this->tied_servers.push_back(this->config_handler_.createTiedServer(it->first, it->second));
 	}
 
-	void	initRequest(const std::vector<string_map> &headers,
+	void	initRequest(const string_map_case_insensitive &headers,
 		const std::string &uri,
 		const HttpRequest::ParseState state,
 		const std::string &body="",
 		const std::string &queries="",
 		const std::string &version="HTTP/1.1"
 		) {
+		this->request_.headers = headers;
 		this->request_.uri = uri;
 		this->request_.parseState = state;
 		this->request_.body = body;
 		this->request_.queries = queries;
 		this->request_.version = version;
-		// this->request_.headers = headers;
-		for (std::vector::<string_map>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-		{
-			this->request_.headers.insert(std::make_pair(it->first, it->second));
-		}
 	}
 
 	/**
@@ -90,11 +85,14 @@ public:
 	}
 
 	void	testHeaders(const std::vector<string_map> &expects) const {
-		for (std::vector<string_map>::const_iterator it = expects.begin(); it != expects.end(); ++it)
+		for (std::vector<string_map>::const_iterator vit = expects.begin(); vit != expects.end(); ++vit)
 		{
-			EXPECT_NO_THROW(
-				EXPECT_EQ(this->response_.headers_[it->first], it->second);
-			);
+			for (string_map::const_iterator sit = vit->begin(); sit != vit->end(); ++sit)
+			{
+				EXPECT_NO_THROW(
+					EXPECT_EQ(this->response_.headers_.at(sit->first), sit->second)
+				);
+			}
 		}
 		EXPECT_EQ(this->response_.headers_.size(), expects.size());
 	}
