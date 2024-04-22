@@ -146,7 +146,6 @@ EOT
 			((PASSED_TESTS++))
 		fi
 	fi
-	sleep 2
 	printf "\n"
 }
 
