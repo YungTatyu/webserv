@@ -10,11 +10,10 @@ COMMENTOUT
 # init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
-readonly CLIENT_TIMEOUT0_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout0"
-readonly CLIENT_TIMEOUT5_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout5"
-readonly CLIENT_TIMEOUT10_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout10"
+readonly CLIENT_SEND_TIMEOUT_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/send_timeout"
 readonly CLIENT_NO_RECEIVE_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/no_recv"
 readonly TEST_NAME="SendTimeout Test"
+readonly MAKEFILE_NAME="MAKE_SENDTIMEOUT"
 # cnt
 TOTAL_TESTS=0
 PASSED_TESTS=0
@@ -36,7 +35,7 @@ function	init {
 		echo "Build webserv failed"
 		exit 1
 	fi
-	make -j -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" > /dev/null
+	make -j -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" > /dev/null
 	if [ $? -eq 1 ]; then
 		echo "Build client failed"
 		rm "${WEBSERV_PATH}"
@@ -50,7 +49,7 @@ function	clean {
 	local	color=$1
 	printf "${color}make fclean webserv & client.${RESET}\n"
 	make fclean -C "${SCRIPT_DIR}/../../" > /dev/null
-	make fclean -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" > /dev/null
+	make fclean -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" > /dev/null
 }
 
 function	Kill {
@@ -93,11 +92,12 @@ function	runClient {
 	local client_executable=$1
 	local server_ip=$2
 	local server_port=$3
-	local request=$4
-	local sleep_time=$5
-	${client_executable} "$server_ip" "$server_port" "$request" "$sleep_time" > /dev/null 2>&1 &
+	local sleep_time=$4
+	local request1=$5
+	local request2=$6
+	${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" > /dev/null 2>&1 &
 	# debug 出力する場合
-	#${client_executable} "$server_ip" "$server_port" "$request" "$sleep_time"
+	#${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}"
 	CLIENT_PID=$!
 }
 
@@ -108,18 +108,14 @@ function	assert {
 	local	client_executable=$4
 	local	executable_name=$5
 	local	url="${Scheme}://${Host}:${Port}${uri}"
-	local	request=$(cat <<EOT
-GET ${uri} HTTP/1.1
-Host: _
-
-EOT
-)
+	local	request1="GET ${uri} HTTP/1.1"
+	local	request2="Host: _"
 
 	((TOTAL_TESTS++))
 	printf "[  test$TOTAL_TESTS  ]\n${url}: "
 
 	# program 実行
-	runClient "${client_executable}" "${Host}" "${Port}" "${request}" "${expect_sec}" &
+	runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}" &
 	sleep $(bc <<< "$expect_sec + 1.5")
 
 	# 判定
@@ -158,11 +154,11 @@ function	runTest {
 	runServer "${root}/${conf}"
 
 	# テスト実行
-	assert "/" "0" "false" "${CLIENT_TIMEOUT0_PATH}" "timeout0"
-	assert "/timeout5/" "5" "true" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
-	assert "/timeout10/" "10" "true" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
-	assert "/timeout5/" "3" "false" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
-	assert "/timeout10/" "8" "false" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
+	assert "/" "0" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout5/" "5" "true" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout10/" "10" "true" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout5/" "3" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout10/" "8" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	# このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
 	assert "/no-recv/" "3" "false" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
 

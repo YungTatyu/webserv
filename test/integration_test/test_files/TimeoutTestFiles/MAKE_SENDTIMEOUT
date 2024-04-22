@@ -1,0 +1,21 @@
+NAME_SEND_TIMEOUT		= send_timeout
+NAME_NO_RECV			= no_recv
+CC					= gcc
+CXX					= c++
+CXXFLAGS			= -std=c++14
+RM					= rm -rf
+
+all: $(NAME_SEND_TIMEOUT) $(NAME_NO_RECV)
+
+$(NAME_SEND_TIMEOUT):
+	$(CXX) $(CXXFLAGS) -o $@ client_send_timeout.cpp
+
+$(NAME_NO_RECV):
+	$(CXX) $(CXXFLAGS) -o $@ client_no_receive.cpp
+
+fclean: clean
+	$(RM) $(NAME_SEND_TIMEOUT) $(NAME_NO_RECV)
+
+re: fclean all
+
+.PHONY: all clean fclean re test
