@@ -42,7 +42,7 @@ def expect_headers(actual, expect):
   for header, value in expect.items():
     assert actual.headers.get(header) == value
 
-def run_test(conf, req_data):
+def run_test(conf, req_data, test_headers={}):
   CWD = os.path.dirname(os.path.abspath(__file__))
   PATH_WEBSERV = f"{CWD}/../../webserv"
   expects = {
@@ -50,6 +50,11 @@ def run_test(conf, req_data):
     CONTENT_LENGTH: len(req_data['body']), # bodyの修正が適応されれば、テスト通ります
     CONNECTION: req_data[CONNECTION]
   }
+  """
+  任意のheaderをテストに追加可能
+  """
+  for header, value in test_headers.items():
+    expects[header] = value
 
   WEBSERV = run_server(PATH_WEBSERV, f"{ROOT}/{conf}")
   try:
