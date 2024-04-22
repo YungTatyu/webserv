@@ -1,11 +1,13 @@
 #include "RequestHandler.hpp"
-#include "HttpResponse.hpp"
-#include <sys/types.h>
-#include <algorithm>
+
+#include <sys/resource.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
+
+#include <algorithm>
+
+#include "HttpResponse.hpp"
 
 RequestHandler::RequestHandler() {}
 
@@ -163,70 +165,64 @@ int RequestHandler::handleWriteEvent(
 	return RequestHandler::UPDATE_READ;
 }
 
-int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd)
-{
-	ssize_t	re = ioHandler.sendRequestBody(connManager, sockfd);
-	
-	const std::string	body = connManager.getRequest(sockfd).body;
-	const cgi::CGIHandler	cgi_handler = connManager.getCgiHandler(sockfd);
-	if (connManager.getSentBytes(sockfd) == body.size() || // bodyを全て送ったら
-		(re == -1 && cgiProcessExited(cgi_handler.getCgiProcessId()))) // cgi processがすでに死んでいたら
-	{
-		connManager.resetSentBytes(sockfd);
-		connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
-		return RequestHandler::UPDATE_CGI_READ;
-	}
-	return RequestHandler::UPDATE_NONE;
+int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+                                        const int sockfd) {
+  ssize_t re = ioHandler.sendRequestBody(connManager, sockfd);
+
+  const std::string body = connManager.getRequest(sockfd).body;
+  const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
+  if (connManager.getSentBytes(sockfd) == body.size() ||              // bodyを全て送ったら
+      (re == -1 && cgiProcessExited(cgi_handler.getCgiProcessId())))  // cgi processがすでに死んでいたら
+  {
+    connManager.resetSentBytes(sockfd);
+    connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+    return RequestHandler::UPDATE_CGI_READ;
+  }
+  return RequestHandler::UPDATE_NONE;
 }
 
-int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, const int sockfd)
-{
-	ioHandler.closeConnection( connManager, sockfd );
-	timerTree.deleteTimer( sockfd );
-	return RequestHandler::UPDATE_CLOSE;
+int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+                                     TimerTree &timerTree, const int sockfd) {
+  ioHandler.closeConnection(connManager, sockfd);
+  timerTree.deleteTimer(sockfd);
+  return RequestHandler::UPDATE_CLOSE;
 }
 
+void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+                                        ConfigHandler &configHandler, TimerTree &timerTree) {
+  configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
+  // timeoutしていない最初のイテレータを取得
+  Timer current_time(-1, Timer::getCurrentTime());
+  std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
 
-void	RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree)
-{
-	configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
-	// timeoutしていない最初のイテレータを取得
-	Timer	current_time(-1, Timer::getCurrentTime());
-	std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
-
-	Timer::updateCurrentTime();
-	// timeout している接続をすべて削除
-	for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin();
-		it != upper_bound;
-		)
-	{
-		std::multiset<Timer>::iterator next = it;
-		next++;
-		// timer tree から削除
-		this->deleteTimerAndConnection(ioHandler, connManager, timerTree, it->getFd());
-		// timeoutの種類によってログ出力変える
-		//std::string	timeout_reason = "waiting for client request.";
-		configHandler.writeErrorLog("webserv: [info] client timed out\n");
-		it = next;
-	}
+  Timer::updateCurrentTime();
+  // timeout している接続をすべて削除
+  for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(); it != upper_bound;) {
+    std::multiset<Timer>::iterator next = it;
+    next++;
+    // timer tree から削除
+    this->deleteTimerAndConnection(ioHandler, connManager, timerTree, it->getFd());
+    // timeoutの種類によってログ出力変える
+    // std::string	timeout_reason = "waiting for client request.";
+    configHandler.writeErrorLog("webserv: [info] client timed out\n");
+    it = next;
+  }
 }
 
 /**
  * @brief cgi processが生きているか確認
- * 
- * @param process_id 
+ *
+ * @param process_id
  * @return true cgi processが終了している
- * @return false 
+ * @return false
  */
-bool	RequestHandler::cgiProcessExited(const pid_t process_id) const
-{
-	int status;
-	pid_t re = waitpid(process_id, &status, WNOHANG);
-	// errorまたはprocessが終了していない
-	// TODO: errorのときの処理はあやしい
-	if (re == 0 || re == -1)
-		return false;
-	return true;
+bool RequestHandler::cgiProcessExited(const pid_t process_id) const {
+  int status;
+  pid_t re = waitpid(process_id, &status, WNOHANG);
+  // errorまたはprocessが終了していない
+  // TODO: errorのときの処理はあやしい
+  if (re == 0 || re == -1) return false;
+  return true;
 }
 
 /**
@@ -301,22 +297,20 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 	return true;
 }
 
-void	RequestHandler::deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, int socket)
-{
-	// もしCGIソケットなら紐づくclientソケットも削除
-	if (connManager.isCgiSocket(socket))
-	{
-		connManager.getCgiHandler(socket).killCgiProcess();
-		int tied_sock = connManager.getCgiHandler(socket).getCliSocket();
-		ioHandler.closeConnection(connManager, tied_sock);
-		timerTree.deleteTimer(tied_sock);
-	}
-	timerTree.deleteTimer(socket);
-	ioHandler.closeConnection(connManager, socket);
+void RequestHandler::deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+                                              TimerTree &timerTree, int socket) {
+  // もしCGIソケットなら紐づくclientソケットも削除
+  if (connManager.isCgiSocket(socket)) {
+    connManager.getCgiHandler(socket).killCgiProcess();
+    int tied_sock = connManager.getCgiHandler(socket).getCliSocket();
+    ioHandler.closeConnection(connManager, tied_sock);
+    timerTree.deleteTimer(tied_sock);
+  }
+  timerTree.deleteTimer(socket);
+  ioHandler.closeConnection(connManager, socket);
 }
 
-bool	RequestHandler::isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler)
-{
-	return connManager.getConnections().size() >= configHandler.config_->events.worker_connections.getWorkerConnections();
+bool RequestHandler::isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler) {
+  return connManager.getConnections().size() >=
+         configHandler.config_->events.worker_connections.getWorkerConnections();
 }
-
