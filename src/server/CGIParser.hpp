@@ -1,22 +1,20 @@
 #ifndef CGI_CGI_PARSER_HPP
 #define CGI_CGI_PARSER_HPP
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "HttpResponse.hpp"
 #include "Utils.hpp"
 
-namespace cgi
-{
-enum PARSE_STATE
-{
-	PARSE_BEFORE = 0,
-	PARSE_COMPLETE,
-	PARSE_INPROGRESS,
-	PARSE_HEADER_DONE,
-	PARSE_BODY_DONE,
-	PARSE_ERROR
+namespace cgi {
+enum PARSE_STATE {
+  PARSE_BEFORE = 0,
+  PARSE_COMPLETE,
+  PARSE_INPROGRESS,
+  PARSE_HEADER_DONE,
+  PARSE_BODY_DONE,
+  PARSE_ERROR
 };
 
 typedef std::map<std::string, std::string, Utils::CaseInsensitiveCompare> string_map_case_insensitive;
@@ -45,6 +43,6 @@ class CGIParser
 		PARSE_STATE	state_;
 		bool	parse(HttpResponse& http_response, const std::string& cgi_response, const PARSE_STATE init_state);
 };
-} // namespace cgi
+}  // namespace cgi
 
 #endif

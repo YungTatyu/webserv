@@ -1,12 +1,12 @@
 #ifndef CONNECTION_MANAGER_HPP
-# define CONNECTION_MANAGER_HPP
+#define CONNECTION_MANAGER_HPP
 
-# include <vector>
-# include <map>
+#include <map>
+#include <vector>
 
-# include "HttpRequest.hpp"
-# include "HttpResponse.hpp"
-# include "CGIHandler.hpp"
+#include "CGIHandler.hpp"
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 
 struct TiedServer;
 class CGIHandler;

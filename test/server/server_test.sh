@@ -5,7 +5,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # サーバープログラムをバックグラウンドで起動
-./webserv $1  > /dev/null &
+./webserv $1 >/dev/null &
 WEBSERV_PID=$!
 
 # 起動プロセス中ちょっと待つ
