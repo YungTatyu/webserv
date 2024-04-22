@@ -1,13 +1,14 @@
 #ifndef REQUEST_HANDLER_HPP
-# define REQUEST_HANDLER_HPP
+#define REQUEST_HANDLER_HPP
 
-# include <vector>
-# include <map>
-# include <string>
-# include <iostream>
-# include "ConnectionManager.hpp"
-# include "NetworkIOHandler.hpp"
-# include "TimerTree.hpp"
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "ConnectionManager.hpp"
+#include "NetworkIOHandler.hpp"
+#include "TimerTree.hpp"
 
 /* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */
 class RequestHandler
