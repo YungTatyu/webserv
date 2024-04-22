@@ -11,8 +11,7 @@
 TEST(HttpResponseError, not_found)
 {
 	test::HttpResponseTest test("test/server/HttpResponse/error/file");
-	test.setUp();
-	std::cerr << "error\n";
+	ASSERT_NO_FATAL_FAILURE(test.setUp());
 	test.initConfigHandler({"127.0.0.1", 4242});
 	test.initRequest({
 		{"host", "test"},

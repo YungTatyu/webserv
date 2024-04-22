@@ -51,7 +51,7 @@ public:
 		this->config_handler_.config_ = config::initConfig(this->conf_path_);
 		ASSERT_NE(this->config_handler_.config_, nullptr);
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
-			FAIL() << "socketpair(): " << std::strerror(errno);
+			err("socketpair(): ");
 	}
 
 	// void	initConfigHandler(const std::vector<ip_address_pair> &ip_addresses) {
