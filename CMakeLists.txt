@@ -52,7 +52,8 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
 	test/server/HttpResponseTest.cpp
-	test/server/HttpResponse/error/error_page.cpp
+	test/server/HttpResponse/error/error_page_res_test.cpp
+	test/server/HttpResponse/index/index_res_test.cpp
 	test/server/WorkerConnectionsNumTest.cpp
 	test/conf/confLexerTest.cpp 
 	test/conf/directives_test.cpp 
