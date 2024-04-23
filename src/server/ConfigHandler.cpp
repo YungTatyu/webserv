@@ -376,7 +376,7 @@ const config::ErrorPage*	ConfigHandler::searchErrorPage( const config::Server& s
 	return NULL;
 }
 
-const struct TiedServer	ConfigHandler::createTiedServer( const std::string addr, const unsigned int port ) const
+struct TiedServer	ConfigHandler::createTiedServer( const std::string addr, const unsigned int port ) const
 {
 	struct TiedServer tied_server(addr, port);
 
@@ -443,7 +443,7 @@ const std::string	getCurrentTimeLogFormat()
 	return oss.str();
 }
 
-const std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const
+std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const
 {
 	std::stringstream	ss;
 

@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -54,11 +55,10 @@ public:
 			err("socketpair(): ");
 	}
 
-	// void	initConfigHandler(const std::vector<ip_address_pair> &ip_addresses) {
-	void	initConfigHandler(const ip_address_pair &ip_addresses) {
-		this->tied_server = this->config_handler_.createTiedServer(ip_addresses.first, ip_addresses.second);
-		// for (std::vector<ip_address_pair>::const_iterator it = 0; it != ip_addresses.end(); ++it)
-		// 	this->tied_servers.push_back(this->config_handler_.createTiedServer(it->first, it->second));
+	void	initConfigHandler(const std::vector<ip_address_pair> &ip_addresses) {
+		for (std::vector<ip_address_pair>::const_iterator it = ip_addresses.begin(); it != ip_addresses.end(); ++it)
+			this->tied_servers_.push_back(this->config_handler_.createTiedServer(it->first, it->second));
+		this->responses_.resize(ip_addresses.size());
 	}
 
 	void	initRequest(const string_map_case_insensitive &headers,
@@ -81,41 +81,44 @@ public:
 	 * 
 	 */
 	void	generateResponse() {
-		this->final_response_ = HttpResponse::generateResponse(this->request_, this->response_, this->tied_server, this->sockets_[0], this->config_handler_);
+		int	i = 0;
+		std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(), [this, &i](TiedServer tied_server) {
+			this->final_responses_.push_back(HttpResponse::generateResponse(this->request_, this->responses_[i], tied_server, this->sockets_[0], this->config_handler_));
+			++i;
+		});
 	}
 
-	void	testHeaders(const std::vector<string_map> &expects) const {
-		for (std::vector<string_map>::const_iterator vit = expects.begin(); vit != expects.end(); ++vit)
-		{
-			for (string_map::const_iterator sit = vit->begin(); sit != vit->end(); ++sit)
+	void	testHeaders(const string_map &expects) const {
+		std::for_each(this->responses_.begin(), this->responses_.end(), [&expects](HttpResponse response) {
+			for (string_map::const_iterator it = expects.begin(); it != expects.end(); ++it)
 			{
 				EXPECT_NO_THROW(
-					EXPECT_EQ(this->response_.headers_.at(sit->first), sit->second)
+					EXPECT_EQ(response.headers_.at(it->first), it->second)
 				);
 			}
-		}
-		EXPECT_EQ(this->response_.headers_.size(), expects.size());
+			EXPECT_EQ(response.headers_.size(), expects.size());
+		});
 	}
 
 	void	testBody(const std::string &expect) const {
-		EXPECT_EQ(this->response_.body_, expect);
+		std::for_each(this->responses_.begin(), this->responses_.end(), [&expect](HttpResponse response) {
+			EXPECT_EQ(response.body_, expect);
+		});
 	}
 
 	void	testResponse(const std::string &expect) const {
-		EXPECT_EQ(this->final_response_, expect);
+		std::for_each(this->final_responses_.begin(), this->final_responses_.end(), [&expect](std::string response) {
+			EXPECT_EQ(response, expect);
+		});
 	}
 
 	int	sockets_[2];
 	const std::string	conf_path_;
-	std::string	final_response_;
 	ConfigHandler	config_handler_;
 	HttpRequest	request_;
-	HttpResponse	response_;
-	TiedServer	tied_server;
 	std::vector<TiedServer>	tied_servers_;
 	std::vector<HttpResponse>	responses_;
 	std::vector<std::string>	final_responses_;
-	int	getSocket() const {return sockets_[0];}
 };
 } // namespace test
 

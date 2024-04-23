@@ -59,7 +59,7 @@ class ConfigHandler
 												const std::string& server_name,
 												const std::string& uri ) const;
 		// TiedServerの作成
-		const struct TiedServer	createTiedServer( const std::string addr, const unsigned int port ) const;
+		struct TiedServer	createTiedServer( const std::string addr, const unsigned int port ) const;
 		const config::ErrorPage*	searchErrorPage( const config::Server& server,
 														const config::Location* location,
 														const unsigned int code ) const;
@@ -67,7 +67,7 @@ class ConfigHandler
 		const config::Location*	searchLongestMatchLocationConfig( const config::Server& server_config, const std::string& uri ) const;
 		std::string	searchRootPath( const config::Server& server, const config::Location* location ) const;
 		bool	isAutoIndexOn( const config::Server& server, const config::Location* location ) const;
-		const std::string	createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const;
+		std::string	createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const;
 
 	// const variable
 	static const int	ACCESS_ALLOW = 1;
