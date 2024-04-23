@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <algorithm>
+#include <regex>
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -27,9 +28,8 @@ class ResponseTest
 {
 private:
 	ResponseTest();
-	void	err(const std::string &err_msg)
-	{
-		FAIL() << err_msg << std::strerror(errno);
+	void	err(const std::string &err_msg) const {
+		FAIL() << err_msg;
 	}
 
 public:
@@ -52,7 +52,7 @@ public:
 		this->config_handler_.loadConfiguration(config::initConfig(this->conf_path_));
 		ASSERT_NE(this->config_handler_.config_, nullptr);
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
-			err("socketpair(): ");
+			err(std::string("socketpair(): ") + std::strerror(errno));
 	}
 
 	void	initConfigHandler(const std::vector<ip_address_pair> &ip_addresses) {
@@ -88,11 +88,25 @@ public:
 		});
 	}
 
+	/**
+	 * @brief headerをtestする
+	 * 
+	 * Dateに関しては、現在のGMTと比較する
+	 * そのため、引数に渡されるDateのvalueは無視される
+	 * 
+	 * @param expects 
+	 */
 	void	testHeaders(const string_map &expects) const {
-		std::for_each(this->responses_.begin(), this->responses_.end(), [&expects](HttpResponse response) {
+		std::for_each(this->responses_.begin(), this->responses_.end(), [&expects, this](HttpResponse response) {
+			const char	*date = "Date";
 			for (string_map::const_iterator it = expects.begin(); it != expects.end(); ++it)
 			{
 				EXPECT_NO_THROW(
+					if (Utils::compareIgnoreCase(it->first, date))
+					{
+						this->testDate(response.headers_[date]);
+						continue;
+					}
 					EXPECT_EQ(response.headers_.at(it->first), it->second)
 				);
 			}
@@ -110,6 +124,69 @@ public:
 		std::for_each(this->final_responses_.begin(), this->final_responses_.end(), [&expect](std::string response) {
 			EXPECT_EQ(response, expect);
 		});
+	}
+
+	/**
+	 * @brief Create a Default Error Body object
+	 * 
+	 * @param status_code 
+	 * @return std::string 
+	 */
+	std::string	createDefaultErrorBody(unsigned int status_code) const {
+		const std::string webserv_error_page_tail = "<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n";
+		return *(HttpResponse::default_error_page_map_[status_code]) + webserv_error_page_tail;
+	}
+
+	/**
+	 * @brief Default Error Pageのサイズを計算する
+	 * 
+	 * @param status_code 
+	 * @return size_t 
+	 */
+	size_t	calcDefaultBodySize(unsigned int status_code) const {
+		std::string	error_page = createDefaultErrorBody(status_code);
+		return error_page.size();
+	} 
+
+	void	testDate(const std::string &actual) const {
+		testDateFormat(actual);
+		testDateTimeWithinRange(actual, 5);
+	}
+
+	void	testDateFormat(const std::string &actual) const {
+	    std::regex pattern("^\\w{3}, \\d{2} \\w{3} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT$");
+	    EXPECT_TRUE(std::regex_match(actual, pattern));
+	}
+
+	/**
+	 * @brief 
+	 * 
+	 * @param actual 
+	 * @param acceptable_diff 許容する時間の差異
+	 */
+	void	testDateTimeWithinRange(const std::string &actual, int acceptable_diff) const {
+		auto now = std::chrono::system_clock::now();
+	    std::time_t current_time = std::chrono::system_clock::to_time_t(now);
+		std::tm *gmt = std::gmtime(&current_time);
+
+	    // 文字列から時刻をパースして、time_t 型に変換する
+	    std::tm t = {};
+	    std::istringstream ss(actual);
+		// Date: Tue, 23 Apr 2024 07:15:28 GMT
+	    ss >> std::get_time(&t, "%a, %d %b %Y %H:%M:%S");
+	    if (ss.fail()) {
+	        err("Date: format error");
+			return;
+	    }
+	    std::time_t time_actual = std::mktime(&t);
+
+	    // 時刻の差を計算
+		// std::cerr << "gmt   =" << std::mktime(gmt) << "\n";
+		// std::cerr << "actual=" << time_actual << "\n";
+	    double diff = std::difftime(std::mktime(gmt), time_actual);
+
+	    // 差が許容範囲内であれば true を返す
+	    EXPECT_TRUE(std::abs(diff) <= acceptable_diff);
 	}
 
 	int	sockets_[2];

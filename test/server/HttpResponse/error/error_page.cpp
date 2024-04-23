@@ -24,11 +24,11 @@ TEST(HttpResponseError, not_found)
 	test.testHeaders({
 		{"Server", "webserv/1.0"},
 		{"Date", ""},
-		{"Content-Length", std::to_string(HttpResponse::default_error_page_map_[404]->size())},
+		{"Content-Length", std::to_string(test.calcDefaultBodySize(404))},
 		{"Content-Type", "text/html"},
 		{"Connection", "close"},
 	});
-	test.testBody(*(HttpResponse::default_error_page_map_[404]));
+	test.testBody(test.createDefaultErrorBody(404));
 	// test.testResponse("");
 }
 
