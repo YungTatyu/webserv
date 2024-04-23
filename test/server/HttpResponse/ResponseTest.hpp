@@ -189,6 +189,38 @@ public:
 	    EXPECT_TRUE(std::abs(diff) <= acceptable_diff);
 	}
 
+	/**
+	 * @brief final responseを作成するhelper関数
+	 * 
+	 * @param status_code_line 
+	 * @return std::string 
+	 */
+	std::string	createResponse(const std::string &status_code_line) const {
+		const HttpResponse response = this->responses_[0];
+		const string_map_case_insensitive headers = response.headers_;
+	
+		std::string	res = "HTTP/1.1 ";
+		res += (status_code_line + "\r\n");
+		for (string_map_case_insensitive::const_iterator it = headers.begin(); it != headers.end(); ++it)
+			res += (toTitleCase(it->first) + ": " + it->second + "\r\n");
+		res += "\r\n";
+		res += response.body_;
+		return res;
+	}
+
+	std::string	toTitleCase(const std::string &input) const {
+		std::string re = input;
+	    std::string::iterator it = std::find(re.begin(), re.end(), '-');
+	    while (it != re.end()) {
+			++it;
+			if (it == re.end())
+				break;
+	        *it = std::toupper(*it);
+	        it = std::find(it, re.end(), '-');
+	   	}
+	    return re;
+	}
+
 	int	sockets_[2];
 	const std::string	conf_path_;
 	ConfigHandler	config_handler_;

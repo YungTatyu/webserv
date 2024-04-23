@@ -29,7 +29,7 @@ TEST(HttpResponseError, not_found)
 		{"Connection", "close"},
 	});
 	test.testBody(test.createDefaultErrorBody(404));
-	// test.testResponse("");
+	test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseError, bad_request)
