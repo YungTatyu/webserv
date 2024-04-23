@@ -29,18 +29,6 @@ void ConfigHandler::loadConfiguration( const config::Main* config )
 {
 	/* ConfファイルをパースしてデータをServConfigクラスにセットする */
 	this->config_ = config;
-	this->servPort_ = 3001;
-	this->listenQ_ = 8;
-}
-
-int ConfigHandler::getServPort()
-{
-	return this->servPort_;
-}
-
-int ConfigHandler::getListenQ()
-{
-	return this->listenQ_;
 }
 
 bool	ConfigHandler::addressInLimit( const std::string& ip_addr_str, const uint32_t cli_addr ) const

@@ -22,19 +22,19 @@ typedef std::pair<std::string, unsigned int> ip_address_pair;
 typedef std::map<std::string, std::string, Utils::CaseInsensitiveCompare> string_map_case_insensitive;
 typedef std::map<std::string, std::string> string_map;
 
-class HttpResponseTest
+class ResponseTest
 {
 private:
-	HttpResponseTest();
+	ResponseTest();
 	void	err(const std::string &err_msg)
 	{
 		FAIL() << err_msg << std::strerror(errno);
 	}
 
 public:
-	HttpResponseTest(const std::string &conf_path) : conf_path_(conf_path) {}
+	ResponseTest(const std::string &conf_path) : conf_path_(conf_path) {}
 
-	~HttpResponseTest() {
+	~ResponseTest() {
 		delete this->config_handler_.config_;
 		close(this->sockets_[0]);
 		close(this->sockets_[1]);
@@ -48,7 +48,7 @@ public:
 	 */
 	void	setUp()
 	{
-		this->config_handler_.config_ = config::initConfig(this->conf_path_);
+		this->config_handler_.loadConfiguration(config::initConfig(this->conf_path_));
 		ASSERT_NE(this->config_handler_.config_, nullptr);
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1)
 			err("socketpair(): ");
@@ -112,7 +112,9 @@ public:
 	HttpRequest	request_;
 	HttpResponse	response_;
 	TiedServer	tied_server;
-	// std::vector<TiedServer>	tied_servers;
+	std::vector<TiedServer>	tied_servers_;
+	std::vector<HttpResponse>	responses_;
+	std::vector<std::string>	final_responses_;
 	int	getSocket() const {return sockets_[0];}
 };
 } // namespace test

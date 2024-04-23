@@ -79,14 +79,6 @@ class ConfigHandler
 		// 必要なメソッド追加
 		bool	limitLoop( const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr ) const;
 		bool	addressInLimit( const std::string& ip_str, const uint32_t cli_addr ) const;
-
-	public:
-		int		getServPort();
-		int		getListenQ();
-
-	private:
-		int		servPort_; /*port*/
-		int		listenQ_; /*maximum number of client connections */
 };
 
 /**
