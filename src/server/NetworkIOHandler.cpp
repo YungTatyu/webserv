@@ -53,7 +53,7 @@ void NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server) 
 int NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const int cli_sock) {
   std::vector<unsigned char> buffer(bufferSize_);
 
-  ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, 0);
+  ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, MSG_NOSIGNAL);
   if (re == 0)  //クライアントとのコネクションが閉じた時。
     return 0;
   else if (re == -1)  //ソケットが使用不可、またはエラー。
@@ -90,7 +90,7 @@ int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli
 
   size_t sentBytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t currentChunkSize = std::min(chunkSize, resSize - sentBytes);
-  int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, 0);
+  int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, MSG_NOSIGNAL);
   if (sent == -1) return -1;
   connManager.getConnection(cli_sock)->sent_bytes_ += sent;
   if (connManager.getConnection(cli_sock)->sent_bytes_ != resSize) return -2;
