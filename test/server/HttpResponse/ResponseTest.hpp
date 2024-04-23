@@ -55,12 +55,27 @@ public:
 			err(std::string("socketpair(): ") + std::strerror(errno));
 	}
 
-	void	initConfigHandler(const std::vector<ip_address_pair> &ip_addresses) {
+	/**
+	 * @brief Tied Serversを初期化する
+	 * 
+	 * @param ip_addresses テストしたいIP Adress
+	 */
+	void	initTiedServers(const std::vector<ip_address_pair> &ip_addresses) {
 		for (std::vector<ip_address_pair>::const_iterator it = ip_addresses.begin(); it != ip_addresses.end(); ++it)
 			this->tied_servers_.push_back(this->config_handler_.createTiedServer(it->first, it->second));
 		this->responses_.resize(ip_addresses.size());
 	}
 
+	/**
+	 * @brief  HttpRequestのメンバ変数を初期化する
+	 * 
+	 * @param headers 
+	 * @param uri 
+	 * @param state 
+	 * @param body 
+	 * @param queries 
+	 * @param version 
+	 */
 	void	initRequest(const string_map_case_insensitive &headers,
 		const std::string &uri,
 		const HttpRequest::ParseState state,
@@ -127,7 +142,7 @@ public:
 	}
 
 	/**
-	 * @brief Create a Default Error Body object
+	 * @brief Default Error Bodyを作成するhelper関数
 	 * 
 	 * @param status_code 
 	 * @return std::string 

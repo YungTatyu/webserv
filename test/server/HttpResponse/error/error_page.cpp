@@ -13,7 +13,7 @@ TEST(HttpResponseError, not_found)
 {
 	test::ResponseTest test("test/server/HttpResponse/error/file/not_found.conf");
 	ASSERT_NO_FATAL_FAILURE(test.setUp());
-	test.initConfigHandler({
+	test.initTiedServers({
 		{"127.0.0.1", 4242},
 		{"127.0.0.1", 4243}
 	});
