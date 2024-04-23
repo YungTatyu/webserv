@@ -59,7 +59,15 @@ int	main(int ac, char *av[])
 		exit(1);
 	}
 
-	// 送信せずにkeepalive_timeout + 1秒sleep
+	// 送信
+	if (send(sockfd, request.data(), request.size(), 0) == 0)
+	{
+		std::cerr << "Error: recv:" << std::strerror(errno);
+		exit(1);
+	}
+	std::cout << "send: " << str << std::endl;
+
+	// 受信せずにkeepalive_timeout + 1秒sleep
 	sleep(sleep_time + 1);
 
 	// 一度目のsendはserver側で接続がcloseされていても成功する
