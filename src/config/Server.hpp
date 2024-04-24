@@ -1,12 +1,10 @@
 #ifndef CONFIG_SERVER_HPP
 #define CONFIG_SERVER_HPP
 
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
-#include "conf.hpp"
-#include "Location.hpp"
 #include "AccessLog.hpp"
 #include "AllowDeny.hpp"
 #include "Autoindex.hpp"
@@ -15,6 +13,7 @@
 #include "Index.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "Listen.hpp"
+#include "Location.hpp"
 #include "ReceiveTimeout.hpp"
 #include "Root.hpp"
 #include "SendTimeout.hpp"
@@ -25,6 +24,7 @@
 #include "UseridExpires.hpp"
 #include "UseridPath.hpp"
 #include "UseridService.hpp"
+#include "conf.hpp"
 
 namespace config
 {
@@ -54,7 +54,6 @@ struct Server
 	std::vector<int>	access_fd_list;
 	std::vector<int>	error_fd_list;
 };
-} // namespace config
-
+}  // namespace config
 
 #endif

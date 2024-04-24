@@ -1,12 +1,10 @@
 #ifndef CONFIG_LOCATION_HPP
 #define CONFIG_LOCATION_HPP
 
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
-#include "conf.hpp"
-#include "LimitExcept.hpp"
 #include "AccessLog.hpp"
 #include "Alias.hpp"
 #include "AllowDeny.hpp"
@@ -15,6 +13,7 @@
 #include "ErrorPage.hpp"
 #include "Index.hpp"
 #include "KeepaliveTimeout.hpp"
+#include "LimitExcept.hpp"
 #include "ReceiveTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
@@ -25,6 +24,7 @@
 #include "UseridExpires.hpp"
 #include "UseridPath.hpp"
 #include "UseridService.hpp"
+#include "conf.hpp"
 
 namespace config
 {
@@ -57,6 +57,6 @@ struct Location
 	std::vector<int>	access_fd_list;
 	std::vector<int>	error_fd_list;
 };
-} // namespace config
+}  // namespace config
 
 #endif

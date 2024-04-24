@@ -10,11 +10,10 @@ COMMENTOUT
 # init variable
 readonly SCRIPT_DIR=$(dirname "$0")
 readonly WEBSERV_PATH="${SCRIPT_DIR}/../../webserv"
-readonly CLIENT_TIMEOUT0_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout0"
-readonly CLIENT_TIMEOUT5_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout5"
-readonly CLIENT_TIMEOUT10_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/timeout10"
+readonly CLIENT_SEND_TIMEOUT_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/send_timeout"
 readonly CLIENT_NO_RECEIVE_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/no_recv"
 readonly TEST_NAME="SendTimeout Test"
+readonly MAKEFILE_NAME="MAKE_SENDTIMEOUT"
 # cnt
 TOTAL_TESTS=0
 PASSED_TESTS=0
@@ -32,14 +31,19 @@ RESET="\033[0m"
 function	init {
 	printf "${GREEN}make executable ......${RESET}\n\n"
 	make -j -C "${SCRIPT_DIR}/../../" > /dev/null
-	if [ $? -eq 1 ]; then
+	if [ ! -f ${WEBSERV_PATH} ]; then
 		echo "Build webserv failed"
 		exit 1
 	fi
-	make -j -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" > /dev/null
-	if [ $? -eq 1 ]; then
-		echo "Build client failed"
-		rm "${WEBSERV_PATH}"
+	make -j -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" > /dev/null
+	if [ ! -f ${CLIENT_SENDTIMEOUT_PATH} ]; then
+		echo "Build send_timeout failed"
+		clean "${RED}"
+		exit 1
+	fi
+	if [ ! -f ${CLIENT_NO_RECEIVE_PATH} ]; then
+		echo "Build no_recv failed"
+		clean "${RED}"
 		exit 1
 	fi
 	printf "|------------------ ${TEST_NAME} start ------------------|\n"
@@ -50,7 +54,7 @@ function	clean {
 	local	color=$1
 	printf "${color}make fclean webserv & client.${RESET}\n"
 	make fclean -C "${SCRIPT_DIR}/../../" > /dev/null
-	make fclean -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" > /dev/null
+	make fclean -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" > /dev/null
 }
 
 function	Kill {
@@ -93,11 +97,12 @@ function	runClient {
 	local client_executable=$1
 	local server_ip=$2
 	local server_port=$3
-	local request=$4
-	local sleep_time=$5
-	${client_executable} "$server_ip" "$server_port" "$request" "$sleep_time" > /dev/null 2>&1 &
+	local sleep_time=$4
+	local request1=$5
+	local request2=$6
+	${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" > /dev/null 2>&1 &
 	# debug 出力する場合
-	#${client_executable} "$server_ip" "$server_port" "$request" "$sleep_time"
+	#${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}"
 	CLIENT_PID=$!
 }
 
@@ -108,18 +113,14 @@ function	assert {
 	local	client_executable=$4
 	local	executable_name=$5
 	local	url="${Scheme}://${Host}:${Port}${uri}"
-	local	request=$(cat <<EOT
-GET ${uri} HTTP/1.1
-Host: _
-
-EOT
-)
+	local	request1="GET ${uri} HTTP/1.1"
+	local	request2="Host: _"
 
 	((TOTAL_TESTS++))
 	printf "[  test$TOTAL_TESTS  ]\n${url}: "
 
 	# program 実行
-	runClient "${client_executable}" "${Host}" "${Port}" "${request}" "${expect_sec}" &
+	runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}" &
 	sleep $(bc <<< "$expect_sec + 1.5")
 
 	# 判定
@@ -135,8 +136,8 @@ EOT
 			((FAILED_TESTS++))
 		fi
 	else # clientが正常にタイムアウトする前にsleepが終了
-		kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
-		#kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1)
+		#kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
+		kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1)
 		if [ "$expect_result" = "true" ]; then
 			printErr "${RED}failed.${RESET}\nServer did not timeout"
 			((FAILED_TESTS++))
@@ -145,6 +146,7 @@ EOT
 			((PASSED_TESTS++))
 		fi
 	fi
+	#sleep 1
 	printf "\n"
 }
 
@@ -157,25 +159,26 @@ function	runTest {
 	runServer "${root}/${conf}"
 
 	# テスト実行
-	assert "/" "0" "false" "${CLIENT_TIMEOUT0_PATH}" "timeout0"
-	assert "/timeout5/" "5" "true" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
-	assert "/timeout10/" "10" "true" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
-	assert "/timeout5/" "3" "false" "${CLIENT_TIMEOUT5_PATH}" "timeout5"
-	assert "/timeout10/" "8" "false" "${CLIENT_TIMEOUT10_PATH}" "timeout10"
+	assert "/timeout0/" "3" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout5/" "5" "true" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout10/" "10" "true" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout5/" "3" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout10/" "8" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	# このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
-	assert "/no-recv/" "3" "false" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
+	assert "/no-recv/" "3" "true" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
+	assert "/no-recv/" "1" "false" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
 
 	# サーバープロセスを終了
-	kill "${WEBSERV_PID}"
-	#kill "${WEBSERV_PID}" > /dev/null 2>&1
+	#kill "${WEBSERV_PID}"
+	kill "${WEBSERV_PID}" > /dev/null 2>&1
 }
 
 function	main {
 	init
 
 	runTest "send_timeout.conf" "kqueue or epoll" # kqueue or epoll
-	runTest "send_timeout_select.conf" "select" # select
 	runTest "send_timeout_poll.conf" "poll" # poll
+	runTest "send_timeout_select.conf" "select" # select
 
 	printLog
 

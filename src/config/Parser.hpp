@@ -1,25 +1,24 @@
 #ifndef CONFIG_PARSER_HPP
 #define CONFIG_PARSER_HPP
 
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <string>
-#include <cstddef>
 #include <sys/types.h>
 
-#include "conf.hpp"
+#include <cstddef>
+#include <map>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
+
 #include "Lexer.hpp"
 #include "Main.hpp"
+#include "conf.hpp"
 
-namespace config
-{
-enum OS
-{
-	OS_BSD_BASED,
-	OS_LINUX,
-	OS_OTHER
+namespace config {
+enum OS {
+  OS_BSD_BASED,
+  OS_LINUX,
+  OS_OTHER
 };
 
 class Parser
@@ -89,6 +88,6 @@ class Parser
  		bool	parse();
 		const Main	&getConfig() const;
 };
-} // namespace config
+}  // namespace config
 
 #endif

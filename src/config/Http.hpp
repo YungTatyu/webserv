@@ -1,12 +1,10 @@
 #ifndef CONFIG_HTTP_HPP
 #define CONFIG_HTTP_HPP
 
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
-#include "conf.hpp"
-#include "Server.hpp"
 #include "AccessLog.hpp"
 #include "AllowDeny.hpp"
 #include "Autoindex.hpp"
@@ -18,6 +16,7 @@
 #include "ReceiveTimeout.hpp"
 #include "Root.hpp"
 #include "SendTimeout.hpp"
+#include "Server.hpp"
 #include "Userid.hpp"
 #include "UseridDomain.hpp"
 #include "UseridExpires.hpp"
@@ -50,7 +49,6 @@ struct Http
 	std::vector<int>	access_fd_list;
 	std::vector<int>	error_fd_list;
 };
-} // namespace config
-
+}  // namespace config
 
 #endif

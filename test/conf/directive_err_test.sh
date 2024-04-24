@@ -3,13 +3,12 @@
 # init
 readonly script_dir_path=$(dirname "$0")
 readonly webserv_path="${script_dir_path}/../../webserv"
-if [ -e $webserv_path ]
-then
-	printf "|------------------ webserv test start ------------------|\n\n"
+if [ -e $webserv_path ]; then
+  printf "|------------------ webserv test start ------------------|\n\n"
 else
-	echo "${webserv_path}: command not found"
-	echo "run \"make\" first to test"
-	exit 1
+  echo "${webserv_path}: command not found"
+  echo "run \"make\" first to test"
+  exit 1
 fi
 
 g_test_directive=""
@@ -17,34 +16,32 @@ g_test_index=0
 g_test_passed=0
 g_test_failed=0
 
-function	assert {
-	g_test_index=$(bc <<< "$g_test_index + 1")
-	local	conf_path=$1
-	printf "[  ${g_test_directive} test $g_test_index  ]\n${conf_path}: "
-	local	actual=$(${webserv_path} $conf_path 2>&1)
-	local	expect=$2
+function assert {
+  g_test_index=$(bc <<<"$g_test_index + 1")
+  local conf_path=$1
+  printf "[  ${g_test_directive} test $g_test_index  ]\n${conf_path}: "
+  local actual=$(${webserv_path} $conf_path 2>&1)
+  local expect=$2
 
-	if [ "$actual" = "$expect" ]
-	then
-		printf "\033[32mpassed\033[0m\n\n"
-		g_test_passed=$(bc <<< "$g_test_passed + 1")
-	else
-		printf "\033[31mfailed\n\033[0m"
-		printf "expected:${expect}---\n"
-		printf "actual  :${actual}---\n\n"
-		g_test_failed=$(bc <<< "$g_test_failed + 1")
-	fi
+  if [ "$actual" = "$expect" ]; then
+    printf "\033[32mpassed\033[0m\n\n"
+    g_test_passed=$(bc <<<"$g_test_passed + 1")
+  else
+    printf "\033[31mfailed\n\033[0m"
+    printf "expected:${expect}---\n"
+    printf "actual  :${actual}---\n\n"
+    g_test_failed=$(bc <<<"$g_test_failed + 1")
+  fi
 }
 
-function	printLog {
-	printf "|------------------ webserv test results ------------------|\n"
-	printf "[========]    ${g_test_index} tests ran\n"
-	printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
-	printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
+function printLog {
+  printf "|------------------ webserv test results ------------------|\n"
+  printf "[========]    ${g_test_index} tests ran\n"
+  printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
+  printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
 }
 
 readonly err_start_with="webserv: [emerg]"
-
 
 # allow
 g_test_directive="allow"
@@ -96,7 +93,6 @@ g_test_index=0
 conf_path="test/conf/conf_files/directive_error/clientMaxBodySize_unit_err.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"client_max_body_size\" directive invalid value ${err_path}:5"
-
 
 conf_path="test/conf/conf_files/directive_error/clientMaxBodySize_over_err.conf"
 err_path="in $(readlink -f $conf_path)"
@@ -291,41 +287,41 @@ g_test_index=0
 os=$(uname -s)
 
 if [ "$os" = "Linux" ]; then
-	printf "\033[32m====================Runnning on Linux====================\033[0m\n\n"
+  printf "\033[32m====================Runnning on Linux====================\033[0m\n\n"
 
-	conf_path="test/conf/conf_files/directive_error/use_linux_invalid_event.conf"
-	err_path="in $(readlink -f $conf_path)"
-	assert $conf_path "${err_start_with} invalid event type \"kqueue\" ${err_path}:2"
+  conf_path="test/conf/conf_files/directive_error/use_linux_invalid_event.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid event type \"kqueue\" ${err_path}:2"
 
-	conf_path="test/conf/conf_files/directive_error/use_linux_invalid_event2.conf"
-	err_path="in $(readlink -f $conf_path)"
-	assert $conf_path "${err_start_with} invalid event type \"EPOLL\" ${err_path}:2"
+  conf_path="test/conf/conf_files/directive_error/use_linux_invalid_event2.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid event type \"EPOLL\" ${err_path}:2"
 
 elif [ "$os" = "Darwin" ]; then
-	printf "\033[32m====================Runnning on macOS====================\033[0m\n\n"
+  printf "\033[32m====================Runnning on macOS====================\033[0m\n\n"
 
-	conf_path="test/conf/conf_files/directive_error/use_mac_invalid_event.conf"
-	err_path="in $(readlink -f $conf_path)"
-	assert $conf_path "${err_start_with} invalid event type \"epoll\" ${err_path}:2"
+  conf_path="test/conf/conf_files/directive_error/use_mac_invalid_event.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid event type \"epoll\" ${err_path}:2"
 
-	conf_path="test/conf/conf_files/directive_error/use_mac_invalid_event2.conf"
-	err_path="in $(readlink -f $conf_path)"
-	assert $conf_path "${err_start_with} invalid event type \"POLL\" ${err_path}:2"
+  conf_path="test/conf/conf_files/directive_error/use_mac_invalid_event2.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid event type \"POLL\" ${err_path}:2"
 
 else
-	printf "\033[32m====================Runnning on Unknown OS====================\033[0m\n\n"
+  printf "\033[32m====================Runnning on Unknown OS====================\033[0m\n\n"
 
-	conf_path="test/conf/conf_files/directive_error/use_unknownOS_invalid_event.conf"
-	err_path="in $(readlink -f $conf_path)"
-	assert $conf_path "${err_start_with} invalid event type \"epoll\" ${err_path}:2"
+  conf_path="test/conf/conf_files/directive_error/use_unknownOS_invalid_event.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid event type \"epoll\" ${err_path}:2"
 
-	conf_path="test/conf/conf_files/directive_error/use_unknownOS_invalid_event2.conf"
-	err_path="in $(readlink -f $conf_path)"
-	assert $conf_path "${err_start_with} invalid event type \"kqueue\" ${err_path}:2"
+  conf_path="test/conf/conf_files/directive_error/use_unknownOS_invalid_event2.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid event type \"kqueue\" ${err_path}:2"
 
 fi
 
-	printf "\033[32m==========================================================\033[0m\n\n"
+printf "\033[32m==========================================================\033[0m\n\n"
 
 # userid
 g_test_directive="userid"
