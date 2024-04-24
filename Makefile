@@ -1,16 +1,17 @@
 NAME				= webserv
-CXX					= c++
+CXX				= c++
 CXXFLAGS			= -std=c++98 -Wall -Wextra -Werror
 CXXDEBUG			= -fsanitize=address -g
 DEPFLAGS			= -MMD -MP -MF $(DEPS_DIR)/$*.d
-RM					= rm -rf
+RM				= rm -rf
 
 SRCS_DIR			= src
 OBJS_DIR			= obj
 DEPS_DIR			= dep
 BUILD_DIR			= build
 CONF_DIR			= conf
-TEST_CGI_DIR		= test/cgi/cgi_files/executor
+TEST_DIR			= test
+TEST_CGI_DIR	= $(TEST_DIR)/cgi/cgi_files/executor
 
 # ソースファイルの拡張子
 SRC_EXT = cpp
@@ -63,6 +64,11 @@ test:
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
+
+format:
+	find $(SRCS_DIR) $(TEST_DIR) -name "*.cpp" -o -name "*.hpp" -o -name "*.c" | xargs clang-format -i
+	black $(TEST_DIR)
+	shfmt -w -l -i 2 $(TEST_DIR)
 
 -include $(DEPS)
 
