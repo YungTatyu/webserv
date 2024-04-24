@@ -63,8 +63,7 @@ int	main(int ac, char *av[])
 		close(sockfd);
 		exit(1);
 	}
-	else
-		std::cout << "connection didn't timeout." << std::endl;
+	std::cout << "connection didn't timeout." << std::endl;
 
 	// send_timeoutで死ななかった場合は10秒だけ待ってcloseする
 	sleep(10);

@@ -62,7 +62,7 @@ int	main(int ac, char *av[])
 	// 送信
 	if (send(sockfd, request.data(), request.size(), 0) == 0)
 	{
-		std::cerr << "Error: recv:" << std::strerror(errno);
+		std::cerr << "Error: send:" << std::strerror(errno);
 		exit(1);
 	}
 	std::cout << "send: " << str << std::endl;
@@ -83,8 +83,7 @@ int	main(int ac, char *av[])
 		close(sockfd);
 		exit(1);
 	}
-	else
-		std::cout << "connection didn't timeout." << std::endl;
+	std::cout << "connection didn't timeout." << std::endl;
 
 	// send_timeoutで死ななかった場合は10秒だけ待ってcloseする
 	sleep(10);
