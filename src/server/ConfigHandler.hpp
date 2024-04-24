@@ -1,30 +1,30 @@
 #ifndef CONFIGHANDLER_HPP
 #define CONFIGHANDLER_HPP
 
-# include "HttpRequest.hpp"
-# include "Main.hpp"
+#include <stdint.h>
 
-# include <map>
-# include <stdint.h>
+#include <map>
+
+#include "HttpRequest.hpp"
+#include "Main.hpp"
 
 /**
  * ConfigHandler 方針
  * 基本的に、直接取りに行くのに条件が必要なものはすべてmethodで撮りに行く
  * 計算量1で撮りに行けるものだけpublicのconfig_を見てもらう
-*/ 
+ */
 
 struct TiedServer;
 
 /* Confファイルの設定値を取り出す */
-class ConfigHandler
-{
-	public:
-		// data
-		const config::Main*	config_;
+class ConfigHandler {
+ public:
+  // data
+  const config::Main* config_;
 
-		// initialize
-		ConfigHandler() : config_(NULL) {};
-		void	loadConfiguration( const config::Main* config );
+  // initialize
+  ConfigHandler() : config_(NULL){};
+  void loadConfiguration(const config::Main* config);
 
 		// method
 		// とりあえずipv4だけ想定
@@ -69,10 +69,10 @@ class ConfigHandler
 		bool	isAutoIndexOn( const config::Server& server, const config::Location* location ) const;
 		std::string	createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const;
 
-	// const variable
-	static const int	ACCESS_ALLOW = 1;
-	static const int	ACCESS_DENY = 0;
-	static const int	METHOD_DENY = -1;
+  // const variable
+  static const int ACCESS_ALLOW = 1;
+  static const int ACCESS_DENY = 0;
+  static const int METHOD_DENY = -1;
 
 	private:
 		// utils
