@@ -42,7 +42,7 @@ public:
 	}
 
 	/**
-	 * @brief Set the Up object
+	 * @brief Set Up object
 	 * 
 	 * constructorでASSERT_NE()やFAIL()を呼べないのでここで処理する
 	 * 
@@ -56,12 +56,15 @@ public:
 	}
 
 	/**
-	 * @brief Set the Up All object
+	 * @brief Set Up All objects
 	 * 
-	 * setUp関数の代わりに呼ぶ: setUpとsetUpAll両方呼ばない
-	 * testに必要なオブジェクトを全て初期化する
-	 * responseの生成まで行う
-	 * 
+	 * @param ip_addresses 
+	 * @param headers 
+	 * @param uri 
+	 * @param state 
+	 * @param body 
+	 * @param queries 
+	 * @param version 
 	 */
 	void	setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers,
 		const std::string &uri,
