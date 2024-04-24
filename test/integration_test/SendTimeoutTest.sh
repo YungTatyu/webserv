@@ -31,14 +31,19 @@ RESET="\033[0m"
 function	init {
 	printf "${GREEN}make executable ......${RESET}\n\n"
 	make -j -C "${SCRIPT_DIR}/../../" > /dev/null
-	if [ $? -eq 1 ]; then
+	if [ ! -f ${WEBSERV_PATH} ]; then
 		echo "Build webserv failed"
 		exit 1
 	fi
 	make -j -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" > /dev/null
-	if [ $? -eq 1 ]; then
-		echo "Build client failed"
-		rm "${WEBSERV_PATH}"
+	if [ ! -f ${CLIENT_SENDTIMEOUT_PATH} ]; then
+		echo "Build send_timeout failed"
+		clean "${RED}"
+		exit 1
+	fi
+	if [ ! -f ${CLIENT_NO_RECEIVE_PATH} ]; then
+		echo "Build no_recv failed"
+		clean "${RED}"
 		exit 1
 	fi
 	printf "|------------------ ${TEST_NAME} start ------------------|\n"
@@ -131,8 +136,8 @@ function	assert {
 			((FAILED_TESTS++))
 		fi
 	else # clientが正常にタイムアウトする前にsleepが終了
-		kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
-		#kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1)
+		#kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
+		kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1)
 		if [ "$expect_result" = "true" ]; then
 			printErr "${RED}failed.${RESET}\nServer did not timeout"
 			((FAILED_TESTS++))
@@ -141,7 +146,7 @@ function	assert {
 			((PASSED_TESTS++))
 		fi
 	fi
-	sleep 2
+	#sleep 1
 	printf "\n"
 }
 
@@ -154,25 +159,26 @@ function	runTest {
 	runServer "${root}/${conf}"
 
 	# テスト実行
-	assert "/" "0" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+	assert "/timeout0/" "3" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	assert "/timeout5/" "5" "true" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	assert "/timeout10/" "10" "true" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	assert "/timeout5/" "3" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	assert "/timeout10/" "8" "false" "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
 	# このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
-	assert "/no-recv/" "3" "false" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
+	assert "/no-recv/" "3" "true" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
+	assert "/no-recv/" "1" "false" "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
 
 	# サーバープロセスを終了
-	kill "${WEBSERV_PID}"
-	#kill "${WEBSERV_PID}" > /dev/null 2>&1
+	#kill "${WEBSERV_PID}"
+	kill "${WEBSERV_PID}" > /dev/null 2>&1
 }
 
 function	main {
 	init
 
 	runTest "send_timeout.conf" "kqueue or epoll" # kqueue or epoll
-	runTest "send_timeout_select.conf" "select" # select
 	runTest "send_timeout_poll.conf" "poll" # poll
+	runTest "send_timeout_select.conf" "select" # select
 
 	printLog
 
