@@ -35,20 +35,20 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   // keepalive_timeout消す。
   timerTree.deleteTimer(sockfd);
 
-	// クライアントソケットへのリクエスト（既存コネクション）
-	ssize_t re = ioHandler.receiveRequest( connManager, sockfd );
-	if (re == -1) //ソケット使用不可。
-		return RequestHandler::UPDATE_NONE;
-	if (re == 0) // クライアントが接続を閉じる
-	{
-		ioHandler.closeConnection( connManager, sockfd );
-		return RequestHandler::UPDATE_CLOSE;
-	}
-	if (re == 2) // buffer分以降を読む
-	       return RequestHandler::UPDATE_NONE;
-	const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
-	// reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
-	std::string requestData = std::string(context.begin(), context.end());
+  // クライアントソケットへのリクエスト（既存コネクション）
+  ssize_t re = ioHandler.receiveRequest(connManager, sockfd);
+  if (re == -1)  //ソケット使用不可。
+    return RequestHandler::UPDATE_NONE;
+  if (re == 0)  // クライアントが接続を閉じる
+  {
+    ioHandler.closeConnection(connManager, sockfd);
+    return RequestHandler::UPDATE_CLOSE;
+  }
+  if (re == 2)  // buffer分以降を読む
+    return RequestHandler::UPDATE_NONE;
+  const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
+  // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
+  std::string requestData = std::string(context.begin(), context.end());
 
   HttpRequest::parseRequest(requestData, connManager.getRequest(sockfd));
 
@@ -104,14 +104,14 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   if (!cgiProcessExited(cgi_handler.getCgiProcessId())) return RequestHandler::UPDATE_NONE;
 
-	const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
-	HttpResponse	&response = connManager.getResponse(sockfd);
-	std::string res(v.begin(), v.end());
-	bool parse_suc = connManager.callCgiParser(sockfd, response, res);
-	response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
-	re = handleResponse(connManager, configHandler, sockfd);
-	ioHandler.closeConnection(connManager, sockfd); // delete cgi event
-	return re;
+  const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
+  HttpResponse &response = connManager.getResponse(sockfd);
+  std::string res(v.begin(), v.end());
+  bool parse_suc = connManager.callCgiParser(sockfd, response, res);
+  response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
+  re = handleResponse(connManager, configHandler, sockfd);
+  ioHandler.closeConnection(connManager, sockfd);  // delete cgi event
+  return re;
 }
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,

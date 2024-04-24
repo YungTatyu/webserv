@@ -42,16 +42,16 @@ class HttpResponse {
                                       const struct TiedServer& tied_servers, const int client_sock,
                                       const ConfigHandler& config_handler);
 
-		// public variables
-		std::string	root_path_;
-		std::string	res_file_path_;
-		RES_STATE	state_;
-		std::string	status_code_line_;
-		long	status_code_; // response生成するときにstatus_line_map_参照する
-		std::map<std::string, std::string, Utils::CaseInsensitiveCompare>	headers_;
-		std::string			body_;
-		static std::map<int, std::string> status_line_map_; // status codeに基づくstatus lineを格納するmap
-		static std::map<int, const std::string*> default_error_page_map_; // defaultのerror pageを格納するmap
+  // public variables
+  std::string root_path_;
+  std::string res_file_path_;
+  RES_STATE state_;
+  std::string status_code_line_;
+  long status_code_;  // response生成するときにstatus_line_map_参照する
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers_;
+  std::string body_;
+  static std::map<int, std::string> status_line_map_;  // status codeに基づくstatus lineを格納するmap
+  static std::map<int, const std::string*> default_error_page_map_;  // defaultのerror pageを格納するmap
 
  private:
   // private member
@@ -84,17 +84,22 @@ class HttpResponse {
                                             const config::Server& server, const config::Location* location,
                                             const ConfigHandler& config_handler);
 
-		// 名前微妙
-		static std::string	autoIndex( const std::string& directory_path, const std::string& index_dir );
-		static std::string	getCurrentGMTTime();
-		static ResponsePhase	returnPhase( HttpResponse& response, const config::Location* location );
-		static void	prepareReturn( HttpResponse& response, const config::Return& return_directive );
-		static ResponsePhase	searchResPath( HttpResponse& response, HttpRequest& request, const config::Server& server, const config::Location* location, const ConfigHandler& config_handler );
-		static ResponsePhase	Index( HttpResponse& response, HttpRequest& request, const std::vector<config::Index>& index_list, bool is_autoindex_on, const std::string& index_dir );
-		static ResponsePhase	TryFiles( HttpResponse& response, HttpRequest& request, const config::TryFiles& try_files );
-		static void	headerFilterPhase( HttpResponse& response, const config::Time& time );
-		static std::string	detectContentType( const std::string& res_file_path );
-		static std::string	transformLetter( const std::string& key_str );
+  // 名前微妙
+  static std::string autoIndex(const std::string& directory_path, const std::string& index_dir);
+  static std::string getCurrentGMTTime();
+  static ResponsePhase returnPhase(HttpResponse& response, const config::Location* location);
+  static void prepareReturn(HttpResponse& response, const config::Return& return_directive);
+  static ResponsePhase searchResPath(HttpResponse& response, HttpRequest& request,
+                                     const config::Server& server, const config::Location* location,
+                                     const ConfigHandler& config_handler);
+  static ResponsePhase Index(HttpResponse& response, HttpRequest& request,
+                             const std::vector<config::Index>& index_list, bool is_autoindex_on,
+                             const std::string& index_dir);
+  static ResponsePhase TryFiles(HttpResponse& response, HttpRequest& request,
+                                const config::TryFiles& try_files);
+  static void headerFilterPhase(HttpResponse& response, const config::Time& time);
+  static std::string detectContentType(const std::string& res_file_path);
+  static std::string transformLetter(const std::string& key_str);
 };
 
 #endif

@@ -28,12 +28,10 @@ const static std::string kLimitExcept = "limit_except";
  */
 
 /* ConfigHandlerクラスの実装 */
-void ConfigHandler::loadConfiguration( const config::Main* config )
-{
-	/* ConfファイルをパースしてデータをServConfigクラスにセットする */
-	this->config_ = config;
+void ConfigHandler::loadConfiguration(const config::Main* config) {
+  /* ConfファイルをパースしてデータをServConfigクラスにセットする */
+  this->config_ = config;
 }
-
 
 bool ConfigHandler::addressInLimit(const std::string& ip_addr_str, const uint32_t cli_addr) const {
   if (ip_addr_str == "all") return true;
@@ -320,9 +318,8 @@ const config::ErrorPage* ConfigHandler::searchErrorPage(const config::Server& se
   return NULL;
 }
 
-struct TiedServer	ConfigHandler::createTiedServer( const std::string addr, const unsigned int port ) const
-{
-	struct TiedServer tied_server(addr, port);
+struct TiedServer ConfigHandler::createTiedServer(const std::string addr, const unsigned int port) const {
+  struct TiedServer tied_server(addr, port);
 
   for (size_t i = 0; i < config_->http.server_list.size(); i++) {
     for (size_t j = 0; j < config_->http.server_list[i].listen_list.size(); j++) {
@@ -379,9 +376,9 @@ const std::string getCurrentTimeLogFormat() {
   return oss.str();
 }
 
-std::string	ConfigHandler::createAcsLogMsg( const uint32_t ip, const long status, const HttpRequest& request ) const
-{
-	std::stringstream	ss;
+std::string ConfigHandler::createAcsLogMsg(const uint32_t ip, const long status,
+                                           const HttpRequest& request) const {
+  std::stringstream ss;
 
   std::string requestMethod, requestUrl, userAgent;
 

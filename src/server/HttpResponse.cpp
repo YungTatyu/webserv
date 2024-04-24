@@ -10,10 +10,10 @@
 static const std::string kTRY_FILES = "try_files";
 static const std::string kINDEX = "index";
 static const std::string kRETURN = "return";
-static const char	*kContentType = "Content-Type";
-static const char	*kHtml = "text/html";
-static const char	*kTextPlain = "text/plain";
-static const char	*kDefaultPage = "defaut.html";
+static const char* kContentType = "Content-Type";
+static const char* kHtml = "text/html";
+static const char* kTextPlain = "text/plain";
+static const char* kDefaultPage = "defaut.html";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -161,22 +161,27 @@ static const std::string webserv_error_507_page =
     "Insufficient Storage</h1></center>\r\n";
 
 HttpResponse::HttpResponse()
-	: root_path_(""), res_file_path_(""), state_(HttpResponse::RES_CREATING_STATIC), status_code_line_(""), status_code_(200), body_(""), internal_redirect_cnt_(0)
-{
-	// status_line
-	this->status_line_map_[200] = "200 OK";
-	this->status_line_map_[201] = "201 Created";
-	this->status_line_map_[202] = "202 Accepted";
-	this->status_line_map_[203] = "203 Non-Authoritative Information";
-	this->status_line_map_[204] = "204 No Content";
-	this->status_line_map_[205] = "205 Reset Content";
-	this->status_line_map_[206] = "206 Partial Content";
-	this->status_line_map_[207] = "207 Multi-Status";
-	this->status_line_map_[300] = "300 Multiple Choices";
-	this->status_line_map_[301] = "301 Moved Permanently";
-	this->status_line_map_[302] = "302 Moved Temporarily";
-	this->status_line_map_[303] = "303 See Other";
-	this->status_line_map_[304] = "304 Not Modified";
+    : root_path_(""),
+      res_file_path_(""),
+      state_(HttpResponse::RES_CREATING_STATIC),
+      status_code_line_(""),
+      status_code_(200),
+      body_(""),
+      internal_redirect_cnt_(0) {
+  // status_line
+  this->status_line_map_[200] = "200 OK";
+  this->status_line_map_[201] = "201 Created";
+  this->status_line_map_[202] = "202 Accepted";
+  this->status_line_map_[203] = "203 Non-Authoritative Information";
+  this->status_line_map_[204] = "204 No Content";
+  this->status_line_map_[205] = "205 Reset Content";
+  this->status_line_map_[206] = "206 Partial Content";
+  this->status_line_map_[207] = "207 Multi-Status";
+  this->status_line_map_[300] = "300 Multiple Choices";
+  this->status_line_map_[301] = "301 Moved Permanently";
+  this->status_line_map_[302] = "302 Moved Temporarily";
+  this->status_line_map_[303] = "303 See Other";
+  this->status_line_map_[304] = "304 Not Modified";
 
   this->status_line_map_[307] = "307 Temporary Redirect";
   this->status_line_map_[308] = "308 Permanent Redirect";
@@ -301,12 +306,11 @@ std::string HttpResponse::transformLetter(const std::string& key_str) {
   return result;
 }
 
-std::string	HttpResponse::createResponse( const HttpResponse& response )
-{
-	std::stringstream stream;
+std::string HttpResponse::createResponse(const HttpResponse& response) {
+  std::stringstream stream;
 
-	// status line
-	stream << http_version << " " << response.status_code_line_ << "\r\n";
+  // status line
+  stream << http_version << " " << response.status_code_line_ << "\r\n";
 
   // headers
   // cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
@@ -329,16 +333,17 @@ std::string	HttpResponse::createResponse( const HttpResponse& response )
 /*
  * HttpResponseオブジェクトを生成し、send用のresponseを生成する
  */
-std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& response, const struct TiedServer& tied_servers, const int client_sock, const ConfigHandler& config_handler )
-{
-	const static char	*kHost = "Host";
-	// chunkなどでparse途中の場合。
-	if (request.parseState == HttpRequest::PARSE_INPROGRESS)
-		return std::string();
+std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& response,
+                                           const struct TiedServer& tied_servers, const int client_sock,
+                                           const ConfigHandler& config_handler) {
+  const static char* kHost = "Host";
+  // chunkなどでparse途中の場合。
+  if (request.parseState == HttpRequest::PARSE_INPROGRESS) return std::string();
 
-	const config::Server&	server = config_handler.searchServerConfig(tied_servers, request.headers.find(kHost)->second);
-	const config::Location*	location = NULL;
-	struct sockaddr_in	client_addr;
+  const config::Server& server =
+      config_handler.searchServerConfig(tied_servers, request.headers.find(kHost)->second);
+  const config::Location* location = NULL;
+  struct sockaddr_in client_addr;
 
   enum ResponsePhase phase = sw_start_phase;
   if (response.state_ == RES_PARSED_CGI)
@@ -408,10 +413,10 @@ std::string	HttpResponse::generateResponse( HttpRequest& request, HttpResponse& 
     }
   }
 
-	if (response.state_ == RES_EXECUTE_CGI)
-		return "";
-	config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
-	headerFilterPhase(response, config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
+  if (response.state_ == RES_EXECUTE_CGI) return "";
+  config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
+  headerFilterPhase(response,
+                    config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
 
   config_handler.writeErrorLog(server, location, "webserv: [debug] create final response\n\n\n");
   return createResponse(response);
@@ -438,20 +443,23 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     return sw_search_location_phase;
 }
 
-HttpResponse::ResponsePhase	HttpResponse::handleSearchLocationPhase( HttpResponse& response, const HttpRequest& request, const config::Server& server, const config::Location** location, const ConfigHandler& config_handler )
-{
-	if (response.internal_redirect_cnt_++ > kMaxInternalRedirect)
-	{
-		config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
-		response.status_code_ = 500;
-		response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
-		response.res_file_path_ = kDefaultPage;
-		return sw_end_phase;
-	}
-	*location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
-	if (*location)
-		config_handler.writeErrorLog(server, *location, "webserv: [debug] a request access " + (*location)->uri + "\n" );
-	return sw_post_search_location_phase;
+HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse& response,
+                                                                    const HttpRequest& request,
+                                                                    const config::Server& server,
+                                                                    const config::Location** location,
+                                                                    const ConfigHandler& config_handler) {
+  if (response.internal_redirect_cnt_++ > kMaxInternalRedirect) {
+    config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
+    response.status_code_ = 500;
+    response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
+    response.res_file_path_ = kDefaultPage;
+    return sw_end_phase;
+  }
+  *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
+  if (*location)
+    config_handler.writeErrorLog(server, *location,
+                                 "webserv: [debug] a request access " + (*location)->uri + "\n");
+  return sw_post_search_location_phase;
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& response, const HttpRequest& request,
@@ -470,28 +478,24 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
     return sw_uri_check_phase;
 }
 
-void	HttpResponse::prepareReturn( HttpResponse& response, const config::Return& return_directive )
-{
-	std::string	url = return_directive.getUrl();
-	int	code = return_directive.getCode();
-	const char	*kLocation = "Location";
+void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& return_directive) {
+  std::string url = return_directive.getUrl();
+  int code = return_directive.getCode();
+  const char* kLocation = "Location";
 
-	if (code == config::Return::kCodeUnset)
-	{
-		response.status_code_ = 302;
-		response.headers_[kLocation] = url;
-		return;
-	}
-	if (config::Return::isRedirectCode(code))
-	{
-		response.status_code_ = code;
-		response.headers_[kLocation] = url;
-		return;
-	}
-	// textの場合
-	response.status_code_ = code;
-	if (!url.empty())
-		response.body_ = url;
+  if (code == config::Return::kCodeUnset) {
+    response.status_code_ = 302;
+    response.headers_[kLocation] = url;
+    return;
+  }
+  if (config::Return::isRedirectCode(code)) {
+    response.status_code_ = code;
+    response.headers_[kLocation] = url;
+    return;
+  }
+  // textの場合
+  response.status_code_ = code;
+  if (!url.empty()) response.body_ = url;
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& response,
@@ -727,15 +731,14 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
                                                                const ConfigHandler& config_handler) {
   const config::ErrorPage* ep = config_handler.searchErrorPage(server, location, response.status_code_);
 
-	if (response.body_.empty() && default_error_page_map_.find(response.status_code_) != default_error_page_map_.end())
-	{
-		response.res_file_path_ = kDefaultPage;
-		response.body_ = *default_error_page_map_[response.status_code_] + webserv_error_page_tail;
-	}
-	if (!ep)
-	{
-		return sw_log_phase;
-	}
+  if (response.body_.empty() &&
+      default_error_page_map_.find(response.status_code_) != default_error_page_map_.end()) {
+    response.res_file_path_ = kDefaultPage;
+    response.body_ = *default_error_page_map_[response.status_code_] + webserv_error_page_tail;
+  }
+  if (!ep) {
+    return sw_log_phase;
+  }
 
   // error page process
   long tmp_code;  // error_pageの=responseはlong_maxまで許容
@@ -744,54 +747,47 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
   return sw_search_location_phase;
 }
 
-void	HttpResponse::headerFilterPhase( HttpResponse& response, const config::Time& time )
-{
-	const static char	*kClose = "close";
-	const static char	*kConnection = "Connection";
-	const static char	*kKeepAlive = "keep-alive";
-	const static char	*kTransferEncoding = "Transfer-Encoding";
-	const std::map<int, std::string>::iterator default_status_line = status_line_map_.find(response.status_code_);
+void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time& time) {
+  const static char* kClose = "close";
+  const static char* kConnection = "Connection";
+  const static char* kKeepAlive = "keep-alive";
+  const static char* kTransferEncoding = "Transfer-Encoding";
+  const std::map<int, std::string>::iterator default_status_line =
+      status_line_map_.find(response.status_code_);
 
-	response.headers_["Server"] = "webserv/1.0";
-	response.headers_["Date"] = getCurrentGMTTime();
-	response.headers_["Content-Length"] = Utils::toStr(response.body_.size());
-	// conetent-lengthで対応するので、Transfer-Encodingは削除する
-	if (response.headers_.find(kTransferEncoding) != response.headers_.end())
-		response.headers_.erase(kTransferEncoding);
+  response.headers_["Server"] = "webserv/1.0";
+  response.headers_["Date"] = getCurrentGMTTime();
+  response.headers_["Content-Length"] = Utils::toStr(response.body_.size());
+  // conetent-lengthで対応するので、Transfer-Encodingは削除する
+  if (response.headers_.find(kTransferEncoding) != response.headers_.end())
+    response.headers_.erase(kTransferEncoding);
 
-	// requestエラーの場合は、接続を切る
-	if (time.isNoTime() || (400 <= response.status_code_
-		&& response.status_code_ < 500))
-		response.headers_[kConnection] = kClose;
-	else
-		response.headers_[kConnection] = kKeepAlive;
+  // requestエラーの場合は、接続を切る
+  if (time.isNoTime() || (400 <= response.status_code_ && response.status_code_ < 500))
+    response.headers_[kConnection] = kClose;
+  else
+    response.headers_[kConnection] = kKeepAlive;
 
-	// cgiでstatus code lineの場合
-	if (!response.status_code_line_.empty())
-		return;
-	if (default_status_line != status_line_map_.end())
-		response.status_code_line_ = default_status_line->second;
-	else
-		response.status_code_line_ = Utils::toStr(response.status_code_);
-	// staticのファイルの場合のみ、contetn-typeをつけてあげる
-	if (response.state_ != RES_CREATING_STATIC)
-		return;
-	
-	if (response.headers_.find(kContentType) == response.headers_.end())
-		response.headers_[kContentType] = detectContentType(response.res_file_path_);
+  // cgiでstatus code lineの場合
+  if (!response.status_code_line_.empty()) return;
+  if (default_status_line != status_line_map_.end())
+    response.status_code_line_ = default_status_line->second;
+  else
+    response.status_code_line_ = Utils::toStr(response.status_code_);
+  // staticのファイルの場合のみ、contetn-typeをつけてあげる
+  if (response.state_ != RES_CREATING_STATIC) return;
+
+  if (response.headers_.find(kContentType) == response.headers_.end())
+    response.headers_[kContentType] = detectContentType(response.res_file_path_);
 }
 
-std::string	HttpResponse::detectContentType(const std::string& res_file_path)
-{
-	const char	*kHtmlExt = ".html";
-	const char	*kCssExt = ".css";
-	const char	*kJsExt = ".js";
+std::string HttpResponse::detectContentType(const std::string& res_file_path) {
+  const char* kHtmlExt = ".html";
+  const char* kCssExt = ".css";
+  const char* kJsExt = ".js";
 
-	if (Utils::isExtensionFile(res_file_path, kHtmlExt))
-		return kHtml;
-	if (Utils::isExtensionFile(res_file_path, kCssExt))
-		return "text/css";
-	if (Utils::isExtensionFile(res_file_path, kJsExt))
-		return "text/javascript";
-	return kTextPlain;
+  if (Utils::isExtensionFile(res_file_path, kHtmlExt)) return kHtml;
+  if (Utils::isExtensionFile(res_file_path, kCssExt)) return "text/css";
+  if (Utils::isExtensionFile(res_file_path, kJsExt)) return "text/javascript";
+  return kTextPlain;
 }
