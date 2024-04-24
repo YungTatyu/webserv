@@ -142,24 +142,26 @@ int RequestHandler::handleWriteEvent(
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 	int re = ioHandler.sendResponse( connManager, sockfd );
 
-	/*  0: connection closed
+	/* -2: send not complete, send remainder later
 	 * -1: send error, retry later
-	 * -2: send not complete, send remainder later
+	 *  0: connection closed
+	 *  1: send complete
 	 */
 	switch (re) {
 	case -2:
-		// send_timeout追加
+		// send_timeout更新
 		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
 		return RequestHandler::UPDATE_NONE;
 		break;
 	case -1:
 		// ここで何も処理しないとsend_timeout0;でselect serverの時おかしくなる。
-		// connManager.setEvent(sockfd, ConnectionData::EV_ERROR);
 		return RequestHandler::UPDATE_NONE;
 		break;
 	case 0:
-		//this->deleteTimerAndConnection(ioHandler, connManager, timerTree, sockfd);
-		//return RequestHandler::UPDATE_CLOSE;
+		this->deleteTimerAndConnection(ioHandler, connManager, timerTree, sockfd);
+		return RequestHandler::UPDATE_CLOSE;
+		break;
+	case 1:
 		break;
 	}
 

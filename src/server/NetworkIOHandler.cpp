@@ -93,8 +93,9 @@ int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli
   int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, MSG_NOSIGNAL);
   if (sent == -1) return -1;
   connManager.getConnection(cli_sock)->sent_bytes_ += sent;
-  if (connManager.getConnection(cli_sock)->sent_bytes_ != resSize) return -2;
-  return 0;
+  if (connManager.getConnection(cli_sock)->sent_bytes_ == resSize) return 1;
+  else return -2;
+  return 0; // clientが切断
 }
 
 ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const int sock) {
