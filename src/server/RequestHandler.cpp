@@ -141,7 +141,6 @@ int RequestHandler::handleWriteEvent(
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 	int re = ioHandler.sendResponse( connManager, sockfd );
-	//std::cout << "send re: " << re << std::endl;
 
 	/*  0: connection closed
 	 * -1: send error, retry later
@@ -270,7 +269,7 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 	it = connManager.getRequest(sockfd).headers.find("Host");
 	std::string host_name;
 	if (it == connManager.getRequest(sockfd).headers.end())
-		host_name = "_";
+		host_name = "";
 	else
 		host_name = it->second;
 
