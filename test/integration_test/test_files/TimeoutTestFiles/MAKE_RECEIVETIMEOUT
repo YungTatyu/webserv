@@ -1,28 +1,20 @@
-NAME_TIMEOUT0			= timeout0
-NAME_TIMEOUT5			= timeout5
-NAME_TIMEOUT10			= timeout10
+NAME_RECEIVE_TIMEOUT	= recv_timeout
 NAME_NO_SEND			= no_send
 CC					= gcc
 CXX					= c++
 CXXFLAGS			= -std=c++14
 RM					= rm -rf
 
-all: $(NAME_TIMEOUT0) $(NAME_TIMEOUT5) $(NAME_TIMEOUT10) $(NAME_NO_SEND)
+all: $(NAME_RECEIVE_TIMEOUT) $(NAME_NO_SEND)
 
-$(NAME_TIMEOUT0):
-	$(CXX) $(CXXFLAGS) -o $@ client_timeout0.cpp
-
-$(NAME_TIMEOUT5):
-	$(CXX) $(CXXFLAGS) -o $@ client_timeout5.cpp
-
-$(NAME_TIMEOUT10):
-	$(CXX) $(CXXFLAGS) -o $@ client_timeout10.cpp
+$(NAME_RECEIVE_TIMEOUT):
+	$(CXX) $(CXXFLAGS) -o $@ client_receive_timeout.cpp
 
 $(NAME_NO_SEND):
 	$(CXX) $(CXXFLAGS) -o $@ client_no_send.cpp
 
 fclean: clean
-	$(RM) $(NAME_TIMEOUT0) $(NAME_TIMEOUT5) $(NAME_TIMEOUT10) $(NAME_NO_SEND)
+	$(RM) $(NAME_RECEIVE_TIMEOUT) $(NAME_NO_SEND)
 
 re: fclean all
 

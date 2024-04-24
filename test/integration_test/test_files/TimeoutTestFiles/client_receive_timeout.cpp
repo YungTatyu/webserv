@@ -12,11 +12,24 @@
 
 int	main(int ac, char *av[])
 {
-	if (ac != 5)
+	if (ac < 5)
 	{
-		std::cout << "Usage: %s <ip address> <port> <msg> <sleep time>" << std::endl;
+		std::cout << "Usage: %s <ip address> <port> <sleep time> <request> ..." << std::endl;
 		return (0);
 	}
+
+	const char*	server_addr = av[1];
+	uint16_t	server_port = atoi(av[2]);
+	int	sleep_time = atoi(av[3]);
+	// request作成
+	std::string	str;
+	for (int i = 4; i < ac; i++)
+	{
+		str += av[i];
+		str += "\r\n";
+	}
+	str += "\r\n";
+	std::vector<unsigned char> request(str.begin(), str.end());
 
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
@@ -25,19 +38,11 @@ int	main(int ac, char *av[])
 		exit (1);
 	}
 
-	//SOCK_MIN_RCVBUFのようなマクロが見つかればそれに差し替える
-	int option_value = 1024; // 環境によって最小値はこれよりも大きいがそちらに合わせられるだけで問題はない。
-	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &option_value, sizeof(option_value)) == -1)
-	{
-		std::cerr << "Error: setsockopt:" << std::strerror(errno);
-		exit(1);
-	}
-
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr(av[1]);
-	addr.sin_port = htons(atoi(av[2])); // network byte order (big endian) に変換
+	addr.sin_addr.s_addr = inet_addr(server_addr);
+	addr.sin_port = htons(server_port);// network byte order (big endian) に変換
 
 	// ソケット接続要求
 	if (connect(sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
@@ -46,27 +51,22 @@ int	main(int ac, char *av[])
 		exit(1);
 	}
 
-	// 送信
-	// 引数から受け取った文字列でrequestを送ると400エラーになってしまう。
-	//char *request = av[3];
-	char request[] = "POST / HTTP/1.1\r\nHost: _\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nrecei\r\n5\r\nve ti\r\n5\r\nmeout\r\n4\r\ntest\r\n0\r\n";
-	if (send(sockfd, request, 60, 0) == 0)
+	// requestの一部だけ送信
+	if (send(sockfd, request.data(), 10, 0) == 0)
 	{
 		std::cerr << "Error: recv:" << std::strerror(errno);
 		exit(1);
 	}
-	std::string	request_str(request);
-	std::cout << "send: " << request.substr(begin(), 60) << std::endl;
 
 	// send_timeout + 1秒待機
-	sleep(atoi(av[4]) + 1);
+	sleep(sleep_time + 1);
 
 	// 一度目のsendはserver側で接続がcloseされていても成功する
 	// close されている場合RESETパケットが送られる。
-	ret = send(sockfd, request, strlen(request), 0);
+	int ret = send(sockfd, request.data(), request.size(), 0);
 	std::cout << "send byte: " << ret << std::endl;
 	// 2回目のsendはcloseされていればsendは失敗する。
-	ret = send(sockfd, request, strlen(request), 0);
+	ret = send(sockfd, request.data(), request.size(), 0);
 	std::cout << "send byte: " << ret << std::endl;
 	if (errno == ECONNRESET || errno == EPIPE)
 	{
