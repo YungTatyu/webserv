@@ -39,3 +39,5 @@ logs
 .DS_Store
 *.cgi
 *.log
+
+__pycache__
