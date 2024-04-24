@@ -56,6 +56,26 @@ public:
 	}
 
 	/**
+	 * @brief Set the Up All object
+	 * 
+	 * setUp関数の代わりに呼ぶ: setUpとsetUpAll両方呼ばない
+	 * testに必要なオブジェクトを全て初期化する
+	 * responseの生成まで行う
+	 * 
+	 */
+	void	setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers,
+		const std::string &uri,
+		const HttpRequest::ParseState state,
+		const std::string &body="",
+		const std::string &queries="",
+		const std::string &version="HTTP/1.1") {
+			ASSERT_NO_FATAL_FAILURE(setUp());
+			initTiedServers(ip_addresses);
+			initRequest(headers, uri, state, body, queries, version);
+			generateResponse();
+	}
+
+	/**
 	 * @brief Tied Serversを初期化する
 	 * 
 	 * @param ip_addresses テストしたいIP Adress

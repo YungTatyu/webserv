@@ -9,19 +9,19 @@
 #include "ResponseTest.hpp"
 
 
-TEST(HttpResponseIndex, root)
+TEST(HttpResponseIndex, index_in_server)
 {
-	test::ResponseTest test("test/server/HttpResponse/index/file/index.conf");
-	ASSERT_NO_FATAL_FAILURE(test.setUp());
-	test.initTiedServers({
-		{"127.0.0.1", 4242},
-		{"127.0.0.1", 4243}
-	});
-	test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-		"/", HttpRequest::PARSE_COMPLETE);
-	test.generateResponse();
+	test::ResponseTest test("test/server/HttpResponse/index/file/index1.conf");
+	ASSERT_NO_FATAL_FAILURE(
+		test.setUpAll(
+		{{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
+		{{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
+		"/",
+		HttpRequest::PARSE_COMPLETE
+		)
+	);
 
-	const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/index.html");
+	const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/index1.html");
 	test.testHeaders({
 		{"Server", "webserv/1.0"},
 		{"Date", ""},
