@@ -50,9 +50,9 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
 
 ConnectionData* ConnectionManager::getConnection(const int fd) { return connections_.at(fd); }
 
-void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest) {
-  connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(),
-                                      rawRequest.end());
+void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest, const ssize_t read_bytes )
+{
+       connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(), rawRequest.begin() + read_bytes);
 }
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd) const {
@@ -93,10 +93,6 @@ void ConnectionManager::setResponse(const int fd, const HttpResponse response) {
 
 HttpResponse& ConnectionManager::getResponse(const int fd) { return connections_.at(fd)->response_; }
 
-void ConnectionManager::addCgiResponse(const int fd, const std::vector<unsigned char>& v) {
-  connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(), v.end());
-}
-
 const std::vector<unsigned char>& ConnectionManager::getCgiResponse(const int fd) const {
   return this->connections_.at(fd)->cgi_response_;
 }
@@ -108,6 +104,11 @@ bool ConnectionManager::callCgiExecutor(const int fd, const std::string& script_
 
 bool ConnectionManager::callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response) {
   return this->connections_.at(fd)->cgi_handler_.callCgiParser(response, cgi_response);
+}
+
+void	ConnectionManager::addCgiResponse( const int fd, const std::vector<unsigned char>& v, const ssize_t read_bytes )
+{
+	connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(), v.begin() + read_bytes);
 }
 
 void ConnectionManager::setTiedServer(const int fd, const TiedServer* tied_server) {
