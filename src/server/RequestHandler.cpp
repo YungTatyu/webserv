@@ -141,22 +141,35 @@ int RequestHandler::handleWriteEvent(
 	if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
 		return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 	int re = ioHandler.sendResponse( connManager, sockfd );
+	//std::cout << "send re: " << re << std::endl;
 
-	// send_timeout削除
-	timerTree.deleteTimer(sockfd);
-
-	/* -1: send error, retry later
+	/*  0: connection closed
+	 * -1: send error, retry later
 	 * -2: send not complete, send remainder later
 	 */
-	if (re != 0)
-	{
+	switch (re) {
+	case -2:
 		// send_timeout追加
 		this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
 		return RequestHandler::UPDATE_NONE;
+		break;
+	case -1:
+		// ここで何も処理しないとsend_timeout0;でselect serverの時おかしくなる。
+		// connManager.setEvent(sockfd, ConnectionData::EV_ERROR);
+		return RequestHandler::UPDATE_NONE;
+		break;
+	case 0:
+		//this->deleteTimerAndConnection(ioHandler, connManager, timerTree, sockfd);
+		//return RequestHandler::UPDATE_CLOSE;
+		break;
 	}
 
 	if (!this->addTimerByType(ioHandler, connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE))
+	{
+		// Connection: closeなので接続閉じる
+		this->deleteTimerAndConnection(ioHandler, connManager, timerTree, sockfd);
 		return UPDATE_CLOSE;
+	}
 
 	// readイベントに更新
 	connManager.setEvent(sockfd, ConnectionData::EV_READ);
@@ -191,11 +204,11 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
 void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         ConfigHandler &configHandler, TimerTree &timerTree) {
   configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
+  Timer::updateCurrentTime();
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
 
-  Timer::updateCurrentTime();
   // timeout している接続をすべて削除
   for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(); it != upper_bound;) {
     std::multiset<Timer>::iterator next = it;
@@ -229,8 +242,9 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id) const {
  * @brief TimerTypeと直前のresponseのヘッダーに従ってtimeout値を取得し、TimerTreeにtimerを追加する。
  *
  * @param NetworkIOHandler, ConnectionManager, ConfigHandler, TimerTree, socket, TimeoutType
- * @return true: timerを追加
- * @return false: 'Connections: closeの'場合
+ *
+ * @return true: N秒timerを追加
+ * @return false: 'Connections: close'の場合
  */
 bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type)
 {
@@ -238,6 +252,7 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 	std::map<std::string, std::string>::iterator	it; 
 
 	// Connectionヘッダーを見てcloseならコネクションを閉じる
+	// TODO: handleResponesの最後にセットするkeepaliveどうする？このままだとcloseなら送らずに閉じちゃう
 	if (type == Timer::TMO_KEEPALIVE)
 	{
 		it = connManager.getResponse(sockfd).headers_.find("Connection");
@@ -252,7 +267,6 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 	// Hostヘッダーがあるか確認
 	// 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
 	// このように探すdirectiveがほんとにこのクライアントが最後にアクセスしたコンテキストかは怪しい。
-	// TODO: 毎回設定値見に行くの計算量かかる？
 	it = connManager.getRequest(sockfd).headers.find("Host");
 	std::string host_name;
 	if (it == connManager.getRequest(sockfd).headers.end())
@@ -284,9 +298,10 @@ bool	RequestHandler::addTimerByType(NetworkIOHandler &ioHandler, ConnectionManag
 		break;
 	}
 
-	// 設定値が0ならばタイムアウトを設定しない
+	// 設定値が0ならばタイムアウトを設定しないで削除
 	if (timeout.isNoTime())
 	{
+		timerTree.deleteTimer(sockfd);
 		return true;
 	}
 
