@@ -271,7 +271,7 @@ HttpResponse::HttpResponse()
   this->default_error_page_map_[507] = &webserv_error_507_page;
 }
 
-std::string HttpResponse::getCurrentGMTTime() {
+std::string HttpResponse::createCurrentGmtTime() {
   // 現在の時間を取得
   std::time_t currentTime = std::time(NULL);
 
@@ -648,6 +648,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequ
       response.status_code_ = 404;
       return sw_error_page_phase;
     }
+    response.res_file_path_ = kDefaultPage;
     return sw_log_phase;
   }
 
@@ -736,9 +737,7 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
     response.res_file_path_ = kDefaultPage;
     response.body_ = *default_error_page_map_[response.status_code_] + webserv_error_page_tail;
   }
-  if (!ep) {
-    return sw_log_phase;
-  }
+  if (!ep) return sw_log_phase;
 
   // error page process
   long tmp_code;  // error_pageの=responseはlong_maxまで許容
@@ -756,7 +755,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
       status_line_map_.find(response.status_code_);
 
   response.headers_["Server"] = "webserv/1.0";
-  response.headers_["Date"] = getCurrentGMTTime();
+  response.headers_["Date"] = createCurrentGmtTime();
   response.headers_["Content-Length"] = Utils::toStr(response.body_.size());
   // conetent-lengthで対応するので、Transfer-Encodingは削除する
   if (response.headers_.find(kTransferEncoding) != response.headers_.end())

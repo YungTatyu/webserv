@@ -86,7 +86,7 @@ class HttpResponse {
 
   // 名前微妙
   static std::string autoIndex(const std::string& directory_path, const std::string& index_dir);
-  static std::string getCurrentGMTTime();
+  static std::string createCurrentGmtTime();
   static ResponsePhase returnPhase(HttpResponse& response, const config::Location* location);
   static void prepareReturn(HttpResponse& response, const config::Return& return_directive);
   static ResponsePhase searchResPath(HttpResponse& response, HttpRequest& request,
