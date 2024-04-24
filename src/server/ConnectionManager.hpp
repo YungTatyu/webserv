@@ -31,7 +31,7 @@ class ConnectionData {
   const TiedServer* tied_server_;
 };
 
-typedef std::map<int, ConnectionData*>::size_type ConnectionSize;
+typedef std::map<int, ConnectionData*>::size_type connection_size;
 
 /* コネクションの疎通したソケットとその直近のリクエストメッセージ情報を管理する */
 class ConnectionManager {
@@ -67,11 +67,11 @@ class ConnectionManager {
   void clearConnectionData(const int fd);
   void closeAllConnections();
   bool isCgiSocket(const int fd) const;
-  ConnectionSize getCgiSockNum() const;
+  connection_size getCgiSockNum() const;
 
  private:
   std::map<int, ConnectionData*> connections_;
-  ConnectionSize cgi_sock_num_;
+  connection_size cgi_sock_num_;
 };
 
 #endif

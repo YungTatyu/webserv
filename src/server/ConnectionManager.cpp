@@ -159,6 +159,6 @@ void ConnectionManager::closeAllConnections() {
   this->connections_.clear();
 }
 
-ConnectionSize ConnectionManager::getCgiSockNum() const {
+connection_size ConnectionManager::getCgiSockNum() const {
   return cgi_sock_num_;
 }
