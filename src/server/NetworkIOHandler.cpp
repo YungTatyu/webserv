@@ -72,7 +72,7 @@ int NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, const i
   const static size_t buffer_size = 1024;
   std::vector<unsigned char> buffer(buffer_size);
 
-	ssize_t re = recv(sock, buffer.data(), buffer_size, 0);
+	ssize_t re = recv(sock, buffer.data(), buffer_size, MSG_NOSIGNAL);
 	if (re == 0) // cgi process died
 		return 0;
 	if (re == -1) // error
@@ -103,7 +103,7 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
 
-  ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), 0);
+  ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), MSG_NOSIGNAL);
   if (re > 0) connManager.addSentBytes(sock, re);
   return re;
 }
