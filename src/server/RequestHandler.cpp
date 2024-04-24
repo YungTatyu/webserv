@@ -48,7 +48,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 	if (re == 2) // buffer分以降を読む
 	       return RequestHandler::UPDATE_NONE;
 	const std::vector<unsigned char>& context = connManager.getRawRequest( sockfd );
-	std::string requestData = std::string(reinterpret_cast<const char*>(context.data()));
+	// reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
+	std::string requestData = std::string(context.begin(), context.end());
 
 	HttpRequest::parseRequest( requestData, connManager.getRequest(sockfd) );
 
@@ -123,7 +124,7 @@ int RequestHandler::handleCgiReadEvent(
 
 	const std::vector<unsigned char>&	v = connManager.getCgiResponse(sockfd);
 	HttpResponse	&response = connManager.getResponse(sockfd);
-	std::string res(reinterpret_cast<const char*>(v.data()), v.size());
+	std::string res(v.begin(), v.end());
 	bool parse_suc = connManager.callCgiParser(sockfd, response, res);
 	response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
 	re = handleResponse(ioHandler, connManager, configHandler, timerTree, sockfd);
