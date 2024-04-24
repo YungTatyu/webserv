@@ -19,7 +19,7 @@ jobs:
 
     - name: Install clang-format
       run: |
-        sudo apt update
+        sudo apt update || true
         sudo apt install -y clang-format
 
     - name: Install Black for Python 3
