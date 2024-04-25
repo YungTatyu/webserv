@@ -35,4 +35,10 @@ bool	EpollActiveEventManager::isErrorEvent( const void *event )
 	//CGIの場合、子プロセスは実行終了後消えるのでEPOLLHUPが発生してエラーイベントになってしまう.
 }
 
+bool	EpollActiveEventManager::isEofEvent( const void *event )
+{
+	const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
+	return (ep_event->events & EPOLLHUP);
+}
+
 #endif

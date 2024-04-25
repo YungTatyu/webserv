@@ -108,6 +108,8 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
       status =
           request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].ident);
+    else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
+      status = request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].ident); // handleEofEvent()がいるかどうか.
 
     // kqueueで監視しているイベント情報を更新
     switch (status) {

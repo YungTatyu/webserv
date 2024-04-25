@@ -38,7 +38,8 @@ void PollActiveEventManager::clearAllEvents() {
  */
 bool PollActiveEventManager::isReadEvent(const void *event) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
-  return (poll_fd->revents & POLLIN) || (poll_fd->revents & POLLHUP);
+  return (poll_fd->revents & POLLIN);
+  //return (poll_fd->revents & POLLIN) || (poll_fd->revents & POLLHUP); // isEofEvent()を追加したのでPOLLHUPはそっちで見る.
 }
 
 bool PollActiveEventManager::isWriteEvent(const void *event) {
@@ -58,4 +59,9 @@ bool PollActiveEventManager::isWriteEvent(const void *event) {
 bool PollActiveEventManager::isErrorEvent(const void *event) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
   return (poll_fd->revents & POLLERR) || (poll_fd->revents & POLLNVAL);
+}
+
+bool PollActiveEventManager::isEofEvent(const void *event) {
+  const pollfd *poll_fd = static_cast<const pollfd *>(event);
+  return (poll_fd->revents & POLLHUP);
 }
