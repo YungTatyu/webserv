@@ -52,22 +52,23 @@ class ResponseTest {
   }
 
   /**
-   * @brief Set Up All objects
-   *
-   * @param ip_addresses
-   * @param headers
-   * @param uri
-   * @param state
-   * @param body
-   * @param queries
-   * @param version
+   * @brief Set the Up All objects and create response
+   * 
+   * @param ip_addresses 
+   * @param headers 
+   * @param method 
+   * @param uri 
+   * @param state 
+   * @param body 
+   * @param queries 
+   * @param version 
    */
-  void setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers,
+  void setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers, const config::REQUEST_METHOD method,
                 const std::string &uri, const HttpRequest::ParseState state, const std::string &body = "",
                 const std::string &queries = "", const std::string &version = "HTTP/1.1") {
     ASSERT_NO_FATAL_FAILURE(setUp());
     initTiedServers(ip_addresses);
-    initRequest(headers, uri, state, body, queries, version);
+    initRequest(headers, method, uri, state, body, queries, version);
     generateResponse();
   }
 
@@ -84,19 +85,21 @@ class ResponseTest {
   }
 
   /**
-   * @brief  HttpRequestのメンバ変数を初期化する
-   *
-   * @param headers
-   * @param uri
-   * @param state
-   * @param body
-   * @param queries
-   * @param version
+   * @brief HttpRequestのメンバ変数を初期化する
+   * 
+   * @param headers 
+   * @param method 
+   * @param uri 
+   * @param state 
+   * @param body 
+   * @param queries 
+   * @param version 
    */
-  void initRequest(const string_map_case_insensitive &headers, const std::string &uri,
+  void initRequest(const string_map_case_insensitive &headers, config::REQUEST_METHOD method, const std::string &uri,
                    const HttpRequest::ParseState state, const std::string &body = "",
                    const std::string &queries = "", const std::string &version = "HTTP/1.1") {
     this->request_.headers = headers;
+    this->request_.method = method;
     this->request_.uri = uri;
     this->request_.parseState = state;
     this->request_.body = body;
