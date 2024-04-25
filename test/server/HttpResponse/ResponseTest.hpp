@@ -56,19 +56,19 @@ class ResponseTest {
    * 
    * @param ip_addresses 
    * @param headers 
-   * @param method 
+   * @param methods
    * @param uri 
    * @param state 
    * @param body 
    * @param queries 
    * @param version 
    */
-  void setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers, const config::REQUEST_METHOD method,
+  void setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers, const std::vector<config::REQUEST_METHOD> &methods,
                 const std::string &uri, const HttpRequest::ParseState state, const std::string &body = "",
                 const std::string &queries = "", const std::string &version = "HTTP/1.1") {
     ASSERT_NO_FATAL_FAILURE(setUp());
     initTiedServers(ip_addresses);
-    initRequest(headers, method, uri, state, body, queries, version);
+    initRequest(headers, methods, uri, state, body, queries, version);
     generateResponse();
   }
 
@@ -81,30 +81,33 @@ class ResponseTest {
     for (std::vector<ip_address_pair>::const_iterator it = ip_addresses.begin(); it != ip_addresses.end();
          ++it)
       this->tied_servers_.push_back(this->config_handler_.createTiedServer(it->first, it->second));
-    this->responses_.resize(ip_addresses.size());
+    this->responses_.resize(this->responses_.size() + ip_addresses.size());
   }
 
   /**
    * @brief HttpRequestのメンバ変数を初期化する
    * 
    * @param headers 
-   * @param method 
+   * @param methods 
    * @param uri 
    * @param state 
    * @param body 
    * @param queries 
    * @param version 
    */
-  void initRequest(const string_map_case_insensitive &headers, config::REQUEST_METHOD method, const std::string &uri,
+  void initRequest(const string_map_case_insensitive &headers, const std::vector<config::REQUEST_METHOD> &methods, const std::string &uri,
                    const HttpRequest::ParseState state, const std::string &body = "",
                    const std::string &queries = "", const std::string &version = "HTTP/1.1") {
     this->request_.headers = headers;
-    this->request_.method = method;
     this->request_.uri = uri;
     this->request_.parseState = state;
     this->request_.body = body;
     this->request_.queries = queries;
     this->request_.version = version;
+    std::for_each(methods.begin(), methods.end(), [this](config::REQUEST_METHOD method) {
+      this->methods_.push_back(method);
+    });
+    this->responses_.resize(this->responses_.size() + methods.size());
   }
 
   /**
@@ -113,10 +116,13 @@ class ResponseTest {
    */
   void generateResponse() {
     int i = 0;
-    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(), [this, &i](TiedServer tied_server) {
-      this->final_responses_.push_back(HttpResponse::generateResponse(
-          this->request_, this->responses_[i], tied_server, this->sockets_[0], this->config_handler_));
-      ++i;
+    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(), [this, &i](TiedServer tied_server) { // testするip adressの数だけloop
+      std::for_each(this->methods_.begin(), this->methods_.end(), [this, &i, &tied_server](config::REQUEST_METHOD method) { // testするmethodの数だけloop
+        this->request_.method = method; // testするmethodを変える
+        this->final_responses_.push_back(HttpResponse::generateResponse(
+            this->request_, this->responses_[i], tied_server, this->sockets_[0], this->config_handler_));
+        ++i;
+      });
     });
   }
 
@@ -247,6 +253,7 @@ class ResponseTest {
 
   int sockets_[2];
   const std::string conf_path_;
+  std::vector<config::REQUEST_METHOD> methods_; // testするmethod
   ConfigHandler config_handler_;
   HttpRequest request_;
   std::vector<TiedServer> tied_servers_;
