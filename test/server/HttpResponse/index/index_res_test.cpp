@@ -33,7 +33,7 @@ TEST(HttpResponseIndex, index_in_loc) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, "/error/",
                                         HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/error.html");
+  const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/error/error.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -48,7 +48,7 @@ TEST(HttpResponseIndex, index_in_loc) {
 TEST(HttpResponseIndex, index_default) {
   test::ResponseTest test("test/server/HttpResponse/index/file/index2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}},
-                                        {{"host", "not_exist"}, {"User-Agent", "Mozilla/5.0"}}, "/error/",
+                                        {{"host", "not_exist"}, {"User-Agent", "Mozilla/5.0"}}, "/",
                                         HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/index.html");
