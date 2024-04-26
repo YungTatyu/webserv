@@ -27,30 +27,24 @@ void cgi::CGIParser::init(HttpResponse& http_response) {
   this->status_code_line_->clear();
 }
 
-bool	cgi::CGIParser::parse(
-	HttpResponse& http_response,
-	const std::string& cgi_response,
-	const PARSE_STATE init_state
-)
-{
-	init(http_response);
-	this->state_ = init_state;
-	while (this->state_ != cgi::PARSE_COMPLETE)
-	{
-		switch (this->state_)
-		{
-		case PARSE_BEFORE:
-			parseHeaders(cgi_response);
-			break;
-		case PARSE_HEADER_DONE:
-			parseBody(cgi_response);
-			break;
-		case PARSE_BODY_DONE:
-			finishParsing();
-			break;
-		default:
-			break;
-		}
+bool cgi::CGIParser::parse(HttpResponse& http_response, const std::string& cgi_response,
+                           const PARSE_STATE init_state) {
+  init(http_response);
+  this->state_ = init_state;
+  while (this->state_ != cgi::PARSE_COMPLETE) {
+    switch (this->state_) {
+      case PARSE_BEFORE:
+        parseHeaders(cgi_response);
+        break;
+      case PARSE_HEADER_DONE:
+        parseBody(cgi_response);
+        break;
+      case PARSE_BODY_DONE:
+        finishParsing();
+        break;
+      default:
+        break;
+    }
 
     if (this->state_ == PARSE_ERROR) return false;
   }
@@ -369,10 +363,7 @@ void cgi::CGIParser::parseBody(const std::string& response) {
   this->state_ = PARSE_BODY_DONE;
 }
 
-void	cgi::CGIParser::finishParsing()
-{
-	this->state_ = PARSE_COMPLETE;
-}
+void cgi::CGIParser::finishParsing() { this->state_ = PARSE_COMPLETE; }
 
 /**
  * @brief status codeは100以上である必要がある
