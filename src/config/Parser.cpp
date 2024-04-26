@@ -6,141 +6,140 @@
 #include <sstream>
 #include <utility>
 
-std::map<std::string, unsigned int>	config::Parser::all_directives_;
+std::map<std::string, unsigned int> config::Parser::all_directives_;
 
-const unsigned int	config::Http::type;
-const unsigned int	config::Events::type;
-const unsigned int	config::Server::type;
-const unsigned int	config::Location::type;
-const unsigned int	config::LimitExcept::type;
-const unsigned int	config::AccessLog::kType_;
-const unsigned int	config::Alias::kType_;
-const unsigned int	config::AllowDeny::kType_;
-const unsigned int	config::Autoindex::kType_;
-const unsigned int	config::ClientMaxBodySize::kType_;
-const unsigned int	config::ErrorLog::kType_;
-const unsigned int	config::ErrorPage::kType_;
-const unsigned int	config::Index::kType_;
-const unsigned int	config::KeepaliveTimeout::kType_;
-const unsigned int	config::Listen::kType_;
-const unsigned int	config::ReceiveTimeout::kType_;
-const unsigned int	config::Return::kType_;
-const unsigned int	config::Root::kType_;
-const unsigned int	config::SendTimeout::kType_;
-const unsigned int	config::ServerName::kType_;
-const unsigned int	config::TryFiles::kType_;
-const unsigned int	config::Use::kType_;
-const unsigned int	config::Userid::kType_;
-const unsigned int	config::UseridDomain::kType_;
-const unsigned int	config::UseridExpires::kType_;
-const unsigned int	config::UseridPath::kType_;
-const unsigned int	config::UseridService::kType_;
-const unsigned int	config::WorkerConnections::kType_;
+const unsigned int config::Http::type;
+const unsigned int config::Events::type;
+const unsigned int config::Server::type;
+const unsigned int config::Location::type;
+const unsigned int config::LimitExcept::type;
+const unsigned int config::AccessLog::kType_;
+const unsigned int config::Alias::kType_;
+const unsigned int config::AllowDeny::kType_;
+const unsigned int config::Autoindex::kType_;
+const unsigned int config::ClientMaxBodySize::kType_;
+const unsigned int config::ErrorLog::kType_;
+const unsigned int config::ErrorPage::kType_;
+const unsigned int config::Index::kType_;
+const unsigned int config::KeepaliveTimeout::kType_;
+const unsigned int config::Listen::kType_;
+const unsigned int config::ReceiveTimeout::kType_;
+const unsigned int config::Return::kType_;
+const unsigned int config::Root::kType_;
+const unsigned int config::SendTimeout::kType_;
+const unsigned int config::ServerName::kType_;
+const unsigned int config::TryFiles::kType_;
+const unsigned int config::Use::kType_;
+const unsigned int config::Userid::kType_;
+const unsigned int config::UseridDomain::kType_;
+const unsigned int config::UseridExpires::kType_;
+const unsigned int config::UseridPath::kType_;
+const unsigned int config::UseridService::kType_;
+const unsigned int config::WorkerConnections::kType_;
 
-const static	std::string kHTTP = "http";
-const static	std::string kEVENTS = "events";
-const static	std::string kSERVER = "server";
-const static	std::string kLOCATION = "location";
-const static	std::string kLIMIT_EXCEPT = "limit_except";
-const static	std::string kACCESS_LOG = "access_log";
-const static	std::string kALIAS = "alias";
-const static	std::string kALLOW = "allow";
-const static	std::string kAUTOINDEX = "autoindex";
-const static	std::string kCLIENT_MAX_BODY_SIZE = "client_max_body_size";
-const static	std::string kDENY = "deny";
-const static	std::string kERROR_LOG = "error_log";
-const static	std::string kERROR_PAGE = "error_page";
-const static	std::string kINDEX = "index";
-const static	std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
-const static	std::string kLISTEN = "listen";
-const static	std::string kRECEIVE_TIMEOUT = "receive_timeout";
-const static	std::string kRETURN = "return";
-const static	std::string kROOT = "root";
-const static	std::string kSEND_TIMEOUT = "send_timeout";
-const static	std::string kSERVER_NAME = "server_name";
-const static	std::string kTRY_FILES = "try_files";
-const static	std::string kUSE = "use";
-const static	std::string kUSERID = "userid";
-const static	std::string kUSERID_DOMAIN = "userid_domain";
-const static	std::string kUSERID_EXPIRES = "userid_expires";
-const static	std::string kUSERID_PATH = "userid_path";
-const static	std::string kUSERID_SERVICE = "userid_service";
-const static	std::string kWORKER_CONNECTIONS = "worker_connections";
-const static	std::string kSELECT = "select";
-const static	std::string kPOLL = "poll";
-const static	std::string kEPOLL = "epoll";
-const static	std::string kKQUEUE = "kqueue";
+const static std::string kHTTP = "http";
+const static std::string kEVENTS = "events";
+const static std::string kSERVER = "server";
+const static std::string kLOCATION = "location";
+const static std::string kLIMIT_EXCEPT = "limit_except";
+const static std::string kACCESS_LOG = "access_log";
+const static std::string kALIAS = "alias";
+const static std::string kALLOW = "allow";
+const static std::string kAUTOINDEX = "autoindex";
+const static std::string kCLIENT_MAX_BODY_SIZE = "client_max_body_size";
+const static std::string kDENY = "deny";
+const static std::string kERROR_LOG = "error_log";
+const static std::string kERROR_PAGE = "error_page";
+const static std::string kINDEX = "index";
+const static std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static std::string kLISTEN = "listen";
+const static std::string kRECEIVE_TIMEOUT = "receive_timeout";
+const static std::string kRETURN = "return";
+const static std::string kROOT = "root";
+const static std::string kSEND_TIMEOUT = "send_timeout";
+const static std::string kSERVER_NAME = "server_name";
+const static std::string kTRY_FILES = "try_files";
+const static std::string kUSE = "use";
+const static std::string kUSERID = "userid";
+const static std::string kUSERID_DOMAIN = "userid_domain";
+const static std::string kUSERID_EXPIRES = "userid_expires";
+const static std::string kUSERID_PATH = "userid_path";
+const static std::string kUSERID_SERVICE = "userid_service";
+const static std::string kWORKER_CONNECTIONS = "worker_connections";
+const static std::string kSELECT = "select";
+const static std::string kPOLL = "poll";
+const static std::string kEPOLL = "epoll";
+const static std::string kKQUEUE = "kqueue";
 
-config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath) :
-	config_(config), tokens_(tokens), filepath_(filepath), ti_(0)
-{
-	// 現在のcontextをセット
-	this->current_context_.push(CONF_MAIN);
+config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath)
+    : config_(config), tokens_(tokens), filepath_(filepath), ti_(0) {
+  // 現在のcontextをセット
+  this->current_context_.push(CONF_MAIN);
 
-	// context
-	this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
-	this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
-	this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
-	this->all_directives_.insert(std::make_pair(kLOCATION, config::Location::type));
-	this->all_directives_.insert(std::make_pair(kLIMIT_EXCEPT, config::LimitExcept::type));
+  // context
+  this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::type));
+  this->all_directives_.insert(std::make_pair(kHTTP, config::Http::type));
+  this->all_directives_.insert(std::make_pair(kSERVER, config::Server::type));
+  this->all_directives_.insert(std::make_pair(kLOCATION, config::Location::type));
+  this->all_directives_.insert(std::make_pair(kLIMIT_EXCEPT, config::LimitExcept::type));
 
-	// directive
-	this->all_directives_.insert(std::make_pair(kACCESS_LOG, config::AccessLog::kType_));
-	this->all_directives_.insert(std::make_pair(kALIAS, config::Alias::kType_));
-	this->all_directives_.insert(std::make_pair(kALLOW, config::AllowDeny::kType_));
-	this->all_directives_.insert(std::make_pair(kAUTOINDEX, config::Autoindex::kType_));
-	this->all_directives_.insert(std::make_pair(kCLIENT_MAX_BODY_SIZE, config::ClientMaxBodySize::kType_));
-	this->all_directives_.insert(std::make_pair(kDENY, config::AllowDeny::kType_));
-	this->all_directives_.insert(std::make_pair(kERROR_LOG, config::ErrorLog::kType_));
-	this->all_directives_.insert(std::make_pair(kERROR_PAGE, config::ErrorPage::kType_));
-	this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
-	this->all_directives_.insert(std::make_pair(kKEEPALIVE_TIMEOUT, config::KeepaliveTimeout::kType_));
-	this->all_directives_.insert(std::make_pair(kLISTEN, config::Listen::kType_));
-	this->all_directives_.insert(std::make_pair(kRECEIVE_TIMEOUT, config::ReceiveTimeout::kType_));
-	this->all_directives_.insert(std::make_pair(kRETURN, config::Return::kType_));
-	this->all_directives_.insert(std::make_pair(kROOT, config::Root::kType_));
-	this->all_directives_.insert(std::make_pair(kSEND_TIMEOUT, config::SendTimeout::kType_));
-	this->all_directives_.insert(std::make_pair(kSERVER_NAME, config::ServerName::kType_));
-	this->all_directives_.insert(std::make_pair(kTRY_FILES, config::TryFiles::kType_));
-	this->all_directives_.insert(std::make_pair(kUSE, config::Use::kType_));
-	this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
-	this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
-	this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
-	this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
-	this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
-	this->all_directives_.insert(std::make_pair(kWORKER_CONNECTIONS, config::WorkerConnections::kType_));
+  // directive
+  this->all_directives_.insert(std::make_pair(kACCESS_LOG, config::AccessLog::kType_));
+  this->all_directives_.insert(std::make_pair(kALIAS, config::Alias::kType_));
+  this->all_directives_.insert(std::make_pair(kALLOW, config::AllowDeny::kType_));
+  this->all_directives_.insert(std::make_pair(kAUTOINDEX, config::Autoindex::kType_));
+  this->all_directives_.insert(std::make_pair(kCLIENT_MAX_BODY_SIZE, config::ClientMaxBodySize::kType_));
+  this->all_directives_.insert(std::make_pair(kDENY, config::AllowDeny::kType_));
+  this->all_directives_.insert(std::make_pair(kERROR_LOG, config::ErrorLog::kType_));
+  this->all_directives_.insert(std::make_pair(kERROR_PAGE, config::ErrorPage::kType_));
+  this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
+  this->all_directives_.insert(std::make_pair(kKEEPALIVE_TIMEOUT, config::KeepaliveTimeout::kType_));
+  this->all_directives_.insert(std::make_pair(kLISTEN, config::Listen::kType_));
+  this->all_directives_.insert(std::make_pair(kRECEIVE_TIMEOUT, config::ReceiveTimeout::kType_));
+  this->all_directives_.insert(std::make_pair(kRETURN, config::Return::kType_));
+  this->all_directives_.insert(std::make_pair(kROOT, config::Root::kType_));
+  this->all_directives_.insert(std::make_pair(kSEND_TIMEOUT, config::SendTimeout::kType_));
+  this->all_directives_.insert(std::make_pair(kSERVER_NAME, config::ServerName::kType_));
+  this->all_directives_.insert(std::make_pair(kTRY_FILES, config::TryFiles::kType_));
+  this->all_directives_.insert(std::make_pair(kUSE, config::Use::kType_));
+  this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
+  this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
+  this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
+  this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
+  this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
+  this->all_directives_.insert(std::make_pair(kWORKER_CONNECTIONS, config::WorkerConnections::kType_));
 
-	// parser
-	this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
-	this->parser_map_[kLOCATION] = &config::Parser::parseLocation;
-	this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
+  // parser
+  this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
+  this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
+  this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
+  this->parser_map_[kLOCATION] = &config::Parser::parseLocation;
+  this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
 
-	this->parser_map_[kACCESS_LOG] = &config::Parser::parseAccessLog;
-	this->parser_map_[kALIAS] = &config::Parser::parseAlias;
-	this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
-	this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
-	this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
-	this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
-	this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
-	this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
-	this->parser_map_[kINDEX] = &config::Parser::parseIndex;
-	this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
-	this->parser_map_[kLISTEN] = &config::Parser::parseListen;
-	this->parser_map_[kRECEIVE_TIMEOUT] = &config::Parser::parseReceiveTimeout;
-	this->parser_map_[kROOT] = &config::Parser::parseRoot;
-	this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
-	this->parser_map_[kRETURN] = &config::Parser::parseReturn;
-	this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
-	this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
-	this->parser_map_[kUSE] = &config::Parser::parseUse;
-	this->parser_map_[kUSERID] = &config::Parser::parseUserid;
-	this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
-	this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
-	this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
-	this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
-	this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
+  this->parser_map_[kACCESS_LOG] = &config::Parser::parseAccessLog;
+  this->parser_map_[kALIAS] = &config::Parser::parseAlias;
+  this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
+  this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
+  this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
+  this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
+  this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
+  this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
+  this->parser_map_[kINDEX] = &config::Parser::parseIndex;
+  this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
+  this->parser_map_[kLISTEN] = &config::Parser::parseListen;
+  this->parser_map_[kRECEIVE_TIMEOUT] = &config::Parser::parseReceiveTimeout;
+  this->parser_map_[kROOT] = &config::Parser::parseRoot;
+  this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
+  this->parser_map_[kRETURN] = &config::Parser::parseReturn;
+  this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
+  this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
+  this->parser_map_[kUSE] = &config::Parser::parseUse;
+  this->parser_map_[kUSERID] = &config::Parser::parseUserid;
+  this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
+  this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
+  this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
+  this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
+  this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
 }
 
 config::Parser::~Parser() {}
@@ -676,7 +675,7 @@ bool config::Parser::canConvertMinSize(long &value, const std::string &unit) {
 
 long config::Parser::parseTime() {
   long num;
-  std::string unit;  //単位
+  std::string unit;  // 単位
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
 
   if (iss >> num) {
@@ -777,72 +776,66 @@ bool config::Parser::parseKeepaliveTimeout() {
   return true;
 }
 
-bool	config::Parser::parseReceiveTimeout()
-{
-	ti_++;
+bool config::Parser::parseReceiveTimeout() {
+  ti_++;
 
-	long ret = parseTime();
-	if (ret == -1)
-	{
-		std::cerr << "webserv: [emerg] \"receive_timeout\" directive invalid value in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-		return false;
-	}
+  long ret = parseTime();
+  if (ret == -1) {
+    std::cerr << "webserv: [emerg] \"receive_timeout\" directive invalid value in " << this->filepath_ << ":"
+              << this->tokens_[ti_].line_ << std::endl;
+    return false;
+  }
 
-	const config::CONTEXT context = this->current_context_.top();
-	switch (context)
-	{
-	case config::CONF_HTTP:
-		this->config_.http.receive_timeout.setTime(ret);
-		this->config_.http.directives_set.insert(kRECEIVE_TIMEOUT);
-		break;
-	
-	case config::CONF_HTTP_SERVER:
-		this->config_.http.server_list.back().receive_timeout.setTime(ret);
-		this->config_.http.server_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
-		break;
+  const config::CONTEXT context = this->current_context_.top();
+  switch (context) {
+    case config::CONF_HTTP:
+      this->config_.http.receive_timeout.setTime(ret);
+      this->config_.http.directives_set.insert(kRECEIVE_TIMEOUT);
+      break;
 
-	case config::CONF_HTTP_LOCATION:
-		this->config_.http.server_list.back().location_list.back().receive_timeout.setTime(ret);
-		this->config_.http.server_list.back().location_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
-		break;
+    case config::CONF_HTTP_SERVER:
+      this->config_.http.server_list.back().receive_timeout.setTime(ret);
+      this->config_.http.server_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
+      break;
 
-	default:
-		break;
-	}
-	ti_ += 2;
-	return true;
+    case config::CONF_HTTP_LOCATION:
+      this->config_.http.server_list.back().location_list.back().receive_timeout.setTime(ret);
+      this->config_.http.server_list.back().location_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
+      break;
+
+    default:
+      break;
+  }
+  ti_ += 2;
+  return true;
 }
 
-bool	config::Parser::parseRoot()
-{
-	ti_++;
-	std::string	path = this->tokens_[ti_].value_;
-	config::CONTEXT context = this->current_context_.top();
+bool config::Parser::parseRoot() {
+  ti_++;
+  std::string path = this->tokens_[ti_].value_;
+  config::CONTEXT context = this->current_context_.top();
 
-	if (context == config::CONF_HTTP)
-	{
-		this->config_.http.root.setPath(path);
-		this->config_.http.directives_set.insert(kROOT);
-	}
-	else if (context == config::CONF_HTTP_SERVER)
-	{
-		this->config_.http.server_list.back().root.setPath(path);
-		this->config_.http.server_list.back().directives_set.insert(kROOT);
-	}
-	else if (context == config::CONF_HTTP_LOCATION)
-	{
-		std::set<std::string>	&location_directives = this->config_.http.server_list.back().location_list.back().directives_set;
-		if (location_directives.find(kALIAS) != location_directives.end())
-		{
-			std::cerr << "webserv: [emerg] \"root\" directive is duplicate, \"alias\" directive was specified earlier in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-			return false;
-		}
-		this->config_.http.server_list.back().location_list.back().root.setPath(path);
-		location_directives.insert(kROOT);
-	}
+  if (context == config::CONF_HTTP) {
+    this->config_.http.root.setPath(path);
+    this->config_.http.directives_set.insert(kROOT);
+  } else if (context == config::CONF_HTTP_SERVER) {
+    this->config_.http.server_list.back().root.setPath(path);
+    this->config_.http.server_list.back().directives_set.insert(kROOT);
+  } else if (context == config::CONF_HTTP_LOCATION) {
+    std::set<std::string> &location_directives =
+        this->config_.http.server_list.back().location_list.back().directives_set;
+    if (location_directives.find(kALIAS) != location_directives.end()) {
+      std::cerr
+          << "webserv: [emerg] \"root\" directive is duplicate, \"alias\" directive was specified earlier in "
+          << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      return false;
+    }
+    this->config_.http.server_list.back().location_list.back().root.setPath(path);
+    location_directives.insert(kROOT);
+  }
 
-	ti_ += 2;
-	return true;
+  ti_ += 2;
+  return true;
 }
 
 bool config::Parser::parseClientMaxBodySize() {

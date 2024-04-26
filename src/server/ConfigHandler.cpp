@@ -60,8 +60,8 @@ bool ConfigHandler::addressInLimit(const std::string& ip_addr_str, const uint32_
 bool ConfigHandler::limitLoop(const std::vector<config::AllowDeny>& allow_deny_list,
                               const uint32_t cli_addr) const {
   // 上から順に制限適用する
-  //制限されているアドレスであれば、false
-  //エラーページどのタイミングで返すか？
+  // 制限されているアドレスであれば、false
+  // エラーページどのタイミングで返すか？
   for (size_t i = 0; i < allow_deny_list.size(); i++) {
     if (addressInLimit(allow_deny_list[i].getAddress(), cli_addr)) {
       switch (allow_deny_list[i].getAccessDirective()) {
@@ -249,9 +249,8 @@ const config::Server& ConfigHandler::searchServerConfig(const struct TiedServer&
   const config::Server* default_server = tied_servers.servers_[0];
 
   for (size_t si = 0; si < tied_servers.servers_.size(); si++) {
-    if (server_name != ""
-        && tied_servers.servers_[si]->server_name.getName().find(server_name) !=
-        tied_servers.servers_[si]->server_name.getName().end())
+    if (server_name != "" && tied_servers.servers_[si]->server_name.getName().find(server_name) !=
+                                 tied_servers.servers_[si]->server_name.getName().end())
       return *tied_servers.servers_[si];
     for (size_t li = 0; li < tied_servers.servers_[si]->listen_list.size(); li++) {
       const config::Listen& tmp_listen = tied_servers.servers_[si]->listen_list[li];

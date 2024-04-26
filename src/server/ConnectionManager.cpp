@@ -46,8 +46,7 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
   if (!cgi) {
     std::cerr << "delete connection:" << fd << "\n";
     delete connections_.at(fd);
-  }
-  else
+  } else
     this->cgi_sock_num_--;
   connections_.erase(fd);
 }
@@ -162,6 +161,4 @@ void ConnectionManager::closeAllConnections() {
   this->connections_.clear();
 }
 
-connection_size ConnectionManager::getCgiSockNum() const {
-  return cgi_sock_num_;
-}
+connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_; }

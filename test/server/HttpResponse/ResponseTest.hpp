@@ -53,18 +53,19 @@ class ResponseTest {
 
   /**
    * @brief Set the Up All objects and create response
-   * 
-   * @param ip_addresses 
-   * @param headers 
+   *
+   * @param ip_addresses
+   * @param headers
    * @param methods
-   * @param uri 
-   * @param state 
-   * @param body 
-   * @param queries 
-   * @param version 
+   * @param uri
+   * @param state
+   * @param body
+   * @param queries
+   * @param version
    */
-  void setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers, const std::vector<config::REQUEST_METHOD> &methods,
-                const std::string &uri, const HttpRequest::ParseState state, const std::string &body = "",
+  void setUpAll(const std::vector<ip_address_pair> &ip_addresses, const string_map_case_insensitive &headers,
+                const std::vector<config::REQUEST_METHOD> &methods, const std::string &uri,
+                const HttpRequest::ParseState state, const std::string &body = "",
                 const std::string &queries = "", const std::string &version = "HTTP/1.1") {
     ASSERT_NO_FATAL_FAILURE(setUp());
     initTiedServers(ip_addresses);
@@ -85,16 +86,17 @@ class ResponseTest {
 
   /**
    * @brief HttpRequestのメンバ変数を初期化する
-   * 
-   * @param headers 
-   * @param methods 
-   * @param uri 
-   * @param state 
-   * @param body 
-   * @param queries 
-   * @param version 
+   *
+   * @param headers
+   * @param methods
+   * @param uri
+   * @param state
+   * @param body
+   * @param queries
+   * @param version
    */
-  void initRequest(const string_map_case_insensitive &headers, const std::vector<config::REQUEST_METHOD> &methods, const std::string &uri,
+  void initRequest(const string_map_case_insensitive &headers,
+                   const std::vector<config::REQUEST_METHOD> &methods, const std::string &uri,
                    const HttpRequest::ParseState state, const std::string &body = "",
                    const std::string &queries = "", const std::string &version = "HTTP/1.1") {
     this->request_.headers = headers;
@@ -103,9 +105,8 @@ class ResponseTest {
     this->request_.body = body;
     this->request_.queries = queries;
     this->request_.version = version;
-    std::for_each(methods.begin(), methods.end(), [this](config::REQUEST_METHOD method) {
-      this->methods_.push_back(method);
-    });
+    std::for_each(methods.begin(), methods.end(),
+                  [this](config::REQUEST_METHOD method) { this->methods_.push_back(method); });
   }
 
   /**
@@ -114,15 +115,19 @@ class ResponseTest {
    */
   void generateResponse() {
     int i = 0;
-    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(), [this, &i](TiedServer tied_server) { // testするip adressの数だけloop
-      std::for_each(this->methods_.begin(), this->methods_.end(), [this, &i, &tied_server](config::REQUEST_METHOD method) { // testするmethodの数だけloop
-        this->request_.method = method; // testするmethodを変える
-        this->responses_.push_back(HttpResponse());
-        this->final_responses_.push_back(HttpResponse::generateResponse(
-            this->request_, this->responses_[i], tied_server, this->sockets_[0], this->config_handler_));
-        ++i;
-      });
-    });
+    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
+                  [this, &i](TiedServer tied_server) {  // testするip adressの数だけloop
+                    std::for_each(this->methods_.begin(), this->methods_.end(),
+                                  [this, &i, &tied_server](
+                                      config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    this->request_.method = method;     // testするmethodを変える
+                                    this->responses_.push_back(HttpResponse());
+                                    this->final_responses_.push_back(HttpResponse::generateResponse(
+                                        this->request_, this->responses_[i], tied_server, this->sockets_[0],
+                                        this->config_handler_));
+                                    ++i;
+                                  });
+                  });
   }
 
   /**
@@ -252,7 +257,7 @@ class ResponseTest {
 
   int sockets_[2];
   const std::string conf_path_;
-  std::vector<config::REQUEST_METHOD> methods_; // testするmethod
+  std::vector<config::REQUEST_METHOD> methods_;  // testするmethod
   ConfigHandler config_handler_;
   HttpRequest request_;
   std::vector<TiedServer> tied_servers_;
