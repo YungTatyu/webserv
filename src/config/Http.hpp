@@ -9,10 +9,11 @@
 #include "AllowDeny.hpp"
 #include "Autoindex.hpp"
 #include "ClientMaxBodySize.hpp"
-#include "ErrorLog.hpp"
 #include "ErrorPage.hpp"
+#include "ErrorLog.hpp"
 #include "Index.hpp"
 #include "KeepaliveTimeout.hpp"
+#include "ReceiveTimeout.hpp"
 #include "Root.hpp"
 #include "SendTimeout.hpp"
 #include "Server.hpp"
@@ -21,30 +22,32 @@
 #include "UseridExpires.hpp"
 #include "UseridPath.hpp"
 #include "UseridService.hpp"
-#include "conf.hpp"
 
-namespace config {
-struct Http {
-  const static unsigned int type = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
-  std::set<std::string> directives_set;
-  std::vector<Server> server_list;
-  Root root;
-  std::vector<Index> index_list;
-  Autoindex autoindex;
-  ClientMaxBodySize client_max_body_size;
-  std::vector<AccessLog> access_log_list;
-  std::vector<ErrorLog> error_log_list;
-  std::vector<ErrorPage> error_page_list;
-  KeepaliveTimeout keepalive_timeout;
-  SendTimeout send_timeout;
-  std::vector<AllowDeny> allow_deny_list;
-  Userid userid;
-  UseridDomain userid_domain;
-  UseridExpires userid_expires;
-  UseridPath userid_path;
-  UseridService userid_service;
-  std::vector<int> access_fd_list;
-  std::vector<int> error_fd_list;
+namespace config
+{
+struct Http
+{
+	const static unsigned int	type = CONF_MAIN|CONF_NOARGS|CONF_UNIQUE;
+	std::set<std::string>	directives_set;
+	std::vector<Server>	server_list;
+	Root	root;
+	std::vector<Index>	index_list;
+	Autoindex	autoindex;
+	ClientMaxBodySize	client_max_body_size;
+	std::vector<AccessLog>	access_log_list;
+	std::vector<ErrorLog>	error_log_list;
+	std::vector<ErrorPage>	error_page_list;
+	KeepaliveTimeout	keepalive_timeout;
+	ReceiveTimeout	receive_timeout;
+	SendTimeout	send_timeout;
+	std::vector<AllowDeny>	allow_deny_list;
+	Userid	userid;
+	UseridDomain	userid_domain;
+	UseridExpires	userid_expires;
+	UseridPath	userid_path;
+	UseridService	userid_service;
+	std::vector<int>	access_fd_list;
+	std::vector<int>	error_fd_list;
 };
 }  // namespace config
 

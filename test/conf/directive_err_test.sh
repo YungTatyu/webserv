@@ -214,6 +214,28 @@ conf_path="test/conf/conf_files/directive_error/listen_duplicate.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} a duplicate default server for 127.0.0.1:9090 ${err_path}:14"
 
+# receive_timeout
+g_test_directive="receive_timeout"
+g_test_index=0
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_ms_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_minus_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_invalid_unit_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+
+
 # return
 g_test_directive="return"
 g_test_index=0
@@ -337,8 +359,7 @@ conf_path="test/conf/conf_files/directive_error/workerConnections_over_longmax_e
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid number \"9223372036854775808\" ${err_path}:2"
 
-conf_path="test/conf/conf_files/directive_error/workerConnections_not_enough_err.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} \"1\" worker_connections are not enough for 1 listening sockets"
+conf_path="test/conf/conf_files/directive_error/workerConnections_select_limit.conf"
+assert $conf_path "${err_start_with} the maximum number of files supported by select() is 1024"
 
 printLog

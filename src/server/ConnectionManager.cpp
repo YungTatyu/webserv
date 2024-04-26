@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-ConnectionManager::ConnectionManager() {}
+ConnectionManager::ConnectionManager() : cgi_sock_num_(0) {}
 
 ConnectionManager::~ConnectionManager() { closeAllConnections(); }
 
@@ -30,12 +30,14 @@ void ConnectionManager::setCgiConnection(const int cli_sock, const ConnectionDat
   this->connections_.insert(std::make_pair(cgi_sock, cd));
   // cgi のイベントに更新
   this->connections_.at(cli_sock)->event = event;
+  this->cgi_sock_num_++;
 }
 
 /**
  * @brief connection mapから削除
- * cgiの場合は、connection dataを削除しない
- * clientがデータを必要とするため
+ * cgi: connection dataを削除しない
+ *      clientがデータを必要とするため
+ *      cgi_sock_num_をdecrement
  *
  * @param fd
  * @param cgi
@@ -45,6 +47,8 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
     std::cerr << "delete connection:" << fd << "\n";
     delete connections_.at(fd);
   }
+  else
+    this->cgi_sock_num_--;
   connections_.erase(fd);
 }
 
@@ -156,4 +160,8 @@ void ConnectionManager::closeAllConnections() {
     delete it->second;
   }
   this->connections_.clear();
+}
+
+connection_size ConnectionManager::getCgiSockNum() const {
+  return cgi_sock_num_;
 }

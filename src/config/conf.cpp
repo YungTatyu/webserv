@@ -7,7 +7,6 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -20,6 +19,7 @@
 
 const char *config::Root::kDefaultPath_ = "html";
 const char *config::UseridPath::kDefaultPath_ = "/";
+const unsigned long	config::ReceiveTimeout::kDefaultTime_ = 60 * Time::seconds; // 60s
 const unsigned long config::SendTimeout::kDefaultTime_ = 60 * Time::seconds;  // 60s
 const int config::Return::kRedirectCodes_[] = {301, 302, 302, 307, 308};
 const char *config::Listen::kDefaultAddress_ = "127.0.0.1";
@@ -70,5 +70,12 @@ config::Main *config::initConfig(const std::string &file_path) {
     return NULL;
   }
 
-  return config;
+	if (config->events.use.getConnectionMethod() == config::SELECT &&
+		config->events.worker_connections.getWorkerConnections() > config::WorkerConnections::kSelectMaxConnections)
+	{
+		std::cerr << "webserv: [emerg] the maximum number of files supported by select() is " << config::WorkerConnections::kSelectMaxConnections << std::endl;
+		return NULL;
+	}
+
+	return config;
 }
