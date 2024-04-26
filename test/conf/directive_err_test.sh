@@ -337,8 +337,7 @@ conf_path="test/conf/conf_files/directive_error/workerConnections_over_longmax_e
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} invalid number \"9223372036854775808\" ${err_path}:2"
 
-conf_path="test/conf/conf_files/directive_error/workerConnections_not_enough_err.conf"
-err_path="in $(readlink -f $conf_path)"
-assert $conf_path "${err_start_with} \"1\" worker_connections are not enough for 1 listening sockets"
+conf_path="test/conf/conf_files/directive_error/workerConnections_select_limit.conf"
+assert $conf_path "${err_start_with} the maximum number of files supported by select() is 1024"
 
 printLog
