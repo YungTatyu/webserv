@@ -234,8 +234,6 @@ conf_path="test/conf/conf_files/directive_error/receiveTimeout_invalid_unit_err.
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
 
-
-
 # return
 g_test_directive="return"
 g_test_index=0
