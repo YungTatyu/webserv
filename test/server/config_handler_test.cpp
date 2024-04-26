@@ -293,18 +293,18 @@ TEST_F(ConfigHandlerTest, searchUseridExpires) {
 }
 
 TEST_F(ConfigHandlerTest, writeAcsLog) {
-  std::string file_path = "../../";
-  char absolute_path[MAXPATHLEN];
+  std::string file_path = "./";
+  char absolute_tmp_path[MAXPATHLEN];
   std::string absolutepath;
 
   // 絶対pathを取得
-  if (realpath(file_path.c_str(), absolute_path) == NULL) {
+  if (realpath(file_path.c_str(), absolute_tmp_path) == NULL) {
     std::cerr << file_path << " is not found." << std::endl;
     exit(EXIT_FAILURE);
   }
 
   // absolutepath = ~/webserv
-  absolutepath = static_cast<std::string>(absolute_path) + "/42tokyo/webserv";
+  absolutepath = static_cast<std::string>(absolute_tmp_path);
 
   std::string msg;
 
@@ -344,18 +344,18 @@ TEST_F(ConfigHandlerTest, writeAcsLog) {
 }
 
 TEST_F(ConfigHandlerTest, writeErrLog) {
-  std::string file_path = "../../";
-  char absolute_path[MAXPATHLEN];
+  std::string file_path = "./";
+  char absolute_tmp_path[MAXPATHLEN];
   std::string absolutepath;
 
   // 絶対pathを取得
-  if (realpath(file_path.c_str(), absolute_path) == NULL) {
+  if (realpath(file_path.c_str(), absolute_tmp_path) == NULL) {
     std::cerr << file_path << " is not found." << std::endl;
     exit(EXIT_FAILURE);
   }
 
   // absolutepath = ~/webserv
-  absolutepath = static_cast<std::string>(absolute_path) + "/42tokyo/webserv";
+  absolutepath = static_cast<std::string>(absolute_tmp_path);
   std::string file;
   std::string msg;
 
