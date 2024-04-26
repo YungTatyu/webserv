@@ -38,14 +38,6 @@ int	main(int ac, char *av[])
 		exit (1);
 	}
 
-	//SOCK_MIN_RCVBUFのようなマクロが見つかればそれに差し替える
-	int option_value = 1024; // 環境によって最小値はこれよりも大きいがそちらに合わせられるだけで問題はない。
-	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &option_value, sizeof(option_value)) == -1)
-	{
-		std::cerr << "Error: setsockopt:" << std::strerror(errno);
-		exit(1);
-	}
-
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
@@ -59,15 +51,14 @@ int	main(int ac, char *av[])
 		exit(1);
 	}
 
-	// 送信
-	if (send(sockfd, request.data(), request.size(), 0) == 0)
+	// requestの一部だけ送信
+	if (send(sockfd, request.data(), 10, 0) == 0)
 	{
 		std::cerr << "Error: send:" << std::strerror(errno);
 		exit(1);
 	}
-	std::cout << "send: " << str << std::endl;
 
-	// 受信せずにkeepalive_timeout + 1秒sleep
+	// send_timeout + 1秒待機
 	sleep(sleep_time + 1);
 
 	// 一度目のsendはserver側で接続がcloseされていても成功する

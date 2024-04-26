@@ -214,6 +214,28 @@ conf_path="test/conf/conf_files/directive_error/listen_duplicate.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} a duplicate default server for 127.0.0.1:9090 ${err_path}:14"
 
+# receive_timeout
+g_test_directive="receive_timeout"
+g_test_index=0
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_ms_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_minus_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+conf_path="test/conf/conf_files/directive_error/receiveTimeout_invalid_unit_err.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} \"receive_timeout\" directive invalid value ${err_path}:6"
+
+
+
 # return
 g_test_directive="return"
 g_test_index=0
