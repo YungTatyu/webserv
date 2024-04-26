@@ -107,6 +107,8 @@ class ResponseTest {
     std::for_each(methods.begin(), methods.end(), [this](config::REQUEST_METHOD method) {
       this->methods_.push_back(method);
     });
+    if (methods.size() <= 1)
+      return;
     this->responses_.resize(this->responses_.size() + methods.size());
   }
 

@@ -368,7 +368,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
         phase = handleSearchLocationPhase(response, request, server, &location, config_handler);
         if (location)
           config_handler.writeErrorLog(server, location,
-                                       "webserv: [debug] location inherit? " + location->uri + "\n");
+                                       "webserv: [debug] location inherit " + location->uri + "\n");
         break;
       case sw_post_search_location_phase:
         config_handler.writeErrorLog(server, location, "webserv: [debug] post search location phase\n");
