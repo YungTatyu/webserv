@@ -70,5 +70,12 @@ config::Main *config::initConfig(const std::string &file_path) {
     return NULL;
   }
 
-  return config;
+	if (config->events.use.getConnectionMethod() == config::SELECT &&
+		config->events.worker_connections.getWorkerConnections() > config::WorkerConnections::kSelectMaxConnections)
+	{
+		std::cerr << "webserv: [emerg] the maximum number of files supported by select() is " << config::WorkerConnections::kSelectMaxConnections << std::endl;
+		return NULL;
+	}
+
+	return config;
 }
