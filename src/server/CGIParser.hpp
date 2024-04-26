@@ -19,29 +19,29 @@ enum PARSE_STATE {
 
 typedef std::map<std::string, std::string, Utils::CaseInsensitiveCompare> string_map_case_insensitive;
 
-class CGIParser
-{
-	private:
-		// 以下のメンバ変数はHttpResponseのメンバ変数のポインタ
-		string_map_case_insensitive	*headers_;
-		std::string	*body_;
-		long	*status_code_;
-		std::string	*status_code_line_;
-		size_t	ri_; // cgi response index
-		void	init(HttpResponse& http_response);
-		void	parseHeaders(const std::string& cgi_response);
-		void	parseBody(const std::string& cgi_response);
-		void	finishParsing();
-		bool	isValidStatusCode(const std::string& status_code) const;
-		bool	isValidContentLength(std::string cl) const;
-		void	setStatusCode(const std::string& value);
-		void	finalizeStatusCode();
-		void	eraseHeader(const std::string& header);
-	public:
-		CGIParser();
-		~CGIParser();
-		PARSE_STATE	state_;
-		bool	parse(HttpResponse& http_response, const std::string& cgi_response, const PARSE_STATE init_state);
+class CGIParser {
+ private:
+  // 以下のメンバ変数はHttpResponseのメンバ変数のポインタ
+  string_map_case_insensitive* headers_;
+  std::string* body_;
+  long* status_code_;
+  std::string* status_code_line_;
+  size_t ri_;  // cgi response index
+  void init(HttpResponse& http_response);
+  void parseHeaders(const std::string& cgi_response);
+  void parseBody(const std::string& cgi_response);
+  void finishParsing();
+  bool isValidStatusCode(const std::string& status_code) const;
+  bool isValidContentLength(std::string cl) const;
+  void setStatusCode(const std::string& value);
+  void finalizeStatusCode();
+  void eraseHeader(const std::string& header);
+
+ public:
+  CGIParser();
+  ~CGIParser();
+  PARSE_STATE state_;
+  bool parse(HttpResponse& http_response, const std::string& cgi_response, const PARSE_STATE init_state);
 };
 }  // namespace cgi
 

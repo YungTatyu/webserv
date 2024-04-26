@@ -30,36 +30,27 @@ void expectHeader(const HttpResponse& response, const std::string& expect, const
   EXPECT_EQ(headers.at(header), expect);
 }
 
-	void	expectHeaders(const HttpResponse& response, const std::vector<string_pair>& test_results)
-	{
-		const cgi::string_map_case_insensitive& headers = response.headers_;
-		if (test_results.size() == 0)
-		{
-			EXPECT_TRUE(headers.size() == 0);
-			return;
-		}
-		for (const string_pair& pair : test_results)
-		{
-			cgi::string_map_case_insensitive::const_iterator hit = headers.find(pair.first);
-			ASSERT_TRUE(hit != headers.end());
-			EXPECT_EQ(hit->second, pair.second);
-		}
-	}
+void expectHeaders(const HttpResponse& response, const std::vector<string_pair>& test_results) {
+  const cgi::string_map_case_insensitive& headers = response.headers_;
+  if (test_results.size() == 0) {
+    EXPECT_TRUE(headers.size() == 0);
+    return;
+  }
+  for (const string_pair& pair : test_results) {
+    cgi::string_map_case_insensitive::const_iterator hit = headers.find(pair.first);
+    ASSERT_TRUE(hit != headers.end());
+    EXPECT_EQ(hit->second, pair.second);
+  }
+}
 
-	void	expectBody(
-		const HttpResponse& response, 
-		const std::string& body,
-		const ssize_t content_length = -1
-	)
-	{
-		if (content_length == -1)
-		{
-			EXPECT_EQ(response.body_, body);
-			return;
-		}
-		EXPECT_EQ(response.body_, body.substr(0, content_length));
-	}
-} // namespace test
+void expectBody(const HttpResponse& response, const std::string& body, const ssize_t content_length = -1) {
+  if (content_length == -1) {
+    EXPECT_EQ(response.body_, body);
+    return;
+  }
+  EXPECT_EQ(response.body_, body.substr(0, content_length));
+}
+}  // namespace test
 
 // ++++++++++++++++++++++++++++++ status code test ++++++++++++++++++++++++++++++
 TEST(cgi_parser, error_no_status_code) {
@@ -350,49 +341,45 @@ TEST(cgi_parser, only_r) {
 }
 
 // ++++++++++++++++++++++++++++++ body test ++++++++++++++++++++++++++++++
-TEST(cgi_parser, body_with_content_length)
-{
-	HttpResponse	response;
-	cgi::CGIParser	parser;
-	const std::string	header = "content-length: 10\r\n\r\n";
-	const std::string	body = " this is body message   ";
+TEST(cgi_parser, body_with_content_length) {
+  HttpResponse response;
+  cgi::CGIParser parser;
+  const std::string header = "content-length: 10\r\n\r\n";
+  const std::string body = " this is body message   ";
 
-	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
-	test::expectHeaders(response, {{"Content-Length", std::to_string(10)}});
-	test::expectBody(response, body, 10);
+  EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+  test::expectHeaders(response, {{"Content-Length", std::to_string(10)}});
+  test::expectBody(response, body, 10);
 }
 
-TEST(cgi_parser, body_no_content_length)
-{
-	HttpResponse	response;
-	cgi::CGIParser	parser;
-	const std::string	header = "\r\n";
-	const std::string	body = "   this is body message     ";
+TEST(cgi_parser, body_no_content_length) {
+  HttpResponse response;
+  cgi::CGIParser parser;
+  const std::string header = "\r\n";
+  const std::string body = "   this is body message     ";
 
-	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
-	test::expectHeaders(response, {});
-	test::expectBody(response, body);
+  EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+  test::expectHeaders(response, {});
+  test::expectBody(response, body);
 }
 
-TEST(cgi_parser, no_body)
-{
-	HttpResponse	response;
-	cgi::CGIParser	parser;
-	const std::string	header = "content-length: 10\r\n\r\n";
+TEST(cgi_parser, no_body) {
+  HttpResponse response;
+  cgi::CGIParser parser;
+  const std::string header = "content-length: 10\r\n\r\n";
 
-	EXPECT_TRUE(parser.parse(response, header, cgi::PARSE_BEFORE));
-	test::expectHeaders(response, {{"Content-Length", std::to_string(10)}});
-	test::expectBody(response, "", 10);
+  EXPECT_TRUE(parser.parse(response, header, cgi::PARSE_BEFORE));
+  test::expectHeaders(response, {{"Content-Length", std::to_string(10)}});
+  test::expectBody(response, "", 10);
 }
 
-TEST(cgi_parser, body_long_content_length)
-{
-	HttpResponse	response;
-	cgi::CGIParser	parser;
-	const std::string	header = "content-length: 9223372036854775807\r\n\r\n";
-	const std::string	body = " this is body message   ";
+TEST(cgi_parser, body_long_content_length) {
+  HttpResponse response;
+  cgi::CGIParser parser;
+  const std::string header = "content-length: 9223372036854775807\r\n\r\n";
+  const std::string body = " this is body message   ";
 
-	EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
-	test::expectHeaders(response, {{"Content-Length", std::to_string(9223372036854775807)}});
-	test::expectBody(response, body, 9223372036854775807);
+  EXPECT_TRUE(parser.parse(response, header + body, cgi::PARSE_BEFORE));
+  test::expectHeaders(response, {{"Content-Length", std::to_string(9223372036854775807)}});
+  test::expectBody(response, body, 9223372036854775807);
 }
