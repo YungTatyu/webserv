@@ -81,7 +81,6 @@ class ResponseTest {
     for (std::vector<ip_address_pair>::const_iterator it = ip_addresses.begin(); it != ip_addresses.end();
          ++it)
       this->tied_servers_.push_back(this->config_handler_.createTiedServer(it->first, it->second));
-    this->responses_.resize(this->responses_.size() + ip_addresses.size());
   }
 
   /**
@@ -107,9 +106,6 @@ class ResponseTest {
     std::for_each(methods.begin(), methods.end(), [this](config::REQUEST_METHOD method) {
       this->methods_.push_back(method);
     });
-    if (methods.size() <= 1)
-      return;
-    this->responses_.resize(this->responses_.size() + methods.size());
   }
 
   /**
@@ -121,6 +117,7 @@ class ResponseTest {
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(), [this, &i](TiedServer tied_server) { // testするip adressの数だけloop
       std::for_each(this->methods_.begin(), this->methods_.end(), [this, &i, &tied_server](config::REQUEST_METHOD method) { // testするmethodの数だけloop
         this->request_.method = method; // testするmethodを変える
+        this->responses_.push_back(HttpResponse());
         this->final_responses_.push_back(HttpResponse::generateResponse(
             this->request_, this->responses_[i], tied_server, this->sockets_[0], this->config_handler_));
         ++i;
