@@ -193,7 +193,7 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
                                         ConfigHandler &configHandler, TimerTree &timerTree) {
   configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
   // timeoutしていない最初のイテレータを取得
-  Timer current_time(-1, Timer::getCurrentTime());
+  Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
 
   Timer::updateCurrentTime();

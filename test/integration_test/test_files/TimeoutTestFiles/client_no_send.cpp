@@ -46,35 +46,13 @@ int	main(int ac, char *av[])
 		exit(1);
 	}
 
-	// 送信
-	// 引数から受け取った文字列でrequestを送ると400エラーになってしまう。
-	//char *request = av[3];
-	char request[] = "GET /timeout10/ HTTP/1.1\r\nHost: _\r\n\r\n";
-	if (send(sockfd, request, strlen(request), 0) == 0)
-	{
-		std::cerr << "Error: recv:" << std::strerror(errno);
-		exit(1);
-	}
-	std::cout << "send: " << request << std::endl;
-
-	// 受信
-	int ret;
-	char r_str[BUF_SIZE];
-	ret = recv(sockfd, r_str, BUF_SIZE, 0);
-	if (ret == 0)
-	{
-		std::cerr << "Error: recv:" << std::strerror(errno);
-		exit(1);
-	}
-	std::cout << "recv byte: " << ret << std::endl;
-	std::cout << "accept: " << r_str << std::endl;
-
-	// send_timeout + 1秒待機
+	// 送信しないでsend_timeout + 1秒待機
 	sleep(atoi(av[4]) + 1);
 
 	// 一度目のsendはserver側で接続がcloseされていても成功する
 	// close されている場合RESETパケットが送られる。
-	ret = send(sockfd, request, strlen(request), 0);
+	char	request[] = "request";
+	int ret = send(sockfd, request, strlen(request), 0);
 	std::cout << "send byte: " << ret << std::endl;
 	// 2回目のsendはcloseされていればsendは失敗する。
 	ret = send(sockfd, request, strlen(request), 0);
@@ -85,8 +63,7 @@ int	main(int ac, char *av[])
 		close(sockfd);
 		exit(1);
 	}
-	else
-		std::cout << "connection didn't timeout." << std::endl;
+	std::cout << "connection didn't timeout." << std::endl;
 
 	// send_timeoutで死ななかった場合は10秒だけ待ってcloseする
 	sleep(10);
