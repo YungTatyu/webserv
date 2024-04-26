@@ -2,7 +2,8 @@ name: Format Code
 
 on:
   pull_request:
-    types: [closed]
+    types:
+      - closed
 
 jobs:
   format_code:
@@ -55,4 +56,4 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: ":recycle: auto-format code"
-
+        target_branch: 'main'
