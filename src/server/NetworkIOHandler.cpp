@@ -54,12 +54,12 @@ int NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const int c
   std::vector<unsigned char> buffer(bufferSize_);
 
   ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, MSG_NOSIGNAL);
-  if (re == 0)  //クライアントとのコネクションが閉じた時。
+  if (re == 0)  // クライアントとのコネクションが閉じた時。
     return 0;
-  else if (re == -1)  //ソケットが使用不可、またはエラー。
+  else if (re == -1)  // ソケットが使用不可、またはエラー。
     return -1;
 
-       connManager.addRawRequest( cli_sock, buffer, re );
+  connManager.addRawRequest(cli_sock, buffer, re);
 
   if (re == bufferSize_)  // bufferSize_分だけ読んだ時。次のループで残りを読む。
                           // ちょうどrecvでbuffersize分読んだ時はどうなる？？（次readイベント発生し 可能性）
@@ -72,15 +72,15 @@ int NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, const i
   const static size_t buffer_size = 1024;
   std::vector<unsigned char> buffer(buffer_size);
 
-	ssize_t re = recv(sock, buffer.data(), buffer_size, MSG_NOSIGNAL);
-	if (re == 0) // cgi process died
-		return 0;
-	if (re == -1) // error
-		return -1;
-	connManager.addCgiResponse(sock, buffer, re);
-	if (re == buffer_size) // continue recv
-		return -2;
-	return 1;
+  ssize_t re = recv(sock, buffer.data(), buffer_size, MSG_NOSIGNAL);
+  if (re == 0)  // cgi process died
+    return 0;
+  if (re == -1)  // error
+    return -1;
+  connManager.addCgiResponse(sock, buffer, re);
+  if (re == buffer_size)  // continue recv
+    return -2;
+  return 1;
 }
 
 int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli_sock) {
@@ -93,9 +93,11 @@ int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli
   int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, MSG_NOSIGNAL);
   if (sent == -1) return -1;
   connManager.getConnection(cli_sock)->sent_bytes_ += sent;
-  if (connManager.getConnection(cli_sock)->sent_bytes_ == resSize) return 1;
-  else return -2;
-  return 0; // clientが切断
+  if (connManager.getConnection(cli_sock)->sent_bytes_ == resSize)
+    return 1;
+  else
+    return -2;
+  return 0;  // clientが切断
 }
 
 ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const int sock) {

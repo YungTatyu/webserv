@@ -1,9 +1,9 @@
 name: Format Code
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
+    branches:
+      - main
 
 jobs:
   format_code:
