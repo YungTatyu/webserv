@@ -40,3 +40,4 @@ logs
 *.cgi
 *.log
 __pycache__
+.clangd
