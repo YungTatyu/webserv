@@ -48,12 +48,16 @@ add_executable(${PROJECT_NAME}-googletest
 	
 	# test files
 	test/server/TimerTree_test.cpp
-	test/server/config_handler_test.cpp
+  test/server/ConfigHandler/allowRequest/allowRequest.cpp
+  test/server/ConfigHandler/createTiedServer/createTiedServer.cpp
+  test/server/ConfigHandler/searchTimeout/searchKeepaliveTimeout.cpp
+  test/server/ConfigHandler/writeAccessLog/writeAccessLog.cpp
+  test/server/ConfigHandler/writeErrorLog/writeErrorLog.cpp
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
 	test/server/HttpResponseTest.cpp
 	test/server/WorkerConnectionsNumTest.cpp
-	test/conf/confLexerTest.cpp 
+  test/conf/confLexerTest.cpp 
 	test/conf/directives_test.cpp 
 	test/conf/main_parser_test.cpp 
 	test/conf/directive_parser/access_log/access_log_test.cpp 
@@ -91,6 +95,7 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	src/config
 	src/utils
 	test/conf
+  test/server/ConfigHandler
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
