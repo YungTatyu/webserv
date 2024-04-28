@@ -39,7 +39,7 @@ HttpRequest HttpRequest::doParseRequest(std::string &rawRequest) {
 
   HttpRequest newRequest;
   state = sw_start;
-  while (state != sw_end) {
+  while (state != sw_end || newRequest.pos_ < rawRequest.size()) {
     switch (state) {
       case sw_start:
         state = sw_request_line;
@@ -213,8 +213,8 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
     sw_end
   } state;
 
-  state = sw_start;
-  size_t i = 0;
+  state = static_cast<parseRequestLineState>(newRequest.state_);
+  size_t i = newRequest.pos_;
   if (rawRequest.empty()) return HttpRequest::PARSE_ERROR;
   while (state != sw_end && i < rawRequest.size()) {
     switch (state) {
@@ -241,6 +241,13 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
     };
     ++i;
   }
+  newRequest.pos_ = i;
+  if (state != sw_end) // parse未完了：引き続きクライアントからのrequestを待つ
+  {
+    newRequest.state_ = state;
+    return newRequest.parseState;
+  }
+  newRequest.state_ = 0;
   return HttpRequest::PARSE_REQUEST_LINE_DONE;
 }
 
