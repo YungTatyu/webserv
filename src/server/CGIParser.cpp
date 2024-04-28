@@ -351,9 +351,7 @@ void cgi::CGIParser::parseBody(const std::string& response) {
   // content lengthが設定されている場合は、bodyの長さを調節する
   if (this->headers_->find(kContentLength) != this->headers_->end()) {
     const std::string& content_length = this->headers_->at(kContentLength);
-    std::istringstream iss(content_length);
-    size_t length;
-    iss >> length;
+    size_t length = Utils::strToSizet(content_length);
 
     *(this->body_) = response.substr(ri_, length);
     this->state_ = PARSE_BODY_DONE;

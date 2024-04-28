@@ -226,3 +226,10 @@ int Utils::setNonBlockingCloExec(const int fd) {
   if (nonblock == -1 || closex == -1) return -1;
   return closex;
 }
+
+size_t Utils::strToSizet(const std::string& str) {
+  std::istringstream iss(str);
+  size_t size;
+  iss >> size;
+  return size;
+}

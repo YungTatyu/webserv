@@ -38,8 +38,8 @@ class HttpRequest {
   // static HttpRequest parseRequest(std::string& rawRequest, HttpRequest&
   // oldRequest);
   static void parseRequest(std::string &rawRequest, HttpRequest &oldRequest);
-  static HttpRequest doParseRequest(std::string &rawRequest);
-  static void doParseChunked(std::string &rawRequest, HttpRequest &request);
+  static HttpRequest doParseRequest(std::string &rawRequest, HttpRequest &oldRequest);
+  static ParseState doParseChunked(std::string &rawRequest, HttpRequest &request);
 
   config::REQUEST_METHOD method;
   std::string key_buf_;
@@ -59,7 +59,7 @@ class HttpRequest {
   static ParseState parseVersion(std::string &rawRequest, HttpRequest &newRequest);
   static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &newRequest);
   static ParseState parseHeaders(std::string &rawRequest, HttpRequest &newRequest);
-  static void parseBody(std::string &rawRequest, HttpRequest &newRequest);
+  static ParseState parseBody(std::string &rawRequest, HttpRequest &newRequest);
   static std::string urlDecode(const std::string &encoded);
 };
 

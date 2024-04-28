@@ -2,6 +2,9 @@
 
 #include "LimitExcept.hpp"
 
+const static char*  kContentLength = "Content-Length";
+const static char*  kTransferEncoding = "Transfer-Encoding";
+
 HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string &uri,
                          const std::string &version,
                          const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers,
@@ -23,67 +26,52 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &oldRequest)
     HttpRequest::doParseChunked(rawRequest, oldRequest);
     return;
   }
-  oldRequest = HttpRequest::doParseRequest(rawRequest);
+  oldRequest = HttpRequest::doParseRequest(rawRequest, oldRequest);
 }
 
-HttpRequest HttpRequest::doParseRequest(std::string &rawRequest) {
-  enum parseRequestPhase {
-    sw_start = 0,
-    sw_request_line,
-    sw_headers,
-    sw_body,
-    sw_chunked,
-    sw_end
-  } state;
-
+HttpRequest HttpRequest::doParseRequest(std::string &rawRequest, HttpRequest &oldRequest) {
   HttpRequest newRequest;
-  state = sw_start;
-  while (state != sw_end) {
-    parseRequestPhase state_before = state;
+  ParseState state = oldRequest.parseState;
+  while (state != PARSE_COMPLETE) {
+    ParseState state_before = state;
     switch (state) {
-      case sw_start:
-        state = sw_request_line;
+      case PARSE_BEFORE:
+        state = HttpRequest::parseRequestLine(rawRequest, newRequest);
         break;
-      case sw_request_line:
-        newRequest.parseState = HttpRequest::parseRequestLine(rawRequest, newRequest);
-        if (newRequest.parseState == HttpRequest::PARSE_ERROR) return newRequest;
-        state = sw_headers;
+      case PARSE_REQUEST_LINE_DONE:
+        state = HttpRequest::parseHeaders(rawRequest, newRequest);
+        if (state == PARSE_ERROR) break;
+        if (newRequest.headers.find(kTransferEncoding) == newRequest.headers.end() && newRequest.headers.find(kContentLength) == newRequest.headers.end())
+          state = PARSE_COMPLETE;
         break;
-      case sw_headers:
-        newRequest.parseState = HttpRequest::parseHeaders(rawRequest, newRequest);
-        if (newRequest.parseState == HttpRequest::PARSE_ERROR) return newRequest;
-        if (newRequest.headers.find("Transfer-Encoding") != newRequest.headers.end())
-          state = sw_chunked;
+      case PARSE_HEADER_DONE:
+      case PARSE_INPROGRESS:
+        if (newRequest.headers.find(kTransferEncoding) != newRequest.headers.end())
+          state = HttpRequest::doParseChunked(rawRequest, newRequest);
         else
-          state = sw_body;
+          state = HttpRequest::parseBody(rawRequest, newRequest);
         break;
-      case sw_body:
-        HttpRequest::parseBody(rawRequest, newRequest);
-        state = sw_end;
-        newRequest.parseState = HttpRequest::PARSE_COMPLETE;
-        break;
-      case sw_chunked:
-        HttpRequest::doParseChunked(rawRequest, newRequest);
-        state = sw_end;
-        break;
-      case sw_end:
-        break;
-
-      if (state == state_before) // parse未完了：引き続きクライアントからのrequestを待つ
+      default:
         break;
     }
+    if (state == PARSE_ERROR) break;
+    if (state == state_before || state == PARSE_INPROGRESS) // parse未完了：引き続きクライアントからのrequestを待つ
+      break;
   }
+  newRequest.state_ = state;
   return newRequest;
 }
 
-void HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &oldRequest) {
+HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &oldRequest) {
   std::string byteSize = rawRequest.substr(0, rawRequest.find('\r'));
+  ParseState state;
   if (byteSize == "0")
-    oldRequest.parseState = HttpRequest::PARSE_COMPLETE;
+    state = HttpRequest::PARSE_COMPLETE;
   else
-    oldRequest.parseState = HttpRequest::PARSE_INPROGRESS;
+    state = HttpRequest::PARSE_INPROGRESS;
   std::string chunkBody = rawRequest.substr(rawRequest.find('\n') + 1);
   oldRequest.body += chunkBody.substr(0, chunkBody.find('\r'));
+  return state;
 }
 
 HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRequest &newRequest) {
@@ -504,7 +492,14 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   return HttpRequest::PARSE_HEADER_DONE;
 }
 
-void HttpRequest::parseBody(std::string &body, HttpRequest &newRequest) { newRequest.body = body; }
+HttpRequest::ParseState HttpRequest::parseBody(std::string &body, HttpRequest &newRequest) { 
+  size_t  body_size = body.size();
+  size_t  content_length = Utils::strToSizet(newRequest.headers.find(kContentLength)->second);
+  newRequest.body = body.substr(0, content_length);
+  if (content_length > body_size)
+    return PARSE_INPROGRESS;
+  return PARSE_COMPLETE;
+}
 
 /*
  * https://www.techieclues.com/blogs/convert-url-encoding-to-string-in-cpp
