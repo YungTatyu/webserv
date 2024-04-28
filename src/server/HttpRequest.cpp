@@ -164,8 +164,8 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
     sw_end
   } state;
 
-  state = sw_start;
-  size_t i = 0;
+  state = static_cast<parseUriPhase>(newRequest.state_);
+  size_t i = newRequest.pos_;
   while (state != sw_end && i < rawRequest.size()) {
     switch (state) {
       case sw_start:
@@ -186,6 +186,14 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
         break;
     }
   }
+
+  newRequest.pos_ = i;
+  if (state != sw_end) // parse未完了：引き続きクライアントからのrequestを待つ
+  {
+    newRequest.state_ = state;
+    return newRequest.parseState;
+  }
+  newRequest.pos_ = 0; // reset
 
   std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
   tmp = urlDecode(tmp);
