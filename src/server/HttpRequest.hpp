@@ -50,7 +50,6 @@ class HttpRequest {
 
   ParseState parseState;
   int state_; // より細かいフェーズのstate
-  size_t pos_; // parseしたindex
 
  private:
   static ParseState parseMethod(std::string &rawRequest, HttpRequest &newRequest);

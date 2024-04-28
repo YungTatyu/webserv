@@ -13,8 +13,7 @@ HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string
       queries(queries),
       body(body),
       parseState(parseState),
-      state_(-1),
-      pos_(0) {}
+      state_(0) {}
 
 HttpRequest::~HttpRequest() {}
 
@@ -39,7 +38,8 @@ HttpRequest HttpRequest::doParseRequest(std::string &rawRequest) {
 
   HttpRequest newRequest;
   state = sw_start;
-  while (state != sw_end || newRequest.pos_ < rawRequest.size()) {
+  while (state != sw_end) {
+    parseRequestPhase state_before = state;
     switch (state) {
       case sw_start:
         state = sw_request_line;
@@ -67,6 +67,9 @@ HttpRequest HttpRequest::doParseRequest(std::string &rawRequest) {
         state = sw_end;
         break;
       case sw_end:
+        break;
+
+      if (state == state_before) // parse未完了：引き続きクライアントからのrequestを待つ
         break;
     }
   }
@@ -165,7 +168,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   } state;
 
   state = static_cast<parseUriPhase>(newRequest.state_);
-  size_t i = newRequest.pos_;
+  size_t i = 0;
   while (state != sw_end && i < rawRequest.size()) {
     switch (state) {
       case sw_start:
@@ -187,13 +190,11 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
     }
   }
 
-  newRequest.pos_ = i;
   if (state != sw_end) // parse未完了：引き続きクライアントからのrequestを待つ
   {
     newRequest.state_ = state;
     return newRequest.parseState;
   }
-  newRequest.pos_ = 0; // reset
 
   std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
   tmp = urlDecode(tmp);
@@ -206,9 +207,142 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
 }
 
 HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpRequest &newRequest) {
-  newRequest.version = rawRequest.substr(0, rawRequest.find('\r'));
-  if (newRequest.version != "HTTP/1.1") return HttpRequest::PARSE_VERSION_ERROR;
-  rawRequest = rawRequest.substr(rawRequest.find('\n') + 1);
+  enum parseVersionPhase {
+    sw_start = 0,
+    sw_H,
+    sw_HT,
+    sw_HTT,
+    sw_HTTP,
+    sw_HTTP1,
+    sw_HTTP1dot,
+    sw_HTTP1dot1,
+    sw_almost_end,
+    sw_end
+  } state;
+
+  state = static_cast<parseVersionPhase>(newRequest.state_);
+  size_t i = 0;
+  std::string version;
+
+  while (state != sw_end || i < rawRequest.size())
+  {
+    unsigned char ch = rawRequest[i];
+    switch (state)
+    {
+    case sw_start:
+      switch (ch)
+      {
+      case 'H':
+        version += ch;
+        state = sw_H;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_H:
+      switch (ch)
+      {
+      case 'T':
+        version += ch;
+        state = sw_HT;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_HT:
+      switch (ch)
+      {
+      case 'T':
+        version += ch;
+        state = sw_HTT;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_HTT:
+      switch (ch)
+      {
+      case 'P':
+        version += ch;
+        state = sw_HTTP;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    /* ver 1.1 のみ */
+    case sw_HTTP:
+      switch (ch)
+      {
+      case '1':
+        version += ch;
+        state = sw_HTTP1;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_HTTP1:
+      switch (ch)
+      {
+      case '.':
+        version += ch;
+        state = sw_HTTP1dot;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_HTTP1dot:
+      switch (ch)
+      {
+      case '1':
+        version += ch;
+        state = sw_HTTP1dot1;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_HTTP1dot1:
+      switch (ch)
+      {
+      case '\r':
+        state = sw_almost_end;
+        break;
+      case '\n':
+        state = sw_end;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_almost_end:
+      switch (ch)
+      {
+      case '\n':
+        state = sw_end;
+        break;
+      default:
+        return HttpRequest::PARSE_VERSION_ERROR;
+      }
+      break;
+    case sw_end:
+      break;
+    }
+    ++i;
+  }
+
+  if (state != sw_end) {
+    newRequest.state_ = state;
+    return newRequest.parseState;
+  }
+  newRequest.state_ = 0; // reset
+  newRequest.version = version;  
+  rawRequest = rawRequest.substr(0, i);
   return HttpRequest::PARSE_VERSION_DONE;
 }
 
@@ -222,7 +356,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
   } state;
 
   state = static_cast<parseRequestLineState>(newRequest.state_);
-  size_t i = newRequest.pos_;
+  size_t i = 0;
   if (rawRequest.empty()) return HttpRequest::PARSE_ERROR;
   while (state != sw_end && i < rawRequest.size()) {
     switch (state) {
@@ -249,7 +383,6 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
     };
     ++i;
   }
-  newRequest.pos_ = i;
   if (state != sw_end) // parse未完了：引き続きクライアントからのrequestを待つ
   {
     newRequest.state_ = state;
