@@ -94,7 +94,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     sw_method_end,
   } state;
 
-  std::string method = newRequest.raw_method;
+  std::string method = newRequest.key_buf_;
 
   state = static_cast<ParseMethodPhase>(newRequest.state_);
   size_t i = 0;
@@ -125,7 +125,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   }
 
   if (state != sw_method_end) {
-    newRequest.raw_method = method;
+    newRequest.key_buf_ = method;
     newRequest.state_ = state;
     return newRequest.parseState;
   }
@@ -202,6 +202,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
     newRequest.state_ = state;
     return newRequest.parseState;
   }
+  newRequest.state_ = 0; // reset
 
   std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
   tmp = urlDecode(tmp);
@@ -349,7 +350,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
   }
   newRequest.state_ = 0; // reset
   newRequest.version = version;  
-  rawRequest = rawRequest.substr(0, i);
+  rawRequest = rawRequest.substr(i);
   return HttpRequest::PARSE_VERSION_DONE;
 }
 
@@ -415,8 +416,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     sw_end
   } state;
 
-  std::string cur_name;
-  std::string cur_value;
+  std::string cur_name = newRequest.key_buf_;
+  std::string cur_value = newRequest.val_buf_;
   state = sw_start;
   size_t i = 0;
   while (state != sw_end && i < rawRequest.size()) {
@@ -461,8 +462,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         // if (!std::isprint(ch) && ch < 128) {
         if (ch == '\r' || ch == '\n') {  // TODO: logic考える必要あり
           newRequest.headers[cur_name] = cur_value;
-          cur_name = "";
-          cur_value = "";
+          cur_name.clear();
+          cur_value.clear();
           state = sw_space_after_value;
         } else {
           cur_value += ch;
@@ -490,6 +491,14 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         break;
     }
   }
+
+  if (state != sw_end) {
+    newRequest.state_ = state;
+    newRequest.key_buf_ = cur_name;
+    newRequest.val_buf_ = cur_value;
+    return newRequest.parseState;
+  }
+  newRequest.state_ = 0; // reset
   if (newRequest.headers.find("Host") == newRequest.headers.end()) return HttpRequest::PARSE_ERROR;
   rawRequest = rawRequest.substr(i);
   return HttpRequest::PARSE_HEADER_DONE;

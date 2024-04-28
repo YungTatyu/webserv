@@ -42,7 +42,8 @@ class HttpRequest {
   static void doParseChunked(std::string &rawRequest, HttpRequest &request);
 
   config::REQUEST_METHOD method;
-  std::string raw_method;
+  std::string key_buf_;
+  std::string val_buf_;
   std::string uri;  // スキーマ、ポートは？？
   std::string version;
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
