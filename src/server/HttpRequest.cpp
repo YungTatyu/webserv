@@ -94,7 +94,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     sw_method_end,
   } state;
 
-  std::string method;
+  std::string method = newRequest.raw_method;
 
   state = static_cast<ParseMethodPhase>(newRequest.state_);
   size_t i = 0;
@@ -125,6 +125,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   }
 
   if (state != sw_method_end) {
+    newRequest.raw_method = method;
     newRequest.state_ = state;
     return newRequest.parseState;
   }
