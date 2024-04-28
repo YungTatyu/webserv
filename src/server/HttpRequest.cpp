@@ -12,20 +12,24 @@ HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string
       headers(headers),
       queries(queries),
       body(body),
-      parseState(parseState) {}
+      parseState(parseState),
+      state_(-1),
+      pos_(0) {}
 
 HttpRequest::~HttpRequest() {}
 
 void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &oldRequest) {
-  if (oldRequest.parseState == PARSE_BEFORE)
-    oldRequest = HttpRequest::doParseRequest(rawRequest);
-  else
+  if (oldRequest.parseState == PARSE_HEADER_DONE)
+  {
     HttpRequest::doParseChunked(rawRequest, oldRequest);
+    return;
+  }
+  oldRequest = HttpRequest::doParseRequest(rawRequest);
 }
 
 HttpRequest HttpRequest::doParseRequest(std::string &rawRequest) {
   enum parseRequestPhase {
-    sw_start,
+    sw_start = 0,
     sw_request_line,
     sw_headers,
     sw_body,
@@ -81,7 +85,7 @@ void HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &oldReques
 
 HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRequest &newRequest) {
   enum ParseMethodPhase {
-    sw_method_start,
+    sw_method_start = 0,
     sw_method_mid,
     sw_method_almost_end,
     sw_method_end,
@@ -153,7 +157,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
  */
 HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpRequest &newRequest) {
   enum parseUriPhase {
-    sw_start,
+    sw_start = 0,
     sw_slash_before_uri,
     sw_schema,
     sw_almost_end,
@@ -202,7 +206,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
 
 HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, HttpRequest &newRequest) {
   enum parseRequestLineState {
-    sw_start,
+    sw_start = 0,
     sw_method,
     sw_uri,
     sw_version,
@@ -245,7 +249,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
  */
 HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpRequest &newRequest) {
   enum parseHeaderPhase {
-    sw_start,
+    sw_start = 0,
     sw_name,
     sw_colon,
     sw_space_before_value,
