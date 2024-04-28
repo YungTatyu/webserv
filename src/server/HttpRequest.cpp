@@ -96,7 +96,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
 
   std::string method;
 
-  state = sw_method_start;
+  state = static_cast<ParseMethodPhase>(newRequest.state_);
   size_t i = 0;
   while (state != sw_method_end && i < rawRequest.size()) {
     unsigned char ch = rawRequest[i];
@@ -123,6 +123,13 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     }
     ++i;
   }
+
+  if (state != sw_method_end) {
+    newRequest.state_ = state;
+    return newRequest.parseState;
+  }
+  newRequest.state_ = 0; // reset;
+
   switch (method.size()) {
     case 3:
       if (method == "GET") {
@@ -148,7 +155,6 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
       break;
     default:
       return HttpRequest::PARSE_ERROR;  // 501 Not Implemented (SHOULD)
-      break;
   }
   return HttpRequest::PARSE_METHOD_DONE;
 }
