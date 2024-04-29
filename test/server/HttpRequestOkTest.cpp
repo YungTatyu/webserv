@@ -32,10 +32,10 @@ TEST(HttpRequest, OkTest1) {
 
 TEST(HttpRequest, OkTest2) {
   // testcase: header fieldが一対ある時
-  // testcase: bodyもある
+  // testcase: bodyもあるけど、content-length, Transfer-Encodingどちらもないのでbody無視される
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "this is body", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
 
   // test
   std::string rawRequest =
@@ -276,6 +276,44 @@ TEST(HttpRequest, OkTest13) {
   std::string rawRequest =
       "DELETE / HTTP/1.1\r\n"
       "Host: aa\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, OkTest14) {
+  // testcase: header fieldが一対ある時
+  // testcase: bodyある
+  std::string body = "this is body";
+  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body, HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      std::string("GET / HTTP/1.1\r\n")
+      + "Host: aa\r\n"
+      + "Content-Length: " + std::to_string(body.size()) + "\r\n"
+      + "\r\n"
+      + body;
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, OkTest15) {
+  // testcase: header fieldが一対ある時
+  // testcase: bodyある
+  std::string body = "this is body";
+  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", "5"}}, "", body.substr(0, 5), HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      std::string("GET / HTTP/1.1\r\n")
+      + "Host: aa\r\n"
+      + "Content-Length: 5\r\n"
+      + "\r\n"
+      + body;
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
