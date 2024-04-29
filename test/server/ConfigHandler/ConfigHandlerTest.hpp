@@ -158,6 +158,14 @@ public:
     return cli_addr;
   }
 
+  bool sameLocation(const config::Location loc1, const config::Location* loc2)
+  {
+    if (loc2)
+      return loc1.uri == loc2->uri;
+    std::cerr << "can't find location" << std::endl;
+    return false;
+  }
+
 };
 
 }; // namespace test 
