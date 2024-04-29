@@ -54,6 +54,7 @@ add_executable(${PROJECT_NAME}-googletest
   test/server/ConfigHandler/searchTimeout/searchKeepaliveTimeout.cpp
   test/server/ConfigHandler/writeAccessLog/writeAccessLog.cpp
   test/server/ConfigHandler/writeErrorLog/writeErrorLog.cpp
+  test/server/ConfigHandler/searchLocationConfig/searchLongestMatchLocationConfig.cpp
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
 	test/server/HttpResponseTest.cpp
