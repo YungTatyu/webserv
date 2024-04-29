@@ -1,16 +1,14 @@
 name: Format Code
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
+    branches:
+      - main
 
 jobs:
   format_code:
     runs-on: ubuntu-latest
 
-    if: github.event.pull_request.merged == true
-    
     permissions:
       contents: write
 
