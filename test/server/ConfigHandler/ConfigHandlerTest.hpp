@@ -62,7 +62,7 @@ public:
     config::Parser parser(*config, lexer.getTokens(), conf_path_);
     if (!parser.parse()){
       std::cerr << "parse failed" << std::endl;
-      exit(1);
+      FAIL();
     }
 
     // log出力テストはlogファイル作成
@@ -72,7 +72,7 @@ public:
       if (!initLogFds(*config)) {
         config_handler_.loadConfiguration(config);
         std::cerr << "parse failed" << std::endl;
-        exit(1);
+        FAIL();
       }
     }
 
@@ -145,8 +145,8 @@ public:
     return false;
   }
 
-  bool sameTime(const config::Time& time1, const config::Time& time2) {
-    return (time1.time_in_ms_ == time2.time_in_ms_);
+  void sameTime(const config::Time& time1, const config::Time& time2) {
+    EXPECT_EQ(time1.time_in_ms_, time2.time_in_ms_);
   }
 
   struct sockaddr_in createClient(std::string ip)
