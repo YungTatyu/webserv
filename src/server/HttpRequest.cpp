@@ -61,7 +61,7 @@ HttpRequest HttpRequest::doParseRequest(std::string &rawRequest, HttpRequest &ol
     if (state == state_before || state == PARSE_INPROGRESS) // parse未完了：引き続きクライアントからのrequestを待つ
       break;
   }
-  newRequest.state_ = state;
+  newRequest.parseState = state;
   return newRequest;
 }
 
@@ -122,7 +122,6 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   }
   newRequest.state_ = 0; // reset;
 
-  std::cerr << "method=" << method << std::endl;
   switch (method.size()) {
     case 3:
       if (method == "GET") {
@@ -198,7 +197,6 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   newRequest.state_ = 0; // reset
 
   std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
-  std::cerr << "uri=" << tmp << std::endl;
   tmp = urlDecode(tmp);
   newRequest.uri = tmp.substr(0, tmp.find('?'));
   size_t qindex = tmp.find('?');
@@ -223,12 +221,11 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
     sw_end
   } state;
 
-  std::cerr << "parse version\n";
   state = static_cast<parseVersionPhase>(newRequest.state_);
   size_t i = 0;
   std::string version = newRequest.key_buf_;
 
-  while (state != sw_end || i < rawRequest.size())
+  while (state != sw_end && i < rawRequest.size())
   {
     unsigned char ch = rawRequest[i];
     switch (state)
@@ -360,7 +357,6 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
   newRequest.state_ = 0; // reset
   newRequest.key_buf_.clear();
   rawRequest = rawRequest.substr(i);
-  std::cerr << "version done request=" << rawRequest << std::endl;
   return HttpRequest::PARSE_VERSION_DONE;
 }
 
@@ -410,8 +406,6 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     sw_end
   } state;
 
-  std::cerr << "parse header\n";
-  std::cerr << "request="  << rawRequest << "--\n";
   std::string cur_name = newRequest.key_buf_;
   std::string cur_value = newRequest.val_buf_;
   state = static_cast<parseHeaderPhase>(newRequest.state_);
@@ -457,8 +451,6 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
       case sw_value:
         // if (!std::isprint(ch) && ch < 128) {
         if (ch == '\r' || ch == '\n') {  // TODO: logic考える必要あり
-        std::cerr << "key=" << cur_name << std::endl;
-        std::cerr << "val=" << cur_value << std::endl;
           newRequest.headers[cur_name] = cur_value;
           cur_name.clear();
           cur_value.clear();
