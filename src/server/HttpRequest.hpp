@@ -61,6 +61,7 @@ class HttpRequest {
   static ParseState parseHeaders(std::string &rawRequest, HttpRequest &newRequest);
   static ParseState parseBody(std::string &rawRequest, HttpRequest &newRequest);
   static std::string urlDecode(const std::string &encoded);
+  static void clearBuf(HttpRequest &request);
 };
 
 #endif
