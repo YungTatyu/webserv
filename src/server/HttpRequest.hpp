@@ -37,8 +37,7 @@ class HttpRequest {
 
   // static HttpRequest parseRequest(std::string& rawRequest, HttpRequest&
   // oldRequest);
-  static void parseRequest(std::string &rawRequest, HttpRequest &oldRequest);
-  static HttpRequest doParseRequest(std::string &rawRequest, HttpRequest &oldRequest);
+  static void parseRequest(std::string &rawRequest, HttpRequest &request);
   static ParseState doParseChunked(std::string &rawRequest, HttpRequest &request);
 
   config::REQUEST_METHOD method;
@@ -54,12 +53,12 @@ class HttpRequest {
   int state_; // より細かいフェーズのstate
 
  private:
-  static ParseState parseMethod(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseUri(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseVersion(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseHeaders(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseBody(std::string &rawRequest, HttpRequest &newRequest);
+  static ParseState parseMethod(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseUri(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseVersion(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseHeaders(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseBody(std::string &rawRequest, HttpRequest &request);
   static std::string urlDecode(const std::string &encoded);
   static void clearBuf(HttpRequest &request);
 };
