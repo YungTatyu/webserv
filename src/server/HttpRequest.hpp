@@ -14,7 +14,7 @@
 class HttpRequest {
  public:
   enum ParseState {
-    PARSE_BEFORE,
+    PARSE_BEFORE = 0,
     PARSE_COMPLETE,
     PARSE_INPROGRESS,
     PARSE_METHOD_DONE,
@@ -23,8 +23,7 @@ class HttpRequest {
     PARSE_VERSION_DONE,
     PARSE_HEADER_DONE,
     PARSE_BODY_DONE,
-    PARSE_ERROR,
-    PARSE_VERSION_ERROR
+    PARSE_ERROR
   };
 
   HttpRequest(const config::REQUEST_METHOD &method = config::UNKNOWN, const std::string &uri = "",
