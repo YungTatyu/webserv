@@ -149,6 +149,15 @@ public:
     return (time1.time_in_ms_ == time2.time_in_ms_);
   }
 
+  struct sockaddr_in createClient(std::string ip)
+  {
+    struct sockaddr_in cli_addr;
+    std::memset(&cli_addr, 0, sizeof(cli_addr));  // ゼロで初期化
+    cli_addr.sin_family = AF_INET;                 // IPv4
+    cli_addr.sin_addr.s_addr = Utils::StrToIPAddress(ip);
+    return cli_addr;
+  }
+
 };
 
 }; // namespace test 

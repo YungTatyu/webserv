@@ -49,6 +49,7 @@ add_executable(${PROJECT_NAME}-googletest
 	# test files
 	test/server/TimerTree_test.cpp
   test/server/ConfigHandler/allowRequest/allowRequest.cpp
+  test/server/ConfigHandler/allowRequest/limitExcept.cpp
   test/server/ConfigHandler/createTiedServer/createTiedServer.cpp
   test/server/ConfigHandler/searchTimeout/searchKeepaliveTimeout.cpp
   test/server/ConfigHandler/writeAccessLog/writeAccessLog.cpp
