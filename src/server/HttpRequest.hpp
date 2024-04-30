@@ -38,6 +38,7 @@ class HttpRequest {
   // oldRequest);
   static void parseRequest(std::string &rawRequest, HttpRequest &request);
   static ParseState doParseChunked(std::string &rawRequest, HttpRequest &request);
+  static bool isInvalidHeaderLetter(unsigned char ch);
 
   config::REQUEST_METHOD method;
   std::string key_buf_;

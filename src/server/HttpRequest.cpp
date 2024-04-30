@@ -96,7 +96,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
         } else if (ch == ' ') {
           state = sw_method_almost_end;
         } else {
-          return HttpRequest::PARSE_ERROR;
+          return PARSE_ERROR;
         }
         break;
       case sw_method_almost_end:
@@ -122,7 +122,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
         request.method = config::GET;
         break;
       }
-      return HttpRequest::PARSE_ERROR;
+      return PARSE_ERROR;
     case 4:
       if (method == "HEAD") {
         request.method = config::HEAD;
@@ -132,7 +132,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
         request.method = config::POST;
         break;
       }
-      return HttpRequest::PARSE_ERROR;
+      return PARSE_ERROR;
     case 6:
       if (method == "DELETE") {
         request.method = config::DELETE;
@@ -140,7 +140,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
       }
       break;
     default:
-      return HttpRequest::PARSE_ERROR;  // 501 Not Implemented (SHOULD)
+      return PARSE_ERROR;  // 501 Not Implemented (SHOULD)
   }
   request.key_buf_.clear();
   return HttpRequest::PARSE_METHOD_DONE;
@@ -168,7 +168,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
         state = sw_slash_before_uri;
         break;
       case sw_slash_before_uri:
-        if (rawRequest[i] != '/') return HttpRequest::PARSE_ERROR;
+        if (rawRequest[i] != '/') return PARSE_ERROR;
         ++i;
         state = sw_schema;
         break;
@@ -408,7 +408,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
       case sw_start:
         if (ch == '\r') {
           ++i;
-          if (rawRequest[i] != '\n') return HttpRequest::PARSE_ERROR;
+          if (rawRequest[i] != '\n') return PARSE_ERROR;
           break;
         }
         if (ch == '\n') {
@@ -417,11 +417,11 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           break;
         }
         // space以下, del, :はエラー
-        if (ch <= ' ' || ch == 127 || ch == ':') return PARSE_ERROR;
+        if (isInvalidHeaderLetter(ch) || ch == ':') return PARSE_ERROR;
         state = sw_name;
         break;
       case sw_name:
-        if (ch <= ' ' || ch == 127) return PARSE_ERROR;
+        if (isInvalidHeaderLetter(ch)) return PARSE_ERROR;
         if (ch == ':') {
           if (cur_name.empty()) return PARSE_ERROR;
           state = sw_colon;
@@ -466,12 +466,12 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         }
         break;
       case sw_header_almost_done:
-        if (ch != '\r') return HttpRequest::PARSE_ERROR;
+        if (ch != '\r') return PARSE_ERROR;
         state = sw_header_done;
         ++i;
         break;
       case sw_header_done:
-        if (ch != '\n') return HttpRequest::PARSE_ERROR;
+        if (ch != '\n') return PARSE_ERROR;
         if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
         // headerが重複している場合は、一番初めに登場したものを優先する
         if (request.headers.find(cur_name) == request.headers.end())
@@ -493,7 +493,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     return request.parseState;
   }
   request.state_ = 0; // reset
-  if (request.headers.find(kHost) == request.headers.end()) return HttpRequest::PARSE_ERROR;
+  if (request.headers.find(kHost) == request.headers.end()) return PARSE_ERROR;
   rawRequest = rawRequest.substr(i);
   clearBuf(request);
   return HttpRequest::PARSE_HEADER_DONE;
@@ -541,4 +541,15 @@ void HttpRequest::clearBuf(HttpRequest &request) {
 bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::string &header) {
   if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) && !Utils::compareIgnoreCase(header, kContentLength)) return false;
   return request.headers.find(header) != request.headers.end();
+}
+
+/**
+ * @brief ascii: space以下, delはheaderの名前に受け付けない
+ * 
+ * @param ch 
+ * @return true 
+ * @return false 
+ */
+bool HttpRequest::isInvalidHeaderLetter(unsigned char ch) {
+  return ch <= ' ' || ch == 127;  
 }
