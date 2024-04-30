@@ -421,13 +421,22 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         state = sw_name;
         break;
       case sw_name:
-        if (isInvalidHeaderLetter(ch)) return PARSE_ERROR;
-        if (ch == ':') {
-          if (cur_name.empty()) return PARSE_ERROR;
+        switch (ch)
+        {
+        case ':':
           state = sw_colon;
-        } else {
+          break;
+        case '\r':
+          state = sw_header_almost_done;
+          break;
+        case '\n':
+          state = sw_header_done;
+          break;        
+        default:
+          if (isInvalidHeaderLetter(ch)) return PARSE_ERROR;
           cur_name += ch;
           ++i;
+          break;
         }
         break;
       case sw_colon:
