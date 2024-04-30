@@ -473,6 +473,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
       case sw_header_done:
         if (ch != '\n') return PARSE_ERROR;
         if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
+        if (Utils::compareIgnoreCase(kHost, cur_name) && !isValidHost(cur_value)) return PARSE_ERROR;
+        if (Utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value)) return PARSE_ERROR;
         // headerが重複している場合は、一番初めに登場したものを優先する
         if (request.headers.find(cur_name) == request.headers.end())
           request.headers[cur_name] = cur_value;
@@ -552,4 +554,17 @@ bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::strin
  */
 bool HttpRequest::isInvalidHeaderLetter(unsigned char ch) {
   return ch <= ' ' || ch == 127;  
+}
+
+bool HttpRequest::isValidHost(const std::string &str) {
+  return !str.empty();
+}
+
+bool HttpRequest::isValidContentLength(const std::string &str) {
+  unsigned long length;
+  std::istringstream iss(str);
+  iss >> length;
+
+  if (iss.fail()) return false;
+  return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
 }

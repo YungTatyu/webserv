@@ -39,6 +39,7 @@ class HttpRequest {
   static void parseRequest(std::string &rawRequest, HttpRequest &request);
   static ParseState doParseChunked(std::string &rawRequest, HttpRequest &request);
   static bool isInvalidHeaderLetter(unsigned char ch);
+  static bool isValidContentLength(const std::string &str);
 
   config::REQUEST_METHOD method;
   std::string key_buf_;
@@ -62,6 +63,7 @@ class HttpRequest {
   static std::string urlDecode(const std::string &encoded);
   static void clearBuf(HttpRequest &request);
   static bool isUniqueHeaderDup(const HttpRequest &request, const std::string &header);
+  static bool isValidHost(const std::string &str);
 };
 
 #endif
