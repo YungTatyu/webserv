@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-ConnectionManager::ConnectionManager() {}
+ConnectionManager::ConnectionManager() : cgi_sock_num_(0) {}
 
 ConnectionManager::~ConnectionManager() { closeAllConnections(); }
 
@@ -30,12 +30,14 @@ void ConnectionManager::setCgiConnection(const int cli_sock, const ConnectionDat
   this->connections_.insert(std::make_pair(cgi_sock, cd));
   // cgi のイベントに更新
   this->connections_.at(cli_sock)->event = event;
+  this->cgi_sock_num_++;
 }
 
 /**
  * @brief connection mapから削除
- * cgiの場合は、connection dataを削除しない
- * clientがデータを必要とするため
+ * cgi: connection dataを削除しない
+ *      clientがデータを必要とするため
+ *      cgi_sock_num_をdecrement
  *
  * @param fd
  * @param cgi
@@ -44,15 +46,17 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
   if (!cgi) {
     std::cerr << "delete connection:" << fd << "\n";
     delete connections_.at(fd);
-  }
+  } else
+    this->cgi_sock_num_--;
   connections_.erase(fd);
 }
 
 ConnectionData* ConnectionManager::getConnection(const int fd) { return connections_.at(fd); }
 
-void ConnectionManager::addRawRequest( const int fd, const std::vector<unsigned char>& rawRequest, const ssize_t read_bytes )
-{
-       connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(), rawRequest.begin() + read_bytes);
+void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest,
+                                      const ssize_t read_bytes) {
+  connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(),
+                                      rawRequest.begin() + read_bytes);
 }
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd) const {
@@ -106,9 +110,10 @@ bool ConnectionManager::callCgiParser(const int fd, HttpResponse& response, cons
   return this->connections_.at(fd)->cgi_handler_.callCgiParser(response, cgi_response);
 }
 
-void	ConnectionManager::addCgiResponse( const int fd, const std::vector<unsigned char>& v, const ssize_t read_bytes )
-{
-	connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(), v.begin() + read_bytes);
+void ConnectionManager::addCgiResponse(const int fd, const std::vector<unsigned char>& v,
+                                       const ssize_t read_bytes) {
+  connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(),
+                                         v.begin() + read_bytes);
 }
 
 void ConnectionManager::setTiedServer(const int fd, const TiedServer* tied_server) {
@@ -155,3 +160,5 @@ void ConnectionManager::closeAllConnections() {
   }
   this->connections_.clear();
 }
+
+connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_; }

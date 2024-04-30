@@ -14,6 +14,7 @@
 #include "Index.hpp"
 #include "KeepaliveTimeout.hpp"
 #include "LimitExcept.hpp"
+#include "ReceiveTimeout.hpp"
 #include "Return.hpp"
 #include "Root.hpp"
 #include "SendTimeout.hpp"
@@ -41,6 +42,7 @@ struct Location {
   std::vector<Index> index_list;
   Autoindex autoindex;
   KeepaliveTimeout keepalive_timeout;
+  ReceiveTimeout receive_timeout;
   SendTimeout send_timeout;
   std::vector<Return> return_list;
   Root root;

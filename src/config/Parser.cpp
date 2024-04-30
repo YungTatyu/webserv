@@ -23,6 +23,7 @@ const unsigned int config::ErrorPage::kType_;
 const unsigned int config::Index::kType_;
 const unsigned int config::KeepaliveTimeout::kType_;
 const unsigned int config::Listen::kType_;
+const unsigned int config::ReceiveTimeout::kType_;
 const unsigned int config::Return::kType_;
 const unsigned int config::Root::kType_;
 const unsigned int config::SendTimeout::kType_;
@@ -52,6 +53,7 @@ const static std::string kERROR_PAGE = "error_page";
 const static std::string kINDEX = "index";
 const static std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
 const static std::string kLISTEN = "listen";
+const static std::string kRECEIVE_TIMEOUT = "receive_timeout";
 const static std::string kRETURN = "return";
 const static std::string kROOT = "root";
 const static std::string kSEND_TIMEOUT = "send_timeout";
@@ -93,6 +95,7 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
   this->all_directives_.insert(std::make_pair(kKEEPALIVE_TIMEOUT, config::KeepaliveTimeout::kType_));
   this->all_directives_.insert(std::make_pair(kLISTEN, config::Listen::kType_));
+  this->all_directives_.insert(std::make_pair(kRECEIVE_TIMEOUT, config::ReceiveTimeout::kType_));
   this->all_directives_.insert(std::make_pair(kRETURN, config::Return::kType_));
   this->all_directives_.insert(std::make_pair(kROOT, config::Root::kType_));
   this->all_directives_.insert(std::make_pair(kSEND_TIMEOUT, config::SendTimeout::kType_));
@@ -114,28 +117,29 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
 
   this->parser_map_[kACCESS_LOG] = &config::Parser::parseAccessLog;
-  this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
-  this->parser_map_[kUSE] = &config::Parser::parseUse;
-  this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
-  this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
-  this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
-  this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
-  this->parser_map_[kROOT] = &config::Parser::parseRoot;
-  this->parser_map_[kINDEX] = &config::Parser::parseIndex;
-  this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
-  this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
+  this->parser_map_[kALIAS] = &config::Parser::parseAlias;
   this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
+  this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
+  this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
   this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
+  this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
+  this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
+  this->parser_map_[kINDEX] = &config::Parser::parseIndex;
+  this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
   this->parser_map_[kLISTEN] = &config::Parser::parseListen;
+  this->parser_map_[kRECEIVE_TIMEOUT] = &config::Parser::parseReceiveTimeout;
+  this->parser_map_[kROOT] = &config::Parser::parseRoot;
+  this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
+  this->parser_map_[kRETURN] = &config::Parser::parseReturn;
   this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
   this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
-  this->parser_map_[kALIAS] = &config::Parser::parseAlias;
-  this->parser_map_[kRETURN] = &config::Parser::parseReturn;
+  this->parser_map_[kUSE] = &config::Parser::parseUse;
   this->parser_map_[kUSERID] = &config::Parser::parseUserid;
   this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
   this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
   this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
   this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
+  this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
 }
 
 config::Parser::~Parser() {}
@@ -671,7 +675,7 @@ bool config::Parser::canConvertMinSize(long &value, const std::string &unit) {
 
 long config::Parser::parseTime() {
   long num;
-  std::string unit;  //単位
+  std::string unit;  // 単位
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
 
   if (iss >> num) {
@@ -763,6 +767,40 @@ bool config::Parser::parseKeepaliveTimeout() {
     case config::CONF_HTTP_LOCATION:
       this->config_.http.server_list.back().location_list.back().keepalive_timeout.setTime(ret);
       this->config_.http.server_list.back().location_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
+      break;
+
+    default:
+      break;
+  }
+  ti_ += 2;
+  return true;
+}
+
+bool config::Parser::parseReceiveTimeout() {
+  ti_++;
+
+  long ret = parseTime();
+  if (ret == -1) {
+    std::cerr << "webserv: [emerg] \"receive_timeout\" directive invalid value in " << this->filepath_ << ":"
+              << this->tokens_[ti_].line_ << std::endl;
+    return false;
+  }
+
+  const config::CONTEXT context = this->current_context_.top();
+  switch (context) {
+    case config::CONF_HTTP:
+      this->config_.http.receive_timeout.setTime(ret);
+      this->config_.http.directives_set.insert(kRECEIVE_TIMEOUT);
+      break;
+
+    case config::CONF_HTTP_SERVER:
+      this->config_.http.server_list.back().receive_timeout.setTime(ret);
+      this->config_.http.server_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
+      break;
+
+    case config::CONF_HTTP_LOCATION:
+      this->config_.http.server_list.back().location_list.back().receive_timeout.setTime(ret);
+      this->config_.http.server_list.back().location_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
       break;
 
     default:
