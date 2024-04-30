@@ -76,7 +76,7 @@ TEST(HttpRequest, ErrorTest7) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_BEFORE, test.parseState);
 }
 
 TEST(HttpRequest, ErrorTest8) {

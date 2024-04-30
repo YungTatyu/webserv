@@ -2,6 +2,7 @@
 
 #include "LimitExcept.hpp"
 
+const static char*  kHost = "Host";
 const static char*  kContentLength = "Content-Length";
 const static char*  kTransferEncoding = "Transfer-Encoding";
 
@@ -422,7 +423,6 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         break;
       case sw_name:
         if (!cur_name.empty() && ch == ':') {
-          request.headers[cur_name];
           state = sw_colon;
         } else {
           cur_name += ch;
@@ -430,6 +430,10 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         }
         break;
       case sw_colon:
+        // host, content-length, transfer-encodingは重複ng
+        if (Utils::compareIgnoreCase(cur_name, kHost) || Utils::compareIgnoreCase(cur_name, kContentLength) || Utils::compareIgnoreCase(cur_name, kContentLength)) {
+          if (request.headers.find(cur_name) != request.headers.end()) return PARSE_ERROR;
+        }
         state = sw_space_before_value;
         ++i;
         break;
@@ -440,15 +444,20 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           ++i;
         break;
       case sw_value:
-        // if (!std::isprint(ch) && ch < 128) {
-        if (ch == '\r' || ch == '\n') {  // TODO: logic考える必要あり
-          request.headers[cur_name] = cur_value;
-          cur_name.clear();
-          cur_value.clear();
+        switch (ch)
+        {
+        case '\r':
+          state = sw_header_almost_done;
+          break;
+        case '\n':
+          state = sw_header_done;
+          break;
+        case ' ':
           state = sw_space_after_value;
-        } else {
+        default:
           cur_value += ch;
           ++i;
+          break;
         }
         break;
       case sw_space_after_value:
@@ -465,6 +474,11 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         break;
       case sw_header_done:
         if (ch != '\n') return HttpRequest::PARSE_ERROR;
+        // headerが重複している場合は、一番初めに登場したものを優先する
+        if (request.headers.find(cur_name) == request.headers.end())
+          request.headers[cur_name] = cur_value;
+        cur_name.clear();
+        cur_value.clear();
         state = sw_start;
         ++i;
         break;
@@ -480,7 +494,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     return request.parseState;
   }
   request.state_ = 0; // reset
-  if (request.headers.find("Host") == request.headers.end()) return HttpRequest::PARSE_ERROR;
+  if (request.headers.find(kHost) == request.headers.end()) return HttpRequest::PARSE_ERROR;
   rawRequest = rawRequest.substr(i);
   clearBuf(request);
   return HttpRequest::PARSE_HEADER_DONE;
