@@ -60,6 +60,7 @@ class HttpRequest {
   static ParseState parseBody(std::string &rawRequest, HttpRequest &request);
   static std::string urlDecode(const std::string &encoded);
   static void clearBuf(HttpRequest &request);
+  static bool isUniqueHeaderDup(const HttpRequest &request, const std::string &header);
 };
 
 #endif

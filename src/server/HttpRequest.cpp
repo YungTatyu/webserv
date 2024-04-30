@@ -416,13 +416,14 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           state = sw_end;
           break;
         }
-        if (!std::isalnum(ch))
-          state = sw_end;
-        else
-          state = sw_name;
+        // space以下, del, :はエラー
+        if (ch <= ' ' || ch == 127 || ch == ':') return PARSE_ERROR;
+        state = sw_name;
         break;
       case sw_name:
-        if (!cur_name.empty() && ch == ':') {
+        if (ch <= ' ' || ch == 127) return PARSE_ERROR;
+        if (ch == ':') {
+          if (cur_name.empty()) return PARSE_ERROR;
           state = sw_colon;
         } else {
           cur_name += ch;
@@ -430,10 +431,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         }
         break;
       case sw_colon:
-        // host, content-length, transfer-encodingは重複ng
-        if (Utils::compareIgnoreCase(cur_name, kHost) || Utils::compareIgnoreCase(cur_name, kContentLength) || Utils::compareIgnoreCase(cur_name, kContentLength)) {
-          if (request.headers.find(cur_name) != request.headers.end()) return PARSE_ERROR;
-        }
+        if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
         state = sw_space_before_value;
         ++i;
         break;
@@ -474,6 +472,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         break;
       case sw_header_done:
         if (ch != '\n') return HttpRequest::PARSE_ERROR;
+        if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
         // headerが重複している場合は、一番初めに登場したものを優先する
         if (request.headers.find(cur_name) == request.headers.end())
           request.headers[cur_name] = cur_value;
@@ -529,4 +528,17 @@ std::string HttpRequest::urlDecode(const std::string &encoded) {
 void HttpRequest::clearBuf(HttpRequest &request) {
   request.key_buf_.clear();
   request.val_buf_.clear();
+}
+
+/**
+ * @brief host, content-length, transfer-encodingが重複しているかチェック
+ * 
+ * @param request 
+ * @param header 
+ * @return true 
+ * @return false 
+ */
+bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::string &header) {
+  if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) && !Utils::compareIgnoreCase(header, kContentLength)) return false;
+  return request.headers.find(header) != request.headers.end();
 }
