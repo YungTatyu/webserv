@@ -510,14 +510,24 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   return HttpRequest::PARSE_HEADER_DONE;
 }
 
+/**
+ * @brief content-lengthのサイズ分bodyをparseする
+ * 
+ * @param rawRequest 
+ * @param request 
+ * @return HttpRequest::ParseState 
+ */
 HttpRequest::ParseState HttpRequest::parseBody(std::string &rawRequest, HttpRequest &request) { 
-  size_t  body_size = rawRequest.size();
   size_t  content_length = Utils::strToSizet(request.headers.find(kContentLength)->second);
-  request.body = rawRequest.substr(0, content_length);
-  rawRequest = rawRequest.substr(content_length); // bodyからはみ出た部分は次のリクエストに追加される
-  if (content_length > body_size)
-    return PARSE_INPROGRESS;
-  return PARSE_COMPLETE;
+  std::string body = rawRequest.substr(0, content_length);
+  request.body += body;
+  size_t parsed_body_size = body.size();
+  rawRequest = rawRequest.substr(parsed_body_size); // bodyからはみ出た部分は次のリクエストに追加される
+  if (parsed_body_size == content_length)
+    return PARSE_COMPLETE;
+  // parse未完了：引き続きbodyを待つ
+  request.headers[kContentLength] = Utils::toStr(content_length - parsed_body_size); // 残りのbodyのsizeをupdate
+  return PARSE_INPROGRESS;
 }
 
 /*
