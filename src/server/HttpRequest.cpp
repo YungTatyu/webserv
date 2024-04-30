@@ -1,6 +1,7 @@
 #include "HttpRequest.hpp"
 
 #include "LimitExcept.hpp"
+#include <limits>
 
 const static char*  kHost = "Host";
 const static char*  kContentLength = "Content-Length";
@@ -63,45 +64,90 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
   enum parseUriPhase {
     sw_chunk_start = 0,
     sw_chunk_size,
-    sw_chunk_extension,
+    // sw_chunk_extension,
     sw_chunk_extension_almost_done,
     sw_chunk_data,
     sw_after_data,
     sw_after_data_almost_done,
     sw_last_chunk_extension,
-    sw_last_chunk_extension_almost_done
+    sw_last_chunk_extension_almost_done,
+    sw_chunk_end
   } state;
 
   state = static_cast<parseUriPhase>(request.state_);
+  const size_t kMaxChunkSize = std::numeric_limits<long>::max();
   size_t i = 0;
-  size_t chunk_size = 0;
-  std::string bytes = request.key_buf_;
+  std::string chunk_bytes = request.key_buf_;
   std::string body = request.val_buf_;
   while (state != sw_last_chunk_extension_almost_done && i < rawRequest.size()) {
-    unsigned char ch = rawRequest[i];
+    unsigned char ch, c;
+    ch = rawRequest[i];
+    
     switch (state)
     {
     case sw_chunk_start:
       if (std::isdigit(ch)) {
-        bytes = ch;
+        chunk_bytes = ch;
         break;
       }
-      if (std::isalpha(ch)) {
-        unsigned char c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
-        bytes = c;
+      c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
+      if (c >= 'a' && c <= 'f') {
+        chunk_bytes = c;
         break;
       }
       return PARSE_ERROR;
       break;
     case sw_chunk_size:
+      if (Utils::strToSizet(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
+      if (std::isdigit(ch)) {
+        chunk_bytes += ch;
+        break;
+      }
+      c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
+      if (c >= 'a' && c <= 'f') {
+        chunk_bytes += c;
+        break;
+      }
+      if (chunk_bytes == "0") {
+        switch (ch) {
+        case '\r':
+          state = sw_last_chunk_extension_almost_done;
+          break;
+        case '\n':
+          state = sw_chunk_end;
+          break;
+        default:
+          return PARSE_ERROR;
+        }
+      }
+
+      switch (ch) {
+      case '\r':
+        state = sw_chunk_extension_almost_done;
+        break;
+      case '\n':
+        state = sw_chunk_data;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+
+    case sw_chunk_extension_almost_done:
+      if (ch != '\n') return PARSE_ERROR;
+      state = sw_chunk_data;
+      break;
+
+    case sw_chunk_data:
       break;
     }
+    ++i;
   }
   
 
-  // std::string byteSize = rawRequest.substr(0, rawRequest.find('\r'));
+  // std::string chunk_byteSize = rawRequest.substr(0, rawRequest.find('\r'));
   // ParseState state;
-  // if (byteSize == "0")
+  // if (chunk_byteSize == "0")
   //   state = HttpRequest::PARSE_COMPLETE;
   // else
   //   state = HttpRequest::PARSE_INPROGRESS;
