@@ -337,8 +337,26 @@ TEST(HttpRequest, ErrorTest29) {
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
       "Host: \r\n"
-      "content-length: \r\n";
+      "content-length: \r\n"
       "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+
+TEST(HttpRequest, ErrorTest30) {
+  // test: body is longer then content-length
+  std::string body = "this is body";
+  std::string rawRequest =
+      std::string("GET / HTTP/1.1\r\n")
+      + "Host: \r\n"
+      + "content-length: "
+      + std::to_string(body.size() + 1)
+      + "\r\n"
+      + "\r\n"
+      + body;
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 

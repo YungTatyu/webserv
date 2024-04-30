@@ -59,7 +59,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
   request.parseState = state;
 }
 
-HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &oldRequest) {
+HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &request) {
   std::string byteSize = rawRequest.substr(0, rawRequest.find('\r'));
   ParseState state;
   if (byteSize == "0")
@@ -67,7 +67,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
   else
     state = HttpRequest::PARSE_INPROGRESS;
   std::string chunkBody = rawRequest.substr(rawRequest.find('\n') + 1);
-  oldRequest.body += chunkBody.substr(0, chunkBody.find('\r'));
+  request.body += chunkBody.substr(0, chunkBody.find('\r'));
   return state;
 }
 
@@ -513,6 +513,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
 HttpRequest::ParseState HttpRequest::parseBody(std::string &body, HttpRequest &request) { 
   size_t  body_size = body.size();
   size_t  content_length = Utils::strToSizet(request.headers.find(kContentLength)->second);
+  if (body_size > content_length)
+    return PARSE_ERROR;
   request.body = body.substr(0, content_length);
   if (content_length > body_size)
     return PARSE_INPROGRESS;

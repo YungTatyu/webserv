@@ -302,16 +302,28 @@ TEST(HttpRequest, OkTest14) {
 }
 
 TEST(HttpRequest, OkTest15) {
-  // testcase: header fieldが一対ある時
-  // testcase: bodyある
-  std::string body = "this is body";
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", "5"}}, "", body.substr(0, 5), HttpRequest::PARSE_COMPLETE);
+  // testcase: long body
+  std::string body = "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
+  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long ";
+  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body, HttpRequest::PARSE_COMPLETE);
 
   // test
   std::string rawRequest =
       std::string("GET / HTTP/1.1\r\n")
       + "Host: aa\r\n"
-      + "Content-Length: 5\r\n"
+      + "Content-Length: " + std::to_string(body.size()) + "\r\n"
       + "\r\n"
       + body;
   HttpRequest test;
