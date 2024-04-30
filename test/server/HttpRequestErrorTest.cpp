@@ -303,4 +303,48 @@ TEST(HttpRequest, ErrorTest26) {
 
 /* -------------- uri decode error test end -------------- */
 
+/* -------------- header host test -------------- */
+TEST(HttpRequest, ErrorTest27) {
+  // test: empty
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: \r\n"
+      "New: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+/* -------------- header host test end -------------- */
+
+/* -------------- header content-length test -------------- */
+TEST(HttpRequest, ErrorTest28) {
+  // test: bigger than longmax
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: \r\n"
+      "content-length: 9223372036854775808\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest29) {
+  // test: empty
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: \r\n"
+      "content-length: \r\n";
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* -------------- header content-length test end -------------- */
+
 // chunkだと？

@@ -320,6 +320,22 @@ TEST(HttpRequest, OkTest15) {
   checkHttpRequestEqual(expect, test);
 }
 
+TEST(HttpRequest, OkTest16) {
+  // testcase: header headerにコロンがない
+  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"test", ""}}, "", "", HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      std::string("GET / HTTP/1.1\r\n")
+      + "Host: aa\r\n"
+      + "test\r\n"
+      + "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  checkHttpRequestEqual(expect, test);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
