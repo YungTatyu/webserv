@@ -145,8 +145,8 @@ public:
     return false;
   }
 
-  void sameTime(const config::Time& time1, const config::Time& time2) {
-    EXPECT_EQ(time1.time_in_ms_, time2.time_in_ms_);
+  void sameTime(const config::Time& expect, const config::Time& actual) {
+    EXPECT_EQ(expect.time_in_ms_, actual.time_in_ms_);
   }
 
   struct sockaddr_in createClient(std::string ip)
@@ -158,12 +158,11 @@ public:
     return cli_addr;
   }
 
-  bool sameLocation(const config::Location loc1, const config::Location* loc2)
+  void sameLocation(const config::Location expect, const config::Location* actual)
   {
-    if (loc2)
-      return loc1.uri == loc2->uri;
-    std::cerr << "can't find location" << std::endl;
-    return false;
+    if (actual)
+      EXPECT_EQ(loc1.uri, loc2->uri);
+    FAIL() << "can't find location" << std::endl;
   }
 
 };
