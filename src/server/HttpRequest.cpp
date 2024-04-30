@@ -60,15 +60,54 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
 }
 
 HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &request) {
-  std::string byteSize = rawRequest.substr(0, rawRequest.find('\r'));
-  ParseState state;
-  if (byteSize == "0")
-    state = HttpRequest::PARSE_COMPLETE;
-  else
-    state = HttpRequest::PARSE_INPROGRESS;
-  std::string chunkBody = rawRequest.substr(rawRequest.find('\n') + 1);
-  request.body += chunkBody.substr(0, chunkBody.find('\r'));
-  return state;
+  enum parseUriPhase {
+    sw_chunk_start = 0,
+    sw_chunk_size,
+    sw_chunk_extension,
+    sw_chunk_extension_almost_done,
+    sw_chunk_data,
+    sw_after_data,
+    sw_after_data_almost_done,
+    sw_last_chunk_extension,
+    sw_last_chunk_extension_almost_done
+  } state;
+
+  state = static_cast<parseUriPhase>(request.state_);
+  size_t i = 0;
+  size_t chunk_size = 0;
+  std::string bytes = request.key_buf_;
+  std::string body = request.val_buf_;
+  while (state != sw_last_chunk_extension_almost_done && i < rawRequest.size()) {
+    unsigned char ch = rawRequest[i];
+    switch (state)
+    {
+    case sw_chunk_start:
+      if (std::isdigit(ch)) {
+        bytes = ch;
+        break;
+      }
+      if (std::isalpha(ch)) {
+        unsigned char c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
+        bytes = c;
+        break;
+      }
+      return PARSE_ERROR;
+      break;
+    case sw_chunk_size:
+      break;
+    }
+  }
+  
+
+  // std::string byteSize = rawRequest.substr(0, rawRequest.find('\r'));
+  // ParseState state;
+  // if (byteSize == "0")
+  //   state = HttpRequest::PARSE_COMPLETE;
+  // else
+  //   state = HttpRequest::PARSE_INPROGRESS;
+  // std::string chunkBody = rawRequest.substr(rawRequest.find('\n') + 1);
+  // request.body += chunkBody.substr(0, chunkBody.find('\r'));
+  // return state;
 }
 
 HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRequest &request) {
