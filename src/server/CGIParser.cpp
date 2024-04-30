@@ -95,7 +95,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             state = sw_almost_end;
             break;
           default:
-            if (std::isspace(ch)) {
+            if (HttpRequest::isInvalidHeaderLetter(ch)) {
               state = sw_error;
               break;
             }
@@ -118,8 +118,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             state = sw_header_almost_done;
             break;
           default:
-            // 記号で始まるheaderはerrorにする
-            if ((cur_name.empty() && !std::isalnum(ch)) || !std::isprint(ch)) {
+            if (HttpRequest::isInvalidHeaderLetter(ch)) {
               state = sw_error;
               break;
             }
@@ -234,7 +233,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
         switch (ch) {
           case '\r':
           case '\n':
-            if (!isValidContentLength(cur_value)) {
+            if (!HttpRequest::isValidContentLength(cur_value)) {
               state = sw_error;
               break;
             }
@@ -254,7 +253,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             ++ri_;
             break;
           case ' ':
-            if (!isValidContentLength(cur_value)) {
+            if (!HttpRequest::isValidContentLength(cur_value)) {
               state = sw_error;
               break;
             }
@@ -410,15 +409,6 @@ void cgi::CGIParser::finalizeStatusCode() {
     return;
   }
   *(this->status_code_) = 200;
-}
-
-bool cgi::CGIParser::isValidContentLength(std::string cl) const {
-  unsigned long length;
-  std::istringstream iss(cl);
-  iss >> length;
-
-  if (iss.fail()) return false;
-  return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
 }
 
 void cgi::CGIParser::eraseHeader(const std::string& header) {

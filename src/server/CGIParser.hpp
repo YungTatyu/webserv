@@ -5,6 +5,7 @@
 #include <string>
 
 #include "HttpResponse.hpp"
+#include "HttpRequest.hpp"
 #include "Utils.hpp"
 
 namespace cgi {
@@ -32,7 +33,6 @@ class CGIParser {
   void parseBody(const std::string& cgi_response);
   void finishParsing();
   bool isValidStatusCode(const std::string& status_code) const;
-  bool isValidContentLength(std::string cl) const;
   void setStatusCode(const std::string& value);
   void finalizeStatusCode();
   void eraseHeader(const std::string& header);
