@@ -510,12 +510,11 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   return HttpRequest::PARSE_HEADER_DONE;
 }
 
-HttpRequest::ParseState HttpRequest::parseBody(std::string &body, HttpRequest &request) { 
-  size_t  body_size = body.size();
+HttpRequest::ParseState HttpRequest::parseBody(std::string &rawRequest, HttpRequest &request) { 
+  size_t  body_size = rawRequest.size();
   size_t  content_length = Utils::strToSizet(request.headers.find(kContentLength)->second);
-  if (body_size > content_length)
-    return PARSE_ERROR;
-  request.body = body.substr(0, content_length);
+  request.body = rawRequest.substr(0, content_length);
+  rawRequest = rawRequest.substr(content_length); // bodyからはみ出た部分は次のリクエストに追加される
   if (content_length > body_size)
     return PARSE_INPROGRESS;
   return PARSE_COMPLETE;

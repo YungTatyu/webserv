@@ -302,21 +302,9 @@ TEST(HttpRequest, OkTest14) {
 }
 
 TEST(HttpRequest, OkTest15) {
-  // testcase: long body
-  std::string body = "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long "
-  "this is body long this is body long this is body long this is body long this is body long this is body long this is body long ";
+  // testcase: body with next request
+  std::string body = "this is body";
+  std::string next_req = "next request";
   HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body, HttpRequest::PARSE_COMPLETE);
 
   // test
@@ -325,11 +313,13 @@ TEST(HttpRequest, OkTest15) {
       + "Host: aa\r\n"
       + "Content-Length: " + std::to_string(body.size()) + "\r\n"
       + "\r\n"
-      + body;
+      + body
+      + next_req;
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
   checkHttpRequestEqual(expect, test);
+  EXPECT_EQ(rawRequest, next_req); // 次のリクエストは残ったまま
 }
 
 TEST(HttpRequest, OkTest16) {
