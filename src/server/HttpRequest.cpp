@@ -75,10 +75,10 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
   } state;
 
   state = static_cast<parseUriPhase>(request.state_);
-  const size_t kMaxChunkSize = std::numeric_limits<long>::max();
+  const static size_t kMaxChunkSize = std::numeric_limits<long>::max();
   size_t i = 0;
+  size_t bytes;
   std::string chunk_bytes = request.key_buf_;
-  std::string body = request.val_buf_;
   while (state != sw_last_chunk_extension_almost_done && i < rawRequest.size()) {
     unsigned char ch, c;
     ch = rawRequest[i];
@@ -119,6 +119,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
         default:
           return PARSE_ERROR;
         }
+        break;
       }
 
       switch (ch) {
@@ -139,12 +140,79 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       break;
 
     case sw_chunk_data:
+      bytes = Utils::strToSizet(chunk_bytes);
+      request.body += ch;
+      if (bytes == 0) {
+        state = sw_after_data;
+        chunk_bytes.clear();
+        break;
+      }
+      --bytes;
+      chunk_bytes = Utils::toStr(bytes);
+      break;
+
+    case sw_after_data:
+      switch (ch)
+      {
+      case '\r':
+        state = sw_after_data_almost_done;
+        break;
+      case '\n':
+        state = sw_chunk_start;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+
+    case sw_after_data_almost_done:
+      switch (ch)
+      {
+      case '\n':
+        state = sw_chunk_start;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+    
+    case sw_last_chunk_extension:
+      switch (ch)
+      {
+      case '\r':
+        state = sw_last_chunk_extension_almost_done;
+        break;
+      case '\n':
+        state = sw_chunk_end;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+
+    case sw_last_chunk_extension_almost_done:
+      switch (ch)
+      {
+      case '\n':
+        state = sw_chunk_end;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+    
+    case sw_chunk_end:
       break;
     }
     ++i;
   }
   
-
+  if (state != sw_chunk_end) {
+    request.key_buf_ = chunk_bytes;
+    request.state_ = state;
+    return request.parseState;
+  }
+  return PARSE_COMPLETE;
   // std::string chunk_byteSize = rawRequest.substr(0, rawRequest.find('\r'));
   // ParseState state;
   // if (chunk_byteSize == "0")
@@ -586,7 +654,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     request.state_ = state;
     request.key_buf_ = cur_name;
     request.val_buf_ = cur_value;
-    return request.parseState;
+    return PARSE_INPROGRESS;
   }
   request.state_ = 0; // reset
   if (request.headers.find(kHost) == request.headers.end()) return PARSE_ERROR;
