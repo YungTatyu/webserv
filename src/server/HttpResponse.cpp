@@ -356,57 +356,68 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   while (phase != sw_end_phase) {
     switch (phase) {
       case sw_start_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] start phase\n");
+        config_handler.writeErrorLog("webserv: [debug] start phase\n");
         phase = sw_pre_search_location_phase;
         break;
+
       case sw_pre_search_location_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] pre search location phase\n");
+        config_handler.writeErrorLog("webserv: [debug] pre search location phase\n");
         phase = handlePreSearchLocationPhase(request.parseState, response, client_sock, client_addr);
         break;
+
       case sw_search_location_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] search location phase\n");
+        config_handler.writeErrorLog("webserv: [debug] search location phase\n");
         phase = handleSearchLocationPhase(response, request, server, &location, config_handler);
         if (location)
-          config_handler.writeErrorLog(server, location,
-                                       "webserv: [debug] location inherit " + location->uri + "\n");
+          config_handler.writeErrorLog("webserv: [debug] location found -> " + location->uri + "\n");
         break;
+
       case sw_post_search_location_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] post search location phase\n");
+        config_handler.writeErrorLog("webserv: [debug] post search location phase\n");
         response.root_path_ = config_handler.searchRootPath(server, location);
+        config_handler.writeErrorLog("webserv: [debug] root path is " + response.root_path_ + "\n");
         phase = sw_return_phase;
         break;
+
       case sw_return_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] return phase\n");
+        config_handler.writeErrorLog("webserv: [debug] return phase\n");
         phase = handleReturnPhase(response, server, location, config_handler);
         break;
+
       case sw_allow_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] allow phase\n");
+        config_handler.writeErrorLog("webserv: [debug] allow phase\n");
         phase = handleAllowPhase(response, request, server, location, client_addr, config_handler);
         break;
+
       case sw_uri_check_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] uri check phase\n");
+        config_handler.writeErrorLog("webserv: [debug] uri check phase\n");
         phase = handleUriCheckPhase(response, request, server, location);
         break;
+
       case sw_search_res_file_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] search response file phase\n");
+        config_handler.writeErrorLog("webserv: [debug] search response file phase\n");
         phase = handleSearchResFilePhase(response, request, server, location, config_handler);
         break;
+
       case sw_content_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] content phase\n");
+        config_handler.writeErrorLog("webserv: [debug] content phase\n");
         phase = handleContentPhase(response);
         break;
+
       case sw_error_page_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] error page phase\n");
+        config_handler.writeErrorLog("webserv: [debug] error page phase\n");
         phase = handleErrorPagePhase(response, request, server, location, config_handler);
         break;
+
       case sw_log_phase:
-        config_handler.writeErrorLog(server, location, "webserv: [debug] log phase\n");
+        config_handler.writeErrorLog("webserv: [debug] log phase\n");
         //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
             config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, request));
         phase = sw_end_phase;
         break;
+
       default:
         phase = sw_end_phase;
         break;
@@ -414,11 +425,11 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   }
 
   if (response.state_ == RES_EXECUTE_CGI) return "";
-  config_handler.writeErrorLog(server, location, "webserv: [debug] header filter\n");
+  config_handler.writeErrorLog("webserv: [debug] header filter\n");
   headerFilterPhase(response,
                     config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
 
-  config_handler.writeErrorLog(server, location, "webserv: [debug] create final response\n\n\n");
+  config_handler.writeErrorLog("webserv: [debug] create final response\n\n");
   return createResponse(response);
 }
 
@@ -457,8 +468,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
   }
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
   if (*location)
-    config_handler.writeErrorLog(server, *location,
-                                 "webserv: [debug] a request access " + (*location)->uri + "\n");
+    config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri + "\n");
   return sw_post_search_location_phase;
 }
 
@@ -506,7 +516,7 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
     return sw_allow_phase;
 
   prepareReturn(response, location->return_list[0]);
-  config_handler.writeErrorLog(server, location, "webserv: [debug] redirect occured\n");
+  config_handler.writeErrorLog("webserv: [debug] redirect occured\n");
   return sw_error_page_phase;
 }
 
