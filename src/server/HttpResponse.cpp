@@ -429,7 +429,8 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   headerFilterPhase(response,
                     config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
 
-  config_handler.writeErrorLog("webserv: [debug] create final response\n\n");
+  config_handler.writeErrorLog("webserv: [debug] create final response\n");
+  config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ + "\n\n");
   return createResponse(response);
 }
 
