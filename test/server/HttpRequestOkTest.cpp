@@ -177,6 +177,7 @@ TEST(HttpRequest, OkTest8) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
 
   // testcase: chunked second
   HttpRequest expect2(config::GET, "/html", "HTTP/1.1", headers, "", "hello world",
@@ -188,6 +189,7 @@ TEST(HttpRequest, OkTest8) {
       " world"
       "\r\n";
   HttpRequest::parseRequest(chunked, test);
+  checkHttpRequestEqual(expect2, test);
 
   // testcase: chunked third (end)
   HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "", "hello world",

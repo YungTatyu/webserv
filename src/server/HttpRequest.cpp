@@ -102,7 +102,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       break;
     case sw_chunk_size:
       std::cerr << "sw_chunk_size\n";
-      if (Utils::strToSizet(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
+      if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
       if (std::isdigit(ch)) {
         chunk_bytes += ch;
         break;
