@@ -381,7 +381,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_return_phase:
         config_handler.writeErrorLog("webserv: [debug] return phase\n");
-        phase = handleReturnPhase(response, server, location, config_handler);
+        phase = handleReturnPhase(response, location, config_handler);
         break;
 
       case sw_allow_phase:
@@ -510,7 +510,6 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& response,
-                                                            const config::Server& server,
                                                             const config::Location* location,
                                                             const ConfigHandler& config_handler) {
   if (!location || location->directives_set.find(kRETURN) == location->directives_set.end())
