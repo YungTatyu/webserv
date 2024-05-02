@@ -61,8 +61,7 @@ public:
 
     config::Parser parser(*config, lexer.getTokens(), conf_path_);
     if (!parser.parse()){
-      std::cerr << "parse failed" << std::endl;
-      FAIL();
+      FAIL() << "Parse failed" << std::endl;
     }
 
     // log出力テストはlogファイル作成
@@ -71,8 +70,7 @@ public:
     {
       if (!initLogFds(*config)) {
         config_handler_.loadConfiguration(config);
-        std::cerr << "parse failed" << std::endl;
-        FAIL();
+        FAIL() << "initLogFds failed" << std::endl;
       }
     }
 
