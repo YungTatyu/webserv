@@ -449,10 +449,35 @@ TEST(HttpRequest, ErrorTest37) {
   EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
+TEST(HttpRequest, ErrorTest38) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:+0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest39) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:-0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
 
 /* -------------- header content-length test end -------------- */
 
-TEST(HttpRequest, ErrorTest38) {
+TEST(HttpRequest, ErrorTest40) {
   // test: dup content-length, transfer-encoding
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
@@ -466,7 +491,7 @@ TEST(HttpRequest, ErrorTest38) {
   EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
-TEST(HttpRequest, ErrorTest39) {
+TEST(HttpRequest, ErrorTest41) {
   // test: dup content-length, transfer-encoding
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"

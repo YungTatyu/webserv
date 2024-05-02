@@ -240,3 +240,8 @@ size_t Utils::strToSizetInHex(const std::string& str) {
   iss >> std::hex >> size;
   return size;
 }
+
+bool Utils::isSign(unsigned char ch) {
+  return ch == '+' || ch == '-';
+}
+
