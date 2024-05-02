@@ -79,25 +79,29 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
   size_t i = 0;
   size_t bytes;
   std::string chunk_bytes = request.key_buf_;
-  while (state != sw_last_chunk_extension_almost_done && i < rawRequest.size()) {
+  while (state != sw_chunk_end && i < rawRequest.size()) {
     unsigned char ch, c;
     ch = rawRequest[i];
     
     switch (state)
     {
     case sw_chunk_start:
+      std::cerr << "sw_chunk_start\n";
       if (std::isdigit(ch)) {
         chunk_bytes = ch;
+        state = sw_chunk_size;
         break;
       }
       c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
       if (c >= 'a' && c <= 'f') {
         chunk_bytes = c;
+        state = sw_chunk_size;
         break;
       }
       return PARSE_ERROR;
       break;
     case sw_chunk_size:
+      std::cerr << "sw_chunk_size\n";
       if (Utils::strToSizet(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
       if (std::isdigit(ch)) {
         chunk_bytes += ch;
@@ -121,7 +125,6 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
         }
         break;
       }
-
       switch (ch) {
       case '\r':
         state = sw_chunk_extension_almost_done;
@@ -135,23 +138,27 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       break;
 
     case sw_chunk_extension_almost_done:
+      std::cerr << "sw_chunk_extension_almost_done\n";
       if (ch != '\n') return PARSE_ERROR;
       state = sw_chunk_data;
       break;
 
     case sw_chunk_data:
+      std::cerr << "sw_chunk_data\n";
       bytes = Utils::strToSizet(chunk_bytes);
+      std::cerr << bytes << "bytes\n";
       request.body += ch;
+      --bytes;
       if (bytes == 0) {
         state = sw_after_data;
         chunk_bytes.clear();
         break;
       }
-      --bytes;
       chunk_bytes = Utils::toStr(bytes);
       break;
 
     case sw_after_data:
+      std::cerr << "sw_after_data\n";
       switch (ch)
       {
       case '\r':
@@ -166,6 +173,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       break;
 
     case sw_after_data_almost_done:
+      std::cerr << "sw_after_data_almost_done\n";
       switch (ch)
       {
       case '\n':
@@ -177,6 +185,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       break;
     
     case sw_last_chunk_extension:
+      std::cerr << "sw_last_chunk_extension\n";
       switch (ch)
       {
       case '\r':
@@ -191,6 +200,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       break;
 
     case sw_last_chunk_extension_almost_done:
+      std::cerr << "sw_last_chunk_extension_almost_done\n";
       switch (ch)
       {
       case '\n':
@@ -210,18 +220,9 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
   if (state != sw_chunk_end) {
     request.key_buf_ = chunk_bytes;
     request.state_ = state;
-    return request.parseState;
+    return PARSE_INPROGRESS;
   }
   return PARSE_COMPLETE;
-  // std::string chunk_byteSize = rawRequest.substr(0, rawRequest.find('\r'));
-  // ParseState state;
-  // if (chunk_byteSize == "0")
-  //   state = HttpRequest::PARSE_COMPLETE;
-  // else
-  //   state = HttpRequest::PARSE_INPROGRESS;
-  // std::string chunkBody = rawRequest.substr(rawRequest.find('\n') + 1);
-  // request.body += chunkBody.substr(0, chunkBody.find('\r'));
-  // return state;
 }
 
 HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRequest &request) {
