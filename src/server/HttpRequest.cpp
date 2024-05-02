@@ -762,6 +762,7 @@ bool HttpRequest::isValidHost(const std::string &str) {
 }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
+  if (str.empty() || str[0] == '-') return false;
   unsigned long length;
   std::istringstream iss(str);
   iss >> length;
