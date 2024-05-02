@@ -774,6 +774,6 @@ bool HttpRequest::isValidContentLength(const std::string &str) {
   std::istringstream iss(str);
   iss >> length;
 
-  if (iss.fail()) return false;
+  if (iss.fail() || iss.bad() || iss.peek() != EOF) return false;
   return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
 }

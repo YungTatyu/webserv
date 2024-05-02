@@ -374,7 +374,7 @@ bool cgi::CGIParser::isValidStatusCode(const std::string& status_code) const {
   std::istringstream iss(status_code.substr(0, 3));
   int num;
   iss >> num;
-  if (iss.fail()) return false;
+  if (iss.fail() || iss.bad()) return false;
   return num >= 100;
 }
 
