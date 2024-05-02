@@ -46,7 +46,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       case PARSE_HEADER_DONE:
       case PARSE_INPROGRESS:
         if (request.headers.find(kTransferEncoding) != request.headers.end())
-          state = HttpRequest::doParseChunked(rawRequest, request);
+          state = HttpRequest::parseChunkedBody(rawRequest, request);
         else
           state = HttpRequest::parseBody(rawRequest, request);
         break;
@@ -60,7 +60,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
   request.parseState = state;
 }
 
-HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, HttpRequest &request) {
+HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, HttpRequest &request) {
   enum parseUriPhase {
     sw_chunk_start = 0,
     sw_chunk_size,
@@ -71,6 +71,8 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
     sw_after_data_almost_done,
     sw_last_chunk_extension,
     sw_last_chunk_extension_almost_done,
+    sw_last_chunk_extension_done,
+    sw_chunk_almost_end,
     sw_chunk_end
   } state;
 
@@ -118,7 +120,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
           state = sw_last_chunk_extension_almost_done;
           break;
         case '\n':
-          state = sw_chunk_end;
+          state = sw_last_chunk_extension_done;
           break;
         default:
           return PARSE_ERROR;
@@ -192,7 +194,7 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
         state = sw_last_chunk_extension_almost_done;
         break;
       case '\n':
-        state = sw_chunk_end;
+        state = sw_last_chunk_extension_done;
         break;
       default:
         return PARSE_ERROR;
@@ -204,13 +206,38 @@ HttpRequest::ParseState HttpRequest::doParseChunked(std::string &rawRequest, Htt
       switch (ch)
       {
       case '\n':
+        state = sw_last_chunk_extension_done;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+
+    case sw_last_chunk_extension_done:
+      switch (ch)
+      {
+      case '\r':
+        state = sw_chunk_almost_end;
+        break;
+      case '\n':
         state = sw_chunk_end;
         break;
       default:
         return PARSE_ERROR;
       }
       break;
-    
+
+    case sw_chunk_almost_end:
+      switch (ch)
+      {
+      case '\n':
+        state = sw_chunk_end;
+        break;
+      default:
+        return PARSE_ERROR;
+      }
+      break;
+
     case sw_chunk_end:
       break;
     }

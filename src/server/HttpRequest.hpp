@@ -37,7 +37,7 @@ class HttpRequest {
   // static HttpRequest parseRequest(std::string& rawRequest, HttpRequest&
   // oldRequest);
   static void parseRequest(std::string &rawRequest, HttpRequest &request);
-  static ParseState doParseChunked(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseChunkedBody(std::string &rawRequest, HttpRequest &request);
   static bool isInvalidHeaderLetter(unsigned char ch);
   static bool isValidContentLength(const std::string &str);
 
