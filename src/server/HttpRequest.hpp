@@ -23,6 +23,7 @@ class HttpRequest {
     PARSE_VERSION_DONE,
     PARSE_HEADER_DONE,
     PARSE_BODY_DONE,
+    PARSE_NOT_IMPLEMENTED,
     PARSE_ERROR
   };
 
@@ -34,8 +35,6 @@ class HttpRequest {
               const ParseState parseState = PARSE_BEFORE);
   ~HttpRequest();
 
-  // static HttpRequest parseRequest(std::string& rawRequest, HttpRequest&
-  // oldRequest);
   static void parseRequest(std::string &rawRequest, HttpRequest &request);
   static ParseState parseChunkedBody(std::string &rawRequest, HttpRequest &request);
   static bool isInvalidHeaderLetter(unsigned char ch);

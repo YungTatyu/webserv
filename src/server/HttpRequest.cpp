@@ -6,6 +6,7 @@
 const static char*  kHost = "Host";
 const static char*  kContentLength = "Content-Length";
 const static char*  kTransferEncoding = "Transfer-Encoding";
+const static char*  kChunk = "chunked";
 
 HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string &uri,
                          const std::string &version,
@@ -685,7 +686,13 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     return PARSE_INPROGRESS;
   }
   request.state_ = 0; // reset
-  if (request.headers.find(kHost) == request.headers.end()) return PARSE_ERROR;
+
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator eit, clit;
+  eit = request.headers.end();
+  if (request.headers.find(kHost) == eit) return PARSE_ERROR;
+  clit = request.headers.find(kTransferEncoding);
+  if (clit != eit && !Utils::compareIgnoreCase(kChunk, clit->second)) return PARSE_NOT_IMPLEMENTED; //chunk以外は対応しない
+  if (clit != eit && request.headers.find(kContentLength) != eit) return PARSE_ERROR; // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
   rawRequest = rawRequest.substr(i);
   clearBuf(request);
   return HttpRequest::PARSE_HEADER_DONE;

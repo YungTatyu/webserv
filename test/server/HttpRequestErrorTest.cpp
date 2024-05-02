@@ -439,12 +439,12 @@ TEST(HttpRequest, ErrorTest36) {
 /* -------------- header content-length test end -------------- */
 
 TEST(HttpRequest, ErrorTest37) {
-  // test: dup content-length, tranfer-encoding
+  // test: dup content-length, transfer-encoding
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
       "Host: tt\r\n"
       "content-length: 2\r\n"
-      "tranfer-encoding: chunked\r\n"
+      "transfer-encoding: chunked\r\n"
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
@@ -453,11 +453,11 @@ TEST(HttpRequest, ErrorTest37) {
 }
 
 TEST(HttpRequest, ErrorTest38) {
-  // test: dup content-length, tranfer-encoding
+  // test: dup content-length, transfer-encoding
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
       "Host: tt\r\n"
-      "tranfer-encoding: chunked\r\n"
+      "transfer-encoding: chunked\r\n"
       "content-length: 2\r\n"
       "\r\n";
   HttpRequest test;
@@ -466,5 +466,6 @@ TEST(HttpRequest, ErrorTest38) {
   EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
+/* -------------- header transfer-encoding test -------------- */
 /* -------------- header transfer-encoding test end -------------- */
 
