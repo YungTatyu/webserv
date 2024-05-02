@@ -159,7 +159,10 @@ public:
   void sameLocation(const config::Location& expect, const config::Location* actual)
   {
     if (actual)
-      EXPECT_EQ(loc1.uri, loc2->uri);
+    {
+      EXPECT_EQ(expect.uri, actual->uri);
+      return;
+    }
     FAIL() << "can't find location" << std::endl;
   }
 
