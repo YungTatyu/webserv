@@ -9,7 +9,7 @@
 #include "LimitExcept.hpp"
 #include "ResponseTest.hpp"
 
-TEST(HttpResponsetry_files, try_files_in_server) {
+TEST(HttpResponseTry_files, in_server) {
   test::ResponseTest test("test/server/HttpResponse/try_files/file/try_files1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}},
                                         {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
@@ -27,7 +27,7 @@ TEST(HttpResponsetry_files, try_files_in_server) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponsetry_files, try_files_in_loc) {
+TEST(HttpResponseTry_files, in_loc) {
   test::ResponseTest test("test/server/HttpResponse/try_files/file/try_files1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4242}, {"127.0.0.1", 4243}}, {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
@@ -45,7 +45,7 @@ TEST(HttpResponsetry_files, try_files_in_loc) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponsetry_files, try_files_redirect) {
+TEST(HttpResponseTry_files, internal_redirect) {
   test::ResponseTest test("test/server/HttpResponse/try_files/file/try_files_redirect.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4242}, {"127.0.0.1", 4243}}, {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
@@ -62,7 +62,7 @@ TEST(HttpResponsetry_files, try_files_redirect) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponsetry_files, try_files_redirect_dir_nothing) {
+TEST(HttpResponseTry_files, internal_redirect_dir_nothing) {
   test::ResponseTest test("test/server/HttpResponse/try_files/file/try_files_redirect.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
@@ -79,7 +79,7 @@ TEST(HttpResponsetry_files, try_files_redirect_dir_nothing) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[500]));
 }
 
-TEST(HttpResponsetry_files, try_files_error_code) {
+TEST(HttpResponseTry_files, error_code) {
   test::ResponseTest test("test/server/HttpResponse/try_files/file/try_files_err.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
