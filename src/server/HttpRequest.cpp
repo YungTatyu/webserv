@@ -40,9 +40,6 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
         break;
       case PARSE_REQUEST_LINE_DONE:
         state = HttpRequest::parseHeaders(rawRequest, request);
-        if (state == PARSE_ERROR) break;
-        if (request.headers.find(kTransferEncoding) == request.headers.end() && request.headers.find(kContentLength) == request.headers.end())
-          state = PARSE_COMPLETE;
         break;
       case PARSE_HEADER_DONE:
       case PARSE_INPROGRESS:
@@ -89,7 +86,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
     switch (state)
     {
     case sw_chunk_start:
-      std::cerr << "sw_chunk_start\n";
       if (std::isdigit(ch)) {
         chunk_bytes = ch;
         state = sw_chunk_size;
@@ -104,7 +100,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       return PARSE_ERROR;
       break;
     case sw_chunk_size:
-      std::cerr << "sw_chunk_size\n";
       if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
       if (std::isdigit(ch)) {
         chunk_bytes += ch;
@@ -141,15 +136,12 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       break;
 
     case sw_chunk_extension_almost_done:
-      std::cerr << "sw_chunk_extension_almost_done\n";
       if (ch != '\n') return PARSE_ERROR;
       state = sw_chunk_data;
       break;
 
     case sw_chunk_data:
-      std::cerr << "sw_chunk_data\n";
       bytes = Utils::strToSizet(chunk_bytes);
-      std::cerr << bytes << "bytes\n";
       request.body += ch;
       --bytes;
       if (bytes == 0) {
@@ -161,7 +153,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       break;
 
     case sw_after_data:
-      std::cerr << "sw_after_data\n";
       switch (ch)
       {
       case '\r':
@@ -176,7 +167,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       break;
 
     case sw_after_data_almost_done:
-      std::cerr << "sw_after_data_almost_done\n";
       switch (ch)
       {
       case '\n':
@@ -188,7 +178,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       break;
     
     case sw_last_chunk_extension:
-      std::cerr << "sw_last_chunk_extension\n";
       switch (ch)
       {
       case '\r':
@@ -203,7 +192,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       break;
 
     case sw_last_chunk_extension_almost_done:
-      std::cerr << "sw_last_chunk_extension_almost_done\n";
       switch (ch)
       {
       case '\n':
@@ -687,15 +675,18 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   }
   request.state_ = 0; // reset
 
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator eit, clit;
-  eit = request.headers.end();
-  if (request.headers.find(kHost) == eit) return PARSE_ERROR;
-  clit = request.headers.find(kTransferEncoding);
-  if (clit != eit && !Utils::compareIgnoreCase(kChunk, clit->second)) return PARSE_NOT_IMPLEMENTED; //chunk以外は対応しない
-  if (clit != eit && request.headers.find(kContentLength) != eit) return PARSE_ERROR; // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator end_it, cl_it, te_it;
+  end_it = request.headers.end();
+  if (request.headers.find(kHost) == end_it) return PARSE_ERROR;
+  te_it = request.headers.find(kTransferEncoding);
+  cl_it = request.headers.find(kContentLength);
+  if (te_it != end_it && !Utils::compareIgnoreCase(kChunk, te_it->second)) return PARSE_NOT_IMPLEMENTED; //chunk以外は対応しない
+  if (te_it != end_it && cl_it != end_it) return PARSE_ERROR; // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
   rawRequest = rawRequest.substr(i);
   clearBuf(request);
-  return HttpRequest::PARSE_HEADER_DONE;
+  if (te_it == end_it && cl_it == end_it) // bodyなし
+    return PARSE_COMPLETE;
+  return PARSE_HEADER_DONE;
 }
 
 /**

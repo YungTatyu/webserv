@@ -23,7 +23,8 @@ TEST(HttpRequest, OkTest1) {
   // test
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -80,7 +81,8 @@ TEST(HttpRequest, OkTest4) {
   // test
   std::string rawRequest =
       "GET /html?query1=value1 HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -97,7 +99,8 @@ TEST(HttpRequest, OkTest5) {
   // test
   std::string rawRequest =
       "GET /html?query1=value1&query2=value2 HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -213,7 +216,8 @@ TEST(HttpRequest, OkTest9) {
   // test
   std::string rawRequest =
       "GET /Hello%20World%21 HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -229,7 +233,8 @@ TEST(HttpRequest, OkTest10) {
   // test
   std::string rawRequest =
       "POST / HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -245,7 +250,8 @@ TEST(HttpRequest, OkTest11) {
   // test
   std::string rawRequest =
       "HEAD / HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -261,7 +267,8 @@ TEST(HttpRequest, OkTest12) {
   // test
   std::string rawRequest =
       "HEAD / HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -277,7 +284,8 @@ TEST(HttpRequest, OkTest13) {
   // test
   std::string rawRequest =
       "DELETE / HTTP/1.1\r\n"
-      "Host: aa\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
