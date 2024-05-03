@@ -538,7 +538,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
 }
 
 HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, HttpRequest &request) {
-  ParseState state = request.parseState;
+  ParseState &state = request.parseState;
   while (state != PARSE_REQUEST_LINE_DONE) {
     ParseState state_before = state;
     switch (state) {
@@ -559,7 +559,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
       default:
         break;
     };
-    if (state == PARSE_ERROR) return state;
+    if (state == PARSE_ERROR) break;
     if (state == state_before) break;
   }
   return state;
