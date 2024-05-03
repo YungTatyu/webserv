@@ -236,6 +236,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
   if (state != sw_chunk_end) {
     request.key_buf_ = chunk_bytes;
     request.state_ = state;
+    rawRequest.clear();
     return PARSE_INPROGRESS;
   }
   return PARSE_COMPLETE;
@@ -274,9 +275,6 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     ++i;
   }
 
-  std::cerr << "method=" << method << "---\n";
-  std::cerr << "raw request=" << rawRequest << "---\n";
-
   if (state != sw_method_end) {
     request.key_buf_ = method;
     request.state_ = state;
@@ -313,8 +311,6 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   request.state_ = 0; // reset;
   request.key_buf_.clear();
   rawRequest = rawRequest.substr(i);
-  std::cerr << "end method=" << method << "---\n";
-  std::cerr << "end raw request=" << rawRequest << "---\n";
   return HttpRequest::PARSE_METHOD_DONE;
 }
 
@@ -528,6 +524,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
   if (state != sw_end) {
     request.key_buf_ = version;
     request.state_ = state;
+    rawRequest.clear();
     return request.parseState;
   }
   request.version = version;
@@ -684,6 +681,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     request.state_ = state;
     request.key_buf_ = cur_name;
     request.val_buf_ = cur_value;
+    rawRequest.clear();
     return request.parseState;
   }
   request.state_ = 0; // reset
