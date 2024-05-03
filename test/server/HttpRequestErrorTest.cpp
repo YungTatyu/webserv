@@ -506,5 +506,59 @@ TEST(HttpRequest, ErrorTest41) {
 }
 
 /* -------------- header transfer-encoding test -------------- */
+
+TEST(HttpRequest, ErrorTest42) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding: \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest43) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest44) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding:\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest45) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding:random \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+
 /* -------------- header transfer-encoding test end -------------- */
 
