@@ -437,3 +437,39 @@ TEST(HttpRequest, OkTest18) {
 
   checkHttpRequestEqual(expect3, test);
 }
+
+/* -------------- chunk test -------------- */
+
+TEST(HttpRequest, chunk_method_get_1) {
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", HttpRequest::PARSE_BEFORE);
+
+  // test: "G" "E" "T" " "
+  std::string req = "G";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "E";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "T";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = " ";
+  HttpRequest expect2(config::GET, "", "", {}, "", "", HttpRequest::PARSE_METHOD_DONE);
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+
+  req =
+  "/ HTTP/1.1\r\n"
+  "Host: aa\r\n"
+  "\r\n";
+  HttpRequest expect3(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
+}
+
+/* -------------- chunk test end -------------- */
