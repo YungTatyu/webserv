@@ -245,7 +245,6 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   enum ParseMethodPhase {
     sw_method_start = 0,
     sw_method_mid,
-    sw_method_almost_end,
     sw_method_end,
   } state;
 
@@ -257,21 +256,17 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     unsigned char ch = rawRequest[i];
     switch (state) {
       case sw_method_start:
+        if (ch < 'A' || ch > 'Z') return PARSE_ERROR;
         method += ch;
         state = sw_method_mid;
         break;
       case sw_method_mid:
-        if (std::isalpha(ch)) {
-          method += ch;
-        } else if (ch == ' ') {
-          state = sw_method_almost_end;
-        } else {
-          return PARSE_ERROR;
+        if (ch == ' ') {
+          state = sw_method_end;
+          break;
         }
-        break;
-      case sw_method_almost_end:
-        rawRequest = rawRequest.substr(i);
-        state = sw_method_end;
+        if (ch < 'A' || ch > 'Z') return PARSE_ERROR;
+        method += ch;
         break;
       case sw_method_end:
         break;
@@ -279,12 +274,15 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     ++i;
   }
 
+  std::cerr << "method=" << method << "---\n";
+  std::cerr << "raw request=" << rawRequest << "---\n";
+
   if (state != sw_method_end) {
     request.key_buf_ = method;
     request.state_ = state;
+    rawRequest.clear();
     return request.parseState;
   }
-  request.state_ = 0; // reset;
 
   switch (method.size()) {
     case 3:
@@ -312,7 +310,11 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     default:
       return PARSE_ERROR;  // 501 Not Implemented (SHOULD)
   }
+  request.state_ = 0; // reset;
   request.key_buf_.clear();
+  rawRequest = rawRequest.substr(i);
+  std::cerr << "end method=" << method << "---\n";
+  std::cerr << "end raw request=" << rawRequest << "---\n";
   return HttpRequest::PARSE_METHOD_DONE;
 }
 
@@ -325,28 +327,37 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   enum parseUriPhase {
     sw_start = 0,
     sw_slash_before_uri,
-    sw_schema,
-    sw_almost_end,
+    sw_after_slash_in_uri,
+    sw_uri,
     sw_end
   } state;
 
   state = static_cast<parseUriPhase>(request.state_);
   size_t i = 0;
+  std::string uri = request.key_buf_;
   while (state != sw_end && i < rawRequest.size()) {
+    unsigned char ch = rawRequest[i];
     switch (state) {
       case sw_start:
         state = sw_slash_before_uri;
         break;
       case sw_slash_before_uri:
         if (rawRequest[i] != '/') return PARSE_ERROR;
+        uri = ch;
         ++i;
-        state = sw_schema;
+        state = sw_after_slash_in_uri;
         break;
-      case sw_schema:
-        state = sw_almost_end;
+      case sw_after_slash_in_uri:
+        state = sw_uri;
         break;
-      case sw_almost_end:
-        state = sw_end;
+      case sw_uri:
+        ++i;
+        if (ch == ' ') {
+          state = sw_end;
+          break;
+        }
+        if (isInvalidLetter(ch)) return PARSE_ERROR;
+        uri += ch;
         break;
       case sw_end:
         break;
@@ -356,17 +367,19 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   if (state != sw_end) // parse未完了：引き続きクライアントからのrequestを待つ
   {
     request.state_ = state;
+    request.key_buf_ = uri;
+    rawRequest.clear();
     return request.parseState;
   }
+
+  uri = urlDecode(uri);
+  request.uri = uri.substr(0, uri.find('?'));
+  size_t qindex = uri.find('?');
+  if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
+  
+  rawRequest = rawRequest.substr(i);
   request.state_ = 0; // reset
-
-  std::string tmp = rawRequest.substr(0, rawRequest.find(' '));
-  tmp = urlDecode(tmp);
-  request.uri = tmp.substr(0, tmp.find('?'));
-  size_t qindex = tmp.find('?');
-  if (qindex != std::string::npos) request.queries = tmp.substr(tmp.find('?') + 1);
-  rawRequest = rawRequest.substr(rawRequest.find(' ') + 1);
-
+  request.key_buf_.clear();
   return HttpRequest::PARSE_URI_DONE;
 }
 
@@ -587,7 +600,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           break;
         }
         // space以下, del, :はエラー
-        if (isInvalidHeaderLetter(ch) || ch == ':') return PARSE_ERROR;
+        if (isInvalidLetter(ch) || ch == ':') return PARSE_ERROR;
         state = sw_name;
         break;
       case sw_name:
@@ -603,7 +616,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           state = sw_header_done;
           break;        
         default:
-          if (isInvalidHeaderLetter(ch)) return PARSE_ERROR;
+          if (isInvalidLetter(ch)) return PARSE_ERROR;
           cur_name += ch;
           ++i;
           break;
@@ -671,7 +684,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     request.state_ = state;
     request.key_buf_ = cur_name;
     request.val_buf_ = cur_value;
-    return PARSE_INPROGRESS;
+    return request.parseState;
   }
   request.state_ = 0; // reset
 
@@ -745,13 +758,13 @@ bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::strin
 }
 
 /**
- * @brief ascii: space以下, delはheaderの名前に受け付けない
+ * @brief ascii: space以下, delはheaderの名前, uriに受け付けない
  * 
  * @param ch 
  * @return true 
  * @return false 
  */
-bool HttpRequest::isInvalidHeaderLetter(unsigned char ch) {
+bool HttpRequest::isInvalidLetter(unsigned char ch) {
   return ch <= ' ' || ch == 127;  
 }
 

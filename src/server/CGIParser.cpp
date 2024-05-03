@@ -95,7 +95,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             state = sw_almost_end;
             break;
           default:
-            if (HttpRequest::isInvalidHeaderLetter(ch)) {
+            if (HttpRequest::isInvalidLetter(ch)) {
               state = sw_error;
               break;
             }
@@ -118,7 +118,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             state = sw_header_almost_done;
             break;
           default:
-            if (HttpRequest::isInvalidHeaderLetter(ch)) {
+            if (HttpRequest::isInvalidLetter(ch)) {
               state = sw_error;
               break;
             }
