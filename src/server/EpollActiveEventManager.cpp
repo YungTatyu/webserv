@@ -19,12 +19,12 @@ void EpollActiveEventManager::clearAllEvents() { this->active_events_.clear(); }
 
 bool EpollActiveEventManager::isReadEvent(const void *event) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
-  return (ep_event->events & EPOLLIN) && !isErrorEvent(event);
+  return (ep_event->events & EPOLLIN) && !isErrorEvent(event) && !isEofEvent(event);
 }
 
 bool EpollActiveEventManager::isWriteEvent(const void *event) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
-  return (ep_event->events & EPOLLOUT) && !isErrorEvent(event);
+  return (ep_event->events & EPOLLOUT) && !isErrorEvent(event) && !isEofEvent(event);
 }
 
 bool EpollActiveEventManager::isErrorEvent(const void *event) {
