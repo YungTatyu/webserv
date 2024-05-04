@@ -24,7 +24,7 @@ HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string
 HttpRequest::~HttpRequest() {}
 
 void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
-  ParseState state = request.parseState;
+  ParseState &state = request.parseState;
   while (state != PARSE_COMPLETE) {
     ParseState state_before = state;
     switch (state) {
@@ -33,10 +33,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       case PARSE_URI_DONE:
       case PARSE_VERSION_DONE:
         state = HttpRequest::parseRequestLine(rawRequest, request);
-        if (state != PARSE_REQUEST_LINE_DONE) { // errorもしくはparse未完了：引き続きクライアントからのrequestを待つ
-          request.parseState = state;
-          return;
-        }
+        if (state != PARSE_REQUEST_LINE_DONE) return; // errorもしくはparse未完了：引き続きクライアントからのrequestを待つ
         break;
       case PARSE_REQUEST_LINE_DONE:
         state = HttpRequest::parseHeaders(rawRequest, request);
@@ -55,7 +52,6 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
     if (state == state_before || state == PARSE_INPROGRESS) // parse未完了：引き続きクライアントからのrequestを待つ
       break;
   }
-  request.parseState = state;
 }
 
 HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, HttpRequest &request) {
@@ -374,6 +370,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
   
   rawRequest = rawRequest.substr(i);
+  std::cerr << "uri done requset=" << rawRequest << "---\n";
   request.state_ = 0; // reset
   request.key_buf_.clear();
   return HttpRequest::PARSE_URI_DONE;
@@ -557,7 +554,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
         break;
     };
     if (state == PARSE_ERROR) break;
-    if (state == state_before) break;
+    if (state == state_before) break; // parse未完
   }
   return state;
 }
