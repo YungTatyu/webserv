@@ -41,8 +41,6 @@ class HttpRequest {
   static bool isValidContentLength(const std::string &str);
 
   config::REQUEST_METHOD method;
-  std::string key_buf_;
-  std::string val_buf_;
   std::string uri;  // スキーマ、ポートは？？
   std::string version;
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
@@ -50,9 +48,12 @@ class HttpRequest {
   std::string body;
 
   ParseState parseState;
-  int state_; // より細かいフェーズのstate
 
  private:
+  std::string key_buf_;
+  std::string val_buf_;
+  int state_; // より細かいフェーズのstate
+
   static ParseState parseMethod(std::string &rawRequest, HttpRequest &request);
   static ParseState parseUri(std::string &rawRequest, HttpRequest &request);
   static ParseState parseVersion(std::string &rawRequest, HttpRequest &request);

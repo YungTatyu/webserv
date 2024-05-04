@@ -637,6 +637,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           break;
         case ' ':
           state = sw_space_after_value;
+          break;
         default:
           cur_value += ch;
           ++i;
@@ -691,8 +692,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   if (te_it != end_it && cl_it != end_it) return PARSE_ERROR; // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
   rawRequest = rawRequest.substr(i);
   clearBuf(request);
-  if (te_it == end_it && cl_it == end_it) // bodyなし
-    return PARSE_COMPLETE;
+  if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE; // bodyなし
   return PARSE_HEADER_DONE;
 }
 
