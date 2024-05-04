@@ -370,7 +370,6 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
   
   rawRequest = rawRequest.substr(i);
-  std::cerr << "uri done requset=" << rawRequest << "---\n";
   request.state_ = 0; // reset
   request.key_buf_.clear();
   return HttpRequest::PARSE_URI_DONE;
