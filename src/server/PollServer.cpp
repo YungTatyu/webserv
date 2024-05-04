@@ -68,7 +68,7 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
       request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(*it))))
-      request_handler->handleEofEvent(*io_handler, *conn_manager, *timer_tree, it->fd); // handleErrorEvent()が必要かどうか.
+      request_handler->handleEofEvent(*io_handler, *conn_manager, *timer_tree, it->fd);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
       request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, it->fd);
   }
