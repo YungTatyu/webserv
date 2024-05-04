@@ -589,8 +589,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           break;
         }
         if (ch == '\n') {
-          ++i;
-          state = sw_end;
+          state = sw_almost_end;
           break;
         }
         // space以下, del, :はエラー
@@ -720,6 +719,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
  */
 HttpRequest::ParseState HttpRequest::parseBody(std::string &rawRequest, HttpRequest &request) { 
   size_t  content_length = Utils::strToSizet(request.headers.find(kContentLength)->second);
+  if (content_length == 0) return PARSE_COMPLETE;
   std::string body = rawRequest.substr(0, content_length);
   request.body += body;
   size_t parsed_body_size = body.size();
