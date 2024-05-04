@@ -1140,7 +1140,7 @@ TEST(HttpRequest, chunk_headers_2) {
   HttpRequest expect2(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = " aa\r\n";
   HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect1, test);
+  checkHttpRequestEqual(expect2, test);
 
   req = "empty1";
   HttpRequest::parseRequest(req, test);
@@ -1169,5 +1169,12 @@ TEST(HttpRequest, chunk_headers_2) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect5, test);
 }
+
+
 /* -------------- chunk headers end -------------- */
+
+
+
+
+
 

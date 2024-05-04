@@ -571,6 +571,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     sw_space_after_value,
     sw_header_almost_done,
     sw_header_done,
+    sw_almost_end,
     sw_end
   } state;
 
@@ -584,7 +585,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
       case sw_start:
         if (ch == '\r') {
           ++i;
-          if (rawRequest[i] != '\n') return PARSE_ERROR;
+          state = sw_almost_end;
           break;
         }
         if (ch == '\n') {
@@ -652,9 +653,18 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         }
         break;
       case sw_header_almost_done:
-        if (ch != '\r') return PARSE_ERROR;
-        state = sw_header_done;
-        ++i;
+        switch (ch)
+        {
+        case '\r':
+          state = sw_header_done;
+          ++i;
+          break;
+        case '\n':
+          state = sw_header_done;
+          break;
+        default:
+          return PARSE_ERROR;
+        }
         break;
       case sw_header_done:
         if (ch != '\n') return PARSE_ERROR;
@@ -667,6 +677,11 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         cur_name.clear();
         cur_value.clear();
         state = sw_start;
+        ++i;
+        break;
+      case sw_almost_end:
+        if (ch != '\n') return PARSE_ERROR;
+        state = sw_end;
         ++i;
         break;
       case sw_end:
