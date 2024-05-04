@@ -97,10 +97,10 @@ void	EpollServer::callEventHandler(
 			status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].data.fd);
 		else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].data.fd);
+		else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
+			status = request_handler->handleEofEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].data.fd); // handleEofEventがいる??
 		else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
 			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].data.fd);
-		else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-			status = request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].data.fd); // handleEofEventがいる??
 		
 		// epoll_fdで監視しているイベント情報を更新
 		switch (status)

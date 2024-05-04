@@ -33,6 +33,7 @@ class RequestHandler {
   int handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                          ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
   int handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, const int sockfd);
+  int handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree, const int sockfd);
   int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree,
                        const int sockfd);
   void handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
