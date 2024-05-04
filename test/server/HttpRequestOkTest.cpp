@@ -750,11 +750,169 @@ TEST(HttpRequest, chunk_uri_1) {
   "HTTP/1.1\r\n"
   "Host: aa\r\n"
   "\r\n";
-  HttpRequest expect8(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect8, test);
+  checkHttpRequestEqual(expect3, test);
 }
 
+TEST(HttpRequest, chunk_uri_2) {
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+
+  // test: "/u" "ri" "/ "
+  HttpRequest expect1(config::POST, "", "", {}, "", "", HttpRequest::PARSE_METHOD_DONE);
+  std::string req = "POST ";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "/u";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "ri";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  HttpRequest expect2(config::POST, "/uri/", "", {}, "", "", HttpRequest::PARSE_URI_DONE);
+  req = "/ ";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+
+  req =
+  "HTTP/1.1\r\n"
+  "Host: aa\r\n"
+  "\r\n";
+  HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
+}
+
+TEST(HttpRequest, chunk_uri_qs_1) {
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+
+  // test: "/" "?" "?" "?" "t" "=" "l"
+  HttpRequest expect1(config::POST, "", "", {}, "", "", HttpRequest::PARSE_METHOD_DONE);
+  std::string req = "POST /uri";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "/";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "?";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "?";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "?";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "t";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "=";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "l";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  HttpRequest expect2(config::POST, "/uri/", "", {}, "??t=l", "", HttpRequest::PARSE_URI_DONE);
+  req = " ";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+
+
+  req =
+  "HTTP/1.1\r\n"
+  "Host: aa\r\n"
+  "\r\n";
+  HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "??t=l", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
+}
+
+
+TEST(HttpRequest, chunk_uri_qs_2) {
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+
+  // test: "?u" "=t" "&t" "=l" "ov" "e "
+  HttpRequest expect1(config::POST, "", "", {}, "", "", HttpRequest::PARSE_METHOD_DONE);
+  std::string req = "POST /uri";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "?u";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "=t";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "&t";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "=l";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "ov";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  HttpRequest expect2(config::POST, "/uri", "", {}, "u=t&t=love", "", HttpRequest::PARSE_URI_DONE);
+  req = "e ";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+
+
+  req =
+  "HTTP/1.1\r\n"
+  "Host: aa\r\n"
+  "\r\n";
+  HttpRequest expect3(config::POST, "/uri", "HTTP/1.1", headers, "u=t&t=love", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
+}
+
+TEST(HttpRequest, chunk_uri_qs_3) {
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+
+  // test: "/u" " "
+  HttpRequest expect1(config::POST, "", "", {}, "", "", HttpRequest::PARSE_METHOD_DONE);
+  std::string req = "POST /uri";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "/?";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  HttpRequest expect2(config::POST, "/uri/", "", {}, "", "", HttpRequest::PARSE_URI_DONE);
+  req = " ";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+
+  req =
+  "HTTP/1.1\r\n"
+  "Host: aa\r\n"
+  "\r\n";
+  HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
+}
 
 /* -------------- chunk method uri end -------------- */
 
