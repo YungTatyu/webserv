@@ -51,8 +51,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
         break;
     }
     if (state == PARSE_ERROR) break;
-    if (state == state_before || state == PARSE_INPROGRESS) // parse未完了：引き続きクライアントからのrequestを待つ
-      break;
+    if (state == state_before || state == PARSE_INPROGRESS) break; // parse未完了：引き続きクライアントからのrequestを待つ
   }
 }
 

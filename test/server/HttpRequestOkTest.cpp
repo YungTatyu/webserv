@@ -1610,5 +1610,18 @@ TEST(HttpRequest, chunk_content_length_2) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
+
+TEST(HttpRequest, chunk_content_length_3) {
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "0"}}, "user=kh", "", HttpRequest::PARSE_COMPLETE);
+
+  // test: content-length 0
+  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+                    "Host: aa\r\n" 
+                    "content-length: 0  \r\n"
+                    "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+}
 /* -------------- chunk body end -------------- */
 
