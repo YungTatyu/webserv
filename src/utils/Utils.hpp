@@ -48,6 +48,7 @@ size_t  strToSizetInHex(const std::string& str);
 bool  isSign(unsigned char ch);
 template <typename T>
 std::string toStr(const T value);
+bool isNumeric(const std::string &str);
 }  // namespace Utils
 
 template <typename T>

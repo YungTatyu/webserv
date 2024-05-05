@@ -13,6 +13,7 @@
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "conf.hpp"
+#include "Utils.hpp"
 
 namespace config {
 enum OS {
@@ -68,7 +69,6 @@ class Parser {
   bool isIPv6(const std::string &ipv6) const;
   bool isMixedIPAddress(const std::string &ipv6) const;
   bool isNumInRange(const std::string &num, long min, long max) const;
-  bool isNumeric(const std::string &str) const;
   bool canConvertMinTime(long &value, const std::string &unit);
   bool canConvertMinSize(long &value, const std::string &unit);
   long parseTime();

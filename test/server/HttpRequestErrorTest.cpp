@@ -363,7 +363,7 @@ TEST(HttpRequest, ErrorTest31) {
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
       "Host: tt\r\n"
-      "content-length: -0\r\n"
+      "content-length: 1.1\r\n"
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);

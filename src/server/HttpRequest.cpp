@@ -786,7 +786,7 @@ bool HttpRequest::isValidHost(const std::string &str) {
 }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
-  if (str.empty() || Utils::isSign(str[0])) return false;
+  if (!Utils::isNumeric(str)) return false;
   unsigned long length;
   std::istringstream iss(str);
   iss >> length;
