@@ -50,8 +50,8 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       default:
         break;
     }
-    if (state == PARSE_ERROR) break;
-    if (state == state_before || state == PARSE_INPROGRESS) break; // parse未完了：引き続きクライアントからのrequestを待つ
+    if (state == PARSE_ERROR) return;
+    if (state == state_before || state == PARSE_INPROGRESS) return; // parse未完了：引き続きクライアントからのrequestを待つ
   }
 }
 
@@ -95,7 +95,6 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
         break;
       }
       return PARSE_ERROR;
-      break;
     case sw_chunk_size:
       if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
       if (std::isdigit(ch)) {
@@ -309,7 +308,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   }
   resetVars(request);
   rawRequest = rawRequest.substr(i);
-  return HttpRequest::PARSE_METHOD_DONE;
+  return PARSE_METHOD_DONE;
 }
 
 /*
@@ -373,7 +372,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   
   resetVars(request);
   rawRequest = rawRequest.substr(i);
-  return HttpRequest::PARSE_URI_DONE;
+  return PARSE_URI_DONE;
 }
 
 HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpRequest &request) {
@@ -527,7 +526,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
   request.version = version;
   resetVars(request);
   rawRequest = rawRequest.substr(i);
-  return HttpRequest::PARSE_VERSION_DONE;
+  return PARSE_VERSION_DONE;
 }
 
 HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, HttpRequest &request) {
