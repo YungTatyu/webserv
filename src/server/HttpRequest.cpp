@@ -24,6 +24,8 @@ HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string
 HttpRequest::~HttpRequest() {}
 
 void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
+  // 新たなリクエストの場合は初期化する
+  if (request.parseState == PARSE_COMPLETE || request.parseState == PARSE_ERROR || request.parseState == PARSE_NOT_IMPLEMENTED) HttpRequest::clear(request);
   ParseState &state = request.parseState;
   while (state != PARSE_COMPLETE) {
     ParseState state_before = state;
@@ -235,6 +237,8 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
     rawRequest.clear();
     return PARSE_INPROGRESS;
   }
+  resetVars(request);
+  rawRequest.substr(i);
   return PARSE_COMPLETE;
 }
 
@@ -304,8 +308,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     default:
       return PARSE_ERROR;  // 501 Not Implemented (SHOULD)
   }
-  request.state_ = 0; // reset;
-  request.key_buf_.clear();
+  resetVars(request);
   rawRequest = rawRequest.substr(i);
   return HttpRequest::PARSE_METHOD_DONE;
 }
@@ -369,9 +372,8 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   size_t qindex = uri.find('?');
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
   
+  resetVars(request);
   rawRequest = rawRequest.substr(i);
-  request.state_ = 0; // reset
-  request.key_buf_.clear();
   return HttpRequest::PARSE_URI_DONE;
 }
 
@@ -524,8 +526,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
     return request.parseState;
   }
   request.version = version;
-  request.state_ = 0; // reset
-  request.key_buf_.clear();
+  resetVars(request);
   rawRequest = rawRequest.substr(i);
   return HttpRequest::PARSE_VERSION_DONE;
 }
@@ -695,7 +696,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     rawRequest.clear();
     return request.parseState;
   }
-  request.state_ = 0; // reset
+  resetVars(request);
+  rawRequest = rawRequest.substr(i);
 
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator end_it, cl_it, te_it;
   end_it = request.headers.end();
@@ -704,8 +706,6 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   cl_it = request.headers.find(kContentLength);
   if (te_it != end_it && !Utils::compareIgnoreCase(kChunk, te_it->second)) return PARSE_NOT_IMPLEMENTED; //chunk以外は対応しない
   if (te_it != end_it && cl_it != end_it) return PARSE_ERROR; // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
-  rawRequest = rawRequest.substr(i);
-  clearBuf(request);
   if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE; // bodyなし
   return PARSE_HEADER_DONE;
 }
@@ -724,8 +724,7 @@ HttpRequest::ParseState HttpRequest::parseBody(std::string &rawRequest, HttpRequ
   request.body += body;
   size_t parsed_body_size = body.size();
   rawRequest = rawRequest.substr(parsed_body_size); // bodyからはみ出た部分は次のリクエストに追加される
-  if (parsed_body_size == content_length)
-    return PARSE_COMPLETE;
+  if (parsed_body_size == content_length) return PARSE_COMPLETE;
   // parse未完了：引き続きbodyを待つ
   request.headers[kContentLength] = Utils::toStr(content_length - parsed_body_size); // 残りのbodyのsizeをupdate
   return PARSE_INPROGRESS;
@@ -748,7 +747,13 @@ std::string HttpRequest::urlDecode(const std::string &encoded) {
   return decoded;
 }
 
-void HttpRequest::clearBuf(HttpRequest &request) {
+/**
+ * @brief parse用変数を初期化
+ * 
+ * @param request 
+ */
+void HttpRequest::resetVars(HttpRequest &request) {
+  request.state_ = 0;
   request.key_buf_.clear();
   request.val_buf_.clear();
 }
@@ -789,4 +794,15 @@ bool HttpRequest::isValidContentLength(const std::string &str) {
 
   if (iss.fail() || iss.bad() || iss.peek() != EOF) return false;
   return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
+}
+
+void HttpRequest::clear(HttpRequest &request) {
+  request.method = config::UNKNOWN;
+  request.uri.clear();
+  request.queries.clear();
+  request.version.clear();
+  request.headers.clear();
+  request.body.clear();
+  request.resetVars(request);
+  request.parseState = PARSE_BEFORE;
 }

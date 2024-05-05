@@ -1481,8 +1481,134 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   checkHttpRequestEqual(expect3, test);
 }
 
-TEST(HttpRequest, chunk_content_length_1) {
+TEST(HttpRequest, chunk_chunked_body_3) {
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+
+  // test:  
+  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+                    "Host: aa\r\n" 
+                    "transfer-encoding: chunked  \r\n"
+                    "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "0";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "\n";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", HttpRequest::PARSE_COMPLETE);
+  req = "\n";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
 }
 
+
+TEST(HttpRequest, chunk_content_length_1) {
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "10"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+
+  // test:  
+  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+                    "Host: aa\r\n" 
+                    "content-length: 10  \r\n"
+                    "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  req = "\r";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "\n";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "2";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "4";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "\n";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "\t";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = " ";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "h";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "i";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "1"}}, "user=kh", "\r\n24\n\t hi\n", HttpRequest::PARSE_COMPLETE);
+  req = "\n";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+}
+
+TEST(HttpRequest, chunk_content_length_2) {
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "14"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+
+  // test: two letters each
+  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+                    "Host: aa\r\n" 
+                    "content-length: 14  \r\n"
+                    "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect1, test);
+
+  // this is a body
+  req = "th";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "is";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = " i";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "s ";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "a ";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req = "bo";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "2"}}, "user=kh", "this is a body", HttpRequest::PARSE_COMPLETE);
+  req = "dy";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect2, test);
+
+  // next request: bodyに含まれない
+  HttpRequest expect3(config::UNKNOWN, "", "", {}, "", "", HttpRequest:: PARSE_ERROR);
+  req = "over content length";
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect3, test);
+}
 /* -------------- chunk body end -------------- */
 
