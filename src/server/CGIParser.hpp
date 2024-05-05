@@ -4,8 +4,8 @@
 #include <map>
 #include <string>
 
-#include "HttpResponse.hpp"
 #include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 #include "Utils.hpp"
 
 namespace cgi {

@@ -559,6 +559,4 @@ TEST(HttpRequest, ErrorTest45) {
   EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
 }
 
-
 /* -------------- header transfer-encoding test end -------------- */
-

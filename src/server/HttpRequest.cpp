@@ -1,12 +1,13 @@
 #include "HttpRequest.hpp"
 
-#include "LimitExcept.hpp"
 #include <limits>
 
-const static char*  kHost = "Host";
-const static char*  kContentLength = "Content-Length";
-const static char*  kTransferEncoding = "Transfer-Encoding";
-const static char*  kChunk = "chunked";
+#include "LimitExcept.hpp"
+
+const static char *kHost = "Host";
+const static char *kContentLength = "Content-Length";
+const static char *kTransferEncoding = "Transfer-Encoding";
+const static char *kChunk = "chunked";
 
 HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string &uri,
                          const std::string &version,
@@ -25,7 +26,9 @@ HttpRequest::~HttpRequest() {}
 
 void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
   // 新たなリクエストの場合は初期化する
-  if (request.parseState == PARSE_COMPLETE || request.parseState == PARSE_ERROR || request.parseState == PARSE_NOT_IMPLEMENTED) HttpRequest::clear(request);
+  if (request.parseState == PARSE_COMPLETE || request.parseState == PARSE_ERROR ||
+      request.parseState == PARSE_NOT_IMPLEMENTED)
+    HttpRequest::clear(request);
   ParseState &state = request.parseState;
   while (state != PARSE_COMPLETE) {
     ParseState state_before = state;
@@ -35,7 +38,8 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       case PARSE_URI_DONE:
       case PARSE_VERSION_DONE:
         state = HttpRequest::parseRequestLine(rawRequest, request);
-        if (state != PARSE_REQUEST_LINE_DONE) return; // errorもしくはparse未完了：引き続きクライアントからのrequestを待つ
+        if (state != PARSE_REQUEST_LINE_DONE)
+          return;  // errorもしくはparse未完了：引き続きクライアントからのrequestを待つ
         break;
       case PARSE_REQUEST_LINE_DONE:
         state = HttpRequest::parseHeaders(rawRequest, request);
@@ -51,7 +55,8 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
         break;
     }
     if (state == PARSE_ERROR) return;
-    if (state == state_before || state == PARSE_INPROGRESS) return; // parse未完了：引き続きクライアントからのrequestを待つ
+    if (state == state_before || state == PARSE_INPROGRESS)
+      return;  // parse未完了：引き続きクライアントからのrequestを待つ
   }
 }
 
@@ -79,156 +84,149 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
   while (state != sw_chunk_end && i < rawRequest.size()) {
     unsigned char ch, c;
     ch = rawRequest[i];
-    
-    switch (state)
-    {
-    case sw_chunk_start:
-      if (std::isdigit(ch)) {
-        chunk_bytes = ch;
-        state = sw_chunk_size;
-        break;
-      }
-      c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
-      if (c >= 'a' && c <= 'f') {
-        chunk_bytes = c;
-        state = sw_chunk_size;
-        break;
-      }
-      return PARSE_ERROR;
-    case sw_chunk_size:
-      if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
-      if (std::isdigit(ch)) {
-        chunk_bytes += ch;
-        break;
-      }
-      c = static_cast<unsigned char>(ch | 0x20); // 小文字に変換
-      if (c >= 'a' && c <= 'f') {
-        chunk_bytes += c;
-        break;
-      }
-      if (chunk_bytes == "0") {
+
+    switch (state) {
+      case sw_chunk_start:
+        if (std::isdigit(ch)) {
+          chunk_bytes = ch;
+          state = sw_chunk_size;
+          break;
+        }
+        c = static_cast<unsigned char>(ch | 0x20);  // 小文字に変換
+        if (c >= 'a' && c <= 'f') {
+          chunk_bytes = c;
+          state = sw_chunk_size;
+          break;
+        }
+        return PARSE_ERROR;
+      case sw_chunk_size:
+        if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
+        if (std::isdigit(ch)) {
+          chunk_bytes += ch;
+          break;
+        }
+        c = static_cast<unsigned char>(ch | 0x20);  // 小文字に変換
+        if (c >= 'a' && c <= 'f') {
+          chunk_bytes += c;
+          break;
+        }
+        if (chunk_bytes == "0") {
+          switch (ch) {
+            case '\r':
+              state = sw_last_chunk_extension_almost_done;
+              break;
+            case '\n':
+              state = sw_last_chunk_extension_done;
+              break;
+            default:
+              return PARSE_ERROR;
+          }
+          break;
+        }
         switch (ch) {
-        case '\r':
-          state = sw_last_chunk_extension_almost_done;
-          break;
-        case '\n':
-          state = sw_last_chunk_extension_done;
-          break;
-        default:
-          return PARSE_ERROR;
+          case '\r':
+            state = sw_chunk_extension_almost_done;
+            break;
+          case '\n':
+            state = sw_chunk_data;
+            break;
+          default:
+            return PARSE_ERROR;
         }
         break;
-      }
-      switch (ch) {
-      case '\r':
-        state = sw_chunk_extension_almost_done;
-        break;
-      case '\n':
+
+      case sw_chunk_extension_almost_done:
+        if (ch != '\n') return PARSE_ERROR;
         state = sw_chunk_data;
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
 
-    case sw_chunk_extension_almost_done:
-      if (ch != '\n') return PARSE_ERROR;
-      state = sw_chunk_data;
-      break;
+      case sw_chunk_data:
+        bytes = Utils::strToSizet(chunk_bytes);
+        request.body += ch;
+        --bytes;
+        if (bytes == 0) {
+          state = sw_after_data;
+          chunk_bytes.clear();
+          break;
+        }
+        chunk_bytes = Utils::toStr(bytes);
+        break;
 
-    case sw_chunk_data:
-      bytes = Utils::strToSizet(chunk_bytes);
-      request.body += ch;
-      --bytes;
-      if (bytes == 0) {
-        state = sw_after_data;
-        chunk_bytes.clear();
+      case sw_after_data:
+        switch (ch) {
+          case '\r':
+            state = sw_after_data_almost_done;
+            break;
+          case '\n':
+            state = sw_chunk_start;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      }
-      chunk_bytes = Utils::toStr(bytes);
-      break;
 
-    case sw_after_data:
-      switch (ch)
-      {
-      case '\r':
-        state = sw_after_data_almost_done;
+      case sw_after_data_almost_done:
+        switch (ch) {
+          case '\n':
+            state = sw_chunk_start;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      case '\n':
-        state = sw_chunk_start;
-        break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
 
-    case sw_after_data_almost_done:
-      switch (ch)
-      {
-      case '\n':
-        state = sw_chunk_start;
+      case sw_last_chunk_extension:
+        switch (ch) {
+          case '\r':
+            state = sw_last_chunk_extension_almost_done;
+            break;
+          case '\n':
+            state = sw_last_chunk_extension_done;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    
-    case sw_last_chunk_extension:
-      switch (ch)
-      {
-      case '\r':
-        state = sw_last_chunk_extension_almost_done;
-        break;
-      case '\n':
-        state = sw_last_chunk_extension_done;
-        break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
 
-    case sw_last_chunk_extension_almost_done:
-      switch (ch)
-      {
-      case '\n':
-        state = sw_last_chunk_extension_done;
+      case sw_last_chunk_extension_almost_done:
+        switch (ch) {
+          case '\n':
+            state = sw_last_chunk_extension_done;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
 
-    case sw_last_chunk_extension_done:
-      switch (ch)
-      {
-      case '\r':
-        state = sw_chunk_almost_end;
+      case sw_last_chunk_extension_done:
+        switch (ch) {
+          case '\r':
+            state = sw_chunk_almost_end;
+            break;
+          case '\n':
+            state = sw_chunk_end;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      case '\n':
-        state = sw_chunk_end;
-        break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
 
-    case sw_chunk_almost_end:
-      switch (ch)
-      {
-      case '\n':
-        state = sw_chunk_end;
+      case sw_chunk_almost_end:
+        switch (ch) {
+          case '\n':
+            state = sw_chunk_end;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
 
-    case sw_chunk_end:
-      break;
+      case sw_chunk_end:
+        break;
     }
     ++i;
   }
-  
+
   if (state != sw_chunk_end) {
     request.key_buf_ = chunk_bytes;
     request.state_ = state;
@@ -357,7 +355,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
     }
   }
 
-  if (state != sw_end) // parse未完了：引き続きクライアントからのrequestを待つ
+  if (state != sw_end)  // parse未完了：引き続きクライアントからのrequestを待つ
   {
     request.state_ = state;
     request.key_buf_ = uri;
@@ -369,7 +367,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   request.uri = uri.substr(0, uri.find('?'));
   size_t qindex = uri.find('?');
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
-  
+
   resetVars(request);
   rawRequest = rawRequest.substr(i);
   return PARSE_URI_DONE;
@@ -382,7 +380,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
     sw_HT,
     sw_HTT,
     sw_HTTP,
-    sw_HTTP_SL, // slash
+    sw_HTTP_SL,  // slash
     sw_HTTP_SL1,
     sw_HTTP_SL1dot,
     sw_HTTP_SL1dot1,
@@ -394,125 +392,113 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
   size_t i = 0;
   std::string version = request.key_buf_;
 
-  while (state != sw_end && i < rawRequest.size())
-  {
+  while (state != sw_end && i < rawRequest.size()) {
     unsigned char ch = rawRequest[i];
-    switch (state)
-    {
-    case sw_start:
-      switch (ch)
-      {
-      case 'H':
-        version += ch;
-        state = sw_H;
+    switch (state) {
+      case sw_start:
+        switch (ch) {
+          case 'H':
+            version += ch;
+            state = sw_H;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_H:
-      switch (ch)
-      {
-      case 'T':
-        version += ch;
-        state = sw_HT;
+      case sw_H:
+        switch (ch) {
+          case 'T':
+            version += ch;
+            state = sw_HT;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_HT:
-      switch (ch)
-      {
-      case 'T':
-        version += ch;
-        state = sw_HTT;
+      case sw_HT:
+        switch (ch) {
+          case 'T':
+            version += ch;
+            state = sw_HTT;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_HTT:
-      switch (ch)
-      {
-      case 'P':
-        version += ch;
-        state = sw_HTTP;
+      case sw_HTT:
+        switch (ch) {
+          case 'P':
+            version += ch;
+            state = sw_HTTP;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_HTTP:
-      switch (ch)
-      {
-      case '/':
-        version += ch;
-        state = sw_HTTP_SL;
+      case sw_HTTP:
+        switch (ch) {
+          case '/':
+            version += ch;
+            state = sw_HTTP_SL;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    /* ver 1.1 のみ */
-    case sw_HTTP_SL:
-      switch (ch)
-      {
-      case '1':
-        version += ch;
-        state = sw_HTTP_SL1;
+      /* ver 1.1 のみ */
+      case sw_HTTP_SL:
+        switch (ch) {
+          case '1':
+            version += ch;
+            state = sw_HTTP_SL1;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_HTTP_SL1:
-      switch (ch)
-      {
-      case '.':
-        version += ch;
-        state = sw_HTTP_SL1dot;
+      case sw_HTTP_SL1:
+        switch (ch) {
+          case '.':
+            version += ch;
+            state = sw_HTTP_SL1dot;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_HTTP_SL1dot:
-      switch (ch)
-      {
-      case '1':
-        version += ch;
-        state = sw_HTTP_SL1dot1;
+      case sw_HTTP_SL1dot:
+        switch (ch) {
+          case '1':
+            version += ch;
+            state = sw_HTTP_SL1dot1;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_HTTP_SL1dot1:
-      switch (ch)
-      {
-      case '\r':
-        state = sw_almost_end;
+      case sw_HTTP_SL1dot1:
+        switch (ch) {
+          case '\r':
+            state = sw_almost_end;
+            break;
+          case '\n':
+            state = sw_end;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      case '\n':
-        state = sw_end;
+      case sw_almost_end:
+        switch (ch) {
+          case '\n':
+            state = sw_end;
+            break;
+          default:
+            return PARSE_ERROR;
+        }
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_almost_end:
-      switch (ch)
-      {
-      case '\n':
-        state = sw_end;
+      case sw_end:
         break;
-      default:
-        return PARSE_ERROR;
-      }
-      break;
-    case sw_end:
-      break;
     }
     ++i;
   }
@@ -552,7 +538,7 @@ HttpRequest::ParseState HttpRequest::parseRequestLine(std::string &rawRequest, H
         break;
     };
     if (state == PARSE_ERROR) break;
-    if (state == state_before) break; // parse未完
+    if (state == state_before) break;  // parse未完
   }
   return state;
 }
@@ -596,22 +582,21 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         state = sw_name;
         break;
       case sw_name:
-        switch (ch)
-        {
-        case ':':
-          state = sw_colon;
-          break;
-        case '\r':
-          state = sw_header_almost_done;
-          break;
-        case '\n':
-          state = sw_header_done;
-          break;        
-        default:
-          if (isInvalidLetter(ch)) return PARSE_ERROR;
-          cur_name += ch;
-          ++i;
-          break;
+        switch (ch) {
+          case ':':
+            state = sw_colon;
+            break;
+          case '\r':
+            state = sw_header_almost_done;
+            break;
+          case '\n':
+            state = sw_header_done;
+            break;
+          default:
+            if (isInvalidLetter(ch)) return PARSE_ERROR;
+            cur_name += ch;
+            ++i;
+            break;
         }
         break;
       case sw_colon:
@@ -626,21 +611,20 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
           ++i;
         break;
       case sw_value:
-        switch (ch)
-        {
-        case '\r':
-          state = sw_header_almost_done;
-          break;
-        case '\n':
-          state = sw_header_done;
-          break;
-        case ' ':
-          state = sw_space_after_value;
-          break;
-        default:
-          cur_value += ch;
-          ++i;
-          break;
+        switch (ch) {
+          case '\r':
+            state = sw_header_almost_done;
+            break;
+          case '\n':
+            state = sw_header_done;
+            break;
+          case ' ':
+            state = sw_space_after_value;
+            break;
+          default:
+            cur_value += ch;
+            ++i;
+            break;
         }
         break;
       case sw_space_after_value:
@@ -651,27 +635,26 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         }
         break;
       case sw_header_almost_done:
-        switch (ch)
-        {
-        case '\r':
-          state = sw_header_done;
-          ++i;
-          break;
-        case '\n':
-          state = sw_header_done;
-          break;
-        default:
-          return PARSE_ERROR;
+        switch (ch) {
+          case '\r':
+            state = sw_header_done;
+            ++i;
+            break;
+          case '\n':
+            state = sw_header_done;
+            break;
+          default:
+            return PARSE_ERROR;
         }
         break;
       case sw_header_done:
         if (ch != '\n') return PARSE_ERROR;
         if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
         if (Utils::compareIgnoreCase(kHost, cur_name) && !isValidHost(cur_value)) return PARSE_ERROR;
-        if (Utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value)) return PARSE_ERROR;
+        if (Utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value))
+          return PARSE_ERROR;
         // headerが重複している場合は、一番初めに登場したものを優先する
-        if (request.headers.find(cur_name) == request.headers.end())
-          request.headers[cur_name] = cur_value;
+        if (request.headers.find(cur_name) == request.headers.end()) request.headers[cur_name] = cur_value;
         cur_name.clear();
         cur_value.clear();
         state = sw_start;
@@ -702,29 +685,32 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
   if (request.headers.find(kHost) == end_it) return PARSE_ERROR;
   te_it = request.headers.find(kTransferEncoding);
   cl_it = request.headers.find(kContentLength);
-  if (te_it != end_it && !Utils::compareIgnoreCase(kChunk, te_it->second)) return PARSE_NOT_IMPLEMENTED; //chunk以外は対応しない
-  if (te_it != end_it && cl_it != end_it) return PARSE_ERROR; // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
-  if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE; // bodyなし
+  if (te_it != end_it && !Utils::compareIgnoreCase(kChunk, te_it->second))
+    return PARSE_NOT_IMPLEMENTED;  // chunk以外は対応しない
+  if (te_it != end_it && cl_it != end_it)
+    return PARSE_ERROR;  // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
+  if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE;  // bodyなし
   return PARSE_HEADER_DONE;
 }
 
 /**
  * @brief content-lengthのサイズ分bodyをparseする
- * 
- * @param rawRequest 
- * @param request 
- * @return HttpRequest::ParseState 
+ *
+ * @param rawRequest
+ * @param request
+ * @return HttpRequest::ParseState
  */
-HttpRequest::ParseState HttpRequest::parseBody(std::string &rawRequest, HttpRequest &request) { 
-  size_t  content_length = Utils::strToSizet(request.headers.find(kContentLength)->second);
+HttpRequest::ParseState HttpRequest::parseBody(std::string &rawRequest, HttpRequest &request) {
+  size_t content_length = Utils::strToSizet(request.headers.find(kContentLength)->second);
   if (content_length == 0) return PARSE_COMPLETE;
   std::string body = rawRequest.substr(0, content_length);
   request.body += body;
   size_t parsed_body_size = body.size();
-  rawRequest = rawRequest.substr(parsed_body_size); // bodyからはみ出た部分は次のリクエストに追加される
+  rawRequest = rawRequest.substr(parsed_body_size);  // bodyからはみ出た部分は次のリクエストに追加される
   if (parsed_body_size == content_length) return PARSE_COMPLETE;
   // parse未完了：引き続きbodyを待つ
-  request.headers[kContentLength] = Utils::toStr(content_length - parsed_body_size); // 残りのbodyのsizeをupdate
+  request.headers[kContentLength] =
+      Utils::toStr(content_length - parsed_body_size);  // 残りのbodyのsizeをupdate
   return PARSE_INPROGRESS;
 }
 
@@ -747,8 +733,8 @@ std::string HttpRequest::urlDecode(const std::string &encoded) {
 
 /**
  * @brief parse用変数を初期化
- * 
- * @param request 
+ *
+ * @param request
  */
 void HttpRequest::resetVars(HttpRequest &request) {
   request.state_ = 0;
@@ -758,31 +744,29 @@ void HttpRequest::resetVars(HttpRequest &request) {
 
 /**
  * @brief host, content-length, transfer-encodingが重複しているかチェック
- * 
- * @param request 
- * @param header 
- * @return true 
- * @return false 
+ *
+ * @param request
+ * @param header
+ * @return true
+ * @return false
  */
 bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::string &header) {
-  if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) && !Utils::compareIgnoreCase(header, kContentLength)) return false;
+  if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) &&
+      !Utils::compareIgnoreCase(header, kContentLength))
+    return false;
   return request.headers.find(header) != request.headers.end();
 }
 
 /**
  * @brief ascii: space以下, delはheaderの名前, uriに受け付けない
- * 
- * @param ch 
- * @return true 
- * @return false 
+ *
+ * @param ch
+ * @return true
+ * @return false
  */
-bool HttpRequest::isInvalidLetter(unsigned char ch) {
-  return ch <= ' ' || ch == 127;  
-}
+bool HttpRequest::isInvalidLetter(unsigned char ch) { return ch <= ' ' || ch == 127; }
 
-bool HttpRequest::isValidHost(const std::string &str) {
-  return !str.empty();
-}
+bool HttpRequest::isValidHost(const std::string &str) { return !str.empty(); }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
   if (!Utils::isNumeric(str)) return false;

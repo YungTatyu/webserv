@@ -241,11 +241,9 @@ size_t Utils::strToSizetInHex(const std::string& str) {
   return size;
 }
 
-bool Utils::isSign(unsigned char ch) {
-  return ch == '+' || ch == '-';
-}
+bool Utils::isSign(unsigned char ch) { return ch == '+' || ch == '-'; }
 
-bool Utils::isNumeric(const std::string &str) {
+bool Utils::isNumeric(const std::string& str) {
   for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
     if (!std::isdigit(*it)) return false;
   }

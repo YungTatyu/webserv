@@ -61,8 +61,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   return handleResponse(connManager, configHandler, timerTree, sockfd);
 }
 
-int RequestHandler::handleResponse(ConnectionManager &connManager,
-                                   ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
+int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler &configHandler,
+                                   TimerTree &timerTree, const int sockfd) {
   HttpRequest &request = connManager.getRequest(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
   std::string final_response = HttpResponse::generateResponse(
@@ -79,8 +79,8 @@ int RequestHandler::handleResponse(ConnectionManager &connManager,
   return RequestHandler::UPDATE_WRITE;
 }
 
-int RequestHandler::handleCgi(ConnectionManager &connManager,
-                              ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
+int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &configHandler,
+                              TimerTree &timerTree, const int sockfd) {
   HttpRequest &request = connManager.getRequest(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
 
@@ -228,9 +228,8 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id) const {
  * @return true: N秒timerを追加
  * @return false: 'Connections: close'の場合
  */
-bool RequestHandler::addTimerByType(ConnectionManager &connManager,
-                                    ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd,
-                                    enum Timer::TimeoutType type) {
+bool RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandler &configHandler,
+                                    TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type) {
   config::Time timeout;
   std::map<std::string, std::string>::iterator it;
 

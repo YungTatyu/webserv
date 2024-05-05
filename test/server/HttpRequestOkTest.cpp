@@ -296,15 +296,13 @@ TEST(HttpRequest, OkTest14) {
   // testcase: header fieldが一対ある時
   // testcase: bodyある
   std::string body = "this is body";
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body, HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect(config::GET, "/", "HTTP/1.1",
+                     {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body,
+                     HttpRequest::PARSE_COMPLETE);
 
   // test
-  std::string rawRequest =
-      std::string("GET / HTTP/1.1\r\n")
-      + "Host: aa\r\n"
-      + "Content-Length: " + std::to_string(body.size()) + "\r\n"
-      + "\r\n"
-      + body;
+  std::string rawRequest = std::string("GET / HTTP/1.1\r\n") + "Host: aa\r\n" +
+                           "Content-Length: " + std::to_string(body.size()) + "\r\n" + "\r\n" + body;
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -315,33 +313,28 @@ TEST(HttpRequest, OkTest15) {
   // testcase: body with next request
   std::string body = "this is body";
   std::string next_req = "next request";
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body, HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect(config::GET, "/", "HTTP/1.1",
+                     {{"Host", "aa"}, {"Content-Length", std::to_string(body.size())}}, "", body,
+                     HttpRequest::PARSE_COMPLETE);
 
   // test
-  std::string rawRequest =
-      std::string("GET / HTTP/1.1\r\n")
-      + "Host: aa\r\n"
-      + "Content-Length: " + std::to_string(body.size()) + "\r\n"
-      + "\r\n"
-      + body
-      + next_req;
+  std::string rawRequest = std::string("GET / HTTP/1.1\r\n") + "Host: aa\r\n" +
+                           "Content-Length: " + std::to_string(body.size()) + "\r\n" + "\r\n" + body +
+                           next_req;
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
   checkHttpRequestEqual(expect, test);
-  EXPECT_EQ(rawRequest, next_req); // 次のリクエストは残ったまま
+  EXPECT_EQ(rawRequest, next_req);  // 次のリクエストは残ったまま
 }
 
 TEST(HttpRequest, OkTest16) {
   // testcase: header headerにコロンがない
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"test", ""}}, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}, {"test", ""}}, "", "",
+                     HttpRequest::PARSE_COMPLETE);
 
   // test
-  std::string rawRequest =
-      std::string("GET / HTTP/1.1\r\n")
-      + "Host: aa\r\n"
-      + "test\r\n"
-      + "\r\n";
+  std::string rawRequest = std::string("GET / HTTP/1.1\r\n") + "Host: aa\r\n" + "test\r\n" + "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -355,7 +348,8 @@ int main(int argc, char **argv) {
 
 TEST(HttpRequest, OkTest17) {
   // testcase: chunked
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", HttpRequest::PARSE_INPROGRESS);
 
   // test
@@ -393,7 +387,6 @@ TEST(HttpRequest, OkTest17) {
 
   checkHttpRequestEqual(expect3, test);
 
-
   // testcase: chunked forth (end)
   HttpRequest expect4(config::GET, "/html", "HTTP/1.1", headers, "", "hello world",
                       HttpRequest::PARSE_COMPLETE);
@@ -407,8 +400,10 @@ TEST(HttpRequest, OkTest17) {
 
 TEST(HttpRequest, OkTest18) {
   // testcase: chunked with \r\n and bytes
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
-  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0\r\n\r\n", HttpRequest::PARSE_INPROGRESS);
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0\r\n\r\n",
+                     HttpRequest::PARSE_INPROGRESS);
 
   // test
   std::string rawRequest =
@@ -472,9 +467,9 @@ TEST(HttpRequest, chunk_method_get_1) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -496,9 +491,9 @@ TEST(HttpRequest, chunk_method_get_2) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::GET, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -532,9 +527,9 @@ TEST(HttpRequest, chunk_method_post_1) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::POST, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -560,9 +555,9 @@ TEST(HttpRequest, chunk_method_post_2) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::POST, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -604,9 +599,9 @@ TEST(HttpRequest, chunk_method_delete_1) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::DELETE, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -636,9 +631,9 @@ TEST(HttpRequest, chunk_method_delete_2) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::DELETE, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -672,9 +667,9 @@ TEST(HttpRequest, chunk_method_head_1) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::HEAD, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -700,9 +695,9 @@ TEST(HttpRequest, chunk_method_head_2) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "/ HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "/ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::HEAD, "/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -747,9 +742,9 @@ TEST(HttpRequest, chunk_uri_1) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -779,9 +774,9 @@ TEST(HttpRequest, chunk_uri_2) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -830,16 +825,14 @@ TEST(HttpRequest, chunk_uri_qs_1) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-
   req =
-  "HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "??t=l", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
-
 
 TEST(HttpRequest, chunk_uri_qs_2) {
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
@@ -876,12 +869,12 @@ TEST(HttpRequest, chunk_uri_qs_2) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-
   req =
-  "HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
-  HttpRequest expect3(config::POST, "/uri", "HTTP/1.1", headers, "u=t&t=love", "", HttpRequest::PARSE_COMPLETE);
+      "HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest expect3(config::POST, "/uri", "HTTP/1.1", headers, "u=t&t=love", "",
+                      HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
@@ -906,9 +899,9 @@ TEST(HttpRequest, chunk_uri_qs_3) {
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "HTTP/1.1\r\n"
-  "Host: aa\r\n"
-  "\r\n";
+      "HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::POST, "/uri/", "HTTP/1.1", headers, "", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -964,14 +957,15 @@ TEST(HttpRequest, chunk_version_1) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
 
-  HttpRequest expect2(config::DELETE, "/uri/", "HTTP/1.1", {}, "t=t", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect2(config::DELETE, "/uri/", "HTTP/1.1", {}, "t=t", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "Host: aa\r\n"
-  "\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::DELETE, "/uri/", "HTTP/1.1", headers, "t=t", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -1003,14 +997,15 @@ TEST(HttpRequest, chunk_version_2) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
 
-  HttpRequest expect2(config::DELETE, "/uri/", "HTTP/1.1", {}, "t=t", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect2(config::DELETE, "/uri/", "HTTP/1.1", {}, "t=t", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
   req =
-  "Host: aa\r\n"
-  "\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect3(config::DELETE, "/uri/", "HTTP/1.1", headers, "t=t", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -1031,14 +1026,15 @@ TEST(HttpRequest, chunk_version_3) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-  HttpRequest expect3(config::DELETE, "/uri/", "HTTP/1.1", {}, "t=t", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect3(config::DELETE, "/uri/", "HTTP/1.1", {}, "t=t", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 
   req =
-  "Host: aa\r\n"
-  "\r\n";
+      "Host: aa\r\n"
+      "\r\n";
   HttpRequest expect4(config::DELETE, "/uri/", "HTTP/1.1", headers, "t=t", "", HttpRequest::PARSE_COMPLETE);
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect4, test);
@@ -1098,7 +1094,8 @@ TEST(HttpRequest, chunk_headers_1) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
 
-  HttpRequest expect2(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "th"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect2(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "th"}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
@@ -1119,7 +1116,8 @@ TEST(HttpRequest, chunk_headers_1) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-  HttpRequest expect3(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "th"}, {"test", "test"}}, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect3(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "th"}, {"test", "test"}}, "", "",
+                      HttpRequest::PARSE_COMPLETE);
   req = "\n\r\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -1137,7 +1135,8 @@ TEST(HttpRequest, chunk_headers_2) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
 
-  HttpRequest expect2(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect2(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = " aa\r\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
@@ -1146,7 +1145,8 @@ TEST(HttpRequest, chunk_headers_2) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-  HttpRequest expect3(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"empty1", ""}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect3(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"empty1", ""}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = ":\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -1154,8 +1154,9 @@ TEST(HttpRequest, chunk_headers_2) {
   req = "empty2";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
-  
-  HttpRequest expect4(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"empty1", ""}, {"empty2", ""}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+
+  HttpRequest expect4(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"empty1", ""}, {"empty2", ""}}, "",
+                      "", HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect4, test);
@@ -1163,8 +1164,9 @@ TEST(HttpRequest, chunk_headers_2) {
   req = "\r";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect4, test);
- 
-  HttpRequest expect5(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"empty1", ""}, {"empty2", ""}}, "", "", HttpRequest::PARSE_COMPLETE);
+
+  HttpRequest expect5(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"empty1", ""}, {"empty2", ""}}, "",
+                      "", HttpRequest::PARSE_COMPLETE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect5, test);
@@ -1195,7 +1197,8 @@ TEST(HttpRequest, chunk_headers_3) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-  HttpRequest expect3(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect3(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\ndu";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
@@ -1220,7 +1223,8 @@ TEST(HttpRequest, chunk_headers_3) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 
-  HttpRequest expect4(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"dup", "dup_value"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect4(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"dup", "dup_value"}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect4, test);
@@ -1233,7 +1237,9 @@ TEST(HttpRequest, chunk_headers_3) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect4, test);
 
-  HttpRequest expect5(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"dup", "dup_value"}, {"test", "test"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect5(config::HEAD, "/uri/", "HTTP/1.1",
+                      {{"Host", "aa"}, {"dup", "dup_value"}, {"test", "test"}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "   \n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect5, test);
@@ -1254,12 +1260,16 @@ TEST(HttpRequest, chunk_headers_3) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect5, test);
 
-  HttpRequest expect6(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"dup", "dup_value"}, {"test", "test"}, {"last", "end"}}, "", "", HttpRequest::PARSE_REQUEST_LINE_DONE);
+  HttpRequest expect6(config::HEAD, "/uri/", "HTTP/1.1",
+                      {{"Host", "aa"}, {"dup", "dup_value"}, {"test", "test"}, {"last", "end"}}, "", "",
+                      HttpRequest::PARSE_REQUEST_LINE_DONE);
   req = "t:     end\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect6, test);
 
-  HttpRequest expect7(config::HEAD, "/uri/", "HTTP/1.1", {{"Host", "aa"}, {"dup", "dup_value"}, {"test", "test"}, {"last", "end"}}, "", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect7(config::HEAD, "/uri/", "HTTP/1.1",
+                      {{"Host", "aa"}, {"dup", "dup_value"}, {"test", "test"}, {"last", "end"}}, "", "",
+                      HttpRequest::PARSE_COMPLETE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect7, test);
@@ -1269,13 +1279,16 @@ TEST(HttpRequest, chunk_headers_3) {
 
 /* -------------- chunk body -------------- */
 TEST(HttpRequest, chunk_chunked_body_1) {
-  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "",
+                      HttpRequest::PARSE_INPROGRESS);
 
   // test:  0 b d 6 \r \n 1 \n \r \t
-  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
-                    "Host: aa\r\n" 
-                    "transfer-encoding: chunked  \r\n"
-                    "\r\n";
+  std::string req =
+      "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked  \r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
@@ -1372,7 +1385,9 @@ TEST(HttpRequest, chunk_chunked_body_1) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "0bd\r\n1\n\r\te", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "0bd\r\n1\n\r\te",
+                      HttpRequest::PARSE_INPROGRESS);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
@@ -1381,20 +1396,25 @@ TEST(HttpRequest, chunk_chunked_body_1) {
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "0bd\r\n1\n\r\te", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "0bd\r\n1\n\r\te",
+                      HttpRequest::PARSE_COMPLETE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
 
 TEST(HttpRequest, chunk_chunked_body_2) {
-  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "",
+                      HttpRequest::PARSE_INPROGRESS);
 
-  // test:  
-  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
-                    "Host: aa\r\n" 
-                    "transfer-encoding: chunked  \r\n"
-                    "\r\n";
+  // test:
+  std::string req =
+      "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked  \r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
@@ -1470,25 +1490,32 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "   this is a bodyhey", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "   this is a bodyhey",
+                      HttpRequest::PARSE_INPROGRESS);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
-  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "   this is a bodyhey", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "   this is a bodyhey",
+                      HttpRequest::PARSE_COMPLETE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
 
 TEST(HttpRequest, chunk_chunked_body_3) {
-  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "",
+                      HttpRequest::PARSE_INPROGRESS);
 
-  // test:  
-  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
-                    "Host: aa\r\n" 
-                    "transfer-encoding: chunked  \r\n"
-                    "\r\n";
+  // test:
+  std::string req =
+      "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked  \r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
@@ -1501,21 +1528,24 @@ TEST(HttpRequest, chunk_chunked_body_3) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1",
+                      {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "",
+                      HttpRequest::PARSE_COMPLETE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
 
-
 TEST(HttpRequest, chunk_content_length_1) {
-  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "10"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "10"}},
+                      "user=kh", "", HttpRequest::PARSE_INPROGRESS);
 
-  // test:  
-  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
-                    "Host: aa\r\n" 
-                    "content-length: 10  \r\n"
-                    "\r\n";
+  // test:
+  std::string req =
+      "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "content-length: 10  \r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
@@ -1556,20 +1586,23 @@ TEST(HttpRequest, chunk_content_length_1) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "1"}}, "user=kh", "\r\n24\n\t hi\n", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "1"}},
+                      "user=kh", "\r\n24\n\t hi\n", HttpRequest::PARSE_COMPLETE);
   req = "\n";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 }
 
 TEST(HttpRequest, chunk_content_length_2) {
-  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "14"}}, "user=kh", "", HttpRequest::PARSE_INPROGRESS);
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "14"}},
+                      "user=kh", "", HttpRequest::PARSE_INPROGRESS);
 
   // test: two letters each
-  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
-                    "Host: aa\r\n" 
-                    "content-length: 14  \r\n"
-                    "\r\n";
+  std::string req =
+      "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "content-length: 14  \r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
@@ -1599,29 +1632,31 @@ TEST(HttpRequest, chunk_content_length_2) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "2"}}, "user=kh", "this is a body", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "2"}},
+                      "user=kh", "this is a body", HttpRequest::PARSE_COMPLETE);
   req = "dy";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect2, test);
 
   // next request: bodyに含まれない
-  HttpRequest expect3(config::UNKNOWN, "", "", {}, "", "", HttpRequest:: PARSE_ERROR);
+  HttpRequest expect3(config::UNKNOWN, "", "", {}, "", "", HttpRequest::PARSE_ERROR);
   req = "over content length";
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect3, test);
 }
 
 TEST(HttpRequest, chunk_content_length_3) {
-  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "0"}}, "user=kh", "", HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect1(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "0"}},
+                      "user=kh", "", HttpRequest::PARSE_COMPLETE);
 
   // test: content-length 0
-  std::string req = "POST /path/to/uri?user=kh HTTP/1.1\r\n"
-                    "Host: aa\r\n" 
-                    "content-length: 0  \r\n"
-                    "\r\n";
+  std::string req =
+      "POST /path/to/uri?user=kh HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "content-length: 0  \r\n"
+      "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect1, test);
 }
 /* -------------- chunk body end -------------- */
-
