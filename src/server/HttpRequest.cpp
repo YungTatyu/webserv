@@ -26,9 +26,7 @@ HttpRequest::~HttpRequest() {}
 
 void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
   // 新たなリクエストの場合は初期化する
-  if (request.parseState == PARSE_COMPLETE || request.parseState == PARSE_ERROR ||
-      request.parseState == PARSE_NOT_IMPLEMENTED)
-    HttpRequest::clear(request);
+  if (request.parseState == PARSE_COMPLETE) HttpRequest::clear(request);
   ParseState &state = request.parseState;
   while (state != PARSE_COMPLETE) {
     ParseState state_before = state;
@@ -233,7 +231,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
     rawRequest.clear();
     return PARSE_INPROGRESS;
   }
-  resetVars(request);
+  resetBufs(request);
   rawRequest.substr(i);
   return PARSE_COMPLETE;
 }
@@ -304,7 +302,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
     default:
       return PARSE_ERROR;  // 501 Not Implemented (SHOULD)
   }
-  resetVars(request);
+  resetBufs(request);
   rawRequest = rawRequest.substr(i);
   return PARSE_METHOD_DONE;
 }
@@ -368,7 +366,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   size_t qindex = uri.find('?');
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
 
-  resetVars(request);
+  resetBufs(request);
   rawRequest = rawRequest.substr(i);
   return PARSE_URI_DONE;
 }
@@ -510,7 +508,7 @@ HttpRequest::ParseState HttpRequest::parseVersion(std::string &rawRequest, HttpR
     return request.parseState;
   }
   request.version = version;
-  resetVars(request);
+  resetBufs(request);
   rawRequest = rawRequest.substr(i);
   return PARSE_VERSION_DONE;
 }
@@ -677,7 +675,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     rawRequest.clear();
     return request.parseState;
   }
-  resetVars(request);
+  resetBufs(request);
   rawRequest = rawRequest.substr(i);
 
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator end_it, cl_it, te_it;
@@ -736,7 +734,7 @@ std::string HttpRequest::urlDecode(const std::string &encoded) {
  *
  * @param request
  */
-void HttpRequest::resetVars(HttpRequest &request) {
+void HttpRequest::resetBufs(HttpRequest &request) {
   request.state_ = 0;
   request.key_buf_.clear();
   request.val_buf_.clear();
@@ -785,6 +783,6 @@ void HttpRequest::clear(HttpRequest &request) {
   request.version.clear();
   request.headers.clear();
   request.body.clear();
-  request.resetVars(request);
+  request.resetBufs(request);
   request.parseState = PARSE_BEFORE;
 }
