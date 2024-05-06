@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <vector>
 
 #include "HttpRequest.hpp"
 
@@ -71,12 +72,13 @@ TEST(HttpRequest, ErrorTest6) {
 }
 
 TEST(HttpRequest, ErrorTest7) {
-  // test format error (empty)
-  std::string rawRequest = "";
+  // test format error (null)
+  std::vector<unsigned char> v = {'\0'};
+  std::string rawRequest(v.begin(), v.end());
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_BEFORE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 
 TEST(HttpRequest, ErrorTest8) {
@@ -333,11 +335,11 @@ TEST(HttpRequest, ErrorTest28) {
 }
 
 TEST(HttpRequest, ErrorTest29) {
-  // test: empty
+  // test: invalid value
   std::string rawRequest =
       "GET / HTTP/1.1\r\n"
       "Host: tt\r\n"
-      "content-length: \r\n"
+      "content-length: 0.0\r\n"
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
