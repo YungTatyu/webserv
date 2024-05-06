@@ -17,27 +17,28 @@ void EpollActiveEventManager::addEvent(const void *event) { (void)event; }
 
 void EpollActiveEventManager::clearAllEvents() { this->active_events_.clear(); }
 
-bool EpollActiveEventManager::isReadEvent(const void *event) {
+bool EpollActiveEventManager::isReadEvent(const void *event, const bool is_cgi_sock) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
-  return (ep_event->events & EPOLLIN) && !isErrorEvent(event) && !isEofEvent(event);
+  return (ep_event->events & EPOLLIN) && !isErrorEvent(event) && !isEofEvent(event, is_cgi_sock);
 }
 
-bool EpollActiveEventManager::isWriteEvent(const void *event) {
+bool EpollActiveEventManager::isWriteEvent(const void *event, const bool is_cgi_sock) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
-  return (ep_event->events & EPOLLOUT) && !isErrorEvent(event) && !isEofEvent(event);
+  return (ep_event->events & EPOLLOUT) && !isErrorEvent(event) && !isEofEvent(event, is_cgi_sock);
 }
 
-bool	EpollActiveEventManager::isEofEvent( const void *event )
+bool	EpollActiveEventManager::isEofEvent( const void *event, const bool is_cgi_sock)
 {
 	const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
+	if (is_cgi_sock) {
+		return false;
+	}
 	return (ep_event->events & EPOLLHUP) && !isErrorEvent(event);
 }
 
 bool EpollActiveEventManager::isErrorEvent(const void *event) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
   return (ep_event->events & EPOLLERR);
-  // return (ep_event->events & EPOLLERR) || (ep_event->events & EPOLLHUP);
-  // CGIの場合、子プロセスは実行終了後消えるのでEPOLLHUPが発生してエラーイベントになってしまう.
 }
 
 #endif

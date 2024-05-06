@@ -14,10 +14,10 @@ class PollActiveEventManager : public IActiveEventManager {
   void setActiveEventsNum(const int num);
   void addEvent(const void *event);
   void clearAllEvents();
-  bool isReadEvent(const void *event);
-  bool isWriteEvent(const void *event);
+  bool isReadEvent(const void *event, const bool is_cgi_sock);
+  bool isWriteEvent(const void *event, const bool is_cgi_sock);
   bool isErrorEvent(const void *event);
-  bool isEofEvent(const void *event);
+  bool isEofEvent(const void *event, const bool is_cgi_sock);
 
  private:
   std::vector<struct pollfd> active_events_;

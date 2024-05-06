@@ -37,8 +37,8 @@ void PollServer::addActiveEvents(const std::vector<pollfd>& pollfds, IActiveEven
   for (size_t i = 0; i < pollfds.size(); ++i) {
     const struct pollfd& cur_pfd = pollfds[i];
     // イベントが発生していたら、active_eventに追加
-    if (event_manager->isReadEvent(static_cast<const void*>(&cur_pfd)) ||
-        event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd)) ||
+    if (event_manager->isReadEvent(static_cast<const void*>(&cur_pfd), false) ||
+        event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd), false) ||
         event_manager->isErrorEvent(static_cast<const void*>(&cur_pfd)))
       event_manager->addEvent(static_cast<const void*>(&cur_pfd));
   }
@@ -63,11 +63,11 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
   for (std::vector<pollfd>::const_iterator it = active_events->begin(); it != active_events->end(); ++it) {
     // 発生したeventに対するhandlerを呼ぶ
     // interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
-    if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
+    if (event_manager->isReadEvent(static_cast<const void*>(&(*it)), false))
       request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
-    else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
+    else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it)), false))
       request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
-    else if (event_manager->isEofEvent(static_cast<const void*>(&(*it))))
+    else if (event_manager->isEofEvent(static_cast<const void*>(&(*it)), false))
       request_handler->handleEofEvent(*io_handler, *conn_manager, *timer_tree, it->fd);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
       request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, it->fd);

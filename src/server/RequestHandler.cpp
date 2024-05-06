@@ -13,6 +13,7 @@ RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                     ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
+	std::cout << "Read Event" << std::endl;
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
     return handleCgiReadEvent(ioHandler, connManager, configHandler, timerTree, sockfd);
   // リスニングソケットへの新規リクエスト
@@ -119,6 +120,7 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
+	std::cout << "Write Event" << std::endl;
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
     return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 
@@ -189,6 +191,7 @@ int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManage
 
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      TimerTree &timerTree, const int sockfd) {
+	std::cout << "error event" << std::endl;
   ioHandler.closeConnection(connManager, sockfd);
   timerTree.deleteTimer(sockfd);
   return RequestHandler::UPDATE_CLOSE;

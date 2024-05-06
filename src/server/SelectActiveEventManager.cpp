@@ -24,12 +24,14 @@ void SelectActiveEventManager::clearAllEvents() {
   // this->active_events_.resize(0);
 }
 
-bool SelectActiveEventManager::isReadEvent(const void *event) {
+bool SelectActiveEventManager::isReadEvent(const void *event, const bool is_cgi_sock) {
+	(void)is_cgi_sock;
   const SelectEvent *sel_event = static_cast<const SelectEvent *>(event);
   return sel_event->event_ == SelectEvent::SELECT_READ;
 }
 
-bool SelectActiveEventManager::isWriteEvent(const void *event) {
+bool SelectActiveEventManager::isWriteEvent(const void *event, const bool is_cgi_sock) {
+	(void)is_cgi_sock;
   const SelectEvent *sel_event = static_cast<const SelectEvent *>(event);
   return sel_event->event_ == SelectEvent::SELECT_WRITE;
 }
@@ -42,7 +44,8 @@ bool SelectActiveEventManager::isErrorEvent(const void *event) {
   return false;
 }
 
-bool SelectActiveEventManager::isEofEvent(const void *event) {
+bool SelectActiveEventManager::isEofEvent(const void *event, const bool is_cgi_sock) {
+	(void)is_cgi_sock;
   static_cast<void>(event);
   return false;
 }

@@ -100,10 +100,10 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
   Timer::updateCurrentTime();
 
   for (size_t i = 0; i < active_events.size(); ++i) {
-    if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
+    if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i]), false))
       request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
                                        active_events[i].fd_);
-    else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
+    else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i]), false))
       request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
                                         active_events[i].fd_);
   }

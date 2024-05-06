@@ -36,13 +36,15 @@ void PollActiveEventManager::clearAllEvents() {
  * @return true
  * @return false
  */
-bool PollActiveEventManager::isReadEvent(const void *event) {
+bool PollActiveEventManager::isReadEvent(const void *event, const bool is_cgi_sock) {
+	(void)is_cgi_sock;
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
   return (poll_fd->revents & POLLIN);
   //return (poll_fd->revents & POLLIN) || (poll_fd->revents & POLLHUP); // isEofEvent()を追加したのでPOLLHUPはそっちで見る.
 }
 
-bool PollActiveEventManager::isWriteEvent(const void *event) {
+bool PollActiveEventManager::isWriteEvent(const void *event, const bool is_cgi_sock) {
+	(void)is_cgi_sock;
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
   return poll_fd->revents & POLLOUT;
 }
@@ -61,7 +63,8 @@ bool PollActiveEventManager::isErrorEvent(const void *event) {
   return (poll_fd->revents & POLLERR) || (poll_fd->revents & POLLNVAL);
 }
 
-bool PollActiveEventManager::isEofEvent(const void *event) {
+bool PollActiveEventManager::isEofEvent(const void *event, const bool is_cgi_sock) {
+	(void)is_cgi_sock;
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
   return (poll_fd->revents & POLLHUP);
 }
