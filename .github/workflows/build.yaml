@@ -3,8 +3,7 @@ name: Compile Test
 on:
   workflow_run:
     workflows: [Format Code]
-    types: 
-      - completed
+    types: [completed]
 
 jobs:
   build-macos:
