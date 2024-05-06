@@ -36,8 +36,8 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       case PARSE_URI_DONE:
       case PARSE_VERSION_DONE:
         state = HttpRequest::parseRequestLine(rawRequest, request);
-        if (state != PARSE_REQUEST_LINE_DONE)
-          return;  // errorもしくはparse未完了：引き続きクライアントからのrequestを待つ
+        // errorもしくはparse未完了：引き続きクライアントからのrequestを待つ
+        if (state != PARSE_REQUEST_LINE_DONE) return;
         break;
       case PARSE_REQUEST_LINE_DONE:
         state = HttpRequest::parseHeaders(rawRequest, request);
@@ -53,8 +53,8 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
         break;
     }
     if (state == PARSE_ERROR) return;
-    if (state == state_before || state == PARSE_INPROGRESS)
-      return;  // parse未完了：引き続きクライアントからのrequestを待つ
+    // parse未完了：引き続きクライアントからのrequestを待つ
+    if (state == state_before || state == PARSE_INPROGRESS) return;
   }
 }
 
@@ -97,6 +97,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
           break;
         }
         return PARSE_ERROR;
+
       case sw_chunk_size:
         if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
         if (std::isdigit(ch)) {
@@ -307,10 +308,15 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
   return PARSE_METHOD_DONE;
 }
 
-/*
- * URLのパース
- * URIかと思っていた、、
- * URLからスキーマ、ポート、パス、クエリーに分解する？
+/**
+ * @brief 
+ * 
+ * @param rawRequest 
+ * @param request 
+ * @return HttpRequest::ParseState 
+ *
+ * URLからスキーマ、ポート、パス、クエリーはparseしない
+ *
  */
 HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpRequest &request) {
   enum parseUriPhase {
