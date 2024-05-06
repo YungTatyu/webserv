@@ -1,4 +1,4 @@
-name: Format Code
+name: Format Code and Compile Test
 
 on:
   pull_request:
@@ -9,6 +9,8 @@ on:
       - ready_for_review
 
 jobs:
+  # formatしてからbuild testしたいから一緒のgithub actionsにした
+  # format codes
   format_code:
     runs-on: ubuntu-latest
 
@@ -57,3 +59,26 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: ":recycle: auto-format code"
+
+  # build test
+  build-macos:
+    if: github.event.pull_request.draft == false
+    name: Build on macOS
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run make (macOS)
+      run: make
+
+  build-ubuntu:
+    if: github.event.pull_request.draft == false
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run make (Ubuntu)
+      run: make
