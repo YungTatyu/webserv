@@ -66,5 +66,5 @@ bool PollActiveEventManager::isEofEvent(const void *event, const bool is_cgi_soc
   if (is_cgi_sock) {
   	return false;
   }
-  return (poll_fd->revents & POLLHUP);
+  return (poll_fd->revents & POLLRDHUP);
 }
