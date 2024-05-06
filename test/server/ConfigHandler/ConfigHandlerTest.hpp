@@ -85,10 +85,16 @@ public:
       unlink("logs/http_access.log");
       unlink("logs/server_access.log");
       unlink("logs/location_access.log");
+      unlink("logs/multiple1.log");
+      unlink("logs/multiple2.log");
+      unlink("logs/multiple3.log");
     } else if (this->conf_path_.find("writeErrorLog") != std::string::npos) {
       config::terminateLogFds(config_handler_.config_);
       unlink("logs/server_error.log");
       unlink("logs/location_error.log");
+      unlink("logs/multiple1.log");
+      unlink("logs/multiple2.log");
+      unlink("logs/multiple3.log");
     }
     delete config_handler_.config_;
   }

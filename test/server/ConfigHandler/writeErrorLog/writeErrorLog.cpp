@@ -68,3 +68,24 @@ TEST(ConfigHandlerTest, writeErrorLog_add_default)
                                  msg);
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, expect_msg));
 }
+
+TEST(ConfigHandlerTest, writeErrorLog_multiple_file)
+{
+  test::ConfigHandlerTest test("writeErrorLog/writeErrLog_test.conf",
+                               "127.0.0.2",
+                               8002);
+  test.initRequest(config::GET, "/multiple/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);
+  test.initTiedServer({{&test.config_handler_.config_->http.server_list[1]}});
+  std::string file_path1 = test.getAbsolutePath("logs/multiple1.log");
+  std::string file_path2 = test.getAbsolutePath("logs/multiple2.log");
+  std::string file_path3 = test.getAbsolutePath("logs/multiple3.log");
+  std::string msg = "naninuneno\n";
+
+  test.config_handler_.writeErrorLog(test.tied_server_,
+                                 test.request_.headers["Host"],
+                                 test.request_.uri,
+                                 msg);
+  EXPECT_TRUE(test.WRITE_ACCURATE(file_path1, msg));
+  EXPECT_TRUE(test.WRITE_ACCURATE(file_path2, msg));
+  EXPECT_TRUE(test.WRITE_ACCURATE(file_path3, msg));
+}
