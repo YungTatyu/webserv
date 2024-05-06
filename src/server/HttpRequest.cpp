@@ -309,11 +309,11 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &rawRequest, HttpRe
 }
 
 /**
- * @brief 
- * 
- * @param rawRequest 
- * @param request 
- * @return HttpRequest::ParseState 
+ * @brief
+ *
+ * @param rawRequest
+ * @param request
+ * @return HttpRequest::ParseState
  *
  * URLからスキーマ、ポート、パス、クエリーはparseしない
  *
