@@ -2,8 +2,7 @@ name: Compile Test
 
 on:
   workflow_run:
-    workflows:
-      - 'Format Code'
+    workflows: [Format Code]
     types: 
       - completed
 
