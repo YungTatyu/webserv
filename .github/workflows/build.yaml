@@ -1,12 +1,11 @@
 name: Compile Test
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
+  workflow_run:
+    workflows:
+      - 'Format Code'
+    types: 
+      - completed
 
 jobs:
   build-macos:
