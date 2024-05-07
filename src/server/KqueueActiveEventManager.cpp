@@ -73,9 +73,7 @@ bool KqueueActiveEventManager::isErrorEvent(const void *event) {
  */
 bool KqueueActiveEventManager::isEofEvent(const void *event, const bool is_cgi_sock) {
   const struct kevent *kq_e = static_cast<const struct kevent *>(event);
-  if (is_cgi_sock) {
-  	return false;
-  }
+  (void)is_cgi_sock;
   return kq_e->flags & EV_EOF;
 }
 

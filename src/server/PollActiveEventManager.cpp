@@ -63,8 +63,6 @@ bool PollActiveEventManager::isErrorEvent(const void *event) {
 
 bool PollActiveEventManager::isEofEvent(const void *event, const bool is_cgi_sock) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
-  if (is_cgi_sock) {
-  	return false;
-  }
+  (void)is_cgi_sock;
   return (poll_fd->revents & POLLRDHUP);
 }
