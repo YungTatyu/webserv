@@ -756,7 +756,7 @@ void HttpRequest::resetBufs(HttpRequest &request) {
  */
 bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::string &header) {
   if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) &&
-      !Utils::compareIgnoreCase(header, kContentLength))
+      !Utils::compareIgnoreCase(header, kTransferEncoding))
     return false;
   return request.headers.find(header) != request.headers.end();
 }
