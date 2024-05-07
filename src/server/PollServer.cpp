@@ -104,13 +104,13 @@ std::vector<struct pollfd> PollServer::convertToPollfds(const ConnectionManager&
 #if defined(__linux__)
         pollfd.events = POLLIN | POLLRDHUP;
 #else
-        pollfd.events = POLLIN | POLLRDHUP;
+        pollfd.events = POLLIN;
 #endif
         break;
       case ConnectionData::EV_WRITE:
       case ConnectionData::EV_CGI_WRITE:
 #if defined(__linux__)
-        pollfd.events = POLLOUT;
+        pollfd.events = POLLOUT | POLLRDHUP;
 #else
         pollfd.events = POLLOUT;
 #endif
