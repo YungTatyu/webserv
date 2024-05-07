@@ -563,3 +563,50 @@ TEST(HttpRequest, ErrorTest45) {
 }
 
 /* -------------- header transfer-encoding test end -------------- */
+
+/* -------------- header unique test -------------- */
+
+TEST(HttpRequest, ErrorTest46) {
+  // test: dup header
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding:chunked \r\n"
+      "transfer-encoding:chunked \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest47) {
+  // test: dup header
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "Host: yay\r\n"
+      "transfer-encoding:chunked \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest48) {
+  // test: dup header
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "Host: yay\r\n"
+      "content-length: 2 \r\n"
+      "content-length: 10 \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* -------------- header unique test end -------------- */

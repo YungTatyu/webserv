@@ -604,7 +604,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         }
         break;
       case sw_colon:
-        if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
+        if (isUniqHeaderDup(request, cur_name)) return PARSE_ERROR;
         state = sw_space_before_value;
         ++i;
         break;
@@ -653,7 +653,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         break;
       case sw_header_done:
         if (ch != '\n') return PARSE_ERROR;
-        if (isUniqueHeaderDup(request, cur_name)) return PARSE_ERROR;
+        if (isUniqHeaderDup(request, cur_name)) return PARSE_ERROR;
         if (Utils::compareIgnoreCase(kHost, cur_name) && !isValidHost(cur_value)) return PARSE_ERROR;
         if (Utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value))
           return PARSE_ERROR;
@@ -754,7 +754,7 @@ void HttpRequest::resetBufs(HttpRequest &request) {
  * @return true
  * @return false
  */
-bool HttpRequest::isUniqueHeaderDup(const HttpRequest &request, const std::string &header) {
+bool HttpRequest::isUniqHeaderDup(const HttpRequest &request, const std::string &header) {
   if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) &&
       !Utils::compareIgnoreCase(header, kTransferEncoding))
     return false;
