@@ -1,6 +1,6 @@
 #include "ConfigHandlerTest.hpp"
 
-TEST(ConfigHandlerTest, allowRequest_allow_all) {
+TEST(ConfigHandlerTestAllowRequest, allow_all) {
   test::ConfigHandlerTest test("allowRequest/allowRequest_test.conf");
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
 
@@ -12,7 +12,7 @@ TEST(ConfigHandlerTest, allowRequest_allow_all) {
              );
 }
 
-TEST(ConfigHandlerTest, allowRequest_deny_all) {
+TEST(ConfigHandlerTestAllowRequest, deny_all) {
   test::ConfigHandlerTest test("allowRequest/allowRequest_test.conf");
   test.initRequest(config::GET, "/hello/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);
 
@@ -24,7 +24,7 @@ TEST(ConfigHandlerTest, allowRequest_deny_all) {
              );
 }
 
-TEST(ConfigHandlerTest, allowRequest_allow_one_address1) {
+TEST(ConfigHandlerTestAllowRequest, allow_one_address1) {
   test::ConfigHandlerTest test("allowRequest/allowRequest_test.conf");
   test.initRequest(config::GET, "/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);
 
@@ -36,7 +36,7 @@ TEST(ConfigHandlerTest, allowRequest_allow_one_address1) {
              );
 }
 
-TEST(ConfigHandlerTest, allowRequest_deny_one_address1) {
+TEST(ConfigHandlerTestAllowRequest, deny_one_address1) {
   test::ConfigHandlerTest test("allowRequest/allowRequest_test.conf");
   test.initRequest(config::GET, "/hello/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);
 
@@ -48,7 +48,7 @@ TEST(ConfigHandlerTest, allowRequest_deny_one_address1) {
              );
 }
 
-TEST(ConfigHandlerTest, allowRequest_deny_one_address2) {
+TEST(ConfigHandlerTestAllowRequest, deny_one_address2) {
   test::ConfigHandlerTest test("allowRequest/allowRequest_test.conf");
   test.initRequest(config::GET, "/", {{"Host", "third_server"}}, "", HttpRequest::PARSE_COMPLETE);
 
@@ -60,7 +60,7 @@ TEST(ConfigHandlerTest, allowRequest_deny_one_address2) {
              );
 }
 
-TEST(ConfigHandlerTest, allowRequest_allow_one_address2) {
+TEST(ConfigHandlerTestAllowRequest, allow_one_address2) {
   test::ConfigHandlerTest test("allowRequest/allowRequest_test.conf");
   test.initRequest(config::GET, "/hello/", {{"Host", "third_server"}}, "", HttpRequest::PARSE_COMPLETE);
 

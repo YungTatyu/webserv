@@ -1,6 +1,6 @@
 #include "ConfigHandlerTest.hpp"
 
-TEST(ConfigHandlerTest, writeErrorLog_off)
+TEST(ConfigHandlerTestWriteErrorLog, off)
 {
   test::ConfigHandlerTest test("writeErrorLog/writeErrLog_test.conf",
                                "127.0.0.1",
@@ -17,7 +17,7 @@ TEST(ConfigHandlerTest, writeErrorLog_off)
   EXPECT_FALSE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeErrorLog_location)
+TEST(ConfigHandlerTestWriteErrorLog, location)
 {
   test::ConfigHandlerTest test("writeErrorLog/writeErrLog_test.conf",
                                "127.0.0.1",
@@ -34,7 +34,7 @@ TEST(ConfigHandlerTest, writeErrorLog_location)
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeErrorLog_default)
+TEST(ConfigHandlerTestWriteErrorLog, Default)
 {
   test::ConfigHandlerTest test("writeErrorLog/writeErrLog_test.conf",
                                "127.0.0.2",
@@ -51,7 +51,7 @@ TEST(ConfigHandlerTest, writeErrorLog_default)
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeErrorLog_add_default)
+TEST(ConfigHandlerTestWriteErrorLog, add_default)
 {
   test::ConfigHandlerTest test("writeErrorLog/writeErrLog_test.conf",
                                "127.0.0.2",
@@ -69,7 +69,7 @@ TEST(ConfigHandlerTest, writeErrorLog_add_default)
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, expect_msg));
 }
 
-TEST(ConfigHandlerTest, writeErrorLog_multiple_file)
+TEST(ConfigHandlerTestWriteErrorLog, multiple_file)
 {
   test::ConfigHandlerTest test("writeErrorLog/writeErrLog_test.conf",
                                "127.0.0.2",

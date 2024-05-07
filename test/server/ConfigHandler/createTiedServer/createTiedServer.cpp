@@ -8,7 +8,7 @@ bool sameTiedServer(const struct TiedServer& tied1, const struct TiedServer& tie
 }
 };
 
-TEST(ConfigHandlerTest, createTiedServer_three_server) {
+TEST(ConfigHandlerTestCreateTiedServer, three_server) {
   test::ConfigHandlerTest test("createTiedServer/createTiedServer_test.conf",
                                "127.0.0.1",
                                8001);
@@ -25,7 +25,7 @@ TEST(ConfigHandlerTest, createTiedServer_three_server) {
               ));
 }
 
-TEST(ConfigHandlerTest, createTiedServer_one_server1) {
+TEST(ConfigHandlerTestCreateTiedServer, one_server1) {
   test::ConfigHandlerTest test("createTiedServer/createTiedServer_test.conf",
                                "127.0.0.2",
                                8002);
@@ -40,7 +40,7 @@ TEST(ConfigHandlerTest, createTiedServer_one_server1) {
               ));
 }
 
-TEST(ConfigHandlerTest, createTiedServer_one_server2) {
+TEST(ConfigHandlerTestCreateTiedServer, one_server2) {
   test::ConfigHandlerTest test("createTiedServer/createTiedServer_test.conf",
                                "127.0.0.3",
                                8003);

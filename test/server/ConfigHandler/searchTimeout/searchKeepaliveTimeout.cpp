@@ -1,6 +1,6 @@
 #include "ConfigHandlerTest.hpp"
 
-TEST(ConfigHandlerTest, searchKeepaliveTimeout_http)
+TEST(ConfigHandlerTestSearchKeepaliveTimeout, http)
 {
   test::ConfigHandlerTest test("searchTimeout/searchKeepaliveTimeout_test.conf",
                                "127.0.0.1",
@@ -17,7 +17,7 @@ TEST(ConfigHandlerTest, searchKeepaliveTimeout_http)
                  );   
 }
 
-TEST(ConfigHandlerTest, searchKeepaliveTimeout_server)
+TEST(ConfigHandlerTestSearchKeepaliveTimeout, server)
 {
   test::ConfigHandlerTest test("searchTimeout/searchKeepaliveTimeout_test.conf",
                                "127.0.0.2",
@@ -34,7 +34,7 @@ TEST(ConfigHandlerTest, searchKeepaliveTimeout_server)
                  );   
 }
 
-TEST(ConfigHandlerTest, SearchKeepAliveTimeout_location)
+TEST(ConfigHandlerTestSearchKeepAliveTimeout, location)
 {
   test::ConfigHandlerTest test("searchTimeout/searchKeepaliveTimeout_test.conf",
                                "127.0.0.1",

@@ -1,6 +1,6 @@
 #include "ConfigHandlerTest.hpp"
 
-TEST(ConfigHandlerTest, searchUseridExpires_http)
+TEST(ConfigHandlerTestSearchUseridExpires, http)
 {
   test::ConfigHandlerTest test("searchTimeout/searchUseridExpires_test.conf",
                                "127.0.0.1",
@@ -17,7 +17,7 @@ TEST(ConfigHandlerTest, searchUseridExpires_http)
                  );   
 }
 
-TEST(ConfigHandlerTest, searchUseridExpires_server)
+TEST(ConfigHandlerTestSearchUseridExpires, server)
 {
   test::ConfigHandlerTest test("searchTimeout/searchUseridExpires_test.conf",
                                "127.0.0.2",
@@ -34,7 +34,7 @@ TEST(ConfigHandlerTest, searchUseridExpires_server)
                  );   
 }
 
-TEST(ConfigHandlerTest, searchUseridExpires_location)
+TEST(ConfigHandlerTestSearchUseridExpires, location)
 {
   test::ConfigHandlerTest test("searchTimeout/searchUseridExpires_test.conf",
                                "127.0.0.1",

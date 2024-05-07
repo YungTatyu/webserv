@@ -37,7 +37,7 @@ void assert_allowRequest_loop(
 }
 }; // namespace test
 
-TEST(ConfigHandlerTest, allowRequest_limit_except_POST)
+TEST(ConfigHandlerTestAllowRequest, limit_except_POST)
 {
   test::ConfigHandlerTest test("allowRequest/limit_method.conf");
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
@@ -56,7 +56,7 @@ TEST(ConfigHandlerTest, allowRequest_limit_except_POST)
   );
 }
 
-TEST(ConfigHandlerTest, allowRequest_limit_except_DELETE)
+TEST(ConfigHandlerTestAllowRequest, limit_except_DELETE)
 {
   test::ConfigHandlerTest test("allowRequest/limit_method.conf");
   test.initRequest(config::GET, "/hello/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
@@ -75,7 +75,7 @@ TEST(ConfigHandlerTest, allowRequest_limit_except_DELETE)
   );
 }
 
-TEST(ConfigHandlerTest, allowRequest_limit_except_do_nothing)
+TEST(ConfigHandlerTestAllowRequest, limit_except_do_nothing)
 {
   test::ConfigHandlerTest test("allowRequest/limit_method.conf");
   test.initRequest(config::GET, "/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);

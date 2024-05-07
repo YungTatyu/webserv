@@ -4,7 +4,7 @@
 //                const config::Server& server_config,
 //                const std::string& uri) const;
 
-TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_root)
+TEST(ConfigHandlerTestSearchLocationConfig, root)
 {
   test::ConfigHandlerTest test("searchLocationConfig/search_location.conf");
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
@@ -15,7 +15,7 @@ TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_root)
           test.config_handler_.searchLongestMatchLocationConfig(server, "/"));
 }
 
-TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_samename)
+TEST(ConfigHandlerTestSearchLocationConfig, samename)
 {
   test::ConfigHandlerTest test("searchLocationConfig/search_location.conf");
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
@@ -26,7 +26,7 @@ TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_samename)
           test.config_handler_.searchLongestMatchLocationConfig(server, "/hello/"));
 }
 
-TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_longest_match1)
+TEST(ConfigHandlerTestSearchLocationConfig, longest_match1)
 {
   test::ConfigHandlerTest test("searchLocationConfig/search_location.conf");
   test.initRequest(config::GET, "/everyone/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
@@ -37,7 +37,7 @@ TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_longest_match1)
           test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
 }
 
-TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_longest_match2)
+TEST(ConfigHandlerTestSearchLocationConfig, longest_match2)
 {
   test::ConfigHandlerTest test("searchLocationConfig/search_location.conf");
   test.initRequest(config::GET, "/hello/goodnight/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
@@ -48,7 +48,7 @@ TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_longest_match2)
           test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
 }
 
-TEST(ConfigHandlerTest, searchLongestMatchLocationConfig_longest_match3)
+TEST(ConfigHandlerTestSearchLocationConfig, longest_match3)
 {
   test::ConfigHandlerTest test("searchLocationConfig/search_location.conf");
   test.initRequest(config::GET, "/helo/goodnight/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);

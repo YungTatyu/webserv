@@ -1,6 +1,6 @@
 #include "ConfigHandlerTest.hpp"
 
-TEST(ConfigHandlerTest, writeAccessLog_off)
+TEST(ConfigHandlerTestWriteAccessLog, off)
 {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf",
                                "127.0.0.1",
@@ -17,7 +17,7 @@ TEST(ConfigHandlerTest, writeAccessLog_off)
   EXPECT_FALSE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeAccessLog_location)
+TEST(ConfigHandlerTestWriteAccessLog, location)
 {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf",
                                "127.0.0.1",
@@ -34,7 +34,7 @@ TEST(ConfigHandlerTest, writeAccessLog_location)
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeAccessLog_parent_context)
+TEST(ConfigHandlerTestWriteAccessLog, parent_context)
 {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf",
                                "127.0.0.1",
@@ -51,7 +51,7 @@ TEST(ConfigHandlerTest, writeAccessLog_parent_context)
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeAccessLog_grand_parent_context)
+TEST(ConfigHandlerTestWriteAccessLog, grand_parent_context)
 {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf",
                                "127.0.0.2",
@@ -68,7 +68,7 @@ TEST(ConfigHandlerTest, writeAccessLog_grand_parent_context)
   EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
 }
 
-TEST(ConfigHandlerTest, writeAccessLog_multiple_file)
+TEST(ConfigHandlerTestWriteAccessLog, multiple_file)
 {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf",
                                "127.0.0.2",
