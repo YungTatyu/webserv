@@ -64,5 +64,9 @@ bool PollActiveEventManager::isErrorEvent(const void *event) {
 bool PollActiveEventManager::isEofEvent(const void *event, const bool is_cgi_sock) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
   (void)is_cgi_sock;
+  #if defined(__linux__)
   return (poll_fd->revents & POLLRDHUP);
+  #endif
+  // linux以外はEOF検知できない.
+  return false;
 }

@@ -101,11 +101,19 @@ std::vector<struct pollfd> PollServer::convertToPollfds(const ConnectionManager&
     switch (it->second->event) {
       case ConnectionData::EV_READ:
       case ConnectionData::EV_CGI_READ:
+#if defined(__linux__)
         pollfd.events = POLLIN | POLLRDHUP;
+#else
+        pollfd.events = POLLIN | POLLRDHUP;
+#endif
         break;
       case ConnectionData::EV_WRITE:
       case ConnectionData::EV_CGI_WRITE:
-        pollfd.events = POLLOUT | POLLRDHUP;
+#if defined(__linux__)
+        pollfd.events = POLLOUT;
+#else
+        pollfd.events = POLLOUT;
+#endif
         break;
     }
     pollfd.revents = 0;
