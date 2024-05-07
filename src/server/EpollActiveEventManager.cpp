@@ -30,9 +30,10 @@ bool EpollActiveEventManager::isWriteEvent(const void *event, const bool is_cgi_
 bool	EpollActiveEventManager::isEofEvent( const void *event, const bool is_cgi_sock)
 {
 	const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
-	if (is_cgi_sock) {
-		return false;
-	}
+	(void)is_cgi_sock;
+	//if (is_cgi_sock) {
+	//	return false;
+	//}
 	return (ep_event->events & EPOLLHUP) && !isErrorEvent(event);
 }
 
