@@ -14,7 +14,7 @@ TEST(ConfigHandlerTestWriteAccessLog, off)
                                  test.request_.headers["Host"],
                                  test.request_.uri,
                                  msg);
-  EXPECT_FALSE(test.WRITE_ACCURATE(file_path, msg));
+  test.EXPECT_NO_FILE(file_path, msg);
 }
 
 TEST(ConfigHandlerTestWriteAccessLog, location)
@@ -31,7 +31,7 @@ TEST(ConfigHandlerTestWriteAccessLog, location)
                                  test.request_.headers["Host"],
                                  test.request_.uri,
                                  msg);
-  EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
+  test.WRITE_ACCURATE(file_path, msg);
 }
 
 TEST(ConfigHandlerTestWriteAccessLog, parent_context)
@@ -48,7 +48,7 @@ TEST(ConfigHandlerTestWriteAccessLog, parent_context)
                                  test.request_.headers["Host"],
                                  test.request_.uri,
                                  msg);
-  EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
+  test.WRITE_ACCURATE(file_path, msg);
 }
 
 TEST(ConfigHandlerTestWriteAccessLog, grand_parent_context)
@@ -65,7 +65,7 @@ TEST(ConfigHandlerTestWriteAccessLog, grand_parent_context)
                                  test.request_.headers["Host"],
                                  test.request_.uri,
                                  msg);
-  EXPECT_TRUE(test.WRITE_ACCURATE(file_path, msg));
+  test.WRITE_ACCURATE(file_path, msg);
 }
 
 TEST(ConfigHandlerTestWriteAccessLog, multiple_file)
@@ -84,7 +84,7 @@ TEST(ConfigHandlerTestWriteAccessLog, multiple_file)
                                  test.request_.headers["Host"],
                                  test.request_.uri,
                                  msg);
-  EXPECT_TRUE(test.WRITE_ACCURATE(file_path1, msg));
-  EXPECT_TRUE(test.WRITE_ACCURATE(file_path2, msg));
-  EXPECT_TRUE(test.WRITE_ACCURATE(file_path3, msg));
+  test.WRITE_ACCURATE(file_path1, msg);
+  test.WRITE_ACCURATE(file_path2, msg);
+  test.WRITE_ACCURATE(file_path3, msg);
 }

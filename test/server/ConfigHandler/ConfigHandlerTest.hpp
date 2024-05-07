@@ -130,10 +130,9 @@ public:
     return static_cast<std::string>(absolute_tmp_path);
   }
 
-  bool WRITE_ACCURATE(std::string file_path, const std::string& msg) {
+  static bool getWriteResult(std::string file_path, const std::string& msg) {
     std::ifstream logFile(file_path.c_str());
     if (!logFile.is_open()) {
-      std::cerr << "Failed to open log file: " << file_path << std::endl;
       return false;
     }
 
@@ -147,6 +146,19 @@ public:
       if (logContent[i].find(msg) != std::string::npos) return true;
     }
     return false;
+  }
+
+  void WRITE_ACCURATE(std::string file_path, const std::string& msg) {
+    EXPECT_TRUE(getWriteResult(file_path, msg));
+  }
+
+  void WRITE_NONE(std::string file_path, const std::string& msg) {
+    EXPECT_FALSE(getWriteResult(file_path, msg));
+  }
+
+  void EXPECT_NO_FILE(std::string file_path, const std::string& msg) {
+    std::ifstream logFile(file_path.c_str());
+    EXPECT_FALSE(logFile.is_open());
   }
 
   void sameTime(const config::Time& expect, const config::Time& actual) {
