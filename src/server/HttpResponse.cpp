@@ -414,7 +414,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
         //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
-            config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, request));
+            config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, response.body_.size(), request));
         phase = sw_end_phase;
         break;
 
