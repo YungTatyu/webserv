@@ -150,17 +150,22 @@ std::string Utils::socketToStrIPAddress(const int sock) {
 
 std::string Utils::ipToStr(const uint32_t ip) {
   std::stringstream ss;
-
+  std::vector<int> segments;
+  uint32_t decimal = ip;
+  for (int i = 0; i < 4; ++i) {
+    segments.push_back(decimal % 256);
+    decimal /= 256;
+  }
 #if defined(__LITTLE_ENDIAN__)
-  ss << ((ip >> 24) & 0xFF) << '.'  // 第1オクテット
-     << ((ip >> 16) & 0xFF) << '.'  // 第2オクテット
-     << ((ip >> 8) & 0xFF) << '.'   // 第3オクテット
-     << (ip & 0xFF);                // 第4オクテット
+  for (int i = 3; i >= 0; --i) {
+    ss << segments[i];
+    if (i > 0) ss << ".";
+  }
 #else
-  ss << (ip & 0xFF) << '.'          // 第1オクテット
-     << ((ip >> 8) & 0xFF) << '.'   // 第2オクテット
-     << ((ip >> 16) & 0xFF) << '.'  // 第3オクテット
-     << ((ip >> 24) & 0xFF);        // 第4オクテット
+  for (int i = 0; i < 4; ++i) {
+    ss << segments[i];
+    if (i < 3) ss << ".";
+  }
 #endif
   return ss.str();
 }
