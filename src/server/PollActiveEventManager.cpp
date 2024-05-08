@@ -66,8 +66,9 @@ bool PollActiveEventManager::isEofEvent(const void *event, const bool is_cgi_soc
   (void)is_cgi_sock;
   #if defined(__linux__)
   return (poll_fd->revents & POLLRDHUP);
-  #endif
-  (void)pollfd;
+  #else
   // linux以外はEOF検知できない.
+  (void)poll_fd;
   return false;
+  #endif
 }
