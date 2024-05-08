@@ -51,7 +51,7 @@ def main():
             passed_cnt += 1
         else:
             print(
-                f"{Fore.RED}[ FAIL ]{Style.RESET_ALL}",
+                f"{Fore.RED}[ FAIL ]{Style.RESET_ALL} {test}",
                 file=sys.stderr,
                 end="\n\n",
                 flush=True,
