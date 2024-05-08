@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <cstring>
 #include <utility>
 
@@ -25,7 +26,8 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
 
     // socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
     int yes = 1;
-    SysCallWrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    int re = SysCallWrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    if (re != 0) std::exit(EXIT_FAILURE);
 
     // preparation of the socket address
     struct sockaddr_in servaddr;
@@ -44,6 +46,7 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
     std::cout << "Server running on port " << port << std::endl;
     return listen_fd;
   } catch (const std::runtime_error& e) {
+    std::cerr << e.what() << std::endl;
     std::exit(EXIT_FAILURE);
   }
 }
