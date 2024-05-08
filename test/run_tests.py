@@ -5,13 +5,21 @@ import sys
 import subprocess
 from colorama import Fore, Style
 
-
 def printLog(passed, failed):
     print("[============== test result ==============]")
     print(f"[========]    {passed + failed} tests ran")
     print(f"{Fore.GREEN}[ PASSED ]{Style.RESET_ALL}    {passed} tests")
     print(f"{Fore.RED}[ FAILED ]{Style.RESET_ALL}    {failed} tests")
 
+def init(path):
+    process = subprocess.Popen(["make", "-j", "-C", path])
+    exit_status = process.wait()
+    output_bytes, _ = process.communicate()  # 標準エラー出力を取得
+    output = output_bytes.decode("utf-8")  # バイト列を文字列にデコード
+
+    if exit_status != 0:
+        print(f'"{output}"', file=sys.stderr)
+        sys.exit(exit_status)
 
 def run_test(command):
     result = subprocess.Popen(
@@ -25,7 +33,6 @@ def run_test(command):
     if exit_status != 0:
         print(f'output: "{output}"', file=sys.stderr)
     return exit_status
-
 
 def main():
     CWD = os.path.dirname(os.path.abspath(__file__))
