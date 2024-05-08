@@ -14,11 +14,8 @@ def printLog(passed, failed):
 def init(path):
     process = subprocess.Popen(["make", "-j", "-C", path])
     exit_status = process.wait()
-    output_bytes, _ = process.communicate()  # 標準エラー出力を取得
-    output = output_bytes.decode("utf-8")  # バイト列を文字列にデコード
 
     if exit_status != 0:
-        print(f'"{output}"', file=sys.stderr)
         sys.exit(exit_status)
 
 def run_test(command):
@@ -47,6 +44,7 @@ def main():
         f"{CWD}/integration_test/SendTimeoutTest.sh",
     ]
 
+    init(f'{CWD}/..')
     ti = 0
     passed_cnt = 0
     failed_cnt = 0
