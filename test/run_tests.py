@@ -5,8 +5,10 @@ import sys
 import subprocess
 from colorama import Fore, Style
 
+TEST_NAME = 'the entire test'
+
 def printLog(passed, failed):
-    print("[============== test result ==============]")
+    print(f"[============== {TEST_NAME} result ==============]")
     print(f"[========]    {passed + failed} tests ran")
     print(f"{Fore.GREEN}[ PASSED ]{Style.RESET_ALL}    {passed} tests")
     print(f"{Fore.RED}[ FAILED ]{Style.RESET_ALL}    {failed} tests")
@@ -19,16 +21,13 @@ def init(path):
         sys.exit(exit_status)
 
 def run_test(command):
-    result = subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    )
+
+    result = subprocess.Popen(command, shell=True)
+    # testの出力を見せたくない場合
+    # result = subprocess.Popen(
+    #     command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    # )
     exit_status = result.wait()
-
-    output_bytes, _ = result.communicate()  # 標準エラー出力を取得
-    output = output_bytes.decode("utf-8")  # バイト列を文字列にデコード
-
-    if exit_status != 0:
-        print(f'output: "{output}"', file=sys.stderr)
     return exit_status
 
 def main():
@@ -49,14 +48,15 @@ def main():
     passed_cnt = 0
     failed_cnt = 0
     for test in test_cases:
-        print(f"[ test{ti} ] {test}", end="\n")
+        CUR_TEST = f'{TEST_NAME}{ti}'
+        print(f"[   {CUR_TEST}   ] {test}", end="\n")
         result = run_test(test)
         if result == 0:
-            print(f"{Fore.GREEN}[ PASS ]{Style.RESET_ALL}", end="\n\n", flush=True)
+            print(f"{Fore.GREEN}[   PASS   ]{Style.RESET_ALL} {CUR_TEST}:{test}", end="\n\n", flush=True)
             passed_cnt += 1
         else:
             print(
-                f"{Fore.RED}[ FAIL ]{Style.RESET_ALL} {test}",
+                f"{Fore.RED}[   FAIL   ]{Style.RESET_ALL} {CUR_TEST}:{test}",
                 file=sys.stderr,
                 end="\n\n",
                 flush=True,
