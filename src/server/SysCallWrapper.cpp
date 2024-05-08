@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include "error.hpp"
 
 int SysCallWrapper::Socket(int domain, int type, int protocol) {
   int listenfd = socket(domain, type, protocol);
@@ -18,12 +19,9 @@ int SysCallWrapper::Socket(int domain, int type, int protocol) {
 
 int SysCallWrapper::Setsockopt(int socket, int level, int option_name, const void *option_value,
                                socklen_t option_len) {
-  int re;
-  re = setsockopt(socket, level, option_name, option_value, option_len);
-  if (re == -1) {
-    perror("setsockopt");
-    throw std::runtime_error("setsockopt");
-  }
+  int re = setsockopt(socket, level, option_name, option_value, option_len);
+  if (re == -1)
+    std::cerr << error::strerror("setsockopt") << std::endl;
   return re;
 }
 

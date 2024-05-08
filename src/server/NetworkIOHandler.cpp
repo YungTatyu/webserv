@@ -1,12 +1,14 @@
 #include "NetworkIOHandler.hpp"
 
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include <algorithm>
 #include <cstring>
 #include <utility>
 
 #include "ConnectionManager.hpp"
+#include "SysCallWrapper.hpp"
 
 NetworkIOHandler::NetworkIOHandler() {}
 
@@ -120,6 +122,10 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
   connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
   fcntl(connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+  #if defined (SO_NOSIGPIPE)
+  int opt = 1;
+  SysCallWrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+  #endif
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);
