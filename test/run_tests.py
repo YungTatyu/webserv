@@ -3,15 +3,21 @@
 import os
 import sys
 import subprocess
-from colorama import Fore, Style
+from colorama import Fore, Style, Back
 
 TEST_NAME = 'the entire test'
+GREEN = f"{Fore.GREEN}"
+RED = f"{Fore.RED}"
+BOLD = f"{Style.BRIGHT}"
+BG_GREEN = f"{Back.GREEN}"
+BG_RED = f"{Back.RED}"
+RESET = f"{Style.RESET_ALL}"
 
 def printLog(passed, failed):
     print(f"[============== {TEST_NAME} result ==============]")
     print(f"[========]    {passed + failed} tests ran")
-    print(f"{Fore.GREEN}[ PASSED ]{Style.RESET_ALL}    {passed} tests")
-    print(f"{Fore.RED}[ FAILED ]{Style.RESET_ALL}    {failed} tests")
+    print(f"{GREEN}[ PASSED ]{RESET}    {passed} tests")
+    print(f"{RED}[ FAILED ]{RESET}    {failed} tests")
 
 def init(path):
     process = subprocess.Popen(["make", "-j", "-C", path])
@@ -49,16 +55,16 @@ def main():
     failed_cnt = 0
     for test in test_cases:
         CUR_TEST = f'{TEST_NAME}{ti}'
-        print(f"[   {CUR_TEST}   ] {test}", end="\n")
+        print(f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}", end="\n")
         result = run_test(test)
         if result == 0:
-            print(f"{Fore.GREEN}[   PASS   ]{Style.RESET_ALL} {CUR_TEST}:{test}", end="\n\n", flush=True)
+            print(f"{BOLD}{BG_GREEN}[       OK ]{RESET} {CUR_TEST}: {test}", end="\n", flush=True)
             passed_cnt += 1
         else:
             print(
-                f"{Fore.RED}[   FAIL   ]{Style.RESET_ALL} {CUR_TEST}:{test}",
+                f"{BOLD}{BG_RED}[  FAILED  ]{RESET} {CUR_TEST}: {test}",
                 file=sys.stderr,
-                end="\n\n",
+                end="\n",
                 flush=True,
             )
             failed_cnt += 1
