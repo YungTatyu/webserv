@@ -13,10 +13,12 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fstream>
 
 #include "ConfigHandler.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "LogFd.hpp"
 
 namespace test {
 
@@ -33,6 +35,9 @@ class ResponseTest {
   ResponseTest(const std::string &conf_path) : conf_path_(conf_path) {}
 
   ~ResponseTest() {
+    if (this->conf_path_.find("AccessLog") != std::string::npos) {
+      unlink("logs/format.log");
+    }
     delete this->config_handler_.config_;
     close(this->sockets_[0]);
     close(this->sockets_[1]);
@@ -225,6 +230,88 @@ class ResponseTest {
   }
 
   /**
+   * @brief ログエントリを解析して各フィールドの値をテストするメソッド
+   *
+   * @param log_path
+   * @param expect_ip
+   * @param expect_method
+   * @param expect_uri
+   * @param expect_httpVersion
+   * @param expect_statusCode
+   * @param expect_resSize
+   * @param expect_userAgent
+   */
+  void testAccessLogEntry(
+                    const std::string& log_path,
+                    std::string expect_ip,
+                    std::string expect_method,
+                    std::string expect_uri,
+                    double expect_httpVersion,
+                    int expect_statusCode,
+                    int expect_resSize,
+                    std::string expect_userAgent) {
+
+    // ログエントリの解析
+    std::ifstream logFile(log_path.c_str());
+    std::string log_entry;
+    std::vector<std::string> log_entries;
+    if (logFile.is_open()) {
+      // どこかでログ出力がされてしまっているので、最後にwriteAccessLogで出力したログのみテストする。
+      while (std::getline(logFile, log_entry)) // 1行読み込む
+        log_entries.push_back(log_entry);
+      logFile.close();
+    }
+    else {
+      FAIL() << "Can't open the log file: " << log_path << std::endl;
+      return;
+    }
+    // 正規表現パターン
+    std::regex pattern(R"((\d+\.\d+\.\d+\.\d+) - - \[(\d+\/\w+\/\d+:\d+:\d+:\d+) GMT\] \"(GET|POST) (\/[^"]*) HTTP\/(\d+\.\d+)\" (\d+) (\d+) \"([^"]*\/\d+[\.\d+]*)\")");
+
+    std::smatch matches;
+    ASSERT_TRUE(std::regex_match(log_entries.back(), matches, pattern));
+
+    // 各フィールドの値を取得してテストする
+    std::string actual_ip = matches[1];
+    std::string actual_time = matches[2];
+    std::string actual_method = matches[3];
+    std::string actual_uri = matches[4];
+    double actual_httpVersion = std::stod(matches[5]);
+    int actual_statusCode = std::stoi(matches[6]);
+    int actual_resSize = std::stoi(matches[7]);
+    std::string actual_userAgent = matches[8];
+    
+    // 時刻に関しては現在時刻との差分が許容範囲かテストする。
+    int acceptable_diff = 3;
+    // 現在時刻を取得
+    auto now = std::chrono::system_clock::now();
+    std::time_t current_time = std::chrono::system_clock::to_time_t(now);
+    std::tm *gmt = std::gmtime(&current_time);
+    // ログの時刻を取得
+    std::tm t = {};
+    std::istringstream ss(actual_time);
+    // Date: 03/May/2024:04:30:17 GMT
+    ss >> std::get_time(&t, "%d/%b/%Y:%H:%M:%S");
+    if (ss.fail()) {
+      err("Date: format error");
+      return;
+    }
+    std::time_t time_actual = std::mktime(&t);
+    // 現在時刻との差分を取得
+    double diff = std::difftime(std::mktime(gmt), time_actual);
+
+    // テスト
+    ASSERT_EQ(actual_ip, expect_ip);
+    ASSERT_TRUE(std::abs(diff) <= acceptable_diff);
+    ASSERT_EQ(actual_method, expect_method);
+    ASSERT_EQ(actual_uri, expect_uri);
+    ASSERT_EQ(actual_httpVersion, expect_httpVersion);
+    ASSERT_EQ(actual_statusCode, expect_statusCode);
+    ASSERT_EQ(actual_resSize, expect_resSize);
+    ASSERT_EQ(actual_userAgent, expect_userAgent);
+  }
+
+  /**
    * @brief final responseを作成するhelper関数
    *
    * @param status_code_line
@@ -253,6 +340,19 @@ class ResponseTest {
       it = std::find(it, re.end(), '-');
     }
     return re;
+  }
+
+  std::string getAbsolutePath(std::string file_path) {
+    char absolute_path[1024];
+
+    // 絶対pathを取得
+    if (realpath(file_path.c_str(), absolute_path) == NULL) {
+      std::cerr << file_path << " is not found." << std::endl;
+    exit(EXIT_FAILURE);
+    }
+
+    // absolutepath = ~/webserv
+    return static_cast<std::string>(absolute_path);
   }
 
   int sockets_[2];
