@@ -55,7 +55,11 @@ void NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server) 
 int NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const int cli_sock) {
   std::vector<unsigned char> buffer(bufferSize_);
 
-  ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, MSG_NOSIGNAL);
+  int flag = 0;
+  #if defined (MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+  #endif
+  ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, flag);
   if (re == 0)  // クライアントとのコネクションが閉じた時。
     return 0;
   else if (re == -1)  // ソケットが使用不可、またはエラー。
@@ -74,7 +78,11 @@ int NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, const i
   const static size_t buffer_size = 1024;
   std::vector<unsigned char> buffer(buffer_size);
 
-  ssize_t re = recv(sock, buffer.data(), buffer_size, MSG_NOSIGNAL);
+  int flag = 0;
+  #if defined (MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+  #endif
+  ssize_t re = recv(sock, buffer.data(), buffer_size, flag);
   if (re == 0)  // cgi process died
     return 0;
   if (re == -1)  // error
@@ -92,7 +100,11 @@ int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli
 
   size_t sentBytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t currentChunkSize = std::min(chunkSize, resSize - sentBytes);
-  int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, MSG_NOSIGNAL);
+  int flag = 0;
+  #if defined (MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+  #endif
+  int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, flag);
   if (sent == -1) return -1;
   connManager.getConnection(cli_sock)->sent_bytes_ += sent;
   if (connManager.getConnection(cli_sock)->sent_bytes_ == resSize)
@@ -108,7 +120,11 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
 
-  ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), MSG_NOSIGNAL);
+  int flag = 0;
+  #if defined (MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+  #endif
+  ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), flag);
   if (re > 0) connManager.addSentBytes(sock, re);
   return re;
 }
