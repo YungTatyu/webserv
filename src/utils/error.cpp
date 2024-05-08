@@ -4,7 +4,7 @@
 #include <cstring>
 #include "Utils.hpp"
 
-std::string error::strerror(const std::string &err_msg) {
+std::string error::strSysCallError(const std::string &syscall) {
   const std::string err = "webserv: [emerg] ";
-  return err + err_msg + " (" + Utils::toStr(errno) + ":" + std::strerror(errno) + ")";
+  return err + syscall + "() failed (" + Utils::toStr(errno) + ":" + std::strerror(errno) + ")";
 }
