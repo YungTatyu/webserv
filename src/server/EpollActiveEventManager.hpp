@@ -18,10 +18,10 @@ class EpollActiveEventManager : public IActiveEventManager {
   void setActiveEventsNum(const int num);
   void addEvent(const void *event);
   void clearAllEvents();
-  bool isReadEvent(const void *event, const bool is_cgi_sock);
-  bool isWriteEvent(const void *event, const bool is_cgi_sock);
+  bool isReadEvent(const void *event);
+  bool isWriteEvent(const void *event);
   bool isErrorEvent(const void *event);
-  bool isEofEvent(const void *event, const bool is_cgi_sock);
+  bool isEofEvent(const void *event);
 
  private:
   std::vector<struct epoll_event> active_events_;

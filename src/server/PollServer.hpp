@@ -21,7 +21,7 @@ class PollServer : public IServer {
                         ConfigHandler* config_handler, TimerTree* timer_tree);
 
  private:
-  void addActiveEvents(const std::vector<struct pollfd>& pollfds, IActiveEventManager* event_manager, ConnectionManager* conn_manager);
+  void addActiveEvents(const std::vector<struct pollfd>& pollfds, IActiveEventManager* event_manager);
   std::vector<struct pollfd> convertToPollfds(const ConnectionManager& conn_manager);
 };
 

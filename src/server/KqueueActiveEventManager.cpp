@@ -35,9 +35,9 @@ void KqueueActiveEventManager::clearAllEvents() {
  * @return true
  * @return false
  */
-bool KqueueActiveEventManager::isReadEvent(const void *event, const bool is_cgi_sock) {
+bool KqueueActiveEventManager::isReadEvent(const void *event) {
   const struct kevent *kq_e = static_cast<const struct kevent *>(event);
-  return kq_e->filter == EVFILT_READ && !isErrorEvent(event) && !isEofEvent(event, is_cgi_sock);
+  return kq_e->filter == EVFILT_READ && !isErrorEvent(event) && !isEofEvent(event);
 }
 
 /**
@@ -47,9 +47,9 @@ bool KqueueActiveEventManager::isReadEvent(const void *event, const bool is_cgi_
  * @return true
  * @return false
  */
-bool KqueueActiveEventManager::isWriteEvent(const void *event, const bool is_cgi_sock) {
+bool KqueueActiveEventManager::isWriteEvent(const void *event) {
   const struct kevent *kq_e = static_cast<const struct kevent *>(event);
-  return kq_e->filter == EVFILT_WRITE && !isErrorEvent(event) && !isEofEvent(event, is_cgi_sock);
+  return kq_e->filter == EVFILT_WRITE && !isErrorEvent(event) && !isEofEvent(event);
 }
 
 /**
@@ -71,9 +71,8 @@ bool KqueueActiveEventManager::isErrorEvent(const void *event) {
  * @return true
  * @return false
  */
-bool KqueueActiveEventManager::isEofEvent(const void *event, const bool is_cgi_sock) {
+bool KqueueActiveEventManager::isEofEvent(const void *event) {
   const struct kevent *kq_e = static_cast<const struct kevent *>(event);
-  (void)is_cgi_sock;
   return kq_e->flags & EV_EOF;
 }
 

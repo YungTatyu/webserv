@@ -99,13 +99,13 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
 
     // TODO: kqueueはeofもevnetとして感知できるので、最適化の余地あり
     int status = RequestHandler::UPDATE_NONE;
-    if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i])), is_cgi_sock))
+    if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
       status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
                                                 active_events[i].ident);
-    else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i])), is_cgi_sock))
+    else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
       status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
                                                  active_events[i].ident);
-    else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i])), is_cgi_sock))
+    else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
       status = request_handler->handleEofEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, active_events[i].ident);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
       status =
