@@ -14,7 +14,7 @@ BG_RED = f"{Back.RED}"
 BG_ORANGE = f"{Back.YELLOW}"
 RESET = f"{Style.RESET_ALL}"
 
-def printLog(passed, failed, failed_tests):
+def print_log(passed, failed, failed_tests):
     print()
     print(f"{BOLD}{BG_GREEN}[==========]{RESET}  {TEST_NAME} result")
     print(f"{BOLD}{BG_GREEN}[==========]{RESET}  {passed + failed} tests ran.")
@@ -79,7 +79,7 @@ def main():
             failed_tests.append(test)
         ti += 1
 
-    printLog(passed_cnt, failed_cnt, failed_tests)
+    print_log(passed_cnt, failed_cnt, failed_tests)
 
     if failed_cnt != 0:
         return 1
