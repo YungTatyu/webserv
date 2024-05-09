@@ -11,13 +11,16 @@ RED = f"{Fore.RED}"
 BOLD = f"{Style.BRIGHT}"
 BG_GREEN = f"{Back.GREEN}"
 BG_RED = f"{Back.RED}"
+BG_ORANGE = f"{Back.YELLOW}"
 RESET = f"{Style.RESET_ALL}"
 
 def printLog(passed, failed):
-    print(f"[============== {TEST_NAME} result ==============]")
-    print(f"[========]    {passed + failed} tests ran")
-    print(f"{GREEN}[ PASSED ]{RESET}    {passed} tests")
-    print(f"{RED}[ FAILED ]{RESET}    {failed} tests")
+    print()
+    print(f"{BOLD}{BG_GREEN}[==========]{RESET}    {TEST_NAME} result")
+    print(f"{BOLD}{BG_GREEN}[==========]{RESET}    {passed + failed} tests ran")
+    print(f"{BOLD}{BG_GREEN}[  PASSED  ]{RESET}    {passed} tests")
+    print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}    {failed} tests")
+    print()
 
 def init(path):
     process = subprocess.Popen(["make", "-j", "-C", path])
