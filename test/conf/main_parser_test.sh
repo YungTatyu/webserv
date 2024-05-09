@@ -27,7 +27,7 @@ function printErr {
 }
 
 function assert {
-  g_test_index=$(bc <<<"$g_test_index + 1")
+  ((++g_test_index))
   local conf_path=$1
   printf "[  test$g_test_index  ]\n${conf_path}: "
   local actual=$(${webserv_path} $conf_path 2>&1)
@@ -40,7 +40,7 @@ function assert {
     printErr "\033[31mfailed\n\033[0m"
     printErr "expected:\"${expect}\"\n"
     printErr "actual  :\"${actual}\"\n\n"
-    g_test_failed=$(bc <<<"$g_test_failed + 1")
+    ((++g_test_failed))
   fi
 }
 
@@ -72,7 +72,12 @@ function main {
 
   conf_path="test/conf/conf_files/error/unknown_directive2.conf"
   err_path="in $(readlink -f $conf_path)"
-  assert $conf_path "${err_start_with} unknown directive \"\n\n\nindex\" ${err_path}:4"
+  # 改行がtestで一致しない
+  # assert $conf_path "${err_start_with} unknown directive \"\n\n\nindex\" ${err_path}:4"
+  assert $conf_path "${err_start_with} unknown directive \"
+
+
+index\" ${err_path}:4"
 
   # test invalid directive in context levle
   conf_path="test/conf/conf_files/error/invalid_directive1.conf"

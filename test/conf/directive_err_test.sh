@@ -12,13 +12,14 @@ else
 fi
 
 g_test_directive=""
+g_test_cnt=0
 g_test_index=0
 g_test_passed=0
 g_test_failed=0
 
 function printLog {
   printf "|------------------ webserv test results ------------------|\n"
-  printf "[========]    ${g_test_index} tests ran\n"
+  printf "[========]    ${g_test_cnt} tests ran\n"
   printf "[ \033[32mPASSED\033[0m ]    ${g_test_passed} tests\n"
   printf "[ \033[31mFAILED\033[0m ]    ${g_test_failed} tests\n"
 }
@@ -28,7 +29,9 @@ function printErr {
 }
 
 function assert {
-  g_test_index=$(bc <<<"$g_test_index + 1")
+  ((++g_test_cnt))
+  ((++g_test_index))
+
   local conf_path=$1
   printf "[  ${g_test_directive} test $g_test_index  ]\n${conf_path}: "
   local actual=$(${webserv_path} $conf_path 2>&1)
@@ -36,12 +39,12 @@ function assert {
 
   if [ "$actual" = "$expect" ]; then
     printf "\033[32mpassed\033[0m\n\n"
-    g_test_passed=$(bc <<<"$g_test_passed + 1")
+    ((++g_test_passed))
   else
     printErr "\033[31mfailed\n\033[0m"
     printErr "expected:\"${expect}\"\n"
     printErr "actual  :\"${actual}\"\n\n"
-    g_test_failed=$(bc <<<"$g_test_failed + 1")
+    ((++g_test_failed))
   fi
 }
 
