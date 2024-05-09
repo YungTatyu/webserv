@@ -3,13 +3,16 @@
 # init
 readonly script_dir_path=$(dirname "$0")
 readonly webserv_path="${script_dir_path}/../../webserv"
-if [ -e $webserv_path ]; then
-  printf "|------------------ webserv test start ------------------|\n\n"
-else
-  echo "${webserv_path}: command not found"
-  echo "run \"make\" first to test"
-  exit 1
-fi
+
+function init {
+  if [ -e $webserv_path ]; then
+    printf "|------------------ webserv test start ------------------|\n\n"
+  else
+    printErr "${webserv_path}: command not found"
+    printErr "run \"make\" first to test"
+    exit 1
+  fi
+}
 
 g_test_index=0
 g_test_passed=0
@@ -45,7 +48,7 @@ function assert {
 }
 
 function main {
-
+  init
   readonly err_start_with="webserv: [emerg]"
 
   # test unexpect token
