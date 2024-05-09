@@ -14,13 +14,17 @@ BG_RED = f"{Back.RED}"
 BG_ORANGE = f"{Back.YELLOW}"
 RESET = f"{Style.RESET_ALL}"
 
-def printLog(passed, failed):
+def printLog(passed, failed, failed_tests):
     print()
-    print(f"{BOLD}{BG_GREEN}[==========]{RESET}    {TEST_NAME} result")
-    print(f"{BOLD}{BG_GREEN}[==========]{RESET}    {passed + failed} tests ran")
-    print(f"{BOLD}{BG_GREEN}[  PASSED  ]{RESET}    {passed} tests")
-    print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}    {failed} tests")
-    print()
+    print(f"{BOLD}{BG_GREEN}[==========]{RESET}  {TEST_NAME} result")
+    print(f"{BOLD}{BG_GREEN}[==========]{RESET}  {passed + failed} tests ran.")
+    print(f"{BOLD}{BG_GREEN}[  PASSED  ]{RESET}  {passed} tests.")
+    if failed == 0:
+        print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}  {failed} tests.")
+        return
+    print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}  {failed} tests, listed below:")
+    for test in failed_tests:
+        print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}  {test}")
 
 def init(path):
     process = subprocess.Popen(["make", "-j", "-C", path])
@@ -56,6 +60,7 @@ def main():
     ti = 0
     passed_cnt = 0
     failed_cnt = 0
+    failed_tests = []
     for test in test_cases:
         CUR_TEST = f'{TEST_NAME}{ti}'
         print(f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}", end="\n")
@@ -71,9 +76,10 @@ def main():
                 flush=True,
             )
             failed_cnt += 1
+            failed_tests.append(test)
         ti += 1
 
-    printLog(passed_cnt, failed_cnt)
+    printLog(passed_cnt, failed_cnt, failed_tests)
 
     if failed_cnt != 0:
         return 1
