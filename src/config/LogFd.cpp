@@ -40,8 +40,7 @@ int config::addAcsFdList(std::set<std::string>& directives_set,
     if (Utils::wrapperAccess(tmp_path, F_OK, false) == 0 && Utils::wrapperAccess(tmp_path, W_OK, false) == -1)
       continue;
     // openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
-    tmp_fd =
-        Utils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+    tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) {
       return -1;
     }
@@ -65,8 +64,7 @@ int config::addErrFdList(std::set<std::string>& directives_set,
     // ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
     if (Utils::wrapperAccess(tmp_path, F_OK, false) == 0 && Utils::wrapperAccess(tmp_path, W_OK, false) == -1)
       continue;
-    tmp_fd =
-        Utils::wrapperOpen(tmp_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+    tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) {
       return -1;
     }
@@ -92,9 +90,8 @@ bool config::initAcsLogFds(config::Main& config) {
                 << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
       return false;
     }
-    int tmp_fd =
-        Utils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_),
-                           O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+    std::string tmp_path = absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_);
+    int tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) {
       return false;
     }
@@ -135,10 +132,8 @@ bool config::initErrLogFds(config::Main& config) {
                 << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
       return false;
     }
-
-    int tmp_fd =
-        Utils::wrapperOpen(absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_),
-                           O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+    std::string tmp_path = absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_);
+    int tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) {
       return false;
     }
@@ -195,4 +190,9 @@ void config::terminateLogFds(const config::Main* config) {
       closeLogFds(config->http.server_list[i].location_list[j].error_fd_list);
     }
   }
+}
+
+int config::openLogFd(std::string& log_path)
+{
+  return Utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | O_NONBLOCK | O_CLOEXEC);
 }

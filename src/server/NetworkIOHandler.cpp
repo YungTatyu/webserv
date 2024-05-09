@@ -18,8 +18,12 @@ NetworkIOHandler::~NetworkIOHandler() {
 int NetworkIOHandler::setupSocket(const std::string address, const unsigned int port) {
   try {
     // creation of the socket
+    #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
+    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    #else
     const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM, 0);
-    fcntl(listen_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+    Utils::setNonBlockingCloExec(listen_fd);
+    #endif
 
     // socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
     int yes = 1;
@@ -119,7 +123,7 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
   client = sizeof(cliaddr);
   connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
-  fcntl(connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+  Utils::setNonBlockingCloExec(listen_fd);
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);
