@@ -312,6 +312,34 @@ class ResponseTest {
   }
 
   /**
+   * @brief textの中にpatternがいくつ出現するか数えるhelper関数
+   *
+   * @param text, pattern
+   * @return int
+   */
+  int countOccurrences(const std::string& text, const std::string& pattern) {
+    int cnt = 0;
+    size_t pos = 0;
+    while ((pos = text.find(pattern, pos)) != std::string::npos) {
+      ++cnt;
+      pos += pattern.size();
+    }
+    return cnt;
+  }
+
+  /**
+   * @brief autoindexの出力をテストする関数
+   *
+   * @param body, expect_file_num
+   * @return std::string
+   */
+  void testAutoindexEntry(const std::string& body, int expect_file_num) {
+    // ../があるので1つ多く見積もる
+    ASSERT_EQ(expect_file_num + 1, countOccurrences(body, "<a href="));
+    ASSERT_EQ(expect_file_num, countOccurrences(body, "<span class="));
+  }
+
+  /**
    * @brief final responseを作成するhelper関数
    *
    * @param status_code_line
