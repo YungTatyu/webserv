@@ -194,5 +194,5 @@ void config::terminateLogFds(const config::Main* config) {
 
 int config::openLogFd(std::string& log_path)
 {
-  return Utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | O_NONBLOCK | O_CLOEXEC);
+  return Utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | O_NONBLOCK);
 }
