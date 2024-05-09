@@ -214,6 +214,10 @@ conf_path="test/conf/conf_files/directive_error/listen_duplicate.conf"
 err_path="in $(readlink -f $conf_path)"
 assert $conf_path "${err_start_with} a duplicate default server for 127.0.0.1:9090 ${err_path}:14"
 
+conf_path="test/conf/conf_files/directive_error/listen_subnet.conf"
+err_path="in $(readlink -f $conf_path)"
+assert $conf_path "${err_start_with} invalid host in \"127.0.0.1/24:9090\" of the \"listen\" directive ${err_path}:6"
+
 # receive_timeout
 g_test_directive="receive_timeout"
 g_test_index=0
