@@ -4,6 +4,6 @@
 #include <string>
 namespace error {
 std::string strSysCallError(const std::string &syscall);
-} // namespace error
+}  // namespace error
 
 #endif

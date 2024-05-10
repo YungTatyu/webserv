@@ -2,6 +2,7 @@
 
 #include <cerrno>
 #include <cstring>
+
 #include "Utils.hpp"
 
 std::string error::strSysCallError(const std::string &syscall) {

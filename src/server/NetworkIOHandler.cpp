@@ -59,9 +59,9 @@ int NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const int c
   std::vector<unsigned char> buffer(bufferSize_);
 
   int flag = 0;
-  #if defined (MSG_NOSIGNAL)
+#if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
-  #endif
+#endif
   ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, flag);
   if (re == 0)  // クライアントとのコネクションが閉じた時。
     return 0;
@@ -82,9 +82,9 @@ int NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, const i
   std::vector<unsigned char> buffer(buffer_size);
 
   int flag = 0;
-  #if defined (MSG_NOSIGNAL)
+#if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
-  #endif
+#endif
   ssize_t re = recv(sock, buffer.data(), buffer_size, flag);
   if (re == 0)  // cgi process died
     return 0;
@@ -104,9 +104,9 @@ int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli
   size_t sentBytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t currentChunkSize = std::min(chunkSize, resSize - sentBytes);
   int flag = 0;
-  #if defined (MSG_NOSIGNAL)
+#if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
-  #endif
+#endif
   int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, flag);
   if (sent == -1) return -1;
   connManager.getConnection(cli_sock)->sent_bytes_ += sent;
@@ -124,9 +124,9 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   const size_t rest = body.size() - sent_bytes;
 
   int flag = 0;
-  #if defined (MSG_NOSIGNAL)
+#if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
-  #endif
+#endif
   ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), flag);
   if (re > 0) connManager.addSentBytes(sock, re);
   return re;
@@ -141,10 +141,10 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
   connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
   fcntl(connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-  #if defined (SO_NOSIGPIPE)
+#if defined(SO_NOSIGPIPE)
   int opt = 1;
   SysCallWrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
-  #endif
+#endif
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);

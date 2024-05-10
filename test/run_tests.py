@@ -5,7 +5,7 @@ import sys
 import subprocess
 from colorama import Fore, Style, Back
 
-TEST_NAME = 'the entire test'
+TEST_NAME = "the entire test"
 GREEN = f"{Fore.GREEN}"
 RED = f"{Fore.RED}"
 BOLD = f"{Style.BRIGHT}"
@@ -13,6 +13,7 @@ BG_GREEN = f"{Back.GREEN}"
 BG_RED = f"{Back.RED}"
 BG_ORANGE = f"{Back.YELLOW}"
 RESET = f"{Style.RESET_ALL}"
+
 
 def print_log(passed, failed, failed_tests):
     print()
@@ -26,12 +27,14 @@ def print_log(passed, failed, failed_tests):
     for test in failed_tests:
         print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}  {test}")
 
+
 def init(path):
     process = subprocess.Popen(["make", "-j", "-C", path])
     exit_status = process.wait()
 
     if exit_status != 0:
         sys.exit(exit_status)
+
 
 def run_test(command):
 
@@ -42,6 +45,7 @@ def run_test(command):
     # )
     exit_status = result.wait()
     return exit_status
+
 
 def main():
     CWD = os.path.dirname(os.path.abspath(__file__))
@@ -56,17 +60,21 @@ def main():
         f"{CWD}/integration_test/SendTimeoutTest.sh",
     ]
 
-    init(f'{CWD}/..')
+    init(f"{CWD}/..")
     ti = 0
     passed_cnt = 0
     failed_cnt = 0
     failed_tests = []
     for test in test_cases:
-        CUR_TEST = f'{TEST_NAME}{ti}'
+        CUR_TEST = f"{TEST_NAME}{ti}"
         print(f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}", end="\n")
         result = run_test(test)
         if result == 0:
-            print(f"{BOLD}{BG_GREEN}[       OK ]{RESET} {CUR_TEST}: {test}", end="\n", flush=True)
+            print(
+                f"{BOLD}{BG_GREEN}[       OK ]{RESET} {CUR_TEST}: {test}",
+                end="\n",
+                flush=True,
+            )
             passed_cnt += 1
         else:
             print(

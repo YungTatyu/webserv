@@ -59,10 +59,10 @@ bool cgi::CGIHandler::callCgiExecutor(const std::string& script_path, const Http
               << std::endl;
     return false;
   }
-  #if defined (SO_NOSIGPIPE)
+#if defined(SO_NOSIGPIPE)
   int opt = 1;
   SysCallWrapper::Setsockopt(this->sockets_[SOCKET_PARENT], SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
-  #endif
+#endif
 
   Utils::setNonBlockingCloExec(this->sockets_[SOCKET_PARENT]);
   return forkCgiProcess(request, script_path);
