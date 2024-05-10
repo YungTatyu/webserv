@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstring>
 #include <utility>
+#include <iostream>
 
 #include "ConnectionManager.hpp"
 
@@ -30,9 +31,7 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
     std::memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
-    // TODO: strtoipaddressを適応する
-    (void)address;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_addr.s_addr = htonl(Utils::StrToIPAddress(address));
     servaddr.sin_port = htons(port);
 
     // 失敗したとき？
