@@ -1264,8 +1264,15 @@ bool config::Parser::parseListen() {
       std::cerr << "webserv: [emerg] no host in \"" << ori_val << "\" of the \"listen\" directive in "
                 << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
       return false;
-    } else if (!isIPv4(segments[0]) && !isIPv6(segments[0])) {
+    }
+    if (!isIPv4(segments[0]) && !isIPv6(segments[0])) {
       std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in "
+                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      return false;
+    }
+    if (segments[0].find('/') != std::string::npos)
+    {
+      std::cerr << "webserv: [emerg] invalid host in \"" << ori_val << "\" of the \"listen\" directive in "
                 << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
       return false;
     }
