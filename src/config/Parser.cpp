@@ -1270,8 +1270,7 @@ bool config::Parser::parseListen() {
                 << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
       return false;
     }
-    if (segments[0].find('/') != std::string::npos)
-    {
+    if (segments[0].find('/') != std::string::npos) {
       std::cerr << "webserv: [emerg] invalid host in \"" << ori_val << "\" of the \"listen\" directive in "
                 << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
       return false;
