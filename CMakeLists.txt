@@ -51,11 +51,12 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/config_handler_test.cpp
 	test/server/HttpRequestErrorTest.cpp 
 	test/server/HttpRequestOkTest.cpp 
-	test/server/HttpResponseTest.cpp
 	test/server/HttpResponse/AccessLog/accessLog_test.cpp
 	test/server/HttpResponse/error/error_page_res_test.cpp
+	test/server/HttpResponse/error_page/error_page_test.cpp
 	test/server/HttpResponse/index/index_res_test.cpp
 	test/server/HttpResponse/index/autoindex_res_test.cpp
+	test/server/HttpResponse/mix/mix_directive_test.cpp
 	test/server/HttpResponse/try_files/try_files_res_test.cpp
 	test/server/HttpResponse/return/return_res_test.cpp
 	test/server/WorkerConnectionsNumTest.cpp
