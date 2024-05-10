@@ -9,6 +9,24 @@
 #include "LimitExcept.hpp"
 #include "ResponseTest.hpp"
 
+TEST(HttpResponseReturn, code){
+  test::ResponseTest test("test/server/HttpResponse/return/file/return1.conf");
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
+                                        {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
+                                        {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
+
+  const std::string expect_body = test.createDefaultErrorBody(404);
+  test.testHeaders({
+      {"Server", "webserv/1.0"},
+      {"Date", ""},
+      {"Content-Length", std::to_string(expect_body.size())},
+      {"Content-Type", "text/plain"},
+      {"Connection", "close"},
+  });
+  test.testBody(expect_body);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
+}
+
 TEST(HttpResponseReturn, code_text) {
   test::ResponseTest test("test/server/HttpResponse/return/file/return1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
