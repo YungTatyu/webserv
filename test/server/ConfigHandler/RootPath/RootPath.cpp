@@ -45,3 +45,24 @@ TEST(ConfigHandlerTestSearchRootPath, http)
   //EXPECT_EQ(test.getAbsolutePath(".") + "alias/", test.searchRootPath(server, location));
   EXPECT_EQ("/var/www/html", test.config_handler_.searchRootPath(server, location));
 }
+
+TEST(ConfigHandlerTestSearchRootPath, relative_path)
+{
+  test::ConfigHandlerTest test("RootPath/test1.conf");
+  test.initRequest(config::GET, "/relative-root/", {{"Host", ""}}, "", HttpRequest::PARSE_COMPLETE);
+  const config::Server& server = test.config_handler_.config_->http.server_list[0];
+  const config::Location* location = &test.config_handler_.config_->http.server_list[0].location_list[3];
+
+  EXPECT_EQ("test/server/HttpResponse/RootPath/file", test.config_handler_.searchRootPath(server, location));
+}
+
+TEST(ConfigHandlerTestSearchRootPath, no_root_directive)
+{
+  test::ConfigHandlerTest test("RootPath/test2.conf");
+  test.initRequest(config::GET, "/no-directive/", {{"Host", ""}}, "", HttpRequest::PARSE_COMPLETE);
+  const config::Server& server = test.config_handler_.config_->http.server_list[0];
+  const config::Location* location = &test.config_handler_.config_->http.server_list[0].location_list[0];
+
+  EXPECT_EQ("html", test.config_handler_.searchRootPath(server, location));
+}
+
