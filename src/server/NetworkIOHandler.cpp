@@ -19,7 +19,7 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
   try {
     // creation of the socket
     #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
-    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
     #else
     const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM, 0);
     Utils::setNonBlockingCloExec(listen_fd);
@@ -123,7 +123,7 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
   client = sizeof(cliaddr);
   connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
-  Utils::setNonBlockingCloExec(listen_fd);
+  Utils::setNonBlockingCloExec(connfd);
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);
