@@ -9,9 +9,9 @@
 #include "LimitExcept.hpp"
 #include "ResponseTest.hpp"
 
-TEST(HttpResponseAutoindex, in_http_on) {
+TEST(HttpResponseAutoindex, in_http_on_and_no_location) {
   test::ResponseTest test("test/server/HttpResponse/index/file/autoindex1.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}},
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4240}, {"127.0.0.1", 4241}},
                                         {{"host", "_"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
@@ -61,4 +61,23 @@ TEST(HttpResponseAutoindex, in_server_off) {
   });
   test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
+}
+
+TEST(HttpResponseAutoindex, in_http_on) {
+  test::ResponseTest test("test/server/HttpResponse/index/file/autoindex1.conf");
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
+      {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "test"}, {"User-Agent", "curl/7.68.0"}},
+      {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
+  std::string expect_body = test.createDefaultErrorBody(403);
+
+  test.testHeaders({
+      {"Server", "webserv/1.0"},
+      {"Date", ""},
+      {"Content-Length", 1070},
+      {"Content-Type", "text/html"},
+      {"Connection", "keep-alive"},
+  });
+  test.testBody(expect_body);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
+  test.testAutoindexEntry(test.responses_[0].body_, 8);
 }
