@@ -1147,19 +1147,12 @@ bool config::Parser::isMixedIPAddress(const std::string &mixed_ip) const {
 }
 
 bool config::Parser::isNumInRange(const std::string &num, long min, long max) const {
-  if (!isNumeric(num)) return false;
+  if (!Utils::isNumeric(num)) return false;
 
   std::istringstream converter(num);
   long value;
   if (!(converter >> value)) return false;
   if (value < min || value > max) return false;
-  return true;
-}
-
-bool config::Parser::isNumeric(const std::string &str) const {
-  for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
-    if (!std::isdigit(*it)) return false;
-  }
   return true;
 }
 
@@ -1482,7 +1475,7 @@ bool config::Parser::parseReturn() {
   const std::string http = "http://";
   const std::string https = "https://";
 
-  if (isNumeric(this->tokens_[ti_].value_)) {
+  if (Utils::isNumeric(this->tokens_[ti_].value_)) {
     if (!isNumInRange(this->tokens_[ti_].value_, 0, 999)) {
       printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"",
                  this->tokens_[ti_]);

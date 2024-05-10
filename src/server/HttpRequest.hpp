@@ -14,17 +14,17 @@
 class HttpRequest {
  public:
   enum ParseState {
-    PARSE_BEFORE,
-    PARSE_COMPLETE,
-    PARSE_INPROGRESS,
+    PARSE_BEFORE = 0,
     PARSE_METHOD_DONE,
-    PARSE_REQUEST_LINE_DONE,
     PARSE_URI_DONE,
     PARSE_VERSION_DONE,
+    PARSE_REQUEST_LINE_DONE,
     PARSE_HEADER_DONE,
     PARSE_BODY_DONE,
-    PARSE_ERROR,
-    PARSE_VERSION_ERROR
+    PARSE_COMPLETE,
+    PARSE_INPROGRESS,
+    PARSE_NOT_IMPLEMENTED,
+    PARSE_ERROR
   };
 
   HttpRequest(const config::REQUEST_METHOD &method = config::UNKNOWN, const std::string &uri = "",
@@ -35,11 +35,10 @@ class HttpRequest {
               const ParseState parseState = PARSE_BEFORE);
   ~HttpRequest();
 
-  // static HttpRequest parseRequest(std::string& rawRequest, HttpRequest&
-  // oldRequest);
-  static void parseRequest(std::string &rawRequest, HttpRequest &oldRequest);
-  static HttpRequest doParseRequest(std::string &rawRequest);
-  static void doParseChunked(std::string &rawRequest, HttpRequest &request);
+  static void parseRequest(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseChunkedBody(std::string &rawRequest, HttpRequest &request);
+  static bool isInvalidLetter(unsigned char ch);
+  static bool isValidContentLength(const std::string &str);
 
   config::REQUEST_METHOD method;
   std::string uri;  // スキーマ、ポートは？？
@@ -51,13 +50,21 @@ class HttpRequest {
   ParseState parseState;
 
  private:
-  static ParseState parseMethod(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseUri(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseVersion(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &newRequest);
-  static ParseState parseHeaders(std::string &rawRequest, HttpRequest &newRequest);
-  static void parseBody(std::string &rawRequest, HttpRequest &newRequest);
+  std::string key_buf_;
+  std::string val_buf_;
+  int state_;  // より細かいフェーズのstate
+
+  static ParseState parseMethod(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseUri(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseVersion(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseHeaders(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseBody(std::string &rawRequest, HttpRequest &request);
   static std::string urlDecode(const std::string &encoded);
+  static void resetBufs(HttpRequest &request);
+  static bool isUniqHeaderDup(const HttpRequest &request, const std::string &header);
+  static bool isValidHost(const std::string &str);
+  static void clear(HttpRequest &request);
 };
 
 #endif
