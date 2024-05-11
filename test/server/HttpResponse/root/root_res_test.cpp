@@ -195,7 +195,6 @@ TEST(HttpResponseRoot, current_directory_index_alias) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
-
 /*
  * no location
  */
