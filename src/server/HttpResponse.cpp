@@ -414,7 +414,8 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
         //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
-            config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_, response.body_.size(), request));
+            config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_,
+                                           response.body_.size(), request));
         phase = sw_end_phase;
         break;
 
@@ -430,7 +431,8 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
                     config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
 
   config_handler.writeErrorLog("webserv: [debug] create final response\n");
-  config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ + "\n\n");
+  config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
+                               "\n\n");
   return createResponse(response);
 }
 
@@ -468,8 +470,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
     return sw_end_phase;
   }
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
-  if (*location)
-    config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri + "\n");
+  if (*location) config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri + "\n");
   return sw_post_search_location_phase;
 }
 

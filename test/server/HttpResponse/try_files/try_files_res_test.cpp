@@ -29,9 +29,9 @@ TEST(HttpResponseTry_files, in_server) {
 
 TEST(HttpResponseTry_files, in_loc) {
   test::ResponseTest test("test/server/HttpResponse/try_files/file/try_files1.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
-      {{"127.0.0.1", 4242}, {"127.0.0.1", 4243}}, {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
-      {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
+                                        {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
+                                        {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
   test.testHeaders({

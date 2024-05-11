@@ -368,15 +368,16 @@ const std::string getCurrentTimeLogFormat() {
   const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
   std::ostringstream oss;
-  oss << std::setfill('0') << std::setw(2) << gmTime->tm_mday << "/" << months[gmTime->tm_mon] << "/" << 1900 + gmTime->tm_year << ":"
-      << std::setfill('0') << std::setw(2) << gmTime->tm_hour << ":" << std::setfill('0') << std::setw(2)
-      << gmTime->tm_min << ":" << std::setfill('0') << std::setw(2) << gmTime->tm_sec << " GMT";
+  oss << std::setfill('0') << std::setw(2) << gmTime->tm_mday << "/" << months[gmTime->tm_mon] << "/"
+      << 1900 + gmTime->tm_year << ":" << std::setfill('0') << std::setw(2) << gmTime->tm_hour << ":"
+      << std::setfill('0') << std::setw(2) << gmTime->tm_min << ":" << std::setfill('0') << std::setw(2)
+      << gmTime->tm_sec << " GMT";
 
   return oss.str();
 }
 
-std::string ConfigHandler::createAcsLogMsg(const uint32_t ip, const long status,
-                                           const size_t resSize, const HttpRequest& request) const {
+std::string ConfigHandler::createAcsLogMsg(const uint32_t ip, const long status, const size_t resSize,
+                                           const HttpRequest& request) const {
   std::stringstream ss;
 
   std::string requestMethod, requestUrl, userAgent;
@@ -391,8 +392,7 @@ std::string ConfigHandler::createAcsLogMsg(const uint32_t ip, const long status,
     userAgent = "-";
 
   ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeLogFormat() << "] \"" << requestMethod << " "
-     << request.uri << " HTTP/1.1\" " << status << " "  << resSize << " \"" << userAgent << "\""
-     << std::endl;
+     << request.uri << " HTTP/1.1\" " << status << " " << resSize << " \"" << userAgent << "\"" << std::endl;
 
   return ss.str();
 }
