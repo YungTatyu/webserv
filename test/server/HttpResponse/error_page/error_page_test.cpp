@@ -23,10 +23,12 @@ class HttpResponseErrorPage : public ::testing::Test {
   void SetUp() override {
     std::string file_path;
     const testing::TestInfo* test_info = testing::UnitTest::GetInstance()->current_test_info();
-    //if (static_cast<std::string>(test_info->name()) == "none") {
-    //  file_path = "test/server/HttpResponse/erro_page/file/ErrorPage.conf";
-    //}
-    file_path = "test/server/HttpResponse/error_page/file/ErrorPage.conf";
+    if (static_cast<std::string>(test_info->name()) == "dup_error_num") {
+      file_path = "test/server/HttpResponse/error_page/file/ErrorPage2.conf";
+    }
+    else {
+      file_path = "test/server/HttpResponse/error_page/file/ErrorPage.conf";
+    }
 
     const config::Main* config = config::initConfig(file_path);
     config_handler_.loadConfiguration(config);
@@ -181,4 +183,33 @@ TEST_F(HttpResponseErrorPage, eternal_redirect) {
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
 }
+
+TEST_F(HttpResponseErrorPage, dup_error_num) {
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}},
+               config::REQUEST_METHOD::GET, "/nothing/",
+               HttpRequest::PARSE_COMPLETE);
+  tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4243);
+
+  // 正解response
+  std::vector<std::string> expect_res;
+  std::string final_response;
+
+  expect_res.push_back("HTTP/1.1 499");
+  expect_res.push_back("Server: webserv/1.0");
+  expect_res.push_back("Connection: close");
+  expect_res.push_back("Content-Type: text/html");
+  expect_res.push_back("Content-Length: 258");
+  std::ifstream ifs("test/server/HttpResponse/error_page/file/40x.html");
+  ASSERT_TRUE(ifs.is_open());
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+  ifs.close();
+  expect_res.push_back(buffer.str());
+
+  // 関数適用
+  final_response = HttpResponse::generateResponse(request_, response_, tied_server_,sockfd[0], config_handler_);
+  // 結果確認
+  ASSERT_CORRECT_RESPONSE(expect_res, final_response);
+}
+
 }; //namespace test
