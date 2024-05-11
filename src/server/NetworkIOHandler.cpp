@@ -23,7 +23,7 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
   try {
     // creation of the socket
 #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
-    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 #else
     const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM, 0);
     Utils::setNonBlockingCloExec(listen_fd);
