@@ -12,7 +12,7 @@
 /*
  *  root + try_files in location
 */
-TEST(HttpResponseRoot, current_directory) {
+TEST(HttpResponseRoot, root_tryfiles_in_location1) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -30,7 +30,7 @@ TEST(HttpResponseRoot, current_directory) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, current_directory_slash) {
+TEST(HttpResponseRoot, root_tryfiles_in_location2) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -48,7 +48,7 @@ TEST(HttpResponseRoot, current_directory_slash) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, parent_directory) {
+TEST(HttpResponseRoot, root_tryfiles_in_location3) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -66,7 +66,7 @@ TEST(HttpResponseRoot, parent_directory) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, parent_directory_slash) {
+TEST(HttpResponseRoot, root_tryfiles_in_location4) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -84,7 +84,7 @@ TEST(HttpResponseRoot, parent_directory_slash) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, current_directory_alias) {
+TEST(HttpResponseRoot, alias_tryfiles_in_location) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -105,7 +105,7 @@ TEST(HttpResponseRoot, current_directory_alias) {
 /*
  *  root + index in location
 */
-TEST(HttpResponseRoot, current_directory_index) {
+TEST(HttpResponseRoot, root_index_in_location1) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4222}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -123,7 +123,7 @@ TEST(HttpResponseRoot, current_directory_index) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, current_directory_slash_index) {
+TEST(HttpResponseRoot, root_index_in_location2) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4233}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -141,7 +141,7 @@ TEST(HttpResponseRoot, current_directory_slash_index) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, parent_directory_index) {
+TEST(HttpResponseRoot, root_index_in_location3) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -159,7 +159,7 @@ TEST(HttpResponseRoot, parent_directory_index) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, parent_directory_slash_index) {
+TEST(HttpResponseRoot, root_index_in_location4) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4255}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -177,7 +177,7 @@ TEST(HttpResponseRoot, parent_directory_slash_index) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, current_directory_index_alias) {
+TEST(HttpResponseRoot, alias_index_in_location) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4266}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -198,7 +198,7 @@ TEST(HttpResponseRoot, current_directory_index_alias) {
 /*
  * no location
  */
-TEST(HttpResponseRoot, current_directory_no_location) {
+TEST(HttpResponseRoot, root_index_no_location1) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test3.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4222}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -216,7 +216,7 @@ TEST(HttpResponseRoot, current_directory_no_location) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, current_directory_slash_no_location) {
+TEST(HttpResponseRoot, root_index_no_location2) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test3.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4233}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -234,7 +234,7 @@ TEST(HttpResponseRoot, current_directory_slash_no_location) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, parent_directory_no_location) {
+TEST(HttpResponseRoot, root_index_no_location3) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test3.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
@@ -252,7 +252,7 @@ TEST(HttpResponseRoot, parent_directory_no_location) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
-TEST(HttpResponseRoot, parent_directory_slash_no_location) {
+TEST(HttpResponseRoot, root_index_no_location4) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test3.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4255}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
