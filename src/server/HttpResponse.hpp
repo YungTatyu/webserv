@@ -99,6 +99,7 @@ class HttpResponse {
   static void headerFilterPhase(HttpResponse& response, const config::Time& time);
   static std::string detectContentType(const std::string& res_file_path);
   static std::string transformLetter(const std::string& key_str);
+  static char lastChar(const std::string& str);
 };
 
 #endif

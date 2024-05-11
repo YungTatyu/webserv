@@ -526,11 +526,11 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
                                                               const config::Server& server,
                                                               const config::Location* location) {
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (request.uri[request.uri.length() - 1] != '/' &&
+  if (lastChar(request.uri) != '/' &&
       Utils::isDirectory(server.root.getPath() + request.uri)) {
     response.status_code_ = 301;
     return sw_error_page_phase;
-  } else if (request.uri[request.uri.length() - 1] == '/' && request.uri != "/" && !location) {
+  } else if (lastChar(request.uri) == '/' && request.uri != "/" && !location) {
     response.status_code_ = 404;
     return sw_error_page_phase;
   }
@@ -677,7 +677,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
                                                         const config::Location* location,
                                                         const ConfigHandler& config_handler) {
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
-  if (request.uri[request.uri.length() - 1] != '/') {
+  if (lastChar(request.uri) != '/') {
     std::string full_path = response.root_path_ + request.uri;
     if (Utils::wrapperAccess(full_path, F_OK, false) != 0 ||
         Utils::wrapperAccess(full_path, R_OK, false) != 0) {
@@ -800,4 +800,8 @@ std::string HttpResponse::detectContentType(const std::string& res_file_path) {
   if (Utils::isExtensionFile(res_file_path, kCssExt)) return "text/css";
   if (Utils::isExtensionFile(res_file_path, kJsExt)) return "text/javascript";
   return kTextPlain;
+}
+
+char HttpResponse::lastChar(const std::string& str) {
+  return str[str.size() - 1];
 }
