@@ -32,8 +32,8 @@ TEST(HttpResponseError, not_found) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
   test.initTiedServers({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}});
-  test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET}, "/nothing/",
-                   HttpRequest::PARSE_COMPLETE);
+  test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET},
+                   "/nothing/", HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
   test.testHeaders({

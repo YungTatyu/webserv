@@ -530,8 +530,7 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
       Utils::isDirectory(server.root.getPath() + request.uri)) {
     response.status_code_ = 301;
     return sw_error_page_phase;
-  } else if (request.uri[request.uri.length() - 1] == '/' &&
-             request.uri != "/" && !location) {
+  } else if (request.uri[request.uri.length() - 1] == '/' && request.uri != "/" && !location) {
     response.status_code_ = 404;
     return sw_error_page_phase;
   }
