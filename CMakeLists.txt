@@ -58,6 +58,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/HttpResponse/index/index_res_test.cpp
 	test/server/HttpResponse/index/autoindex_res_test.cpp
 	test/server/HttpResponse/mix/mix_directive_test.cpp
+	test/server/HttpResponse/root/root_res_test.cpp
 	test/server/HttpResponse/try_files/try_files_res_test.cpp
 	test/server/HttpResponse/return/return_res_test.cpp
 	test/server/WorkerConnectionsNumTest.cpp
