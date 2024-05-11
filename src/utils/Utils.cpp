@@ -231,3 +231,26 @@ int Utils::setNonBlockingCloExec(const int fd) {
   if (nonblock == -1 || closex == -1) return -1;
   return closex;
 }
+
+size_t Utils::strToSizet(const std::string& str) {
+  std::istringstream iss(str);
+  size_t size;
+  iss >> size;
+  return size;
+}
+
+size_t Utils::strToSizetInHex(const std::string& str) {
+  std::istringstream iss(str);
+  size_t size;
+  iss >> std::hex >> size;
+  return size;
+}
+
+bool Utils::isSign(unsigned char ch) { return ch == '+' || ch == '-'; }
+
+bool Utils::isNumeric(const std::string& str) {
+  for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+    if (!std::isdigit(*it)) return false;
+  }
+  return true;
+}

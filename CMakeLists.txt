@@ -45,6 +45,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/SelectServer.cpp
 	src/server/WebServer.cpp
 	src/utils/Utils.cpp
+	src/utils/error.cpp
 	
 	# test files
 	test/server/TimerTree_test.cpp

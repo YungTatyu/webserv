@@ -1,12 +1,16 @@
 #include "NetworkIOHandler.hpp"
 
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <utility>
 
 #include "ConnectionManager.hpp"
+#include "SysCallWrapper.hpp"
 
 NetworkIOHandler::NetworkIOHandler() {}
 
@@ -23,16 +27,15 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
 
     // socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
     int yes = 1;
-    SysCallWrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    int re = SysCallWrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    if (re != 0) std::exit(EXIT_FAILURE);
 
     // preparation of the socket address
     struct sockaddr_in servaddr;
     std::memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
-    // TODO: strtoipaddressを適応する
-    (void)address;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_addr.s_addr = htonl(Utils::StrToIPAddress(address));
     servaddr.sin_port = htons(port);
 
     // 失敗したとき？
@@ -42,6 +45,7 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
     std::cout << "Server running on port " << port << std::endl;
     return listen_fd;
   } catch (const std::runtime_error& e) {
+    std::cerr << e.what() << std::endl;
     std::exit(EXIT_FAILURE);
   }
 }
@@ -53,7 +57,11 @@ void NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server) 
 int NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const int cli_sock) {
   std::vector<unsigned char> buffer(bufferSize_);
 
-  ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, MSG_NOSIGNAL);
+  int flag = 0;
+#if defined(MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+#endif
+  ssize_t re = recv(cli_sock, buffer.data(), bufferSize_, flag);
   if (re == 0)  // クライアントとのコネクションが閉じた時。
     return 0;
   else if (re == -1)  // ソケットが使用不可、またはエラー。
@@ -72,7 +80,11 @@ int NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, const i
   const static size_t buffer_size = 1024;
   std::vector<unsigned char> buffer(buffer_size);
 
-  ssize_t re = recv(sock, buffer.data(), buffer_size, MSG_NOSIGNAL);
+  int flag = 0;
+#if defined(MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+#endif
+  ssize_t re = recv(sock, buffer.data(), buffer_size, flag);
   if (re == 0)  // cgi process died
     return 0;
   if (re == -1)  // error
@@ -90,7 +102,11 @@ int NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli
 
   size_t sentBytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t currentChunkSize = std::min(chunkSize, resSize - sentBytes);
-  int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, MSG_NOSIGNAL);
+  int flag = 0;
+#if defined(MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+#endif
+  int sent = send(cli_sock, response.data() + sentBytes, currentChunkSize, flag);
   if (sent == -1) return -1;
   connManager.getConnection(cli_sock)->sent_bytes_ += sent;
   if (connManager.getConnection(cli_sock)->sent_bytes_ == resSize)
@@ -106,7 +122,11 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
 
-  ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), MSG_NOSIGNAL);
+  int flag = 0;
+#if defined(MSG_NOSIGNAL)
+  flag |= MSG_NOSIGNAL;
+#endif
+  ssize_t re = send(sock, &body.c_str()[sent_bytes], std::min(buffer_size, rest), flag);
   if (re > 0) connManager.addSentBytes(sock, re);
   return re;
 }
@@ -120,6 +140,10 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
   connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
   fcntl(connfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+#if defined(SO_NOSIGPIPE)
+  int opt = 1;
+  SysCallWrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+#endif
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);

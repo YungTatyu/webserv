@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "HttpRequest.hpp"
 
 /* --------------  request line error test -------------- */
@@ -71,8 +73,9 @@ TEST(HttpRequest, ErrorTest6) {
 }
 
 TEST(HttpRequest, ErrorTest7) {
-  // test format error (empty)
-  std::string rawRequest = "";
+  // test format error (null)
+  std::vector<unsigned char> v = {'\0'};
+  std::string rawRequest(v.begin(), v.end());
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
@@ -303,4 +306,307 @@ TEST(HttpRequest, ErrorTest26) {
 
 /* -------------- uri decode error test end -------------- */
 
-// chunkだと？
+/* -------------- header host test -------------- */
+TEST(HttpRequest, ErrorTest27) {
+  // test: empty
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: \r\n"
+      "New: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+/* -------------- header host test end -------------- */
+
+/* -------------- header content-length test -------------- */
+TEST(HttpRequest, ErrorTest28) {
+  // test: bigger than longmax
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: 9223372036854775808\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest29) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: 0.0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest30) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: -1\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest31) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: 1.1\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest32) {
+  // test: empty value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest33) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: l\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest34) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest35) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest36) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:test\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest37) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:1A\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest38) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:+0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest39) {
+  // test: invalid value
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length:-0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* -------------- header content-length test end -------------- */
+
+TEST(HttpRequest, ErrorTest40) {
+  // test: dup content-length, transfer-encoding
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "content-length: 2\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest41) {
+  // test: dup content-length, transfer-encoding
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding: chunked\r\n"
+      "content-length: 2\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* -------------- header transfer-encoding test -------------- */
+
+TEST(HttpRequest, ErrorTest42) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding: \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest43) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest44) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding:\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest45) {
+  // test: transfer-encoding not implemented
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding:random \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+}
+
+/* -------------- header transfer-encoding test end -------------- */
+
+/* -------------- header unique test -------------- */
+
+TEST(HttpRequest, ErrorTest46) {
+  // test: dup header
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "transfer-encoding:chunked \r\n"
+      "transfer-encoding:chunked \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest47) {
+  // test: dup header
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "Host: yay\r\n"
+      "transfer-encoding:chunked \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, ErrorTest48) {
+  // test: dup header
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt\r\n"
+      "Host: yay\r\n"
+      "content-length: 2 \r\n"
+      "content-length: 10 \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+/* -------------- header unique test end -------------- */
