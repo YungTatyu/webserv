@@ -266,26 +266,22 @@ const config::Server& ConfigHandler::searchServerConfig(const struct TiedServer&
   return *default_server;
 }
 
-bool sameURI(const std::string& request_uri, std::string config_uri) {
-  // location uriが'/'で始まってなかったらスラッシュをつける
-  if (config_uri[0] != '/') config_uri.insert(config_uri.begin(), '/');
-  // location uriが'/'で終わってなかったらスラッシュをつける
-  if (config_uri[config_uri.length() - 1] != '/') config_uri.push_back('/');
-
-  if (request_uri == config_uri) return true;
-  return false;
-}
-
+/*
+ * uriが最長一致しているlocationを返す。
+ */
 const config::Location* ConfigHandler::searchLongestMatchLocationConfig(const config::Server& server_config,
                                                                         const std::string& uri) const {
-  // uriがファイルなら直前の/まで切る
-  // でもそのファイルやディレクトリが存在しなかったら location / の内容を探すわけではない
+  const config::Location* longest_match = NULL;
 
-  // location探す
   for (size_t i = 0; i < server_config.location_list.size(); i++) {
-    if (sameURI(uri, server_config.location_list[i].uri)) return &server_config.location_list[i];
+    std::string config_uri = server_config.location_list[i].uri;
+    // なければlocation uriの前後に'/'をつける
+    if (config_uri[0] != '/') config_uri.insert(config_uri.begin(), '/');
+    if (config_uri[config_uri.length() - 1] != '/') config_uri.push_back('/');
+    if (uri.find(config_uri) == 0)
+      longest_match = &server_config.location_list[i];
   }
-  return NULL;
+  return longest_match;
 }
 
 const config::ErrorPage* ConfigHandler::searchErrorPage(const config::Server& server,
