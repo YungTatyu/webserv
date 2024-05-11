@@ -90,7 +90,7 @@ TEST_F(HttpResponseErrorPage, code_response_uri1) {
   expect_res.push_back("Connection: close");
   expect_res.push_back("Content-Type: text/html");
   expect_res.push_back("Content-Length: 258");
-  std::ifstream ifs("test/server/ResponseTestFiles/testHtml/40x.html");
+  std::ifstream ifs("test/server/HttpResponse/error_page/file/40x.html");
   ASSERT_TRUE(ifs.is_open());
   std::stringstream buffer;
   buffer << ifs.rdbuf();
@@ -117,7 +117,7 @@ TEST_F(HttpResponseErrorPage, code_response_uri2) {
   expect_res.push_back("Connection: close");
   expect_res.push_back("Content-Type: text/html");
   expect_res.push_back("Content-Length: 258");
-  std::ifstream ifs("test/server/ResponseTestFiles/testHtml/40x.html");
+  std::ifstream ifs("test/server/HttpResponse/error_page/file/40x.html");
   ASSERT_TRUE(ifs.is_open());
   std::stringstream buffer;
   buffer << ifs.rdbuf();
