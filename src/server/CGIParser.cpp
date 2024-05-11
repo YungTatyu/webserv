@@ -95,7 +95,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             state = sw_almost_end;
             break;
           default:
-            if (std::isspace(ch)) {
+            if (HttpRequest::isInvalidLetter(ch)) {
               state = sw_error;
               break;
             }
@@ -118,8 +118,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             state = sw_header_almost_done;
             break;
           default:
-            // 記号で始まるheaderはerrorにする
-            if ((cur_name.empty() && !std::isalnum(ch)) || !std::isprint(ch)) {
+            if (HttpRequest::isInvalidLetter(ch)) {
               state = sw_error;
               break;
             }
@@ -234,7 +233,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
         switch (ch) {
           case '\r':
           case '\n':
-            if (!isValidContentLength(cur_value)) {
+            if (!HttpRequest::isValidContentLength(cur_value)) {
               state = sw_error;
               break;
             }
@@ -254,7 +253,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
             ++ri_;
             break;
           case ' ':
-            if (!isValidContentLength(cur_value)) {
+            if (!HttpRequest::isValidContentLength(cur_value)) {
               state = sw_error;
               break;
             }
@@ -351,9 +350,7 @@ void cgi::CGIParser::parseBody(const std::string& response) {
   // content lengthが設定されている場合は、bodyの長さを調節する
   if (this->headers_->find(kContentLength) != this->headers_->end()) {
     const std::string& content_length = this->headers_->at(kContentLength);
-    std::istringstream iss(content_length);
-    size_t length;
-    iss >> length;
+    size_t length = Utils::strToSizet(content_length);
 
     *(this->body_) = response.substr(ri_, length);
     this->state_ = PARSE_BODY_DONE;
@@ -377,7 +374,7 @@ bool cgi::CGIParser::isValidStatusCode(const std::string& status_code) const {
   std::istringstream iss(status_code.substr(0, 3));
   int num;
   iss >> num;
-  if (iss.fail()) return false;
+  if (iss.fail() || iss.bad()) return false;
   return num >= 100;
 }
 
@@ -412,15 +409,6 @@ void cgi::CGIParser::finalizeStatusCode() {
     return;
   }
   *(this->status_code_) = 200;
-}
-
-bool cgi::CGIParser::isValidContentLength(std::string cl) const {
-  unsigned long length;
-  std::istringstream iss(cl);
-  iss >> length;
-
-  if (iss.fail()) return false;
-  return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
 }
 
 void cgi::CGIParser::eraseHeader(const std::string& header) {

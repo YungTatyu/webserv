@@ -43,8 +43,12 @@ std::string toLower(std::string str);
 bool isSpace(const unsigned char ch);
 bool compareIgnoreCase(std::string lhs, std::string rhs);
 int setNonBlockingCloExec(const int fd);
+size_t strToSizet(const std::string& str);
+size_t strToSizetInHex(const std::string& str);
+bool isSign(unsigned char ch);
 template <typename T>
 std::string toStr(const T value);
+bool isNumeric(const std::string& str);
 }  // namespace Utils
 
 template <typename T>
