@@ -11,7 +11,7 @@
 
 /*
  *  root + try_files in location
-*/
+ */
 TEST(HttpResponseRoot, current_directory) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
@@ -86,7 +86,7 @@ TEST(HttpResponseRoot, parent_directory_slash) {
 
 /*
  *  root + index in location
-*/
+ */
 TEST(HttpResponseRoot, current_directory_index) {
   test::ResponseTest test("test/server/HttpResponse/root/file/test2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4222}},
