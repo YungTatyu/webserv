@@ -20,7 +20,7 @@ TEST(HttpResponseReturn, code) {
       {"Server", "webserv/1.0"},
       {"Date", ""},
       {"Content-Length", std::to_string(expect_body.size())},
-      {"Content-Type", "text/plain"},
+      {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
   test.testBody(expect_body);
