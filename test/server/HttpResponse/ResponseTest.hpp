@@ -9,11 +9,11 @@
 
 #include <algorithm>
 #include <cstring>
+#include <fstream>
 #include <regex>
 #include <string>
 #include <utility>
 #include <vector>
-#include <fstream>
 
 #include "ConfigHandler.hpp"
 #include "HttpRequest.hpp"
@@ -241,32 +241,25 @@ class ResponseTest {
    * @param expect_resSize
    * @param expect_userAgent
    */
-  void testAccessLogEntry(
-                    const std::string& log_path,
-                    std::string expect_ip,
-                    std::string expect_method,
-                    std::string expect_uri,
-                    double expect_httpVersion,
-                    int expect_statusCode,
-                    int expect_resSize,
-                    std::string expect_userAgent) {
-
+  void testAccessLogEntry(const std::string &log_path, std::string expect_ip, std::string expect_method,
+                          std::string expect_uri, double expect_httpVersion, int expect_statusCode,
+                          int expect_resSize, std::string expect_userAgent) {
     // ログエントリの解析
     std::ifstream logFile(log_path.c_str());
     std::string log_entry;
     std::vector<std::string> log_entries;
     if (logFile.is_open()) {
       // どこかでログ出力がされてしまっているので、最後にwriteAccessLogで出力したログのみテストする。
-      while (std::getline(logFile, log_entry)) // 1行読み込む
+      while (std::getline(logFile, log_entry))  // 1行読み込む
         log_entries.push_back(log_entry);
       logFile.close();
-    }
-    else {
+    } else {
       FAIL() << "Can't open the log file: " << log_path << std::endl;
       return;
     }
     // 正規表現パターン
-    std::regex pattern(R"((\d+\.\d+\.\d+\.\d+) - - \[(\d+\/\w+\/\d+:\d+:\d+:\d+) GMT\] \"(GET|POST) (\/[^"]*) HTTP\/(\d+\.\d+)\" (\d+) (\d+) \"([^"]*\/\d+[\.\d+]*)\")");
+    std::regex pattern(
+        R"((\d+\.\d+\.\d+\.\d+) - - \[(\d+\/\w+\/\d+:\d+:\d+:\d+) GMT\] \"(GET|POST) (\/[^"]*) HTTP\/(\d+\.\d+)\" (\d+) (\d+) \"([^"]*\/\d+[\.\d+]*)\")");
 
     std::smatch matches;
     ASSERT_TRUE(std::regex_match(log_entries.back(), matches, pattern));
@@ -280,7 +273,7 @@ class ResponseTest {
     int actual_statusCode = std::stoi(matches[6]);
     int actual_resSize = std::stoi(matches[7]);
     std::string actual_userAgent = matches[8];
-    
+
     // 時刻に関しては現在時刻との差分が許容範囲かテストする。
     int acceptable_diff = 3;
     // 現在時刻を取得
@@ -317,7 +310,7 @@ class ResponseTest {
    * @param text, pattern
    * @return int
    */
-  int countOccurrences(const std::string& text, const std::string& pattern) {
+  int countOccurrences(const std::string &text, const std::string &pattern) {
     int cnt = 0;
     size_t pos = 0;
     while ((pos = text.find(pattern, pos)) != std::string::npos) {
@@ -333,7 +326,7 @@ class ResponseTest {
    * @param body, expect_file_num
    * @return std::string
    */
-  void testAutoindexEntry(const std::string& body, int expect_file_num) {
+  void testAutoindexEntry(const std::string &body, int expect_file_num) {
     // ../があるので1つ多く見積もる
     ASSERT_EQ(expect_file_num + 1, countOccurrences(body, "<a href="));
     ASSERT_EQ(expect_file_num, countOccurrences(body, "<span class="));
@@ -376,7 +369,7 @@ class ResponseTest {
     // 絶対pathを取得
     if (realpath(file_path.c_str(), absolute_path) == NULL) {
       std::cerr << file_path << " is not found." << std::endl;
-    exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
     }
 
     // absolutepath = ~/webserv
