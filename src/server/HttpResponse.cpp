@@ -652,6 +652,15 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequ
       return sw_content_phase;
     }
   }
+  if (index_list.size() == 0)
+  {
+    std::string full_path = directory_path + config::Index::kDefaultFile_;
+    if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
+        Utils::wrapperAccess(full_path, R_OK, false) == 0) {
+      response.res_file_path_ = full_path;
+      return sw_content_phase;
+    }
+  }
 
   if (is_autoindex_on) {
     response.body_ = autoIndex(directory_path, request.uri);
