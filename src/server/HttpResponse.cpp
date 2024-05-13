@@ -526,8 +526,7 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
                                                               const config::Server& server,
                                                               const config::Location* location) {
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' &&
-      Utils::isDirectory(server.root.getPath() + request.uri)) {
+  if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri)) {
     response.status_code_ = 301;
     return sw_error_page_phase;
   } else if (lastChar(request.uri) == '/' && request.uri != "/" && !location) {
@@ -799,6 +798,4 @@ std::string HttpResponse::detectContentType(const std::string& res_file_path) {
   return kTextPlain;
 }
 
-char HttpResponse::lastChar(const std::string& str) {
-  return str[str.size() - 1];
-}
+char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]; }
