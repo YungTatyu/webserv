@@ -52,8 +52,10 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
   HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
   // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
-  if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR)
+  if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR) {
+    connManager.clearRawRequest(sockfd);
     return RequestHandler::UPDATE_NONE;
+  }
   return handleResponse(connManager, configHandler, timerTree, sockfd);
 }
 

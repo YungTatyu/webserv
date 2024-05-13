@@ -20,7 +20,7 @@ class ConnectionData {
     EV_CGI_WRITE,
   };
   std::vector<unsigned char>
-      rawRequest;  // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
+      raw_request_;  // 画像などのテキスト以外のバイナリデータを扱う可能性があるのでstd::stringではなく、vector<char>にした。
   std::vector<unsigned char> final_response_;
   std::vector<unsigned char> cgi_response_;
   size_t sent_bytes_;  // responseやcgi bodyをsendする際に送信したbyte数を記録する
@@ -65,6 +65,7 @@ class ConnectionManager {
   bool callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response);
   void resetSentBytes(const int fd);
   void resetCgiSockets(const int fd);
+  void clearRawRequest(const int fd);
   void clearConnectionData(const int fd);
   void closeAllConnections();
   bool isCgiSocket(const int fd) const;
