@@ -279,9 +279,7 @@ const config::Location* ConfigHandler::searchLongestMatchLocationConfig(const co
     // なければlocation uriの前後に'/'をつける
     if (config_uri[0] != '/') config_uri.insert(config_uri.begin(), '/');
     if (config_uri[config_uri.length() - 1] != '/') config_uri.push_back('/');
-    if (uri.find(config_uri) == 0 &&
-        max_len < config_uri.size())
-    {
+    if (uri.find(config_uri) == 0 && max_len < config_uri.size()) {
       max_len = std::max(max_len, config_uri.size());
       longest_match = &server_config.location_list[i];
     }
