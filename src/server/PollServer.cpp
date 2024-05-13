@@ -39,6 +39,7 @@ void PollServer::addActiveEvents(const std::vector<pollfd>& pollfds, IActiveEven
     // イベントが発生していたら、active_eventに追加
     if (event_manager->isReadEvent(static_cast<const void*>(&cur_pfd)) ||
         event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd)) ||
+        event_manager->isEofEvent(static_cast<const void*>(&cur_pfd)) ||
         event_manager->isErrorEvent(static_cast<const void*>(&cur_pfd)))
       event_manager->addEvent(static_cast<const void*>(&cur_pfd));
   }
