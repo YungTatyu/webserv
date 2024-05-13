@@ -209,7 +209,7 @@ class ResponseTest {
     std::istringstream ss(actual);
     // Date: Tue, 23 Apr 2024 07:15:28 GMT
     ss >> std::get_time(&t, "%a, %d %b %Y %H:%M:%S");
-    if (ss.fail()) {
+    if (ss.fail() || ss.bad()) {
       err("Date: format error");
       return;
     }

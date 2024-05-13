@@ -41,13 +41,12 @@ class RequestHandler {
 
  private:
   bool cgiProcessExited(const pid_t process_id) const;
-  int handleResponse(ConnectionManager &connManager,
-                     ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
-  int handleCgi(ConnectionManager &connManager, ConfigHandler &configHandler,
-                TimerTree &timerTree, const int sockfd);
-  bool addTimerByType(ConnectionManager &connManager,
-                      ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd,
-                      enum Timer::TimeoutType type);
+  int handleResponse(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
+                     const int sockfd);
+  int handleCgi(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
+                const int sockfd);
+  bool addTimerByType(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
+                      const int sockfd, enum Timer::TimeoutType type);
   void deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                 TimerTree &timerTree, int socket);
   bool isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler);
