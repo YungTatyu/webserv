@@ -272,14 +272,19 @@ const config::Server& ConfigHandler::searchServerConfig(const struct TiedServer&
 const config::Location* ConfigHandler::searchLongestMatchLocationConfig(const config::Server& server_config,
                                                                         const std::string& uri) const {
   const config::Location* longest_match = NULL;
+  size_t max_len = 0;
 
   for (size_t i = 0; i < server_config.location_list.size(); i++) {
     std::string config_uri = server_config.location_list[i].uri;
     // なければlocation uriの前後に'/'をつける
     if (config_uri[0] != '/') config_uri.insert(config_uri.begin(), '/');
     if (config_uri[config_uri.length() - 1] != '/') config_uri.push_back('/');
-    if (uri.find(config_uri) == 0)
+    if (uri.find(config_uri) == 0 &&
+        max_len < config_uri.size())
+    {
+      max_len = std::max(max_len, config_uri.size());
       longest_match = &server_config.location_list[i];
+    }
   }
   return longest_match;
 }
