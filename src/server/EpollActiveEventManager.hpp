@@ -21,6 +21,7 @@ class EpollActiveEventManager : public IActiveEventManager {
   bool isReadEvent(const void *event);
   bool isWriteEvent(const void *event);
   bool isErrorEvent(const void *event);
+  bool isEofEvent(const void *event);
 
  private:
   std::vector<struct epoll_event> active_events_;
