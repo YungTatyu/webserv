@@ -530,9 +530,7 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
       Utils::isDirectory(server.root.getPath() + request.uri)) {
     response.status_code_ = 301;
     return sw_error_page_phase;
-  }
-  if (lastChar(request.uri) == '/' && request.uri != "/" && !location) {
-    //internal_redirectしていたら500エラー
+  } else if (lastChar(request.uri) == '/' && request.uri != "/" && !location) {
     response.status_code_ = 404;
     return sw_error_page_phase;
   }
@@ -546,8 +544,6 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
  * URIなら内部リダイレクト
  */
 HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpRequest& request,
-                                                   const config::Server& server,
-                                                   const ConfigHandler& config_handler,
                                                    const config::TryFiles& try_files) {
   std::vector<std::string> file_list = try_files.getFileList();
 
@@ -563,16 +559,12 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
   // uri
   if (try_files.getCode() == config::TryFiles::kCodeUnset) {
     request.uri = try_files.getUri();
-    if (config_handler.searchLongestMatchLocationConfig(server, request.uri) == NULL)
-    {
-      response.status_code_ = 500;
-      return sw_error_page_phase;
-    }
     return sw_search_location_phase;
+  } else  // code
+  {
+    response.status_code_ = try_files.getCode();
+    return sw_error_page_phase;
   }
-  // code
-  response.status_code_ = try_files.getCode();
-  return sw_error_page_phase;
 }
 
 std::string HttpResponse::autoIndex(const std::string& directory_path, const std::string& index_dir) {
@@ -710,13 +702,13 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
 
   // location context
   if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
-    return TryFiles(response, request, server, config_handler, location->try_files);
+    return TryFiles(response, request, location->try_files);
   else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
     return Index(response, request, location->index_list, is_autoindex_on, index_dir);
 
   // server context
   if (server.directives_set.find(kTRY_FILES) != server.directives_set.end())
-    return TryFiles(response, request, server, config_handler, server.try_files);
+    return TryFiles(response, request, server.try_files);
   else if (server.directives_set.find(kINDEX) != server.directives_set.end())
     return Index(response, request, server.index_list, is_autoindex_on, index_dir);
 

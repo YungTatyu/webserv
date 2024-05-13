@@ -95,8 +95,6 @@ class HttpResponse {
                              const std::vector<config::Index>& index_list, bool is_autoindex_on,
                              const std::string& index_dir);
   static ResponsePhase TryFiles(HttpResponse& response, HttpRequest& request,
-                                const config::Server& server,
-                                const ConfigHandler& config_handler,
                                 const config::TryFiles& try_files);
   static void headerFilterPhase(HttpResponse& response, const config::Time& time);
   static std::string detectContentType(const std::string& res_file_path);
