@@ -184,6 +184,7 @@ TEST_F(HttpResponseErrorPage, eternal_redirect) {
 }
 
 TEST_F(HttpResponseErrorPage, dup_error_num) {
+  // ErrorPage2.conf
   initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::GET,
               "/nothing/", HttpRequest::PARSE_COMPLETE);
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4243);
