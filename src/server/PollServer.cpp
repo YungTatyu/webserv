@@ -39,6 +39,7 @@ void PollServer::addActiveEvents(const std::vector<pollfd>& pollfds, IActiveEven
     // イベントが発生していたら、active_eventに追加
     if (event_manager->isReadEvent(static_cast<const void*>(&cur_pfd)) ||
         event_manager->isWriteEvent(static_cast<const void*>(&cur_pfd)) ||
+        event_manager->isEofEvent(static_cast<const void*>(&cur_pfd)) ||
         event_manager->isErrorEvent(static_cast<const void*>(&cur_pfd)))
       event_manager->addEvent(static_cast<const void*>(&cur_pfd));
   }
@@ -67,6 +68,8 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
       request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
       request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
+    else if (event_manager->isEofEvent(static_cast<const void*>(&(*it))))
+      request_handler->handleEofEvent(*io_handler, *conn_manager, *config_handler, *timer_tree, it->fd);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
       request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, it->fd);
   }
@@ -98,10 +101,16 @@ std::vector<struct pollfd> PollServer::convertToPollfds(const ConnectionManager&
       case ConnectionData::EV_READ:
       case ConnectionData::EV_CGI_READ:
         pollfd.events = POLLIN;
+#if defined(__linux__)
+        pollfd.events |= POLLRDHUP;
+#endif
         break;
       case ConnectionData::EV_WRITE:
       case ConnectionData::EV_CGI_WRITE:
         pollfd.events = POLLOUT;
+#if defined(__linux__)
+        pollfd.events |= POLLRDHUP;
+#endif
         break;
     }
     pollfd.revents = 0;
