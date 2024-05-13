@@ -643,7 +643,7 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
 
 HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequest& request,
                                                 const std::vector<config::Index>& index_list,
-                                                bool is_autoindex_on, const std::string& index_dir) {
+                                                bool is_autoindex_on) {
   std::string directory_path = response.root_path_ + request.uri;
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
@@ -655,7 +655,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequ
   }
 
   if (is_autoindex_on) {
-    response.body_ = autoIndex(directory_path, index_dir);
+    response.body_ = autoIndex(directory_path, request.uri);
     // autoindexでディレクトリが見つからなかったら404エラー
     if (response.body_.empty()) {
       response.status_code_ = 404;
@@ -696,27 +696,22 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
    * 3つともなかったら上位のcontextで検索する
    */
   bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
-  std::string index_dir;
-  if (location)
-    index_dir = location->uri;
-  else
-    index_dir = "/";
 
   // location context
   if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
     return TryFiles(response, request, location->try_files);
   else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
-    return Index(response, request, location->index_list, is_autoindex_on, index_dir);
+    return Index(response, request, location->index_list, is_autoindex_on);
 
   // server context
   if (server.directives_set.find(kTRY_FILES) != server.directives_set.end())
     return TryFiles(response, request, server.try_files);
   else if (server.directives_set.find(kINDEX) != server.directives_set.end())
-    return Index(response, request, server.index_list, is_autoindex_on, index_dir);
+    return Index(response, request, server.index_list, is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
   // なくとも、デフォルトのindexディレクティブを見る
-  return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on, index_dir);
+  return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on);
 }
 
 /**
