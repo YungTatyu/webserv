@@ -85,7 +85,7 @@ ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int
   size_t res_size = response.size();
   size_t sent_bytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t cur_chunk_size = std::min(buffer_size_, res_size - sent_bytes);
-  if (cur_chunk_size == 0) return 0; // すでにresponseを全て送信しきっていたら
+  if (cur_chunk_size == 0) return 1; // すでにresponseを全て送信しきっていたら、send終了
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
@@ -100,7 +100,7 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
   size_t cur_chunk_size = std::min(buffer_size_, rest);
-  if (cur_chunk_size == 0) return 0;
+  if (cur_chunk_size == 0) return 1; // すでにresponseを全て送信しきっていたら、send終了
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;

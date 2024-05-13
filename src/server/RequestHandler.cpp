@@ -37,15 +37,13 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
   // クライアントソケットへのリクエスト（既存コネクション）
   ssize_t re = ioHandler.receiveRequest(connManager, sockfd);
-  if (re == -1)  // ソケット使用不可。
-    return RequestHandler::UPDATE_NONE;
+  // ソケット使用不可。
+  if (re == -1) return RequestHandler::UPDATE_NONE;
   if (re == 0)  // クライアントが接続を閉じる
   {
     ioHandler.closeConnection(connManager, sockfd);
     return RequestHandler::UPDATE_CLOSE;
   }
-  if (re == 2)  // buffer分以降を読む
-    return RequestHandler::UPDATE_NONE;
   const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
   // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
   std::string requestData = std::string(context.begin(), context.end());
@@ -53,10 +51,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   HttpRequest::parseRequest(requestData, connManager.getRequest(sockfd));
 
   HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
-  if (state != HttpRequest::PARSE_COMPLETE &&
-      state !=
-          HttpRequest::
-              PARSE_ERROR)  // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+  // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
+  if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR)
     return RequestHandler::UPDATE_NONE;
   return handleResponse(connManager, configHandler, timerTree, sockfd);
 }
@@ -101,9 +97,9 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
 
 int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                        ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
-  int re = ioHandler.receiveCgiResponse(connManager, sockfd);
-  if (re == -1 || re == 2)  // recv errorまたはbuffer size分recv
-    return RequestHandler::UPDATE_NONE;
+  ssize_t re = ioHandler.receiveCgiResponse(connManager, sockfd);
+  // recv error
+  if (re == -1) return RequestHandler::UPDATE_NONE;
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   if (!cgiProcessExited(cgi_handler.getCgiProcessId())) return RequestHandler::UPDATE_NONE;
 
@@ -122,29 +118,20 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
     return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 
-  int re = ioHandler.sendResponse(connManager, sockfd);
+  ssize_t re = ioHandler.sendResponse(connManager, sockfd);
 
-  /* -2: send not complete, send remainder later
-   * -1: send error, retry later
-   *  0: connection closed
-   *  1: send complete
-   */
-  switch (re) {
-    case -2:
-      // send_timeout更新
-      this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
-      return RequestHandler::UPDATE_NONE;
-      break;
-    case -1:
-      // ここで何も処理しないとsend_timeout0;でselect serverの時おかしくなる。
-      return RequestHandler::UPDATE_NONE;
-      break;
-    case 0:
-      this->deleteTimerAndConnection(ioHandler, connManager, timerTree, sockfd);
-      return RequestHandler::UPDATE_CLOSE;
-      break;
-    case 1:
-      break;
+  ssize_t buff_size = static_cast<ssize_t>(ioHandler.getBufferSize());
+  // error
+  if (re == -1) return RequestHandler::UPDATE_NONE;
+  // client connection closed
+  if (re == 0) {
+    this->deleteTimerAndConnection(ioHandler, connManager, timerTree, sockfd);
+    return RequestHandler::UPDATE_CLOSE;
+  }
+  // 引き続きresponseを送信
+  if (re == buff_size) {
+    this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
+    return RequestHandler::UPDATE_NONE;
   }
 
   if (!this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE)) {
@@ -162,12 +149,12 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
 int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         const int sockfd) {
-  ssize_t re = ioHandler.sendRequestBody(connManager, sockfd);
+  ioHandler.sendRequestBody(connManager, sockfd);
 
   const std::string body = connManager.getRequest(sockfd).body;
   const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
   if (connManager.getSentBytes(sockfd) == body.size() ||              // bodyを全て送ったら
-      (re == -1 && cgiProcessExited(cgi_handler.getCgiProcessId())))  // cgi processがすでに死んでいたら
+      (cgiProcessExited(cgi_handler.getCgiProcessId())))  // cgi processがすでに死んでいたら
   {
     connManager.resetSentBytes(sockfd);
     connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
