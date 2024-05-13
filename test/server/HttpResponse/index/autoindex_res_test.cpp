@@ -18,7 +18,7 @@ TEST(HttpResponseAutoindex, in_http_on_and_no_location) {
   std::string dir_path = test.getAbsolutePath("test/server/HttpResponse/index/file");
   test.testHeaders({{"Server", "webserv/1.0"},
                     {"Date", ""},
-                    {"Content-Length", std::to_string(339)},
+                    {"Content-Length", std::to_string(1070)},
                     {"Content-Type", "text/html"},
                     {"Connection", "keep-alive"}});
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
@@ -51,7 +51,7 @@ TEST(HttpResponseAutoindex, in_server_off) {
                     {"Date", ""},
                     {"Content-Length", std::to_string(expect_body.size())},
                     {"Content-Type", "text/html"},
-                    {"Connection", "keep-alive"}});
+                    {"Connection", "close"}});
   test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
