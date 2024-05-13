@@ -90,14 +90,14 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
       static_cast<std::vector<SelectEvent>*>(event_manager->getActiveEvents());
   const std::vector<SelectEvent> active_events = *active_events_ptr;
 
-  // TimeoutEvent発生
-  if (event_manager->getActiveEventsNum() == 0) {
-    request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-    return;
-  }
-
   // 現在時刻を更新
   Timer::updateCurrentTime();
+
+  // TimeoutEvent発生
+  //if (event_manager->getActiveEventsNum() == 0) {
+  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    //return;
+  //}
 
   for (size_t i = 0; i < active_events.size(); ++i) {
     if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
@@ -110,4 +110,5 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
       request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
                                         active_events[i].fd_);
   }
+  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
 }
