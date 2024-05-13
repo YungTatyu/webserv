@@ -202,7 +202,7 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id) const {
   int status;
   pid_t re = waitpid(process_id, &status, WNOHANG);
   // errorまたはprocessが終了していない
-  // TODO: errorのときの処理はあやしい
+  // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
   if (re == 0 || re == -1) return false;
   return true;
 }

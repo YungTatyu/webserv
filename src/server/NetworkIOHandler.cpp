@@ -1,4 +1,6 @@
 #include "NetworkIOHandler.hpp"
+#include "Utils.hpp"
+#include "error.hpp"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -41,7 +43,9 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
     servaddr.sin_port = htons(port);
 
     // 失敗したとき？
-    SysCallWrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    re = SysCallWrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    if (re == -1) throw std::runtime_error(error::strSysCallError("bind", " to " + address + ":" + Utils::toStr(port)));
+
     SysCallWrapper::Listen(listen_fd, SOMAXCONN);
 
     std::cout << "Server running on port " << port << std::endl;
