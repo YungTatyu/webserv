@@ -39,7 +39,8 @@ void PollActiveEventManager::clearAllEvents() {
 bool PollActiveEventManager::isReadEvent(const void *event) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
   return (poll_fd->revents & POLLIN) && !isEofEvent(event);
-  //return (poll_fd->revents & POLLIN) || (poll_fd->revents & POLLHUP); // isEofEvent()を追加したのでPOLLHUPはそっちで見る.
+  // return (poll_fd->revents & POLLIN) || (poll_fd->revents & POLLHUP); //
+  // isEofEvent()を追加したのでPOLLHUPはそっちで見る.
 }
 
 bool PollActiveEventManager::isWriteEvent(const void *event) {
@@ -63,11 +64,11 @@ bool PollActiveEventManager::isErrorEvent(const void *event) {
 
 bool PollActiveEventManager::isEofEvent(const void *event) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);
-  #if defined(__linux__)
+#if defined(__linux__)
   return (poll_fd->revents & POLLRDHUP);
-  #else
+#else
   // linux以外はEOF検知できない.
   (void)poll_fd;
   return false;
-  #endif
+#endif
 }
