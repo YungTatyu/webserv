@@ -531,7 +531,10 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
     response.status_code_ = 301;
     return sw_error_page_phase;
   } else if (lastChar(request.uri) == '/' && request.uri != "/" && !location) {
-    response.status_code_ = 404;
+    if (response.internal_redirect_cnt_ > 1)
+      response.status_code_ = 500;
+    else
+      response.status_code_ = 404;
     return sw_error_page_phase;
   }
   return sw_search_res_file_phase;
@@ -560,11 +563,10 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
   if (try_files.getCode() == config::TryFiles::kCodeUnset) {
     request.uri = try_files.getUri();
     return sw_search_location_phase;
-  } else  // code
-  {
-    response.status_code_ = try_files.getCode();
-    return sw_error_page_phase;
   }
+  // code
+  response.status_code_ = try_files.getCode();
+  return sw_error_page_phase;
 }
 
 std::string HttpResponse::autoIndex(const std::string& directory_path, const std::string& index_dir) {
