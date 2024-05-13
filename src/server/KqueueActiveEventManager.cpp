@@ -73,7 +73,7 @@ bool KqueueActiveEventManager::isErrorEvent(const void *event) {
  */
 bool KqueueActiveEventManager::isEofEvent(const void *event) {
   const struct kevent *kq_e = static_cast<const struct kevent *>(event);
-  return kq_e->flags & EV_EOF;
+  return (kq_e->flags & EV_EOF) && !isErrorEvent(event);
 }
 
 #endif
