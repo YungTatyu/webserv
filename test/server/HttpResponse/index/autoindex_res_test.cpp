@@ -73,9 +73,9 @@ TEST(HttpResponseAutoindex, in_http_on) {
 
 TEST(HttpResponseAutoindex, request_uri_listing) {
   test::ResponseTest test("test/server/HttpResponse/index/file/autoindex1.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}},
-                                        {{"host", "test"}, {"User-Agent", "curl/7.68.0"}},
-                                        {config::REQUEST_METHOD::GET}, "/error/", HttpRequest::PARSE_COMPLETE));
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
+      {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "test"}, {"User-Agent", "curl/7.68.0"}},
+      {config::REQUEST_METHOD::GET}, "/error/", HttpRequest::PARSE_COMPLETE));
 
   test.testHeaders({{"Server", "webserv/1.0"},
                     {"Date", ""},

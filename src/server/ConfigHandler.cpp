@@ -348,20 +348,18 @@ std::string ConfigHandler::searchRootPath(const config::Server& server,
 }
 
 bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Location* location) const {
-  if (location && location->directives_set.find(kAUTOINDEX) != location->directives_set.end())
-  {
+  if (location && location->directives_set.find(kAUTOINDEX) != location->directives_set.end()) {
     if (location->autoindex.getIsAutoindexOn())
       return true;
     else
       return false;
-  } else if (server.directives_set.find(kAUTOINDEX) != server.directives_set.end())
-  {
+  } else if (server.directives_set.find(kAUTOINDEX) != server.directives_set.end()) {
     if (server.autoindex.getIsAutoindexOn())
       return true;
     else
       return false;
   } else if (config_->http.directives_set.find(kAUTOINDEX) != config_->http.directives_set.end() &&
-           config_->http.autoindex.getIsAutoindexOn())
+             config_->http.autoindex.getIsAutoindexOn())
     return true;
   return false;
 }
