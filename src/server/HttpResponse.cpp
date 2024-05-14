@@ -562,8 +562,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
 
   for (size_t i = 0; i < file_list.size(); i++) {
     std::string full_path = response.root_path_ + file_list[i];
-    if (Utils::wrapperAccess(full_path, F_OK, false) == 0 &&
-        Utils::wrapperAccess(full_path, R_OK, false) == 0) {
+    if (isAccessible(full_path)) {
       response.res_file_path_ = full_path;
       return sw_content_phase;
     }
@@ -656,16 +655,14 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
                                                 std::string directory_path, bool is_autoindex_on) {
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
-    if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
-        Utils::wrapperAccess(full_path, R_OK, false) == 0) {
+    if (isAccessible(full_path)) {
       response.res_file_path_ = full_path;
       return sw_content_phase;
     }
   }
   if (index_list.size() == 0) {
     std::string full_path = directory_path + config::Index::kDefaultFile_;
-    if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
-        Utils::wrapperAccess(full_path, R_OK, false) == 0) {
+    if (isAccessible(full_path)) {
       response.res_file_path_ = full_path;
       return sw_content_phase;
     }
@@ -698,8 +695,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
   if (lastChar(request.uri) != '/') {
     std::string full_path = response.root_path_ + request.uri;
-    if (Utils::wrapperAccess(full_path, F_OK, false) != 0 ||
-        Utils::wrapperAccess(full_path, R_OK, false) != 0) {
+    if (!isAccessible(full_path)) {
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
@@ -832,3 +828,8 @@ char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]
 int HttpResponse::getStatusCode() const { return this->status_code_; }
 
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
+
+bool HttpResponse::isAccessible(const std::string& file_path) {
+  return Utils::wrapperAccess(file_path, F_OK, false) == 0 &&
+         Utils::wrapperAccess(file_path, R_OK, false) == 0;
+}

@@ -101,6 +101,7 @@ class HttpResponse {
   static char lastChar(const std::string& str);
   int getStatusCode() const;
   void  setStatusCode(int code);
+  static bool isAccessible(const std::string& file_path);
 };
 
 #endif
