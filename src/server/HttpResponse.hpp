@@ -78,7 +78,7 @@ class HttpResponse {
                                                 const config::Server& server,
                                                 const config::Location* location,
                                                 const ConfigHandler& config_handler);
-  static ResponsePhase handleContentPhase(HttpResponse& response);
+  static ResponsePhase handleContentPhase(HttpResponse& response, HttpRequest& request);
   static ResponsePhase handleErrorPagePhase(HttpResponse& response, HttpRequest& request,
                                             const config::Server& server, const config::Location* location,
                                             const ConfigHandler& config_handler);

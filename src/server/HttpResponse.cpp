@@ -401,7 +401,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_content_phase:
         config_handler.writeErrorLog("webserv: [debug] content phase\n");
-        phase = handleContentPhase(response);
+        phase = handleContentPhase(response, request);
         break;
 
       case sw_error_page_phase:
@@ -733,10 +733,15 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
   return searchResPath(response, request, server, location, config_handler);
 }
 
-HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response) {
+HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
     response.state_ = RES_EXECUTE_CGI;
     return sw_log_phase;
+  }
+  if (request.method == config::POST || request.method == config::DELETE)
+  {
+    response.status_code_ = 405;
+    return sw_error_page_phase;
   }
   response.body_ = Utils::readFile(response.res_file_path_);
   return sw_log_phase;
