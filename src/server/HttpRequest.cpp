@@ -631,11 +631,26 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
             break;
         }
         break;
+
+      /**
+       * valueは複数ある場合がある
+       * ex) ex1: v1, v2, v3
+       * ex) ex2: v1 v2  v3
+       */
       case sw_space_after_value:
-        if (ch != ' ') {
-          state = sw_header_almost_done;
-        } else {
-          ++i;
+        switch (ch) {
+          case ' ':
+            ++i;
+            break;
+          case '\r':
+            state = sw_header_almost_done;
+            break;
+          case '\n':
+            state = sw_header_done;
+            break;
+          default:
+            state = sw_value;
+            break;          
         }
         break;
       case sw_header_almost_done:
