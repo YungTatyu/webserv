@@ -533,18 +533,12 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
   if (lastChar(request.uri) == '/' && !location && !Utils::isDirectory(response.root_path_ + request.uri)) {
-    if (response.internal_redirect_cnt_ > 1)
-      response.setStatusCode(500);
-    else
-      response.setStatusCode(404);
+    response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
     return sw_error_page_phase;
   }
   // root_path_が存在しなければ404エラー
   if (!Utils::isDirectory(response.root_path_)) {
-    if (response.internal_redirect_cnt_ > 1)
-      response.setStatusCode(500);
-    else
-      response.setStatusCode(404);
+    response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
     return sw_error_page_phase;
   }
   return sw_search_res_file_phase;
@@ -715,11 +709,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
     return TryFiles(response, request, location->try_files);
   else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
   {
-    std::string directory_path;
-    if (location->directives_set.find(kALIAS) != location->directives_set.end())
-      directory_path = response.root_path_;
-    else
-      directory_path = response.root_path_ + request.uri;
+    std::string directory_path = (location->directives_set.count(kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
     return Index(response, request.uri, location->index_list, directory_path, is_autoindex_on);
   }
 
@@ -794,17 +784,11 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
     response.headers_.erase(kTransferEncoding);
 
   // requestエラーの場合は、接続を切る
-  if (time.isNoTime() || (400 <= response.getStatusCode() && response.getStatusCode() < 500))
-    response.headers_[kConnection] = kClose;
-  else
-    response.headers_[kConnection] = kKeepAlive;
+  response.headers_[kConnection] = (time.isNoTime() || (400 <= response.getStatusCode() && response.getStatusCode() < 500) ? kClose : kKeepAlive);
 
   // cgiでstatus code lineの場合
   if (!response.status_code_line_.empty()) return;
-  if (default_status_line != status_line_map_.end())
-    response.status_code_line_ = default_status_line->second;
-  else
-    response.status_code_line_ = Utils::toStr(response.getStatusCode());
+  response.status_code_line_ = (default_status_line != status_line_map_.end()) ? default_status_line->second  : Utils::toStr(response.getStatusCode());
   // staticのファイルの場合のみ、contetn-typeをつけてあげる
   if (response.state_ != RES_CREATING_STATIC) return;
 
