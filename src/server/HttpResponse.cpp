@@ -351,7 +351,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
     phase = sw_end_phase;
   else if (response.state_ == RES_CGI_ERROR) {
     phase = sw_error_page_phase;
-    response.status_code_ = 502;  // bad gate error
+    response.setStatusCode(502); // bad gate error
   }
 
   while (phase != sw_end_phase) {
@@ -415,7 +415,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
         //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
-            config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.status_code_,
+            config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.getStatusCode(),
                                            response.body_.size(), request));
         phase = sw_end_phase;
         break;
@@ -442,7 +442,7 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     struct sockaddr_in& client_addr) {
   // parse error
   if (parse_state == HttpRequest::PARSE_ERROR) {
-    response.status_code_ = 400;
+    response.setStatusCode(400);
     return sw_error_page_phase;
   }
 
@@ -465,7 +465,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
                                                                     const ConfigHandler& config_handler) {
   if (response.internal_redirect_cnt_++ > kMaxInternalRedirect) {
     config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
-    response.status_code_ = 500;
+    response.setStatusCode(500);
     response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
     response.res_file_path_ = kDefaultPage;
     return sw_end_phase;
@@ -482,10 +482,10 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
                                                            const ConfigHandler& config_handler) {
   int ret = config_handler.allowRequest(server, location, request, client_addr);
   if (ret == ConfigHandler::ACCESS_DENY) {
-    response.status_code_ = 403;
+    response.setStatusCode(403);
     return sw_error_page_phase;
   } else if (ret == ConfigHandler::METHOD_DENY) {
-    response.status_code_ = 405;
+    response.setStatusCode(405);
     return sw_error_page_phase;
   } else
     return sw_uri_check_phase;
@@ -497,17 +497,17 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
   const char* kLocation = "Location";
 
   if (code == config::Return::kCodeUnset) {
-    response.status_code_ = 302;
+    response.setStatusCode(302);
     response.headers_[kLocation] = url;
     return;
   }
   if (config::Return::isRedirectCode(code)) {
-    response.status_code_ = code;
+    response.setStatusCode(code);
     response.headers_[kLocation] = url;
     return;
   }
   // textの場合
-  response.status_code_ = code;
+  response.setStatusCode(code);
   if (!url.empty()) response.body_ = url;
 }
 
@@ -528,23 +528,23 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
                                                               const config::Location* location) {
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri)) {
-    response.status_code_ = 301;
+    response.setStatusCode(301);
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
   if (lastChar(request.uri) == '/' && !location && !Utils::isDirectory(response.root_path_ + request.uri)) {
     if (response.internal_redirect_cnt_ > 1)
-      response.status_code_ = 500;
+      response.setStatusCode(500);
     else
-      response.status_code_ = 404;
+      response.setStatusCode(404);
     return sw_error_page_phase;
   }
   // root_path_が存在しなければ404エラー
   if (!Utils::isDirectory(response.root_path_)) {
     if (response.internal_redirect_cnt_ > 1)
-      response.status_code_ = 500;
+      response.setStatusCode(500);
     else
-      response.status_code_ = 404;
+      response.setStatusCode(404);
     return sw_error_page_phase;
   }
   return sw_search_res_file_phase;
@@ -575,7 +575,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
     return sw_search_location_phase;
   }
   // code
-  response.status_code_ = try_files.getCode();
+  response.setStatusCode(try_files.getCode());
   return sw_error_page_phase;
 }
 
@@ -675,7 +675,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
     response.body_ = autoIndex(directory_path, request_uri);
     // autoindexでディレクトリが見つからなかったら404エラー
     if (response.body_.empty()) {
-      response.status_code_ = 404;
+      response.setStatusCode(404);
       return sw_error_page_phase;
     }
     response.res_file_path_ = kDefaultPage;
@@ -683,7 +683,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
   }
 
   // autoindex offなら403
-  response.status_code_ = 403;
+  response.setStatusCode(403);
   return sw_error_page_phase;
 }
 
@@ -700,7 +700,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
     std::string full_path = response.root_path_ + request.uri;
     if (Utils::wrapperAccess(full_path, F_OK, false) != 0 ||
         Utils::wrapperAccess(full_path, R_OK, false) != 0) {
-      response.status_code_ = 404;
+      response.setStatusCode(404);
       return sw_error_page_phase;
     }
     response.res_file_path_ = full_path;
@@ -755,7 +755,7 @@ HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& respo
     return sw_log_phase;
   }
   if (request.method == config::POST || request.method == config::DELETE) {
-    response.status_code_ = 405;
+    response.setStatusCode(405);
     return sw_error_page_phase;
   }
   response.body_ = Utils::readFile(response.res_file_path_);
@@ -766,18 +766,18 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
                                                                const config::Server& server,
                                                                const config::Location* location,
                                                                const ConfigHandler& config_handler) {
-  const config::ErrorPage* ep = config_handler.searchErrorPage(server, location, response.status_code_);
+  const config::ErrorPage* ep = config_handler.searchErrorPage(server, location, response.getStatusCode());
 
   if (response.body_.empty() &&
-      default_error_page_map_.find(response.status_code_) != default_error_page_map_.end()) {
+      default_error_page_map_.find(response.getStatusCode()) != default_error_page_map_.end()) {
     response.res_file_path_ = kDefaultPage;
-    response.body_ = *default_error_page_map_[response.status_code_] + webserv_error_page_tail;
+    response.body_ = *default_error_page_map_[response.getStatusCode()] + webserv_error_page_tail;
   }
   if (!ep) return sw_log_phase;
 
   // error page process
   long tmp_code;  // error_pageの=responseはlong_maxまで許容
-  if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset) response.status_code_ = tmp_code;
+  if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset) response.setStatusCode(tmp_code);
   request.uri = ep->getUri();
   return sw_search_location_phase;
 }
@@ -788,7 +788,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
   const static char* kKeepAlive = "keep-alive";
   const static char* kTransferEncoding = "Transfer-Encoding";
   const std::map<int, std::string>::iterator default_status_line =
-      status_line_map_.find(response.status_code_);
+      status_line_map_.find(response.getStatusCode());
 
   response.headers_["Server"] = "webserv/1.0";
   response.headers_["Date"] = createCurrentGmtTime();
@@ -798,7 +798,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
     response.headers_.erase(kTransferEncoding);
 
   // requestエラーの場合は、接続を切る
-  if (time.isNoTime() || (400 <= response.status_code_ && response.status_code_ < 500))
+  if (time.isNoTime() || (400 <= response.getStatusCode() && response.getStatusCode() < 500))
     response.headers_[kConnection] = kClose;
   else
     response.headers_[kConnection] = kKeepAlive;
@@ -808,7 +808,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
   if (default_status_line != status_line_map_.end())
     response.status_code_line_ = default_status_line->second;
   else
-    response.status_code_line_ = Utils::toStr(response.status_code_);
+    response.status_code_line_ = Utils::toStr(response.getStatusCode());
   // staticのファイルの場合のみ、contetn-typeをつけてあげる
   if (response.state_ != RES_CREATING_STATIC) return;
 
@@ -828,3 +828,7 @@ std::string HttpResponse::detectContentType(const std::string& res_file_path) {
 }
 
 char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]; }
+
+int HttpResponse::getStatusCode() const { return this->status_code_; }
+
+void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }

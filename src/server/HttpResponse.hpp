@@ -99,6 +99,8 @@ class HttpResponse {
   static std::string detectContentType(const std::string& res_file_path);
   static std::string transformLetter(const std::string& key_str);
   static char lastChar(const std::string& str);
+  int getStatusCode() const;
+  void  setStatusCode(int code);
 };
 
 #endif
