@@ -298,7 +298,7 @@ TEST(HttpResponseRoot, invalid_path2) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = test.createDefaultErrorBody(400);
+  const std::string expect_body = test.createDefaultErrorBody(404);
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -307,7 +307,7 @@ TEST(HttpResponseRoot, invalid_path2) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(test.createResponse(HttpResponse::status_line_map_[400]));
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseRoot, invalid_path3) {
