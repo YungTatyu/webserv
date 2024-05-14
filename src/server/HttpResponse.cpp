@@ -351,7 +351,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
     phase = sw_end_phase;
   else if (response.state_ == RES_CGI_ERROR) {
     phase = sw_error_page_phase;
-    response.setStatusCode(502); // bad gate error
+    response.setStatusCode(502);  // bad gate error
   }
 
   while (phase != sw_end_phase) {
@@ -707,9 +707,9 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   // location context
   if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
     return TryFiles(response, request, location->try_files);
-  else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
-  {
-    std::string directory_path = (location->directives_set.count(kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
+  else if (location && location->directives_set.find(kINDEX) != location->directives_set.end()) {
+    std::string directory_path =
+        (location->directives_set.count(kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
     return Index(response, request.uri, location->index_list, directory_path, is_autoindex_on);
   }
 
@@ -717,11 +717,13 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   if (server.directives_set.find(kTRY_FILES) != server.directives_set.end())
     return TryFiles(response, request, server.try_files);
   else if (server.directives_set.find(kINDEX) != server.directives_set.end())
-    return Index(response, request.uri, server.index_list, response.root_path_ + request.uri, is_autoindex_on);
+    return Index(response, request.uri, server.index_list, response.root_path_ + request.uri,
+                 is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
   // なくとも、デフォルトのindexディレクティブを見る
-  return Index(response, request.uri, config_handler.config_->http.index_list, response.root_path_ + request.uri, is_autoindex_on);
+  return Index(response, request.uri, config_handler.config_->http.index_list,
+               response.root_path_ + request.uri, is_autoindex_on);
 }
 
 /**
@@ -784,11 +786,15 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
     response.headers_.erase(kTransferEncoding);
 
   // requestエラーの場合は、接続を切る
-  response.headers_[kConnection] = (time.isNoTime() || (400 <= response.getStatusCode() && response.getStatusCode() < 500) ? kClose : kKeepAlive);
+  response.headers_[kConnection] =
+      (time.isNoTime() || (400 <= response.getStatusCode() && response.getStatusCode() < 500) ? kClose
+                                                                                              : kKeepAlive);
 
   // cgiでstatus code lineの場合
   if (!response.status_code_line_.empty()) return;
-  response.status_code_line_ = (default_status_line != status_line_map_.end()) ? default_status_line->second  : Utils::toStr(response.getStatusCode());
+  response.status_code_line_ = (default_status_line != status_line_map_.end())
+                                   ? default_status_line->second
+                                   : Utils::toStr(response.getStatusCode());
   // staticのファイルの場合のみ、contetn-typeをつけてあげる
   if (response.state_ != RES_CREATING_STATIC) return;
 
