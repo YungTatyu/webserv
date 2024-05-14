@@ -662,8 +662,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequ
       return sw_content_phase;
     }
   }
-  if (index_list.size() == 0)
-  {
+  if (index_list.size() == 0) {
     std::string full_path = directory_path + config::Index::kDefaultFile_;
     if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
         Utils::wrapperAccess(full_path, R_OK, false) == 0) {
@@ -748,8 +747,7 @@ HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& respo
     response.state_ = RES_EXECUTE_CGI;
     return sw_log_phase;
   }
-  if (request.method == config::POST || request.method == config::DELETE)
-  {
+  if (request.method == config::POST || request.method == config::DELETE) {
     response.status_code_ = 405;
     return sw_error_page_phase;
   }
