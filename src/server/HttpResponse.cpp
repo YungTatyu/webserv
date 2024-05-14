@@ -530,8 +530,8 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
     response.status_code_ = 301;
     return sw_error_page_phase;
   }
-  // uriがディレクトリを指定しているのにlocationが存在しなければエラー
-  if (lastChar(request.uri) == '/' && request.uri != "/" && !location) {
+  // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
+  if (lastChar(request.uri) == '/' && !location && !Utils::isDirectory(response.root_path_ + request.uri)) {
     if (response.internal_redirect_cnt_ > 1)
       response.status_code_ = 500;
     else
@@ -540,7 +540,10 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
   }
   // root_path_が存在しなければ404エラー
   if (!Utils::isDirectory(response.root_path_)) {
-    response.status_code_ = 404;
+    if (response.internal_redirect_cnt_ > 1)
+      response.status_code_ = 500;
+    else
+      response.status_code_ = 404;
     return sw_error_page_phase;
   }
   return sw_search_res_file_phase;
