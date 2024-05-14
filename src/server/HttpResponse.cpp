@@ -7,6 +7,7 @@
 #include "CGIHandler.hpp"
 #include "Utils.hpp"
 
+static const std::string kALIAS = "alias";
 static const std::string kTRY_FILES = "try_files";
 static const std::string kINDEX = "index";
 static const std::string kRETURN = "return";
@@ -650,10 +651,9 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
   return buffer.str();
 }
 
-HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequest& request,
+HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::string& request_uri,
                                                 const std::vector<config::Index>& index_list,
-                                                bool is_autoindex_on) {
-  std::string directory_path = response.root_path_ + request.uri;
+                                                std::string directory_path, bool is_autoindex_on) {
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
     if (Utils::wrapperAccess(full_path, F_OK, false) == 0 ||
@@ -672,7 +672,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, HttpRequ
   }
 
   if (is_autoindex_on) {
-    response.body_ = autoIndex(directory_path, request.uri);
+    response.body_ = autoIndex(directory_path, request_uri);
     // autoindexでディレクトリが見つからなかったら404エラー
     if (response.body_.empty()) {
       response.status_code_ = 404;
@@ -718,17 +718,24 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   if (location && location->directives_set.find(kTRY_FILES) != location->directives_set.end())
     return TryFiles(response, request, location->try_files);
   else if (location && location->directives_set.find(kINDEX) != location->directives_set.end())
-    return Index(response, request, location->index_list, is_autoindex_on);
+  {
+    std::string directory_path;
+    if (location->directives_set.find(kALIAS) != location->directives_set.end())
+      directory_path = response.root_path_;
+    else
+      directory_path = response.root_path_ + request.uri;
+    return Index(response, request.uri, location->index_list, directory_path, is_autoindex_on);
+  }
 
   // server context
   if (server.directives_set.find(kTRY_FILES) != server.directives_set.end())
     return TryFiles(response, request, server.try_files);
   else if (server.directives_set.find(kINDEX) != server.directives_set.end())
-    return Index(response, request, server.index_list, is_autoindex_on);
+    return Index(response, request.uri, server.index_list, response.root_path_ + request.uri, is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
   // なくとも、デフォルトのindexディレクティブを見る
-  return Index(response, request, config_handler.config_->http.index_list, is_autoindex_on);
+  return Index(response, request.uri, config_handler.config_->http.index_list, response.root_path_ + request.uri, is_autoindex_on);
 }
 
 /**
