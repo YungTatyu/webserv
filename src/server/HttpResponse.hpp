@@ -19,7 +19,8 @@ class HttpResponse {
     RES_CREATING_STATIC,
     RES_EXECUTE_CGI,
     RES_PARSED_CGI,
-    RES_CGI_ERROR
+    RES_CGI_ERROR,
+    RES_COMPLETE
   };
 
   enum ResponsePhase {
@@ -100,6 +101,7 @@ class HttpResponse {
   static void headerFilterPhase(HttpResponse& response, const config::Time& time);
   static std::string detectContentType(const std::string& res_file_path);
   static std::string transformLetter(const std::string& key_str);
+  static void clear(HttpResponse& response);
 };
 
 #endif
