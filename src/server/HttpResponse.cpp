@@ -538,7 +538,7 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
   }
   // root_path_が存在しなければ404エラー
   if (!Utils::isDirectory(response.root_path_)) {
-    response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
+    response.setStatusCode(404);
     return sw_error_page_phase;
   }
   return sw_search_res_file_phase;
