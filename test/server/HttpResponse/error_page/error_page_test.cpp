@@ -105,7 +105,7 @@ TEST_F(HttpResponseErrorPage, code_response_uri1) {
 }
 
 TEST_F(HttpResponseErrorPage, code_response_uri2) {
-  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::POST,
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::GET,
               "/method-error/", HttpRequest::PARSE_COMPLETE);
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
 
