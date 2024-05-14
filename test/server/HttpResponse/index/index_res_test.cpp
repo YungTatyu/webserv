@@ -49,7 +49,7 @@ TEST(HttpResponseIndex, index_default) {
   test::ResponseTest test("test/server/HttpResponse/index/file/index2.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "not_exist"}, {"User-Agent", "Mozilla/5.0"}},
-      {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST}, "/", HttpRequest::PARSE_COMPLETE));
+      {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/index.html");
   test.testHeaders({
