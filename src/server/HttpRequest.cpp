@@ -566,6 +566,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
 
   std::string cur_name = request.key_buf_;
   std::string cur_value = request.val_buf_;
+  std::string cur_space = request.spc_buf_; // header valueのspaceを格納
   state = static_cast<parseHeaderPhase>(request.state_);
   size_t i = 0;
   while (state != sw_end && i < rawRequest.size()) {
@@ -640,6 +641,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
       case sw_space_after_value:
         switch (ch) {
           case ' ':
+            cur_space += ch;
             ++i;
             break;
           case '\r':
@@ -649,8 +651,9 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
             state = sw_header_done;
             break;
           default:
+            cur_value += cur_space;
             state = sw_value;
-            break;          
+            break;
         }
         break;
       case sw_header_almost_done:
@@ -676,6 +679,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
         if (request.headers.find(cur_name) == request.headers.end()) request.headers[cur_name] = cur_value;
         cur_name.clear();
         cur_value.clear();
+        cur_space.clear();
         state = sw_start;
         ++i;
         break;
@@ -693,6 +697,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     request.state_ = state;
     request.key_buf_ = cur_name;
     request.val_buf_ = cur_value;
+    request.spc_buf_ = cur_space;
     rawRequest.clear();
     return request.parseState;
   }
@@ -759,6 +764,7 @@ void HttpRequest::resetBufs(HttpRequest &request) {
   request.state_ = 0;
   request.key_buf_.clear();
   request.val_buf_.clear();
+  request.spc_buf_.clear();
 }
 
 /**
@@ -785,7 +791,14 @@ bool HttpRequest::isUniqHeaderDup(const HttpRequest &request, const std::string 
  */
 bool HttpRequest::isInvalidLetter(unsigned char ch) { return ch <= ' ' || ch == 127; }
 
-bool HttpRequest::isValidHost(const std::string &str) { return !str.empty(); }
+/**
+ * @brief hostが空またはspaceが含まれているといけない
+ * 
+ * @param str 
+ * @return true 
+ * @return false 
+ */
+bool HttpRequest::isValidHost(const std::string &str) { return !str.empty() || str.find(' ') == std::string::npos; }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
   if (!Utils::isNumeric(str)) return false;
