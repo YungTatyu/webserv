@@ -49,6 +49,8 @@ bool isSign(unsigned char ch);
 template <typename T>
 std::string toStr(const T value);
 bool isNumeric(const std::string& str);
+template <typename Context>
+bool hasDirective(const Context& context, const std::string& directive);
 }  // namespace Utils
 
 template <typename T>
@@ -56,6 +58,11 @@ std::string Utils::toStr(const T value) {
   std::stringstream converter;
   converter << value;
   return converter.str();
+}
+
+template <typename Context>
+bool Utils::hasDirective(const Context& context, const std::string& directive) {
+    return context.directives_set.find(directive) != context.directives_set.end();
 }
 
 #endif

@@ -514,7 +514,7 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
 HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& response,
                                                             const config::Location* location,
                                                             const ConfigHandler& config_handler) {
-  if (!location || (location && !hasDirective(*location, kRETURN)))
+  if (!location || (location && !Utils::hasDirective(*location, kRETURN)))
     return sw_allow_phase;
 
   prepareReturn(response, location->return_list[0]);
@@ -705,18 +705,18 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
 
   // location context
-  if (location && hasDirective(*location, kTRY_FILES))
+  if (location && Utils::hasDirective(*location, kTRY_FILES))
     return TryFiles(response, request, location->try_files);
-  else if (location && hasDirective(*location, kINDEX)) {
+  else if (location && Utils::hasDirective(*location, kINDEX)) {
     std::string directory_path =
-        (hasDirective(*location, kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
+        (Utils::hasDirective(*location, kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
     return Index(response, request.uri, location->index_list, directory_path, is_autoindex_on);
   }
 
   // server context
-  if (hasDirective(server, kTRY_FILES))
+  if (Utils::hasDirective(server, kTRY_FILES))
     return TryFiles(response, request, server.try_files);
-  else if (hasDirective(server, kINDEX))
+  else if (Utils::hasDirective(server, kINDEX))
     return Index(response, request.uri, server.index_list, response.root_path_ + request.uri,
                  is_autoindex_on);
 
