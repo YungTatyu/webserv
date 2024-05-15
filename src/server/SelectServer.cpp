@@ -106,8 +106,5 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
       request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
                                         active_events[i].fd_);
-    else if (event_manager->isErrorEvent(static_cast<const void*>(&active_events[i])))
-      request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                        active_events[i].fd_);
   }
 }

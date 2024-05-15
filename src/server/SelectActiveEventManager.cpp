@@ -41,3 +41,8 @@ bool SelectActiveEventManager::isErrorEvent(const void *event) {
   static_cast<void>(event);
   return false;
 }
+
+bool SelectActiveEventManager::isEofEvent(const void *event) {
+  static_cast<void>(event);
+  return false;
+}

@@ -165,6 +165,18 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
   return RequestHandler::UPDATE_NONE;
 }
 
+int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+                                   ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
+  if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ) {
+    return handleCgiReadEvent(ioHandler, connManager, configHandler, timerTree, sockfd);
+  } else if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE) {
+    return RequestHandler::UPDATE_CGI_READ;
+  }
+  ioHandler.closeConnection(connManager, sockfd);
+  timerTree.deleteTimer(sockfd);
+  return RequestHandler::UPDATE_CLOSE;
+}
+
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      TimerTree &timerTree, const int sockfd) {
   ioHandler.closeConnection(connManager, sockfd);
