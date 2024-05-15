@@ -441,6 +441,38 @@ TEST(HttpRequest, OkTest18) {
   checkHttpRequestEqual(expect3, test);
 }
 
+TEST(HttpRequest, OkTest19) {
+  // testcase: header with space
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", {{"Host", "aa"}, {"space", "this is  test"}}, "", "",
+                     HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "space:     this is  test     \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, OkTest20) {
+  // testcase: header with space
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1",
+  {{"Host", "aa"}, {"space1", ",   ,,, ,"}, {"space2", ",.     \"\' | |  |   |"}}, "", "", HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "space1:     ,   ,,, ,     \r\n"
+      "space2:,.     \"\' | |  |   |     \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+}
 /* -------------- chunk method test -------------- */
 
 TEST(HttpRequest, chunk_method_get_1) {

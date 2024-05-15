@@ -652,6 +652,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
             break;
           default:
             cur_value += cur_space;
+            cur_space.clear();
             state = sw_value;
             break;
         }
@@ -798,7 +799,7 @@ bool HttpRequest::isInvalidLetter(unsigned char ch) { return ch <= ' ' || ch == 
  * @return true 
  * @return false 
  */
-bool HttpRequest::isValidHost(const std::string &str) { return !str.empty() || str.find(' ') == std::string::npos; }
+bool HttpRequest::isValidHost(const std::string &str) { return !str.empty() && str.find(' ') == std::string::npos; }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
   if (!Utils::isNumeric(str)) return false;
