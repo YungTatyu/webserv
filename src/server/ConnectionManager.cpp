@@ -56,7 +56,7 @@ ConnectionData* ConnectionManager::getConnection(const int fd) { return connecti
 void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest,
                                       const ssize_t read_bytes) {
   connections_[fd]->raw_request_.insert(connections_[fd]->raw_request_.end(), rawRequest.begin(),
-                                      rawRequest.begin() + read_bytes);
+                                        rawRequest.begin() + read_bytes);
 }
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd) const {

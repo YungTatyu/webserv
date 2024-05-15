@@ -3,7 +3,7 @@
 
 #include <string>
 namespace error {
-std::string strSysCallError(const std::string &syscall, const std::string &msg="");
+std::string strSysCallError(const std::string &syscall, const std::string &msg = "");
 }  // namespace error
 
 #endif

@@ -155,7 +155,7 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
 
   const std::string body = connManager.getRequest(sockfd).body;
   const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
-  if (connManager.getSentBytes(sockfd) == body.size() ||              // bodyを全て送ったら
+  if (connManager.getSentBytes(sockfd) == body.size() ||  // bodyを全て送ったら
       (cgiProcessExited(cgi_handler.getCgiProcessId())))  // cgi processがすでに死んでいたら
   {
     connManager.resetSentBytes(sockfd);

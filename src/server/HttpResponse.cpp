@@ -347,8 +347,10 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   struct sockaddr_in client_addr;
 
   enum ResponsePhase phase = sw_start_phase;
-  if (response.state_ == RES_COMPLETE) clear(response);
-  else if (response.state_ == RES_PARSED_CGI) phase = sw_end_phase;
+  if (response.state_ == RES_COMPLETE)
+    clear(response);
+  else if (response.state_ == RES_PARSED_CGI)
+    phase = sw_end_phase;
   else if (response.state_ == RES_CGI_ERROR) {
     phase = sw_error_page_phase;
     response.status_code_ = 502;  // bad gate error

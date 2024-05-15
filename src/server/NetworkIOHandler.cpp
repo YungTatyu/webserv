@@ -1,6 +1,4 @@
 #include "NetworkIOHandler.hpp"
-#include "Utils.hpp"
-#include "error.hpp"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -13,6 +11,8 @@
 
 #include "ConnectionManager.hpp"
 #include "SysCallWrapper.hpp"
+#include "Utils.hpp"
+#include "error.hpp"
 
 const size_t NetworkIOHandler::buffer_size_;
 
@@ -44,7 +44,8 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
 
     // 失敗したとき？
     re = SysCallWrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
-    if (re == -1) throw std::runtime_error(error::strSysCallError("bind", " to " + address + ":" + Utils::toStr(port)));
+    if (re == -1)
+      throw std::runtime_error(error::strSysCallError("bind", " to " + address + ":" + Utils::toStr(port)));
 
     SysCallWrapper::Listen(listen_fd, SOMAXCONN);
 
@@ -67,8 +68,7 @@ ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const i
   flag |= MSG_NOSIGNAL;
 #endif
   ssize_t re = recv(cli_sock, buffer.data(), buffer_size_, flag);
-  if (re > 0)
-    connManager.addRawRequest(cli_sock, buffer, re);
+  if (re > 0) connManager.addRawRequest(cli_sock, buffer, re);
   return re;
 }
 
@@ -79,8 +79,7 @@ ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, con
   flag |= MSG_NOSIGNAL;
 #endif
   ssize_t re = recv(sock, buffer.data(), buffer_size_, flag);
-  if (re > 0)
-    connManager.addCgiResponse(sock, buffer, re);
+  if (re > 0) connManager.addCgiResponse(sock, buffer, re);
   return re;
 }
 
@@ -89,7 +88,7 @@ ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int
   size_t res_size = response.size();
   size_t sent_bytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t cur_chunk_size = std::min(buffer_size_, res_size - sent_bytes);
-  if (cur_chunk_size == 0) return 1; // すでにresponseを全て送信しきっていたら、send終了
+  if (cur_chunk_size == 0) return 1;  // すでにresponseを全て送信しきっていたら、send終了
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
@@ -104,7 +103,7 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
   size_t cur_chunk_size = std::min(buffer_size_, rest);
-  if (cur_chunk_size == 0) return 1; // すでにresponseを全て送信しきっていたら、send終了
+  if (cur_chunk_size == 0) return 1;  // すでにresponseを全て送信しきっていたら、send終了
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;

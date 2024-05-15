@@ -460,7 +460,8 @@ TEST(HttpRequest, OkTest19) {
 TEST(HttpRequest, OkTest20) {
   // testcase: header with space
   HttpRequest expect(config::GET, "/html", "HTTP/1.1",
-  {{"Host", "aa"}, {"space1", ",   ,,, ,"}, {"space2", ",.     \"\' | |  |   |"}}, "", "", HttpRequest::PARSE_COMPLETE);
+                     {{"Host", "aa"}, {"space1", ",   ,,, ,"}, {"space2", ",.     \"\' | |  |   |"}}, "", "",
+                     HttpRequest::PARSE_COMPLETE);
 
   // test
   std::string rawRequest =

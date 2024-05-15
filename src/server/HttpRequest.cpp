@@ -566,7 +566,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
 
   std::string cur_name = request.key_buf_;
   std::string cur_value = request.val_buf_;
-  std::string cur_space = request.spc_buf_; // header valueのspaceを格納
+  std::string cur_space = request.spc_buf_;  // header valueのspaceを格納
   state = static_cast<parseHeaderPhase>(request.state_);
   size_t i = 0;
   while (state != sw_end && i < rawRequest.size()) {
@@ -794,12 +794,14 @@ bool HttpRequest::isInvalidLetter(unsigned char ch) { return ch <= ' ' || ch == 
 
 /**
  * @brief hostが空またはspaceが含まれているといけない
- * 
- * @param str 
- * @return true 
- * @return false 
+ *
+ * @param str
+ * @return true
+ * @return false
  */
-bool HttpRequest::isValidHost(const std::string &str) { return !str.empty() && str.find(' ') == std::string::npos; }
+bool HttpRequest::isValidHost(const std::string &str) {
+  return !str.empty() && str.find(' ') == std::string::npos;
+}
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
   if (!Utils::isNumeric(str)) return false;
