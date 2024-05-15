@@ -514,8 +514,7 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
 HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& response,
                                                             const config::Location* location,
                                                             const ConfigHandler& config_handler) {
-  if (!location || (location && !hasDirective(*location, kRETURN)))
-    return sw_allow_phase;
+  if (!location || (location && !hasDirective(*location, kRETURN))) return sw_allow_phase;
 
   prepareReturn(response, location->return_list[0]);
   config_handler.writeErrorLog("webserv: [debug] redirect occured\n");
