@@ -774,8 +774,9 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
   const static char* kConnection = "Connection";
   const static char* kKeepAlive = "keep-alive";
   const static char* kTransferEncoding = "Transfer-Encoding";
+  const int status_code = response.getStatusCode();
   const std::map<int, std::string>::iterator default_status_line =
-      status_line_map_.find(response.getStatusCode());
+      status_line_map_.find(status_code);
 
   response.headers_["Server"] = "webserv/1.0";
   response.headers_["Date"] = createCurrentGmtTime();
@@ -786,14 +787,13 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
 
   // requestエラーの場合は、接続を切る
   response.headers_[kConnection] =
-      (time.isNoTime() || (400 <= response.getStatusCode() && response.getStatusCode() < 500) ? kClose
-                                                                                              : kKeepAlive);
+      (time.isNoTime() || (400 <= status_code && status_code < 500) ? kClose : kKeepAlive);
 
   // cgiでstatus code lineの場合
   if (!response.status_code_line_.empty()) return;
   response.status_code_line_ = (default_status_line != status_line_map_.end())
                                    ? default_status_line->second
-                                   : Utils::toStr(response.getStatusCode());
+                                   : Utils::toStr(status_code);
   // staticのファイルの場合のみ、contetn-typeをつけてあげる
   if (response.state_ != RES_CREATING_STATIC) return;
 
