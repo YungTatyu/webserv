@@ -332,10 +332,8 @@ struct TiedServer ConfigHandler::createTiedServer(const std::string addr, const 
 std::string ConfigHandler::searchRootPath(const config::Server& server,
                                           const config::Location* location) const {
   if (location) {
-    if (Utils::hasDirective(*location, kROOT))
-      return location->root.getPath();
-    if (Utils::hasDirective(*location, kALIAS))
-      return location->alias.getPath();
+    if (Utils::hasDirective(*location, kROOT)) return location->root.getPath();
+    if (Utils::hasDirective(*location, kALIAS)) return location->alias.getPath();
   }
   if (Utils::hasDirective(server, kROOT))
     return server.root.getPath();
@@ -350,8 +348,7 @@ bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Lo
     return location->autoindex.getIsAutoindexOn();
   } else if (Utils::hasDirective(server, kAUTOINDEX)) {
     return server.autoindex.getIsAutoindexOn();
-  } else if (Utils::hasDirective(config_->http, kAUTOINDEX) &&
-             config_->http.autoindex.getIsAutoindexOn())
+  } else if (Utils::hasDirective(config_->http, kAUTOINDEX) && config_->http.autoindex.getIsAutoindexOn())
     return true;
   return false;
 }
