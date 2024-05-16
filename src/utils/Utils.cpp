@@ -150,7 +150,7 @@ std::string Utils::socketToStrIPAddress(const int sock) {
 
 std::string Utils::ipToStr(const uint32_t ip) {
   std::stringstream ss;
-  uint32_t ip_host_order = ntohl(ip); // ネットワークバイト順からホストバイト順に変換
+  uint32_t ip_host_order = ntohl(ip);  // ネットワークバイト順からホストバイト順に変換
   ss << ((ip_host_order >> 24) & 0xFF) << '.'  // 第1オクテット
      << ((ip_host_order >> 16) & 0xFF) << '.'  // 第2オクテット
      << ((ip_host_order >> 8) & 0xFF) << '.'   // 第3オクテット
