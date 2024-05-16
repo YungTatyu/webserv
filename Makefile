@@ -56,14 +56,19 @@ fclean: clean
 
 re: fclean all
 
+ptest:	fclean
+	docker build -t test-image . && docker run --rm test-image
+
 TEST_FILTER ?= '*'
 
-test:
+gtest:
 	$(MAKE) -C $(TEST_CGI_DIR)
 	@mkdir -p logs/
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)
 	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
+
+test:	gtest	ptest
 
 format:
 	find $(SRCS_DIR) $(TEST_DIR) -name "*.cpp" -o -name "*.hpp" -o -name "*.c" | xargs clang-format -i
@@ -80,4 +85,4 @@ format:
 # valgrind:
 # 	valgrind --leak-check=full ./$(NAME)
 
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re test ptest gtest
