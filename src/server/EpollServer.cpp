@@ -72,10 +72,10 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
-  // if (event_manager->getActiveEventsNum() == 0) {
-  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-  //  return;
-  //}
+  if (event_manager->getActiveEventsNum() == 0) {
+    request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    return;
+  }
 
   // 発生したイベントの数だけloopする
   for (int i = 0; i < event_manager->getActiveEventsNum(); ++i) {
