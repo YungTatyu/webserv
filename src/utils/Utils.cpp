@@ -151,17 +151,23 @@ std::string Utils::socketToStrIPAddress(const int sock) {
 std::string Utils::ipToStr(const uint32_t ip) {
   std::stringstream ss;
 
-#if defined(__LITTLE_ENDIAN__)
-  ss << ((ip >> 24) & 0xFF) << '.'  // 第1オクテット
-     << ((ip >> 16) & 0xFF) << '.'  // 第2オクテット
-     << ((ip >> 8) & 0xFF) << '.'   // 第3オクテット
-     << (ip & 0xFF);                // 第4オクテット
-#else
-  ss << (ip & 0xFF) << '.'          // 第1オクテット
-     << ((ip >> 8) & 0xFF) << '.'   // 第2オクテット
-     << ((ip >> 16) & 0xFF) << '.'  // 第3オクテット
-     << ((ip >> 24) & 0xFF);        // 第4オクテット
-#endif
+// #if defined(__LITTLE_ENDIAN__)
+//   ss << ((ip >> 24) & 0xFF) << '.'  // 第1オクテット
+//      << ((ip >> 16) & 0xFF) << '.'  // 第2オクテット
+//      << ((ip >> 8) & 0xFF) << '.'   // 第3オクテット
+//      << (ip & 0xFF);                // 第4オクテット
+// #else
+//   ss << (ip & 0xFF) << '.'          // 第1オクテット
+//      << ((ip >> 8) & 0xFF) << '.'   // 第2オクテット
+//      << ((ip >> 16) & 0xFF) << '.'  // 第3オクテット
+//      << ((ip >> 24) & 0xFF);        // 第4オクテット
+// #endif
+
+  uint32_t ip_host_order = ntohl(ip); // ネットワークバイト順からホストバイト順に変換
+  ss << ((ip_host_order >> 24) & 0xFF) << '.'  // 第1オクテット
+     << ((ip_host_order >> 16) & 0xFF) << '.'  // 第2オクテット
+     << ((ip_host_order >> 8) & 0xFF) << '.'   // 第3オクテット
+     << (ip_host_order & 0xFF);                // 第4オクテット
   return ss.str();
 }
 
