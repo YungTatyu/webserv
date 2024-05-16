@@ -14,7 +14,7 @@ static const char* kContentType = "Content-Type";
 static const char* kHtml = "text/html";
 static const char* kTextPlain = "text/plain";
 static const char* kDefaultPage = "defaut.html";
-static const long kInitStatusCode = 200;
+static const int kInitStatusCode = 200;
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
