@@ -28,6 +28,7 @@ int SelectServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   struct timeval tv = timer_tree->findTimeval();
   struct timeval* tvp = &tv;
   if (tv.tv_sec == -1 && tv.tv_usec == -1) tvp = NULL;
+  std::cout << tv.tv_sec << std::endl;
   int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
   addActiveEvents(conn_manager->getConnections(), event_manager);
 
@@ -94,10 +95,10 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
-  // if (event_manager->getActiveEventsNum() == 0) {
-  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-  // return;
-  //}
+  if (event_manager->getActiveEventsNum() == 0) {
+	  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+	  return;
+  }
 
   for (size_t i = 0; i < active_events.size(); ++i) {
     if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
