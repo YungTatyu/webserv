@@ -14,7 +14,7 @@ static const char* kContentType = "Content-Type";
 static const char* kHtml = "text/html";
 static const char* kTextPlain = "text/plain";
 static const char* kDefaultPage = "defaut.html";
-static const long init_status_code = 200;
+static const long kInitStatusCode = 200;
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -166,7 +166,7 @@ HttpResponse::HttpResponse()
       res_file_path_(""),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
-      status_code_(init_status_code),
+      status_code_(kInitStatusCode),
       body_(""),
       internal_redirect_cnt_(0) {
   // status_line
@@ -800,7 +800,7 @@ void HttpResponse::clear(HttpResponse& response) {
   response.res_file_path_.clear();
   response.state_ = RES_CREATING_STATIC;
   response.status_code_line_.clear();
-  response.status_code_ = init_status_code;
+  response.status_code_ = kInitStatusCode;
   response.headers_.clear();
   response.body_.clear();
   response.internal_redirect_cnt_ = 0;
