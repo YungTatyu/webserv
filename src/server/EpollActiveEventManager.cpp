@@ -29,12 +29,12 @@ bool EpollActiveEventManager::isWriteEvent(const void *event) {
 
 /**
  * @brief eof
- * 
+ *
  * eofイベントが発生する際、エラーイベントも発生しうるので、エラーイベントはみない
- * 
- * @param event 
- * @return true 
- * @return false 
+ *
+ * @param event
+ * @return true
+ * @return false
  */
 bool EpollActiveEventManager::isEofEvent(const void *event) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
