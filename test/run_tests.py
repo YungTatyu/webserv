@@ -51,8 +51,8 @@ def main():
     CWD = os.path.dirname(os.path.abspath(__file__))
     test_cases = [
         f"{CWD}/integration_test/server_res_test.sh",
-        f"pytest -vv {CWD}/integration_test/server_res_header_test.py",
-        f"pytest -vv {CWD}/cgi/meta_vars_test.py",
+        f"python3 -m pytest -vv {CWD}/integration_test/server_res_header_test.py",
+        f"python3 -m pytest -vv {CWD}/cgi/meta_vars_test.py",
         f"{CWD}/conf/main_parser_test.sh",
         f"{CWD}/conf/directive_err_test.sh",
         f"{CWD}/integration_test/KeepaliveTimeoutTest.sh",
