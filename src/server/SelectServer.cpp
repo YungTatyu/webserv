@@ -28,7 +28,6 @@ int SelectServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   struct timeval tv = timer_tree->findTimeval();
   struct timeval* tvp = &tv;
   if (tv.tv_sec == -1 && tv.tv_usec == -1) tvp = NULL;
-  std::cout << tv.tv_sec << std::endl;
   int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
   addActiveEvents(conn_manager->getConnections(), event_manager);
 
