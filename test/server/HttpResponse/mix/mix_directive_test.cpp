@@ -59,7 +59,7 @@ class HttpResponseMix : public ::testing::Test {
   }
 
   void ASSERT_CORRECT_RESPONSE(const std::vector<std::string> &expect, const std::string &actual) {
-    for (size_t i = 0; i < expect.size(); i++) {
+    for (size_t i = 0; i < expect.size(); ++i) {
       ASSERT_TRUE(actual.find(expect[i]) != std::string::npos);
     }
   }

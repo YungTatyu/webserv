@@ -463,13 +463,14 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
                                                                     const config::Server& server,
                                                                     const config::Location** location,
                                                                     const ConfigHandler& config_handler) {
-  if (response.internal_redirect_cnt_++ > kMaxInternalRedirect) {
+  if (response.internal_redirect_cnt_ > kMaxInternalRedirect) {
     config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
     response.setStatusCode(500);
     response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
     response.res_file_path_ = kDefaultPage;
     return sw_end_phase;
   }
+  ++(response.internal_redirect_cnt_);
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
   if (*location) config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri + "\n");
   return sw_post_search_location_phase;
