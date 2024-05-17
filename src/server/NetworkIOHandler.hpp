@@ -16,8 +16,8 @@
 
 #include "Listen.hpp"
 #include "Server.hpp"
-#include "TimerTree.hpp"
 #include "SysCallWrapper.hpp"
+#include "TimerTree.hpp"
 
 class ConfigHandler;
 class ConnectionManager;
