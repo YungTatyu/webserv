@@ -91,4 +91,4 @@ format:
 # valgrind:
 # 	valgrind --leak-check=full ./$(NAME)
 
-.PHONY: all clean fclean re test ptest gtest
+.PHONY: all clean fclean re test ptest gtest format

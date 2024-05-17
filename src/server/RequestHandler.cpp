@@ -20,13 +20,19 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     int new_sock = ioHandler.acceptConnection(connManager, sockfd);
     if (new_sock == -1) return new_sock;
 
-    // timeout追加
     // TODO: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
     this->addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_CLI_REQUEST);
-
-    // worker_connections確認
-    if (this->isOverWorkerConnections(connManager, configHandler))
-      ioHandler.closeConnection(connManager, timerTree, sockfd);
+    if (!this->isOverWorkerConnections(connManager, configHandler)) return new_sock;
+    int timeout_fd = timerTree.getClosestTimeout();
+    // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
+    if (connManager.isCgiSocket(timeout_fd)) {
+      const cgi::CGIHandler& cgi_handler =  connManager.getCgiHandler(timeout_fd);
+      int client = cgi_handler.getCliSocket();
+      ioHandler.closeConnection(connManager, timerTree, timeout_fd); // cgiから削除する
+      ioHandler.closeConnection(connManager, timerTree, client);
+      return new_sock;
+    }
+    ioHandler.closeConnection(connManager, timerTree, timeout_fd);
     return new_sock;
   }
 
