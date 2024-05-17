@@ -13,6 +13,7 @@ BUILD_DIR			= build
 CONF_DIR			= conf
 TEST_DIR			= test
 TEST_CGI_DIR	= $(TEST_DIR)/cgi/cgi_files/executor
+
 DOCKERFILE_PTEST	= Dockerfile.ptest
 PTEST_IMG_NAME	= test-image
 DOCKERFILE_FORMATTER	= Dockerfile.formatter
@@ -62,7 +63,8 @@ fclean: clean
 re: fclean all
 
 ptest:	fclean
-	docker build -t $(PTEST_IMG_NAME) . -f $(DOCKERFILE_PTEST) && docker run --rm $(PTEST_IMG_NAME)
+	docker build -t $(PTEST_IMG_NAME) . -f $(DOCKERFILE_PTEST)
+	docker run --rm $(PTEST_IMG_NAME)
 
 TEST_FILTER ?= '*'
 

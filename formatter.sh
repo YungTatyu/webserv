@@ -1,6 +1,7 @@
 #! /bin/bash
 
 SRCS_DIR="src"
+TEST_DIR="test"
 
 function main {
   find ${SRCS_DIR} ${TEST_DIR} -name "*.cpp" -o -name "*.hpp" -o -name "*.c" |
