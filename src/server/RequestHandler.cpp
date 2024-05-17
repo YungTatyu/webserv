@@ -70,7 +70,10 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
                                std::vector<unsigned char>(final_response.begin(), final_response.end()));
 
   // send開始するまでのtimout追加
-  this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE);
+  // cgiだったら紐づくclient_socketにタイマーを設定する
+  int client = connManager.isCgiSocket(sockfd) ? connManager.getCgiHandler(sockfd).getCliSocket() : sockfd;
+  this->addTimerByType(connManager, configHandler, timerTree, client, Timer::TMO_KEEPALIVE);
+
   connManager.setEvent(sockfd, ConnectionData::EV_WRITE);  // writeイベントに更新
   return RequestHandler::UPDATE_WRITE;
 }
