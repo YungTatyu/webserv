@@ -16,6 +16,7 @@
 
 #include "Listen.hpp"
 #include "Server.hpp"
+#include "TimerTree.hpp"
 #include "SysCallWrapper.hpp"
 
 class ConfigHandler;
@@ -51,7 +52,7 @@ class NetworkIOHandler {
   ssize_t receiveCgiResponse(ConnectionManager& connManager, const int sock);
   ssize_t sendRequestBody(ConnectionManager& connManager, const int sock);
   int acceptConnection(ConnectionManager& connManager, const int listen_fd);
-  void closeConnection(ConnectionManager& connManager, const int cli_sock);
+  void closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int cli_sock);
   void closeAllListenSockets();
   const std::map<int, TiedServer>& getListenfdMap();
   void addVServer(const int listen_fd, const TiedServer server);

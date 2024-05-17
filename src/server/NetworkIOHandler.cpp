@@ -11,6 +11,7 @@
 
 #include "ConnectionManager.hpp"
 #include "SysCallWrapper.hpp"
+#include "TimerTree.hpp"
 #include "Utils.hpp"
 #include "error.hpp"
 
@@ -148,8 +149,15 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
   }
 }
 
-void NetworkIOHandler::closeConnection(ConnectionManager& connManager, const int cli_sock) {
+/**
+ * @brief connectionとそれに紐づくtimerを消す
+ * 
+ * @param connManager 
+ * @param cli_sock 
+ */
+void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int cli_sock) {
   close(cli_sock);
+  timerTree.deleteTimer(cli_sock);
   bool cgi = connManager.isCgiSocket(cli_sock);
   if (cgi) connManager.resetCgiSockets(cli_sock);
   connManager.removeConnection(cli_sock, cgi);
