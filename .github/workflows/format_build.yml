@@ -18,6 +18,9 @@ jobs:
       contents: write
 
     steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
     - name: Format code
       run: |
         make format
@@ -45,7 +48,7 @@ jobs:
     needs: format_code
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Run make (macOS)
       run: make
@@ -57,7 +60,7 @@ jobs:
     needs: format_code
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Run make (Ubuntu)
       run: make
