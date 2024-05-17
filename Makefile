@@ -8,10 +8,15 @@ RM				= rm -rf
 SRCS_DIR			= src
 OBJS_DIR			= obj
 DEPS_DIR			= dep
+ROOT_DIR			= .
 BUILD_DIR			= build
 CONF_DIR			= conf
 TEST_DIR			= test
 TEST_CGI_DIR	= $(TEST_DIR)/cgi/cgi_files/executor
+DOCKERFILE_PTEST	= Dockerfile.ptest
+PTEST_IMG_NAME	= test-image
+DOCKERFILE_FORMATTER	= Dockerfile.formatter
+FORMATTER_IMG_NAME	= formatter-image
 
 # ソースファイルの拡張子
 SRC_EXT = cpp
@@ -57,7 +62,7 @@ fclean: clean
 re: fclean all
 
 ptest:	fclean
-	docker build -t test-image . && docker run --rm test-image
+	docker build -t $(PTEST_IMG_NAME) . -f $(DOCKERFILE_PTEST) && docker run --rm $(PTEST_IMG_NAME)
 
 TEST_FILTER ?= '*'
 
@@ -71,9 +76,11 @@ gtest:
 test:	gtest	ptest
 
 format:
-	find $(SRCS_DIR) $(TEST_DIR) -name "*.cpp" -o -name "*.hpp" -o -name "*.c" | xargs clang-format -i
-	black $(TEST_DIR)
-	shfmt -w -l -i 2 $(TEST_DIR)
+	docker build -t $(FORMATTER_IMG_NAME) . -f $(DOCKERFILE_FORMATTER)
+	docker run --rm -v $(ROOT_DIR):$(ROOT_DIR) $(FORMATTER_IMG_NAME)
+	# find $(SRCS_DIR) $(TEST_DIR) -name "*.cpp" -o -name "*.hpp" -o -name "*.c" | xargs clang-format -i
+	# black $(TEST_DIR)
+	# shfmt -w -l -i 2 $(TEST_DIR)
 
 -include $(DEPS)
 
