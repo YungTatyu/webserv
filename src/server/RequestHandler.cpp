@@ -112,7 +112,7 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   bool parse_suc = connManager.callCgiParser(sockfd, response, res);
   response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
   re = handleResponse(connManager, configHandler, timerTree, sockfd);
-  ioHandler.closeConnection(connManager, timerTree, sockfd); // delete cgi event
+  ioHandler.closeConnection(connManager, timerTree, sockfd);  // delete cgi event
   return re;
 }
 
