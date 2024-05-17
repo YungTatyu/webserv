@@ -26,9 +26,9 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     int timeout_fd = timerTree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
     if (connManager.isCgiSocket(timeout_fd)) {
-      const cgi::CGIHandler& cgi_handler =  connManager.getCgiHandler(timeout_fd);
+      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(timeout_fd);
       int client = cgi_handler.getCliSocket();
-      ioHandler.closeConnection(connManager, timerTree, timeout_fd); // cgiから削除する
+      ioHandler.closeConnection(connManager, timerTree, timeout_fd);  // cgiから削除する
       ioHandler.closeConnection(connManager, timerTree, client);
       return new_sock;
     }
