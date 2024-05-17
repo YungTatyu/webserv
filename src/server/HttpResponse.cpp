@@ -527,17 +527,17 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
                                                               const config::Server& server,
                                                               const config::Location* location) {
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri)) {
+  if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
     response.setStatusCode(301);
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
-  if (lastChar(request.uri) == '/' && !location && !Utils::isDirectory(response.root_path_ + request.uri)) {
+  if (lastChar(request.uri) == '/' && !location && !Utils::isDirectory(response.root_path_ + request.uri, false)) {
     response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
     return sw_error_page_phase;
   }
   // root_path_が存在しなければ404エラー
-  if (!Utils::isDirectory(response.root_path_)) {
+  if (!Utils::isDirectory(response.root_path_, false)) {
     response.setStatusCode(404);
     return sw_error_page_phase;
   }
