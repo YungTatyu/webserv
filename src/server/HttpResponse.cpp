@@ -532,7 +532,8 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
-  if (lastChar(request.uri) == '/' && !location && !Utils::isDirectory(response.root_path_ + request.uri, false)) {
+  if (lastChar(request.uri) == '/' && !location &&
+      !Utils::isDirectory(response.root_path_ + request.uri, false)) {
     response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
     return sw_error_page_phase;
   }
