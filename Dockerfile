@@ -5,6 +5,7 @@ WORKDIR .
 COPY requirements.txt .
 
 RUN pip3 install --no-cache-dir -r requirements.txt
+RUN apt update && apt install -y bc
 
 # ソースコードをコピー
 COPY . .
