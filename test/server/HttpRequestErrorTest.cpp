@@ -319,6 +319,33 @@ TEST(HttpRequest, ErrorTest27) {
 
   EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
+
+TEST(HttpRequest, invalid_host1) {
+  // test: empty
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host: tt tt\r\n"
+      "New: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, invalid_host2) {
+  // test: empty
+  std::string rawRequest =
+      "GET / HTTP/1.1\r\n"
+      "Host:a   a\r\n"
+      "New: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
 /* -------------- header host test end -------------- */
 
 /* -------------- header content-length test -------------- */
