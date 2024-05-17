@@ -2,15 +2,18 @@ FROM alpine:latest
 
 WORKDIR .
 
-RUN apk add --update --no-cache clang-format
+RUN apk update && apk add bash
 
-RUN apk add -y python3 python3-pip && \
-    python3 -m pip install --upgrade pip && \
-    python3 -m pip install black
+RUN apk add --no-cache clang-extra-tools && \
+    clang-format --version
 
-RUN apk add --no-cache go vim git make musl-dev curl && \
-    apk add GO111MODULE=on go install mvdan.cc/sh/v3/cmd/shfmt@latest
+RUN apk add --update python3 py3-pip && rm /usr/lib/python3.11/EXTERNALLY-MANAGED && \
+    apk add --no-cache python3 py3-pip && \
+    pip install --upgrade pip && \
+    pip3 install black
+
+RUN apk add --upgrade shfmt
 
 COPY . .
 
-CMD ["/bin/bash", "formatter.sh"]
+CMD ["./formatter.sh"]

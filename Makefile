@@ -8,7 +8,7 @@ RM				= rm -rf
 SRCS_DIR			= src
 OBJS_DIR			= obj
 DEPS_DIR			= dep
-ROOT_DIR			= .
+ROOT_DIR			= $(shell pwd)
 BUILD_DIR			= build
 CONF_DIR			= conf
 TEST_DIR			= test
@@ -77,10 +77,7 @@ test:	gtest	ptest
 
 format:
 	docker build -t $(FORMATTER_IMG_NAME) . -f $(DOCKERFILE_FORMATTER)
-	docker run --rm -v $(ROOT_DIR):$(ROOT_DIR) $(FORMATTER_IMG_NAME)
-	# find $(SRCS_DIR) $(TEST_DIR) -name "*.cpp" -o -name "*.hpp" -o -name "*.c" | xargs clang-format -i
-	# black $(TEST_DIR)
-	# shfmt -w -l -i 2 $(TEST_DIR)
+	docker run --rm -v "$(ROOT_DIR):$(ROOT_DIR)" -w "$(ROOT_DIR)" $(FORMATTER_IMG_NAME)
 
 -include $(DEPS)
 
