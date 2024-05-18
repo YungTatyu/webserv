@@ -12,6 +12,7 @@ class IActiveEventManager {
   virtual bool isReadEvent(const void *event) = 0;
   virtual bool isWriteEvent(const void *event) = 0;
   virtual bool isErrorEvent(const void *event) = 0;
+  virtual bool isEofEvent(const void *event) = 0;
 };
 
 #endif
