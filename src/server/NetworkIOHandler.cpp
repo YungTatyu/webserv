@@ -153,15 +153,14 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @brief connectionとそれに紐づくtimerを消す
  *
  * @param connManager
- * @param cli_sock
+ * @param sock
  */
-void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree,
-                                       const int cli_sock) {
-  close(cli_sock);
-  timerTree.deleteTimer(cli_sock);
-  bool cgi = connManager.isCgiSocket(cli_sock);
-  if (cgi) connManager.resetCgiSockets(cli_sock);
-  connManager.removeConnection(cli_sock, cgi);
+void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock) {
+  close(sock);
+  timerTree.deleteTimer(sock);
+  bool cgi = connManager.isCgiSocket(sock);
+  if (cgi) connManager.resetCgiSockets(sock);
+  connManager.removeConnection(sock, cgi);
   std::cerr << "client disconnected\n";
 }
 
