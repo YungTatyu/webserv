@@ -57,7 +57,8 @@ class ConfigHandler {
                                                            const std::string& uri) const;
   std::string searchRootPath(const config::Server& server, const config::Location* location) const;
   bool isAutoIndexOn(const config::Server& server, const config::Location* location) const;
-  std::string createAcsLogMsg(const uint32_t ip, const long status, const HttpRequest& request) const;
+  std::string createAcsLogMsg(const uint32_t ip, const long status, const size_t resSize,
+                              const HttpRequest& request) const;
 
   // const variable
   static const int ACCESS_ALLOW = 1;
