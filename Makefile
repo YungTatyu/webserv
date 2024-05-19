@@ -73,7 +73,7 @@ gtest:
 	@mkdir -p logs/
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR)
-	./$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
+	$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
 test:	gtest	ptest
 
