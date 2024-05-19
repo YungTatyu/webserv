@@ -34,13 +34,13 @@ void sameServer(const config::Server& expect, const config::Server& actual) {
   std::set<std::string>::const_iterator expect_nit = expect.server_name.getName().begin();
   std::vector<config::Listen>::const_iterator actual_lit = actual.listen_list.begin();
   std::set<std::string>::const_iterator actual_nit = actual.server_name.getName().begin();
-  for (; expect_lit != expect.listen_list.end(), actual_lit != actual.listen_list.end();
+  for (; expect_lit != expect.listen_list.end();
        expect_lit++, actual_lit++) {
     ASSERT_EQ(expect_lit->getAddress(), actual_lit->getAddress());
     ASSERT_EQ(expect_lit->getport(), actual_lit->getport());
   }
 
-  for (; expect_nit != expect.server_name.getName().end(), actual_nit != actual.server_name.getName().end();
+  for (; expect_nit != expect.server_name.getName().end();
        expect_nit++, actual_nit++) {
     ASSERT_EQ(*expect_nit, *actual_nit);
   }
