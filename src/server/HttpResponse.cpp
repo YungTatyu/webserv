@@ -412,7 +412,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_log_phase:
         config_handler.writeErrorLog("webserv: [debug] log phase\n");
-        //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
             config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.getStatusCode(),
@@ -741,7 +740,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
     response.state_ = RES_EXECUTE_CGI;
-    return sw_log_phase;
+    return sw_end_phase;
   }
   if (request.method == config::POST || request.method == config::DELETE) {
     response.setStatusCode(405);
