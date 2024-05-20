@@ -355,7 +355,8 @@ TEST(HttpResponseRoot, path_info1) {
   test::ResponseTest test("test/server/HttpResponse/root/file/path_info.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4240}, {"127.0.0.1", 4241}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST}, "/cgi-bin/path_info.php/path/info/", HttpRequest::PARSE_COMPLETE));
+                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST},
+                                        "/cgi-bin/path_info.php/path/info/", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
   ASSERT_EQ(test.responses_[0].state_, HttpResponse::RES_EXECUTE_CGI);
@@ -365,9 +366,9 @@ TEST(HttpResponseRoot, path_info1) {
 
 TEST(HttpResponseRoot, path_info2) {
   test::ResponseTest test("test/server/HttpResponse/root/file/path_info.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4240}, {"127.0.0.1", 4241}},
-                                        {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET}, "/cgi-bin/non_exist.php/path/info/", HttpRequest::PARSE_COMPLETE));
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
+      {{"127.0.0.1", 4240}, {"127.0.0.1", 4241}}, {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
+      {config::REQUEST_METHOD::GET}, "/cgi-bin/non_exist.php/path/info/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
@@ -385,7 +386,8 @@ TEST(HttpResponseRoot, path_info3) {
   test::ResponseTest test("test/server/HttpResponse/root/file/path_info.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4240}, {"127.0.0.1", 4241}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST}, "/cgi-bin/path/info/", HttpRequest::PARSE_COMPLETE));
+                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST},
+                                        "/cgi-bin/path/info/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = test.createDefaultErrorBody(403);
   test.testHeaders({
@@ -403,7 +405,8 @@ TEST(HttpResponseRoot, path_info4) {
   test::ResponseTest test("test/server/HttpResponse/root/file/path_info.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4240}, {"127.0.0.1", 4241}},
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST}, "/cgi-bin/path_info.php/path/info/", HttpRequest::PARSE_COMPLETE));
+                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST},
+                                        "/cgi-bin/path_info.php/path/info/", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
   ASSERT_EQ(test.responses_[0].state_, HttpResponse::RES_EXECUTE_CGI);
