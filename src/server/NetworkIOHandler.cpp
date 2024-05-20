@@ -165,7 +165,6 @@ void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree
   bool cgi = connManager.isCgiSocket(sock);
   if (cgi) connManager.resetCgiSockets(sock);
   connManager.removeConnection(sock, cgi);
-  std::cerr << "client disconnected\n";
 }
 
 const std::map<int, TiedServer>& NetworkIOHandler::getListenfdMap() { return this->listenfd_map_; }
