@@ -521,13 +521,11 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
   return sw_error_page_phase;
 }
 
-HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response,
-                                                              HttpRequest& request,
+HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                                               const config::Server& server,
                                                               const config::Location* location) {
   // uriにcgi_pathがあれば、path info処理をする
-  if (haveValidCgiPath(response, request))
-    return sw_content_phase;
+  if (haveValidCgiPath(response, request)) return sw_content_phase;
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
     response.setStatusCode(301);
@@ -825,12 +823,12 @@ bool HttpResponse::isAccessible(const std::string& file_path) {
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
-bool  HttpResponse::haveValidCgiPath(HttpResponse& response, HttpRequest& request) {
+bool HttpResponse::haveValidCgiPath(HttpResponse& response, HttpRequest& request) {
   std::vector<std::string> segments;
   std::istringstream iss(request.uri);
   std::string segment;
   while (std::getline(iss, segment, '/')) {
-      segments.push_back(segment);
+    segments.push_back(segment);
   }
 
   for (size_t i = 0; i < segments.size(); ++i) {
