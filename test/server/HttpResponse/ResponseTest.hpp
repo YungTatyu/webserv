@@ -36,6 +36,7 @@ class ResponseTest {
 
   ~ResponseTest() {
     if (this->conf_path_.find("AccessLog") != std::string::npos) {
+      config::terminateLogFds(config_handler_.config_);
       unlink("logs/format.log");
     }
     delete this->config_handler_.config_;
