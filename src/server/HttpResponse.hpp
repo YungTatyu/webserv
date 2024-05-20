@@ -45,6 +45,8 @@ class HttpResponse {
   // public variables
   std::string root_path_;
   std::string res_file_path_;
+  // TODO: clearに追加
+  std::string path_info_;
   RES_STATE state_;
   std::string status_code_line_;
   long status_code_;  // response生成するときにstatus_line_map_参照する
@@ -72,7 +74,7 @@ class HttpResponse {
                                         struct sockaddr_in client_addr, const ConfigHandler& config_handler);
   static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Location* location,
                                          const ConfigHandler& config_handler);
-  static ResponsePhase handleUriCheckPhase(HttpResponse& response, const HttpRequest& request,
+  static ResponsePhase handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                            const config::Server& server, const config::Location* location);
   static ResponsePhase handleSearchResFilePhase(HttpResponse& response, HttpRequest& request,
                                                 const config::Server& server,
@@ -103,6 +105,8 @@ class HttpResponse {
   int getStatusCode() const;
   void setStatusCode(int code);
   static bool isAccessible(const std::string& file_path);
+  static bool haveValidCgiPath(HttpResponse& response, HttpRequest& request);
+  void separatePathinfo(const std::string& uri, const std::string& cgi_path);
 };
 
 #endif
