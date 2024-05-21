@@ -46,7 +46,6 @@ class HttpResponse {
   // public variables
   std::string root_path_;
   std::string res_file_path_;
-  // TODO: clearに追加
   std::string path_info_;
   RES_STATE state_;
   std::string status_code_line_;

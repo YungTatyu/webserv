@@ -165,6 +165,7 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
     : root_path_(""),
       res_file_path_(""),
+      path_info_(""),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
       status_code_(kInitStatusCode),
@@ -858,6 +859,7 @@ void HttpResponse::separatePathinfo(const std::string& uri, size_t pos) {
 void HttpResponse::clear(HttpResponse& response) {
   response.root_path_.clear();
   response.res_file_path_.clear();
+  response.path_info_.clear();
   response.state_ = RES_CREATING_STATIC;
   response.status_code_line_.clear();
   response.status_code_ = kInitStatusCode;
