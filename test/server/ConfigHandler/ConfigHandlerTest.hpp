@@ -1,37 +1,35 @@
 #ifndef CONFIG_HANDLER_TEST_HPP
 #define CONFIG_HANDLER_TEST_HPP
 
+#include <arpa/inet.h>
 #include <gtest/gtest-param-test.h>
 #include <gtest/gtest.h>
-
-#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/param.h>
+
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 
-
 #include "ConfigHandler.hpp"
+#include "Http.hpp"
+#include "HttpRequest.hpp"
 #include "Lexer.hpp"
+#include "LimitExcept.hpp"
+#include "Location.hpp"
 #include "LogFd.hpp"
 #include "NetworkIOHandler.hpp"
 #include "Parser.hpp"
-#include "Utils.hpp"
-#include "HttpRequest.hpp"
-#include "Http.hpp"
 #include "Server.hpp"
-#include "Location.hpp"
-#include "LimitExcept.hpp"
-
+#include "Utils.hpp"
 
 namespace test {
 
 static const std::string kConfigHandlerTestPath = "test/server/ConfigHandler/";
 
 class ConfigHandlerTest {
-public:
+ public:
   // テストに使うオブジェクト
   ConfigHandler config_handler_;
   HttpRequest request_;
@@ -40,16 +38,12 @@ public:
 
   // 各TESTの前に呼び出されるセットアップメソッド
   ConfigHandlerTest(std::string conf_name)
-  : tied_server_(TiedServer("127.0.0.1", 8001)),
-    conf_path_(kConfigHandlerTestPath + conf_name) {
+      : tied_server_(TiedServer("127.0.0.1", 8001)), conf_path_(kConfigHandlerTestPath + conf_name) {
     this->setup();
   }
 
-  ConfigHandlerTest(std::string conf_name,
-                    std::string ip,
-                    unsigned int port)
-  : tied_server_(TiedServer(ip, port)),
-    conf_path_(kConfigHandlerTestPath + conf_name) {
+  ConfigHandlerTest(std::string conf_name, std::string ip, unsigned int port)
+      : tied_server_(TiedServer(ip, port)), conf_path_(kConfigHandlerTestPath + conf_name) {
     this->setup();
   }
 
@@ -60,14 +54,13 @@ public:
     lexer.tokenize();
 
     config::Parser parser(*config, lexer.getTokens(), conf_path_);
-    if (!parser.parse()){
+    if (!parser.parse()) {
       FAIL() << "Parse failed" << std::endl;
     }
 
     // log出力テストはlogファイル作成
     if (this->conf_path_.find("writeAccessLog") != std::string::npos ||
-        this->conf_path_.find("writeErrorLog")  != std::string::npos)
-    {
+        this->conf_path_.find("writeErrorLog") != std::string::npos) {
       if (!initLogFds(*config)) {
         config_handler_.loadConfiguration(config);
         FAIL() << "initLogFds failed" << std::endl;
@@ -99,12 +92,9 @@ public:
     delete config_handler_.config_;
   }
 
-  void  initRequest(const config::REQUEST_METHOD &method,
-                    const std::string &uri,
-                    const std::map<std::string, std::string,
-                    Utils::CaseInsensitiveCompare> &headers,
-                    const std::string &body,
-                    const HttpRequest::ParseState parseState) {
+  void initRequest(const config::REQUEST_METHOD& method, const std::string& uri,
+                   const std::map<std::string, std::string, Utils::CaseInsensitiveCompare>& headers,
+                   const std::string& body, const HttpRequest::ParseState parseState) {
     this->request_.method = method;
     this->request_.uri = uri;
     this->request_.headers = headers;
@@ -113,8 +103,7 @@ public:
   }
 
   void initTiedServer(std::vector<const config::Server*> server_list) {
-    for (auto server : server_list)
-      this->tied_server_.servers_.push_back(server);
+    for (auto server : server_list) this->tied_server_.servers_.push_back(server);
   }
 
   std::string getAbsolutePath(std::string file_path) {
@@ -165,26 +154,22 @@ public:
     EXPECT_EQ(expect.time_in_ms_, actual.time_in_ms_);
   }
 
-  struct sockaddr_in createClient(std::string ip)
-  {
+  struct sockaddr_in createClient(std::string ip) {
     struct sockaddr_in cli_addr;
     std::memset(&cli_addr, 0, sizeof(cli_addr));  // ゼロで初期化
-    cli_addr.sin_family = AF_INET;                 // IPv4
+    cli_addr.sin_family = AF_INET;                // IPv4
     cli_addr.sin_addr.s_addr = Utils::StrToIPAddress(ip);
     return cli_addr;
   }
 
-  void sameLocation(const config::Location& expect, const config::Location* actual)
-  {
-    if (actual)
-    {
+  void sameLocation(const config::Location& expect, const config::Location* actual) {
+    if (actual) {
       EXPECT_EQ(expect.uri, actual->uri);
       return;
     }
     FAIL() << "can't find location" << std::endl;
   }
-
 };
 
-}; // namespace test 
+};  // namespace test
 #endif
