@@ -38,7 +38,7 @@ function assert {
 
   if [ "$actual" = "$expect" ]; then
     printf "\033[32mpassed\033[0m\n\n"
-    g_test_passed=$(bc <<<"$g_test_passed + 1")
+    ((++g_test_passed))
   else
     printErr "\033[31mfailed\n\033[0m"
     printErr "expected:\"${expect}\"\n"

@@ -17,6 +17,7 @@
 #include "Listen.hpp"
 #include "Server.hpp"
 #include "SysCallWrapper.hpp"
+#include "TimerTree.hpp"
 
 class ConfigHandler;
 class ConnectionManager;
@@ -46,20 +47,21 @@ class NetworkIOHandler {
   NetworkIOHandler();
   ~NetworkIOHandler();
   int setupSocket(const std::string address, const unsigned int port);
-  int receiveRequest(ConnectionManager& connManager, const int cli_sock);
-  int sendResponse(ConnectionManager& connManager, const int cli_sock);
-  int receiveCgiResponse(ConnectionManager& connManager, const int sock);
+  ssize_t receiveRequest(ConnectionManager& connManager, const int cli_sock);
+  ssize_t sendResponse(ConnectionManager& connManager, const int cli_sock);
+  ssize_t receiveCgiResponse(ConnectionManager& connManager, const int sock);
   ssize_t sendRequestBody(ConnectionManager& connManager, const int sock);
   int acceptConnection(ConnectionManager& connManager, const int listen_fd);
-  void closeConnection(ConnectionManager& connManager, const int cli_sock);
+  void closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock);
   void closeAllListenSockets();
   const std::map<int, TiedServer>& getListenfdMap();
   void addVServer(const int listen_fd, const TiedServer server);
   bool isListenSocket(const int listen_fd) const;
+  static size_t getBufferSize();
 
  private:
   std::map<int, TiedServer> listenfd_map_;  // リスニングソケットとそれに紐づくserver configを管理
-  static const size_t bufferSize_ = 1024;
+  static const size_t buffer_size_ = 1024;
 };
 
 #endif

@@ -14,6 +14,7 @@ static const char* kContentType = "Content-Type";
 static const char* kHtml = "text/html";
 static const char* kTextPlain = "text/plain";
 static const char* kDefaultPage = "defaut.html";
+static const int kInitStatusCode = 200;
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -165,7 +166,7 @@ HttpResponse::HttpResponse()
       res_file_path_(""),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
-      status_code_(200),
+      status_code_(kInitStatusCode),
       body_(""),
       internal_redirect_cnt_(0) {
   // status_line
@@ -346,7 +347,9 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   struct sockaddr_in client_addr;
 
   enum ResponsePhase phase = sw_start_phase;
-  if (response.state_ == RES_PARSED_CGI)
+  if (response.state_ == RES_COMPLETE)
+    clear(response);
+  else if (response.state_ == RES_PARSED_CGI)
     phase = sw_end_phase;
   else if (response.state_ == RES_CGI_ERROR) {
     phase = sw_error_page_phase;
@@ -433,6 +436,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   config_handler.writeErrorLog("webserv: [debug] create final response\n");
   config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
                                "\n\n");
+  response.state_ = RES_COMPLETE;
   return createResponse(response);
 }
 
@@ -800,4 +804,15 @@ std::string HttpResponse::detectContentType(const std::string& res_file_path) {
   if (Utils::isExtensionFile(res_file_path, kCssExt)) return "text/css";
   if (Utils::isExtensionFile(res_file_path, kJsExt)) return "text/javascript";
   return kTextPlain;
+}
+
+void HttpResponse::clear(HttpResponse& response) {
+  response.root_path_.clear();
+  response.res_file_path_.clear();
+  response.state_ = RES_CREATING_STATIC;
+  response.status_code_line_.clear();
+  response.status_code_ = kInitStatusCode;
+  response.headers_.clear();
+  response.body_.clear();
+  response.internal_redirect_cnt_ = 0;
 }
