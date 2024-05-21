@@ -11,9 +11,9 @@
 
 TEST(HttpResponseIndex, index_in_server) {
   test::ResponseTest test("test/server/HttpResponse/index/file/index1.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
-                                        {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
+      {{"127.0.0.1", 4242}, {"127.0.0.1", 4243}}, {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
+      {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/server1.html");
   test.testHeaders({
@@ -47,9 +47,9 @@ TEST(HttpResponseIndex, index_in_loc) {
 
 TEST(HttpResponseIndex, index_default) {
   test::ResponseTest test("test/server/HttpResponse/index/file/index2.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}},
-                                        {{"host", "not_exist"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
+      {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "not_exist"}, {"User-Agent", "Mozilla/5.0"}},
+      {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = Utils::readFile("test/server/HttpResponse/index/file/index.html");
   test.testHeaders({

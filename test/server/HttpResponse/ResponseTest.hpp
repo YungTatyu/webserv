@@ -165,7 +165,7 @@ class ResponseTest {
                   [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
-                                  &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                   &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
                                     if (method != config::HEAD) EXPECT_EQ(this->responses_[i].body_, expect);
                                     ++i;
                                   });
@@ -178,7 +178,7 @@ class ResponseTest {
                   [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
-                                  &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                   &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
                                     if (method != config::HEAD) EXPECT_EQ(this->final_responses_[i], expect);
                                     ++i;
                                   });
