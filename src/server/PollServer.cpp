@@ -51,14 +51,14 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
   const std::vector<pollfd>* active_events =
       static_cast<const std::vector<pollfd>*>(event_manager->getActiveEvents());
 
+  // 現在時刻を更新
+  Timer::updateCurrentTime();
+
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
     request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
     return;
   }
-
-  // 現在時刻を更新
-  Timer::updateCurrentTime();
 
   // 発生したイベントの数だけloopする
   for (std::vector<pollfd>::const_iterator it = active_events->begin(); it != active_events->end(); ++it) {
@@ -73,6 +73,7 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(*it))))
       request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, it->fd);
   }
+  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
 }
 
 /**
