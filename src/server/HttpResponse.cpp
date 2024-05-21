@@ -165,7 +165,6 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
     : root_path_(""),
       res_file_path_(""),
-      method_(config::GET),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
       status_code_(kInitStatusCode),
@@ -309,11 +308,11 @@ std::string HttpResponse::transformLetter(const std::string& key_str) {
   return result;
 }
 
-std::string HttpResponse::createResponse(const HttpResponse& response) {
+std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) const {
   std::stringstream stream;
 
   // status line
-  stream << http_version << " " << response.status_code_line_ << "\r\n";
+  stream << http_version << " " << this->status_code_line_ << "\r\n";
 
   // headers
   // cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
@@ -323,14 +322,14 @@ std::string HttpResponse::createResponse(const HttpResponse& response) {
   // TODO: 以下の場合に、responseをchunkしたい
   // headerに Content-Lengthがない場合（主にcgiレスポンス）
   // headerに responseが長い場合、例えばbuffer size以上
-  for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
-       it != response.headers_.end(); ++it)
+  for (std::map<std::string, std::string>::const_iterator it = this->headers_.begin();
+       it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
   stream << "\r\n";
-  if (response.method_ == config::HEAD) return stream.str();
+  if (method == config::HEAD) return stream.str();
 
   // body
-  stream << response.body_;
+  stream << this->body_;
   return stream.str();
 }
 
@@ -363,7 +362,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
     switch (phase) {
       case sw_start_phase:
         config_handler.writeErrorLog("webserv: [debug] start phase\n");
-        response.method_ = request.method;
         phase = sw_pre_search_location_phase;
         break;
 
@@ -441,7 +439,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
                                "\n\n");
   response.state_ = RES_COMPLETE;
-  return createResponse(response);
+  return response.createResponse(request.method);
 }
 
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(

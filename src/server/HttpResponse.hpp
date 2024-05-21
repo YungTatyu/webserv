@@ -46,7 +46,6 @@ class HttpResponse {
   // public variables
   std::string root_path_;
   std::string res_file_path_;
-  config::REQUEST_METHOD method_;
   RES_STATE state_;
   std::string status_code_line_;
   long status_code_;  // response生成するときにstatus_line_map_参照する
@@ -60,7 +59,7 @@ class HttpResponse {
   size_t internal_redirect_cnt_;
   static const size_t kMaxInternalRedirect = 10;
 
-  static std::string createResponse(const HttpResponse& response);
+  std::string createResponse(const config::REQUEST_METHOD& method) const;
   // handle phase methods
   static ResponsePhase handlePreSearchLocationPhase(const HttpRequest::ParseState parse_state,
                                                     HttpResponse& response, const int client_sock,
