@@ -13,7 +13,7 @@ TEST(HttpResponseError, not_slash_ending_dir) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
   test.initTiedServers({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}});
-  test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET}, "/file",
+  test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/file",
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
@@ -32,7 +32,7 @@ TEST(HttpResponseError, not_found) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
   test.initTiedServers({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}});
-  test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET},
+  test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD},
                    "/nothing/", HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
@@ -51,7 +51,7 @@ TEST(HttpResponseError, bad_request) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
   test.initTiedServers({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}});
-  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET}, "/",
+  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/",
                    HttpRequest::PARSE_ERROR);
   test.generateResponse();
 
@@ -70,7 +70,7 @@ TEST(HttpResponseError, forbidden) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
   test.initTiedServers({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}});
-  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET},
+  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD},
                    "/forbidden/", HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 

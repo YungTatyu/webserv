@@ -13,7 +13,7 @@ TEST(HttpResponseReturn, code) {
   test::ResponseTest test("test/server/HttpResponse/return/file/return1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
+                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = test.createDefaultErrorBody(404);
   test.testHeaders({
@@ -31,7 +31,7 @@ TEST(HttpResponseReturn, code_text) {
   test::ResponseTest test("test/server/HttpResponse/return/file/return1.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4242}, {"127.0.0.1", 4243}}, {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
-      {config::REQUEST_METHOD::GET}, "/text/", HttpRequest::PARSE_COMPLETE));
+      {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/text/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = "no file";
   test.testHeaders({
@@ -49,7 +49,7 @@ TEST(HttpResponseReturn, url) {
   test::ResponseTest test("test/server/HttpResponse/return/file/return_redirect.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
+                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = test.createDefaultErrorBody(302);
   test.testHeaders({
@@ -68,7 +68,7 @@ TEST(HttpResponseReturn, code_and_url) {
   test::ResponseTest test("test/server/HttpResponse/return/file/return_redirect.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}},
                                         {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
+                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = test.createDefaultErrorBody(303);
   test.testHeaders({
@@ -87,7 +87,7 @@ TEST(HttpResponseReturn, non_redirect_code_and_url) {
   test::ResponseTest test("test/server/HttpResponse/return/file/return_redirect.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4244}, {"127.0.0.1", 4245}}, {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
-      {config::REQUEST_METHOD::GET}, "/non-redirect-code/", HttpRequest::PARSE_COMPLETE));
+      {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::HEAD}, "/non-redirect-code/", HttpRequest::PARSE_COMPLETE));
 
   const std::string expect_body = "http://localhost:4242/";
   test.testHeaders({
