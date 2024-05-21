@@ -79,7 +79,7 @@ class HttpResponse {
                                                 const config::Server& server,
                                                 const config::Location* location,
                                                 const ConfigHandler& config_handler);
-  static ResponsePhase handleContentPhase(HttpResponse& response);
+  static ResponsePhase handleContentPhase(HttpResponse& response, HttpRequest& request);
   static ResponsePhase handleErrorPagePhase(HttpResponse& response, HttpRequest& request,
                                             const config::Server& server, const config::Location* location,
                                             const ConfigHandler& config_handler);
@@ -92,14 +92,18 @@ class HttpResponse {
   static ResponsePhase searchResPath(HttpResponse& response, HttpRequest& request,
                                      const config::Server& server, const config::Location* location,
                                      const ConfigHandler& config_handler);
-  static ResponsePhase Index(HttpResponse& response, HttpRequest& request,
-                             const std::vector<config::Index>& index_list, bool is_autoindex_on,
-                             const std::string& index_dir);
+  static ResponsePhase Index(HttpResponse& response, std::string& request,
+                             const std::vector<config::Index>& index_list, std::string directory_path,
+                             bool is_autoindex_on);
   static ResponsePhase TryFiles(HttpResponse& response, HttpRequest& request,
                                 const config::TryFiles& try_files);
   static void headerFilterPhase(HttpResponse& response, const config::Time& time);
   static std::string detectContentType(const std::string& res_file_path);
   static std::string transformLetter(const std::string& key_str);
+  static char lastChar(const std::string& str);
+  int getStatusCode() const;
+  void setStatusCode(int code);
+  static bool isAccessible(const std::string& file_path);
   static void clear(HttpResponse& response);
 };
 

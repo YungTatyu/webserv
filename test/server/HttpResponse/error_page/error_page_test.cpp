@@ -64,8 +64,9 @@ class HttpResponseErrorPage : public ::testing::Test {
   }
 
   void ASSERT_CORRECT_RESPONSE(const std::vector<std::string> &expect, const std::string &actual) {
-    for (size_t i = 0; i < expect.size(); i++) {
-      ASSERT_TRUE(actual.find(expect[i]) != std::string::npos);
+    for (size_t i = 0; i < expect.size(); ++i) {
+      ASSERT_TRUE(actual.find(expect[i]) != std::string::npos) << "actual: " << actual << std::endl
+                                                               << "expect: " << expect[i] << std::endl;
     }
   }
 
@@ -104,8 +105,8 @@ TEST_F(HttpResponseErrorPage, code_response_uri1) {
 }
 
 TEST_F(HttpResponseErrorPage, code_response_uri2) {
-  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::POST, "/",
-              HttpRequest::PARSE_COMPLETE);
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::GET,
+              "/method-error/", HttpRequest::PARSE_COMPLETE);
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
 
   // 正解response
@@ -183,6 +184,7 @@ TEST_F(HttpResponseErrorPage, eternal_redirect) {
 }
 
 TEST_F(HttpResponseErrorPage, dup_error_num) {
+  // ErrorPage2.conf
   initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::GET,
               "/nothing/", HttpRequest::PARSE_COMPLETE);
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4243);

@@ -9,7 +9,7 @@ TEST(ConfigHandlerTestSearchLocationConfig, root) {
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
   config::Server server = test.config_handler_.config_->http.server_list[0];
 
-  test.sameLocation(server.location_list[0],
+  test.sameLocation(server.location_list[1],
                     test.config_handler_.searchLongestMatchLocationConfig(server, "/"));
 }
 
@@ -18,7 +18,7 @@ TEST(ConfigHandlerTestSearchLocationConfig, samename) {
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
   config::Server server = test.config_handler_.config_->http.server_list[0];
 
-  test.sameLocation(server.location_list[1],
+  test.sameLocation(server.location_list[0],
                     test.config_handler_.searchLongestMatchLocationConfig(server, "/hello/"));
 }
 
@@ -27,7 +27,7 @@ TEST(ConfigHandlerTestSearchLocationConfig, longest_match1) {
   test.initRequest(config::GET, "/everyone/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
   config::Server server = test.config_handler_.config_->http.server_list[0];
 
-  test.sameLocation(server.location_list[0],
+  test.sameLocation(server.location_list[1],
                     test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
 }
 
@@ -37,7 +37,7 @@ TEST(ConfigHandlerTestSearchLocationConfig, longest_match2) {
                    HttpRequest::PARSE_COMPLETE);
   config::Server server = test.config_handler_.config_->http.server_list[0];
 
-  test.sameLocation(server.location_list[1],
+  test.sameLocation(server.location_list[0],
                     test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
 }
 
@@ -47,6 +47,6 @@ TEST(ConfigHandlerTestSearchLocationConfig, longest_match3) {
                    HttpRequest::PARSE_COMPLETE);
   config::Server server = test.config_handler_.config_->http.server_list[0];
 
-  test.sameLocation(server.location_list[0],
+  test.sameLocation(server.location_list[1],
                     test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
 }

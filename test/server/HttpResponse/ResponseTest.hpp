@@ -120,12 +120,15 @@ class ResponseTest {
    */
   void generateResponse() {
     int i = 0;
+    std::string ori_uri = this->request_.uri;
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
-                  [this, &i](TiedServer tied_server) {  // testするip adressの数だけloop
+                  [this, &i, &ori_uri](TiedServer tied_server) {  // testするip adressの数だけloop
                     std::for_each(this->methods_.begin(), this->methods_.end(),
-                                  [this, &i, &tied_server](
-                                      config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    this->request_.method = method;     // testするmethodを変える
+                                  [this, &i, &tied_server,
+                                   &ori_uri](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    this->request_.uri =
+                                        ori_uri;  // テスト中に変更されている可能性があるのでuriをもどす
+                                    this->request_.method = method;  // testするmethodを変える
                                     this->responses_.push_back(HttpResponse());
                                     this->final_responses_.push_back(HttpResponse::generateResponse(
                                         this->request_, this->responses_[i], tied_server, this->sockets_[0],

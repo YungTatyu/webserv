@@ -85,17 +85,17 @@ int ConfigHandler::allowRequest(const config::Server& server, const config::Loca
                                 const HttpRequest& request, struct sockaddr_in client_addr) const {
   // ------ access の制限 ------
   // configからアドレス制限ディレクトリのあるcontext探す
-  if (location && location->directives_set.find(kDENY) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kDENY)) {
     if (!limitLoop(location->allow_deny_list, client_addr.sin_addr.s_addr)) return ACCESS_DENY;
-  } else if (server.directives_set.find(kDENY) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kDENY)) {
     if (!limitLoop(server.allow_deny_list, client_addr.sin_addr.s_addr)) return ACCESS_DENY;
-  } else if (this->config_->http.directives_set.find(kDENY) != this->config_->http.directives_set.end()) {
+  } else if (Utils::hasDirective(this->config_->http, kDENY)) {
     if (!limitLoop(this->config_->http.allow_deny_list, client_addr.sin_addr.s_addr)) return ACCESS_DENY;
   }
 
   // ------ method の制限 ------
   // location内にlimit_except contextあるか？
-  if (location && location->directives_set.find(kLimitExcept) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kLimitExcept)) {
     // 制限されたメソッドでなければ、スルー
     // HttpRequestでLIMIT_EXCEPTのenum使ってほしい
     if (location->limit_except.excepted_methods.find(request.method) ==
@@ -119,20 +119,19 @@ void ConfigHandler::writeAccessLog(const struct TiedServer& tied_servers, const 
 void ConfigHandler::writeAccessLog(const config::Server& server, const config::Location* location,
                                    const std::string& msg) const {
   // access_logがどのコンテキスがあれば出力する
-  if (location && location->directives_set.find(kACCESS_FD) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kACCESS_FD)) {
     for (size_t i = 0; i < location->access_fd_list.size(); i++) {
       if (Utils::wrapperWrite(location->access_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
                   << std::endl;
     }
-  } else if (server.directives_set.find(kACCESS_FD) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kACCESS_FD)) {
     for (size_t i = 0; i < server.access_fd_list.size(); i++) {
       if (Utils::wrapperWrite(server.access_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
                   << std::endl;
     }
-  } else if (this->config_->http.directives_set.find(kACCESS_FD) !=
-             this->config_->http.directives_set.end()) {
+  } else if (Utils::hasDirective(this->config_->http, kACCESS_FD)) {
     for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
@@ -143,13 +142,13 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
 
 void ConfigHandler::writeErrorLog(const std::string& msg) const {
   // http conterxtにerror_logディレクティブがあれば出力
-  if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end()) {
+  if (Utils::hasDirective(this->config_->http, kERROR_FD)) {
     for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
                   << std::endl;
     }
-  } else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end()) {
+  } else if (Utils::hasDirective(*this->config_, kERROR_FD)) {
     // main contextにerror_logディレクティブがなくてもデフォルトに出力する
     // fdがopenできずに追加できていない可能性があるので、一応条件文で確認している。
     for (size_t i = 0; i < this->config_->error_fd_list.size(); i++) {
@@ -169,25 +168,25 @@ void ConfigHandler::writeErrorLog(const struct TiedServer& tied_servers, const s
 
 void ConfigHandler::writeErrorLog(const config::Server& server, const config::Location* location,
                                   const std::string& msg) const {
-  if (location && location->directives_set.find(kERROR_FD) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kERROR_FD)) {
     for (size_t i = 0; i < location->error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(location->error_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
                   << std::endl;
     }
-  } else if (server.directives_set.find(kERROR_FD) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kERROR_FD)) {
     for (size_t i = 0; i < server.error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(server.error_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
                   << std::endl;
     }
-  } else if (this->config_->http.directives_set.find(kERROR_FD) != this->config_->http.directives_set.end()) {
+  } else if (Utils::hasDirective(this->config_->http, kERROR_FD)) {
     for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
                   << std::endl;
     }
-  } else if (this->config_->directives_set.find(kERROR_FD) != this->config_->directives_set.end()) {
+  } else if (Utils::hasDirective(*this->config_, kERROR_FD)) {
     for (size_t i = 0; i < this->config_->error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
         std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
@@ -202,9 +201,9 @@ const config::Time& ConfigHandler::searchKeepaliveTimeout(const struct TiedServe
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && location->directives_set.find(kKEEPALIVE_TIMEOUT) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kKEEPALIVE_TIMEOUT)) {
     return location->keepalive_timeout.getTime();
-  } else if (server.directives_set.find(kKEEPALIVE_TIMEOUT) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kKEEPALIVE_TIMEOUT)) {
     return server.keepalive_timeout.getTime();
   } else  // http兼default
   {
@@ -218,9 +217,9 @@ const config::Time& ConfigHandler::searchSendTimeout(const TiedServer& tied_serv
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && location->directives_set.find(kSEND_TIMEOUT) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kSEND_TIMEOUT)) {
     return location->send_timeout.getTime();
-  } else if (server.directives_set.find(kSEND_TIMEOUT) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kSEND_TIMEOUT)) {
     return server.send_timeout.getTime();
   } else  // http兼default
   {
@@ -234,9 +233,9 @@ const config::Time& ConfigHandler::searchUseridExpires(const struct TiedServer& 
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && location->directives_set.find(kUSERID_EXPIRES) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kUSERID_EXPIRES)) {
     return location->userid_expires.getTime();
-  } else if (server.directives_set.find(kUSERID_EXPIRES) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kUSERID_EXPIRES)) {
     return server.userid_expires.getTime();
   } else  // http兼default
   {
@@ -266,47 +265,45 @@ const config::Server& ConfigHandler::searchServerConfig(const struct TiedServer&
   return *default_server;
 }
 
-bool sameURI(const std::string& request_uri, std::string config_uri) {
-  // location uriが'/'で始まってなかったらスラッシュをつける
-  if (config_uri[0] != '/') config_uri.insert(config_uri.begin(), '/');
-  // location uriが'/'で終わってなかったらスラッシュをつける
-  if (config_uri[config_uri.length() - 1] != '/') config_uri.push_back('/');
-
-  if (request_uri == config_uri) return true;
-  return false;
-}
-
+/*
+ * uriが最長一致しているlocationを返す。
+ */
 const config::Location* ConfigHandler::searchLongestMatchLocationConfig(const config::Server& server_config,
                                                                         const std::string& uri) const {
-  // uriがファイルなら直前の/まで切る
-  // でもそのファイルやディレクトリが存在しなかったら location / の内容を探すわけではない
+  const config::Location* longest_match = NULL;
+  size_t max_len = 0;
 
-  // location探す
   for (size_t i = 0; i < server_config.location_list.size(); i++) {
-    if (sameURI(uri, server_config.location_list[i].uri)) return &server_config.location_list[i];
+    std::string config_uri = server_config.location_list[i].uri;
+    // なければlocation uriの前後に'/'をつける
+    if (config_uri[0] != '/') config_uri.insert(config_uri.begin(), '/');
+    if (config_uri[config_uri.length() - 1] != '/') config_uri.push_back('/');
+    if (uri.find(config_uri) == 0 && max_len < config_uri.size()) {
+      max_len = std::max(max_len, config_uri.size());
+      longest_match = &server_config.location_list[i];
+    }
   }
-  return NULL;
+  return longest_match;
 }
 
 const config::ErrorPage* ConfigHandler::searchErrorPage(const config::Server& server,
                                                         const config::Location* location,
                                                         const unsigned int code) const {
-  if (location && location->directives_set.find(kERROR_PAGE) != location->directives_set.end()) {
+  if (location && Utils::hasDirective(*location, kERROR_PAGE)) {
     const std::vector<config::ErrorPage>& ep_list = location->error_page_list;
     for (size_t i = 0; i < ep_list.size(); i++) {
       if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end()) {
         return &ep_list[i];
       }
     }
-  } else if (server.directives_set.find(kERROR_PAGE) != server.directives_set.end()) {
+  } else if (Utils::hasDirective(server, kERROR_PAGE)) {
     const std::vector<config::ErrorPage>& ep_list = server.error_page_list;
     for (size_t i = 0; i < ep_list.size(); i++) {
       if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end()) {
         return &ep_list[i];
       }
     }
-  } else if (this->config_->http.directives_set.find(kERROR_PAGE) !=
-             this->config_->http.directives_set.end()) {
+  } else if (Utils::hasDirective(this->config_->http, kERROR_PAGE)) {
     const std::vector<config::ErrorPage>& ep_list = this->config_->http.error_page_list;
     for (size_t i = 0; i < ep_list.size(); i++) {
       if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end()) {
@@ -335,28 +332,23 @@ struct TiedServer ConfigHandler::createTiedServer(const std::string addr, const 
 std::string ConfigHandler::searchRootPath(const config::Server& server,
                                           const config::Location* location) const {
   if (location) {
-    if (location->directives_set.find(kROOT) != location->directives_set.end())
-      return location->root.getPath();
-    if (location->directives_set.find(kALIAS) != location->directives_set.end())
-      return location->alias.getPath();
+    if (Utils::hasDirective(*location, kROOT)) return location->root.getPath();
+    if (Utils::hasDirective(*location, kALIAS)) return location->alias.getPath();
   }
-  if (server.directives_set.find(kROOT) != server.directives_set.end())
+  if (Utils::hasDirective(server, kROOT))
     return server.root.getPath();
-  else if (config_->http.directives_set.find(kROOT) != config_->http.directives_set.end())
+  else if (Utils::hasDirective(this->config_->http, kROOT))
     return config_->http.root.getPath();
   // これいるか？上のやつと一緒でいいのでは？
   return config::Root::kDefaultPath_;
 }
 
 bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Location* location) const {
-  if (location && location->directives_set.find(kAUTOINDEX) != location->directives_set.end() &&
-      location->autoindex.getIsAutoindexOn())
-    return true;
-  else if (server.directives_set.find(kAUTOINDEX) != server.directives_set.end() &&
-           server.autoindex.getIsAutoindexOn())
-    return true;
-  else if (config_->http.directives_set.find(kAUTOINDEX) != config_->http.directives_set.end() &&
-           config_->http.autoindex.getIsAutoindexOn())
+  if (location && Utils::hasDirective(*location, kAUTOINDEX)) {
+    return location->autoindex.getIsAutoindexOn();
+  } else if (Utils::hasDirective(server, kAUTOINDEX)) {
+    return server.autoindex.getIsAutoindexOn();
+  } else if (Utils::hasDirective(config_->http, kAUTOINDEX) && config_->http.autoindex.getIsAutoindexOn())
     return true;
   return false;
 }

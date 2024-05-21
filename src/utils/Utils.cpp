@@ -48,9 +48,9 @@ bool Utils::isFile(const std::string& path) {
   return S_ISREG(statbuf.st_mode);
 }
 
-bool Utils::isDirectory(const std::string& path) {
+bool Utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
-  if (stat(path.c_str(), &statbuf) != 0) {
+  if (stat(path.c_str(), &statbuf) != 0 && err_log) {
     std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
               << ")" << std::endl;
     return false;
@@ -77,7 +77,7 @@ std::vector<std::string> Utils::createDirectoryContents(const std::string& direc
   while ((entry = readdir(dir)) != NULL) {
     std::string filename = entry->d_name;
     if (filename != "." && filename != "..") {
-      if (Utils::isDirectory(directoryPath + "/" + filename)) filename += "/";
+      if (Utils::isDirectory(directoryPath + "/" + filename, false)) filename += "/";
       contents.push_back(filename);
     }
   }

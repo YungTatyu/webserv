@@ -28,7 +28,7 @@ int wrapperOpen(const std::string path, int flags, mode_t modes);
 int wrapperAccess(const std::string path, int modes, bool err_log);
 bool wrapperRealpath(const std::string path, std::string& absolute_path);
 bool isFile(const std::string& path);
-bool isDirectory(const std::string& path);
+bool isDirectory(const std::string& path, bool err_log);
 std::string readFile(const std::string& filePath);
 std::vector<std::string> createDirectoryContents(const std::string& directoryPath);
 bool isExecutable(const char* filename);
@@ -49,6 +49,8 @@ bool isSign(unsigned char ch);
 template <typename T>
 std::string toStr(const T value);
 bool isNumeric(const std::string& str);
+template <typename Context>
+bool hasDirective(const Context& context, const std::string& directive);
 }  // namespace Utils
 
 template <typename T>
@@ -56,6 +58,11 @@ std::string Utils::toStr(const T value) {
   std::stringstream converter;
   converter << value;
   return converter.str();
+}
+
+template <typename Context>
+bool Utils::hasDirective(const Context& context, const std::string& directive) {
+  return context.directives_set.find(directive) != context.directives_set.end();
 }
 
 #endif
