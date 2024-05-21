@@ -78,14 +78,14 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
   std::vector<struct kevent>& active_events = *active_events_ptr;
 
+  // 現在時刻を更新
+  Timer::updateCurrentTime();
+
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
     request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
     return;
   }
-
-  // 現在時刻を更新
-  Timer::updateCurrentTime();
 
   // 発生したイベントの数だけloopする
   for (int i = 0; i < event_manager->getActiveEventsNum(); ++i) {
@@ -147,6 +147,7 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
         break;
     }
   }
+  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
 }
 
 /**
