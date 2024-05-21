@@ -423,10 +423,10 @@ TEST(HttpResponseRoot, path_info5) {
 
 TEST(HttpResponseRoot, path_info6) {
   test::ResponseTest test("test/server/HttpResponse/root/file/path_info.conf");
-  ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4240}, {"127.0.0.1", 4241}},
-                                        {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
-                                        {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST},
-                                        "/cgi-bin/path_info.php/a/bc//d//ef/g/h/ij/k/lm/n", HttpRequest::PARSE_COMPLETE));
+  ASSERT_NO_FATAL_FAILURE(test.setUpAll(
+      {{"127.0.0.1", 4240}, {"127.0.0.1", 4241}}, {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
+      {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST},
+      "/cgi-bin/path_info.php/a/bc//d//ef/g/h/ij/k/lm/n", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
   test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php", "/a/bc//d//ef/g/h/ij/k/lm/n");
