@@ -50,9 +50,13 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   }
   const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
   // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
-  std::string requestData = std::string(context.begin(), context.end());
+  std::string request = std::string(context.begin(), context.end());
+  return handleRequest(connManager, configHandler, timerTree, sockfd, request);
+}
 
-  HttpRequest::parseRequest(requestData, connManager.getRequest(sockfd));
+int RequestHandler::handleRequest(ConnectionManager &connManager, ConfigHandler &configHandler,
+                                  TimerTree &timerTree, const int sockfd, std::string &rawRequest) {
+  HttpRequest::parseRequest(rawRequest, connManager.getRequest(sockfd));
 
   HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
   // 新しいHttpRequestを使う時にここを有効にしてchunk読み中はreadイベントのままにする
@@ -60,11 +64,11 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     connManager.clearRawRequest(sockfd);
     return RequestHandler::UPDATE_NONE;
   }
-  return handleResponse(connManager, configHandler, timerTree, sockfd);
+  return handleResponse(connManager, configHandler, timerTree, sockfd, rawRequest);
 }
 
 int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler &configHandler,
-                                   TimerTree &timerTree, const int sockfd) {
+                                   TimerTree &timerTree, const int sockfd, std::string &rawRequest) {
   HttpRequest &request = connManager.getRequest(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
   std::string final_response = HttpResponse::generateResponse(
@@ -72,8 +76,14 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
 
   if (response.state_ == HttpResponse::RES_EXECUTE_CGI)
     return handleCgi(connManager, configHandler, timerTree, sockfd);
-  connManager.setFinalResponse(sockfd,
+  connManager.addFinalResponse(sockfd,
                                std::vector<unsigned char>(final_response.begin(), final_response.end()));
+
+  HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
+  // 複数のリクエストが来た場合、全てparseする
+  // parseした結果がエラーの場合は、それ以上のリクエストはみない
+  if (state == HttpRequest::PARSE_COMPLETE && !rawRequest.empty())
+    return handleRequest(connManager, configHandler, timerTree, sockfd, rawRequest);
 
   // send開始するまでのtimout追加
   // cgiだったら紐づくclient_socketにタイマーを設定する
@@ -93,7 +103,8 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
   if (!re) {
     connManager.resetCgiSockets(sockfd);
     response.state_ = HttpResponse::RES_CGI_ERROR;
-    return handleResponse(connManager, configHandler, timerTree, sockfd);
+    std::string next_req;
+    return handleResponse(connManager, configHandler, timerTree, sockfd, next_req);
   }
   // bodyが空なら、bodyをsendしない
   if (request.body.empty()) {
@@ -117,7 +128,8 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   std::string res(v.begin(), v.end());
   bool parse_suc = connManager.callCgiParser(sockfd, response, res);
   response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
-  re = handleResponse(connManager, configHandler, timerTree, sockfd);
+  std::string next_req;
+  re = handleResponse(connManager, configHandler, timerTree, sockfd, next_req);
   ioHandler.closeConnection(connManager, timerTree, sockfd);  // delete cgi event
   return re;
 }
