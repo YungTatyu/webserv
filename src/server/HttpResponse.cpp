@@ -165,6 +165,7 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
     : root_path_(""),
       res_file_path_(""),
+      path_info_(""),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
       status_code_(kInitStatusCode),
@@ -416,7 +417,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_log_phase:
         config_handler.writeErrorLog("webserv: [debug] log phase\n");
-        //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
             config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.getStatusCode(),
@@ -527,10 +527,11 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
   return sw_error_page_phase;
 }
 
-HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response,
-                                                              const HttpRequest& request,
+HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                                               const config::Server& server,
                                                               const config::Location* location) {
+  // uriにcgi_pathがあれば、path info処理をする
+  if (haveValidCgiPath(response, request)) return sw_content_phase;
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
     response.setStatusCode(301);
@@ -746,7 +747,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
     response.state_ = RES_EXECUTE_CGI;
-    return sw_log_phase;
+    return sw_end_phase;
   }
   if (request.method == config::POST || request.method == config::DELETE) {
     response.setStatusCode(405);
@@ -828,9 +829,38 @@ bool HttpResponse::isAccessible(const std::string& file_path) {
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
+bool HttpResponse::haveValidCgiPath(HttpResponse& response, HttpRequest& request) {
+  std::vector<std::string> segments;
+  std::istringstream iss(request.uri);
+  std::string segment;
+  while (std::getline(iss, segment, '/')) {
+    segments.push_back(segment);
+  }
+
+  for (size_t i = 0; i < segments.size(); ++i) {
+    std::string path;
+    for (size_t j = 0; j <= i; ++j) {
+      if (j != 0) path += "/";
+      path += segments[j];
+    }
+    if (cgi::CGIHandler::isCgi(path) && isAccessible(response.root_path_ + path)) {
+      response.separatePathinfo(request.uri, path.size());
+      request.uri = path;
+      return true;
+    }
+  }
+  return false;
+}
+
+void HttpResponse::separatePathinfo(const std::string& uri, size_t pos) {
+  this->res_file_path_ = uri.substr(0, pos);
+  this->path_info_ = uri.substr(pos);
+}
+
 void HttpResponse::clear(HttpResponse& response) {
   response.root_path_.clear();
   response.res_file_path_.clear();
+  response.path_info_.clear();
   response.state_ = RES_CREATING_STATIC;
   response.status_code_line_.clear();
   response.status_code_ = kInitStatusCode;
