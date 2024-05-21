@@ -380,6 +380,15 @@ class ResponseTest {
     return static_cast<std::string>(absolute_path);
   }
 
+  void  testPathInfo(HttpResponse::RES_STATE state, const std::string& res_file_path, const std::string& path_info) {
+    std::for_each(this->responses_.begin(), this->responses_.end(), [this, &state, &res_file_path, &path_info](HttpResponse response) {
+      EXPECT_EQ(response.state_, state);
+      EXPECT_EQ(response.res_file_path_, res_file_path);
+      EXPECT_EQ(response.path_info_, path_info);
+    });
+
+  }
+
   int sockets_[2];
   const std::string conf_path_;
   std::vector<config::REQUEST_METHOD> methods_;  // testするmethod
