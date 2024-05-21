@@ -46,6 +46,7 @@ class HttpResponse {
   // public variables
   std::string root_path_;
   std::string res_file_path_;
+  config::REQUEST_METHOD method_;
   RES_STATE state_;
   std::string status_code_line_;
   long status_code_;  // response生成するときにstatus_line_map_参照する

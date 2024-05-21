@@ -165,6 +165,7 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
     : root_path_(""),
       res_file_path_(""),
+      method_(config::GET),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
       status_code_(kInitStatusCode),
@@ -326,6 +327,7 @@ std::string HttpResponse::createResponse(const HttpResponse& response) {
        it != response.headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
   stream << "\r\n";
+  if (response.method_ == config::HEAD) return stream.str();
 
   // body
   stream << response.body_;
@@ -361,6 +363,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
     switch (phase) {
       case sw_start_phase:
         config_handler.writeErrorLog("webserv: [debug] start phase\n");
+        response.method_ = request.method;
         phase = sw_pre_search_location_phase;
         break;
 
