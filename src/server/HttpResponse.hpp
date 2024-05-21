@@ -19,7 +19,8 @@ class HttpResponse {
     RES_CREATING_STATIC,
     RES_EXECUTE_CGI,
     RES_PARSED_CGI,
-    RES_CGI_ERROR
+    RES_CGI_ERROR,
+    RES_COMPLETE
   };
 
   enum ResponsePhase {
@@ -103,6 +104,7 @@ class HttpResponse {
   int getStatusCode() const;
   void setStatusCode(int code);
   static bool isAccessible(const std::string& file_path);
+  static void clear(HttpResponse& response);
 };
 
 #endif

@@ -52,6 +52,7 @@ class HttpRequest {
  private:
   std::string key_buf_;
   std::string val_buf_;
+  std::string spc_buf_;
   int state_;  // より細かいフェーズのstate
 
   static ParseState parseMethod(std::string &rawRequest, HttpRequest &request);
