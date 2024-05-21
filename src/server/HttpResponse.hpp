@@ -19,7 +19,8 @@ class HttpResponse {
     RES_CREATING_STATIC,
     RES_EXECUTE_CGI,
     RES_PARSED_CGI,
-    RES_CGI_ERROR
+    RES_CGI_ERROR,
+    RES_COMPLETE
   };
 
   enum ResponsePhase {
@@ -107,6 +108,7 @@ class HttpResponse {
   static bool isAccessible(const std::string& file_path);
   static bool haveValidCgiPath(HttpResponse& response, HttpRequest& request);
   void separatePathinfo(const std::string& uri, size_t pos);
+  static void clear(HttpResponse& response);
 };
 
 #endif

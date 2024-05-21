@@ -150,23 +150,28 @@ std::string Utils::socketToStrIPAddress(const int sock) {
 
 std::string Utils::ipToStr(const uint32_t ip) {
   std::stringstream ss;
-  std::vector<int> segments;
-  uint32_t decimal = ip;
-  for (int i = 0; i < 4; ++i) {
-    segments.push_back(decimal % 256);
-    decimal /= 256;
-  }
-#if defined(__LITTLE_ENDIAN__)
-  for (int i = 3; i >= 0; --i) {
-    ss << segments[i];
-    if (i > 0) ss << ".";
-  }
-#else
-  for (int i = 0; i < 4; ++i) {
-    ss << segments[i];
-    if (i < 3) ss << ".";
-  }
-#endif
+  uint32_t ip_host_order = ntohl(ip);  // ネットワークバイト順からホストバイト順に変換
+  ss << ((ip_host_order >> 24) & 0xFF) << '.'  // 第1オクテット
+     << ((ip_host_order >> 16) & 0xFF) << '.'  // 第2オクテット
+     << ((ip_host_order >> 8) & 0xFF) << '.'   // 第3オクテット
+     << (ip_host_order & 0xFF);                // 第4オクテット
+                                               //   std::vector<int> segments;
+                                               //   uint32_t decimal = ip;
+                                               //   for (int i = 0; i < 4; ++i) {
+                                               //     segments.push_back(decimal % 256);
+                                               //     decimal /= 256;
+                                               //   }
+                                               // #if defined(__LITTLE_ENDIAN__)
+                                               //   for (int i = 3; i >= 0; --i) {
+                                               //     ss << segments[i];
+                                               //     if (i > 0) ss << ".";
+                                               //   }
+                                               // #else
+                                               //   for (int i = 0; i < 4; ++i) {
+                                               //     ss << segments[i];
+                                               //     if (i < 3) ss << ".";
+                                               //   }
+                                               // #endif
   return ss.str();
 }
 

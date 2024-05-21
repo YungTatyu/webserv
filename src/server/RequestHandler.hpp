@@ -48,8 +48,6 @@ class RequestHandler {
                 const int sockfd);
   bool addTimerByType(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
                       const int sockfd, enum Timer::TimeoutType type);
-  void deleteTimerAndConnection(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                                TimerTree &timerTree, int socket);
   bool isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler);
 };
 

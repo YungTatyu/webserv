@@ -55,12 +55,12 @@ ConnectionData* ConnectionManager::getConnection(const int fd) { return connecti
 
 void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest,
                                       const ssize_t read_bytes) {
-  connections_[fd]->rawRequest.insert(connections_[fd]->rawRequest.end(), rawRequest.begin(),
-                                      rawRequest.begin() + read_bytes);
+  connections_[fd]->raw_request_.insert(connections_[fd]->raw_request_.end(), rawRequest.begin(),
+                                        rawRequest.begin() + read_bytes);
 }
 
 const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd) const {
-  return connections_.at(fd)->rawRequest;
+  return connections_.at(fd)->raw_request_;
 }
 
 void ConnectionManager::setFinalResponse(const int fd, const std::vector<unsigned char>& final_response) {
@@ -138,9 +138,14 @@ void ConnectionManager::resetSentBytes(const int fd) { connections_.at(fd)->sent
 
 void ConnectionManager::resetCgiSockets(const int fd) { connections_.at(fd)->cgi_handler_.resetSockets(); }
 
+void ConnectionManager::clearRawRequest(const int fd) {
+  ConnectionData* cd = this->connections_.at(fd);
+  cd->raw_request_.clear();
+}
+
 void ConnectionManager::clearConnectionData(const int fd) {
   ConnectionData* cd = this->connections_.at(fd);
-  cd->rawRequest.clear();
+  clearRawRequest(fd);
   cd->final_response_.clear();
   cd->cgi_response_.clear();
   resetCgiSockets(fd);
