@@ -82,7 +82,7 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
   HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
   // 複数のリクエストが来た場合、全てparseする
   // parseした結果がエラーの場合は、それ以上のリクエストはみない
-  if (state == HttpRequest::PARSE_COMPLETE && !rawRequest.empty())
+  if (state == HttpRequest::PARSE_COMPLETE && !rawRequest.empty() && !HttpResponse::isErrorResponse(response))
     return handleRequest(connManager, configHandler, timerTree, sockfd, rawRequest);
 
   // send開始するまでのtimout追加
