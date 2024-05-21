@@ -838,7 +838,7 @@ bool HttpResponse::haveValidCgiPath(HttpResponse& response, HttpRequest& request
       path += segments[j];
     }
     if (cgi::CGIHandler::isCgi(path) && isAccessible(response.root_path_ + path)) {
-      response.separatePathinfo(request.uri, path);
+      response.separatePathinfo(request.uri, path.size());
       request.uri = path;
       return true;
     }
@@ -846,8 +846,7 @@ bool HttpResponse::haveValidCgiPath(HttpResponse& response, HttpRequest& request
   return false;
 }
 
-void HttpResponse::separatePathinfo(const std::string& uri, const std::string& cgi_path) {
-  size_t pos = cgi_path.size();
+void HttpResponse::separatePathinfo(const std::string& uri, size_t pos) {
   this->res_file_path_ = uri.substr(0, pos);
   this->path_info_ = uri.substr(pos);
 }
