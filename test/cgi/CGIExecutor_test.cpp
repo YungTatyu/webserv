@@ -86,7 +86,7 @@ int waitProcess(pid_t pid) {
 
 void testCgiOutput(cgi::CGIHandler& cgi_handler, const std::string& cgi_path, const HttpRequest& http_request,
                    const std::string expect) {
-  cgi_handler.callCgiExecutor(cgi_path, http_request, 0);
+  ASSERT_TRUE(cgi_handler.callCgiExecutor(cgi_path, http_request, 0));
   if (!http_request.body.empty()) sendBody(http_request.body, cgi_handler.getCgiSocket());
   waitProcess(cgi_handler.getCgiProcessId());
   const std::string actual = test::recvCgiResponse(cgi_handler);

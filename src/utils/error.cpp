@@ -5,7 +5,14 @@
 
 #include "Utils.hpp"
 
-std::string error::strSysCallError(const std::string &syscall) {
+/**
+ * @brief errorメッセージの文字列を取得する
+ *
+ * @param syscall
+ * @param msg 初めの空白も含めたメッセージにすること
+ * @return std::string
+ */
+std::string error::strSysCallError(const std::string &syscall, const std::string &msg) {
   const std::string err = "webserv: [emerg] ";
-  return err + syscall + "() failed (" + Utils::toStr(errno) + ":" + std::strerror(errno) + ")";
+  return err + syscall + "()" + msg + " failed (" + Utils::toStr(errno) + ": " + std::strerror(errno) + ")";
 }

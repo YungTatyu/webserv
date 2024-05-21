@@ -23,10 +23,7 @@ int SysCallWrapper::Setsockopt(int socket, int level, int option_name, const voi
 }
 
 int SysCallWrapper::Bind(int socket, const struct sockaddr *address, socklen_t address_len) {
-  int re;
-  re = bind(socket, address, address_len);
-  if (re == -1) throw std::runtime_error(error::strSysCallError("bind"));
-  return re;
+  return bind(socket, address, address_len);
 }
 
 int SysCallWrapper::Listen(int socket, int backlog) {
