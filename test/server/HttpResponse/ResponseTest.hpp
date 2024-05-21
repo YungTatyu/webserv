@@ -160,13 +160,29 @@ class ResponseTest {
   }
 
   void testBody(const std::string &expect) const {
-    std::for_each(this->responses_.begin(), this->responses_.end(),
-                  [&expect](HttpResponse response) { EXPECT_EQ(response.body_, expect); });
+    int i = 0;
+    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
+                  [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    std::for_each(this->methods_.begin(), this->methods_.end(),
+                                  [this, &i, &tied_server,
+                                  &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    if (method != config::HEAD) EXPECT_EQ(this->responses_[i].body_, expect);
+                                    ++i;
+                                  });
+                  });
   }
 
   void testResponse(const std::string &expect) const {
-    std::for_each(this->final_responses_.begin(), this->final_responses_.end(),
-                  [&expect](std::string response) { EXPECT_EQ(response, expect); });
+    int i = 0;
+    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
+                  [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    std::for_each(this->methods_.begin(), this->methods_.end(),
+                                  [this, &i, &tied_server,
+                                  &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    if (method != config::HEAD) EXPECT_EQ(this->final_responses_[i], expect);
+                                    ++i;
+                                  });
+                  });
   }
 
   /**
