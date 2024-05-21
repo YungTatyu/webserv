@@ -70,8 +70,7 @@ class HttpResponse {
   static ResponsePhase handleAllowPhase(HttpResponse& response, const HttpRequest& request,
                                         const config::Server& server, const config::Location* location,
                                         struct sockaddr_in client_addr, const ConfigHandler& config_handler);
-  static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Server& server,
-                                         const config::Location* location,
+  static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Location* location,
                                          const ConfigHandler& config_handler);
   static ResponsePhase handleUriCheckPhase(HttpResponse& response, const HttpRequest& request,
                                            const config::Server& server, const config::Location* location);
