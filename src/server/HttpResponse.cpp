@@ -530,7 +530,7 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
                                                               const config::Server& server,
                                                               const config::Location* location) {
   // uriにcgi_pathがあれば、path info処理をする
-  if (haveValidCgiPath(response, request)) return sw_content_phase;
+  if (setPathinfoIfValidCgi(response, request)) return sw_content_phase;
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
     response.setStatusCode(301);
@@ -828,7 +828,7 @@ bool HttpResponse::isAccessible(const std::string& file_path) {
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
-bool HttpResponse::haveValidCgiPath(HttpResponse& response, HttpRequest& request) {
+bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
   std::vector<std::string> segments;
   std::istringstream iss(request.uri);
   std::string segment;

@@ -105,7 +105,7 @@ class HttpResponse {
   int getStatusCode() const;
   void setStatusCode(int code);
   static bool isAccessible(const std::string& file_path);
-  static bool haveValidCgiPath(HttpResponse& response, HttpRequest& request);
+  static bool setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request);
   void separatePathinfo(const std::string& uri, size_t pos);
   static void clear(HttpResponse& response);
 };
