@@ -835,7 +835,7 @@ bool HttpResponse::isAccessible(const std::string& file_path) {
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
-bool  HttpResponse::isExecutable(const std::string& file_path) {
+bool HttpResponse::isExecutable(const std::string& file_path) {
   return Utils::wrapperAccess(file_path, X_OK, false) == 0;
 }
 
