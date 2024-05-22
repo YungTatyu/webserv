@@ -530,7 +530,9 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
                                                               const config::Server& server,
                                                               const config::Location* location) {
   // uriにcgi_pathがあれば、path info処理をする
-  if (setPathinfoIfValidCgi(response, request)) return sw_content_phase;
+  if (setPathinfoIfValidCgi(response, request)) {
+    return sw_content_phase;
+  }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
     response.setStatusCode(301);
@@ -745,6 +747,11 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
+    if (!isExecutable(response.res_file_path_)) {
+      // TODO: ここのエラー番号これでいい？
+      response.setStatusCode(500);
+      return sw_error_page_phase;
+    }
     response.state_ = RES_EXECUTE_CGI;
     return sw_end_phase;
   }
@@ -828,6 +835,10 @@ bool HttpResponse::isAccessible(const std::string& file_path) {
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
+bool  HttpResponse::isExecutable(const std::string& file_path) {
+  return Utils::wrapperAccess(file_path, X_OK, false) == 0;
+}
+
 bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
   std::vector<std::string> segments;
   std::istringstream iss(request.uri);
@@ -842,7 +853,7 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
       if (j != 0) path += "/";
       path += segments[j];
     }
-    if (cgi::CGIHandler::isCgi(path) && isAccessible(response.root_path_ + path)) {
+    if (cgi::CGIHandler::isCgi(path) && Utils::isFile(response.root_path_ + path)) {
       response.separatePathinfo(request.uri, path.size());
       request.uri = path;
       return true;
