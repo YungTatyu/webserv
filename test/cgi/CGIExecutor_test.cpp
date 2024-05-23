@@ -84,9 +84,10 @@ int waitProcess(pid_t pid) {
   return -1;
 }
 
-void testCgiOutput(cgi::CGIHandler& cgi_handler, const std::string& cgi_path, const HttpRequest& http_request,
+void testCgiOutput(cgi::CGIHandler& cgi_handler, const std::string& cgi_path, const std::string& path_info,
+const HttpRequest& http_request,
                    const std::string expect) {
-  ASSERT_TRUE(cgi_handler.callCgiExecutor(cgi_path, http_request, 0));
+  ASSERT_TRUE(cgi_handler.callCgiExecutor(cgi_path, path_info, http_request, 0));
   if (!http_request.body.empty()) sendBody(http_request.body, cgi_handler.getCgiSocket());
   waitProcess(cgi_handler.getCgiProcessId());
   const std::string actual = test::recvCgiResponse(cgi_handler);
@@ -116,7 +117,7 @@ TEST(cgi_executor, document_response) {
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = !request.body.empty() ? (expect_header + request.body) : expect_header;
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/document_response.py", request, expect);
+  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/document_response.py", "", request, expect);
 }
 
 TEST(cgi_executor, local_redirect_res) {
@@ -125,7 +126,7 @@ TEST(cgi_executor, local_redirect_res) {
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
 
   const std::string expect = "Location: /\r\n\r\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/local_redirect_res.php", request, expect);
+  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/local_redirect_res.php", "", request, expect);
 }
 
 TEST(cgi_executor, client_redirect_res) {
@@ -134,7 +135,7 @@ TEST(cgi_executor, client_redirect_res) {
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
 
   const std::string expect = "Location: https://www.google.com/\r\nMETHOD: GET\r\nSERVER_NAME: tachu\r\n\r\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/client_redirect_res.cgi", request, expect);
+  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/client_redirect_res.cgi", "", request, expect);
 }
 
 TEST(cgi_executor, client_redirect_res_doc) {
@@ -144,7 +145,7 @@ TEST(cgi_executor, client_redirect_res_doc) {
 
   const std::string expect_header = "Location: /\r\nStatus: 301\r\nContent-Type: text/html\r\n\r\n";
   const std::string expect = expect_header + "<h1>cgi response</h1><h2>client-redirdoc-response<h2>\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/client_redirect_res_doc.cgi", request,
+  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/client_redirect_res_doc.cgi", "", request,
                       expect);
 }
 
@@ -157,7 +158,7 @@ TEST(cgi_executor, body) {
   const std::string expect_header = "Status: 200\r\nContent-Type: text/html\r\n\r\n";
   const std::string expect =
       expect_header + "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/body.py",
+  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/body.py", "",
                       // "test/cgi/cgi_files/executor/body.cgi",
                       request, expect);
 }
@@ -180,5 +181,5 @@ TEST(cgi_executor, meta_vars) {
                              "<h2>SERVER_NAME=tt</h2>"
                              // + "<h2>SERVER_PORT=4242</h2>" テスト不可のため、別のテストを追加
                              + "<h2>SERVER_PROTOCOL=HTTP/1.1</h2>" + "<h2>SERVER_SOFTWARE=webserv/1.0</h2>";
-  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/meta_vars.py", cd.request, expect);
+  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/meta_vars.py", "", cd.request, expect);
 }
