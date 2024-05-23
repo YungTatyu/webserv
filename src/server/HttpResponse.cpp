@@ -747,7 +747,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
-    if (!isExecutable(response.res_file_path_)) {
+    if (!isExecutable(response.root_path_ + response.res_file_path_)) {
       // TODO: ここのエラー番号これでいい？
       response.setStatusCode(500);
       return sw_error_page_phase;
