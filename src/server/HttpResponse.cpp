@@ -848,13 +848,13 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
   }
 
   for (size_t i = 0; i < segments.size(); ++i) {
-    std::string path;
+    std::string path = response.root_path_;
     for (size_t j = 0; j <= i; ++j) {
       if (j != 0) path += "/";
       path += segments[j];
     }
-    if (cgi::CGIHandler::isCgi(path) && Utils::isFile(response.root_path_ + path)) {
-      response.separatePathinfo(request.uri, path.size());
+    if (cgi::CGIHandler::isCgi(path) && Utils::isFile(path)) {
+      response.separatePathinfo(response.root_path_ + request.uri, path.size());
       request.uri = path;
       return true;
     }
