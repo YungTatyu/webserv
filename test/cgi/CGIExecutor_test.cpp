@@ -32,12 +32,20 @@ HttpRequest initRequest(const config::REQUEST_METHOD method, const std::string& 
   request.version = version;
   request.queries = queries;
   request.body = body;
-
   std::for_each(headers.begin(), headers.end(), [&request](const string_pair header) {
     request.headers.insert(std::make_pair(header.first, header.second));
   });
 
   return request;
+}
+
+HttpResponse initResponse(const std::string& script_path, const std::string& path_info) {
+  HttpResponse response;
+
+  response.res_file_path_ = script_path;
+  response.path_info_ = path_info;
+
+  return response;
 }
 
 std::string recvCgiResponse(cgi::CGIHandler& cgi_handler) {
@@ -84,13 +92,14 @@ int waitProcess(pid_t pid) {
   return -1;
 }
 
-void testCgiOutput(cgi::CGIHandler& cgi_handler, const std::string& cgi_path, const std::string& path_info,
-const HttpRequest& http_request,
-                   const std::string expect) {
-  ASSERT_TRUE(cgi_handler.callCgiExecutor(cgi_path, path_info, http_request, 0));
-  if (!http_request.body.empty()) sendBody(http_request.body, cgi_handler.getCgiSocket());
-  waitProcess(cgi_handler.getCgiProcessId());
-  const std::string actual = test::recvCgiResponse(cgi_handler);
+void testCgiOutput(ConnectionData& cd, const std::string expect) {
+  const HttpRequest& http_request = cd.request;
+  const HttpResponse& http_response = cd.response_;
+
+  ASSERT_TRUE(cd.cgi_handler_.callCgiExecutor(http_response, http_request, 0));
+  if (!http_request.body.empty()) sendBody(http_request.body, cd.cgi_handler_.getCgiSocket());
+  waitProcess(cd.cgi_handler_.getCgiProcessId());
+  const std::string actual = test::recvCgiResponse(cd.cgi_handler_);
 
   EXPECT_EQ(actual, expect);
 }
@@ -111,56 +120,58 @@ std::string searchMetaVar(const std::vector<const char*> meta_vars, const std::s
 }  // namespace test
 
 TEST(cgi_executor, document_response) {
-  cgi::CGIHandler cgi_handler;
-  HttpRequest request =
+  ConnectionData cd;
+  cd.request =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/document_response.py", "");
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
-  const std::string expect = !request.body.empty() ? (expect_header + request.body) : expect_header;
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/document_response.py", "", request, expect);
+  const std::string expect = !cd.request.body.empty() ? (expect_header + cd.request.body) : expect_header;
+  test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, local_redirect_res) {
-  cgi::CGIHandler cgi_handler;
-  HttpRequest request =
+  ConnectionData cd;
+  cd.request =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/local_redirect_res.php", "");
 
   const std::string expect = "Location: /\r\n\r\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/local_redirect_res.php", "", request, expect);
+  test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, client_redirect_res) {
-  cgi::CGIHandler cgi_handler;
-  HttpRequest request =
+  ConnectionData cd;
+  cd.request =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/client_redirect_res.cgi", "");
 
   const std::string expect = "Location: https://www.google.com/\r\nMETHOD: GET\r\nSERVER_NAME: tachu\r\n\r\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/client_redirect_res.cgi", "", request, expect);
+  test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, client_redirect_res_doc) {
-  cgi::CGIHandler cgi_handler;
-  HttpRequest request =
+  ConnectionData cd;
+  cd.request =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/client_redirect_res_doc.cgi", "");
 
   const std::string expect_header = "Location: /\r\nStatus: 301\r\nContent-Type: text/html\r\n\r\n";
   const std::string expect = expect_header + "<h1>cgi response</h1><h2>client-redirdoc-response<h2>\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/client_redirect_res_doc.cgi", "", request,
-                      expect);
+  test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, body) {
-  cgi::CGIHandler cgi_handler;
-  HttpRequest request = test::initRequest(
+  ConnectionData cd;
+  cd.request = test::initRequest(
       config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "",
-      "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n", {{"Host", "tt"}});
+      "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n", {{"Host", "tt"}, {"Content-Length", "59"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/body.py", "");
 
   const std::string expect_header = "Status: 200\r\nContent-Type: text/html\r\n\r\n";
   const std::string expect =
       expect_header + "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n";
-  test::testCgiOutput(cgi_handler, "test/cgi/cgi_files/executor/body.py", "",
-                      // "test/cgi/cgi_files/executor/body.cgi",
-                      request, expect);
+  test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, meta_vars) {
@@ -168,6 +179,7 @@ TEST(cgi_executor, meta_vars) {
   cd.request =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3", "",
                         {{"Host", "tt"}, {"content-type", "text/html"}, {"CONTENT_LENGTH", "10"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/meta_vars.py", "/a/b/c/d//e");
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = expect_header + "<h1>env vars list</h1>" + "<h2>AUTH_TYPE=</h2>" +
@@ -181,31 +193,28 @@ TEST(cgi_executor, meta_vars) {
                              "<h2>SERVER_NAME=tt</h2>"
                              // + "<h2>SERVER_PORT=4242</h2>" テスト不可のため、別のテストを追加
                              + "<h2>SERVER_PROTOCOL=HTTP/1.1</h2>" + "<h2>SERVER_SOFTWARE=webserv/1.0</h2>";
-  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/meta_vars.py", "/a/b/c/d//e", cd.request, expect);
+  test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, path_info_GET) {
   ConnectionData cd;
-  cd.request =
-      test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3", "",
-                        {{"Host", "tt"}, {"content-type", "text/html"}});
+  cd.request = test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3",
+                                 "", {{"Host", "tt"}, {"content-type", "text/html"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/path_info.py", "/test/cgi/cgi_files/executor/path_info_dir/");
 
   const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
-  const std::string expect = expect_header +
-  "<ul>\r\n" +
-  "<li><a href=\"a\">a</a></li>\r\n" +
-  "<li><a href=\"b\">b</a></li>\r\n" +
-  "<li><a href=\"c\">c</a></li>\r\n" +
-  "</ul>\r\n";
+  const std::string expect = expect_header + "<ul>\r\n" + "<li><a href=\"a\">a</a></li>\r\n" +
+                             "<li><a href=\"b\">b</a></li>\r\n" + "<li><a href=\"c\">c</a></li>\r\n" +
+                             "</ul>\r\n";
 
-  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/path_info.py", "/test/cgi/cgi_files/executor/path_info_dir/", cd.request, expect);
+  test::testCgiOutput(cd, expect);
 }
- 
+
 TEST(cgi_executor, path_info_POST) {
   ConnectionData cd;
-  cd.request =
-      test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "", "name=mahayase",
-                        {{"Host", "tt"}, {"content-type", "text/html"}});
+  cd.request = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "", "name=mahayase",
+                                 {{"Host", "tt"}, {"content-type", "text/html"}, {"Content-Length", "13"}});
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/post_and_pathinfo.py", "/test/cgi/cgi_files/executor/path_info_dir/");
 
   const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = expect_header +
@@ -227,6 +236,5 @@ TEST(cgi_executor, path_info_POST) {
   "</body>\n" +
   "</html>\n";
 
-  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/post_and_pathinfo.py", "/test/cgi/cgi_files/executor/path_info_dir/", cd.request, expect);
+  test::testCgiOutput(cd, expect);
 }
- 
