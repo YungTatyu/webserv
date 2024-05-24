@@ -61,7 +61,8 @@ class ConnectionManager {
   const cgi::CGIHandler& getCgiHandler(const int fd) const;
   size_t getSentBytes(const int fd) const;
   void addSentBytes(const int fd, const size_t bytes);
-  bool callCgiExecutor(const int fd, const std::string& script_path, const std::string& path_info, const HttpRequest& request);
+  bool callCgiExecutor(const int fd, const HttpResponse& response,
+                       const HttpRequest& request);
   bool callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response);
   void resetSentBytes(const int fd);
   void resetCgiSockets(const int fd);

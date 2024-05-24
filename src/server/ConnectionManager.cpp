@@ -101,10 +101,9 @@ const std::vector<unsigned char>& ConnectionManager::getCgiResponse(const int fd
   return this->connections_.at(fd)->cgi_response_;
 }
 
-bool ConnectionManager::callCgiExecutor(const int fd, const std::string& script_path,
-                                        const std::string& path_info,
+bool ConnectionManager::callCgiExecutor(const int fd, const HttpResponse& response,
                                         const HttpRequest& request) {
-  return this->connections_.at(fd)->cgi_handler_.callCgiExecutor(script_path, path_info, request, fd);
+  return this->connections_.at(fd)->cgi_handler_.callCgiExecutor(response, request, fd);
 }
 
 bool ConnectionManager::callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response) {

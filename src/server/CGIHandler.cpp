@@ -38,12 +38,12 @@ bool cgi::CGIHandler::isCgi(const std::string& script_path) {
  * @return true
  * @return false
  */
-bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const std::string& script_path, const std::string& path_info) {
+bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const HttpResponse& response) {
   pid_t pid = SysCallWrapper::Fork();
   if (pid == -1) return false;
   if (pid == 0) {
     close(this->sockets_[SOCKET_PARENT]);
-    this->cgi_executor_.executeCgiScript(request, script_path, path_info, this->sockets_[SOCKET_CHILD],
+    this->cgi_executor_.executeCgiScript(request, response, this->sockets_[SOCKET_CHILD],
                                          this->cli_socket_);
   }
   this->cgi_process_id_ = pid;
@@ -51,7 +51,7 @@ bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const std::stri
   return true;
 }
 
-bool cgi::CGIHandler::callCgiExecutor(const std::string& script_path, const std::string& path_info, const HttpRequest& request,
+bool cgi::CGIHandler::callCgiExecutor(const HttpResponse& response, const HttpRequest& request,
                                       const int cli_sock) {
   this->cli_socket_ = cli_sock;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1) {
@@ -65,7 +65,7 @@ bool cgi::CGIHandler::callCgiExecutor(const std::string& script_path, const std:
 #endif
 
   Utils::setNonBlockingCloExec(this->sockets_[SOCKET_PARENT]);
-  return forkCgiProcess(request, script_path, path_info);
+  return forkCgiProcess(request, response);
 }
 
 bool cgi::CGIHandler::callCgiParser(HttpResponse& response, const std::string& cgi_response) {

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 
 namespace cgi {
 class CGIExecutor {
@@ -12,8 +13,8 @@ class CGIExecutor {
   std::string script_path_;
   std::vector<const char*> argv_;
   std::vector<const char*> meta_vars_;  // メタ変数(環境変数)
-  void prepareCgiExecution(const HttpRequest& request, const std::string& script_path,
-                           const std::string& path_info, const int cgi_sock, const int cli_sock);
+  void prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
+                           const int cgi_sock, const int cli_sock);
   void createScriptPath(const std::string& script_path);
   void createArgv(const std::string& script_path);
   void createMetaVars(const HttpRequest& request, const std::string& path_info, const int cli_sock);
@@ -24,7 +25,7 @@ class CGIExecutor {
  public:
   CGIExecutor();
   ~CGIExecutor();
-  void executeCgiScript(const HttpRequest& request, const std::string& script_path, const std::string& path_info,
+  void executeCgiScript(const HttpRequest& request, const HttpResponse& response,
                         const int cgi_sock, const int cli_sock);
   const std::string& getScriptPath() const;
   const std::vector<const char*>& getArgv() const;
