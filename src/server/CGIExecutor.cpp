@@ -20,8 +20,9 @@ cgi::CGIExecutor::CGIExecutor() {}
 
 cgi::CGIExecutor::~CGIExecutor() {}
 
-void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const std::string& script_path, const std::string& path_info,
-                                        const int cgi_sock, const int cli_sock) {
+void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const std::string& script_path,
+                                        const std::string& path_info, const int cgi_sock,
+                                        const int cli_sock) {
   prepareCgiExecution(request, script_path, path_info, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
          const_cast<char* const*>(this->meta_vars_.data()));
@@ -31,7 +32,8 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const std::s
 }
 
 void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const std::string& script_path,
-                                           const std::string& path_info, const int cgi_sock, const int cli_sock) {
+                                           const std::string& path_info, const int cgi_sock,
+                                           const int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
   createScriptPath(script_path);
   createArgv(script_path);
@@ -60,7 +62,8 @@ void cgi::CGIExecutor::createArgv(const std::string& script_path) {
   this->argv_.push_back(NULL);
 }
 
-void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::string& path_info, const int cli_sock) {
+void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::string& path_info,
+                                      const int cli_sock) {
   const static char* kContentType = "content-type";
 
   this->meta_vars_.push_back("AUTH_TYPE=");  // Authorizationをparseするロジックを実装しないため、値は空文字
@@ -80,10 +83,10 @@ void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::str
   if (!path_info.empty()) path_info_var += path_info;
   this->meta_vars_.push_back(path_info_var.c_str());
 
-  this->meta_vars_.push_back("PATH_TRANSLATED=");  // pathinfoと同じ
+  this->meta_vars_.push_back("PATH_TRANSLATED=");  // path translatedを受け渡す実装になっていないので値は空文字
 
   const static std::string query_string = std::string("QUERY_STRING=") + request.queries;
-  this->meta_vars_.push_back(query_string.c_str());  // pathinfoと同じ
+  this->meta_vars_.push_back(query_string.c_str());  // PATH_TRANSLATEDと同じ
 
   const std::string ip_address = Utils::socketToStrIPAddress(cli_sock);
   const static std::string remote_addr = std::string("REMOTE_ADDR=") + ip_address;
