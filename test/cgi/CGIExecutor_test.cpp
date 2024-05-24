@@ -173,7 +173,7 @@ TEST(cgi_executor, meta_vars) {
   const std::string expect = expect_header + "<h1>env vars list</h1>" + "<h2>AUTH_TYPE=</h2>" +
                              "<h2>CONTENT_LENGTH=" + std::to_string(cd.request.body.size()) + "</h2>" +
                              "<h2>CONTENT_TYPE=text/html</h2>" + "<h2>GATEWAY_INTERFACE=CGI/1.1</h2>" +
-                             "<h2>PATH_INFO=</h2>" + "<h2>PATH_TRANSLATED=</h2>" +
+                             "<h2>PATH_INFO=/a/b/c/d//e</h2>" + "<h2>PATH_TRANSLATED=</h2>" +
                              "<h2>QUERY_STRING=one=1&two=2&three=3</h2>"
                              // + "<h2>REMOTE_ADDR=127.0.0.1</h2>" テスト不可のため、別のテストを追加
                              // + "<h2>REMOTE_HOST=127.0.0.1</h2>" テスト不可のため、別のテストを追加
@@ -181,5 +181,23 @@ TEST(cgi_executor, meta_vars) {
                              "<h2>SERVER_NAME=tt</h2>"
                              // + "<h2>SERVER_PORT=4242</h2>" テスト不可のため、別のテストを追加
                              + "<h2>SERVER_PROTOCOL=HTTP/1.1</h2>" + "<h2>SERVER_SOFTWARE=webserv/1.0</h2>";
-  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/meta_vars.py", "", cd.request, expect);
+  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/meta_vars.py", "/a/b/c/d//e", cd.request, expect);
 }
+
+TEST(cgi_executor, path_info_GET) {
+  ConnectionData cd;
+  cd.request =
+      test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3", "",
+                        {{"Host", "tt"}, {"content-type", "text/html"}});
+
+  const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
+  const std::string expect = expect_header +
+  "<ul>\r\n" +
+  "<li><a href=\"a\">a</a></li>" +
+  "<li><a href=\"b\">b</a></li>" +
+  "<li><a href=\"c\">c</a></li>" +
+  "</ul>\r\n";
+
+  test::testCgiOutput(cd.cgi_handler_, "test/cgi/cgi_files/executor/path_info.py", "/test/cgi/cgi_files/executor/path_info_dir/", cd.request, expect);
+}
+ 
