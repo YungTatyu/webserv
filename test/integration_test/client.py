@@ -3,10 +3,12 @@
 import sys
 import socket
 import select
+import os
+import time
 
 
 def replace_escape_sequences(input_str):
-    escape_sequences = {r"\\n": "\n", r"\\r": "\r", r"\\t": "\t", r"\\\\": "\\"}
+    escape_sequences = {r"\n": "\n", r"\r": "\r", r"\t": "\t", r"\\": "\\", r"\0": "\0"}
 
     for esc_seq, real_char in escape_sequences.items():
         input_str = input_str.replace(esc_seq, real_char)
@@ -19,11 +21,16 @@ def readline():
 
 
 def send_request(cli_sock):
-    print("request: ", end="", file=sys.stderr, flush=True)
+    # どうしてもbufferがフラッシュされないのでコメントアウト
+    # print("request: ", end="", file=sys.stderr, flush=True)
+    # os.fsync(sys.stderr.fileno())
+    # time.sleep(0.1)
     message = readline()
     message = replace_escape_sequences(message)
+    if not message:
+        return
+    print(f'sending "{message}"', file=sys.stderr, flush=True)
     cli_sock.sendall(message.encode("utf-8"))
-    print(f'"{message}" sent', file=sys.stderr)
 
 
 def recv_response(cli_sock):
