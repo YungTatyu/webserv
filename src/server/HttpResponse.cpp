@@ -451,13 +451,13 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     return sw_error_page_phase;
   }
 
-  // clientのip_addressを取る
+  // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
   if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0) {
     std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": "
               << strerror(errno) << ")" << std::endl;
-    // getsockname()ダメだったらどうするか？
+    // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
   } else
     return sw_search_location_phase;
@@ -490,11 +490,12 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
   if (ret == ConfigHandler::ACCESS_DENY) {
     response.setStatusCode(403);
     return sw_error_page_phase;
-  } else if (ret == ConfigHandler::METHOD_DENY) {
+  }
+  if (ret == ConfigHandler::METHOD_DENY) {
     response.setStatusCode(405);
     return sw_error_page_phase;
-  } else
-    return sw_uri_check_phase;
+  }
+  return sw_uri_check_phase;
 }
 
 void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& return_directive) {
