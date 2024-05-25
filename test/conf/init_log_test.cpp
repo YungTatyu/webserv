@@ -53,7 +53,6 @@ class InitLogTest : public ::testing::Test {
     // テストケースのクリーンアップ処理
     const testing::TestInfo* test_info = testing::UnitTest::GetInstance()->current_test_info();
     if (static_cast<std::string>(test_info->name()) == "initAcsLogFds_Success") {
-      config::terminateLogFds(config_);
       unlink("test/conf/init_log_files/test_server1_access.log");
       unlink("test/conf/init_log_files/test_server2_access.log");
       unlink("test/conf/init_log_files/test_server3_access.log");
@@ -64,7 +63,6 @@ class InitLogTest : public ::testing::Test {
       unlink("test/conf/init_log_files/test_location3-1_access.log");
       unlink("test/conf/init_log_files/test_location3-2_access.log");
     } else if (static_cast<std::string>(test_info->name()) == "initAcsLogFds_Fail") {
-      config::terminateLogFds(config_);
       unlink("test/conf/init_log_files/test_server1_access.log");
       unlink("test/conf/init_log_files/test_server2_access.log");
       unlink("test/conf/init_log_files/test_server3_access.log");
@@ -73,7 +71,6 @@ class InitLogTest : public ::testing::Test {
       unlink("test/conf/init_log_files/test_location2-1_access.log");
       unlink("test/conf/init_log_files/test_location2-2_access.log");
     } else if (static_cast<std::string>(test_info->name()) == "initErrLogFds_Success") {
-      config::terminateLogFds(config_);
       unlink("off");
       unlink("test/conf/init_log_files/test_error.log");
       unlink("test/conf/init_log_files/test_server1_error.log");
@@ -86,7 +83,6 @@ class InitLogTest : public ::testing::Test {
       unlink("test/conf/init_log_files/test_location3-1_error.log");
       unlink("test/conf/init_log_files/test_location3-2_error.log");
     } else if (static_cast<std::string>(test_info->name()) == "initErrLogFds_Fail") {
-      config::terminateLogFds(config_);
       unlink("off");
       unlink("test/conf/init_log_files/test_error.log");
       unlink("test/conf/init_log_files/test_server1_error.log");
@@ -96,6 +92,7 @@ class InitLogTest : public ::testing::Test {
       unlink("test/conf/init_log_files/test_location1-2_error.log");
       unlink("test/conf/init_log_files/test_location2-1_error.log");
     }
+    config::terminateLogFds(config_);
     delete config_;
   }
 

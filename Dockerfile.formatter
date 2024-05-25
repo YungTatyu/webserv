@@ -1,20 +1,17 @@
 FROM alpine:latest
 
-WORKDIR .
+WORKDIR /app
 
-RUN apk update && apk add --upgrade apk-tools && apk upgrade --available
-
-RUN apk add bash
-
-RUN apk add --no-cache clang-extra-tools && \
-    clang-format --version
-
-RUN apk add --update python3 py3-pip && rm /usr/lib/python3.11/EXTERNALLY-MANAGED && \
-    apk add --no-cache python3 py3-pip && \
+RUN apk update && \
+    apk add --upgrade apk-tools && \
+    apk upgrade --available && \
+    apk add bash clang-extra-tools python3 py3-pip py3-virtualenv && \
+    clang-format --version && \
+    python3 -m venv /app/venv && \
+    . /app/venv/bin/activate && \
     pip install --upgrade pip && \
-    pip3 install black
-
-RUN apk add --upgrade shfmt
+    pip install black && \
+    apk add --upgrade shfmt
 
 COPY . .
 
