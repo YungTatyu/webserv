@@ -173,20 +173,23 @@ class ResponseTest {
                   });
   }
 
-  void testResponse(const std::string& status_code_line) const {
+  void testResponse(const std::string &status_code_line) const {
     int i = 0;
     const std::string expect = createResponse(status_code_line, false);
     const std::string expect_head = createResponse(status_code_line, true);
-    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
-                  [this, &i, &expect, &expect_head](TiedServer tied_server) {  // testするip adressの数だけloop
-                    std::for_each(this->methods_.begin(), this->methods_.end(),
-                                  [this, &i, &tied_server,
-                                   &expect, &expect_head](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    if (method == config::HEAD) EXPECT_EQ(this->final_responses_[i], expect_head);
-                                    else EXPECT_EQ(this->final_responses_[i], expect);
-                                    ++i;
-                                  });
-                  });
+    std::for_each(
+        this->tied_servers_.begin(), this->tied_servers_.end(),
+        [this, &i, &expect, &expect_head](TiedServer tied_server) {  // testするip adressの数だけloop
+          std::for_each(this->methods_.begin(), this->methods_.end(),
+                        [this, &i, &tied_server, &expect,
+                         &expect_head](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                          if (method == config::HEAD)
+                            EXPECT_EQ(this->final_responses_[i], expect_head);
+                          else
+                            EXPECT_EQ(this->final_responses_[i], expect);
+                          ++i;
+                        });
+        });
   }
 
   /**
