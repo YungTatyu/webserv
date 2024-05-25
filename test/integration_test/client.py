@@ -52,17 +52,20 @@ def watch_events(cli_sock):
                 recv_response(cli_sock)
 
 
+def client(ip_address, port):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((ip_address, port))
+    watch_events(client_socket)
+
+
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python client.py <ip_address> <port>", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} <ip_address> <port>", file=sys.stderr)
         sys.exit(1)
 
     ip_address = "127.0.0.1" if sys.argv[1] == "localhost" else sys.argv[1]
     port = int(sys.argv[2])
-
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((ip_address, port))
-    watch_events(client_socket)
+    client(ip_address, port)
     return 1
 
 
