@@ -24,7 +24,7 @@ TEST(HttpResponseIndex, index_in_server) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
+  test.testResponse(HttpResponse::status_line_map_[200]);
 }
 
 TEST(HttpResponseIndex, index_in_loc) {
@@ -42,7 +42,7 @@ TEST(HttpResponseIndex, index_in_loc) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
+  test.testResponse(HttpResponse::status_line_map_[200]);
 }
 
 TEST(HttpResponseIndex, index_default) {
@@ -60,7 +60,7 @@ TEST(HttpResponseIndex, index_default) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
+  test.testResponse(HttpResponse::status_line_map_[200]);
 }
 
 TEST(HttpResponseIndex, no_location_and_not_root_uri) {
@@ -78,5 +78,5 @@ TEST(HttpResponseIndex, no_location_and_not_root_uri) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
+  test.testResponse(HttpResponse::status_line_map_[200]);
 }

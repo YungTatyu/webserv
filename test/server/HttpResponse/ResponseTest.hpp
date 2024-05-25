@@ -173,14 +173,17 @@ class ResponseTest {
                   });
   }
 
-  void testResponse(const std::string &expect) const {
+  void testResponse(const std::string& status_code_line) const {
     int i = 0;
+    const std::string expect = createResponse(status_code_line, false);
+    const std::string expect_head = createResponse(status_code_line, true);
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
-                  [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                  [this, &i, &expect, &expect_head](TiedServer tied_server) {  // testするip adressの数だけloop
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
-                                   &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    if (method != config::HEAD) EXPECT_EQ(this->final_responses_[i], expect);
+                                   &expect, &expect_head](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    if (method == config::HEAD) EXPECT_EQ(this->final_responses_[i], expect_head);
+                                    else EXPECT_EQ(this->final_responses_[i], expect);
                                     ++i;
                                   });
                   });
@@ -358,7 +361,7 @@ class ResponseTest {
    * @param status_code_line
    * @return std::string
    */
-  std::string createResponse(const std::string &status_code_line) const {
+  std::string createResponse(const std::string &status_code_line, bool is_head_method) const {
     const HttpResponse response = this->responses_[0];
     const string_map_case_insensitive headers = response.headers_;
 
@@ -367,6 +370,7 @@ class ResponseTest {
     for (string_map_case_insensitive::const_iterator it = headers.begin(); it != headers.end(); ++it)
       res += (toTitleCase(it->first) + ": " + it->second + "\r\n");
     res += "\r\n";
+    if (is_head_method) return res;
     res += response.body_;
     return res;
   }
