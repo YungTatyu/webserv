@@ -43,8 +43,7 @@ bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const HttpRespo
   if (pid == -1) return false;
   if (pid == 0) {
     close(this->sockets_[SOCKET_PARENT]);
-    this->cgi_executor_.executeCgiScript(request, response, this->sockets_[SOCKET_CHILD],
-                                         this->cli_socket_);
+    this->cgi_executor_.executeCgiScript(request, response, this->sockets_[SOCKET_CHILD], this->cli_socket_);
   }
   this->cgi_process_id_ = pid;
   close(this->sockets_[SOCKET_CHILD]);

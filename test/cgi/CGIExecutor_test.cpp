@@ -163,9 +163,9 @@ TEST(cgi_executor, client_redirect_res_doc) {
 
 TEST(cgi_executor, body) {
   ConnectionData cd;
-  cd.request = test::initRequest(
-      config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "",
-      "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n", {{"Host", "tt"}, {"Content-Length", "59"}});
+  cd.request = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "",
+                                 "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n",
+                                 {{"Host", "tt"}, {"Content-Length", "59"}});
   cd.response_ = test::initResponse("test/cgi/cgi_files/executor/body.py", "");
 
   const std::string expect_header = "Status: 200\r\nContent-Type: text/html\r\n\r\n";
@@ -200,7 +200,8 @@ TEST(cgi_executor, path_info_GET) {
   ConnectionData cd;
   cd.request = test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3",
                                  "", {{"Host", "tt"}, {"content-type", "text/html"}});
-  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/path_info.py", "/test/cgi/cgi_files/executor/path_info_dir/");
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/path_info.py",
+                                    "/test/cgi/cgi_files/executor/path_info_dir/");
 
   const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = expect_header + "<ul>\r\n" + "<li><a href=\"a\">a</a></li>\r\n" +
@@ -214,27 +215,17 @@ TEST(cgi_executor, path_info_POST) {
   ConnectionData cd;
   cd.request = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "", "name=mahayase",
                                  {{"Host", "tt"}, {"content-type", "text/html"}, {"Content-Length", "13"}});
-  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/post_and_pathinfo.py", "/test/cgi/cgi_files/executor/path_info_dir/");
+  cd.response_ = test::initResponse("test/cgi/cgi_files/executor/post_and_pathinfo.py",
+                                    "/test/cgi/cgi_files/executor/path_info_dir/");
 
   const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
-  const std::string expect = expect_header +
-  "<!doctype html>\n" +
-  "<html>\n" +
-  "<body>\n" +
-  "<h2>Hello, mahayase!</h2>\n\n" +
-  "<h2>Enter your name</h2>\n" +
-  "<form method=\"post\" action=\"\">\n" +
-  "    <label for=\"name\">Name:</label>\n" +
-  "    <input type=\"text\" id=\"name\" name=\"name\">\n" +
-  "    <input type=\"submit\" value=\"Submit\">\n" +
-  "</form>\n\n" +
-  "<ul>\n" +
-  "    <li><a href=\"a\">a</a></li>\n" +
-  "    <li><a href=\"b\">b</a></li>\n" +
-  "    <li><a href=\"c\">c</a></li>\n" +
-  "</ul>\n" +
-  "</body>\n" +
-  "</html>\n";
+  const std::string expect =
+      expect_header + "<!doctype html>\n" + "<html>\n" + "<body>\n" + "<h2>Hello, mahayase!</h2>\n\n" +
+      "<h2>Enter your name</h2>\n" + "<form method=\"post\" action=\"\">\n" +
+      "    <label for=\"name\">Name:</label>\n" + "    <input type=\"text\" id=\"name\" name=\"name\">\n" +
+      "    <input type=\"submit\" value=\"Submit\">\n" + "</form>\n\n" + "<ul>\n" +
+      "    <li><a href=\"a\">a</a></li>\n" + "    <li><a href=\"b\">b</a></li>\n" +
+      "    <li><a href=\"c\">c</a></li>\n" + "</ul>\n" + "</body>\n" + "</html>\n";
 
   test::testCgiOutput(cd, expect);
 }

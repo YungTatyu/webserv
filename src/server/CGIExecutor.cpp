@@ -81,7 +81,8 @@ void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::str
   if (!path_info.empty()) path_info_var += path_info;
   this->meta_vars_.push_back(path_info_var.c_str());
 
-  this->meta_vars_.push_back("PATH_TRANSLATED=");  // path translatedを受け渡す実装になっていないので値は空文字
+  this->meta_vars_.push_back(
+      "PATH_TRANSLATED=");  // path translatedを受け渡す実装になっていないので値は空文字
 
   const static std::string query_string = std::string("QUERY_STRING=") + request.queries;
   this->meta_vars_.push_back(query_string.c_str());  // PATH_TRANSLATEDと同じ
