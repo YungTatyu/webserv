@@ -749,7 +749,7 @@ HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& respo
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
     if (!isExecutable(response.res_file_path_)) {
       // TODO: ここのエラー番号これでいい？
-      response.setStatusCode(500);
+      response.setStatusCode(403);
       return sw_error_page_phase;
     }
     response.state_ = RES_EXECUTE_CGI;

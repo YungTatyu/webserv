@@ -443,14 +443,14 @@ TEST(HttpResponseRoot, path_info7) {
       {config::REQUEST_METHOD::GET, config::REQUEST_METHOD::POST, config::REQUEST_METHOD::DELETE},
       "/cgi-bin/not_executable.py/path/info/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = test.createDefaultErrorBody(500);
+  const std::string expect_body = test.createDefaultErrorBody(403);
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
       {"Content-Length", std::to_string(expect_body.size())},
       {"Content-Type", "text/html"},
-      {"Connection", "keep-alive"},
+      {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(test.createResponse(HttpResponse::status_line_map_[500]));
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
