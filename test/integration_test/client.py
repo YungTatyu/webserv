@@ -3,8 +3,6 @@
 import sys
 import socket
 import select
-import os
-import time
 
 
 def replace_escape_sequences(input_str):
@@ -53,35 +51,44 @@ def send_request(cli_sock):
     cli_sock.sendall(message.encode("utf-8"))
 
 
-def recv_response(cli_sock):
+def recv_response(cli_sock, request_num):
     response = receive_full_response(cli_sock)
     if not response:
-        sys.exit(1)
-    print(f'response: "{response}"', flush=True)
+        return ""
+    if request_num == 0:
+        print(f'response: "{response}"', flush=True)
+    return response
 
 
-def watch_events(cli_sock):
-    inputs = [cli_sock, sys.stdin]
+def watch_events(cli_sock, request_num, request=""):
+    if not hasattr(watch_events, "cnt"):
+        watch_events.cnt = 0
+    inputs = [cli_sock]
+    if request_num == 0:
+        inputs.append(sys.stdin)
+    else:
+        cli_sock.sendall(request.encode("utf-8"))
+    responses = []
     while True:
         readable, _, _ = select.select(inputs, [], [])
         for sock in readable:
             if sock is sys.stdin:
                 send_request(cli_sock)
             elif sock is cli_sock:
-                recv_response(cli_sock)
+                buffer = recv_response(cli_sock, request_num)
+                if not buffer:
+                    return
+                watch_events.cnt += 1
+                responses.append(buffer)
+                if request_num != 0 and watch_events.cnt == request_num:
+                    return responses
 
 
-def send_and_recv(cli_sock, request):
-    cli_sock.sendall(request.encode("utf-8"))
-    return receive_full_response(cli_sock)
-
-
-def client(ip_address, port, request=""):
+def client(ip_address, port, request="", request_num=0):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip_address, port))
-    if request:
-        return print(send_and_recv(client_socket, request))
-    watch_events(client_socket)
+    watch_events(client_socket, request_num, request)
+    # print(watch_events(client_socket, request_num, request))
 
 
 def main():
@@ -92,6 +99,9 @@ def main():
     ip_address = "127.0.0.1" if sys.argv[1] == "localhost" else sys.argv[1]
     port = int(sys.argv[2])
     client(ip_address, port)
+    # client(
+    #     ip_address, port, "GET / HTTP/1.1\nhost:tt\n\nGET / HTTP/1.1\nhost:tt\n\n", 2
+    # )
     return 1
 
 
