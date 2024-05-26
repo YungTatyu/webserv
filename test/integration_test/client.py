@@ -84,7 +84,7 @@ def watch_events(cli_sock, request_num, request=""):
                     return responses
 
 
-def client(ip_address, port, request="", request_num=0):
+def spawn_client(ip_address, port, request_num=0, request=""):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip_address, port))
     watch_events(client_socket, request_num, request)
@@ -98,7 +98,7 @@ def main():
 
     ip_address = "127.0.0.1" if sys.argv[1] == "localhost" else sys.argv[1]
     port = int(sys.argv[2])
-    client(ip_address, port)
+    spawn_client(ip_address, port)
     # client(
     #     ip_address, port, "GET / HTTP/1.1\nhost:tt\n\nGET / HTTP/1.1\nhost:tt\n\n", 2
     # )
