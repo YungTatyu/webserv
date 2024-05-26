@@ -20,6 +20,26 @@ def readline():
     return message[:-1]  # 最後の改行を削除
 
 
+def receive_full_response(sock, timeout=3):
+    sock.settimeout(timeout)
+    BUFFER_SIZE = 1024
+    response = b""
+
+    try:
+        while True:
+            buffer = sock.recv(BUFFER_SIZE)
+            if len(buffer) == 0:
+                print("server closed connection")
+                return ""
+            response += buffer
+            if len(buffer) < BUFFER_SIZE:
+                break
+    except sock.timeout:
+        print("recv() timeout")
+        return ""
+    return response.decode("utf-8")
+
+
 def send_request(cli_sock):
     # どうしてもbufferがフラッシュされないのでコメントアウト
     # print("request: ", end="", file=sys.stderr, flush=True)
@@ -34,11 +54,10 @@ def send_request(cli_sock):
 
 
 def recv_response(cli_sock):
-    response = cli_sock.recv(1024)
+    response = receive_full_response(cli_sock)
     if not response:
-        print("Server closed the connection.")
         sys.exit(1)
-    print(f'response: "{response.decode()}"', flush=True)
+    print(f'response: "{response}"', flush=True)
 
 
 def watch_events(cli_sock):
@@ -52,9 +71,16 @@ def watch_events(cli_sock):
                 recv_response(cli_sock)
 
 
-def client(ip_address, port):
+def send_and_recv(cli_sock, request):
+    cli_sock.sendall(request.encode("utf-8"))
+    return receive_full_response(cli_sock)
+
+
+def client(ip_address, port, request=""):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip_address, port))
+    if request:
+        return print(send_and_recv(client_socket, request))
     watch_events(client_socket)
 
 
