@@ -58,10 +58,31 @@ class HttpResponseMix : public ::testing::Test {
     this->request_.method = method;
   }
 
-  void ASSERT_CORRECT_RESPONSE(const std::vector<std::string> &expect, const std::string &actual) {
-    for (size_t i = 0; i < expect.size(); ++i) {
-      ASSERT_TRUE(actual.find(expect[i]) != std::string::npos);
+  std::string createHeader(const std::string &status_code_line) const {
+    const string_map_case_insensitive headers = this->response_.headers_;
+
+    std::string res = "HTTP/1.1 ";
+    res += (status_code_line + "\r\n");
+    for (string_map_case_insensitive::const_iterator it = headers.begin(); it != headers.end(); ++it)
+      res += (toTitleCase(it->first) + ": " + it->second + "\r\n");
+    res += "\r\n";
+    return res;
+  }
+
+  std::string toTitleCase(const std::string &input) const {
+    std::string re = input;
+    std::string::iterator it = std::find(re.begin(), re.end(), '-');
+    while (it != re.end()) {
+      ++it;
+      if (it == re.end()) break;
+      *it = std::toupper(*it);
+      it = std::find(it, re.end(), '-');
     }
+    return re;
+  }
+
+  void ASSERT_CORRECT_RESPONSE(const std::string &expect, const std::string &actual) {
+    ASSERT_EQ(expect, actual);
   }
 
   ConfigHandler config_handler_;
@@ -77,24 +98,14 @@ TEST_F(HttpResponseMix, try_files_and_alias) {
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
 
   // 正解response
-  std::vector<std::string> expect_res;
   std::string final_response;
+  std::string expect_res;
 
-  expect_res.push_back("HTTP/1.1 200 OK");
-  expect_res.push_back("Server: webserv/1.0");
-  expect_res.push_back("Connection: keep-alive");
-  expect_res.push_back("Content-Type: text/html");
-  expect_res.push_back("Content-Length: 286");
-  std::ifstream ifs("test/server/HttpResponse/mix/file/aliasHtml/alias.html");
-  ASSERT_TRUE(ifs.is_open());
-  std::stringstream buffer;
-  buffer << ifs.rdbuf();
-  ifs.close();
-  expect_res.push_back(buffer.str());
-
-  // 関数適用
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[200]);
+  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/aliasHtml/alias.html");
+
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
 }
@@ -105,24 +116,14 @@ TEST_F(HttpResponseMix, try_files_and_root_in_loc) {
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
 
   // 正解response
-  std::vector<std::string> expect_res;
+  std::string expect_res;
   std::string final_response;
 
-  expect_res.push_back("HTTP/1.1 200 OK");
-  expect_res.push_back("Server: webserv/1.0");
-  expect_res.push_back("Connection: keep-alive");
-  expect_res.push_back("Content-Type: text/html");
-  expect_res.push_back("Content-Length: 272");
-  std::ifstream ifs("test/server/HttpResponse/mix/file/index.html");
-  ASSERT_TRUE(ifs.is_open());
-  std::stringstream buffer;
-  buffer << ifs.rdbuf();
-  ifs.close();
-  expect_res.push_back(buffer.str());
-
-  // 関数適用
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[200]);
+  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/index.html");
+
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
 }
@@ -133,24 +134,14 @@ TEST_F(HttpResponseMix, try_files_internal_redirect) {
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
 
   // 正解response
-  std::vector<std::string> expect_res;
   std::string final_response;
+  std::string expect_res;
 
-  expect_res.push_back("HTTP/1.1 200 OK");
-  expect_res.push_back("Server: webserv/1.0");
-  expect_res.push_back("Connection: keep-alive");
-  expect_res.push_back("Content-Type: text/html");
-  expect_res.push_back("Content-Length: 274");
-  std::ifstream ifs("test/server/HttpResponse/mix/file/internal_redirect.html");
-  ASSERT_TRUE(ifs.is_open());
-  std::stringstream buffer;
-  buffer << ifs.rdbuf();
-  ifs.close();
-  expect_res.push_back(buffer.str());
-
-  // 関数適用
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[200]);
+  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/internal_redirect.html");
+
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
 }
@@ -161,24 +152,86 @@ TEST_F(HttpResponseMix, try_files_error_page) {
   tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
 
   // 正解response
-  std::vector<std::string> expect_res;
   std::string final_response;
+  std::string expect_res;
 
-  expect_res.push_back("HTTP/1.1 405 Not Allowed");
-  expect_res.push_back("Server: webserv/1.0");
-  expect_res.push_back("Connection: close");
-  expect_res.push_back("Content-Type: text/html");
-  expect_res.push_back("Content-Length: 272");
-  std::ifstream ifs("test/server/HttpResponse/mix/file/index.html");
-  ASSERT_TRUE(ifs.is_open());
-  std::stringstream buffer;
-  buffer << ifs.rdbuf();
-  ifs.close();
-  expect_res.push_back(buffer.str());
-
-  // 関数適用
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[405]);
+  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/index.html");
+
+  // 結果確認
+  ASSERT_CORRECT_RESPONSE(expect_res, final_response);
+}
+
+/*
+ * HEAD method ver.
+ */
+
+TEST_F(HttpResponseMix, try_files_and_alias_HEAD) {
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::HEAD,
+              "/alias/", HttpRequest::PARSE_COMPLETE);
+  tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
+
+  // 正解response
+  std::string final_response;
+  std::string expect_res;
+
+  final_response =
+      HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[200]);
+
+  // 結果確認
+  ASSERT_CORRECT_RESPONSE(expect_res, final_response);
+}
+
+TEST_F(HttpResponseMix, try_files_and_root_in_loc_HEAD) {
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::HEAD,
+              "/location-root/", HttpRequest::PARSE_COMPLETE);
+  tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
+
+  // 正解response
+  std::string final_response;
+  std::string expect_res;
+
+  final_response =
+      HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[200]);
+
+  // 結果確認
+  ASSERT_CORRECT_RESPONSE(expect_res, final_response);
+}
+
+TEST_F(HttpResponseMix, try_files_internal_redirect_HEAD) {
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::HEAD,
+              "/redirect/", HttpRequest::PARSE_COMPLETE);
+  tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
+
+  // 正解response
+  std::string final_response;
+  std::string expect_res;
+
+  final_response =
+      HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[200]);
+
+  // 結果確認
+  ASSERT_CORRECT_RESPONSE(expect_res, final_response);
+}
+
+TEST_F(HttpResponseMix, try_files_error_page_HEAD) {
+  initRequest({{"host", "test_server"}, {"User-Agent", "Mozilla/5.0"}}, config::REQUEST_METHOD::HEAD,
+              "/code-error-page/", HttpRequest::PARSE_COMPLETE);
+  tied_server_ = config_handler_.createTiedServer("127.0.0.1", 4242);
+
+  // 正解response
+  std::string final_response;
+  std::string expect_res;
+
+  final_response =
+      HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
+  expect_res = createHeader(HttpResponse::status_line_map_[405]);
+
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
 }
