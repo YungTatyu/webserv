@@ -367,6 +367,9 @@ class ResponseTest {
     for (string_map_case_insensitive::const_iterator it = headers.begin(); it != headers.end(); ++it)
       res += (toTitleCase(it->first) + ": " + it->second + "\r\n");
     res += "\r\n";
+
+    if (this->request_.method == config::HEAD) return res;
+
     res += response.body_;
     return res;
   }
