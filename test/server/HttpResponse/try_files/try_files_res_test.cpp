@@ -24,7 +24,7 @@ TEST(HttpResponseTry_files, in_server) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseTry_files, in_loc) {
@@ -42,7 +42,7 @@ TEST(HttpResponseTry_files, in_loc) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseTry_files, internal_redirect) {
@@ -59,7 +59,7 @@ TEST(HttpResponseTry_files, internal_redirect) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseTry_files, internal_redirect_dir_nothing) {
@@ -76,7 +76,7 @@ TEST(HttpResponseTry_files, internal_redirect_dir_nothing) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[500]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[500]));
 }
 
 TEST(HttpResponseTry_files, internal_redirect_file_nothing) {
@@ -93,7 +93,7 @@ TEST(HttpResponseTry_files, internal_redirect_file_nothing) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseTry_files, error_code) {
@@ -111,5 +111,5 @@ TEST(HttpResponseTry_files, error_code) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }

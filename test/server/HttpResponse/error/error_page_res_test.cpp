@@ -26,7 +26,7 @@ TEST(HttpResponseError, not_slash_ending_dir) {
       {"Connection", "keep-alive"},
   });
   test.testBody(test.createDefaultErrorBody(301));
-  test.testResponse(HttpResponse::status_line_map_[301]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }
 
 TEST(HttpResponseError, not_found) {
@@ -46,7 +46,7 @@ TEST(HttpResponseError, not_found) {
       {"Connection", "close"},
   });
   test.testBody(test.createDefaultErrorBody(404));
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseError, bad_request) {
@@ -66,7 +66,7 @@ TEST(HttpResponseError, bad_request) {
       {"Connection", "close"},
   });
   test.testBody(test.createDefaultErrorBody(400));
-  test.testResponse(HttpResponse::status_line_map_[400]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[400]));
 }
 
 TEST(HttpResponseError, forbidden) {
@@ -86,7 +86,7 @@ TEST(HttpResponseError, forbidden) {
       {"Connection", "close"},
   });
   test.testBody(test.createDefaultErrorBody(403));
-  test.testResponse(HttpResponse::status_line_map_[403]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
 TEST(HttpResponseError, not_allowed) {
@@ -106,5 +106,5 @@ TEST(HttpResponseError, not_allowed) {
       {"Connection", "close"},
   });
   test.testBody(test.createDefaultErrorBody(405));
-  test.testResponse(HttpResponse::status_line_map_[405]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[405]));
 }

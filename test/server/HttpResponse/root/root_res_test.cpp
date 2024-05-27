@@ -27,7 +27,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location1) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_tryfiles_in_location2) {
@@ -45,7 +45,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location2) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_tryfiles_in_location3) {
@@ -63,7 +63,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location3) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_tryfiles_in_location4) {
@@ -81,7 +81,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location4) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, alias_tryfiles_in_location) {
@@ -99,7 +99,7 @@ TEST(HttpResponseRoot, alias_tryfiles_in_location) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 /*
@@ -120,7 +120,7 @@ TEST(HttpResponseRoot, root_index_in_location1) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_index_in_location2) {
@@ -138,7 +138,7 @@ TEST(HttpResponseRoot, root_index_in_location2) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_index_in_location3) {
@@ -156,7 +156,7 @@ TEST(HttpResponseRoot, root_index_in_location3) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_index_in_location4) {
@@ -174,7 +174,7 @@ TEST(HttpResponseRoot, root_index_in_location4) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, alias_index_in_location) {
@@ -192,7 +192,7 @@ TEST(HttpResponseRoot, alias_index_in_location) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[403]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
 /*
@@ -213,7 +213,7 @@ TEST(HttpResponseRoot, root_index_no_location1) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_index_no_location2) {
@@ -231,7 +231,7 @@ TEST(HttpResponseRoot, root_index_no_location2) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_index_no_location3) {
@@ -249,7 +249,7 @@ TEST(HttpResponseRoot, root_index_no_location3) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, root_index_no_location4) {
@@ -267,7 +267,7 @@ TEST(HttpResponseRoot, root_index_no_location4) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 /*
@@ -289,7 +289,7 @@ TEST(HttpResponseRoot, invalid_path1) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseRoot, invalid_path2) {
@@ -307,7 +307,7 @@ TEST(HttpResponseRoot, invalid_path2) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseRoot, invalid_path3) {
@@ -325,7 +325,7 @@ TEST(HttpResponseRoot, invalid_path3) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 TEST(HttpResponseRoot, invalid_path4) {
@@ -343,7 +343,7 @@ TEST(HttpResponseRoot, invalid_path4) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[404]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
 /*
@@ -378,7 +378,7 @@ TEST(HttpResponseRoot, path_info2) {
       {"Connection", "keep-alive"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
 TEST(HttpResponseRoot, path_info3) {
@@ -397,7 +397,7 @@ TEST(HttpResponseRoot, path_info3) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[403]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
 TEST(HttpResponseRoot, path_info4) {
@@ -452,5 +452,5 @@ TEST(HttpResponseRoot, path_info7) {
       {"Connection", "close"},
   });
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[403]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }

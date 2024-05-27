@@ -21,7 +21,7 @@ TEST(HttpResponseAutoindex, in_http_on_and_no_location) {
                     {"Content-Length", std::to_string(1070)},
                     {"Content-Type", "text/html"},
                     {"Connection", "keep-alive"}});
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
   test.testAutoindexEntry(test.responses_[0].body_, 8);
 }
 
@@ -36,7 +36,7 @@ TEST(HttpResponseAutoindex, in_loc_on) {
                     {"Content-Length", std::to_string(1070)},
                     {"Content-Type", "text/html"},
                     {"Connection", "keep-alive"}});
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
   test.testAutoindexEntry(test.responses_[0].body_, 8);
 }
 
@@ -53,7 +53,7 @@ TEST(HttpResponseAutoindex, in_server_off) {
                     {"Content-Type", "text/html"},
                     {"Connection", "close"}});
   test.testBody(expect_body);
-  test.testResponse(HttpResponse::status_line_map_[403]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
 TEST(HttpResponseAutoindex, in_http_on) {
@@ -67,7 +67,7 @@ TEST(HttpResponseAutoindex, in_http_on) {
                     {"Content-Length", std::to_string(1070)},
                     {"Content-Type", "text/html"},
                     {"Connection", "keep-alive"}});
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
   test.testAutoindexEntry(test.responses_[0].body_, 8);
 }
 
@@ -82,6 +82,6 @@ TEST(HttpResponseAutoindex, request_uri_listing) {
                     {"Content-Length", std::to_string(339)},
                     {"Content-Type", "text/html"},
                     {"Connection", "keep-alive"}});
-  test.testResponse(HttpResponse::status_line_map_[200]);
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
   test.testAutoindexEntry(test.responses_[0].body_, 1);
 }
