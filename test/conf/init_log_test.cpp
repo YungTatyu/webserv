@@ -92,6 +92,7 @@ class InitLogTest : public ::testing::Test {
       unlink("test/conf/init_log_files/test_location1-2_error.log");
       unlink("test/conf/init_log_files/test_location2-1_error.log");
     }
+    config::terminateLogFds(config_);
     delete config_;
   }
 
