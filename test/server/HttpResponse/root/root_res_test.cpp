@@ -120,7 +120,6 @@ TEST(HttpResponseRoot, root_tryfiles_in_location1_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -138,7 +137,6 @@ TEST(HttpResponseRoot, root_tryfiles_in_location2_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -156,7 +154,6 @@ TEST(HttpResponseRoot, root_tryfiles_in_location3_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -174,7 +171,6 @@ TEST(HttpResponseRoot, root_tryfiles_in_location4_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -192,7 +188,6 @@ TEST(HttpResponseRoot, alias_tryfiles_in_location_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -307,7 +302,6 @@ TEST(HttpResponseRoot, root_index_in_location1_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -325,7 +319,6 @@ TEST(HttpResponseRoot, root_index_in_location2_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -343,7 +336,6 @@ TEST(HttpResponseRoot, root_index_in_location3_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -361,7 +353,6 @@ TEST(HttpResponseRoot, root_index_in_location4_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -379,7 +370,6 @@ TEST(HttpResponseRoot, alias_index_in_location_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
@@ -476,7 +466,6 @@ TEST(HttpResponseRoot, root_index_no_location1_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -494,7 +483,6 @@ TEST(HttpResponseRoot, root_index_no_location2_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -512,7 +500,6 @@ TEST(HttpResponseRoot, root_index_no_location3_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -530,7 +517,6 @@ TEST(HttpResponseRoot, root_index_no_location4_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -629,7 +615,6 @@ TEST(HttpResponseRoot, invalid_path1_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -647,7 +632,6 @@ TEST(HttpResponseRoot, invalid_path2_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -665,7 +649,6 @@ TEST(HttpResponseRoot, invalid_path3_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -683,7 +666,6 @@ TEST(HttpResponseRoot, invalid_path4_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -819,7 +801,6 @@ TEST(HttpResponseRoot, path_info2_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -837,7 +818,6 @@ TEST(HttpResponseRoot, path_info3_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 
@@ -855,6 +835,5 @@ TEST(HttpResponseRoot, path_info7_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }

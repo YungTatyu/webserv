@@ -133,7 +133,6 @@ TEST(HttpResponseAutoindex, in_server_off_HEAD) {
                     {"Content-Length", std::to_string(expect_body.size())},
                     {"Content-Type", "text/html"},
                     {"Connection", "close"}});
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }
 

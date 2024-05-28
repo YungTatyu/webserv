@@ -124,7 +124,6 @@ TEST(HttpResponseError, not_slash_ending_dir_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(test.createDefaultErrorBody(301));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }
 
@@ -143,7 +142,6 @@ TEST(HttpResponseError, not_found_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(test.createDefaultErrorBody(404));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -162,7 +160,6 @@ TEST(HttpResponseError, bad_request_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(test.createDefaultErrorBody(400));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[400]));
 }
 
@@ -181,6 +178,5 @@ TEST(HttpResponseError, forbidden_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(test.createDefaultErrorBody(403));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[403]));
 }

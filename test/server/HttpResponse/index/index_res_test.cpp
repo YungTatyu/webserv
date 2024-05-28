@@ -98,7 +98,6 @@ TEST(HttpResponseIndex, index_in_server_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -116,7 +115,6 @@ TEST(HttpResponseIndex, index_in_loc_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -134,7 +132,6 @@ TEST(HttpResponseIndex, index_default_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }
 
@@ -152,6 +149,5 @@ TEST(HttpResponseIndex, no_location_and_not_root_uri_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[200]));
 }

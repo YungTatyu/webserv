@@ -119,7 +119,6 @@ TEST(HttpResponseReturn, code_HEAD) {
       {"Content-Type", "text/html"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -137,7 +136,6 @@ TEST(HttpResponseReturn, code_text_HEAD) {
       {"Content-Type", "text/plain"},
       {"Connection", "close"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[404]));
 }
 
@@ -156,7 +154,6 @@ TEST(HttpResponseReturn, url_HEAD) {
       {"Connection", "keep-alive"},
       {"Location", "http://localhost:4244/"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[302]));
 }
 
@@ -175,7 +172,6 @@ TEST(HttpResponseReturn, code_and_url_HEAD) {
       {"Connection", "keep-alive"},
       {"Location", "http://localhost:4242/"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[303]));
 }
 
@@ -193,6 +189,5 @@ TEST(HttpResponseReturn, non_redirect_code_and_url_HEAD) {
       {"Content-Type", "text/plain"},
       {"Connection", "keep-alive"},
   });
-  test.testBody(expect_body);
   test.testResponse(test.createResponse("306"));
 }

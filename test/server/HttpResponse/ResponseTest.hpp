@@ -167,7 +167,7 @@ class ResponseTest {
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
                                    &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    if (method != config::HEAD) EXPECT_EQ(this->responses_[i].body_, expect);
+                                    EXPECT_EQ(this->responses_[i].body_, expect);
                                     ++i;
                                   });
                   });
@@ -180,7 +180,7 @@ class ResponseTest {
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
                                    &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    if (method != config::HEAD) EXPECT_EQ(this->final_responses_[i], expect);
+                                    EXPECT_EQ(this->final_responses_[i], expect);
                                     ++i;
                                   });
                   });
