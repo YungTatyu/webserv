@@ -27,13 +27,13 @@ def receive_full_response(sock, timeout=3):
         while True:
             buffer = sock.recv(BUFFER_SIZE)
             if len(buffer) == 0:
-                print("server closed connection")
+                print("recv() server closed connection", file=sys.stderr)
                 return ""
             response += buffer
             if len(buffer) < BUFFER_SIZE:
                 break
     except sock.timeout:
-        print("recv() timeout")
+        print("recv() timeout", file=sys.stderr)
         return ""
     return response.decode("utf-8")
 
@@ -68,27 +68,38 @@ def watch_events(cli_sock, request_num, request=""):
         inputs.append(sys.stdin)
     else:
         cli_sock.sendall(request.encode("utf-8"))
-    responses = []
-    while True:
-        readable, _, _ = select.select(inputs, [], [])
-        for sock in readable:
-            if sock is sys.stdin:
-                send_request(cli_sock)
-            elif sock is cli_sock:
-                buffer = recv_response(cli_sock, request_num)
-                if not buffer:
-                    return
-                watch_events.cnt += 1
-                responses.append(buffer)
-                if request_num != 0 and watch_events.cnt == request_num:
-                    return responses
+        # print(f'request sent: "{request}"')
+    responses = ""
+    timeout = 3.0 if request_num != 0 else None
+    try:
+        while True:
+            readable, _, _ = select.select(inputs, [], [], timeout)
+            if not readable:
+                return responses
+            for sock in readable:
+                if sock is sys.stdin:
+                    send_request(cli_sock)
+                elif sock is cli_sock:
+                    buffer = recv_response(cli_sock, request_num)
+                    # print(f'buffer:"{buffer}"')
+                    if not buffer:
+                        return
+                    watch_events.cnt += 1
+                    responses += buffer
+                    # print(f"cnt={watch_events.cnt}")
+                    if request_num != 0 and watch_events.cnt >= request_num:
+                        return responses
+    finally:
+        watch_events.cnt = 0
 
 
 def spawn_client(ip_address, port, request_num=0, request=""):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip_address, port))
-    watch_events(client_socket, request_num, request)
+    responses = watch_events(client_socket, request_num, request)
     # print(watch_events(client_socket, request_num, request))
+    client_socket.close()
+    return responses
 
 
 def main():
@@ -98,10 +109,15 @@ def main():
 
     ip_address = "127.0.0.1" if sys.argv[1] == "localhost" else sys.argv[1]
     port = int(sys.argv[2])
-    spawn_client(ip_address, port)
-    # client(
-    #     ip_address, port, "GET / HTTP/1.1\nhost:tt\n\nGET / HTTP/1.1\nhost:tt\n\n", 2
-    # )
+    # spawn_client(ip_address, port)
+    print(
+        spawn_client(
+            ip_address,
+            port,
+            2,
+            "GET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\nGET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\n",
+        )
+    )
     return 1
 
 
