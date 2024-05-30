@@ -43,9 +43,9 @@ class RequestHandler {
  private:
   bool cgiProcessExited(const pid_t process_id) const;
   int handleRequest(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
-                    const int sockfd, std::string &rawRequest);
+                    const int sockfd);
   int handleResponse(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
-                     const int sockfd, std::string &rawRequest);
+                     const int sockfd);
   int handleCgi(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
                 const int sockfd);
   bool addTimerByType(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,

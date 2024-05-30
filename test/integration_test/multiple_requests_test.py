@@ -41,8 +41,8 @@ def parse_status_code(response):
 def expect_status(res, expects):
     actuals = parse_status_code(res)
     for expect, actual in zip_longest(expects, actuals, fillvalue=None):
-        print(f"expect={expect}")
-        print(f"actual={actual}")
+        # print(f"expect={expect}")
+        # print(f"actual={actual}")
         assert expect == actual, f'expected: "{expect}"\nactual  : "{actual}"'
 
 
@@ -60,6 +60,7 @@ def run_test(conf, test_data):
             expect = test_data[EXPECTS][i]
             res = spawn_client(address, port, request_num, request)
             assert res is not None, "Response cannot be None"
+            print(f'response: "{res}"')
             expect_status(res, expect)
     finally:
         WEBSERV.kill()

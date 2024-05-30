@@ -53,6 +53,10 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
 
 ConnectionData* ConnectionManager::getConnection(const int fd) { return connections_.at(fd); }
 
+void ConnectionManager::setRawRequest(const int fd, const std::vector<unsigned char>& rawRequest) {
+  connections_[fd]->raw_request_ = rawRequest;
+}
+
 void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest,
                                       const ssize_t read_bytes) {
   connections_[fd]->raw_request_.insert(connections_[fd]->raw_request_.end(), rawRequest.begin(),

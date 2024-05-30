@@ -70,7 +70,7 @@ def watch_events(cli_sock, request_num, request=""):
         cli_sock.sendall(request.encode("utf-8"))
         # print(f'request sent: "{request}"')
     responses = ""
-    timeout = 3.0 if request_num != 0 else None
+    timeout = 1.0 if request_num != 0 else None
     try:
         while True:
             readable, _, _ = select.select(inputs, [], [], timeout)
@@ -109,15 +109,15 @@ def main():
 
     ip_address = "127.0.0.1" if sys.argv[1] == "localhost" else sys.argv[1]
     port = int(sys.argv[2])
-    # spawn_client(ip_address, port)
-    print(
-        spawn_client(
-            ip_address,
-            port,
-            2,
-            "GET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\nGET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\n",
-        )
-    )
+    spawn_client(ip_address, port)
+    # print(
+    #     spawn_client(
+    #         ip_address,
+    #         port,
+    #         2,
+    #         "GET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\nGET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\n",
+    #     )
+    # )
     return 1
 
 

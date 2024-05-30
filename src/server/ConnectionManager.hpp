@@ -14,7 +14,7 @@ class CGIHandler;
 class ConnectionData {
  public:
   enum EVENT {
-    EV_READ,
+    EV_READ = 0,
     EV_WRITE,
     EV_CGI_READ,
     EV_CGI_WRITE,
@@ -41,6 +41,7 @@ class ConnectionManager {
   ~ConnectionManager();
   void setConnection(const int fd);
   ConnectionData* getConnection(const int fd);
+  void setRawRequest(const int fd, const std::vector<unsigned char>& rawRequest);
   void addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest, const ssize_t read_bytes);
   void setCgiConnection(const int cli_sock, const ConnectionData::EVENT event);
   void removeConnection(const int fd, const bool cgi);
