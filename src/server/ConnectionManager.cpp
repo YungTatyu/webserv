@@ -148,18 +148,21 @@ void ConnectionManager::clearRawRequest(const int fd) {
   cd->raw_request_.clear();
 }
 
-void ConnectionManager::clearCgiResponse(const int fd) {
+/**
+ * @brief リクエストデータ以外を削除する
+ * 一人のクライアントからの複数のリクエストをさばく時に呼ぶ
+ */
+void ConnectionManager::clearResData(const int fd) {
   ConnectionData* cd = this->connections_.at(fd);
+  cd->final_response_.clear();
   cd->cgi_response_.clear();
+  resetCgiSockets(fd);
+  resetSentBytes(fd);
 }
 
 void ConnectionManager::clearConnectionData(const int fd) {
-  ConnectionData* cd = this->connections_.at(fd);
   clearRawRequest(fd);
-  cd->final_response_.clear();
-  clearCgiResponse(fd);
-  resetCgiSockets(fd);
-  resetSentBytes(fd);
+  clearResData(fd);
 }
 
 bool ConnectionManager::isCgiSocket(const int fd) const {

@@ -125,9 +125,6 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
   std::string res(v.begin(), v.end());
-  // cgi resをclearしないといけない
-  // 連続でcgiのリクエストが来た時に、前回のcgi responseを引き継いでしまう
-  connManager.clearCgiResponse(sockfd);
   bool parse_suc = connManager.callCgiParser(sockfd, response, res);
   response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
   re = handleResponse(connManager, configHandler, timerTree, sockfd);
@@ -159,8 +156,10 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
   // requestが残っている場合は、引き続きparseする
   const HttpResponse &response = connManager.getResponse(sockfd);
-  if (!context.empty() && HttpResponse::isKeepaliveConnection(response))
+  if (!context.empty() && HttpResponse::isKeepaliveConnection(response)) {
+    connManager.clearResData(sockfd);
     return handleRequest(connManager, configHandler, timerTree, sockfd);
+  }
   if (!addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE)) {
     // Connection: closeなので接続閉じる
     ioHandler.closeConnection(connManager, timerTree, sockfd);
@@ -180,9 +179,8 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
 
   const std::string body = connManager.getRequest(sockfd).body;
   const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
-  if (connManager.getSentBytes(sockfd) == body.size() ||  // bodyを全て送ったら
-      (cgiProcessExited(cgi_handler.getCgiProcessId())))  // cgi processがすでに死んでいたら
-  {
+  if (connManager.getSentBytes(sockfd) == body.size() ||    // bodyを全て送ったら
+      (cgiProcessExited(cgi_handler.getCgiProcessId()))) {  // cgi processがすでに死んでいたら
     connManager.resetSentBytes(sockfd);
     connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
     return RequestHandler::UPDATE_CGI_READ;

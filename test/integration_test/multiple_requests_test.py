@@ -74,12 +74,16 @@ def test(conf):
     test_data = {
         REQUESTS: [
             f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\nPOST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\n",  # static res test
-            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # dynamic, static res test
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nGET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # dynamic, static res test
             f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.py HTTP/1.1\nhost:tt\n\n",  # dynamic res test
-            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\ncontent-length: 3\n\n333DELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # content-length test
-            f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\n3\n333\n0\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # chunked test
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\ncontent-length: 3\n\n333GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # content-length test
+            f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\n3\n333\n0\n\nGET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # chunked test
             f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE ",  # dynamic res with uncomplite request
-            f"POST /{ROOT}/index.html HTTP/1.1\nhost:tt\n\nDELETE ",  # dynamic res with uncomplite request
+            f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\nDELETE ",  # dynamic res with uncomplite request
+            f"GET /{ROOT}/not_found.html HTTP/1.1\nhost:tt\n\nGET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # error status code
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\ncontent-length: 12\n\nthis is test"
+            + f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n"
+            + f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\n13\nthis is body.\n0\n\n",  # three requests test
         ],
         REQUEST_NUM: [
             2,
@@ -89,6 +93,8 @@ def test(conf):
             2,
             1,
             1,
+            1,
+            3,
         ],
         EXPECTS: [
             [200, 302],
@@ -98,6 +104,8 @@ def test(conf):
             [302, 200],
             [302],
             [200],
+            [404],
+            [302, 200, 302],
         ],
         ADDRESS: "127.0.0.1",
         PORT: 4242,
