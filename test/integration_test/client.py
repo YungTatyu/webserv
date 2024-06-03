@@ -5,6 +5,7 @@ import socket
 import select
 
 
+# 特殊文字を置換
 def replace_escape_sequences(input_str):
     escape_sequences = {r"\n": "\n", r"\r": "\r", r"\t": "\t", r"\\": "\\", r"\0": "\0"}
 
@@ -39,10 +40,6 @@ def receive_full_response(sock, timeout=3):
 
 
 def send_request(cli_sock):
-    # どうしてもbufferがフラッシュされないのでコメントアウト
-    # print("request: ", end="", file=sys.stderr, flush=True)
-    # os.fsync(sys.stderr.fileno())
-    # time.sleep(0.1)
     message = readline()
     message = replace_escape_sequences(message)
     if not message:
@@ -64,7 +61,7 @@ def watch_events(cli_sock, request_num, request=""):
     if not hasattr(watch_events, "cnt"):
         watch_events.cnt = 0
     inputs = [cli_sock]
-    if request_num == 0:
+    if request_num == 0:  # 標準入力からリクエストを受信する場合
         inputs.append(sys.stdin)
     else:
         cli_sock.sendall(request.encode("utf-8"))
@@ -86,7 +83,7 @@ def watch_events(cli_sock, request_num, request=""):
                         return
                     watch_events.cnt += 1
                     responses += buffer
-                    # print(f"cnt={watch_events.cnt}")
+                    # testで送るリクエストの数が指定されている場合は、responseを受け取り次第終了
                     if request_num != 0 and watch_events.cnt >= request_num:
                         return responses
     finally:
