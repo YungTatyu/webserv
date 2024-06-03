@@ -12,7 +12,6 @@ RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                     ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
-  std::cerr << "handle read event\n";
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
     return handleCgiReadEvent(ioHandler, connManager, configHandler, timerTree, sockfd);
   // リスニングソケットへの新規リクエスト
@@ -21,8 +20,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     if (new_sock == -1) return new_sock;
 
     // TODO: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
-    this->addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_CLI_REQUEST);
-    if (!this->isOverWorkerConnections(connManager, configHandler)) return new_sock;
+    addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_CLI_REQUEST);
+    if (!isOverWorkerConnections(connManager, configHandler)) return new_sock;
     int timeout_fd = timerTree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
     if (connManager.isCgiSocket(timeout_fd)) {
@@ -88,7 +87,7 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
   // send開始するまでのtimout追加
   // cgiだったら紐づくclient_socketにタイマーを設定する
   int client = connManager.isCgiSocket(sockfd) ? connManager.getCgiHandler(sockfd).getCliSocket() : sockfd;
-  this->addTimerByType(connManager, configHandler, timerTree, client, Timer::TMO_KEEPALIVE);
+  addTimerByType(connManager, configHandler, timerTree, client, Timer::TMO_KEEPALIVE);
 
   connManager.setEvent(sockfd, ConnectionData::EV_WRITE);  // writeイベントに更新
   return RequestHandler::UPDATE_WRITE;
@@ -117,7 +116,6 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
 
 int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                        ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
-  std::cerr << "handle cgi read event\n";
   ssize_t re = ioHandler.receiveCgiResponse(connManager, sockfd);
   // recv error
   if (re == -1) return RequestHandler::UPDATE_NONE;
@@ -136,7 +134,6 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
 
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
-  std::cerr << "handle write event\n";
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
     return handleCgiWriteEvent(ioHandler, connManager, sockfd);
 
@@ -152,7 +149,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   }
   // 引き続きresponseを送信
   if (re == buff_size) {
-    this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
+    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
     return RequestHandler::UPDATE_NONE;
   }
 
@@ -161,7 +158,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   const HttpResponse &response = connManager.getResponse(sockfd);
   if (!context.empty() && HttpResponse::isKeepaliveConnection(response))
     return handleRequest(connManager, configHandler, timerTree, sockfd);
-  if (!this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE)) {
+  if (!addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE)) {
     // Connection: closeなので接続閉じる
     ioHandler.closeConnection(connManager, timerTree, sockfd);
     return UPDATE_CLOSE;
@@ -176,7 +173,6 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
 int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         const int sockfd) {
-  std::cerr << "handle cgi write event\n";
   ioHandler.sendRequestBody(connManager, sockfd);
 
   const std::string body = connManager.getRequest(sockfd).body;
