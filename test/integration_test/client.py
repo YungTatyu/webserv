@@ -65,7 +65,6 @@ def watch_events(cli_sock, request_num, request=""):
         inputs.append(sys.stdin)
     else:
         cli_sock.sendall(request.encode("utf-8"))
-        # print(f'request sent: "{request}"')
     responses = ""
     timeout = 1.0 if request_num != 0 else None
     try:

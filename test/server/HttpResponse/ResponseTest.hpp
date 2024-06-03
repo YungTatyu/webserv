@@ -36,6 +36,7 @@ class ResponseTest {
 
   ~ResponseTest() {
     if (this->conf_path_.find("AccessLog") != std::string::npos) {
+      config::terminateLogFds(config_handler_.config_);
       unlink("logs/format.log");
     }
     delete this->config_handler_.config_;
@@ -120,12 +121,15 @@ class ResponseTest {
    */
   void generateResponse() {
     int i = 0;
+    std::string ori_uri = this->request_.uri;
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
-                  [this, &i](TiedServer tied_server) {  // testするip adressの数だけloop
+                  [this, &i, &ori_uri](TiedServer tied_server) {  // testするip adressの数だけloop
                     std::for_each(this->methods_.begin(), this->methods_.end(),
-                                  [this, &i, &tied_server](
-                                      config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    this->request_.method = method;     // testするmethodを変える
+                                  [this, &i, &tied_server,
+                                   &ori_uri](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    this->request_.uri =
+                                        ori_uri;  // テスト中に変更されている可能性があるのでuriをもどす
+                                    this->request_.method = method;  // testするmethodを変える
                                     this->responses_.push_back(HttpResponse());
                                     this->final_responses_.push_back(HttpResponse::generateResponse(
                                         this->request_, this->responses_[i], tied_server, this->sockets_[0],
@@ -157,13 +161,29 @@ class ResponseTest {
   }
 
   void testBody(const std::string &expect) const {
-    std::for_each(this->responses_.begin(), this->responses_.end(),
-                  [&expect](HttpResponse response) { EXPECT_EQ(response.body_, expect); });
+    int i = 0;
+    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
+                  [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    std::for_each(this->methods_.begin(), this->methods_.end(),
+                                  [this, &i, &tied_server,
+                                   &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    EXPECT_EQ(this->responses_[i].body_, expect);
+                                    ++i;
+                                  });
+                  });
   }
 
   void testResponse(const std::string &expect) const {
-    std::for_each(this->final_responses_.begin(), this->final_responses_.end(),
-                  [&expect](std::string response) { EXPECT_EQ(response, expect); });
+    int i = 0;
+    std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
+                  [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    std::for_each(this->methods_.begin(), this->methods_.end(),
+                                  [this, &i, &tied_server,
+                                   &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    EXPECT_EQ(this->final_responses_[i], expect);
+                                    ++i;
+                                  });
+                  });
   }
 
   /**
@@ -347,6 +367,9 @@ class ResponseTest {
     for (string_map_case_insensitive::const_iterator it = headers.begin(); it != headers.end(); ++it)
       res += (toTitleCase(it->first) + ": " + it->second + "\r\n");
     res += "\r\n";
+
+    if (this->request_.method == config::HEAD) return res;
+
     res += response.body_;
     return res;
   }
@@ -374,6 +397,16 @@ class ResponseTest {
 
     // absolutepath = ~/webserv
     return static_cast<std::string>(absolute_path);
+  }
+
+  void testPathInfo(HttpResponse::RES_STATE state, const std::string &res_file_path,
+                    const std::string &path_info) {
+    std::for_each(this->responses_.begin(), this->responses_.end(),
+                  [this, &state, &res_file_path, &path_info](HttpResponse response) {
+                    EXPECT_EQ(response.state_, state);
+                    EXPECT_EQ(response.res_file_path_, res_file_path);
+                    EXPECT_EQ(response.path_info_, path_info);
+                  });
   }
 
   int sockets_[2];

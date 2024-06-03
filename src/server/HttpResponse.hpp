@@ -46,6 +46,7 @@ class HttpResponse {
   // public variables
   std::string root_path_;
   std::string res_file_path_;
+  std::string path_info_;
   RES_STATE state_;
   std::string status_code_line_;
   long status_code_;  // response生成するときにstatus_line_map_参照する
@@ -58,7 +59,7 @@ class HttpResponse {
   size_t internal_redirect_cnt_;
   static const size_t kMaxInternalRedirect = 10;
 
-  static std::string createResponse(const HttpResponse& response);
+  std::string createResponse(const config::REQUEST_METHOD& method) const;
   // handle phase methods
   static ResponsePhase handlePreSearchLocationPhase(const HttpRequest::ParseState parse_state,
                                                     HttpResponse& response, const int client_sock,
@@ -72,13 +73,13 @@ class HttpResponse {
                                         struct sockaddr_in client_addr, const ConfigHandler& config_handler);
   static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Location* location,
                                          const ConfigHandler& config_handler);
-  static ResponsePhase handleUriCheckPhase(HttpResponse& response, const HttpRequest& request,
+  static ResponsePhase handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                            const config::Server& server, const config::Location* location);
   static ResponsePhase handleSearchResFilePhase(HttpResponse& response, HttpRequest& request,
                                                 const config::Server& server,
                                                 const config::Location* location,
                                                 const ConfigHandler& config_handler);
-  static ResponsePhase handleContentPhase(HttpResponse& response);
+  static ResponsePhase handleContentPhase(HttpResponse& response, HttpRequest& request);
   static ResponsePhase handleErrorPagePhase(HttpResponse& response, HttpRequest& request,
                                             const config::Server& server, const config::Location* location,
                                             const ConfigHandler& config_handler);
@@ -91,14 +92,21 @@ class HttpResponse {
   static ResponsePhase searchResPath(HttpResponse& response, HttpRequest& request,
                                      const config::Server& server, const config::Location* location,
                                      const ConfigHandler& config_handler);
-  static ResponsePhase Index(HttpResponse& response, HttpRequest& request,
-                             const std::vector<config::Index>& index_list, bool is_autoindex_on,
-                             const std::string& index_dir);
+  static ResponsePhase Index(HttpResponse& response, std::string& request,
+                             const std::vector<config::Index>& index_list, std::string directory_path,
+                             bool is_autoindex_on);
   static ResponsePhase TryFiles(HttpResponse& response, HttpRequest& request,
                                 const config::TryFiles& try_files);
   static void headerFilterPhase(HttpResponse& response, const config::Time& time);
   static std::string detectContentType(const std::string& res_file_path);
   static std::string transformLetter(const std::string& key_str);
+  static char lastChar(const std::string& str);
+  int getStatusCode() const;
+  void setStatusCode(int code);
+  static bool isAccessible(const std::string& file_path);
+  static bool isExecutable(const std::string& file_path);
+  static bool setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request);
+  void separatePathinfo(const std::string& uri, size_t pos);
   static void clear(HttpResponse& response);
 };
 

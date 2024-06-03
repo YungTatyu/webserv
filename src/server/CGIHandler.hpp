@@ -23,14 +23,14 @@ class CGIHandler {
   CGIExecutor cgi_executor_;
   pid_t cgi_process_id_;
   int cli_socket_;  // cgiが紐づくクライアント
-  bool forkCgiProcess(const HttpRequest& request, const std::string& script_path);
+  bool forkCgiProcess(const HttpRequest& request, const HttpResponse& response);
 
  public:
   int sockets_[2];
   CGIHandler();
   ~CGIHandler();
   static bool isCgi(const std::string& script_path);
-  bool callCgiExecutor(const std::string& script_path, const HttpRequest& request, const int cli_sock);
+  bool callCgiExecutor(const HttpResponse& response, const HttpRequest& request, const int cli_sock);
   bool callCgiParser(HttpResponse& response, const std::string& cgi_response);
   void killCgiProcess() const;
   const CGIParser& getCgiParser() const;
