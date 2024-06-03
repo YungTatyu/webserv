@@ -309,11 +309,11 @@ std::string HttpResponse::transformLetter(const std::string& key_str) {
   return result;
 }
 
-std::string HttpResponse::createResponse(const HttpResponse& response) {
+std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) const {
   std::stringstream stream;
 
   // status line
-  stream << http_version << " " << response.status_code_line_ << "\r\n";
+  stream << http_version << " " << this->status_code_line_ << "\r\n";
 
   // headers
   // cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
@@ -323,13 +323,14 @@ std::string HttpResponse::createResponse(const HttpResponse& response) {
   // TODO: 以下の場合に、responseをchunkしたい
   // headerに Content-Lengthがない場合（主にcgiレスポンス）
   // headerに responseが長い場合、例えばbuffer size以上
-  for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
-       it != response.headers_.end(); ++it)
+  for (std::map<std::string, std::string>::const_iterator it = this->headers_.begin();
+       it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
   stream << "\r\n";
+  if (method == config::HEAD) return stream.str();
 
   // body
-  stream << response.body_;
+  stream << this->body_;
   return stream.str();
 }
 
@@ -438,7 +439,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
                                "\n\n");
   response.state_ = RES_COMPLETE;
-  return createResponse(response);
+  return response.createResponse(request.method);
 }
 
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
@@ -450,13 +451,13 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     return sw_error_page_phase;
   }
 
-  // clientのip_addressを取る
+  // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
   if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0) {
     std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": "
               << strerror(errno) << ")" << std::endl;
-    // getsockname()ダメだったらどうするか？
+    // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
   } else
     return sw_search_location_phase;
@@ -489,11 +490,12 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
   if (ret == ConfigHandler::ACCESS_DENY) {
     response.setStatusCode(403);
     return sw_error_page_phase;
-  } else if (ret == ConfigHandler::METHOD_DENY) {
+  }
+  if (ret == ConfigHandler::METHOD_DENY) {
     response.setStatusCode(405);
     return sw_error_page_phase;
-  } else
-    return sw_uri_check_phase;
+  }
+  return sw_uri_check_phase;
 }
 
 void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& return_directive) {

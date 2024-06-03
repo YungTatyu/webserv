@@ -60,7 +60,7 @@ class HttpResponse {
   size_t internal_redirect_cnt_;
   static const size_t kMaxInternalRedirect = 10;
 
-  static std::string createResponse(const HttpResponse& response);
+  std::string createResponse(const config::REQUEST_METHOD& method) const;
   // handle phase methods
   static ResponsePhase handlePreSearchLocationPhase(const HttpRequest::ParseState parse_state,
                                                     HttpResponse& response, const int client_sock,
