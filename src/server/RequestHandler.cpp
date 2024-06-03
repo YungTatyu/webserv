@@ -158,7 +158,9 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
   const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
   // requestが残っている場合は、引き続きparseする
-  if (!context.empty()) return handleRequest(connManager, configHandler, timerTree, sockfd);
+  const HttpResponse &response = connManager.getResponse(sockfd);
+  if (!context.empty() && HttpResponse::isKeepaliveConnection(response))
+    return handleRequest(connManager, configHandler, timerTree, sockfd);
   if (!this->addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE)) {
     // Connection: closeなので接続閉じる
     ioHandler.closeConnection(connManager, timerTree, sockfd);

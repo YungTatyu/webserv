@@ -73,12 +73,13 @@ def run_test(conf, test_data):
 def test(conf):
     test_data = {
         REQUESTS: [
-            f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\nPOST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\n",
-            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",
-            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",
-            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.py HTTP/1.1\nhost:tt\n\n",
-            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\ncontent-length: 3\n\n333DELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",
-            f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\n3\n333\n0\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",
+            f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\nPOST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\n",  # static res test
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # dynamic, static res test
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE /{ROOT}/index.py HTTP/1.1\nhost:tt\n\n",  # dynamic res test
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\ncontent-length: 3\n\n333DELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # content-length test
+            f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\n3\n333\n0\n\nDELETE /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # chunked test
+            f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\n\nDELETE ",  # dynamic res with uncomplite request
+            f"POST /{ROOT}/index.html HTTP/1.1\nhost:tt\n\nDELETE ",  # dynamic res with uncomplite request
         ],
         REQUEST_NUM: [
             2,
@@ -86,15 +87,17 @@ def test(conf):
             2,
             2,
             2,
-            2,
+            1,
+            1,
         ],
         EXPECTS: [
             [200, 302],
             [302, 200],
-            [302, 200],
             [302, 302],
             [302, 200],
             [302, 200],
+            [302],
+            [200],
         ],
         ADDRESS: "127.0.0.1",
         PORT: 4242,
