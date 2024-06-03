@@ -125,6 +125,9 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
   std::string res(v.begin(), v.end());
+  // cgi resをclearしないといけない
+  // 連続でcgiのリクエストが来た時に、前回のcgi responseを引き継いでしまう
+  connManager.clearCgiResponse(sockfd);
   bool parse_suc = connManager.callCgiParser(sockfd, response, res);
   response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
   re = handleResponse(connManager, configHandler, timerTree, sockfd);

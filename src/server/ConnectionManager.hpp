@@ -67,6 +67,7 @@ class ConnectionManager {
   void resetSentBytes(const int fd);
   void resetCgiSockets(const int fd);
   void clearRawRequest(const int fd);
+  void clearCgiResponse(const int fd);
   void clearConnectionData(const int fd);
   void closeAllConnections();
   bool isCgiSocket(const int fd) const;

@@ -148,11 +148,16 @@ void ConnectionManager::clearRawRequest(const int fd) {
   cd->raw_request_.clear();
 }
 
+void ConnectionManager::clearCgiResponse(const int fd) {
+  ConnectionData* cd = this->connections_.at(fd);
+  cd->cgi_response_.clear();
+}
+
 void ConnectionManager::clearConnectionData(const int fd) {
   ConnectionData* cd = this->connections_.at(fd);
   clearRawRequest(fd);
   cd->final_response_.clear();
-  cd->cgi_response_.clear();
+  clearCgiResponse(fd);
   resetCgiSockets(fd);
   resetSentBytes(fd);
 }
