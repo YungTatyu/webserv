@@ -17,11 +17,8 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBSERV_PATH = os.path.join(SCRIPT_DIR, "../../webserv")
 CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_sender.py")
-TEST_NAME = "CGIRecvTimeout Test"
 TOTAL_TESTS = PASSED_TESTS = FAILED_TESTS = 0
-SCHEME = "http"
-HOST = "127.0.0.1"
-PORT = "4400"
+PORT = 4600
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -29,7 +26,7 @@ WEBSERV_PROCESS = None
 CLIENT_PROCESS = None
 
 
-def init():
+def init(test_name):
     # make webserv
     print(f"{GREEN}make executable ......{RESET}\n")
     subprocess.run(
@@ -40,7 +37,9 @@ def init():
     if not os.path.exists(WEBSERV_PATH):
         print("Build webserv failed")
         sys.exit(1)
-    print(f"|------------------ {TEST_NAME} start ------------------|\n")
+
+    print(f"|------------------ {test_name} start ------------------|\n")
+
     signal.signal(signal.SIGHUP, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGQUIT, signal_handler)
@@ -64,15 +63,15 @@ def kill_process(target_name, target_process, color):
 
 
 def signal_handler(sig, frame):
-    print_err(f"\n\n{RED}{TEST_NAME} interrupted: Signal received.{RESET}")
+    print_err(f"\n\n{RED} interrupted: Signal received.{RESET}")
     kill_process("webserv", WEBSERV_PROCESS, f"{RED}")
     kill_process("client", CLIENT_PROCESS, f"{RED}")
     clean(f"{RED}")
     sys.exit(1)
 
 
-def print_log():
-    print(f"\n|------------------ {TEST_NAME} results ------------------|\n")
+def print_log(test_name):
+    print(f"\n|------------------ {test_name} results ------------------|\n")
     print(f"[========]    {TOTAL_TESTS} tests ran")
     print(f"[ {GREEN}PASSED{RESET} ]    {PASSED_TESTS} tests")
     print(f"[ {RED}FAILED{RESET} ]    {FAILED_TESTS} tests")
@@ -106,11 +105,13 @@ def run_client(
     )
 
 
-def assert_test(uri, expect_sec, expect_result, client_executable, executable_name):
+def assert_test(uri, body, expect_sec, expect_result, client_executable, executable_name):
     global TOTAL_TESTS, PASSED_TESTS, FAILED_TESTS
     TOTAL_TESTS += 1
-    url = f"{SCHEME}://{HOST}:{PORT}{uri}"
-    request = f"GET {uri} HTTP/1.1i\nHost: \n\n"
+    scheme = "http"
+    host = "127.0.0.1"
+    url = f"{scheme}://{host}:{PORT}{uri}"
+    request = f"GET {uri} HTTP/1.1i\nHost: \n\n{body}"
 
     print(f"[  test{TOTAL_TESTS}  ]\n{url}: ", end="")
 
@@ -156,25 +157,26 @@ def run_test(conf, server_name):
     run_server(os.path.join(root, conf))
 
     # テスト実行
-    assert_test("/timeout0/", 0, True, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout3/", 3, True, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout6/", 6, True, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout3/", 1, False, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout6/", 4, False, CLIENT_PATH, "request_sender.py")
-    assert_test("/no-send/", 3, True, CLIENT_PATH, "request_sender.py")
+    assert_test("/timeout0/", "", 0, True, CLIENT_PATH, "request_sender.py")
+    assert_test("/timeout3/", "", 3, True, CLIENT_PATH, "request_sender.py")
+    assert_test("/timeout6/", "", 6, True, CLIENT_PATH, "request_sender.py")
+    assert_test("/timeout3/", "", 1, False, CLIENT_PATH, "request_sender.py")
+    assert_test("/timeout6/", "", 4, False, CLIENT_PATH, "request_sender.py")
+    assert_test("/no-send/", "", 3, True, CLIENT_PATH, "request_sender.py")
 
     # サーバープロセスを終了
     WEBSERV_PROCESS.kill()
 
 
 def main():
-    init()
+    test_name = "CgiRecvTimeoutTest"
+    init(test_name)
 
     run_test("cgi_recv.conf", "kqueue or epoll")  # kqueue or epoll
     run_test("cgi_recv_poll.conf", "poll")  # poll
     run_test("cgi_recv_select.conf", "select")  # select
 
-    print_log()
+    print_log(test_name)
 
     clean(RESET)
 
