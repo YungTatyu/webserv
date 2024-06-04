@@ -8,9 +8,10 @@ import sys
 """
 ～～テスト概要～～
 1. テストするサーバーごとにwebservを実行する
-2. テストケースごとにclientを実行し、webservにリクエストをそもそも送らないか、一部だけ送って途中で止める。
+2. テストケースごとにclientプログラムかをcgiを実行するリクエストを送る。そのcgiはわざとserverにレスポンスを送るのを遅らせる。
 3. 想定receivetimeout時間分sleepし、client processがtimeoutされているかどうか確認する
 """
+
 
 # init variable
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -149,7 +150,7 @@ def assert_test(uri, expect_sec, expect_result, client_executable, executable_na
 
 
 def run_test(conf, server_name):
-    root = os.path.join(SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles")
+    root = os.path.join(SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/")
 
     print(f"\n{GREEN}<<< {server_name} server test >>>{RESET}")
     run_server(os.path.join(root, conf))
