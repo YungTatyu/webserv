@@ -83,26 +83,34 @@ def print_err(msg):
 
 def run_server(conf):
     global WEBSERV_PROCESS
-    WEBSERV_PROCESS = subprocess.Popen(
-        [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-    )
-    time.sleep(1)
+    try:
+        WEBSERV_PROCESS = subprocess.Popen(
+            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        time.sleep(0.5)
+    except Exception as e:
+        print(f"{e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def run_client(
     client_executable, server_ip, server_port, sleep_time, request
 ):
     global CLIENT_PROCESS
-    CLIENT_PROCESS = subprocess.Popen(
-        [
-            client_executable,
-            server_ip,
-            server_port,
-            request,
-        ],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    try:
+        CLIENT_PROCESS = subprocess.Popen(
+            [
+                client_executable,
+                server_ip,
+                server_port,
+                request,
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception as e:
+        print(f"{e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def assert_test(uri, body, expect_sec, expect_result, client_executable, executable_name):
