@@ -153,18 +153,19 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
     return RequestHandler::UPDATE_NONE;
   }
 
-  const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
-  // requestが残っている場合は、引き続きparseする
   const HttpResponse &response = connManager.getResponse(sockfd);
-  if (!context.empty() && HttpResponse::isKeepaliveConnection(response)) {
-    connManager.clearResData(sockfd);
-    return handleRequest(connManager, configHandler, timerTree, sockfd);
-  }
-  if (!addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE)) {
-    // Connection: closeなので接続閉じる
+  if (!HttpResponse::isKeepaliveConnection(response)) {
     ioHandler.closeConnection(connManager, timerTree, sockfd);
     return UPDATE_CLOSE;
   }
+  const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
+  // requestが残っている場合は、引き続きparseする
+  if (!context.empty()) {
+    connManager.clearResData(sockfd);
+    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
+    return handleRequest(connManager, configHandler, timerTree, sockfd);
+  }
+  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE);
 
   // readイベントに更新
   connManager.setEvent(sockfd, ConnectionData::EV_READ);

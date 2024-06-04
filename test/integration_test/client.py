@@ -58,35 +58,30 @@ def recv_response(cli_sock, request_num):
 
 
 def watch_events(cli_sock, request_num, request=""):
-    if not hasattr(watch_events, "cnt"):
-        watch_events.cnt = 0
+    res_cnt = 0
+    responses = ""
+    timeout = 1.0 if request_num != 0 else None
     inputs = [cli_sock]
     if request_num == 0:  # 標準入力からリクエストを受信する場合
         inputs.append(sys.stdin)
     else:
         cli_sock.sendall(request.encode("utf-8"))
-    responses = ""
-    timeout = 1.0 if request_num != 0 else None
-    try:
-        while True:
-            readable, _, _ = select.select(inputs, [], [], timeout)
-            if not readable:
-                return responses
-            for sock in readable:
-                if sock is sys.stdin:
-                    send_request(cli_sock)
-                elif sock is cli_sock:
-                    buffer = recv_response(cli_sock, request_num)
-                    # print(f'buffer:"{buffer}"')
-                    if not buffer:
-                        return
-                    watch_events.cnt += 1
-                    responses += buffer
-                    # testで送るリクエストの数が指定されている場合は、responseを受け取り次第終了
-                    if request_num != 0 and watch_events.cnt >= request_num:
-                        return responses
-    finally:
-        watch_events.cnt = 0
+    while True:
+        readable, _, _ = select.select(inputs, [], [], timeout)
+        if not readable:
+            return responses
+        for sock in readable:
+            if sock is sys.stdin:
+                send_request(cli_sock)
+            elif sock is cli_sock:
+                buffer = recv_response(cli_sock, request_num)
+                if not buffer:
+                    return
+                res_cnt += 1
+                responses += buffer
+                # testで送るリクエストの数が指定されている場合は、responseを受け取り次第終了
+                if request_num != 0 and res_cnt >= request_num:
+                    return responses
 
 
 def spawn_client(ip_address, port, request_num=0, request=""):
