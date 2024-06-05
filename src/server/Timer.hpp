@@ -25,7 +25,7 @@ class Timer {
   static void updateCurrentTime();
   enum TimeoutType {
     TMO_KEEPALIVE,
-    TMO_CLI_REQUEST,
+    TMO_RECV,
     TMO_SEND,
   };
 };
