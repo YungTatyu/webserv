@@ -20,8 +20,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     int new_sock = ioHandler.acceptConnection(connManager, sockfd);
     if (new_sock == -1) return new_sock;
 
-    // TODO: 本来client_header_timeoutだが、client_request_timeoutというのを後で作る。
-    this->addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_CLI_REQUEST);
+    // TODO: 本来client_header_timeoutだが、receive_timeoutというのを後で作る。
+    this->addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_RECV);
     if (!this->isOverWorkerConnections(connManager, configHandler)) return new_sock;
     int timeout_fd = timerTree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
@@ -110,7 +110,10 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   // recv error
   if (re == -1) return RequestHandler::UPDATE_NONE;
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
-  if (!cgiProcessExited(cgi_handler.getCgiProcessId())) return RequestHandler::UPDATE_NONE;
+  if (!cgiProcessExited(cgi_handler.getCgiProcessId())) {
+    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV); // cgiからrecvする間のtimeout
+    return RequestHandler::UPDATE_NONE;
+  }
 
   const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
@@ -125,7 +128,7 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
 int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
-    return handleCgiWriteEvent(ioHandler, connManager, sockfd);
+    return handleCgiWriteEvent(ioHandler, connManager, configHandler, timerTree, sockfd);
 
   ssize_t re = ioHandler.sendResponse(connManager, sockfd);
 
@@ -157,7 +160,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 }
 
 int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                                        const int sockfd) {
+                                        ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
   ioHandler.sendRequestBody(connManager, sockfd);
 
   const std::string body = connManager.getRequest(sockfd).body;
@@ -167,8 +170,10 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
   {
     connManager.resetSentBytes(sockfd);
     connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV); // cgiのレスポンスをreadするまでのtimeout
     return RequestHandler::UPDATE_CGI_READ;
   }
+  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND); // cgiにsendする間のtimeout
   return RequestHandler::UPDATE_NONE;
 }
 
@@ -264,7 +269,7 @@ bool RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandle
                                                      connManager.getRequest(sockfd).uri);
       break;
 
-    case Timer::TMO_CLI_REQUEST:
+    case Timer::TMO_RECV:
       // TODO: ディレクティブ作る
       timeout = config::Time(60 * config::Time::seconds);
       break;
