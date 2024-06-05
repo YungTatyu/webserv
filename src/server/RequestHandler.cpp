@@ -21,8 +21,6 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
     addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_RECV);
     if (!isOverWorkerConnections(connManager, configHandler)) return new_sock;
-    addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_CLI_REQUEST);
-    if (!isOverWorkerConnections(connManager, configHandler)) return new_sock;
     int timeout_fd = timerTree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
     if (connManager.isCgiSocket(timeout_fd)) {
@@ -170,7 +168,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   // requestが残っている場合は、引き続きparseする
   if (!context.empty()) {
     connManager.clearResData(sockfd);
-    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_CLI_REQUEST);
+    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV);
     return handleRequest(connManager, configHandler, timerTree, sockfd);
   }
   addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE);
