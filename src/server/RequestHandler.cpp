@@ -247,22 +247,11 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id) const {
  *
  * @param NetworkIOHandler, ConnectionManager, ConfigHandler, TimerTree, socket, TimeoutType
  *
- * @return true: N秒timerを追加
- * @return false: 'Connections: close'の場合
  */
-bool RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandler &configHandler,
+void RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandler &configHandler,
                                     TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type) {
   config::Time timeout;
   std::map<std::string, std::string>::iterator it;
-
-  // send後にConnectionヘッダーを見てcloseならコネクションを閉じる
-  if (type == Timer::TMO_KEEPALIVE &&
-      connManager.getConnections().at(sockfd)->event == ConnectionData::EV_WRITE) {
-    it = connManager.getResponse(sockfd).headers_.find("Connection");
-    if (it != connManager.getResponse(sockfd).headers_.end() && it->second == "close") {
-      return false;
-    }
-  }
 
   // Hostヘッダーがあるか確認
   // 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
@@ -295,12 +284,10 @@ bool RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandle
   // 設定値が0ならばタイムアウトを設定しないで削除
   if (timeout.isNoTime()) {
     timerTree.deleteTimer(sockfd);
-    return true;
+    return;
   }
 
   timerTree.addTimer(Timer(sockfd, timeout));
-
-  return true;
 }
 
 bool RequestHandler::isOverWorkerConnections(ConnectionManager &connManager, ConfigHandler &configHandler) {
