@@ -48,11 +48,11 @@ def main():
     run_test("cgi_send_poll.conf", "poll", test_cases)  # poll
     run_test("cgi_send_select.conf", "select", test_cases)  # select
 
-    print_log(test_name)
+    failed = print_log(test_name)
 
     clean(RESET)
 
-    if FAILED_TESTS != 0:
+    if failed != 0:
         return 1
     return 0
 

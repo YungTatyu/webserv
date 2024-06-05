@@ -47,7 +47,7 @@ def init(test_name):
 
 
 def clean(color):
-    print(f"{color}make fclean webserv & client.{RESET}")
+    print(f"{color}make fclean webserv.{RESET}")
     subprocess.run(
         ["make", "fclean", "-C", f"{SCRIPT_DIR}/../../"],
         stdout=subprocess.DEVNULL,
@@ -74,6 +74,8 @@ def print_log(test_name):
     print(f"[========]    {TOTAL_TESTS} tests ran")
     print(f"[ {GREEN}PASSED{RESET} ]    {PASSED_TESTS} tests")
     print(f"[ {RED}FAILED{RESET} ]    {FAILED_TESTS} tests")
+
+    return {FAILED_TESTS}
 
 
 def print_err(msg):
