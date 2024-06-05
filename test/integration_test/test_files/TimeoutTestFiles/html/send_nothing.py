@@ -1,8 +1,9 @@
-import requests
-import pytest
+#!/usr/bin/python3
+
+import time
 
 
 def main():
     # ずっとスリープ
-    time.sleep(60)
-    print("Status: 200\r\nContent-Type: text/html\r\n\r\n", end="")
+    while True:
+        time.sleep(60)

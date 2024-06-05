@@ -3,9 +3,6 @@
 import os
 import sys
 import time
-import subprocess
-import requests
-import pytest
 
 
 def main():
