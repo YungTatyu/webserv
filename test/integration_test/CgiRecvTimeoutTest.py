@@ -17,12 +17,12 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBSERV_PATH = os.path.join(SCRIPT_DIR, "../../webserv")
 CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_sender.py")
-TOTAL_TESTS = PASSED_TESTS = FAILED_TESTS = 0
+g_total_tests = g_passed_tests = g_failed_tests = 0
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
-WEBSERV_PROCESS = None
-CLIENT_PROCESS = None
+g_webserv_pid = None
+g_client_process = None
 
 
 def init(test_name):
@@ -54,18 +54,18 @@ def kill_process(target_name, target_process, color):
 
 def signal_handler(sig, frame):
     print_err(f"\n\n{RED} interrupted: Signal received.{RESET}")
-    kill_process("webserv", WEBSERV_PROCESS, f"{RED}")
-    kill_process("client", CLIENT_PROCESS, f"{RED}")
+    kill_process("webserv", g_webserv_pid, f"{RED}")
+    kill_process("client", g_client_process, f"{RED}")
     sys.exit(1)
 
 
 def print_log(test_name):
     print(f"\n|------------------ {test_name} results ------------------|\n")
-    print(f"[========]    {TOTAL_TESTS} tests ran")
-    print(f"[ {GREEN}PASSED{RESET} ]    {PASSED_TESTS} tests")
-    print(f"[ {RED}FAILED{RESET} ]    {FAILED_TESTS} tests")
+    print(f"[========]    {g_total_tests} tests ran")
+    print(f"[ {GREEN}PASSED{RESET} ]    {g_passed_tests} tests")
+    print(f"[ {RED}FAILED{RESET} ]    {g_failed_tests} tests")
 
-    return {FAILED_TESTS}
+    return {g_failed_tests}
 
 
 def print_err(msg):
@@ -73,11 +73,11 @@ def print_err(msg):
 
 
 def run_server(conf):
-    global WEBSERV_PROCESS
+    global g_webserv_pid
     try:
         with subprocess.Popen(
             [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        ) as WEBSERV_PROCESS:
+        ) as g_webserv_pid:
             time.sleep(0.5)
     except Exception as e:
         print(f"{e}", file=sys.stderr)
@@ -85,9 +85,9 @@ def run_server(conf):
 
 
 def run_client(client_executable, server_ip, server_port, request, body_path):
-    global CLIENT_PROCESS
+    global g_client_process
     try:
-        CLIENT_PROCESS = subprocess.Popen(
+        g_client_process = subprocess.Popen(
             [
                 sys.executable,
                 client_executable,
@@ -107,14 +107,14 @@ def run_client(client_executable, server_ip, server_port, request, body_path):
 def assert_test(
     method, uri, body, port, expect_sec, expect_result, client_executable, executable_name
 ):
-    global TOTAL_TESTS, PASSED_TESTS, FAILED_TESTS
-    TOTAL_TESTS += 1
+    global g_total_tests, g_passed_tests, g_failed_tests
+    g_total_tests += 1
     scheme = "http"
     host = "127.0.0.1"
     url = f"{scheme}://{host}:{port}{uri}"
     request = f"{method} {uri} HTTP/1.1i\nHost: \n\n"
 
-    print(f"[  test{TOTAL_TESTS}  ]\n{url}: ", end="")
+    print(f"[  test{g_total_tests}  ]\n{url}: ", end="")
 
     # program 実行
     run_client(client_executable, host, port, request, body)
@@ -132,10 +132,10 @@ def assert_test(
     if not client_running:
         if expect_result:
             print(f"{GREEN}passed.{RESET}\nServer closed the connection")
-            PASSED_TESTS += 1
+            g_passed_tests += 1
         else:
             print_err(f"{RED}failed.{RESET}\nServer closed the connection")
-            FAILED_TESTS += 1
+            g_failed_tests += 1
     else:
         subprocess.run(
             ["pkill", "-f", executable_name],
@@ -144,10 +144,10 @@ def assert_test(
         )
         if expect_result:
             print_err(f"{RED}failed.{RESET}\nServer did not timeout")
-            FAILED_TESTS += 1
+            g_failed_tests += 1
         else:
             print(f"{GREEN}passed.{RESET}\nServer did not timeout\n")
-            PASSED_TESTS += 1
+            g_passed_tests += 1
     print()
 
 
@@ -164,7 +164,7 @@ def run_test(conf, server_name, test_cases):
         assert_test(*test_case)
 
     # サーバープロセスを終了
-    WEBSERV_PROCESS.kill()
+    g_webserv_pid.kill()
 
 
 def main():
@@ -189,7 +189,7 @@ def main():
     print_log(test_name)
 
 
-    if FAILED_TESTS != 0:
+    if g_failed_tests != 0:
         return 1
     return 0
 
