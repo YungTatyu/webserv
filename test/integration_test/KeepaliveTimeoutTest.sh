@@ -38,8 +38,6 @@ function init {
 
 function clean {
   local color=$1
-  printf "${color}make fclean webserv.${RESET}\n"
-  make fclean -C "${SCRIPT_DIR}/../../" >/dev/null
 }
 
 function Kill {

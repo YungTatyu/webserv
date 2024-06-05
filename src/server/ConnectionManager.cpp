@@ -53,6 +53,10 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
 
 ConnectionData* ConnectionManager::getConnection(const int fd) { return connections_.at(fd); }
 
+void ConnectionManager::setRawRequest(const int fd, const std::vector<unsigned char>& rawRequest) {
+  connections_[fd]->raw_request_ = rawRequest;
+}
+
 void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest,
                                       const ssize_t read_bytes) {
   connections_[fd]->raw_request_.insert(connections_[fd]->raw_request_.end(), rawRequest.begin(),
@@ -63,8 +67,13 @@ const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd)
   return connections_.at(fd)->raw_request_;
 }
 
-void ConnectionManager::setFinalResponse(const int fd, const std::vector<unsigned char>& final_response) {
-  connections_.at(fd)->final_response_ = final_response;
+void ConnectionManager::setFinalResponse(const int fd, const std::vector<unsigned char>& new_response) {
+  connections_.at(fd)->final_response_ = new_response;
+}
+
+void ConnectionManager::addFinalResponse(const int fd, const std::vector<unsigned char>& new_response) {
+  std::vector<unsigned char>& final_response = connections_.at(fd)->final_response_;
+  final_response.insert(final_response.end(), new_response.begin(), new_response.end());
 }
 
 const std::vector<unsigned char>& ConnectionManager::getFinalResponse(const int fd) const {
@@ -143,13 +152,21 @@ void ConnectionManager::clearRawRequest(const int fd) {
   cd->raw_request_.clear();
 }
 
-void ConnectionManager::clearConnectionData(const int fd) {
+/**
+ * @brief リクエストデータ以外を削除する
+ * 一人のクライアントからの複数のリクエストをさばく時に呼ぶ
+ */
+void ConnectionManager::clearResData(const int fd) {
   ConnectionData* cd = this->connections_.at(fd);
-  clearRawRequest(fd);
   cd->final_response_.clear();
   cd->cgi_response_.clear();
   resetCgiSockets(fd);
   resetSentBytes(fd);
+}
+
+void ConnectionManager::clearConnectionData(const int fd) {
+  clearRawRequest(fd);
+  clearResData(fd);
 }
 
 bool ConnectionManager::isCgiSocket(const int fd) const {

@@ -52,8 +52,7 @@ function init {
 
 function clean {
   local color=$1
-  printf "${color}make fclean webserv & client.${RESET}\n"
-  make fclean -C "${SCRIPT_DIR}/../../" >/dev/null
+  printf "${color}make fclean client.${RESET}\n"
   make fclean -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" >/dev/null
 }
 
