@@ -115,7 +115,14 @@ def run_client(client_executable, server_ip, server_port, request, body_path):
 
 
 def assert_test(
-    method, uri, body, port, expect_sec, expect_result, client_executable, executable_name
+    method,
+    uri,
+    body,
+    port,
+    expect_sec,
+    expect_result,
+    client_executable,
+    executable_name,
 ):
     global TOTAL_TESTS, PASSED_TESTS, FAILED_TESTS
     TOTAL_TESTS += 1
@@ -184,12 +191,66 @@ def main():
     body_path = "none"
 
     test_cases = [
-        ("GET", "/timeout0/", body_path, 4600, 0, True, CLIENT_PATH, "request_sender.py"),
-        ("GET", "/timeout3/", body_path, 4600, 3, True, CLIENT_PATH, "request_sender.py"),
-        ("GET", "/timeout6/", body_path, 4600, 6, True, CLIENT_PATH, "request_sender.py"),
-        ("GET", "/timeout3/", body_path, 4600, 1, False, CLIENT_PATH, "request_sender.py"),
-        ("GET", "/timeout6/", body_path, 4600, 4, False, CLIENT_PATH, "request_sender.py"),
-        ("GET", "/no-send/", body_path, 4600, 3, True, CLIENT_PATH, "request_sender.py"),
+        (
+            "GET",
+            "/timeout0/",
+            body_path,
+            4600,
+            0,
+            True,
+            CLIENT_PATH,
+            "request_sender.py",
+        ),
+        (
+            "GET",
+            "/timeout3/",
+            body_path,
+            4600,
+            3,
+            True,
+            CLIENT_PATH,
+            "request_sender.py",
+        ),
+        (
+            "GET",
+            "/timeout6/",
+            body_path,
+            4600,
+            6,
+            True,
+            CLIENT_PATH,
+            "request_sender.py",
+        ),
+        (
+            "GET",
+            "/timeout3/",
+            body_path,
+            4600,
+            1,
+            False,
+            CLIENT_PATH,
+            "request_sender.py",
+        ),
+        (
+            "GET",
+            "/timeout6/",
+            body_path,
+            4600,
+            4,
+            False,
+            CLIENT_PATH,
+            "request_sender.py",
+        ),
+        (
+            "GET",
+            "/no-send/",
+            body_path,
+            4600,
+            3,
+            True,
+            CLIENT_PATH,
+            "request_sender.py",
+        ),
     ]
 
     run_test("cgi_recv.conf", "kqueue or epoll", test_cases)  # kqueue or epoll
