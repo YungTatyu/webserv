@@ -136,8 +136,8 @@ function assert {
       ((FAILED_TESTS++))
     fi
   else # clientが正常にタイムアウトする前にsleepが終了
-    #kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1) > /dev/null 2>&1
-    kill $(ps | grep "${executable_name}" | grep -v grep | cut -d ' ' -f1)
+    kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
+    #kill "${CLIENT_PID}" >/dev/null 2>&1
     if [ "$expect_result" = "true" ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
