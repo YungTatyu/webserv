@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 import os
 import sys
-from CgiRecvTimeoutTest import init, clean, kill_process, signal_handler, print_log, print_err, run_server, run_client, assert_test
+from CgiRecvTimeoutTest import (
+    init,
+    clean,
+    kill_process,
+    signal_handler,
+    print_log,
+    print_err,
+    run_server,
+    run_client,
+    assert_test,
+)
 
 """
 ～～テスト概要～～
@@ -15,10 +25,12 @@ FILE_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/html/big_buf.h
 
 
 def run_test(conf, server_name):
-    root = os.path.join(SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/")
+    root = os.path.join(
+        SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/"
+    )
     # 大きな文字列をbodyにいれる
     body = ""
-    with open(f"{FILE_PATH}", 'r') as file:
+    with open(f"{FILE_PATH}", "r") as file:
         body = file.read()
 
     print(f"\n{GREEN}<<< {server_name} server test >>>{RESET}")
