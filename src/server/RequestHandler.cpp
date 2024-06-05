@@ -81,7 +81,7 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
   if (response.state_ == HttpResponse::RES_EXECUTE_CGI) {
     return handleCgi(connManager, configHandler, timerTree, sockfd);
   }
-  connManager.addFinalResponse(sockfd,
+  connManager.setFinalResponse(sockfd,
                                std::vector<unsigned char>(final_response.begin(), final_response.end()));
 
   // send開始するまでのtimout追加

@@ -67,6 +67,10 @@ const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd)
   return connections_.at(fd)->raw_request_;
 }
 
+void ConnectionManager::setFinalResponse(const int fd, const std::vector<unsigned char>& new_response) {
+  connections_.at(fd)->final_response_ = new_response;
+}
+
 void ConnectionManager::addFinalResponse(const int fd, const std::vector<unsigned char>& new_response) {
   std::vector<unsigned char>& final_response = connections_.at(fd)->final_response_;
   final_response.insert(final_response.end(), new_response.begin(), new_response.end());

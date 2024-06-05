@@ -46,6 +46,7 @@ class ConnectionManager {
   void setCgiConnection(const int cli_sock, const ConnectionData::EVENT event);
   void removeConnection(const int fd, const bool cgi);
   const std::vector<unsigned char>& getRawRequest(const int fd) const;
+  void setFinalResponse(const int fd, const std::vector<unsigned char>& new_responsea);
   void addFinalResponse(const int fd, const std::vector<unsigned char>& new_responsea);
   const std::vector<unsigned char>& getFinalResponse(const int fd) const;
   void setEvent(const int fd, const ConnectionData::EVENT event);
