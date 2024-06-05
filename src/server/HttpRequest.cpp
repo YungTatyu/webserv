@@ -233,7 +233,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
     return PARSE_INPROGRESS;
   }
   resetBufs(request);
-  rawRequest.substr(i);
+  rawRequest = rawRequest.substr(i);
   return PARSE_COMPLETE;
 }
 
