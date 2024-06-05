@@ -84,7 +84,8 @@ def run_server(conf):
     global WEBSERV_PROCESS
     try:
         with subprocess.Popen(
-            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) as WEBSERV_PROCESS:
+            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        ) as WEBSERV_PROCESS:
             time.sleep(0.5)
     except Exception as e:
         print(f"{e}", file=sys.stderr)
@@ -159,7 +160,9 @@ def assert_test(uri, body, port, expect_sec, expect_result, client_executable, e
 
 
 def run_test(conf, server_name, test_cases):
-    root = os.path.join(SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/")
+    root = os.path.join(
+        SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/"
+    )
 
     print(f"\n{GREEN}<<< {server_name} server test >>>{RESET}")
     run_server(os.path.join(root, conf))

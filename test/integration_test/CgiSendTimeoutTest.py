@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 import os
 import sys
-from CgiRecvTimeoutTest import init, clean, kill_process, signal_handler, print_log, print_err, run_server, run_client, assert_test, run_test
+from CgiRecvTimeoutTest import (
+    init,
+    clean,
+    kill_process,
+    signal_handler,
+    print_log,
+    print_err,
+    run_server,
+    run_client,
+    assert_test,
+    run_test,
+)
 
 """
 ～～テスト概要～～

@@ -6,13 +6,15 @@ def send_requests(address, port, request, body_file):
     if (!body_file.empty()):
         with open(body_file, 'r') as f:
             request += f.read()
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((address, port))
         s.sendall(request.encode())
         response = s.recv(1024)
-        print(f'Received response: {response.decode()}')
-        
-    print('Finished sending requests and sleeping.')
+        print(f"Received response: {response.decode()}")
+
+    print("Finished sending requests and sleeping.")
+
 
 if __name__ == "__main__":
     address = sys.argv[1]
