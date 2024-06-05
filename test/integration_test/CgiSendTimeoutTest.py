@@ -37,11 +37,11 @@ def main():
     body_path = f"{FILE_PATH}"
 
     test_cases = [
-        ("/timeout0/", body_path, 4700, 0, True, CLIENT_PATH, "request_sender.py"),
-        ("/timeout3/", body_path, 4700, 3, True, CLIENT_PATH, "request_sender.py"),
-        ("/timeout6/", body_path, 4700, 6, True, CLIENT_PATH, "request_sender.py"),
-        ("/timeout3/", body_path, 4700, 1, False, CLIENT_PATH, "request_sender.py"),
-        ("/timeout6/", body_path, 4700, 4, False, CLIENT_PATH, "request_sender.py"),
+        ("POST", "/timeout0/", body_path, 4700, 0, True, CLIENT_PATH, "request_sender.py"),
+        ("POST", "/timeout3/", body_path, 4700, 3, True, CLIENT_PATH, "request_sender.py"),
+        ("POST", "/timeout6/", body_path, 4700, 6, True, CLIENT_PATH, "request_sender.py"),
+        ("POST", "/timeout3/", body_path, 4700, 1, False, CLIENT_PATH, "request_sender.py"),
+        ("POST", "/timeout6/", body_path, 4700, 4, False, CLIENT_PATH, "request_sender.py"),
     ]
 
     run_test("cgi_send.conf", "kqueue or epoll", test_cases)  # kqueue or epoll

@@ -115,14 +115,14 @@ def run_client(client_executable, server_ip, server_port, request, body_path):
 
 
 def assert_test(
-    uri, body, port, expect_sec, expect_result, client_executable, executable_name
+    method, uri, body, port, expect_sec, expect_result, client_executable, executable_name
 ):
     global TOTAL_TESTS, PASSED_TESTS, FAILED_TESTS
     TOTAL_TESTS += 1
     scheme = "http"
     host = "127.0.0.1"
     url = f"{scheme}://{host}:{port}{uri}"
-    request = f"GET {uri} HTTP/1.1i\nHost: \n\n"
+    request = f"{method} {uri} HTTP/1.1i\nHost: \n\n"
 
     print(f"[  test{TOTAL_TESTS}  ]\n{url}: ", end="")
 
@@ -181,13 +181,15 @@ def main():
     test_name = "CgiRecvTimeoutTest"
     init(test_name)
 
+    body_path = "none"
+
     test_cases = [
-        ("/timeout0/", "", 4600, 0, True, CLIENT_PATH, "request_sender.py"),
-        ("/timeout3/", "", 4600, 3, True, CLIENT_PATH, "request_sender.py"),
-        ("/timeout6/", "", 4600, 6, True, CLIENT_PATH, "request_sender.py"),
-        ("/timeout3/", "", 4600, 1, False, CLIENT_PATH, "request_sender.py"),
-        ("/timeout6/", "", 4600, 4, False, CLIENT_PATH, "request_sender.py"),
-        ("/no-send/", "", 4600, 3, True, CLIENT_PATH, "request_sender.py"),
+        ("GET", "/timeout0/", body_path, 4600, 0, True, CLIENT_PATH, "request_sender.py"),
+        ("GET", "/timeout3/", body_path, 4600, 3, True, CLIENT_PATH, "request_sender.py"),
+        ("GET", "/timeout6/", body_path, 4600, 6, True, CLIENT_PATH, "request_sender.py"),
+        ("GET", "/timeout3/", body_path, 4600, 1, False, CLIENT_PATH, "request_sender.py"),
+        ("GET", "/timeout6/", body_path, 4600, 4, False, CLIENT_PATH, "request_sender.py"),
+        ("GET", "/no-send/", body_path, 4600, 3, True, CLIENT_PATH, "request_sender.py"),
     ]
 
     run_test("cgi_recv.conf", "kqueue or epoll", test_cases)  # kqueue or epoll
