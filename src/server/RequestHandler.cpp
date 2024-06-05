@@ -97,9 +97,13 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
   }
   // bodyが空なら、bodyをsendしない
   if (request.body.empty()) {
+    // 最初にcgiのレスポンスをrecvするまでのtimeout
+    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV);
     connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_READ);
     return RequestHandler::UPDATE_CGI_READ;
   }
+  // 最初にcgiにbodyをsendするまでのtimeout
+  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
   connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_WRITE);
   return RequestHandler::UPDATE_CGI_WRITE;
 }
