@@ -17,10 +17,10 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBSERV_PATH = os.path.join(SCRIPT_DIR, "../../webserv")
 CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_sender.py")
-g_total_tests = g_passed_tests = g_failed_tests = 0
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
+g_total_tests = g_passed_tests = g_failed_tests = 0
 g_webserv_pid = None
 g_client_process = None
 
