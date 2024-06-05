@@ -84,10 +84,9 @@ def print_err(msg):
 def run_server(conf):
     global WEBSERV_PROCESS
     try:
-        WEBSERV_PROCESS = subprocess.Popen(
-            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        time.sleep(0.5)
+        with subprocess.Popen(
+            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) as WEBSERV_PROCESS:
+            time.sleep(0.5)
     except Exception as e:
         print(f"{e}", file=sys.stderr)
         sys.exit(1)
@@ -98,7 +97,7 @@ def run_client(
 ):
     global CLIENT_PROCESS
     try:
-        CLIENT_PROCESS = subprocess.Popen(
+        with subprocess.Popen(
             [
                 client_executable,
                 server_ip,
@@ -107,7 +106,7 @@ def run_client(
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-        )
+        ) as CLIENT_PROCESS:
     except Exception as e:
         print(f"{e}", file=sys.stderr)
         sys.exit(1)
