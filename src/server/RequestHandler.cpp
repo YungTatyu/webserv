@@ -102,7 +102,6 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
   if (!re) {
     connManager.resetCgiSockets(sockfd);
     response.state_ = HttpResponse::RES_CGI_ERROR;
-    std::string next_req;
     return handleResponse(connManager, configHandler, timerTree, sockfd);
   }
   // bodyが空なら、bodyをsendしない
