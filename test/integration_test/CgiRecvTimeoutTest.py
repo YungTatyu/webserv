@@ -46,15 +46,6 @@ def init(test_name):
     signal.signal(signal.SIGTERM, signal_handler)
 
 
-def clean(color):
-    print(f"{color}make fclean webserv.{RESET}")
-    subprocess.run(
-        ["make", "fclean", "-C", f"{SCRIPT_DIR}/../../"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-
 def kill_process(target_name, target_process, color):
     if target_process:
         target_process.kill()
@@ -65,7 +56,6 @@ def signal_handler(sig, frame):
     print_err(f"\n\n{RED} interrupted: Signal received.{RESET}")
     kill_process("webserv", WEBSERV_PROCESS, f"{RED}")
     kill_process("client", CLIENT_PROCESS, f"{RED}")
-    clean(f"{RED}")
     sys.exit(1)
 
 
@@ -198,7 +188,6 @@ def main():
 
     print_log(test_name)
 
-    clean(RESET)
 
     if FAILED_TESTS != 0:
         return 1

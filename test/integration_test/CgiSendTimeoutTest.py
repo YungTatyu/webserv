@@ -3,7 +3,6 @@ import os
 import sys
 from CgiRecvTimeoutTest import (
     init,
-    clean,
     kill_process,
     signal_handler,
     print_log,
