@@ -93,12 +93,13 @@ def run_server(conf):
 
 
 def run_client(
-    client_executable, server_ip, server_port, sleep_time, request
+    client_executable, server_ip, server_port, request
 ):
     global CLIENT_PROCESS
     try:
-        with subprocess.Popen(
+        CLIENT_PROCESS = subprocess.Popen(
             [
+                sys.executable,
                 client_executable,
                 server_ip,
                 server_port,
@@ -106,7 +107,7 @@ def run_client(
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-        ) as CLIENT_PROCESS:
+        )
     except Exception as e:
         print(f"{e}", file=sys.stderr)
         sys.exit(1)
@@ -123,7 +124,7 @@ def assert_test(uri, body, expect_sec, expect_result, client_executable, executa
     print(f"[  test{TOTAL_TESTS}  ]\n{url}: ", end="")
 
     # program 実行
-    run_client(client_executable, HOST, PORT, request)
+    run_client(client_executable, host, "{PORT}", request)
     time.sleep(expect_sec + 1)
 
     # 判定

@@ -14,7 +14,6 @@ def send_requests(address, port, request):
 if __name__ == "__main__":
     address = sys.argv[1]
     port = int(sys.argv[2])
-    sleep_time = int(sys.argv[3])
-    request = sys.argv[4]
+    request = sys.argv[3]
     
     send_requests(address, port, request)
