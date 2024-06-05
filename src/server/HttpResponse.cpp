@@ -165,6 +165,7 @@ static const std::string webserv_error_507_page =
 HttpResponse::HttpResponse()
     : root_path_(""),
       res_file_path_(""),
+      path_info_(""),
       state_(HttpResponse::RES_CREATING_STATIC),
       status_code_line_(""),
       status_code_(kInitStatusCode),
@@ -308,11 +309,11 @@ std::string HttpResponse::transformLetter(const std::string& key_str) {
   return result;
 }
 
-std::string HttpResponse::createResponse(const HttpResponse& response) {
+std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) const {
   std::stringstream stream;
 
   // status line
-  stream << http_version << " " << response.status_code_line_ << "\r\n";
+  stream << http_version << " " << this->status_code_line_ << "\r\n";
 
   // headers
   // cgi responseの場合は、ヘッダーの大文字小文字変換をしないのもあるがどうしよう？
@@ -322,13 +323,14 @@ std::string HttpResponse::createResponse(const HttpResponse& response) {
   // TODO: 以下の場合に、responseをchunkしたい
   // headerに Content-Lengthがない場合（主にcgiレスポンス）
   // headerに responseが長い場合、例えばbuffer size以上
-  for (std::map<std::string, std::string>::const_iterator it = response.headers_.begin();
-       it != response.headers_.end(); ++it)
+  for (std::map<std::string, std::string>::const_iterator it = this->headers_.begin();
+       it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
   stream << "\r\n";
+  if (method == config::HEAD) return stream.str();
 
   // body
-  stream << response.body_;
+  stream << this->body_;
   return stream.str();
 }
 
@@ -415,7 +417,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_log_phase:
         config_handler.writeErrorLog("webserv: [debug] log phase\n");
-        //  TODO: cgi errorの場合、アクセスログを二回かきこまないようにする
         config_handler.writeAccessLog(
             server, location,
             config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.getStatusCode(),
@@ -438,7 +439,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
                                "\n\n");
   response.state_ = RES_COMPLETE;
-  return createResponse(response);
+  return response.createResponse(request.method);
 }
 
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
@@ -450,13 +451,13 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     return sw_error_page_phase;
   }
 
-  // clientのip_addressを取る
+  // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
   if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0) {
     std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": "
               << strerror(errno) << ")" << std::endl;
-    // getsockname()ダメだったらどうするか？
+    // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
   } else
     return sw_search_location_phase;
@@ -489,11 +490,12 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
   if (ret == ConfigHandler::ACCESS_DENY) {
     response.setStatusCode(403);
     return sw_error_page_phase;
-  } else if (ret == ConfigHandler::METHOD_DENY) {
+  }
+  if (ret == ConfigHandler::METHOD_DENY) {
     response.setStatusCode(405);
     return sw_error_page_phase;
-  } else
-    return sw_uri_check_phase;
+  }
+  return sw_uri_check_phase;
 }
 
 void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& return_directive) {
@@ -526,10 +528,13 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
   return sw_error_page_phase;
 }
 
-HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response,
-                                                              const HttpRequest& request,
+HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                                               const config::Server& server,
                                                               const config::Location* location) {
+  // uriにcgi_pathがあれば、path info処理をする
+  if (setPathinfoIfValidCgi(response, request)) {
+    return sw_content_phase;
+  }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
     response.setStatusCode(301);
@@ -744,8 +749,13 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
+    if (!isExecutable(response.res_file_path_)) {
+      // TODO: ここのエラー番号これでいい？
+      response.setStatusCode(403);
+      return sw_error_page_phase;
+    }
     response.state_ = RES_EXECUTE_CGI;
-    return sw_log_phase;
+    return sw_end_phase;
   }
   if (request.method == config::POST || request.method == config::DELETE) {
     response.setStatusCode(405);
@@ -827,9 +837,42 @@ bool HttpResponse::isAccessible(const std::string& file_path) {
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
+bool HttpResponse::isExecutable(const std::string& file_path) {
+  return Utils::wrapperAccess(file_path, X_OK, false) == 0;
+}
+
+bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
+  std::vector<std::string> segments;
+  std::istringstream iss(request.uri);
+  std::string segment;
+  while (std::getline(iss, segment, '/')) {
+    segments.push_back(segment);
+  }
+
+  for (size_t i = 0; i < segments.size(); ++i) {
+    std::string path = response.root_path_;
+    for (size_t j = 0; j <= i; ++j) {
+      if (j != 0) path += "/";
+      path += segments[j];
+    }
+    if (cgi::CGIHandler::isCgi(path) && Utils::isFile(path)) {
+      response.separatePathinfo(response.root_path_ + request.uri, path.size());
+      request.uri = path;
+      return true;
+    }
+  }
+  return false;
+}
+
+void HttpResponse::separatePathinfo(const std::string& uri, size_t pos) {
+  this->res_file_path_ = uri.substr(0, pos);
+  this->path_info_ = uri.substr(pos);
+}
+
 void HttpResponse::clear(HttpResponse& response) {
   response.root_path_.clear();
   response.res_file_path_.clear();
+  response.path_info_.clear();
   response.state_ = RES_CREATING_STATIC;
   response.status_code_line_.clear();
   response.status_code_ = kInitStatusCode;

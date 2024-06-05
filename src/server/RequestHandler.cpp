@@ -89,7 +89,7 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
   HttpRequest &request = connManager.getRequest(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
 
-  bool re = connManager.callCgiExecutor(sockfd, response.res_file_path_, request);
+  bool re = connManager.callCgiExecutor(sockfd, response, request);
   if (!re) {
     connManager.resetCgiSockets(sockfd);
     response.state_ = HttpResponse::RES_CGI_ERROR;
