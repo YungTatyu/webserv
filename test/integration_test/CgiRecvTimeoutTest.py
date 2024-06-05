@@ -18,7 +18,6 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBSERV_PATH = os.path.join(SCRIPT_DIR, "../../webserv")
 CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_sender.py")
 TOTAL_TESTS = PASSED_TESTS = FAILED_TESTS = 0
-PORT = 4600
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -93,8 +92,8 @@ def run_server(conf):
 
 
 def run_client(
-    client_executable, server_ip, server_port, request
-):
+    client_executable, server_ip, server_port, request, body_path
+    ):
     global CLIENT_PROCESS
     try:
         CLIENT_PROCESS = subprocess.Popen(
@@ -102,8 +101,9 @@ def run_client(
                 sys.executable,
                 client_executable,
                 server_ip,
-                server_port,
+                str(server_port),
                 request,
+                body_path
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -113,18 +113,18 @@ def run_client(
         sys.exit(1)
 
 
-def assert_test(uri, body, expect_sec, expect_result, client_executable, executable_name):
+def assert_test(uri, body, port, expect_sec, expect_result, client_executable, executable_name):
     global TOTAL_TESTS, PASSED_TESTS, FAILED_TESTS
     TOTAL_TESTS += 1
     scheme = "http"
     host = "127.0.0.1"
-    url = f"{scheme}://{host}:{PORT}{uri}"
-    request = f"GET {uri} HTTP/1.1i\nHost: \n\n{body}"
+    url = f"{scheme}://{host}:{port}{uri}"
+    request = f"GET {uri} HTTP/1.1i\nHost: \n\n"
 
     print(f"[  test{TOTAL_TESTS}  ]\n{url}: ", end="")
 
     # program 実行
-    run_client(client_executable, host, "{PORT}", request)
+    run_client(client_executable, host, port, request, body)
     time.sleep(expect_sec + 1)
 
     # 判定
@@ -158,19 +158,15 @@ def assert_test(uri, body, expect_sec, expect_result, client_executable, executa
     print()
 
 
-def run_test(conf, server_name):
+def run_test(conf, server_name, test_cases):
     root = os.path.join(SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/")
 
     print(f"\n{GREEN}<<< {server_name} server test >>>{RESET}")
     run_server(os.path.join(root, conf))
 
     # テスト実行
-    assert_test("/timeout0/", "", 0, True, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout3/", "", 3, True, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout6/", "", 6, True, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout3/", "", 1, False, CLIENT_PATH, "request_sender.py")
-    assert_test("/timeout6/", "", 4, False, CLIENT_PATH, "request_sender.py")
-    assert_test("/no-send/", "", 3, True, CLIENT_PATH, "request_sender.py")
+    for test_case in test_cases:
+        assert_test(*test_case)
 
     # サーバープロセスを終了
     WEBSERV_PROCESS.kill()
@@ -180,9 +176,18 @@ def main():
     test_name = "CgiRecvTimeoutTest"
     init(test_name)
 
-    run_test("cgi_recv.conf", "kqueue or epoll")  # kqueue or epoll
-    run_test("cgi_recv_poll.conf", "poll")  # poll
-    run_test("cgi_recv_select.conf", "select")  # select
+    test_cases = [
+        ("/timeout0/", "", 4600, 0, True, CLIENT_PATH, "request_sender.py"),
+        ("/timeout3/", "", 4600, 3, True, CLIENT_PATH, "request_sender.py"),
+        ("/timeout6/", "", 4600, 6, True, CLIENT_PATH, "request_sender.py"),
+        ("/timeout3/", "", 4600, 1, False, CLIENT_PATH, "request_sender.py"),
+        ("/timeout6/", "", 4600, 4, False, CLIENT_PATH, "request_sender.py"),
+        ("/no-send/", "", 4600, 3, True, CLIENT_PATH, "request_sender.py"),
+    ]
+
+    run_test("cgi_recv.conf", "kqueue or epoll", test_cases)  # kqueue or epoll
+    run_test("cgi_recv_poll.conf", "poll", test_cases)  # poll
+    run_test("cgi_recv_select.conf", "select", test_cases)  # select
 
     print_log(test_name)
 
