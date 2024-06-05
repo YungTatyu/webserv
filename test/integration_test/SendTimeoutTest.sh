@@ -172,7 +172,6 @@ function main {
 
   printLog
 
-
   if [ ${FAILED_TESTS} -ne 0 ]; then
     return 1
   fi

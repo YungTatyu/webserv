@@ -249,7 +249,6 @@ def main():
 
     print_log(test_name)
 
-
     if g_failed_tests != 0:
         return 1
     return 0
