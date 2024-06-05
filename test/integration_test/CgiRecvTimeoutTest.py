@@ -94,9 +94,7 @@ def run_server(conf):
         sys.exit(1)
 
 
-def run_client(
-    client_executable, server_ip, server_port, request, body_path
-    ):
+def run_client(client_executable, server_ip, server_port, request, body_path):
     global CLIENT_PROCESS
     try:
         CLIENT_PROCESS = subprocess.Popen(
@@ -106,7 +104,7 @@ def run_client(
                 server_ip,
                 str(server_port),
                 request,
-                body_path
+                body_path,
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -116,7 +114,9 @@ def run_client(
         sys.exit(1)
 
 
-def assert_test(uri, body, port, expect_sec, expect_result, client_executable, executable_name):
+def assert_test(
+    uri, body, port, expect_sec, expect_result, client_executable, executable_name
+):
     global TOTAL_TESTS, PASSED_TESTS, FAILED_TESTS
     TOTAL_TESTS += 1
     scheme = "http"

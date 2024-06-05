@@ -111,7 +111,8 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   if (re == -1) return RequestHandler::UPDATE_NONE;
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   if (!cgiProcessExited(cgi_handler.getCgiProcessId())) {
-    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV); // cgiからrecvする間のtimeout
+    addTimerByType(connManager, configHandler, timerTree, sockfd,
+                   Timer::TMO_RECV);  // cgiからrecvする間のtimeout
     return RequestHandler::UPDATE_NONE;
   }
 
@@ -160,7 +161,8 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 }
 
 int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                                        ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd) {
+                                        ConfigHandler &configHandler, TimerTree &timerTree,
+                                        const int sockfd) {
   ioHandler.sendRequestBody(connManager, sockfd);
 
   const std::string body = connManager.getRequest(sockfd).body;
@@ -170,10 +172,11 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
   {
     connManager.resetSentBytes(sockfd);
     connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
-    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV); // cgiのレスポンスをreadするまでのtimeout
+    addTimerByType(connManager, configHandler, timerTree, sockfd,
+                   Timer::TMO_RECV);  // cgiのレスポンスをreadするまでのtimeout
     return RequestHandler::UPDATE_CGI_READ;
   }
-  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND); // cgiにsendする間のtimeout
+  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);  // cgiにsendする間のtimeout
   return RequestHandler::UPDATE_NONE;
 }
 
