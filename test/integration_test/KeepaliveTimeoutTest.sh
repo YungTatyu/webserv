@@ -36,12 +36,6 @@ function init {
   trap signalHandler HUP INT QUIT ABRT KILL TERM
 }
 
-function clean {
-  local color=$1
-  printf "${color}make fclean webserv.${RESET}\n"
-  make fclean -C "${SCRIPT_DIR}/../../" >/dev/null
-}
-
 function Kill {
   local target_pid=$1
   local color=$2
@@ -52,7 +46,6 @@ function Kill {
 function signalHandler {
   printErr "\n\n${RED}${TEST_NAME} interrupted: Signal received.${RESET}"
   Kill "${WEBSERV_PID}" "${RED}"
-  clean "${RED}"
   exit 1
 }
 
@@ -148,7 +141,6 @@ function main {
 
   printLog
 
-  clean "${GREEN}"
 
   if [ ${FAILED_TESTS} -ne 0 ]; then
     return 1
