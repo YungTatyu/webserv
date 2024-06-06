@@ -94,7 +94,7 @@ class HttpResponse {
                                      const config::Server& server, const config::Location* location,
                                      const ConfigHandler& config_handler);
   static ResponsePhase Index(HttpResponse& response, std::string& request,
-                             const std::vector<config::Index>& index_list, std::string directory_path,
+                             const std::vector<config::Index>& index_list, bool is_alias,
                              bool is_autoindex_on);
   static ResponsePhase TryFiles(HttpResponse& response, HttpRequest& request,
                                 const config::TryFiles& try_files);

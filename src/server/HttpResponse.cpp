@@ -567,7 +567,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
   for (size_t i = 0; i < file_list.size(); i++) {
     std::string full_path = response.root_path_ + file_list[i];
     if (isAccessible(full_path)) {
-      response.res_file_path_ = full_path;
+      response.res_file_path_ = file_list[i];
       return sw_content_phase;
     }
   }
@@ -656,18 +656,24 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
 
 HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::string& request_uri,
                                                 const std::vector<config::Index>& index_list,
-                                                std::string directory_path, bool is_autoindex_on) {
+                                                bool is_alias, bool is_autoindex_on) {
+  std::string directory_path = (is_alias) ? response.root_path_ : response.root_path_ + request_uri;
+
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
     if (isAccessible(full_path)) {
-      response.res_file_path_ = full_path;
+      //response.res_file_path_ = full_path;
+      response.res_file_path_ =
+        (is_alias) ? config::Index::kDefaultFile_ : request_uri + index_list[i].getFile();
       return sw_content_phase;
     }
   }
   if (index_list.size() == 0) {
     std::string full_path = directory_path + config::Index::kDefaultFile_;
     if (isAccessible(full_path)) {
-      response.res_file_path_ = full_path;
+      //response.res_file_path_ = full_path;
+      response.res_file_path_ =
+        (is_alias) ? config::Index::kDefaultFile_ : request_uri + config::Index::kDefaultFile_;
       return sw_content_phase;
     }
   }
@@ -703,7 +709,8 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
-    response.res_file_path_ = full_path;
+    //response.res_file_path_ = full_path;
+    response.res_file_path_ = request.uri;
     return sw_content_phase;
   }
 
@@ -713,27 +720,29 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
    * 3つともなかったら上位のcontextで検索する
    */
   bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
+  bool is_alias = false;
 
   // location context
   if (location && Utils::hasDirective(*location, kTRY_FILES))
     return TryFiles(response, request, location->try_files);
   else if (location && Utils::hasDirective(*location, kINDEX)) {
-    std::string directory_path =
-        (Utils::hasDirective(*location, kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
-    return Index(response, request.uri, location->index_list, directory_path, is_autoindex_on);
+    if (Utils::hasDirective(*location, kALIAS)) is_alias = true;
+    //std::string directory_path =
+    //    (Utils::hasDirective(*location, kALIAS)) ? response.root_path_ : response.root_path_ + request.uri;
+    return Index(response, request.uri, location->index_list, is_alias, is_autoindex_on);
   }
 
   // server context
   if (Utils::hasDirective(server, kTRY_FILES))
     return TryFiles(response, request, server.try_files);
   else if (Utils::hasDirective(server, kINDEX))
-    return Index(response, request.uri, server.index_list, response.root_path_ + request.uri,
+    return Index(response, request.uri, server.index_list, is_alias,
                  is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
   // なくとも、デフォルトのindexディレクティブを見る
   return Index(response, request.uri, config_handler.config_->http.index_list,
-               response.root_path_ + request.uri, is_autoindex_on);
+               is_alias, is_autoindex_on);
 }
 
 /**
@@ -749,8 +758,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
   if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
-    if (!isExecutable(response.res_file_path_)) {
-      // TODO: ここのエラー番号これでいい？
+    if (!isExecutable(response.root_path_ + response.res_file_path_)) {
       response.setStatusCode(403);
       return sw_error_page_phase;
     }
@@ -761,7 +769,7 @@ HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& respo
     response.setStatusCode(405);
     return sw_error_page_phase;
   }
-  response.body_ = Utils::readFile(response.res_file_path_);
+  response.body_ = Utils::readFile(response.root_path_ + response.res_file_path_);
   return sw_log_phase;
 }
 
@@ -842,21 +850,21 @@ bool HttpResponse::isExecutable(const std::string& file_path) {
 }
 
 bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
+  std::istringstream uri_stream(request.uri);
   std::vector<std::string> segments;
-  std::istringstream iss(request.uri);
   std::string segment;
-  while (std::getline(iss, segment, '/')) {
+  while (std::getline(uri_stream, segment, '/')) {
     segments.push_back(segment);
   }
 
+  std::string path = "";
   for (size_t i = 0; i < segments.size(); ++i) {
-    std::string path = response.root_path_;
-    for (size_t j = 0; j <= i; ++j) {
-      if (j != 0) path += "/";
-      path += segments[j];
-    }
-    if (cgi::CGIHandler::isCgi(path) && Utils::isFile(path)) {
-      response.separatePathinfo(response.root_path_ + request.uri, path.size());
+    if (i != 0) path += "/";
+    path += segments[i];
+
+    if (cgi::CGIHandler::isCgi(response.root_path_ + path) &&
+        Utils::isFile(response.root_path_ + path)) {
+      response.separatePathinfo(request.uri, path.size());
       request.uri = path;
       return true;
     }
