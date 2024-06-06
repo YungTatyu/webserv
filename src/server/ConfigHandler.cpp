@@ -13,7 +13,7 @@
 const static std::string kACCESS_FD = "access_fd";
 const static std::string kERROR_FD = "error_fd";
 const static std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
-const static std::string kRECEIVE_TIMEOUT = "keepalive_timeout";
+const static std::string kRECEIVE_TIMEOUT = "receive_timeout";
 const static std::string kSEND_TIMEOUT = "send_timeout";
 const static std::string kUSERID_EXPIRES = "userid_expires";
 const static std::string kDENY = "deny";
