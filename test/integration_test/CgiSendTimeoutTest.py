@@ -94,8 +94,6 @@ def main():
 
     failed = print_log(test_name)
 
-    clean(RESET)
-
     if failed != 0:
         return 1
     return 0
