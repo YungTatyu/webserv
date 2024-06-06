@@ -1,0 +1,33 @@
+name: run test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  test-ubuntu:
+    if: github.event.pull_request.draft == false
+    name: test on ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run test (ubuntu) 
+      run: make test
+
+  test-macos:
+    if: github.event.pull_request.draft == false
+    name: test on macOS
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run gtest (macOS)
+      run: make gtest
+
