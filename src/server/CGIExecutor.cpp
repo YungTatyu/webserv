@@ -32,7 +32,8 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
 }
 
 void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
-                                           const std::string& full_path, const int cgi_sock, const int cli_sock) {
+                                           const std::string& full_path, const int cgi_sock,
+                                           const int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
   createScriptPath(full_path);
   createArgv(full_path);

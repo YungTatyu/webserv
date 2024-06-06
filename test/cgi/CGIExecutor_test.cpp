@@ -39,7 +39,8 @@ HttpRequest initRequest(const config::REQUEST_METHOD method, const std::string& 
   return request;
 }
 
-HttpResponse initResponse(const std::string& root_path, const std::string& script_path, const std::string& path_info) {
+HttpResponse initResponse(const std::string& root_path, const std::string& script_path,
+                          const std::string& path_info) {
   HttpResponse response;
 
   response.root_path_ = root_path;
@@ -134,7 +135,8 @@ TEST(cgi_executor, document_response) {
 TEST(cgi_executor, local_redirect_res) {
   ConnectionData cd;
   cd.request =
-      test::initRequest(config::REQUEST_METHOD::GET, "test/cgi/cgi_files/executor/local_redirect_res.php", "HTTP/1.1", "", "", {{"Host", "tt"}});
+      test::initRequest(config::REQUEST_METHOD::GET, "test/cgi/cgi_files/executor/local_redirect_res.php",
+                        "HTTP/1.1", "", "", {{"Host", "tt"}});
   cd.response_ = test::initResponse("./", "/test/cgi/cgi_files/executor/local_redirect_res.php", "");
 
   const std::string expect = "Location: /\r\n\r\n";
@@ -190,7 +192,8 @@ TEST(cgi_executor, meta_vars) {
                              "<h2>QUERY_STRING=one=1&two=2&three=3</h2>"
                              // + "<h2>REMOTE_ADDR=127.0.0.1</h2>" テスト不可のため、別のテストを追加
                              // + "<h2>REMOTE_HOST=127.0.0.1</h2>" テスト不可のため、別のテストを追加
-                             + "<h2>REQUEST_METHOD=GET</h2>" + "<h2>SCRIPT_NAME=test/cgi/cgi_files/executor/meta_vars.py</h2>" +
+                             + "<h2>REQUEST_METHOD=GET</h2>" +
+                             "<h2>SCRIPT_NAME=test/cgi/cgi_files/executor/meta_vars.py</h2>" +
                              "<h2>SERVER_NAME=tt</h2>"
                              // + "<h2>SERVER_PORT=4242</h2>" テスト不可のため、別のテストを追加
                              + "<h2>SERVER_PROTOCOL=HTTP/1.1</h2>" + "<h2>SERVER_SOFTWARE=webserv/1.0</h2>";
