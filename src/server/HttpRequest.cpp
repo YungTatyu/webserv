@@ -59,7 +59,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
 }
 
 HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, HttpRequest &request) {
-  enum parseUriPhase {
+  enum parseChunkPhase {
     sw_chunk_start = 0,
     sw_chunk_size,
     // sw_chunk_extension,
@@ -74,7 +74,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
     sw_chunk_end
   } state;
 
-  state = static_cast<parseUriPhase>(request.state_);
+  state = static_cast<parseChunkPhase>(request.state_);
   const static size_t kMaxChunkSize = std::numeric_limits<long>::max();
   size_t i = 0;
   size_t bytes;
@@ -368,7 +368,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   }
 
   uri = urlDecode(uri);
-  request.uri = uri.substr(0, uri.find('?'));
+  request.uri = Utils::normalizePath(uri.substr(0, uri.find('?')));
   size_t qindex = uri.find('?');
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
 
