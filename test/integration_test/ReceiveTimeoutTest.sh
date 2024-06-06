@@ -38,14 +38,22 @@ function init {
   make -j -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" >/dev/null
   if [ ! -f ${CLIENT_RECV_TIMEOUT_PATH} ]; then
     echo "Build recv_timeout failed"
+    clean "${RED}"
     exit 1
   fi
   if [ ! -f ${CLIENT_NO_SEND_PATH} ]; then
     echo "Build no_send failed"
+    clean "${RED}"
     exit 1
   fi
   printf "|------------------ ${TEST_NAME} start ------------------|\n"
   trap signalHandler HUP INT QUIT ABRT KILL TERM
+}
+
+function clean {
+  local color=$1
+  printf "${color}make fclean client.${RESET}\n"
+  make fclean -C "${SCRIPT_DIR}/test_files/TimeoutTestFiles/" -f "${MAKEFILE_NAME}" >/dev/null
 }
 
 function Kill {
@@ -53,6 +61,7 @@ function Kill {
   local target_pid=$2
   local color=$3
   kill ${target_pid} >/dev/null 2>&1
+  clean "${RED}"
   printErr "${color}kill ${target_name}.${RESET}"
 }
 
@@ -170,6 +179,8 @@ function main {
   runTest "receive_timeout_select.conf" "select"   # select
 
   printLog
+
+  clean "${RED}"
 
   if [ ${FAILED_TESTS} -ne 0 ]; then
     return 1
