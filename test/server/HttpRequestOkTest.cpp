@@ -1724,12 +1724,26 @@ TEST(HttpRequest, normalize_uri_2) {
 }
 
 TEST(HttpRequest, normalize_uri_3) {
-  HttpRequest expect(config::GET, "/path/to/scirpt//", "HTTP/1.1", {{"Host", "aa"}}, "user=kh", "",
+  HttpRequest expect(config::GET, "/path/to/scirpt/", "HTTP/1.1", {{"Host", "aa"}}, "user=kh", "",
                      HttpRequest::PARSE_COMPLETE);
 
   // test: multiple slashes
   std::string req =
       "GET /path/to/scirpt// HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  checkHttpRequestEqual(expect, test);
+}
+
+TEST(HttpRequest, normalize_uri_4) {
+  HttpRequest expect(config::GET, "/path/to/scirpt/", "HTTP/1.1", {{"Host", "aa"}}, "user=kh", "",
+                     HttpRequest::PARSE_COMPLETE);
+
+  // test: multiple slashes
+  std::string req =
+      "GET /path////to//scirpt/// HTTP/1.1\r\n"
       "Host: aa\r\n"
       "\r\n";
   HttpRequest test;
