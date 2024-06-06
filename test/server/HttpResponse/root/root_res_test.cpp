@@ -683,8 +683,7 @@ TEST(HttpResponseRoot, path_info1) {
                                         "/cgi-bin/path_info.php/path/info/", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
-  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php",
-                    "/path/info/");
+  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php", "/path/info/");
 }
 
 TEST(HttpResponseRoot, path_info2) {
@@ -733,8 +732,7 @@ TEST(HttpResponseRoot, path_info4) {
                                         "/cgi-bin/path_info.php", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
-  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php",
-                    "");
+  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php", "");
 }
 
 TEST(HttpResponseRoot, path_info5) {
@@ -746,8 +744,7 @@ TEST(HttpResponseRoot, path_info5) {
                                         "/cgi-bin/path_info.php/path1/path2/", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
-  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php",
-                    "/path1/path2/");
+  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php", "/path1/path2/");
 }
 
 TEST(HttpResponseRoot, path_info6) {
@@ -759,8 +756,7 @@ TEST(HttpResponseRoot, path_info6) {
       "/cgi-bin/path_info.php/a/bc//d//ef/g/h/ij/k/lm/n", HttpRequest::PARSE_COMPLETE));
 
   // test member variables
-  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php",
-                    "/a/bc//d//ef/g/h/ij/k/lm/n");
+  test.testPathInfo(HttpResponse::RES_EXECUTE_CGI, "/cgi-bin/path_info.php", "/a/bc//d//ef/g/h/ij/k/lm/n");
 }
 
 TEST(HttpResponseRoot, path_info7) {
