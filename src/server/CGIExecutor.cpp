@@ -22,7 +22,8 @@ cgi::CGIExecutor::~CGIExecutor() {}
 
 void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpResponse& response,
                                         const int cgi_sock, const int cli_sock) {
-  prepareCgiExecution(request, response, cgi_sock, cli_sock);
+  std::string full_path = response.root_path_ + response.res_file_path_;
+  prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
          const_cast<char* const*>(this->meta_vars_.data()));
   std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << std::strerror(errno) << ")"
@@ -31,11 +32,12 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
 }
 
 void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
-                                           const int cgi_sock, const int cli_sock) {
+                                           const std::string& full_path, const int cgi_sock,
+                                           const int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
-  createScriptPath(response.res_file_path_);
-  createArgv(response.res_file_path_);
-  createMetaVars(request, response.path_info_, cli_sock);
+  createScriptPath(full_path);
+  createArgv(full_path);
+  createMetaVars(request, response, cli_sock);
 }
 
 void cgi::CGIExecutor::createScriptPath(const std::string& script_path) {
@@ -60,7 +62,7 @@ void cgi::CGIExecutor::createArgv(const std::string& script_path) {
   this->argv_.push_back(NULL);
 }
 
-void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::string& path_info,
+void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const HttpResponse& response,
                                       const int cli_sock) {
   const static char* kContentType = "content-type";
 
@@ -78,7 +80,7 @@ void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::str
   this->meta_vars_.push_back("GATEWAY_INTERFACE=CGI/1.1");
 
   static std::string path_info_var = "PATH_INFO=";
-  if (!path_info.empty()) path_info_var += path_info;
+  if (!response.path_info_.empty()) path_info_var += response.path_info_;
   this->meta_vars_.push_back(path_info_var.c_str());
 
   this->meta_vars_.push_back(
@@ -99,7 +101,7 @@ void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const std::str
       std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method);
   this->meta_vars_.push_back(method.c_str());
 
-  const static std::string script_name = std::string("SCRIPT_NAME=") + request.uri;
+  const static std::string script_name = std::string("SCRIPT_NAME=") + response.res_file_path_;
   this->meta_vars_.push_back(script_name.c_str());
 
   const static std::string server_name = std::string("SERVER_NAME=") + request.headers.at("host");
