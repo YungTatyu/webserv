@@ -77,10 +77,12 @@ def print_err(msg):
 def run_server(conf):
     global g_webserv_pid
     try:
-        with subprocess.Popen(
-            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        ) as g_webserv_pid:
-            time.sleep(0.5)
+        g_webserv_pid = subprocess.Popen(
+            [WEBSERV_PATH, conf],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        time.sleep(0.5)
     except Exception as e:
         print(f"{e}", file=sys.stderr)
         sys.exit(1)
@@ -121,7 +123,7 @@ def assert_test(
     scheme = "http"
     host = "127.0.0.1"
     url = f"{scheme}://{host}:{port}{uri}"
-    request = f"{method} {uri} HTTP/1.1i\nHost: \n\n"
+    request = f"{method} {uri} HTTP/1.1\nHost: _\n\n"
 
     print(f"[  test{g_total_tests}  ]\n{url}: ", end="")
 
@@ -138,7 +140,7 @@ def assert_test(
         ).returncode
         == 0
     )
-    if not client_running:
+    if not client_running:  # client does't exist
         if expect_result:
             print(f"{GREEN}passed.{RESET}\nServer closed the connection")
             g_passed_tests += 1
@@ -162,7 +164,7 @@ def assert_test(
 
 def run_test(conf, server_name, test_cases):
     root = os.path.join(
-        SCRIPT_DIR, "test/integration_test/test_files/TimeoutTestFiles/"
+        SCRIPT_DIR, "test_files/TimeoutTestFiles/"
     )
 
     print(f"\n{GREEN}<<< {server_name} server test >>>{RESET}")
@@ -189,7 +191,7 @@ def main():
             body_path,
             4600,
             0,
-            DISCONNECT,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),

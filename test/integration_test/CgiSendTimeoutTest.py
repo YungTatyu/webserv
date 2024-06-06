@@ -44,7 +44,7 @@ def main():
             body_path,
             4700,
             0,
-            DISCONNECT,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
