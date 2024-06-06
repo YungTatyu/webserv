@@ -38,7 +38,7 @@ class RequestHandler {
                      ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
   int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree,
                        const int sockfd);
-  void handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+  std::map<int, RequestHandler::UPDATE_STATUS> handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                           ConfigHandler &configHandler, TimerTree &timerTree);
 
  private:
