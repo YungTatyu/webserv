@@ -43,6 +43,8 @@ class ConfigHandler {
   // timeout値の取得
   const config::Time& searchKeepaliveTimeout(const struct TiedServer& tied_servers,
                                              const std::string& server_name, const std::string& uri) const;
+  const config::Time& searchReceiveTimeout(const struct TiedServer& tied_servers, const std::string& server_name,
+                                        const std::string& uri) const;
   const config::Time& searchSendTimeout(const struct TiedServer& tied_servers, const std::string& server_name,
                                         const std::string& uri) const;
   const config::Time& searchUseridExpires(const struct TiedServer& tied_servers,
