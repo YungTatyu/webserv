@@ -213,12 +213,16 @@ int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManage
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      TimerTree &timerTree, const int sockfd) {
   ioHandler.closeConnection(connManager, timerTree, sockfd);
+  // cgiならすぐには接続切らず、timoutに任せる
+  if (connManager.isCgiSocket(sockfd))
+    return RequestHandler::UPDATE_NONE;
   return RequestHandler::UPDATE_CLOSE;
 }
 
-void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
+std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         ConfigHandler &configHandler, TimerTree &timerTree) {
   configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
+  std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
@@ -228,12 +232,28 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
     std::multiset<Timer>::iterator next = it;
     next++;
     // timer tree から削除
+    if (connManager.isCgiSocket(it->getFd())) {
+      int cgi_sock = it->getFd();
+      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
+      int client_sock = cgi_handler.getCliSocket();
+
+      ioHandler.closeConnection(connManager, timerTree, cgi_sock);
+      // 504 error responseを生成
+      HttpRequest &request = connManager.getRequest(client_sock);
+      HttpResponse &response = connManager.getResponse(client_sock);
+      response.state_ = HttpResponse::RES_CGI_TIMEOUT;
+      HttpResponse::generateResponse(request, response, connManager.getTiedServer(client_sock), client_sock, configHandler);
+      timeout_sock_map[client_sock] = RequestHandler::UPDATE_WRITE;
+      it = next;
+      continue;
+    }
     ioHandler.closeConnection(connManager, timerTree, it->getFd());
     // timeoutの種類によってログ出力変える
     // std::string	timeout_reason = "waiting for client request.";
     configHandler.writeErrorLog("webserv: [info] client timed out\n");
     it = next;
   }
+  return timeout_sock_map;
 }
 
 /**
