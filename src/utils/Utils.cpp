@@ -253,8 +253,7 @@ std::string Utils::normalizePath(const std::string& full_path) {
   std::string token;
 
   if (full_path.empty()) return "/";
-  const char& last_ch = full_path.back();
-  bool end_with_sl = last_ch == '/' ? true : false;
+  bool end_with_sl = full_path.at(full_path.size() - 1) == '/' ? true : false;
   while (std::getline(ss, token, '/')) {
     if (token.empty() || token == ".") {
       continue;
