@@ -253,7 +253,8 @@ std::string Utils::normalizePath(const std::string& full_path) {
   std::string token;
 
   if (full_path.empty()) return "/";
-  bool is_dir = full_path.back() == '/' ? true : false;
+  const char& last_ch = full_path.back();
+  bool end_with_sl = last_ch == '/' ? true : false;
   while (std::getline(ss, token, '/')) {
     if (token.empty() || token == ".") {
       continue;
@@ -270,6 +271,6 @@ std::string Utils::normalizePath(const std::string& full_path) {
     if (i != 0) result += "/";
     result += components[i];
   }
-  if (is_dir && result != "/") result += "/";
+  if (end_with_sl && result != "/") result += "/";
   return result;
 }
