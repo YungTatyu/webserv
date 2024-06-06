@@ -281,8 +281,8 @@ void RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandle
       break;
 
     case Timer::TMO_RECV:
-      // TODO: ディレクティブ作る
-      timeout = config::Time(60 * config::Time::seconds);
+      timeout = configHandler.searchReceiveTimeout(connManager.getTiedServer(sockfd), host_name,
+                                                     connManager.getRequest(sockfd).uri);
       break;
 
     case Timer::TMO_SEND:
