@@ -270,6 +270,6 @@ std::string Utils::normalizePath(const std::string& full_path) {
     if (i != 0) result += "/";
     result += components[i];
   }
-  if (is_dir) result += "/";
+  if (is_dir && result != "/") result += "/";
   return result;
 }
