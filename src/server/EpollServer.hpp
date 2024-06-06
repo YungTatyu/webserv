@@ -31,6 +31,7 @@ class EpollServer : public IServer {
   int addNewEvent(const int fd, const uint32_t event_filter);
   int updateEvent(struct epoll_event& old_event, const uint32_t event_filter);
   int deleteEvent(struct epoll_event& old_event);
+  void  addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map);
 };
 
 #endif
