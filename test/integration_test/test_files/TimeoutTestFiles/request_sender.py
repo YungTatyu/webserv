@@ -25,7 +25,7 @@ def send_requests(address, port, request, body_file):
     request += "\r\n"
     print("request", request)
     request += body
-    #request = replace_escape_sequences(request)
+    request = replace_escape_sequences(request)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((address, port))
