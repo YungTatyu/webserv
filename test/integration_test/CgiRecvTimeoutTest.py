@@ -123,7 +123,7 @@ def assert_test(
     scheme = "http"
     host = "127.0.0.1"
     url = f"{scheme}://{host}:{port}{uri}"
-    request = f"{method} {uri} HTTP/1.1\nHost: _\n\n"
+    request = f"{method} {uri} HTTP/1.1\nHost: _\n"
 
     print(f"[  test{g_total_tests}  ]\n{url}: ", end="")
 
