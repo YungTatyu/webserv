@@ -22,7 +22,7 @@ def run_server(webserv, conf):
 
 def send_request(req_data):
     headers = {"host": req_data["host"], "content-type": req_data["content_type"]}
-    req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}?{req_data['query_string']}"
+    req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}{req_data['path_info']}?{req_data['query_string']}"
     r = requests.get(req, headers=headers, data=f"{req_data['body']}", timeout=0.5)
     return r
 
@@ -37,7 +37,7 @@ def expect_body(response, req_data):
         f"CONTENT_LENGTH={len(req_data['body'])}\n"
         f"CONTENT_TYPE={req_data['content_type']}\n"
         f"GATEWAY_INTERFACE=CGI/1.1\n"
-        f"PATH_INFO=\n"
+        f"PATH_INFO={req_data['path_info']}\n"
         f"PATH_TRANSLATED=\n"
         f"QUERY_STRING={req_data['query_string']}\n"
         f"REMOTE_ADDR=127.0.0.1\n"
@@ -82,6 +82,7 @@ def test_all_meta_vars1(conf1):
             "query_string": "a=a&b=b&c=c",
             "port": 4242,
             "cgi_file": "all_meta_vars.py",
+            "path_info": "",
         },
     )
 
@@ -100,5 +101,25 @@ def test_all_meta_vars2(conf2):
             "query_string": "location=japan&user=guest",
             "port": 4343,
             "cgi_file": "all_meta_vars.py",
+            "path_info": "",
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    "conf3",
+    ["all_meta_vars3.conf", "all_meta_vars3_poll.conf", "all_meta_vars3_select.conf"],
+)
+def test_all_meta_vars3(conf3):
+    run_test(
+        conf3,
+        {
+            "host": "_",
+            "content_type": "text/plain",
+            "body": "\n\n\n\n\n\n\n\n",
+            "query_string": "key1=&key2=value2", # key1の値は空
+            "port": 4444,
+            "cgi_file": "all_meta_vars.py",
+            "path_info": "/path/info",
         },
     )
