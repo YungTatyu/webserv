@@ -17,7 +17,7 @@ class CGIExecutor {
                            const int cli_sock);
   void createScriptPath(const std::string& script_path);
   void createArgv(const std::string& script_path);
-  void createMetaVars(const HttpRequest& request, const std::string& path_info, const int cli_sock);
+  void createMetaVars(const HttpRequest& request, const HttpResponse& response, const int cli_sock);
   std::vector<std::string> split(const std::string& s, char delimiter) const;
   std::string searchCommandInPath(const std::string& command) const;
   bool isExecutableFile(const std::string& path) const;
