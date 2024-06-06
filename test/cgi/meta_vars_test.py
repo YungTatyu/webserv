@@ -117,7 +117,7 @@ def test_all_meta_vars3(conf3):
             "host": "_",
             "content_type": "text/plain",
             "body": "\n\n\n\n\n\n\n\n",
-            "query_string": "key1=&key2=value2", # key1の値は空
+            "query_string": "key1=&key2=value2",  # key1の値は空
             "port": 4444,
             "cgi_file": "all_meta_vars.py",
             "path_info": "/path/info",
