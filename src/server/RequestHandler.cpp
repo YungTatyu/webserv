@@ -104,15 +104,16 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
     return handleResponse(connManager, configHandler, timerTree, sockfd);
   }
   // bodyが空なら、bodyをsendしない
+  int cgi_sock = connManager.getCgiHandler(sockfd).getCgiSocket();
   if (request.body.empty()) {
-    // 最初にcgiのレスポンスをrecvするまでのtimeout
-    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV);
     connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_READ);
+    // 最初にcgiのレスポンスをrecvするまでのtimeout
+    addTimerByType(connManager, configHandler, timerTree, cgi_sock, Timer::TMO_RECV);
     return RequestHandler::UPDATE_CGI_READ;
   }
-  // 最初にcgiにbodyをsendするまでのtimeout
-  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
   connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_WRITE);
+  // 最初にcgiにbodyをsendするまでのtimeout
+  addTimerByType(connManager, configHandler, timerTree, cgi_sock, Timer::TMO_SEND);
   return RequestHandler::UPDATE_CGI_WRITE;
 }
 
