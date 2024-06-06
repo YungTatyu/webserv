@@ -38,11 +38,11 @@ class HttpResponse {
     sw_end_phase
   };
 
-  // member methods
   static std::string generateResponse(HttpRequest& request, HttpResponse& response,
                                       const struct TiedServer& tied_servers, const int client_sock,
                                       const ConfigHandler& config_handler);
-
+  static bool isKeepaliveConnection(const HttpResponse& response);
+  static bool isErrorResponse(const HttpResponse& response);
   // public variables
   std::string root_path_;
   std::string res_file_path_;
@@ -56,7 +56,6 @@ class HttpResponse {
   static std::map<int, const std::string*> default_error_page_map_;  // defaultのerror pageを格納するmap
 
  private:
-  // private member
   size_t internal_redirect_cnt_;
   static const size_t kMaxInternalRedirect = 10;
 

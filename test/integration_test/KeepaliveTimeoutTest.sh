@@ -21,6 +21,8 @@ Port="4242"
 GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
+DISCONNECT="true"
+STAY_CONNECT="false"
 
 # functions
 function init {
@@ -36,12 +38,6 @@ function init {
   trap signalHandler HUP INT QUIT ABRT KILL TERM
 }
 
-function clean {
-  local color=$1
-  printf "${color}make fclean webserv.${RESET}\n"
-  make fclean -C "${SCRIPT_DIR}/../../" >/dev/null
-}
-
 function Kill {
   local target_pid=$1
   local color=$2
@@ -52,7 +48,6 @@ function Kill {
 function signalHandler {
   printErr "\n\n${RED}${TEST_NAME} interrupted: Signal received.${RESET}"
   Kill "${WEBSERV_PID}" "${RED}"
-  clean "${RED}"
   exit 1
 }
 
@@ -102,8 +97,8 @@ EOT
   local telnet_running=$?
 
   if [ "$telnet_running" -eq 1 ]; then
-    kill $(ps | grep "sleep" | grep -v grep | cut -d ' ' -f2) >/dev/null 2>&1
-    if [ "$expect_result" = "true" ]; then
+    kill $(ps | grep "sleep" | grep -v grep | awk '{print $1}')
+    if [ "$expect_result" = ${DISCONNECT} ]; then
       printf "${GREEN}passed.${RESET}\nServer closed the connection\n\n"
       ((PASSED_TESTS++))
     else
@@ -111,8 +106,8 @@ EOT
       ((FAILED_TESTS++))
     fi
   else # telnetが正常にタイムアウトする前にsleepが終了
-    kill $(ps | grep "telnet" | grep -v grep | cut -d ' ' -f2) >/dev/null 2>&1
-    if [ "$expect_result" = "true" ]; then
+    kill $(ps | grep "telnet" | grep -v grep | awk '{print $1}')
+    if [ "$expect_result" = ${DISCONNECT} ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
     else
@@ -129,11 +124,12 @@ function runTest {
   runServer "${root}/${conf}"
 
   printf "\n${GREEN}<<< ${server_name} server test >>>${RESET}\n"
-  assert "/" "0" "true"
-  assert "/timeout5/" "5" "true"
-  assert "/timeout10/" "10" "true"
-  assert "/timeout5/" "3" "false"
-  assert "/timeout10/" "8" "false"
+
+  assert "/" "0" ${DISCONNECT}
+  assert "/timeout5/" "5" ${DISCONNECT}
+  assert "/timeout10/" "10" ${DISCONNECT}
+  assert "/timeout5/" "3" ${STAY_CONNECT}
+  assert "/timeout10/" "8" ${STAY_CONNECT}
 
   # サーバープロセスを終了
   kill "${WEBSERV_PID}"
@@ -147,8 +143,6 @@ function main {
   runTest "keepalive_timeout_poll.conf" "poll"       # poll
 
   printLog
-
-  clean "${GREEN}"
 
   if [ ${FAILED_TESTS} -ne 0 ]; then
     return 1

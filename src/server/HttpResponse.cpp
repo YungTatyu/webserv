@@ -16,6 +16,10 @@ static const char* kHtml = "text/html";
 static const char* kTextPlain = "text/plain";
 static const char* kDefaultPage = "defaut.html";
 static const int kInitStatusCode = 200;
+static const char* kClose = "close";
+static const char* kConnection = "Connection";
+static const char* kKeepAlive = "keep-alive";
+static const char* kTransferEncoding = "Transfer-Encoding";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
 std::map<int, const std::string*> HttpResponse::default_error_page_map_;
@@ -787,10 +791,6 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
 }
 
 void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time& time) {
-  const static char* kClose = "close";
-  const static char* kConnection = "Connection";
-  const static char* kKeepAlive = "keep-alive";
-  const static char* kTransferEncoding = "Transfer-Encoding";
   const int status_code = response.getStatusCode();
   const std::map<int, std::string>::iterator default_status_line = status_line_map_.find(status_code);
 
@@ -825,6 +825,21 @@ std::string HttpResponse::detectContentType(const std::string& res_file_path) {
   if (Utils::isExtensionFile(res_file_path, kCssExt)) return "text/css";
   if (Utils::isExtensionFile(res_file_path, kJsExt)) return "text/javascript";
   return kTextPlain;
+}
+
+bool HttpResponse::isKeepaliveConnection(const HttpResponse& response) {
+  std::map<std::string, std::string>::const_iterator it = response.headers_.find(kConnection);
+  if (it == response.headers_.end()) return false;
+  return it->second == kKeepAlive;
+}
+
+/**
+ *
+ * クライアントエラーリスポンス：400 – 499
+ * サーバーエラーリスポンス：500 – 599
+ */
+bool HttpResponse::isErrorResponse(const HttpResponse& response) {
+  return response.status_code_ >= 400 && response.status_code_ < 600;
 }
 
 char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]; }

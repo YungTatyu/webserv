@@ -51,13 +51,16 @@ def main():
     CWD = os.path.dirname(os.path.abspath(__file__))
     test_cases = [
         f"{CWD}/integration_test/server_res_test.sh",
-        f"python3 -m pytest -vv {CWD}/integration_test/server_res_header_test.py",
-        f"python3 -m pytest -vv {CWD}/cgi/meta_vars_test.py",
+        f"python3 -m pytest -vv -s {CWD}/integration_test/server_res_header_test.py",
+        f"python3 -m pytest -vv -s {CWD}/integration_test/multiple_requests_test.py",
+        f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py",
         f"{CWD}/conf/main_parser_test.sh",
         f"{CWD}/conf/directive_err_test.sh",
         f"{CWD}/integration_test/KeepaliveTimeoutTest.sh",
         f"{CWD}/integration_test/ReceiveTimeoutTest.sh",
         f"{CWD}/integration_test/SendTimeoutTest.sh",
+        f"{CWD}/integration_test/CgiRecvTimeoutTest.py",
+        f"{CWD}/integration_test/CgiSendTimeoutTest.py",
     ]
 
     init(f"{CWD}/..")
@@ -67,7 +70,11 @@ def main():
     failed_tests = []
     for test in test_cases:
         CUR_TEST = f"{TEST_NAME}{ti}"
-        print(f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}", end="\n")
+        print(
+            f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}",
+            end="\n",
+            flush=True,
+        )
         result = run_test(test)
         if result == 0:
             print(
