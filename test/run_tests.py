@@ -59,6 +59,8 @@ def main():
         f"{CWD}/integration_test/KeepaliveTimeoutTest.sh",
         f"{CWD}/integration_test/ReceiveTimeoutTest.sh",
         f"{CWD}/integration_test/SendTimeoutTest.sh",
+        f"{CWD}/integration_test/CgiRecvTimeoutTest.py",
+        f"{CWD}/integration_test/CgiSendTimeoutTest.py",
     ]
 
     init(f"{CWD}/..")
