@@ -27,6 +27,8 @@ FILE_PATH = os.path.join(ROOT_PATH, "test_files/TimeoutTestFiles/html/big_buf.ht
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
+DISCONNECT = True
+STAY_CONNECT = False
 
 
 def main():
@@ -42,7 +44,7 @@ def main():
             body_path,
             4700,
             0,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -52,7 +54,7 @@ def main():
             body_path,
             4700,
             3,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -62,7 +64,7 @@ def main():
             body_path,
             4700,
             6,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -72,7 +74,7 @@ def main():
             body_path,
             4700,
             1,
-            False,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -82,7 +84,7 @@ def main():
             body_path,
             4700,
             4,
-            False,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),

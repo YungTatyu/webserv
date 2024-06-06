@@ -20,6 +20,8 @@ CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_send
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
+DISCONNECT = True
+STAY_CONNECT = False
 g_total_tests = g_passed_tests = g_failed_tests = 0
 g_webserv_pid = None
 g_client_process = None
@@ -187,7 +189,7 @@ def main():
             body_path,
             4600,
             0,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -197,7 +199,7 @@ def main():
             body_path,
             4600,
             3,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -207,7 +209,7 @@ def main():
             body_path,
             4600,
             6,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -217,7 +219,7 @@ def main():
             body_path,
             4600,
             1,
-            False,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -227,7 +229,7 @@ def main():
             body_path,
             4600,
             4,
-            False,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
@@ -237,7 +239,7 @@ def main():
             body_path,
             4600,
             3,
-            True,
+            DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
         ),
