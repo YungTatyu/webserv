@@ -22,7 +22,8 @@ cgi::CGIExecutor::~CGIExecutor() {}
 
 void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpResponse& response,
                                         const int cgi_sock, const int cli_sock) {
-  prepareCgiExecution(request, response, cgi_sock, cli_sock);
+  std::string full_path = response.root_path_ + response.res_file_path_;
+  prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
          const_cast<char* const*>(this->meta_vars_.data()));
   std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << std::strerror(errno) << ")"
@@ -31,10 +32,10 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
 }
 
 void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
-                                           const int cgi_sock, const int cli_sock) {
+                                           const std::string& full_path, const int cgi_sock, const int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
-  createScriptPath(response.root_path_ + response.res_file_path_);
-  createArgv(response.root_path_ + response.res_file_path_);
+  createScriptPath(full_path);
+  createArgv(full_path);
   createMetaVars(request, response, cli_sock);
 }
 

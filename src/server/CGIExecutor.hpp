@@ -13,8 +13,8 @@ class CGIExecutor {
   std::string script_path_;
   std::vector<const char*> argv_;
   std::vector<const char*> meta_vars_;  // メタ変数(環境変数)
-  void prepareCgiExecution(const HttpRequest& request, const HttpResponse& response, const int cgi_sock,
-                           const int cli_sock);
+  void prepareCgiExecution(const HttpRequest& request, const HttpResponse& response, const std::string& full_path,
+                           const int cgi_sock, const int cli_sock);
   void createScriptPath(const std::string& script_path);
   void createArgv(const std::string& script_path);
   void createMetaVars(const HttpRequest& request, const HttpResponse& response, const int cli_sock);
