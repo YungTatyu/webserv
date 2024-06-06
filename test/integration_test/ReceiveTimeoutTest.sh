@@ -26,6 +26,9 @@ Port="4300"
 GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
+# expect_result
+DISCONNECT="true"
+STAY_CONNECT="false"
 
 # functions
 function init {
@@ -127,7 +130,7 @@ function assert {
   ps | grep "${executable_name}" | grep -v grep >/dev/null 2>&1
   local client_running=$?
   if [ "$client_running" -eq 1 ]; then
-    if [ "$expect_result" = "true" ]; then
+    if [ "$expect_result" = ${DISCONNECT} ]; then
       printf "${GREEN}passed.${RESET}\nServer closed the connection\n"
       ((PASSED_TESTS++))
     else
@@ -137,7 +140,7 @@ function assert {
   else # clientが正常にタイムアウトする前にsleepが終了
     #kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}') >/dev/null 2>&1
     kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
-    if [ "$expect_result" = "true" ]; then
+    if [ "$expect_result" = ${DISCONNECT} ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
     else
@@ -157,14 +160,14 @@ function runTest {
   runServer "${root}/${conf}"
 
   # テスト実行
-  assert "/timeout0/" "3" "false" "${CLIENT_RECV_TIMEOUT_PATH}" "timeout0"
-  assert "/timeout5/" "5" "true" "${CLIENT_RECV_TIMEOUT_PATH}" "timeout5"
-  assert "/timeout10/" "10" "true" "${CLIENT_RECV_TIMEOUT_PATH}" "timeout10"
-  assert "/timeout5/" "3" "false" "${CLIENT_RECV_TIMEOUT_PATH}" "timeout5"
-  assert "/timeout10/" "8" "false" "${CLIENT_RECV_TIMEOUT_PATH}" "timeout10"
+  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout0"
+  assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout5"
+  assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout10"
+  assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout5"
+  assert "/timeout10/" "8" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout10"
   # このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
-  assert "/no-send/" "3" "true" "${CLIENT_NO_SEND_PATH}" "no_send"
-  assert "/no-send/" "1" "false" "${CLIENT_NO_SEND_PATH}" "no_send"
+  assert "/no-send/" "3" ${DISCONNECT} "${CLIENT_NO_SEND_PATH}" "no_send"
+  assert "/no-send/" "1" ${STAY_CONNECT} "${CLIENT_NO_SEND_PATH}" "no_send"
 
   # サーバープロセスを終了
   kill "${WEBSERV_PID}"
@@ -180,7 +183,7 @@ function main {
 
   printLog
 
-  clean "${RED}"
+  clean "${RESET}"
 
   if [ ${FAILED_TESTS} -ne 0 ]; then
     return 1
