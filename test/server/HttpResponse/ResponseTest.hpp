@@ -34,9 +34,7 @@ class ResponseTest {
 
  public:
   ResponseTest(const std::string &conf_path)
-      : conf_path_(conf_path),
-        webserver_(new WebServer(NULL)),
-        config_handler_(const_cast<ConfigHandler &>(webserver_->getConfigHandler())) {}
+      : conf_path_(conf_path), config_handler_(const_cast<ConfigHandler &>(WebServer::getConfigHandler())) {}
 
   ~ResponseTest() {
     if (this->conf_path_.find("AccessLog") != std::string::npos) {
@@ -44,7 +42,6 @@ class ResponseTest {
       unlink("logs/format.log");
     }
     delete this->config_handler_.config_;
-    delete this->webserver_;
     close(this->sockets_[0]);
     close(this->sockets_[1]);
   }
@@ -81,6 +78,7 @@ class ResponseTest {
     ASSERT_NO_FATAL_FAILURE(setUp());
     initTiedServers(ip_addresses);
     initRequest(headers, methods, uri, state, body, queries, version);
+    std::cerr << "genereate res\n";
     generateResponse();
   }
 
@@ -413,7 +411,7 @@ class ResponseTest {
                     EXPECT_EQ(response.path_info_, path_info);
                   });
   }
-  WebServer *webserver_;
+
   int sockets_[2];
   const std::string conf_path_;
   std::vector<config::REQUEST_METHOD> methods_;  // testするmethod

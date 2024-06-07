@@ -11,6 +11,7 @@
 #include "Lexer.hpp"
 #include "LogFd.hpp"
 #include "Parser.hpp"
+#include "WebServer.hpp"
 
 // 各テストで使うconfigをセットするクラス
 class InitLogTest : public ::testing::Test {
