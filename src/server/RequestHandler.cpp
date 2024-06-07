@@ -230,9 +230,10 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
 
   // timeout している接続をすべて削除
   for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(); it != upper_bound;) {
+    // next iterator を保存
     std::multiset<Timer>::iterator next = it;
     next++;
-    // timer tree から削除
+    // timer treeから削除
     if (connManager.isCgiSocket(it->getFd())) {
       int cgi_sock = it->getFd();
       const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
@@ -240,18 +241,16 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
 
       ioHandler.closeConnection(connManager, timerTree, cgi_sock);
       // 504 error responseを生成
-      HttpRequest &request = connManager.getRequest(client_sock);
       HttpResponse &response = connManager.getResponse(client_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      HttpResponse::generateResponse(request, response, connManager.getTiedServer(client_sock), client_sock, configHandler);
+      handleResponse(connManager, configHandler, timerTree, client_sock);
       timeout_sock_map[client_sock] = RequestHandler::UPDATE_WRITE;
+      configHandler.writeErrorLog("webserv: [info] cgi timed out\n"); // debug
       it = next;
       continue;
     }
     ioHandler.closeConnection(connManager, timerTree, it->getFd());
-    // timeoutの種類によってログ出力変える
-    // std::string	timeout_reason = "waiting for client request.";
-    configHandler.writeErrorLog("webserv: [info] client timed out\n");
+    configHandler.writeErrorLog("webserv: [info] client timed out\n"); // debug
     it = next;
   }
   return timeout_sock_map;
