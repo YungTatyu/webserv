@@ -5,10 +5,10 @@
 
 #include "LogFd.hpp"
 
-/* WebServerクラスの実装 */
-WebServer::WebServer(const config::Main *config) {
-  this->configHandler = new ConfigHandler();
+ConfigHandler WebServer::config_handler_;
 
+WebServer::WebServer(const config::Main *config) {
+  this->configHandler = &(config_handler_);
   this->configHandler->loadConfiguration(config);
   this->initializeServer();
   if (this->ioHandler->getListenfdMap().size() >=
@@ -38,12 +38,8 @@ void WebServer::initializeServer() {
       this->server = new KqueueServer();
       this->eventManager = new KqueueActiveEventManager();
       break;
-    case config::EPOLL:
-      break;
 #endif
 #if defined(EPOLL_AVAILABLE)
-    case config::KQUEUE:
-      break;
     case config::EPOLL:
       this->server = new EpollServer();
       this->eventManager = new EpollActiveEventManager();
@@ -56,6 +52,8 @@ void WebServer::initializeServer() {
     case config::SELECT:
       this->server = new SelectServer();
       this->eventManager = new SelectActiveEventManager();
+      break;
+    default:  // kqueueもepoll使えない場合は、defaultが必要
       break;
   }
   configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");
@@ -120,7 +118,6 @@ void WebServer::deleteObjects() {
   config::terminateLogFds(this->configHandler->config_);
   delete this->timerTree;
   delete this->configHandler->config_;
-  delete this->configHandler;
   delete this->ioHandler;
   delete this->requestHandler;
   delete this->connManager;

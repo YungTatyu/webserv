@@ -24,6 +24,7 @@ class WebServer {
   void run();
 
  private:
+  static ConfigHandler config_handler_;
   NetworkIOHandler *ioHandler;
   RequestHandler *requestHandler;
   ConnectionManager *connManager;
