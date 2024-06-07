@@ -107,6 +107,8 @@ void WebServer::initializeConnManager() {
   }
 }
 
+void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
+
 WebServer::~WebServer() {
   this->configHandler->writeErrorLog("webserv: [debug] Close webserv.\n\n");
   // close( this->connManager->getConnection() ); //
