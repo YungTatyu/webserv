@@ -147,8 +147,8 @@ def assert_test(
             print_err(f"{RED}failed.{RESET}\nServer closed the connection")
             g_failed_tests += 1
     else:
-        subprocess.run( ["pkill", "-f", executable_name] )
-        subprocess.run( ["pkill", "-f", cgi_name] )
+        subprocess.run(["pkill", "-f", executable_name])
+        subprocess.run(["pkill", "-f", cgi_name])
         if expect_result:
             print_err(f"{RED}failed.{RESET}\nServer did not timeout")
             g_failed_tests += 1
