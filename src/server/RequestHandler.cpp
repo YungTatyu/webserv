@@ -215,13 +215,13 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
                                      TimerTree &timerTree, const int sockfd) {
   ioHandler.closeConnection(connManager, timerTree, sockfd);
   // cgiならすぐには接続切らず、timoutに任せる
-  if (connManager.isCgiSocket(sockfd))
-    return RequestHandler::UPDATE_NONE;
+  if (connManager.isCgiSocket(sockfd)) return RequestHandler::UPDATE_NONE;
   return RequestHandler::UPDATE_CLOSE;
 }
 
-std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                                        ConfigHandler &configHandler, TimerTree &timerTree) {
+std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
+    NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler,
+    TimerTree &timerTree) {
   std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
@@ -235,7 +235,7 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
     // timer treeから削除
     if (connManager.isCgiSocket(it->getFd())) {
       int cgi_sock = it->getFd();
-      const cgi::CGIHandler& cgi_handler = connManager.getCgiHandler(cgi_sock);
+      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
       int client_sock = cgi_handler.getCliSocket();
 
       cgi_handler.killCgiProcess();
@@ -245,12 +245,12 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
       handleResponse(connManager, configHandler, timerTree, client_sock);
       timeout_sock_map[client_sock] = RequestHandler::UPDATE_WRITE;
-      configHandler.writeErrorLog("webserv: [info] cgi timed out\n"); // debug
+      configHandler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
       it = next;
       continue;
     }
     ioHandler.closeConnection(connManager, timerTree, it->getFd());
-    configHandler.writeErrorLog("webserv: [info] client timed out\n"); // debug
+    configHandler.writeErrorLog("webserv: [info] client timed out\n");  // debug
     it = next;
   }
   return timeout_sock_map;
@@ -302,7 +302,7 @@ void RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandle
 
     case Timer::TMO_RECV:
       timeout = configHandler.searchReceiveTimeout(connManager.getTiedServer(sockfd), host_name,
-                                                     connManager.getRequest(sockfd).uri);
+                                                   connManager.getRequest(sockfd).uri);
       break;
 
     case Timer::TMO_SEND:

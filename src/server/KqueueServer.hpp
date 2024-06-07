@@ -34,7 +34,7 @@ class KqueueServer : public IServer {
   int updateEvent(struct kevent& event, const short event_filter);
   int deleteEvent(struct kevent& event);
   int addNewEvent(const int fd, const short event_filter);
-  void  addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map);
+  void addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map);
 };
 
 #endif

@@ -74,12 +74,10 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
 /*
  * cgi socketがtimeoutした場合にそれに紐づくclientのeventをWRITE EVENTに変更する関数。
  */
-void  EpollServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
+void EpollServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
   std::map<int, RequestHandler::UPDATE_STATUS>::const_iterator it;
 
-  for (it = timeout_sock_map.begin();
-         it != timeout_sock_map.end();
-         ++it) {
+  for (it = timeout_sock_map.begin(); it != timeout_sock_map.end(); ++it) {
     switch (it->second) {
       case RequestHandler::UPDATE_WRITE:
         addNewEvent(it->first, EVFILT_WRITE);
@@ -104,7 +102,8 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    timeout_sock_map = request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    timeout_sock_map =
+        request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
     addClientNewEvent(timeout_sock_map);
     return;
   }
@@ -169,7 +168,8 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
         break;
     }
   }
-  timeout_sock_map = request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+  timeout_sock_map =
+      request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
   addClientNewEvent(timeout_sock_map);
 }
 

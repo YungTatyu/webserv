@@ -213,8 +213,8 @@ const config::Time& ConfigHandler::searchKeepaliveTimeout(const struct TiedServe
 }
 
 const config::Time& ConfigHandler::searchReceiveTimeout(const struct TiedServer& tied_servers,
-                                                          const std::string& server_name,
-                                                          const std::string& uri) const {
+                                                        const std::string& server_name,
+                                                        const std::string& uri) const {
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 

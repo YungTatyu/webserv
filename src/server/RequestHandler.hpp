@@ -38,8 +38,10 @@ class RequestHandler {
                      ConfigHandler &configHandler, TimerTree &timerTree, const int sockfd);
   int handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, TimerTree &timerTree,
                        const int sockfd);
-  std::map<int, RequestHandler::UPDATE_STATUS> handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                          ConfigHandler &configHandler, TimerTree &timerTree);
+  std::map<int, RequestHandler::UPDATE_STATUS> handleTimeoutEvent(NetworkIOHandler &ioHandler,
+                                                                  ConnectionManager &connManager,
+                                                                  ConfigHandler &configHandler,
+                                                                  TimerTree &timerTree);
 
  private:
   bool cgiProcessExited(const pid_t process_id) const;

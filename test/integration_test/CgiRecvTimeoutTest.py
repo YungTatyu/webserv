@@ -78,9 +78,7 @@ def run_server(conf):
     global g_webserv_pid
     try:
         g_webserv_pid = subprocess.Popen(
-            [WEBSERV_PATH, conf],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         time.sleep(0.5)
     except Exception as e:
@@ -163,9 +161,7 @@ def assert_test(
 
 
 def run_test(conf, server_name, test_cases):
-    root = os.path.join(
-        SCRIPT_DIR, "test_files/TimeoutTestFiles/"
-    )
+    root = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/")
 
     print(f"\n{GREEN}<<< {server_name} server test >>>{RESET}")
     run_server(os.path.join(root, conf))
