@@ -3,7 +3,8 @@
 #include "ConnectionManager.hpp"
 #include "NetworkIOHandler.hpp"
 #include "RequestHandler.hpp"
-
+#include "WebServer.hpp"
+#include "error.hpp"
 #if defined(EPOLL_AVAILABLE)
 #include <sys/epoll.h>
 
