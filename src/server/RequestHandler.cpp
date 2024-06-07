@@ -222,7 +222,6 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
 std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         ConfigHandler &configHandler, TimerTree &timerTree) {
-  configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
   std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
@@ -236,9 +235,10 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
     // timer treeから削除
     if (connManager.isCgiSocket(it->getFd())) {
       int cgi_sock = it->getFd();
-      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
+      const cgi::CGIHandler& cgi_handler = connManager.getCgiHandler(cgi_sock);
       int client_sock = cgi_handler.getCliSocket();
 
+      cgi_handler.killCgiProcess();
       ioHandler.closeConnection(connManager, timerTree, cgi_sock);
       // 504 error responseを生成
       HttpResponse &response = connManager.getResponse(client_sock);
