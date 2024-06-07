@@ -37,7 +37,7 @@ bool EpollServer::initEpollServer() {
   // epoll1_create(EPOLL_CLOEXEC);を使用することで、forkでこのfdのオープンを防げる。
   this->epfd_ = epoll_create1(EPOLL_CLOEXEC);
   if (this->epfd_ == -1) {
-    std::cerr << "webserv: [emerg] epoll_create1 (" << errno << ":" << strerror(errno) << ")\n";
+    std::cerr << error::strSysCallError("epoll_create1") << "\n";
     return false;
   }
   return true;
@@ -52,7 +52,7 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
     ep.data.fd = it->first;
 
     if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1) {
-      std::cerr << "webserv: [emerg] epoll_ctl (" << errno << ":" << strerror(errno) << ")\n";
+      std::cerr << error::strSysCallError("epoll_ctl") << "\n";
       return false;
     }
   }
@@ -157,6 +157,7 @@ int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManag
   Timer::updateCurrentTime();
   int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
   event_manager->setActiveEventsNum(size);
+  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait"));
   return size;
 }
 
@@ -164,16 +165,22 @@ int EpollServer::addNewEvent(const int fd, const uint32_t event_filter) {
   struct epoll_event new_event;
   new_event.events = event_filter;
   new_event.data.fd = fd;
-  return epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
+  int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"));
+  return re;
 }
 
 int EpollServer::updateEvent(struct epoll_event& old_event, const uint32_t event_filter) {
   old_event.events = event_filter;
-  return epoll_ctl(this->epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
+  int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"));
+  return re;
 }
 
 int EpollServer::deleteEvent(struct epoll_event& old_event) {
-  return epoll_ctl(this->epfd_, EPOLL_CTL_DEL, old_event.data.fd, NULL);
+  int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, old_event.data.fd, NULL);
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"));
+  return re;
 }
 
 #endif
