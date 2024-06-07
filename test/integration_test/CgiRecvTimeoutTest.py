@@ -109,12 +109,13 @@ def run_client(client_executable, server_ip, server_port, request, body_path):
 def assert_test(
     method,
     uri,
-    body,
+    body_path,
     port,
     expect_sec,
     expect_result,
     client_executable,
     executable_name,
+    cgi_name="none",
 ):
     global g_total_tests, g_passed_tests, g_failed_tests
     g_total_tests += 1
@@ -126,7 +127,7 @@ def assert_test(
     print(f"[  test{g_total_tests}  ]\n{url}: ", end="")
 
     # program 実行
-    run_client(client_executable, host, port, request, body)
+    run_client(client_executable, host, port, request, body_path)
     time.sleep(expect_sec + 1)
 
     # 判定
@@ -146,11 +147,8 @@ def assert_test(
             print_err(f"{RED}failed.{RESET}\nServer closed the connection")
             g_failed_tests += 1
     else:
-        subprocess.run(
-            ["pkill", "-f", executable_name],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        subprocess.run( ["pkill", "-f", executable_name] )
+        subprocess.run( ["pkill", "-f", cgi_name] )
         if expect_result:
             print_err(f"{RED}failed.{RESET}\nServer did not timeout")
             g_failed_tests += 1
@@ -186,10 +184,11 @@ def main():
             "/timeout0/",
             body_path,
             4600,
-            0,
+            2,
             STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "send_partial.py",
         ),
         (
             "GET",
@@ -200,6 +199,7 @@ def main():
             DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "send_partial.py",
         ),
         (
             "GET",
@@ -210,16 +210,18 @@ def main():
             DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "send_partial.py",
         ),
         (
             "GET",
             "/timeout3/",
             body_path,
             4600,
-            1,
+            2,
             STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "send_partial.py",
         ),
         (
             "GET",
@@ -230,6 +232,7 @@ def main():
             STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "send_partial.py",
         ),
         (
             "GET",
@@ -240,6 +243,18 @@ def main():
             DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "send_nothing.py",
+        ),
+        (
+            "GET",
+            "/no-send/",
+            body_path,
+            4600,
+            2,
+            STAY_CONNECT,
+            CLIENT_PATH,
+            "request_sender.py",
+            "send_nothing.py",
         ),
     ]
 
