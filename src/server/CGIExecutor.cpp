@@ -4,14 +4,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
 
 #include "ConfigHandler.hpp"
 #include "LimitExcept.hpp"
+#include "SysCallWrapper.hpp"
 #include "Utils.hpp"
+#include "WebServer.hpp"
+#include "error.hpp"
 
 const static char* kPhpExtension = ".php";
 const static char* kPhp = "php";
@@ -26,8 +28,7 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
   prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
          const_cast<char* const*>(this->meta_vars_.data()));
-  std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << std::strerror(errno) << ")"
-            << std::endl;
+  WebServer::writeErrorlog(error::strSysCallError("execve") + "\n");
   std::exit(EXIT_FAILURE);
 }
 
@@ -158,17 +159,13 @@ std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) co
  * @return false
  */
 bool cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& request, const int socket) const {
-  if (dup2(socket, STDOUT_FILENO) == -1) {
-    std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")"
-              << std::endl;
+  if (SysCallWrapper::Dup2(socket, STDOUT_FILENO) == -1) {
     close(socket);
     return false;
   }
   // bodyが存在する場合は、標準入力にbodyをセットする必要がある
   if (!request.body.empty()) {
-    if (dup2(socket, STDIN_FILENO) == -1) {
-      std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")"
-                << std::endl;
+    if (SysCallWrapper::Dup2(socket, STDIN_FILENO) == -1) {
       close(STDOUT_FILENO);
       close(socket);
       return false;

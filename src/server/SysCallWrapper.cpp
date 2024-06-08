@@ -57,3 +57,9 @@ int SysCallWrapper::Fcntl(int fd, int cmd, int flags) {
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("fctnl") + "\n");
   return re;
 }
+
+int SysCallWrapper::Getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
+  int re = getsockname(sockfd, addr, addrlen);
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("getsockname") + "\n");
+  return re;
+}

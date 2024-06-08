@@ -4,13 +4,14 @@
 #include <stdio.h>
 #include <sys/socket.h>
 
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 
 #include "SysCallWrapper.hpp"
 #include "Utils.hpp"
+#include "WebServer.hpp"
+#include "error.hpp"
 
 cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1), cli_socket_(-1) { resetSockets(); }
 
@@ -54,8 +55,7 @@ bool cgi::CGIHandler::callCgiExecutor(const HttpResponse& response, const HttpRe
                                       const int cli_sock) {
   this->cli_socket_ = cli_sock;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1) {
-    std::cerr << "webserv: [emerg] socketpair() failed (" << errno << ": " << std::strerror(errno) << ")"
-              << std::endl;
+    WebServer::writeErrorlog(error::strSysCallError("socketpair") + "\n");
     return false;
   }
 #if defined(SO_NOSIGPIPE)
@@ -89,8 +89,7 @@ int cgi::CGIHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]
  */
 void cgi::CGIHandler::killCgiProcess() const {
   if (kill(this->cgi_process_id_, SIGINT) == -1)
-    std::cerr << "webserv: [emerg] kill() failed (" << errno << ": " << std::strerror(errno) << ")"
-              << std::endl;
+    WebServer::writeErrorlog(error::strSysCallError("kill") + "\n");
 }
 
 /**

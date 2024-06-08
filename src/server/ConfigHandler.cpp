@@ -9,6 +9,7 @@
 
 #include "NetworkIOHandler.hpp"
 #include "Utils.hpp"
+#include "error.hpp"
 
 const static std::string kACCESS_FD = "access_fd";
 const static std::string kERROR_FD = "error_fd";
@@ -122,20 +123,17 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
   if (location && Utils::hasDirective(*location, kACCESS_FD)) {
     for (size_t i = 0; i < location->access_fd_list.size(); i++) {
       if (Utils::wrapperWrite(location->access_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (Utils::hasDirective(server, kACCESS_FD)) {
     for (size_t i = 0; i < server.access_fd_list.size(); i++) {
       if (Utils::wrapperWrite(server.access_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (Utils::hasDirective(this->config_->http, kACCESS_FD)) {
     for (size_t i = 0; i < this->config_->http.access_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http.access_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   }
 }
@@ -145,16 +143,14 @@ void ConfigHandler::writeErrorLog(const std::string& msg) const {
   if (Utils::hasDirective(this->config_->http, kERROR_FD)) {
     for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (Utils::hasDirective(*this->config_, kERROR_FD)) {
     // main contextにerror_logディレクティブがなくてもデフォルトに出力する
     // fdがopenできずに追加できていない可能性があるので、一応条件文で確認している。
     for (size_t i = 0; i < this->config_->error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   }
 }
@@ -171,26 +167,22 @@ void ConfigHandler::writeErrorLog(const config::Server& server, const config::Lo
   if (location && Utils::hasDirective(*location, kERROR_FD)) {
     for (size_t i = 0; i < location->error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(location->error_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (Utils::hasDirective(server, kERROR_FD)) {
     for (size_t i = 0; i < server.error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(server.error_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (Utils::hasDirective(this->config_->http, kERROR_FD)) {
     for (size_t i = 0; i < this->config_->http.error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http.error_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (Utils::hasDirective(*this->config_, kERROR_FD)) {
     for (size_t i = 0; i < this->config_->error_fd_list.size(); i++) {
       if (Utils::wrapperWrite(this->config_->error_fd_list[i], msg) == -1)
-        std::cerr << "webserv: [error] write() failed (" << errno << ": " << std::strerror(errno) << ")"
-                  << std::endl;
+        std::cerr << error::strSysCallError("write") << std::endl;
     }
   }
 }
