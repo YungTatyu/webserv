@@ -158,7 +158,7 @@ int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManag
   Timer::updateCurrentTime();
   int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
   event_manager->setActiveEventsNum(size);
-  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait"));
+  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait") + "\n");
   return size;
 }
 
@@ -167,20 +167,20 @@ int EpollServer::addNewEvent(const int fd, const uint32_t event_filter) {
   new_event.events = event_filter;
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 
 int EpollServer::updateEvent(struct epoll_event& old_event, const uint32_t event_filter) {
   old_event.events = event_filter;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 
 int EpollServer::deleteEvent(struct epoll_event& old_event) {
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, old_event.data.fd, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 

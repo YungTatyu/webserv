@@ -53,7 +53,7 @@ void WebServer::initializeServer() {
       this->server = new SelectServer();
       this->eventManager = new SelectActiveEventManager();
       break;
-    default:  // kqueueもepoll使えない場合は、defaultが必要
+    default:  // kqueueとepoll両方使えない場合は、defaultが必要
       break;
   }
   configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");

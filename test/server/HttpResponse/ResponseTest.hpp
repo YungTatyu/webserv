@@ -78,7 +78,6 @@ class ResponseTest {
     ASSERT_NO_FATAL_FAILURE(setUp());
     initTiedServers(ip_addresses);
     initRequest(headers, methods, uri, state, body, queries, version);
-    std::cerr << "genereate res\n";
     generateResponse();
   }
 

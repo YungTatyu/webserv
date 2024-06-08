@@ -70,7 +70,7 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   struct timespec* tsp = &ts;
   if (ts.tv_sec == -1 && ts.tv_nsec == -1) tsp = NULL;
   int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), tsp);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
   event_manager->setActiveEventsNum(re);
   return re;
 }
@@ -174,7 +174,7 @@ int KqueueServer::updateEvent(struct kevent& old_event, const short event_filter
 int KqueueServer::deleteEvent(struct kevent& event) {
   EV_SET(&event, event.ident, event.filter, EV_DELETE, event.fflags, event.data, event.udata);
   int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
   return re;
 }
 
@@ -183,7 +183,7 @@ int KqueueServer::addNewEvent(const int fd, const short event_filter) {
   EV_SET(&event, fd, event_filter, EV_ADD | EV_ENABLE, 0, 0, 0);
   int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
   // TODO: errorのとき、再トライ？
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
   return re;
 }
 

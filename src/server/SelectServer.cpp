@@ -32,7 +32,7 @@ int SelectServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   struct timeval* tvp = &tv;
   if (tv.tv_sec == -1 && tv.tv_usec == -1) tvp = NULL;
   int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("select"));
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("select") + "\n");
   addActiveEvents(conn_manager->getConnections(), event_manager);
   return re;
 }
