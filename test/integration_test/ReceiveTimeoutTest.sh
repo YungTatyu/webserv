@@ -160,12 +160,11 @@ function runTest {
   runServer "${root}/${conf}"
 
   # テスト実行
-  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout0"
-  assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout5"
-  assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout10"
-  assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout5"
-  assert "/timeout10/" "8" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "timeout10"
-  # このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
+  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
+  assert "/timeout3/" "3" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
+  assert "/timeout6/" "6" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
+  assert "/timeout3/" "2" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
+  assert "/timeout6/" "5" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
   assert "/no-send/" "3" ${DISCONNECT} "${CLIENT_NO_SEND_PATH}" "no_send"
   assert "/no-send/" "1" ${STAY_CONNECT} "${CLIENT_NO_SEND_PATH}" "no_send"
 
