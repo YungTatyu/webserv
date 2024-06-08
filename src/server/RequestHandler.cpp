@@ -34,9 +34,6 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     return new_sock;
   }
 
-  // keepalive_timeout消す。
-  timerTree.deleteTimer(sockfd);
-
   // クライアントソケットへのリクエスト（既存コネクション）
   ssize_t re = ioHandler.receiveRequest(connManager, sockfd);
   // ソケット使用不可。
@@ -46,6 +43,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     ioHandler.closeConnection(connManager, timerTree, sockfd);
     return RequestHandler::UPDATE_CLOSE;
   }
+  // 2つのrecv間のtimeout設定
+  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV);
   return handleRequest(connManager, configHandler, timerTree, sockfd);
 }
 
