@@ -162,7 +162,7 @@ function runTest {
 
   # テスト実行
   for test_case in "${cases[@]}"; do
-    IFS=' ' read -r -a params <<< "$test_case"
+    IFS=' ' read -r -a params <<<"$test_case"
     assert "${params[@]}"
   done
 
@@ -172,29 +172,28 @@ function runTest {
 
 # テストケースの定義
 declare -a timeout0_cases=(
-    "/ 2 $STAY_CONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
-    "/ 2 $STAY_CONNECT $CLIENT_NO_SEND_PATH no_send"
+  "/ 2 $STAY_CONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
+  "/ 2 $STAY_CONNECT $CLIENT_NO_SEND_PATH no_send"
 )
 
 declare -a timeout3_cases=(
-    "/ 3 $DISCONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
-    "/ 1 $STAY_CONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
-    "/ 3 $DISCONNECT $CLIENT_NO_SEND_PATH no_send"
-    "/ 1 $STAY_CONNECT $CLIENT_NO_SEND_PATH no_send"
+  "/ 3 $DISCONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
+  "/ 1 $STAY_CONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
+  "/ 3 $DISCONNECT $CLIENT_NO_SEND_PATH no_send"
+  "/ 1 $STAY_CONNECT $CLIENT_NO_SEND_PATH no_send"
 )
-
 
 function main {
   init
 
   # receive_timeout 3;
   runTest "receive_timeout0.conf" "kqueue or epoll timeout 0" timeout0_cases # kqueue or epoll
-  runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases      # poll
-  runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases  # select
+  runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases       # poll
+  runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases   # select
   # receive_timeout 3;
   runTest "receive_timeout3.conf" "kqueue or epoll timeout 3" timeout3_cases # kqueue or epoll
-  runTest "receive_timeout3_poll.conf" "poll timeout 3" timeout3_cases      # poll
-  runTest "receive_timeout3_select.conf" "select timeout 3" timeout3_cases  # select
+  runTest "receive_timeout3_poll.conf" "poll timeout 3" timeout3_cases       # poll
+  runTest "receive_timeout3_select.conf" "select timeout 3" timeout3_cases   # select
 
   printLog
 

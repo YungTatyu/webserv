@@ -42,7 +42,6 @@ int main(int ac, char *av[]) {
   // 送信しないでsend_timeout + 1秒待機
   sleep(sleep_time + 1);
 
-
   // 一度目のsendはserver側で接続がcloseされていても成功する
   // close されている場合RESETパケットが送られる。
   char request[] = "request";
