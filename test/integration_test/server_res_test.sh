@@ -62,10 +62,11 @@ function assert {
   local uri=$1
   local request="localhost:4242/${uri}"
   local method=$3
+  local header=$4
   printf "[  test${g_test_index}  ]\n${request}: "
 
   # responseのtimeoutを1秒に設定 --max-time
-  local actual=$(curl -X ${method} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
+  local actual=$(curl -X ${method} ${header} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
   local expect=$2
   if [ "${actual}" == "${expect}" ]; then
     printf "${GREEN}passed${WHITE}\n\n"
@@ -88,13 +89,16 @@ function runTest {
   printf "\n${GREEN}<<< ${server_name} server test >>>${WHITE}\n"
 
   # 以下にテストを追加
-  assert "${root}/static/index.html" "200" "GET"
-  assert "${root}/nonexist" "404" "GET"
-  assert "${root}/dynamic/document_response.py" "200" "GET"
-  assert "${root}/dynamic/local_redirect_res.py" "302" "GET"
-  assert "${root}/dynamic/client_redirect_res.cgi" "302" "GET"
-  assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET"
-  assert "${root}/dynamic/body_res.py" "200" "GET"
+  assert "${root}/static/index.html" "200" "GET" ""
+  assert "${root}/static/index.html" "400" "GET" "-H Host:"
+  assert "${root}/nonexist" "404" "GET" ""
+  assert "${root}/static/index.html" "501" "GET" "-H Transfer-Encoding:gzip"
+  assert "${root}/dynamic/cannot_exec.py" "502" "GET" ""
+  assert "${root}/dynamic/document_response.py" "200" "GET" ""
+  assert "${root}/dynamic/local_redirect_res.py" "302" "GET" ""
+  assert "${root}/dynamic/client_redirect_res.cgi" "302" "GET" ""
+  assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET" ""
+  assert "${root}/dynamic/body_res.py" "200" "GET" ""
 
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
