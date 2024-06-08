@@ -1764,45 +1764,6 @@ TEST(HttpRequest, normalize_uri_5) {
 }
 
 TEST(HttpRequest, normalize_uri_6) {
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_COMPLETE);
-
-  // test: dotdot
-  std::string req =
-      "GET /.. HTTP/1.1\r\n"
-      "Host: aa\r\n"
-      "\r\n";
-  HttpRequest test;
-  HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect, test);
-}
-
-TEST(HttpRequest, normalize_uri_7) {
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_COMPLETE);
-
-  // test: dotdot
-  std::string req =
-      "GET /../ HTTP/1.1\r\n"
-      "Host: aa\r\n"
-      "\r\n";
-  HttpRequest test;
-  HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect, test);
-}
-
-TEST(HttpRequest, normalize_uri_8) {
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_COMPLETE);
-
-  // test: dotdot
-  std::string req =
-      "GET /../ HTTP/1.1\r\n"
-      "Host: aa\r\n"
-      "\r\n";
-  HttpRequest test;
-  HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect, test);
-}
-
-TEST(HttpRequest, normalize_uri_9) {
   HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_COMPLETE);
 
   // test: dotdot
@@ -1815,7 +1776,7 @@ TEST(HttpRequest, normalize_uri_9) {
   checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, normalize_uri_10) {
+TEST(HttpRequest, normalize_uri_7) {
   HttpRequest expect(config::GET, "/test/", "HTTP/1.1", {{"Host", "aa"}}, "", "",
                      HttpRequest::PARSE_COMPLETE);
 
@@ -1829,26 +1790,13 @@ TEST(HttpRequest, normalize_uri_10) {
   checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, normalize_uri_11) {
-  HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}}, "", "", HttpRequest::PARSE_COMPLETE);
-
-  // test: dotdot
-  std::string req =
-      "GET /path/../../.. HTTP/1.1\r\n"
-      "Host: aa\r\n"
-      "\r\n";
-  HttpRequest test;
-  HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect, test);
-}
-
-TEST(HttpRequest, normalize_uri_12) {
+TEST(HttpRequest, normalize_uri_8) {
   HttpRequest expect(config::GET, "/.../..../path/", "HTTP/1.1", {{"Host", "aa"}}, "query", "",
                      HttpRequest::PARSE_COMPLETE);
 
   // test: go crazy!
   std::string req =
-      "GET /..///..//...///..../path///to//../script///..///?query HTTP/1.1\r\n"
+      "GET //////...///..../path///to//../script///..///?query HTTP/1.1\r\n"
       "Host: aa\r\n"
       "\r\n";
   HttpRequest test;
@@ -1856,32 +1804,18 @@ TEST(HttpRequest, normalize_uri_12) {
   checkHttpRequestEqual(expect, test);
 }
 
-TEST(HttpRequest, normalize_uri_13) {
-  HttpRequest expect(config::GET, "/.../..../path", "HTTP/1.1", {{"Host", "aa"}}, "query", "",
-                     HttpRequest::PARSE_COMPLETE);
-
-  // test: go crazy!
-  std::string req =
-      "GET //..//..///...///..../path///to//../script///..?query HTTP/1.1\r\n"
-      "Host: aa\r\n"
-      "\r\n";
-  HttpRequest test;
-  HttpRequest::parseRequest(req, test);
-  checkHttpRequestEqual(expect, test);
-}
-
-TEST(HttpRequest, normalize_uri_14) {
+TEST(HttpRequest, normalize_uri_9) {
   HttpRequest expect(config::GET, "/", "HTTP/1.1", {{"Host", "aa"}}, "query", "",
                      HttpRequest::PARSE_COMPLETE);
 
   // test: go crazy!
   std::string req =
-      "GET /../../../////..//..///.../..//..../////../path/../../.../..//to//../script///..?query "
-      "HTTP/1.1\r\n"
+      "GET ////.///...///...././//./../////../path//..//to//../script///..?query HTTP/1.1\r\n"
       "Host: aa\r\n"
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   checkHttpRequestEqual(expect, test);
 }
+
 /* -------------- normalize uri end -------------- */

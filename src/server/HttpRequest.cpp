@@ -368,8 +368,10 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &rawRequest, HttpReque
   }
 
   uri = urlDecode(uri);
-  request.uri = Utils::normalizePath(uri.substr(0, uri.find('?')));
   size_t qindex = uri.find('?');
+  std::string uri_part = uri.substr(0, qindex);
+  if (!isValidUri(uri_part)) return PARSE_ERROR;
+  request.uri = Utils::normalizePath(uri_part);
   if (qindex != std::string::npos) request.queries = uri.substr(uri.find('?') + 1);
 
   resetBufs(request);
@@ -811,6 +813,29 @@ bool HttpRequest::isValidContentLength(const std::string &str) {
 
   if (iss.fail() || iss.bad() || iss.peek() != EOF) return false;
   return length <= static_cast<unsigned long>(std::numeric_limits<long>::max());
+}
+
+/**
+ * @brief rootを遡ろうとするuriはerrorとする
+ * ex) /..  /test/../..
+ */
+bool HttpRequest::isValidUri(const std::string &str) {
+  std::vector<std::string> components;
+  std::istringstream ss(str);
+  std::string token;
+
+  while (std::getline(ss, token, '/')) {
+    if (token.empty() || token == ".") {
+      continue;
+    }
+    if (token == "..") {
+      if (components.empty()) return false;
+      components.pop_back();
+      continue;
+    }
+    components.push_back(token);
+  }
+  return true;
 }
 
 void HttpRequest::clear(HttpRequest &request) {

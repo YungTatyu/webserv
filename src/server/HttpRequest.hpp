@@ -64,6 +64,7 @@ class HttpRequest {
   static void resetBufs(HttpRequest &request);
   static bool isUniqHeaderDup(const HttpRequest &request, const std::string &header);
   static bool isValidHost(const std::string &str);
+  static bool isValidUri(const std::string &str);
   static void clear(HttpRequest &request);
 };
 
