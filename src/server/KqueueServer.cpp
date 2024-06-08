@@ -74,7 +74,7 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
 /*
  * cgi socketがtimeoutした場合にそれに紐づくclientのeventをWRITE EVENTに変更する関数。
  */
-void EpollServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
+void KqueueServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
   std::map<int, RequestHandler::UPDATE_STATUS>::const_iterator it;
 
   for (it = timeout_sock_map.begin(); it != timeout_sock_map.end(); ++it) {
