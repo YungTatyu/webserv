@@ -123,7 +123,7 @@ function assert {
 
   # program 実行
   runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}" &
-  sleep $(bc <<<"${expect_sec} + 1.5")
+  sleep $(bc <<<"${expect_sec} + 1")
 
   # 判定
   #ps | grep "${executable_name}" | grep -v grep
@@ -154,31 +154,47 @@ function assert {
 function runTest {
   local conf=$1
   local server_name=$2
-  local root="test/integration_test/test_files/TimeoutTestFiles"
+  local -n cases=$3
+  local root="${SCRIPT_DIR}/test_files/TimeoutTestFiles"
 
   printf "\n${GREEN}<<< ${server_name} server test >>>${RESET}\n"
   runServer "${root}/${conf}"
 
   # テスト実行
-  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
-  assert "/timeout3/" "3" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
-  assert "/timeout6/" "6" ${DISCONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
-  assert "/timeout3/" "2" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
-  assert "/timeout6/" "5" ${STAY_CONNECT} "${CLIENT_RECV_TIMEOUT_PATH}" "recv_timeout"
-  assert "/no-send/" "3" ${DISCONNECT} "${CLIENT_NO_SEND_PATH}" "no_send"
-  assert "/no-send/" "1" ${STAY_CONNECT} "${CLIENT_NO_SEND_PATH}" "no_send"
+  for test_case in "${cases[@]}"; do
+    IFS=' ' read -r -a params <<< "$test_case"
+    assert "${params[@]}"
+  done
 
   # サーバープロセスを終了
   kill "${WEBSERV_PID}"
-  #kill "${WEBSERV_PID}" > /dev/null 2>&1
 }
+
+# テストケースの定義
+declare -a timeout0_cases=(
+    "/ 2 $STAY_CONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
+    "/ 2 $STAY_CONNECT $CLIENT_NO_SEND_PATH no_send"
+)
+
+declare -a timeout3_cases=(
+    "/ 3 $DISCONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
+    "/ 1 $STAY_CONNECT $CLIENT_RECV_TIMEOUT_PATH recv_timeout"
+    "/ 3 $DISCONNECT $CLIENT_NO_SEND_PATH no_send"
+    "/ 1 $STAY_CONNECT $CLIENT_NO_SEND_PATH no_send"
+)
+
 
 function main {
   init
 
-  runTest "receive_timeout.conf" "kqueue or epoll" # kqueue or epoll
-  runTest "receive_timeout_poll.conf" "poll"       # poll
-  runTest "receive_timeout_select.conf" "select"   # select
+  # receive_timeout 3;
+  runTest "receive_timeout0.conf" "kqueue or epoll timeout 0" timeout0_cases # kqueue or epoll
+  runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases      # poll
+  runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases  # select
+  # receive_timeout 3;
+  runTest "receive_timeout3.conf" "kqueue or epoll timeout 3" timeout3_cases # kqueue or epoll
+  runTest "receive_timeout3_poll.conf" "poll timeout 3" timeout3_cases      # poll
+  runTest "receive_timeout3_select.conf" "select timeout 3" timeout3_cases  # select
 
   printLog
 
