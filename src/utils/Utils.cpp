@@ -14,13 +14,13 @@
 
 int Utils::wrapperOpen(const std::string path, int flags, mode_t modes) {
   int fd = open(path.c_str(), flags, modes);
-  if (fd == -1) WebServer::writeErrorlog(error::strSysCallError("open", path));
+  if (fd == -1) WebServer::writeErrorlog(error::strSysCallError("open", path) + "\n");
   return fd;
 }
 
 int Utils::wrapperAccess(const std::string path, int modes, bool err_log) {
   int ret = access(path.c_str(), modes);
-  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path));
+  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n");
   return ret;
 }
 
@@ -37,7 +37,7 @@ bool Utils::wrapperRealpath(const std::string& path, std::string& absolute_path)
 bool Utils::isFile(const std::string& path) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
-    WebServer::writeErrorlog(error::strSysCallError("stat", path));
+    WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
     return false;
   }
   return S_ISREG(statbuf.st_mode);
@@ -46,7 +46,7 @@ bool Utils::isFile(const std::string& path) {
 bool Utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0 && err_log) {
-    WebServer::writeErrorlog(error::strSysCallError("stat", path));
+    WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
@@ -111,7 +111,7 @@ ssize_t Utils::wrapperWrite(const int fd, const std::string& msg) {
 bool Utils::wrapperGetsockname(struct sockaddr_in& addr, const int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
-    WebServer::writeErrorlog(error::strSysCallError("getsockname", Utils::toStr(sock)));
+    WebServer::writeErrorlog(error::strSysCallError("getsockname", Utils::toStr(sock)) + "\n");
     return false;
   }
   return true;
