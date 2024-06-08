@@ -213,9 +213,9 @@ int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManage
 
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      TimerTree &timerTree, const int sockfd) {
-  ioHandler.closeConnection(connManager, timerTree, sockfd);
   // cgiならすぐには接続切らず、timoutに任せる
   if (connManager.isCgiSocket(sockfd)) return RequestHandler::UPDATE_NONE;
+  ioHandler.closeConnection(connManager, timerTree, sockfd);
   return RequestHandler::UPDATE_CLOSE;
 }
 
