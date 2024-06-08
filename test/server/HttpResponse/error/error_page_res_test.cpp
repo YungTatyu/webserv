@@ -109,8 +109,8 @@ TEST(HttpResponseError, not_implemented) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
   test.initTiedServers({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}});
-  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET}, "/",
-                   HttpRequest::PARSE_NOT_IMPLEMENTED);
+  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}, {"transfer-encoding", "not implemented"}},
+                   {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_NOT_IMPLEMENTED);
   test.generateResponse();
 
   test.testHeaders({
