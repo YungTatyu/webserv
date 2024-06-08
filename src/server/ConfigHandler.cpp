@@ -222,10 +222,9 @@ const config::Time& ConfigHandler::searchReceiveTimeout(const struct TiedServer&
     return location->receive_timeout.getTime();
   } else if (Utils::hasDirective(server, kRECEIVE_TIMEOUT)) {
     return server.receive_timeout.getTime();
-  } else  // http兼default
-  {
-    return this->config_->http.receive_timeout.getTime();
   }
+  // http兼default
+  return this->config_->http.receive_timeout.getTime();
 }
 
 const config::Time& ConfigHandler::searchSendTimeout(const TiedServer& tied_servers,
