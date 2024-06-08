@@ -114,6 +114,7 @@ function assert {
   local expect_result=$3
   local client_executable=$4
   local executable_name=$5
+  local sleep_between_case=$5
   local url="${Scheme}://${Host}:${Port}${uri}"
   local request1="GET ${uri} HTTP/1.1"
   local request2="Host: _"
@@ -139,7 +140,6 @@ function assert {
     fi
   else # clientが正常にタイムアウトする前にsleepが終了
     kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
-    #kill "${CLIENT_PID}" >/dev/null 2>&1
     if [ "$expect_result" = ${DISCONNECT} ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
@@ -148,27 +148,28 @@ function assert {
       ((PASSED_TESTS++))
     fi
   fi
-  #sleep 1
   printf "\n"
+  sleep $(bc <<<"$sleep_between_case + 1.5")
 }
 
 function runTest {
   local conf=$1
   local server_name=$2
+  local sleep_between_case=$3
   local root="test/integration_test/test_files/TimeoutTestFiles"
 
   printf "\n${GREEN}<<< ${server_name} server test >>>${RESET}\n"
   runServer "${root}/${conf}"
 
   # テスト実行
-  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
-  assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
-  assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
-  assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
-  assert "/timeout10/" "8" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout"
+  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
+  assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
+  assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
+  assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
+  assert "/timeout10/" "8" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   # このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
-  assert "/no-recv/" "3" ${DISCONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
-  assert "/no-recv/" "1" ${STAY_CONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv"
+  assert "/no-recv/" "3" ${DISCONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv" ${sleep_between_case}
+  assert "/no-recv/" "1" ${STAY_CONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv" ${sleep_between_case}
 
   # サーバープロセスを終了
   #kill "${WEBSERV_PID}"
@@ -178,9 +179,9 @@ function runTest {
 function main {
   init
 
-  runTest "send_timeout.conf" "kqueue or epoll" # kqueue or epoll
-  runTest "send_timeout_poll.conf" "poll"       # poll
-  runTest "send_timeout_select.conf" "select"   # select
+  runTest "send_timeout.conf" "kqueue or epoll" "0" # kqueue or epoll
+  runTest "send_timeout_poll.conf" "poll" "0"       # poll
+  runTest "send_timeout_select.conf" "select" "3"   # select
 
   printLog
 
