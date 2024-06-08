@@ -67,7 +67,7 @@ def print_log(test_name):
     print(f"[ {GREEN}PASSED{RESET} ]    {g_passed_tests} tests")
     print(f"[ {RED}FAILED{RESET} ]    {g_failed_tests} tests")
 
-    return {g_failed_tests}
+    return g_failed_tests
 
 
 def print_err(msg):
