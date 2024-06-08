@@ -1,5 +1,6 @@
 import sys
 import os
 
-main():
+
+def main():
     print("Status: 200 OK\r\n\r\n")
