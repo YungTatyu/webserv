@@ -446,8 +446,8 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   else if (response.state_ == RES_PARSED_CGI)
     return sw_end_phase;
   else if (response.state_ == RES_CGI_ERROR) {
-    return sw_error_page_phase;
     response.setStatusCode(502);  // bad gate error
+    return sw_error_page_phase;
   } else if (parse_state == HttpRequest::PARSE_ERROR) {
     response.setStatusCode(400);
     return sw_error_page_phase;
