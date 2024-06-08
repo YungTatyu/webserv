@@ -154,7 +154,7 @@ function assert {
 function runTest {
   local conf=$1
   local server_name=$2
-  local -n cases=$3
+  local cases=("${!3}")
   local root="${SCRIPT_DIR}/test_files/TimeoutTestFiles"
 
   printf "\n${GREEN}<<< ${server_name} server test >>>${RESET}\n"
@@ -187,13 +187,13 @@ function main {
   init
 
   # receive_timeout 3;
-  runTest "receive_timeout0.conf" "kqueue or epoll timeout 0" timeout0_cases # kqueue or epoll
-  runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases       # poll
-  runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases   # select
+  runTest "receive_timeout0.conf" "kqueue or epoll timeout 0" timeout0_cases[@] # kqueue or epoll
+  runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases[@]       # poll
+  runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases[@]   # select
   # receive_timeout 3;
-  runTest "receive_timeout3.conf" "kqueue or epoll timeout 3" timeout3_cases # kqueue or epoll
-  runTest "receive_timeout3_poll.conf" "poll timeout 3" timeout3_cases       # poll
-  runTest "receive_timeout3_select.conf" "select timeout 3" timeout3_cases   # select
+  runTest "receive_timeout3.conf" "kqueue or epoll timeout 3" timeout3_cases[@] # kqueue or epoll
+  runTest "receive_timeout3_poll.conf" "poll timeout 3" timeout3_cases[@]       # poll
+  runTest "receive_timeout3_select.conf" "select timeout 3" timeout3_cases[@]   # select
 
   printLog
 
