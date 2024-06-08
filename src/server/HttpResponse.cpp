@@ -354,14 +354,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   struct sockaddr_in client_addr;
 
   enum ResponsePhase phase = sw_start_phase;
-  if (response.state_ == RES_COMPLETE)
-    clear(response);
-  else if (response.state_ == RES_PARSED_CGI)
-    phase = sw_end_phase;
-  else if (response.state_ == RES_CGI_ERROR) {
-    phase = sw_error_page_phase;
-    response.setStatusCode(502);  // bad gate error
-  }
 
   while (phase != sw_end_phase) {
     switch (phase) {
@@ -449,9 +441,18 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock,
     struct sockaddr_in& client_addr) {
-  // parse error
-  if (parse_state == HttpRequest::PARSE_ERROR) {
+  if (response.state_ == RES_COMPLETE)
+    clear(response);
+  else if (response.state_ == RES_PARSED_CGI)
+    return sw_end_phase;
+  else if (response.state_ == RES_CGI_ERROR) {
+    return sw_error_page_phase;
+    response.setStatusCode(502);  // bad gate error
+  } else if (parse_state == HttpRequest::PARSE_ERROR) {
     response.setStatusCode(400);
+    return sw_error_page_phase;
+  } else if (parse_state == HttpRequest::PARSE_NOT_IMPLEMENTED) {
+    response.setStatusCode(501);
     return sw_error_page_phase;
   }
 
