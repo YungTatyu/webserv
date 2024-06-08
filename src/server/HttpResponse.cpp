@@ -640,7 +640,8 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
         buffer << space << file_stat.st_size << "  ";
       } else {
         for (size_t i = 0; i < 15; i++) space += " ";
-        buffer << space << "-" << "  ";
+        buffer << space << "-"
+               << "  ";
       }
       buffer << "</span>";
     }
