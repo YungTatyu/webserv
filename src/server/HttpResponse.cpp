@@ -803,8 +803,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
     response.headers_.erase(kTransferEncoding);
 
   // requestエラーの場合は、接続を切る
-  response.headers_[kConnection] =
-      (time.isNoTime() || (400 <= status_code && status_code < 500) ? kClose : kKeepAlive);
+  response.headers_[kConnection] = (time.isNoTime() || isErrorResponse(response) ? kClose : kKeepAlive);
 
   // cgiでstatus code lineの場合
   if (!response.status_code_line_.empty()) return;
@@ -840,7 +839,7 @@ bool HttpResponse::isKeepaliveConnection(const HttpResponse& response) {
  * サーバーエラーリスポンス：500 – 599
  */
 bool HttpResponse::isErrorResponse(const HttpResponse& response) {
-  return response.status_code_ >= 400 && response.status_code_ < 600;
+  return response.getStatusCode() >= 400 && response.getStatusCode() < 600;
 }
 
 char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]; }
