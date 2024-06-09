@@ -114,7 +114,7 @@ function assert {
   local expect_result=$3
   local client_executable=$4
   local executable_name=$5
-  local sleep_between_case=$5
+  local sleep_between_case=$6
   local url="${Scheme}://${Host}:${Port}${uri}"
   local request1="GET ${uri} HTTP/1.1"
   local request2="Host: _"
@@ -124,6 +124,7 @@ function assert {
 
   # program 実行
   runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}" &
+  # bufferが詰まるまでに時間がかかることがあるので他のテストよりも長めにsleep
   sleep $(bc <<<"$expect_sec + 1.5")
 
   # 判定
@@ -149,7 +150,7 @@ function assert {
     fi
   fi
   printf "\n"
-  sleep $(bc <<<"$sleep_between_case + 1.5")
+  sleep $(bc <<<"$sleep_between_case") # selectのみsleep
 }
 
 function runTest {
@@ -179,6 +180,8 @@ function runTest {
 function main {
   init
 
+  # 第三引数の数値はテストケース間のスリープ秒数
+  # selectはeofを感知できないので、timeoutが終わるまで待たないといけません。
   runTest "send_timeout.conf" "kqueue or epoll" "0" # kqueue or epoll
   runTest "send_timeout_poll.conf" "poll" "0"       # poll
   runTest "send_timeout_select.conf" "select" "3"   # select
