@@ -1,5 +1,8 @@
 #!/bin/bash
 
+readonly CWD=$(dirname "$0")
+printf "${CWD}\n"
+
 make fclean
 
-python3 ../test/run_tests.py
+python3 ${CWD}/run_tests.py
