@@ -39,7 +39,6 @@ class HttpRequest {
   static ParseState parseChunkedBody(std::string &rawRequest, HttpRequest &request);
   static bool isInvalidLetter(unsigned char ch);
   static bool isValidContentLength(const std::string &str);
-
   config::REQUEST_METHOD method;
   std::string uri;  // スキーマ、ポートは？？
   std::string version;
@@ -65,6 +64,7 @@ class HttpRequest {
   static void resetBufs(HttpRequest &request);
   static bool isUniqHeaderDup(const HttpRequest &request, const std::string &header);
   static bool isValidHost(const std::string &str);
+  static bool isValidUri(const std::string &str);
   static void clear(HttpRequest &request);
 };
 

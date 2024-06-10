@@ -46,6 +46,7 @@ int setNonBlockingCloExec(const int fd);
 size_t strToSizet(const std::string& str);
 size_t strToSizetInHex(const std::string& str);
 bool isSign(unsigned char ch);
+std::string normalizePath(const std::string& full_path);
 template <typename T>
 std::string toStr(const T value);
 bool isNumeric(const std::string& str);

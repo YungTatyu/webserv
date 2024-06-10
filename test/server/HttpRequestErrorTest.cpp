@@ -637,3 +637,73 @@ TEST(HttpRequest, ErrorTest48) {
 }
 
 /* -------------- header unique test end -------------- */
+
+/* -------------- header uri test -------------- */
+
+TEST(HttpRequest, error_normalize_uri_1) {
+  // test: dotdot
+  std::string req =
+      "GET /.. HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_normalize_uri_2) {
+  // test: dotdot
+  std::string req =
+      "GET /../ HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_normalize_uri_3) {
+  // test: dotdot
+  std::string req =
+      "GET /path/../.. HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_normalize_uri_4) {
+  // test: dotdot
+  std::string req =
+      "GET /path/../../.. HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_normalize_uri_5) {
+  // test: go crazy!
+  std::string req =
+      "GET //.///./////.../..//..../////../path/../../.../..//to//../script///..?query "
+      "HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_normalize_uri_6) {
+  // test: go crazy!
+  std::string req =
+      "GET //..//..///...///..../path///to//../script///..?query HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+/* -------------- header uri test end -------------- */

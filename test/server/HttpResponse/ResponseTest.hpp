@@ -35,10 +35,8 @@ class ResponseTest {
   ResponseTest(const std::string &conf_path) : conf_path_(conf_path) {}
 
   ~ResponseTest() {
-    if (this->conf_path_.find("AccessLog") != std::string::npos) {
-      config::terminateLogFds(config_handler_.config_);
-      unlink("logs/format.log");
-    }
+    if (this->conf_path_.find("AccessLog") != std::string::npos) unlink("logs/format.log");
+    config::terminateLogFds(config_handler_.config_);
     delete this->config_handler_.config_;
     close(this->sockets_[0]);
     close(this->sockets_[1]);
