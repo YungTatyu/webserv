@@ -540,7 +540,8 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
     return sw_content_phase;
   }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false) && !location) {
+  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false) &&
+      !location) {
     response.setStatusCode(301);
     return sw_error_page_phase;
   }
@@ -840,7 +841,7 @@ bool HttpResponse::isKeepaliveConnection(const HttpResponse& response) {
  * サーバーエラーリスポンス：500 – 599
  */
 bool HttpResponse::isErrorResponse(const HttpResponse& response) {
-  return response.getStatusCode() >= 400 && response.getStatusCode() < 600;
+  return response.getStatusCode() >= 400 && response.getStatusCode() < 500;
 }
 
 char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]; }
@@ -850,8 +851,7 @@ int HttpResponse::getStatusCode() const { return this->status_code_; }
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
 
 bool HttpResponse::isAccessibleFile(const std::string& file_path) {
-  return Utils::isFile(file_path) &&
-         Utils::wrapperAccess(file_path, R_OK, false) == 0;
+  return Utils::isFile(file_path) && Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
 bool HttpResponse::isExecutable(const std::string& file_path) {
