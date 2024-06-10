@@ -393,7 +393,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_uri_check_phase:
         config_handler.writeErrorLog("webserv: [debug] uri check phase\n");
-        phase = handleUriCheckPhase(response, request, server, location);
+        phase = handleUriCheckPhase(response, request, location);
         break;
 
       case sw_search_res_file_phase:
@@ -534,14 +534,13 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                                              const config::Server& server,
                                                               const config::Location* location) {
   // uriにcgi_pathがあれば、path info処理をする
   if (setPathinfoIfValidCgi(response, request)) {
     return sw_content_phase;
   }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
+  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false) && !location) {
     response.setStatusCode(301);
     return sw_error_page_phase;
   }
