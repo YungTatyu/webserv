@@ -853,7 +853,7 @@ int HttpResponse::getStatusCode() const { return this->status_code_; }
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
 
 bool HttpResponse::isAccessibleFile(const std::string& file_path) {
-  return Utils::isFile(file_path) && Utils::wrapperAccess(file_path, R_OK, false) == 0;
+  return Utils::isFile(file_path, false) && Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
 bool HttpResponse::isExecutable(const std::string& file_path) {
@@ -873,7 +873,7 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
     if (i != 0) path += "/";
     path += segments[i];
 
-    if (cgi::CGIHandler::isCgi(response.root_path_ + path) && Utils::isFile(response.root_path_ + path)) {
+    if (cgi::CGIHandler::isCgi(response.root_path_ + path) && Utils::isFile(response.root_path_ + path, false)) {
       response.separatePathinfo(request.uri, path.size());
       request.uri = path;
       return true;

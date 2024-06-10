@@ -38,11 +38,12 @@ bool Utils::wrapperRealpath(const std::string path, std::string& absolute_path) 
   return true;
 }
 
-bool Utils::isFile(const std::string& path) {
+bool Utils::isFile(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
-    std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
-              << ")" << std::endl;
+    if (err_log)
+      std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
+                << ")" << std::endl;
     return false;
   }
   return S_ISREG(statbuf.st_mode);
@@ -50,9 +51,10 @@ bool Utils::isFile(const std::string& path) {
 
 bool Utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
-  if (stat(path.c_str(), &statbuf) != 0 && err_log) {
-    std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
-              << ")" << std::endl;
+  if (stat(path.c_str(), &statbuf) != 0) {
+    if (err_log)
+      std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
+                << ")" << std::endl;
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
