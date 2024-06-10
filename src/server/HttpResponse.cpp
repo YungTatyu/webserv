@@ -18,7 +18,10 @@ static const char* kDefaultPage = "defaut.html";
 static const int kInitStatusCode = 200;
 static const char* kClose = "close";
 static const char* kConnection = "Connection";
+static const char* kHost = "host";
 static const char* kKeepAlive = "keep-alive";
+static const char* kLocation = "Location";
+static const char* kScheme = "http://";
 static const char* kTransferEncoding = "Transfer-Encoding";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
@@ -344,7 +347,6 @@ std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) c
 std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& response,
                                            const struct TiedServer& tied_servers, const int client_sock,
                                            const ConfigHandler& config_handler) {
-  const static char* kHost = "Host";
   // chunkなどでparse途中の場合。
   if (request.parseState == HttpRequest::PARSE_INPROGRESS) return std::string();
 
@@ -393,7 +395,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_uri_check_phase:
         config_handler.writeErrorLog("webserv: [debug] uri check phase\n");
-        phase = handleUriCheckPhase(response, request, location);
+        phase = handleUriCheckPhase(response, request, location, tied_servers.port_);
         break;
 
       case sw_search_res_file_phase:
@@ -506,7 +508,6 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
 void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& return_directive) {
   std::string url = return_directive.getUrl();
   int code = return_directive.getCode();
-  const char* kLocation = "Location";
 
   if (code == config::Return::kCodeUnset) {
     response.setStatusCode(302);
@@ -534,15 +535,16 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                                              const config::Location* location) {
+                                                              const config::Location* location, const unsigned int request_port) {
   // uriにcgi_pathがあれば、path info処理をする
   if (setPathinfoIfValidCgi(response, request)) {
     return sw_content_phase;
   }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false) &&
-      !location) {
+  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false)) {
     response.setStatusCode(301);
+    // http://_:9090/html/
+    response.headers_[kLocation] = kScheme + request.headers[kHost] + ":" + Utils::toStr(request_port) + request.uri + "/";
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
@@ -708,13 +710,13 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
   if (lastChar(request.uri) != '/') {
     std::string full_path = response.root_path_ + request.uri;
-    if (!isAccessibleFile(full_path) && !location) {
-      response.setStatusCode(404);
-      return sw_error_page_phase;
-    }
-    if (!location) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ = request.uri;
       return sw_content_phase;
+    }
+    if (!Utils::isDirectory(response.root_path_ + request.uri, false)) {
+      response.setStatusCode(404);
+      return sw_error_page_phase;
     }
   }
 

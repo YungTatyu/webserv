@@ -12,7 +12,7 @@
 TEST(HttpResponseError, not_slash_ending_dir) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
-  test.initTiedServers({{"127.0.0.1", 4246}, {"127.0.0.1", 4247}});
+  test.initTiedServers({{"127.0.0.1", 4246}});
   test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET}, "/file",
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
@@ -23,6 +23,7 @@ TEST(HttpResponseError, not_slash_ending_dir) {
       {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
+      {"Location", "http://test:4246/file/"}
   });
   test.testBody(test.createDefaultErrorBody(301));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
@@ -131,7 +132,7 @@ TEST(HttpResponseError, not_implemented) {
 TEST(HttpResponseError, not_slash_ending_dir_HEAD) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
-  test.initTiedServers({{"127.0.0.1", 4246}, {"127.0.0.1", 4247}});
+  test.initTiedServers({{"127.0.0.1", 4246}});
   test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::HEAD}, "/file",
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
@@ -142,6 +143,7 @@ TEST(HttpResponseError, not_slash_ending_dir_HEAD) {
       {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
       {"Content-Type", "text/html"},
       {"Connection", "keep-alive"},
+      {"Location", "http://test:4246/file/"}
   });
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }

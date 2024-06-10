@@ -75,7 +75,7 @@ class HttpResponse {
   static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Location* location,
                                          const ConfigHandler& config_handler);
   static ResponsePhase handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                           const config::Location* location);
+                                           const config::Location* location, const unsigned int request_port);
   static ResponsePhase handleSearchResFilePhase(HttpResponse& response, HttpRequest& request,
                                                 const config::Server& server,
                                                 const config::Location* location,
