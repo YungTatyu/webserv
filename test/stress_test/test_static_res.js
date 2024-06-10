@@ -15,7 +15,6 @@ export default function () {
   // define URL and request body
   const url = "http://localhost:4242/";
 
-  // send a post request and save response as a variable
   const res = http.get(url);
 
   // check that response is 200
