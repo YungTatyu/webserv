@@ -707,12 +707,14 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
   if (lastChar(request.uri) != '/') {
     std::string full_path = response.root_path_ + request.uri;
-    if (!isAccessibleFile(full_path)) {
+    if (!isAccessibleFile(full_path) && !location) {
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
-    response.res_file_path_ = request.uri;
-    return sw_content_phase;
+    if (!location) {
+      response.res_file_path_ = request.uri;
+      return sw_content_phase;
+    }
   }
 
   /* ~ try_filesとindex/autoindexのファイル検索 ~
