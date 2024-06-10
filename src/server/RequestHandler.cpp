@@ -242,10 +242,9 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
       // 504 error responseを生成
       HttpResponse &response = connManager.getResponse(client_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      handleResponse(connManager, configHandler, timerTree, client_sock);
-      timeout_sock_map[client_sock] = RequestHandler::UPDATE_WRITE;    // epoll, kqueue用
-      connManager.setEvent(client_sock, ConnectionData::EV_WRITE);     // poll, select用
-      configHandler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
+      handleResponse(connManager, configHandler, timerTree, client_sock);  // 中でsetEvent
+      timeout_sock_map[client_sock] = RequestHandler::UPDATE_WRITE;        // epoll, kqueue用
+      configHandler.writeErrorLog("webserv: [info] cgi timed out\n");      // debug
       it = next;
       continue;
     }

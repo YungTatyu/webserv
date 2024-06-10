@@ -155,23 +155,6 @@ std::string Utils::ipToStr(const uint32_t ip) {
      << ((ip_host_order >> 16) & 0xFF) << '.'  // 第2オクテット
      << ((ip_host_order >> 8) & 0xFF) << '.'   // 第3オクテット
      << (ip_host_order & 0xFF);                // 第4オクテット
-                                               //   std::vector<int> segments;
-                                               //   uint32_t decimal = ip;
-                                               //   for (int i = 0; i < 4; ++i) {
-                                               //     segments.push_back(decimal % 256);
-                                               //     decimal /= 256;
-                                               //   }
-                                               // #if defined(__LITTLE_ENDIAN__)
-                                               //   for (int i = 3; i >= 0; --i) {
-                                               //     ss << segments[i];
-                                               //     if (i > 0) ss << ".";
-                                               //   }
-                                               // #else
-                                               //   for (int i = 0; i < 4; ++i) {
-                                               //     ss << segments[i];
-                                               //     if (i < 3) ss << ".";
-                                               //   }
-                                               // #endif
   return ss.str();
 }
 
@@ -258,4 +241,35 @@ bool Utils::isNumeric(const std::string& str) {
     if (!std::isdigit(*it)) return false;
   }
   return true;
+}
+
+/**
+ * @brief 絶対パスを正規化する
+ * WARNING:相対パスは引数で渡さない
+ */
+std::string Utils::normalizePath(const std::string& full_path) {
+  std::vector<std::string> components;
+  std::istringstream ss(full_path);
+  std::string token;
+
+  if (full_path.empty()) return "/";
+  bool end_with_sl = full_path.at(full_path.size() - 1) == '/' ? true : false;
+  while (std::getline(ss, token, '/')) {
+    if (token.empty() || token == ".") {
+      continue;
+    }
+    if (token == "..") {
+      if (!components.empty()) components.pop_back();
+      continue;
+    }
+    components.push_back(token);
+  }
+
+  std::string result = "/";
+  for (size_t i = 0; i < components.size(); ++i) {
+    if (i != 0) result += "/";
+    result += components[i];
+  }
+  if (end_with_sl && result != "/") result += "/";
+  return result;
 }
