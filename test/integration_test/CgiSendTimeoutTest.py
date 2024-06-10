@@ -43,10 +43,11 @@ def main():
             "/timeout0/",
             body_path,
             4700,
-            0,
-            DISCONNECT,
+            2,
+            STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "recv_nothing.py",
         ),
         (
             "POST",
@@ -57,6 +58,7 @@ def main():
             DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "recv_nothing.py",
         ),
         (
             "POST",
@@ -67,16 +69,18 @@ def main():
             DISCONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "recv_nothing.py",
         ),
         (
             "POST",
             "/timeout3/",
             body_path,
             4700,
-            1,
+            2,
             STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "recv_nothing.py",
         ),
         (
             "POST",
@@ -87,6 +91,7 @@ def main():
             STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
+            "recv_nothing.py",
         ),
     ]
 
