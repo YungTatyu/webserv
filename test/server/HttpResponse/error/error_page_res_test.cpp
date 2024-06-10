@@ -17,14 +17,12 @@ TEST(HttpResponseError, not_slash_ending_dir) {
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
-  test.testHeaders({
-      {"Server", "webserv/1.0"},
-      {"Date", ""},
-      {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
-      {"Content-Type", "text/html"},
-      {"Connection", "keep-alive"},
-      {"Location", "http://test:4246/file/"}
-  });
+  test.testHeaders({{"Server", "webserv/1.0"},
+                    {"Date", ""},
+                    {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
+                    {"Content-Type", "text/html"},
+                    {"Connection", "keep-alive"},
+                    {"Location", "http://test:4246/file/"}});
   test.testBody(test.createDefaultErrorBody(301));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }
@@ -137,14 +135,12 @@ TEST(HttpResponseError, not_slash_ending_dir_HEAD) {
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
-  test.testHeaders({
-      {"Server", "webserv/1.0"},
-      {"Date", ""},
-      {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
-      {"Content-Type", "text/html"},
-      {"Connection", "keep-alive"},
-      {"Location", "http://test:4246/file/"}
-  });
+  test.testHeaders({{"Server", "webserv/1.0"},
+                    {"Date", ""},
+                    {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
+                    {"Content-Type", "text/html"},
+                    {"Connection", "keep-alive"},
+                    {"Location", "http://test:4246/file/"}});
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }
 

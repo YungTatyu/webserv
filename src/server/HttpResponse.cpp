@@ -535,7 +535,8 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                                              const config::Location* location, const unsigned int request_port) {
+                                                              const config::Location* location,
+                                                              const unsigned int request_port) {
   // uriにcgi_pathがあれば、path info処理をする
   if (setPathinfoIfValidCgi(response, request)) {
     return sw_content_phase;
@@ -544,7 +545,8 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
   if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false)) {
     response.setStatusCode(301);
     // http://_:9090/html/
-    response.headers_[kLocation] = kScheme + request.headers[kHost] + ":" + Utils::toStr(request_port) + request.uri + "/";
+    response.headers_[kLocation] =
+        kScheme + request.headers[kHost] + ":" + Utils::toStr(request_port) + request.uri + "/";
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
@@ -873,7 +875,8 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
     if (i != 0) path += "/";
     path += segments[i];
 
-    if (cgi::CGIHandler::isCgi(response.root_path_ + path) && Utils::isFile(response.root_path_ + path, false)) {
+    if (cgi::CGIHandler::isCgi(response.root_path_ + path) &&
+        Utils::isFile(response.root_path_ + path, false)) {
       response.separatePathinfo(request.uri, path.size());
       request.uri = path;
       return true;
