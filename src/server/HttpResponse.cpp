@@ -571,7 +571,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
 
   for (size_t i = 0; i < file_list.size(); i++) {
     std::string full_path = response.root_path_ + file_list[i];
-    if (isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ = file_list[i];
       return sw_content_phase;
     }
@@ -666,7 +666,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
 
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
-    if (isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ =
           (is_alias) ? config::Index::kDefaultFile_ : request_uri + index_list[i].getFile();
       return sw_content_phase;
@@ -674,7 +674,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
   }
   if (index_list.size() == 0) {
     std::string full_path = directory_path + config::Index::kDefaultFile_;
-    if (isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ =
           (is_alias) ? config::Index::kDefaultFile_ : request_uri + config::Index::kDefaultFile_;
       return sw_content_phase;
@@ -708,7 +708,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
   if (lastChar(request.uri) != '/') {
     std::string full_path = response.root_path_ + request.uri;
-    if (!isAccessible(full_path)) {
+    if (!isAccessibleFile(full_path)) {
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
@@ -848,8 +848,8 @@ int HttpResponse::getStatusCode() const { return this->status_code_; }
 
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
 
-bool HttpResponse::isAccessible(const std::string& file_path) {
-  return Utils::wrapperAccess(file_path, F_OK, false) == 0 &&
+bool HttpResponse::isAccessibleFile(const std::string& file_path) {
+  return Utils::isFile(file_path) &&
          Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 

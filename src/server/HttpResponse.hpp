@@ -103,7 +103,7 @@ class HttpResponse {
   static char lastChar(const std::string& str);
   int getStatusCode() const;
   void setStatusCode(int code);
-  static bool isAccessible(const std::string& file_path);
+  static bool isAccessibleFile(const std::string& file_path);
   static bool isExecutable(const std::string& file_path);
   static bool setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request);
   void separatePathinfo(const std::string& uri, size_t pos);
