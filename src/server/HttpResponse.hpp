@@ -20,6 +20,7 @@ class HttpResponse {
     RES_EXECUTE_CGI,
     RES_PARSED_CGI,
     RES_CGI_ERROR,
+    RES_CGI_TIMEOUT,
     RES_COMPLETE
   };
 
