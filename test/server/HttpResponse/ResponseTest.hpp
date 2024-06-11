@@ -34,7 +34,7 @@ class ResponseTest {
 
  public:
   ResponseTest(const std::string &conf_path)
-      : conf_path_(conf_path), config_handler_(const_cast<ConfigHandler &>(WebServer::getConfigHandler())) {}
+      : conf_path_(conf_path) {}
 
   ~ResponseTest() {
     if (this->conf_path_.find("AccessLog") != std::string::npos) {
@@ -414,7 +414,7 @@ class ResponseTest {
   int sockets_[2];
   const std::string conf_path_;
   std::vector<config::REQUEST_METHOD> methods_;  // testするmethod
-  ConfigHandler &config_handler_;
+  ConfigHandler config_handler_;
   HttpRequest request_;
   std::vector<TiedServer> tied_servers_;
   std::vector<HttpResponse> responses_;
