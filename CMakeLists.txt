@@ -104,9 +104,10 @@ add_executable(${PROJECT_NAME}-googletest
 	test/cgi/CGIExecutor_test.cpp
 	test/cgi/CGIParser_test.cpp
 )
-# target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
+target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 # debug
-target_link_libraries(${PROJECT_NAME}-googletest gtest_main -fsanitize=address -g)
+# target_link_libraries(${PROJECT_NAME}-googletest gtest_main -fsanitize=address -g)
+# target_compile_options(${PROJECT_NAME}-googletest PRIVATE -fsanitize=address -g)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	src
 	src/server
@@ -117,7 +118,6 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	test/server/HttpResponse
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
-target_compile_options(${PROJECT_NAME}-googletest PRIVATE -fsanitize=address -g)
 
 # target_compile_definitions(${PROJECT_NAME}-googletest PRIVATE TEST) # To avoid including main() when testing.
 enable_testing()
