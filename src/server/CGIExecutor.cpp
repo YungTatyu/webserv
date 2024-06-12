@@ -15,9 +15,6 @@
 #include "WebServer.hpp"
 #include "error.hpp"
 
-const static char* kPhpExtension = ".php";
-const static char* kPhp = "php";
-
 cgi::CGIExecutor::CGIExecutor() {}
 
 cgi::CGIExecutor::~CGIExecutor() {}
@@ -36,27 +33,12 @@ void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const Htt
                                            const std::string& full_path, const int cgi_sock,
                                            const int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
-  createScriptPath(full_path);
+  this->script_path_ = full_path;
   createArgv(full_path);
   createMetaVars(request, response, cli_sock);
 }
 
-void cgi::CGIExecutor::createScriptPath(const std::string& script_path) {
-  this->script_path_ = script_path;
-  if (!Utils::isExtensionFile(script_path, kPhpExtension)) return;
-  // スクリプトがphpの場合は、phpのpathを探す必要がある
-  const std::string path = searchCommandInPath(kPhp);
-  if (path == "") return;
-  this->script_path_ = path;
-}
-
 void cgi::CGIExecutor::createArgv(const std::string& script_path) {
-  if (Utils::isExtensionFile(script_path, kPhpExtension)) {
-    this->argv_.push_back(kPhp);
-    this->argv_.push_back(script_path.c_str());
-    this->argv_.push_back(NULL);
-    return;
-  }
   const std::string::size_type n = script_path.rfind("/");
   const static std::string cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
   this->argv_.push_back(cgi_script.c_str());
@@ -135,17 +117,6 @@ bool cgi::CGIExecutor::isExecutableFile(const std::string& path) const {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) return false;
   return S_ISREG(statbuf.st_mode) && access(path.c_str(), X_OK) == 0;
-}
-
-std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) const {
-  const char* path = std::getenv("PATH");
-  if (path == NULL) return "";
-  std::vector<std::string> directories = split(path, ':');
-  for (size_t i = 0; i < directories.size(); ++i) {
-    std::string command_path = directories[i] + "/" + command;
-    if (isExecutableFile(command_path)) return command_path;
-  }
-  return "";
 }
 
 /**

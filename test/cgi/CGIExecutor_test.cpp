@@ -136,9 +136,9 @@ TEST(cgi_executor, document_response) {
 TEST(cgi_executor, local_redirect_res) {
   ConnectionData cd;
   cd.request =
-      test::initRequest(config::REQUEST_METHOD::GET, "test/cgi/cgi_files/executor/local_redirect_res.php",
+      test::initRequest(config::REQUEST_METHOD::GET, "test/cgi/cgi_files/executor/local_redirect_res.cgi",
                         "HTTP/1.1", "", "", {{"Host", "tt"}});
-  cd.response_ = test::initResponse("./", "/test/cgi/cgi_files/executor/local_redirect_res.php", "");
+  cd.response_ = test::initResponse("./", "/test/cgi/cgi_files/executor/local_redirect_res.cgi", "");
 
   const std::string expect = "Location: /\r\n\r\n";
   test::testCgiOutput(cd, expect);
