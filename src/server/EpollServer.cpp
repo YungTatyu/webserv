@@ -61,6 +61,24 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
   return true;
 }
 
+/*
+ * cgi socketがtimeoutした場合にそれに紐づくclientのeventをWRITE EVENTに変更する関数。
+ */
+void EpollServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
+  std::map<int, RequestHandler::UPDATE_STATUS>::const_iterator it;
+
+  for (it = timeout_sock_map.begin(); it != timeout_sock_map.end(); ++it) {
+    switch (it->second) {
+      case RequestHandler::UPDATE_WRITE:
+        addNewEvent(it->first, EPOLLOUT);
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
 void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                                    NetworkIOHandler* io_handler, RequestHandler* request_handler,
                                    ConfigHandler* config_handler, TimerTree* timer_tree) {
@@ -68,13 +86,16 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
   std::vector<struct epoll_event>* active_events_ptr =
       static_cast<std::vector<struct epoll_event>*>(event_manager->getActiveEvents());
   std::vector<struct epoll_event>& active_events = *active_events_ptr;
+  std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    timeout_sock_map =
+        request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    addClientNewEvent(timeout_sock_map);
     return;
   }
 
@@ -138,7 +159,9 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
         break;
     }
   }
-  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+  timeout_sock_map =
+      request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+  addClientNewEvent(timeout_sock_map);
 }
 
 int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,

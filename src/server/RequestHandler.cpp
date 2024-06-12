@@ -104,15 +104,16 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, ConfigHandler &con
     return handleResponse(connManager, configHandler, timerTree, sockfd);
   }
   // bodyが空なら、bodyをsendしない
+  int cgi_sock = connManager.getCgiHandler(sockfd).getCgiSocket();
   if (request.body.empty()) {
-    // 最初にcgiのレスポンスをrecvするまでのtimeout
-    addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV);
     connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_READ);
+    // 最初にcgiのレスポンスをrecvするまでのtimeout
+    addTimerByType(connManager, configHandler, timerTree, cgi_sock, Timer::TMO_RECV);
     return RequestHandler::UPDATE_CGI_READ;
   }
-  // 最初にcgiにbodyをsendするまでのtimeout
-  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
   connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_WRITE);
+  // 最初にcgiにbodyをsendするまでのtimeout
+  addTimerByType(connManager, configHandler, timerTree, cgi_sock, Timer::TMO_SEND);
   return RequestHandler::UPDATE_CGI_WRITE;
 }
 
@@ -212,28 +213,47 @@ int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManage
 
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      TimerTree &timerTree, const int sockfd) {
+  // cgiならすぐには接続切らず、timoutに任せる
+  if (connManager.isCgiSocket(sockfd)) return RequestHandler::UPDATE_NONE;
   ioHandler.closeConnection(connManager, timerTree, sockfd);
   return RequestHandler::UPDATE_CLOSE;
 }
 
-void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
-                                        ConfigHandler &configHandler, TimerTree &timerTree) {
-  configHandler.writeErrorLog("webserv: [debug] enter timeout handler\n");
+std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
+    NetworkIOHandler &ioHandler, ConnectionManager &connManager, ConfigHandler &configHandler,
+    TimerTree &timerTree) {
+  std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
 
   // timeout している接続をすべて削除
   for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(); it != upper_bound;) {
+    // next iterator を保存
     std::multiset<Timer>::iterator next = it;
     next++;
-    // timer tree から削除
+    // timer treeから削除
+    if (connManager.isCgiSocket(it->getFd())) {
+      int cgi_sock = it->getFd();
+      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
+      int client_sock = cgi_handler.getCliSocket();
+
+      cgi_handler.killCgiProcess();
+      ioHandler.closeConnection(connManager, timerTree, cgi_sock);
+      // 504 error responseを生成
+      HttpResponse &response = connManager.getResponse(client_sock);
+      response.state_ = HttpResponse::RES_CGI_TIMEOUT;
+      handleResponse(connManager, configHandler, timerTree, client_sock);  // 中でsetEvent
+      timeout_sock_map[client_sock] = RequestHandler::UPDATE_WRITE;        // epoll, kqueue用
+      configHandler.writeErrorLog("webserv: [info] cgi timed out\n");      // debug
+      it = next;
+      continue;
+    }
     ioHandler.closeConnection(connManager, timerTree, it->getFd());
-    // timeoutの種類によってログ出力変える
-    // std::string	timeout_reason = "waiting for client request.";
-    configHandler.writeErrorLog("webserv: [info] client timed out\n");
+    configHandler.writeErrorLog("webserv: [info] client timed out\n");  // debug
     it = next;
   }
+  return timeout_sock_map;
 }
 
 /**
@@ -281,8 +301,8 @@ void RequestHandler::addTimerByType(ConnectionManager &connManager, ConfigHandle
       break;
 
     case Timer::TMO_RECV:
-      // TODO: ディレクティブ作る
-      timeout = config::Time(60 * config::Time::seconds);
+      timeout = configHandler.searchReceiveTimeout(connManager.getTiedServer(sockfd), host_name,
+                                                   connManager.getRequest(sockfd).uri);
       break;
 
     case Timer::TMO_SEND:

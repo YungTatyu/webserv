@@ -16,6 +16,7 @@
 const static std::string kACCESS_FD = "access_fd";
 const static std::string kERROR_FD = "error_fd";
 const static std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
+const static std::string kRECEIVE_TIMEOUT = "receive_timeout";
 const static std::string kSEND_TIMEOUT = "send_timeout";
 const static std::string kUSERID_EXPIRES = "userid_expires";
 const static std::string kDENY = "deny";
@@ -203,6 +204,21 @@ const config::Time& ConfigHandler::searchKeepaliveTimeout(const struct TiedServe
   {
     return this->config_->http.keepalive_timeout.getTime();
   }
+}
+
+const config::Time& ConfigHandler::searchReceiveTimeout(const struct TiedServer& tied_servers,
+                                                        const std::string& server_name,
+                                                        const std::string& uri) const {
+  const config::Server& server = searchServerConfig(tied_servers, server_name);
+  const config::Location* location = searchLongestMatchLocationConfig(server, uri);
+
+  if (location && Utils::hasDirective(*location, kRECEIVE_TIMEOUT)) {
+    return location->receive_timeout.getTime();
+  } else if (Utils::hasDirective(server, kRECEIVE_TIMEOUT)) {
+    return server.receive_timeout.getTime();
+  }
+  // http兼default
+  return this->config_->http.receive_timeout.getTime();
 }
 
 const config::Time& ConfigHandler::searchSendTimeout(const TiedServer& tied_servers,

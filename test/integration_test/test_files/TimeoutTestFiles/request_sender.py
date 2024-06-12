@@ -14,10 +14,17 @@ def replace_escape_sequences(input_str):
 
 
 def send_requests(address, port, request, body_file):
+    body = ""
     if body_file and os.path.exists(body_file) and os.path.getsize(body_file) > 0:
         with open(body_file, "r") as f:
-            request += f.read()
+            body += f.read()
 
+    print("request", request)
+    if body:
+        request += f"Content-Length: {len(body)}\r\n"
+    request += "\r\n"
+    print("request", request)
+    request += body
     request = replace_escape_sequences(request)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

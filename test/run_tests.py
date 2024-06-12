@@ -56,7 +56,7 @@ def main():
         f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py",
         f"{CWD}/conf/main_parser_test.sh",
         f"{CWD}/conf/directive_err_test.sh",
-        f"{CWD}/integration_test/KeepaliveTimeoutTest.sh",
+        f"{CWD}/integration_test/KeepaliveTimeoutTest.py",
         f"{CWD}/integration_test/ReceiveTimeoutTest.sh",
         f"{CWD}/integration_test/SendTimeoutTest.sh",
         f"{CWD}/integration_test/CgiRecvTimeoutTest.py",

@@ -362,6 +362,9 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   else if (response.state_ == RES_CGI_ERROR) {
     phase = sw_error_page_phase;
     response.setStatusCode(502);  // bad gate error
+  } else if (response.state_ == RES_CGI_TIMEOUT) {
+    phase = sw_error_page_phase;
+    response.setStatusCode(504);  // cgi timeout
   }
 
   while (phase != sw_end_phase) {
