@@ -104,7 +104,7 @@ add_executable(${PROJECT_NAME}-googletest
 	test/cgi/CGIExecutor_test.cpp
 	test/cgi/CGIParser_test.cpp
 )
-# target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
+target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 # debug
 # target_link_libraries(${PROJECT_NAME}-googletest gtest_main -fsanitize=address -g)
 # target_compile_options(${PROJECT_NAME}-googletest PRIVATE -fsanitize=address -g)
