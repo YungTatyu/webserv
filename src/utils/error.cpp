@@ -14,5 +14,7 @@
  */
 std::string error::strSysCallError(const std::string &syscall, const std::string &msg) {
   const std::string err = "webserv: [emerg] ";
-  return err + syscall + "()" + msg + " failed (" + Utils::toStr(errno) + ": " + std::strerror(errno) + ")";
+  std::string err_msg = msg.empty() ? msg : std::string(" ") + msg;  // errorメッセージをフォーマット
+  return err + syscall + "()" + err_msg + " failed (" + Utils::toStr(errno) + ": " + std::strerror(errno) +
+         ")";
 }

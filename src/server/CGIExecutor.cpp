@@ -4,17 +4,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
 
 #include "ConfigHandler.hpp"
 #include "LimitExcept.hpp"
+#include "SysCallWrapper.hpp"
 #include "Utils.hpp"
-
-const static char* kPhpExtension = ".php";
-const static char* kPhp = "php";
+#include "WebServer.hpp"
+#include "error.hpp"
 
 cgi::CGIExecutor::CGIExecutor() {}
 
@@ -26,8 +25,7 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
   prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
          const_cast<char* const*>(this->meta_vars_.data()));
-  std::cerr << "webserv: [emerg] execve() failed (" << errno << ": " << std::strerror(errno) << ")"
-            << std::endl;
+  WebServer::writeErrorlog(error::strSysCallError("execve") + "\n");
   std::exit(EXIT_FAILURE);
 }
 
@@ -35,27 +33,12 @@ void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const Htt
                                            const std::string& full_path, const int cgi_sock,
                                            const int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
-  createScriptPath(full_path);
+  this->script_path_ = full_path;
   createArgv(full_path);
   createMetaVars(request, response, cli_sock);
 }
 
-void cgi::CGIExecutor::createScriptPath(const std::string& script_path) {
-  this->script_path_ = script_path;
-  if (!Utils::isExtensionFile(script_path, kPhpExtension)) return;
-  // スクリプトがphpの場合は、phpのpathを探す必要がある
-  const std::string path = searchCommandInPath(kPhp);
-  if (path == "") return;
-  this->script_path_ = path;
-}
-
 void cgi::CGIExecutor::createArgv(const std::string& script_path) {
-  if (Utils::isExtensionFile(script_path, kPhpExtension)) {
-    this->argv_.push_back(kPhp);
-    this->argv_.push_back(script_path.c_str());
-    this->argv_.push_back(NULL);
-    return;
-  }
   const std::string::size_type n = script_path.rfind("/");
   const static std::string cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
   this->argv_.push_back(cgi_script.c_str());
@@ -136,17 +119,6 @@ bool cgi::CGIExecutor::isExecutableFile(const std::string& path) const {
   return S_ISREG(statbuf.st_mode) && access(path.c_str(), X_OK) == 0;
 }
 
-std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) const {
-  const char* path = std::getenv("PATH");
-  if (path == NULL) return "";
-  std::vector<std::string> directories = split(path, ':');
-  for (size_t i = 0; i < directories.size(); ++i) {
-    std::string command_path = directories[i] + "/" + command;
-    if (isExecutableFile(command_path)) return command_path;
-  }
-  return "";
-}
-
 /**
  * @brief socketを標準入力と標準出力に複製する
  *
@@ -158,17 +130,13 @@ std::string cgi::CGIExecutor::searchCommandInPath(const std::string& command) co
  * @return false
  */
 bool cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& request, const int socket) const {
-  if (dup2(socket, STDOUT_FILENO) == -1) {
-    std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")"
-              << std::endl;
+  if (SysCallWrapper::Dup2(socket, STDOUT_FILENO) == -1) {
     close(socket);
     return false;
   }
   // bodyが存在する場合は、標準入力にbodyをセットする必要がある
   if (!request.body.empty()) {
-    if (dup2(socket, STDIN_FILENO) == -1) {
-      std::cerr << "webserv: [emerg] dup2() failed (" << errno << ": " << std::strerror(errno) << ")"
-                << std::endl;
+    if (SysCallWrapper::Dup2(socket, STDIN_FILENO) == -1) {
       close(STDOUT_FILENO);
       close(socket);
       return false;

@@ -19,6 +19,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "LogFd.hpp"
+#include "WebServer.hpp"
 
 namespace test {
 

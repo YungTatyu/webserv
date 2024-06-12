@@ -5,6 +5,7 @@
 #include <iomanip>
 
 #include "CGIHandler.hpp"
+#include "SysCallWrapper.hpp"
 #include "Utils.hpp"
 
 static const std::string kALIAS = "alias";
@@ -461,9 +462,8 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
-  if (getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addrlen) != 0) {
-    std::cerr << "webserv: [emerge] getsockname() \"" << client_sock << "\" failed (" << errno << ": "
-              << strerror(errno) << ")" << std::endl;
+  if (SysCallWrapper::Getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr),
+                                  &client_addrlen) != 0) {
     // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
   } else

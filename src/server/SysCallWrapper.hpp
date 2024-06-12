@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include <stdexcept>
@@ -20,6 +21,7 @@ int Pipe(int fildes[2]);
 pid_t Fork(void);
 int Dup2(int fildes, int fildes2);
 int Fcntl(int fd, int cmd, int flags);
+int Getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 }  // namespace SysCallWrapper
 
 #endif
