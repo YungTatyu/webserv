@@ -330,7 +330,7 @@ std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) c
 
   // TODO: 以下の場合に、responseをchunkしたい
   // headerに Content-Lengthがない場合（主にcgiレスポンス）
-  // headerに responseが長い場合、例えばbuffer size以上
+  // responseが長い場合、例えばbuffer size以上
   for (std::map<std::string, std::string>::const_iterator it = this->headers_.begin();
        it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
