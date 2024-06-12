@@ -95,6 +95,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res.cgi" "302" "GET"
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET"
   assert "${root}/dynamic/body_res.py" "200" "GET"
+  assert "${root}/dynamic/exit_non_zero.cgi" "500" "GET"
 
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
