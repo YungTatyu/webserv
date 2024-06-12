@@ -341,11 +341,6 @@ TEST(HttpRequest, OkTest16) {
   checkHttpRequestEqual(expect, test);
 }
 
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
 TEST(HttpRequest, OkTest17) {
   // testcase: chunked
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {

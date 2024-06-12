@@ -200,6 +200,13 @@ bool config::Parser::parse() {
     std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
     return false;
   }
+  if (this->config_.events.use.getConnectionMethod() == config::SELECT &&
+      this->config_.events.worker_connections.getWorkerConnections() >
+          config::WorkerConnections::kSelectMaxConnections) {
+    std::cerr << "webserv: [emerg] the maximum number of files supported by select() is "
+              << config::WorkerConnections::kSelectMaxConnections << std::endl;
+    return false;
+  }
   return true;
 }
 

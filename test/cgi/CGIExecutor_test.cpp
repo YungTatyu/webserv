@@ -17,6 +17,7 @@
 #include "ConnectionManager.hpp"
 #include "LimitExcept.hpp"
 #include "Utils.hpp"
+#include "WebServer.hpp"
 
 typedef std::map<std::string, std::string> string_map;
 typedef std::pair<std::string, std::string> string_pair;

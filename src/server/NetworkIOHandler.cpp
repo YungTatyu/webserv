@@ -50,7 +50,7 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
     // 失敗したとき？
     re = SysCallWrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
     if (re == -1)
-      throw std::runtime_error(error::strSysCallError("bind", " to " + address + ":" + Utils::toStr(port)));
+      throw std::runtime_error(error::strSysCallError("bind", "to " + address + ":" + Utils::toStr(port)));
 
     SysCallWrapper::Listen(listen_fd, SOMAXCONN);
 

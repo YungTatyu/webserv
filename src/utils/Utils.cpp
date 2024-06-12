@@ -9,26 +9,22 @@
 #include <unistd.h>
 
 #include "SysCallWrapper.hpp"
+#include "WebServer.hpp"
+#include "error.hpp"
 
 int Utils::wrapperOpen(const std::string path, int flags, mode_t modes) {
   int fd = open(path.c_str(), flags, modes);
-  if (fd == -1) {
-    std::cerr << "webserv: [emerg] open() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
-              << ")" << std::endl;
-  }
+  if (fd == -1) WebServer::writeErrorlog(error::strSysCallError("open", path) + "\n");
   return fd;
 }
 
 int Utils::wrapperAccess(const std::string path, int modes, bool err_log) {
   int ret = access(path.c_str(), modes);
-  if (ret == -1 && err_log) {
-    std::cerr << "webserv: [emerg] access() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
-              << ")" << std::endl;
-  }
+  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n");
   return ret;
 }
 
-bool Utils::wrapperRealpath(const std::string path, std::string& absolute_path) {
+bool Utils::wrapperRealpath(const std::string& path, std::string& absolute_path) {
   char tmp_path[MAXPATHLEN];
   if (realpath(path.c_str(), tmp_path) == NULL) {
     return false;
@@ -42,8 +38,7 @@ bool Utils::isFile(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
     if (err_log)
-      std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
-                << ")" << std::endl;
+      WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
     return false;
   }
   return S_ISREG(statbuf.st_mode);
@@ -53,8 +48,7 @@ bool Utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
     if (err_log)
-      std::cerr << "webserv: [emerg] stat() \"" << path << "\" failed (" << errno << ": " << strerror(errno)
-                << ")" << std::endl;
+      WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
@@ -119,8 +113,7 @@ ssize_t Utils::wrapperWrite(const int fd, const std::string& msg) {
 bool Utils::wrapperGetsockname(struct sockaddr_in& addr, const int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
-    std::cerr << "webserv: [emerge] getsockname() \"" << sock << "\" failed (" << errno << ": "
-              << strerror(errno) << ")" << std::endl;
+    WebServer::writeErrorlog(error::strSysCallError("getsockname", Utils::toStr(sock)) + "\n");
     return false;
   }
   return true;
