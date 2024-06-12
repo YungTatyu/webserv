@@ -544,7 +544,6 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
   if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false)) {
     response.setStatusCode(301);
-    // http://_:9090/html/
     response.headers_[kLocation] =
         kScheme + request.headers[kHost] + ":" + Utils::toStr(request_port) + request.uri + "/";
     return sw_error_page_phase;
