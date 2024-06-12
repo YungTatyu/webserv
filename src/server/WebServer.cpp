@@ -121,7 +121,6 @@ WebServer::~WebServer() {
 void WebServer::deleteObjects() {
   config::terminateLogFds(this->configHandler->config_);
   delete this->timerTree;
-  delete this->configHandler->config_;
   delete this->ioHandler;
   delete this->requestHandler;
   delete this->connManager;

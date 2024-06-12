@@ -34,9 +34,7 @@ class InitLogTest : public ::testing::Test {
       GTEST_SKIP();
     }
     this->config_ = new config::Main();
-    ConfigHandler& config_handler = const_cast<ConfigHandler&>(WebServer::getConfigHandler());
-    config_handler.loadConfiguration(this->config_);
-    // // 絶対pathを取得
+    // 絶対pathを取得
     // std::string	absolute_path;
     // absolute_path = Utils::deriveAbsolutePath(file_path);
     // if (absolute_path == "")
