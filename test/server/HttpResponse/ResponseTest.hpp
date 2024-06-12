@@ -33,8 +33,7 @@ class ResponseTest {
   void err(const std::string &err_msg) const { FAIL() << err_msg; }
 
  public:
-  ResponseTest(const std::string &conf_path)
-      : conf_path_(conf_path) {}
+  ResponseTest(const std::string &conf_path) : conf_path_(conf_path) {}
 
   ~ResponseTest() {
     if (this->conf_path_.find("AccessLog") != std::string::npos) unlink("logs/format.log");
