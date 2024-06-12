@@ -19,7 +19,10 @@ static const char* kDefaultPage = "defaut.html";
 static const int kInitStatusCode = 200;
 static const char* kClose = "close";
 static const char* kConnection = "Connection";
+static const char* kHost = "host";
 static const char* kKeepAlive = "keep-alive";
+static const char* kLocation = "Location";
+static const char* kScheme = "http://";
 static const char* kTransferEncoding = "Transfer-Encoding";
 
 std::map<int, std::string> HttpResponse::status_line_map_;
@@ -327,7 +330,7 @@ std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) c
 
   // TODO: 以下の場合に、responseをchunkしたい
   // headerに Content-Lengthがない場合（主にcgiレスポンス）
-  // headerに responseが長い場合、例えばbuffer size以上
+  // responseが長い場合、例えばbuffer size以上
   for (std::map<std::string, std::string>::const_iterator it = this->headers_.begin();
        it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
@@ -345,7 +348,6 @@ std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) c
 std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& response,
                                            const struct TiedServer& tied_servers, const int client_sock,
                                            const ConfigHandler& config_handler) {
-  const static char* kHost = "Host";
   // chunkなどでparse途中の場合。
   if (request.parseState == HttpRequest::PARSE_INPROGRESS) return std::string();
 
@@ -355,17 +357,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   struct sockaddr_in client_addr;
 
   enum ResponsePhase phase = sw_start_phase;
-  if (response.state_ == RES_COMPLETE)
-    clear(response);
-  else if (response.state_ == RES_PARSED_CGI)
-    phase = sw_end_phase;
-  else if (response.state_ == RES_CGI_ERROR) {
-    phase = sw_error_page_phase;
-    response.setStatusCode(502);  // bad gate error
-  } else if (response.state_ == RES_CGI_TIMEOUT) {
-    phase = sw_error_page_phase;
-    response.setStatusCode(504);  // cgi timeout
-  }
 
   while (phase != sw_end_phase) {
     switch (phase) {
@@ -405,7 +396,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_uri_check_phase:
         config_handler.writeErrorLog("webserv: [debug] uri check phase\n");
-        phase = handleUriCheckPhase(response, request, server, location);
+        phase = handleUriCheckPhase(response, request, location, tied_servers.port_);
         break;
 
       case sw_search_res_file_phase:
@@ -453,9 +444,18 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock,
     struct sockaddr_in& client_addr) {
-  // parse error
-  if (parse_state == HttpRequest::PARSE_ERROR) {
+  if (response.state_ == RES_COMPLETE)
+    clear(response);
+  else if (response.state_ == RES_PARSED_CGI)
+    return sw_end_phase;
+  else if (response.state_ == RES_CGI_ERROR) {
+    response.setStatusCode(502);  // bad gate error
+    return sw_error_page_phase;
+  } else if (parse_state == HttpRequest::PARSE_ERROR) {
     response.setStatusCode(400);
+    return sw_error_page_phase;
+  } else if (parse_state == HttpRequest::PARSE_NOT_IMPLEMENTED) {
+    response.setStatusCode(501);
     return sw_error_page_phase;
   }
 
@@ -508,7 +508,6 @@ HttpResponse::ResponsePhase HttpResponse::handleAllowPhase(HttpResponse& respons
 void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& return_directive) {
   std::string url = return_directive.getUrl();
   int code = return_directive.getCode();
-  const char* kLocation = "Location";
 
   if (code == config::Return::kCodeUnset) {
     response.setStatusCode(302);
@@ -536,15 +535,17 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                                              const config::Server& server,
-                                                              const config::Location* location) {
+                                                              const config::Location* location,
+                                                              const unsigned int request_port) {
   // uriにcgi_pathがあれば、path info処理をする
   if (setPathinfoIfValidCgi(response, request)) {
     return sw_content_phase;
   }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' && Utils::isDirectory(server.root.getPath() + request.uri, false)) {
+  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false)) {
     response.setStatusCode(301);
+    response.headers_[kLocation] =
+        kScheme + request.headers[kHost] + ":" + Utils::toStr(request_port) + request.uri + "/";
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
@@ -573,7 +574,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
 
   for (size_t i = 0; i < file_list.size(); i++) {
     std::string full_path = response.root_path_ + file_list[i];
-    if (isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ = file_list[i];
       return sw_content_phase;
     }
@@ -668,7 +669,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
 
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
-    if (isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ =
           (is_alias) ? config::Index::kDefaultFile_ : request_uri + index_list[i].getFile();
       return sw_content_phase;
@@ -676,7 +677,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
   }
   if (index_list.size() == 0) {
     std::string full_path = directory_path + config::Index::kDefaultFile_;
-    if (isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
       response.res_file_path_ =
           (is_alias) ? config::Index::kDefaultFile_ : request_uri + config::Index::kDefaultFile_;
       return sw_content_phase;
@@ -710,12 +711,14 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
   if (lastChar(request.uri) != '/') {
     std::string full_path = response.root_path_ + request.uri;
-    if (!isAccessible(full_path)) {
+    if (isAccessibleFile(full_path)) {
+      response.res_file_path_ = request.uri;
+      return sw_content_phase;
+    }
+    if (!Utils::isDirectory(response.root_path_ + request.uri, false)) {
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
-    response.res_file_path_ = request.uri;
-    return sw_content_phase;
   }
 
   /* ~ try_filesとindex/autoindexのファイル検索 ~
@@ -805,8 +808,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
     response.headers_.erase(kTransferEncoding);
 
   // requestエラーの場合は、接続を切る
-  response.headers_[kConnection] =
-      (time.isNoTime() || (400 <= status_code && status_code < 500) ? kClose : kKeepAlive);
+  response.headers_[kConnection] = (time.isNoTime() || isErrorResponse(response) ? kClose : kKeepAlive);
 
   // cgiでstatus code lineの場合
   if (!response.status_code_line_.empty()) return;
@@ -842,7 +844,7 @@ bool HttpResponse::isKeepaliveConnection(const HttpResponse& response) {
  * サーバーエラーリスポンス：500 – 599
  */
 bool HttpResponse::isErrorResponse(const HttpResponse& response) {
-  return response.status_code_ >= 400 && response.status_code_ < 600;
+  return response.getStatusCode() >= 400 && response.getStatusCode() < 500;
 }
 
 char HttpResponse::lastChar(const std::string& str) { return str[str.size() - 1]; }
@@ -851,9 +853,8 @@ int HttpResponse::getStatusCode() const { return this->status_code_; }
 
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
 
-bool HttpResponse::isAccessible(const std::string& file_path) {
-  return Utils::wrapperAccess(file_path, F_OK, false) == 0 &&
-         Utils::wrapperAccess(file_path, R_OK, false) == 0;
+bool HttpResponse::isAccessibleFile(const std::string& file_path) {
+  return Utils::isFile(file_path, false) && Utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
 bool HttpResponse::isExecutable(const std::string& file_path) {
@@ -873,7 +874,8 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
     if (i != 0) path += "/";
     path += segments[i];
 
-    if (cgi::CGIHandler::isCgi(response.root_path_ + path) && Utils::isFile(response.root_path_ + path)) {
+    if (cgi::CGIHandler::isCgi(response.root_path_ + path) &&
+        Utils::isFile(response.root_path_ + path, false)) {
       response.separatePathinfo(request.uri, path.size());
       request.uri = path;
       return true;

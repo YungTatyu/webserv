@@ -62,7 +62,7 @@ fclean: clean
 
 re: fclean all
 
-ptest:	fclean
+ptest:
 	docker build -t $(PTEST_IMG_NAME) . -f $(DOCKERFILE_PTEST)
 	docker run --rm $(PTEST_IMG_NAME)
 
