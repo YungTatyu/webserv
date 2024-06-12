@@ -40,7 +40,7 @@ config::Main *initConfigTest(const std::string &file_path) {
   if (Utils::wrapperAccess(absolute_path, R_OK, true) == -1) return NULL;
 
   // file_path がファイルかどうか確認する。
-  if (!Utils::isFile(absolute_path)) {
+  if (!Utils::isFile(absolute_path, false)) {
     std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
     return NULL;
   }

@@ -75,7 +75,7 @@ class HttpResponse {
   static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Location* location,
                                          const ConfigHandler& config_handler);
   static ResponsePhase handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                           const config::Server& server, const config::Location* location);
+                                           const config::Location* location, const unsigned int request_port);
   static ResponsePhase handleSearchResFilePhase(HttpResponse& response, HttpRequest& request,
                                                 const config::Server& server,
                                                 const config::Location* location,
@@ -104,7 +104,7 @@ class HttpResponse {
   static char lastChar(const std::string& str);
   int getStatusCode() const;
   void setStatusCode(int code);
-  static bool isAccessible(const std::string& file_path);
+  static bool isAccessibleFile(const std::string& file_path);
   static bool isExecutable(const std::string& file_path);
   static bool setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request);
   void separatePathinfo(const std::string& uri, size_t pos);
