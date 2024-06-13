@@ -61,6 +61,7 @@ class ConfigHandler {
   bool isAutoIndexOn(const config::Server& server, const config::Location* location) const;
   std::string createAcsLogMsg(const uint32_t ip, const long status, const size_t resSize,
                               const HttpRequest& request) const;
+  unsigned long searchCliMaxBodySize() const;
 
   // const variable
   static const int ACCESS_ALLOW = 1;

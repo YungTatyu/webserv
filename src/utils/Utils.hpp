@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,8 @@ std::string toStr(const T value);
 bool isNumeric(const std::string& str);
 template <typename Context>
 bool hasDirective(const Context& context, const std::string& directive);
+template <typename T>
+T strToT(const std::string& str);
 }  // namespace Utils
 
 template <typename T>
@@ -64,6 +67,15 @@ std::string Utils::toStr(const T value) {
 template <typename Context>
 bool Utils::hasDirective(const Context& context, const std::string& directive) {
   return context.directives_set.find(directive) != context.directives_set.end();
+}
+
+template <typename T>
+T Utils::strToT(const std::string& str) {
+  T t;
+  std::istringstream iss(str);
+  iss >> t;
+  if (iss.fail() || iss.bad() || iss.peek() != EOF) std::invalid_argument("strToT");
+  return t;
 }
 
 #endif

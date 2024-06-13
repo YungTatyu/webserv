@@ -350,6 +350,11 @@ std::string ConfigHandler::searchRootPath(const config::Server& server,
   return config::Root::kDefaultPath_;
 }
 
+unsigned long ConfigHandler::searchCliMaxBodySize() const {
+  const config::Size& size = this->config_->http.client_max_body_size.getSize();
+  return size.size_in_bytes_;
+}
+
 bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Location* location) const {
   if (location && Utils::hasDirective(*location, kAUTOINDEX)) {
     return location->autoindex.getIsAutoindexOn();

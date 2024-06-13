@@ -3,6 +3,7 @@
 #include <limits>
 
 #include "LimitExcept.hpp"
+#include "WebServer.hpp"
 
 const static char *kHost = "Host";
 const static char *kContentLength = "Content-Length";
@@ -52,7 +53,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       default:
         break;
     }
-    if (state == PARSE_ERROR) return;
+    if (state == PARSE_ERROR || state == PARSE_ERROR_REQ_TOO_LARGE) return;
     // parse未完了：引き続きクライアントからのrequestを待つ
     if (state == state_before || state == PARSE_INPROGRESS) return;
   }
@@ -79,6 +80,9 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
   size_t i = 0;
   size_t bytes;
   std::string chunk_bytes = request.key_buf_;
+  std::string total_bytes = request.val_buf_.empty() ? "0" : request.val_buf_;
+  const ConfigHandler &config_handler = WebServer::getConfigHandler();
+  unsigned long cli_max_body_size = config_handler.searchCliMaxBodySize();
   while (state != sw_chunk_end && i < rawRequest.size()) {
     unsigned char ch, c;
     ch = rawRequest[i];
@@ -128,6 +132,8 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
             break;
           case '\n':
             state = sw_chunk_data;
+            if (isChunkBytesBiggerThanCliMaxBodySize(chunk_bytes, total_bytes, cli_max_body_size))
+              return PARSE_ERROR_REQ_TOO_LARGE;
             break;
           default:
             return PARSE_ERROR;
@@ -137,6 +143,8 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       case sw_chunk_extension_almost_done:
         if (ch != '\n') return PARSE_ERROR;
         state = sw_chunk_data;
+        if (isChunkBytesBiggerThanCliMaxBodySize(chunk_bytes, total_bytes, cli_max_body_size))
+          return PARSE_ERROR_REQ_TOO_LARGE;
         break;
 
       case sw_chunk_data:
@@ -228,6 +236,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
 
   if (state != sw_chunk_end) {
     request.key_buf_ = chunk_bytes;
+    request.val_buf_ = total_bytes;
     request.state_ = state;
     rawRequest.clear();
     return PARSE_INPROGRESS;
@@ -716,6 +725,15 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     return PARSE_NOT_IMPLEMENTED;  // chunk以外は対応しない
   if (te_it != end_it && cl_it != end_it)
     return PARSE_ERROR;  // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
+
+  // client max body sizeをチェック
+  if (cl_it != end_it) {
+    const ConfigHandler &config_handler = WebServer::getConfigHandler();
+    unsigned long cli_max_body_size = config_handler.searchCliMaxBodySize();
+    unsigned long cl = Utils::strToT<unsigned long>(cl_it->second);
+    if (cl >= cli_max_body_size) return PARSE_ERROR_REQ_TOO_LARGE;
+  }
+
   if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE;  // bodyなし
   return PARSE_HEADER_DONE;
 }
@@ -838,6 +856,28 @@ bool HttpRequest::isValidUri(const std::string &str) {
   return true;
 }
 
+/**
+ * @brief chunked bodyがclient max body sizeを超えるかチェック
+ * total_bytesの値を更新
+ */
+bool HttpRequest::isChunkBytesBiggerThanCliMaxBodySize(const std::string &chunk_bytes,
+                                                       std::string &total_bytes, size_t cli_max_body_size) {
+  size_t cb = Utils::strToSizet(chunk_bytes);
+  if (cb >= cli_max_body_size) return true;
+  size_t tb = Utils::strToSizet(total_bytes);
+  // check overflow
+  if (std::numeric_limits<size_t>::max() - tb < cb) return true;
+  size_t total = cb + tb;
+  // total bytesの値を更新
+  total_bytes = Utils::toStr(total);
+  return total >= cli_max_body_size;
+}
+
+bool HttpRequest::isParsePending(const HttpRequest &request) {
+  enum ParseState state = request.parseState;
+  return state != PARSE_COMPLETE && state != PARSE_ERROR && state != PARSE_ERROR_REQ_TOO_LARGE &&
+         state != PARSE_NOT_IMPLEMENTED;
+}
 void HttpRequest::clear(HttpRequest &request) {
   request.method = config::UNKNOWN;
   request.uri.clear();
