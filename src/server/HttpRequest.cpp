@@ -134,7 +134,8 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
           case '\n':
             state = sw_chunk_data;
             bytes = Utils::hexToDec(chunk_bytes);
-            if (isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
+            if (cli_max_body_size != 0 &&
+                isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
               return PARSE_ERROR_REQ_TOO_LARGE;
             chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
             break;
@@ -147,7 +148,8 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
         if (ch != '\n') return PARSE_ERROR;
         state = sw_chunk_data;
         bytes = Utils::hexToDec(chunk_bytes);
-        if (isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
+        if (cli_max_body_size != 0 &&
+            isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
           return PARSE_ERROR_REQ_TOO_LARGE;
         chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
         break;
@@ -736,7 +738,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     const ConfigHandler &config_handler = WebServer::getConfigHandler();
     unsigned long cli_max_body_size = config_handler.searchCliMaxBodySize();
     unsigned long cl = Utils::strToT<unsigned long>(cl_it->second);
-    if (cl >= cli_max_body_size) return PARSE_ERROR_REQ_TOO_LARGE;
+    if (cli_max_body_size != 0 && cl >= cli_max_body_size) return PARSE_ERROR_REQ_TOO_LARGE;
   }
 
   if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE;  // bodyなし

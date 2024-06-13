@@ -61,8 +61,9 @@ add_executable(${PROJECT_NAME}-googletest
   test/server/ConfigHandler/searchLocationConfig/searchLongestMatchLocationConfig.cpp
   test/server/ConfigHandler/searchServerConfig/searchServerConfigTest.cpp
   test/server/ConfigHandler/RootPath/RootPath.cpp
-	test/server/HttpRequestErrorTest.cpp 
-	test/server/HttpRequestOkTest.cpp 
+  test/server/HttpRequest/HttpRequestErrorTest.cpp 
+  test/server/HttpRequest/HttpRequestOkTest.cpp 
+  test/server/HttpRequest/cli_max_body_size_test.cpp 
 	test/server/HttpResponse/AccessLog/accessLog_test.cpp
 	test/server/HttpResponse/error/error_page_res_test.cpp
 	test/server/HttpResponse/error_page/error_page_test.cpp
@@ -117,6 +118,7 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	test/conf
   test/server/ConfigHandler
 	test/server/HttpResponse
+  test/server/HttpRequest
 )
 add_test(NAME test COMMAND ${PROJECT_NAME}-googletest)
 

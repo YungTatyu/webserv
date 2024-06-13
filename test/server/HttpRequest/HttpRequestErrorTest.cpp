@@ -707,3 +707,17 @@ TEST(HttpRequest, error_normalize_uri_6) {
   EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 /* -------------- header uri test end -------------- */
+
+/* -------------- client max body size test -------------- */
+TEST(HttpRequest, error_cli_max_body_size_1) {
+  // test: content-length too long
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "content-length: 100\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+}
+/* -------------- client max body size test end -------------- */
