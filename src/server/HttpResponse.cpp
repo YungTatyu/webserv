@@ -448,8 +448,9 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     clear(response);
   else if (response.state_ == RES_PARSED_CGI)
     return sw_end_phase;
-  else if (response.state_ == RES_CGI_ERROR) {
-    response.setStatusCode(502);  // bad gate error
+  else if (response.state_ == RES_CGI_ERROR || // fork childp error or parse error
+           response.state_ == RES_CGI_EXIT_FAILURE) { // cgi exited non zero value
+    response.setStatusCode(500);
     return sw_error_page_phase;
   } else if (parse_state == HttpRequest::PARSE_ERROR) {
     response.setStatusCode(400);
