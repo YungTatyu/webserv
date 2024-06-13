@@ -44,7 +44,7 @@ class RequestHandler {
                                                                   TimerTree &timerTree);
 
  private:
-  bool cgiProcessExited(const pid_t process_id) const;
+  int cgiProcessExited(const pid_t process_id) const;
   int handleRequest(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
                     const int sockfd);
   int handleResponse(ConnectionManager &connManager, ConfigHandler &configHandler, TimerTree &timerTree,
