@@ -1,5 +1,6 @@
 #include "HttpRequest.hpp"
 
+#include <cstddef>
 #include <limits>
 
 #include "LimitExcept.hpp"
@@ -103,7 +104,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
         return PARSE_ERROR;
 
       case sw_chunk_size:
-        if (Utils::strToSizetInHex(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
+        if (Utils::hexToDec(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
         if (std::isdigit(ch)) {
           chunk_bytes += ch;
           break;
@@ -132,8 +133,10 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
             break;
           case '\n':
             state = sw_chunk_data;
-            if (isChunkBytesBiggerThanCliMaxBodySize(chunk_bytes, total_bytes, cli_max_body_size))
+            bytes = Utils::hexToDec(chunk_bytes);
+            if (isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
               return PARSE_ERROR_REQ_TOO_LARGE;
+            chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
             break;
           default:
             return PARSE_ERROR;
@@ -143,8 +146,10 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
       case sw_chunk_extension_almost_done:
         if (ch != '\n') return PARSE_ERROR;
         state = sw_chunk_data;
-        if (isChunkBytesBiggerThanCliMaxBodySize(chunk_bytes, total_bytes, cli_max_body_size))
+        bytes = Utils::hexToDec(chunk_bytes);
+        if (isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
           return PARSE_ERROR_REQ_TOO_LARGE;
+        chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
         break;
 
       case sw_chunk_data:
@@ -860,14 +865,13 @@ bool HttpRequest::isValidUri(const std::string &str) {
  * @brief chunked bodyがclient max body sizeを超えるかチェック
  * total_bytesの値を更新
  */
-bool HttpRequest::isChunkBytesBiggerThanCliMaxBodySize(const std::string &chunk_bytes,
-                                                       std::string &total_bytes, size_t cli_max_body_size) {
-  size_t cb = Utils::strToSizet(chunk_bytes);
-  if (cb >= cli_max_body_size) return true;
+bool HttpRequest::isChunkBytesBiggerThanCliMaxBodySize(size_t chunk_bytes, std::string &total_bytes,
+                                                       size_t cli_max_body_size) {
+  if (chunk_bytes >= cli_max_body_size) return true;
   size_t tb = Utils::strToSizet(total_bytes);
   // check overflow
-  if (std::numeric_limits<size_t>::max() - tb < cb) return true;
-  size_t total = cb + tb;
+  if (std::numeric_limits<size_t>::max() - tb < chunk_bytes) return true;
+  size_t total = chunk_bytes + tb;
   // total bytesの値を更新
   total_bytes = Utils::toStr(total);
   return total >= cli_max_body_size;

@@ -67,7 +67,7 @@ class HttpRequest {
   static bool isUniqHeaderDup(const HttpRequest &request, const std::string &header);
   static bool isValidHost(const std::string &str);
   static bool isValidUri(const std::string &str);
-  static bool isChunkBytesBiggerThanCliMaxBodySize(const std::string &chunk_bytes, std::string &total_bytes,
+  static bool isChunkBytesBiggerThanCliMaxBodySize(size_t chunk_bytes, std::string &total_bytes,
                                                    size_t cli_max_body_size);
   static void clear(HttpRequest &request);
 };

@@ -45,7 +45,7 @@ bool isSpace(const unsigned char ch);
 bool compareIgnoreCase(std::string lhs, std::string rhs);
 int setNonBlockingCloExec(const int fd);
 size_t strToSizet(const std::string& str);
-size_t strToSizetInHex(const std::string& str);
+size_t hexToDec(const std::string& str);
 bool isSign(unsigned char ch);
 std::string normalizePath(const std::string& full_path);
 template <typename T>

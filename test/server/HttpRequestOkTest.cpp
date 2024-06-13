@@ -1460,7 +1460,7 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  req = "\n14";
+  req = "\ne";
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
@@ -1814,3 +1814,91 @@ TEST(HttpRequest, normalize_uri_9) {
 }
 
 /* -------------- normalize uri end -------------- */
+
+/* -------------- body chunk test -------------- */
+TEST(HttpRequest, chunk_hex_1) {
+  // testcase: chunked with hex bytes
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0123456789",
+                     HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "a\r\n"
+      "0123456789"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+
+  // testcase: chunked second
+  HttpRequest expect2(config::GET, "/html", "HTTP/1.1", headers, "", "01234567890123456789a",
+                      HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string chunked =
+      "B\r\n"
+      "0123456789a"
+      "\r\n";
+  HttpRequest::parseRequest(chunked, test);
+  checkHttpRequestEqual(expect2, test);
+
+  // testcase: chunked third
+  HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "", "01234567890123456789a",
+                      HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string chunked2 = "0\r\n\r\n";
+  HttpRequest::parseRequest(chunked2, test);
+
+  checkHttpRequestEqual(expect3, test);
+}
+
+TEST(HttpRequest, chunk_hex_2) {
+  // testcase: chunked with hex bytes
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0123456789abcdef",
+                     HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "10\r\n"  // 16 in decimal
+      "0123456789abcdef"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+
+  // testcase: chunked second
+  HttpRequest expect2(config::GET, "/html", "HTTP/1.1", headers, "",
+                      "0123456789abcdef01234567890123456789012345", HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string chunked =
+      "1A\r\n"  // 26 in decimal
+      "01234567890123456789012345"
+      "\r\n";
+  HttpRequest::parseRequest(chunked, test);
+  checkHttpRequestEqual(expect2, test);
+
+  // testcase: chunked third
+  HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "",
+                      "0123456789abcdef01234567890123456789012345", HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string chunked2 = "0\r\n\r\n";
+  HttpRequest::parseRequest(chunked2, test);
+
+  checkHttpRequestEqual(expect3, test);
+}
+/* -------------- body chunk test end -------------- */
