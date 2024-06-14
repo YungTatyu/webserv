@@ -15,10 +15,14 @@ export default function () {
   // define URL and request body
   const url = "http://localhost:4242/";
 
-  const res = http.get(url);
+  const getRes = http.get(url);
+  const headRes = http.head(url);
 
-  // check that response is 200
-  check(res, {
-    "response code was 200": (res) => res.status == 200,
+  // check that getResponse is 200
+  check(getRes, {
+    "get: response code was 200": (getRes) => getRes.status == 200,
+  });
+  check(headRes, {
+    "head: response code was 200": (headRes) => headRes.status == 200,
   });
 }

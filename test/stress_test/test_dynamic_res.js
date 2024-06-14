@@ -16,10 +16,25 @@ export const options = {
 export default function () {
   // define URL and request body
   const url = `http://localhost:4242/cgi/`;
+  const payload = "this is body data";
+  const params = {
+    headers: {
+      "Content-Type": "text",
+      "Content-Length": payload.length.toString(),
+    },
+  };
 
-  const res = http.get(url);
+  const getRes = http.get(url);
+  const postRes = http.post(url, payload, params);
+  const delRes = http.del(url, payload, params);
 
-  check(res, {
-    "response code was 200": (res) => res.status == 200,
+  check(getRes, {
+    "get: response code was 200": (getRes) => getRes.status == 200,
+  });
+  check(postRes, {
+    "post: response code was 200": (postRes) => postRes.status == 200,
+  });
+  check(delRes, {
+    "del: response code was 200": (delRes) => delRes.status == 200,
   });
 }
