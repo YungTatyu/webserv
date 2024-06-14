@@ -1468,7 +1468,7 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  req = "\ne";
+  req = "\ne";  // 14 bytes in decimal
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
