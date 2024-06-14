@@ -271,8 +271,8 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
  * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
  *
  * @param process_id, status
- * @return true cgi processが終了している
- * @return false cgi processが終了していない
+ * @return true cgi processが死んでいる
+ * @return false cgi processがまだ生きている
  */
 bool RequestHandler::cgiProcessExited(const pid_t process_id, int &status) const {
   pid_t re = waitpid(process_id, &status, WNOHANG);
