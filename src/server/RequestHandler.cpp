@@ -8,10 +8,6 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 
-const static int NOT_EXITED = 0;
-const static int EXIT_NON_ZERO = 1;
-const static int EXIT_SUC = 2;
-
 RequestHandler::RequestHandler() {}
 
 int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
