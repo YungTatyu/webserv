@@ -131,17 +131,16 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
 
   int cgi_exit = cgiProcessExited(cgi_handler.getCgiProcessId());
   switch (cgi_exit) {
-
-    case NOT_EXITED: // まだcgiが終了していない場合
+    case NOT_EXITED:  // まだcgiが終了していない場合
       addTimerByType(connManager, configHandler, timerTree, sockfd,
                      Timer::TMO_RECV);  // cgiからrecvする間のtimeout
       return RequestHandler::UPDATE_NONE;
 
-    case EXIT_NON_ZERO: // cgiが異常終了した場合
+    case EXIT_NON_ZERO:  // cgiが異常終了した場合
       response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
       break;
 
-    case EXIT_SUC: // 正常にcgiが終了した場合
+    case EXIT_SUC:  // 正常にcgiが終了した場合
       const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
       std::string res(v.begin(), v.end());
       bool parse_suc = connManager.callCgiParser(sockfd, response, res);
@@ -203,7 +202,7 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
 
   const std::string body = connManager.getRequest(sockfd).body;
   const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
-  if (connManager.getSentBytes(sockfd) == body.size() ||    // bodyを全て送ったら
+  if (connManager.getSentBytes(sockfd) == body.size() ||                  // bodyを全て送ったら
       (cgiProcessExited(cgi_handler.getCgiProcessId()) != NOT_EXITED)) {  // cgi processがすでに死んでいたら
     connManager.resetSentBytes(sockfd);
     connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
