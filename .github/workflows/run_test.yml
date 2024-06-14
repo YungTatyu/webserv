@@ -35,4 +35,6 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run gtest (macOS)
-      run: make gtest
+      run: |
+        make gtest
+        ./test/run_tests.py
