@@ -26,8 +26,8 @@ struct CaseInsensitiveCompare {
 
 int wrapperOpen(const std::string path, int flags, mode_t modes);
 int wrapperAccess(const std::string path, int modes, bool err_log);
-bool wrapperRealpath(const std::string path, std::string& absolute_path);
-bool isFile(const std::string& path);
+bool wrapperRealpath(const std::string& path, std::string& absolute_path);
+bool isFile(const std::string& path, bool err_log);
 bool isDirectory(const std::string& path, bool err_log);
 std::string readFile(const std::string& filePath);
 std::vector<std::string> createDirectoryContents(const std::string& directoryPath);

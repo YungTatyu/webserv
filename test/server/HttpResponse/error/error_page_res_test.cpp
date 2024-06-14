@@ -12,18 +12,17 @@
 TEST(HttpResponseError, not_slash_ending_dir) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
-  test.initTiedServers({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}});
+  test.initTiedServers({{"127.0.0.1", 4246}});
   test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::GET}, "/file",
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
-  test.testHeaders({
-      {"Server", "webserv/1.0"},
-      {"Date", ""},
-      {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
-      {"Content-Type", "text/html"},
-      {"Connection", "keep-alive"},
-  });
+  test.testHeaders({{"Server", "webserv/1.0"},
+                    {"Date", ""},
+                    {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
+                    {"Content-Type", "text/html"},
+                    {"Connection", "keep-alive"},
+                    {"Location", "http://test:4246/file/"}});
   test.testBody(test.createDefaultErrorBody(301));
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }
@@ -105,6 +104,25 @@ TEST(HttpResponseError, not_allowed) {
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[405]));
 }
 
+TEST(HttpResponseError, not_implemented) {
+  test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
+  ASSERT_NO_FATAL_FAILURE(test.setUp());
+  test.initTiedServers({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}});
+  test.initRequest({{"host", "42"}, {"User-Agent", "Mozilla/5.0"}, {"transfer-encoding", "not implemented"}},
+                   {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_NOT_IMPLEMENTED);
+  test.generateResponse();
+
+  test.testHeaders({
+      {"Server", "webserv/1.0"},
+      {"Date", ""},
+      {"Content-Length", std::to_string(test.calcDefaultBodySize(501))},
+      {"Content-Type", "text/html"},
+      {"Connection", "keep-alive"},
+  });
+  test.testBody(test.createDefaultErrorBody(501));
+  test.testResponse(test.createResponse(HttpResponse::status_line_map_[501]));
+}
+
 /*
  * HEAD method ver.
  */
@@ -112,18 +130,17 @@ TEST(HttpResponseError, not_allowed) {
 TEST(HttpResponseError, not_slash_ending_dir_HEAD) {
   test::ResponseTest test("test/server/HttpResponse/error/file/error.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUp());
-  test.initTiedServers({{"127.0.0.1", 4244}, {"127.0.0.1", 4245}});
+  test.initTiedServers({{"127.0.0.1", 4246}});
   test.initRequest({{"host", "test"}, {"User-Agent", "Mozilla/5.0"}}, {config::REQUEST_METHOD::HEAD}, "/file",
                    HttpRequest::PARSE_COMPLETE);
   test.generateResponse();
 
-  test.testHeaders({
-      {"Server", "webserv/1.0"},
-      {"Date", ""},
-      {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
-      {"Content-Type", "text/html"},
-      {"Connection", "keep-alive"},
-  });
+  test.testHeaders({{"Server", "webserv/1.0"},
+                    {"Date", ""},
+                    {"Content-Length", std::to_string(test.calcDefaultBodySize(301))},
+                    {"Content-Type", "text/html"},
+                    {"Connection", "keep-alive"},
+                    {"Location", "http://test:4246/file/"}});
   test.testResponse(test.createResponse(HttpResponse::status_line_map_[301]));
 }
 

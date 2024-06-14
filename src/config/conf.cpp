@@ -50,7 +50,7 @@ config::Main *config::initConfig(const std::string &file_path) {
   if (Utils::wrapperAccess(absolute_path, R_OK, true) == -1) return NULL;
 
   // file_path がファイルかどうか確認する。
-  if (!Utils::isFile(absolute_path)) {
+  if (!Utils::isFile(absolute_path, false)) {
     std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
     return NULL;
   }
@@ -68,14 +68,6 @@ config::Main *config::initConfig(const std::string &file_path) {
 
   if (!initLogFds(*config)) {
     delete config;
-    return NULL;
-  }
-
-  if (config->events.use.getConnectionMethod() == config::SELECT &&
-      config->events.worker_connections.getWorkerConnections() >
-          config::WorkerConnections::kSelectMaxConnections) {
-    std::cerr << "webserv: [emerg] the maximum number of files supported by select() is "
-              << config::WorkerConnections::kSelectMaxConnections << std::endl;
     return NULL;
   }
 
