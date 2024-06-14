@@ -720,7 +720,7 @@ TEST(HttpRequest, error_cli_max_body_size_1) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parseState);
   test::teardownMaxBodySize();
 }
 
@@ -742,7 +742,7 @@ TEST(HttpRequest, error_cli_max_body_size_2) {
       "63\r\n"  // 99 bytes in dec
       "this is test";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parseState);
   test::teardownMaxBodySize();
 }
 
@@ -771,7 +771,7 @@ TEST(HttpRequest, error_cli_max_body_size_3) {
       "t\n"
       "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parseState);
   test::teardownMaxBodySize();
 }
 /* -------------- client max body size test end -------------- */

@@ -54,7 +54,7 @@ void HttpRequest::parseRequest(std::string &rawRequest, HttpRequest &request) {
       default:
         break;
     }
-    if (state == PARSE_ERROR || state == PARSE_ERROR_REQ_TOO_LARGE) return;
+    if (state == PARSE_ERROR || state == PARSE_ERROR_BODY_TOO_LARGE) return;
     // parse未完了：引き続きクライアントからのrequestを待つ
     if (state == state_before || state == PARSE_INPROGRESS) return;
   }
@@ -136,7 +136,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
             bytes = Utils::hexToDec(chunk_bytes);
             if (cli_max_body_size != 0 &&
                 isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
-              return PARSE_ERROR_REQ_TOO_LARGE;
+              return PARSE_ERROR_BODY_TOO_LARGE;
             chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
             break;
           default:
@@ -150,7 +150,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &rawRequest, H
         bytes = Utils::hexToDec(chunk_bytes);
         if (cli_max_body_size != 0 &&
             isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
-          return PARSE_ERROR_REQ_TOO_LARGE;
+          return PARSE_ERROR_BODY_TOO_LARGE;
         chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
         break;
 
@@ -738,7 +738,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
     const ConfigHandler &config_handler = WebServer::getConfigHandler();
     unsigned long cli_max_body_size = config_handler.searchCliMaxBodySize();
     unsigned long cl = Utils::strToT<unsigned long>(cl_it->second);
-    if (cli_max_body_size != 0 && cl >= cli_max_body_size) return PARSE_ERROR_REQ_TOO_LARGE;
+    if (cli_max_body_size != 0 && cl >= cli_max_body_size) return PARSE_ERROR_BODY_TOO_LARGE;
   }
 
   if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE;  // bodyなし
@@ -881,7 +881,7 @@ bool HttpRequest::isChunkBytesBiggerThanCliMaxBodySize(size_t chunk_bytes, std::
 
 bool HttpRequest::isParsePending(const HttpRequest &request) {
   enum ParseState state = request.parseState;
-  return state != PARSE_COMPLETE && state != PARSE_ERROR && state != PARSE_ERROR_REQ_TOO_LARGE &&
+  return state != PARSE_COMPLETE && state != PARSE_ERROR && state != PARSE_ERROR_BODY_TOO_LARGE &&
          state != PARSE_NOT_IMPLEMENTED;
 }
 void HttpRequest::clear(HttpRequest &request) {

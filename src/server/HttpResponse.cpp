@@ -464,7 +464,7 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     case HttpRequest::PARSE_NOT_IMPLEMENTED:
       response.setStatusCode(501);
       return sw_error_page_phase;
-    case HttpRequest::PARSE_ERROR_REQ_TOO_LARGE:
+    case HttpRequest::PARSE_ERROR_BODY_TOO_LARGE:
       response.setStatusCode(413);
       return sw_error_page_phase;
     default:
