@@ -135,13 +135,13 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
                    Timer::TMO_RECV);  // cgiからrecvする間のtimeout
     return RequestHandler::UPDATE_NONE;
   }
-  if (!WEXITSTATUS(status)) { // 正常にcgiが終了した場合
+  if (!WEXITSTATUS(status)) {  // 正常にcgiが終了した場合
     const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
     std::string res(v.begin(), v.end());
     bool parse_suc = connManager.callCgiParser(sockfd, response, res);
     response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
-  } else { // cgiが異常終了した場合
-      response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
+  } else {  // cgiが異常終了した場合
+    response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
   }
 
   re = handleResponse(connManager, configHandler, timerTree, sockfd);
@@ -199,7 +199,7 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
   const std::string body = connManager.getRequest(sockfd).body;
   const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
   int status = -1;
-  if (connManager.getSentBytes(sockfd) == body.size() ||                  // bodyを全て送ったら
+  if (connManager.getSentBytes(sockfd) == body.size() ||          // bodyを全て送ったら
       cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processがすでに死んでいたら
     connManager.resetSentBytes(sockfd);
     connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
@@ -274,7 +274,7 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
  * @return true cgi processが終了している
  * @return false cgi processが終了していない
  */
-bool  RequestHandler::cgiProcessExited(const pid_t process_id, int& status) const {
+bool RequestHandler::cgiProcessExited(const pid_t process_id, int &status) const {
   pid_t re = waitpid(process_id, &status, WNOHANG);
   // errorまたはprocessが終了していない
   // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
