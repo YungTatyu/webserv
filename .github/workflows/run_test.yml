@@ -37,4 +37,5 @@ jobs:
     - name: Run gtest (macOS)
       run: |
         make gtest
+        source venv/bin/activate
         ./test/run_tests.py
