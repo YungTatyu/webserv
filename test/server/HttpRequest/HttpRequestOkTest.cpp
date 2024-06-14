@@ -159,8 +159,15 @@ TEST(HttpRequest, OkTest7) {
       " world"
       "\r\n";
   HttpRequest::parseRequest(chunked, test);
-
   checkHttpRequestEqual(expect2, test);
+
+  HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "", "hello world",
+                      HttpRequest::PARSE_COMPLETE);
+  std::string chunked2 =
+      "0\n"
+      "\n";
+  HttpRequest::parseRequest(chunked2, test);
+  checkHttpRequestEqual(expect3, test);
 }
 
 TEST(HttpRequest, OkTest8) {
@@ -189,9 +196,9 @@ TEST(HttpRequest, OkTest8) {
 
   // test
   std::string chunked =
-      "6\r\n"
+      "6\n"
       " world"
-      "\r\n";
+      "\n";
   HttpRequest::parseRequest(chunked, test);
   checkHttpRequestEqual(expect2, test);
 
@@ -1901,5 +1908,34 @@ TEST(HttpRequest, chunk_hex_2) {
   HttpRequest::parseRequest(chunked2, test);
 
   checkHttpRequestEqual(expect3, test);
+}
+
+TEST(HttpRequest, chunk_hex_3) {
+  // testcase: client max body size = 0 means no limits
+  test::setupMaxBodySize(0);
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "",
+                     std::string("0123456789") + "0123456789" + "0123456789" + "0123456789" + "42",
+                     HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "2A\r\n"  // 42 in decimal
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "42\r\n"
+      "0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+  test::teardownMaxBodySize();
 }
 /* -------------- body chunk test end -------------- */

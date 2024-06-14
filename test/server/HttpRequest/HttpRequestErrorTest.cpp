@@ -733,11 +733,93 @@ TEST(HttpRequest, error_cli_max_body_size_2) {
       "transfer-encoding: chunked\r\n"
       "\r\n"
       "1\r\n"
-      "a\r\n"
-      "63\r\n";  // 99 bytes in dec
+      "a\r\n";
   HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req =
+      "63\r\n"  // 99 bytes in dec
+      "this is test";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+  test::teardownMaxBodySize();
+}
+
+TEST(HttpRequest, error_cli_max_body_size_3) {
+  // test: chunked bytes too large
+  test::setupMaxBodySize(5);
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n"
+      "1\r\n"
+      "a\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req =
+      "3\r\n"
+      "123\n";
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+
+  req =
+      "1\r\n"
+      "t\n"
+      "\r\n";
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
   test::teardownMaxBodySize();
 }
 /* -------------- client max body size test end -------------- */
+
+/* -------------- chunked body test -------------- */
+TEST(HttpRequest, error_chunked_body_1) {
+  // test: chunked date is bigger than expected
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n"
+      "5\r\n"
+      "123456\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_chunked_body_2) {
+  // test: need nl after data
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n"
+      "5\r\n"
+      "12345"
+      "0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_chunked_body_3) {
+  // test: need nl  after bytes
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n"
+      "5"
+      "this \r\n"
+      "0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+/* -------------- chunked body test end -------------- */
