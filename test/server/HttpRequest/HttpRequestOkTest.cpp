@@ -2,6 +2,7 @@
 
 #include "HttpRequest.hpp"
 #include "LimitExcept.hpp"
+#include "cli_max_body_size_test.hpp"
 
 void checkHttpRequestEqual(HttpRequest expect, HttpRequest test) {
   EXPECT_EQ(expect.method, test.method);

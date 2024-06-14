@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "HttpRequest.hpp"
+#include "cli_max_body_size_test.hpp"
 
 /* --------------  request line error test -------------- */
 
@@ -711,6 +712,7 @@ TEST(HttpRequest, error_normalize_uri_6) {
 /* -------------- client max body size test -------------- */
 TEST(HttpRequest, error_cli_max_body_size_1) {
   // test: content-length too long
+  test::setupMaxBodySize(100);
   std::string req =
       "GET / HTTP/1.1\r\n"
       "Host: aa\r\n"
@@ -719,5 +721,23 @@ TEST(HttpRequest, error_cli_max_body_size_1) {
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+  test::teardownMaxBodySize();
+}
+
+TEST(HttpRequest, error_cli_max_body_size_2) {
+  // test: chunked bytes too large
+  test::setupMaxBodySize(100);
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n"
+      "1\r\n"
+      "a\r\n"
+      "63\r\n";  // 99 bytes in dec
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_REQ_TOO_LARGE, test.parseState);
+  test::teardownMaxBodySize();
 }
 /* -------------- client max body size test end -------------- */
