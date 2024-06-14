@@ -74,7 +74,7 @@ T Utils::strToT(const std::string& str) {
   T t;
   std::istringstream iss(str);
   iss >> t;
-  if (iss.fail() || iss.bad() || iss.peek() != EOF) std::invalid_argument("strToT");
+  if (iss.fail() || iss.bad() || iss.peek() != EOF) throw std::invalid_argument("strToT");
   return t;
 }
 
