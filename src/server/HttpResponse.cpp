@@ -454,6 +454,9 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   } else if (response.state_ == RES_CGI_ERROR) {  // fork childp error or parse error
     response.setStatusCode(502);
     return sw_error_page_phase;
+  } else if (response.state_ == RES_CGI_TIMEOUT) {  // cgi timeout error
+    response.setStatusCode(504);
+    return sw_error_page_phase;
   } else if (parse_state == HttpRequest::PARSE_ERROR) {
     response.setStatusCode(400);
     return sw_error_page_phase;
