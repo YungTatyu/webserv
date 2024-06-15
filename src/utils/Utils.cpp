@@ -220,7 +220,7 @@ size_t Utils::strToSizet(const std::string& str) {
   return size;
 }
 
-size_t Utils::strToSizetInHex(const std::string& str) {
+size_t Utils::hexToDec(const std::string& str) {
   std::istringstream iss(str);
   size_t size;
   iss >> std::hex >> size;

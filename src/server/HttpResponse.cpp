@@ -444,22 +444,37 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
     const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock,
     struct sockaddr_in& client_addr) {
-  if (response.state_ == RES_COMPLETE)
-    clear(response);
-  else if (response.state_ == RES_PARSED_CGI)
-    return sw_end_phase;
-  else if (response.state_ == RES_CGI_EXIT_FAILURE) {  // cgi exited non zero value
-    response.setStatusCode(500);
-    return sw_error_page_phase;
-  } else if (response.state_ == RES_CGI_ERROR) {  // fork childp error or parse error
-    response.setStatusCode(502);
-    return sw_error_page_phase;
-  } else if (parse_state == HttpRequest::PARSE_ERROR) {
-    response.setStatusCode(400);
-    return sw_error_page_phase;
-  } else if (parse_state == HttpRequest::PARSE_NOT_IMPLEMENTED) {
-    response.setStatusCode(501);
-    return sw_error_page_phase;
+  switch (response.state_) {
+    case RES_COMPLETE:
+      clear(response);
+      break;
+    case RES_PARSED_CGI:
+      return sw_end_phase;
+    case RES_CGI_EXIT_FAILURE:  // cgi exited non zero value
+      response.setStatusCode(500);
+      return sw_error_page_phase;
+    case RES_CGI_ERROR:  // fork childp error or parse error
+      response.setStatusCode(502);
+      return sw_error_page_phase;
+    case RES_CGI_TIMEOUT:  // cgi timeout
+      response.setStatusCode(504);
+      return sw_error_page_phase;
+    default:
+      break;
+  }
+
+  switch (parse_state) {
+    case HttpRequest::PARSE_ERROR:
+      response.setStatusCode(400);
+      return sw_error_page_phase;
+    case HttpRequest::PARSE_NOT_IMPLEMENTED:
+      response.setStatusCode(501);
+      return sw_error_page_phase;
+    case HttpRequest::PARSE_ERROR_BODY_TOO_LARGE:
+      response.setStatusCode(413);
+      return sw_error_page_phase;
+    default:
+      break;
   }
 
   // get client ip_address
@@ -647,8 +662,7 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
         buffer << space << file_stat.st_size << "  ";
       } else {
         for (size_t i = 0; i < 15; i++) space += " ";
-        buffer << space << "-"
-               << "  ";
+        buffer << space << "-  ";
       }
       buffer << "</span>";
     }
