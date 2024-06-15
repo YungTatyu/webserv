@@ -24,6 +24,7 @@ class HttpRequest {
     PARSE_COMPLETE,
     PARSE_INPROGRESS,
     PARSE_NOT_IMPLEMENTED,
+    PARSE_ERROR_BODY_TOO_LARGE,
     PARSE_ERROR
   };
 
@@ -39,6 +40,7 @@ class HttpRequest {
   static ParseState parseChunkedBody(std::string &rawRequest, HttpRequest &request);
   static bool isInvalidLetter(unsigned char ch);
   static bool isValidContentLength(const std::string &str);
+  static bool isParsePending(const HttpRequest &request);
   config::REQUEST_METHOD method;
   std::string uri;  // スキーマ、ポートは？？
   std::string version;
@@ -65,6 +67,8 @@ class HttpRequest {
   static bool isUniqHeaderDup(const HttpRequest &request, const std::string &header);
   static bool isValidHost(const std::string &str);
   static bool isValidUri(const std::string &str);
+  static bool isChunkBytesBiggerThanCliMaxBodySize(size_t chunk_bytes, std::string &total_bytes,
+                                                   size_t cli_max_body_size);
   static void clear(HttpRequest &request);
 };
 

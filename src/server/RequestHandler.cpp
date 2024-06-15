@@ -54,12 +54,11 @@ int RequestHandler::handleRequest(ConnectionManager &connManager, ConfigHandler 
   const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
   // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
   std::string raw_request = std::string(context.begin(), context.end());
-  HttpRequest::parseRequest(raw_request, connManager.getRequest(sockfd));
+  HttpRequest &request = connManager.getRequest(sockfd);
+  HttpRequest::parseRequest(raw_request, request);
 
-  HttpRequest::ParseState state = connManager.getRequest(sockfd).parseState;
   // requestが未完の場合は引き続きrequestをまつ
-  if (state != HttpRequest::PARSE_COMPLETE && state != HttpRequest::PARSE_ERROR &&
-      state != HttpRequest::PARSE_NOT_IMPLEMENTED) {
+  if (HttpRequest::isParsePending(request)) {
     connManager.clearRawRequest(sockfd);
     return RequestHandler::UPDATE_READ;
   }

@@ -2,6 +2,7 @@
 
 #include "HttpRequest.hpp"
 #include "LimitExcept.hpp"
+#include "cli_max_body_size_test.hpp"
 
 void checkHttpRequestEqual(HttpRequest expect, HttpRequest test) {
   EXPECT_EQ(expect.method, test.method);
@@ -158,8 +159,15 @@ TEST(HttpRequest, OkTest7) {
       " world"
       "\r\n";
   HttpRequest::parseRequest(chunked, test);
-
   checkHttpRequestEqual(expect2, test);
+
+  HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "", "hello world",
+                      HttpRequest::PARSE_COMPLETE);
+  std::string chunked2 =
+      "0\n"
+      "\n";
+  HttpRequest::parseRequest(chunked2, test);
+  checkHttpRequestEqual(expect3, test);
 }
 
 TEST(HttpRequest, OkTest8) {
@@ -188,9 +196,9 @@ TEST(HttpRequest, OkTest8) {
 
   // test
   std::string chunked =
-      "6\r\n"
+      "6\n"
       " world"
-      "\r\n";
+      "\n";
   HttpRequest::parseRequest(chunked, test);
   checkHttpRequestEqual(expect2, test);
 
@@ -1460,7 +1468,7 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
-  req = "\n14";
+  req = "\ne";  // 14 bytes in decimal
   HttpRequest::parseRequest(req, test);
   EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
 
@@ -1814,3 +1822,146 @@ TEST(HttpRequest, normalize_uri_9) {
 }
 
 /* -------------- normalize uri end -------------- */
+
+/* -------------- body chunk test -------------- */
+TEST(HttpRequest, chunk_hex_1) {
+  // testcase: chunked with hex bytes
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0123456789",
+                     HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "a\r\n"
+      "0123456789"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+
+  // testcase: chunked second
+  HttpRequest expect2(config::GET, "/html", "HTTP/1.1", headers, "", "01234567890123456789a",
+                      HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string chunked =
+      "B\r\n"
+      "0123456789a"
+      "\r\n";
+  HttpRequest::parseRequest(chunked, test);
+  checkHttpRequestEqual(expect2, test);
+
+  // testcase: chunked third
+  HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "", "01234567890123456789a",
+                      HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string chunked2 = "0\r\n\r\n";
+  HttpRequest::parseRequest(chunked2, test);
+
+  checkHttpRequestEqual(expect3, test);
+}
+
+TEST(HttpRequest, chunk_hex_2) {
+  // testcase: chunked with hex bytes
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0123456789abcdef",
+                     HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "10\r\n"  // 16 in decimal
+      "0123456789abcdef"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+
+  // testcase: chunked second
+  HttpRequest expect2(config::GET, "/html", "HTTP/1.1", headers, "",
+                      "0123456789abcdef01234567890123456789012345", HttpRequest::PARSE_INPROGRESS);
+
+  // test
+  std::string chunked =
+      "1A\r\n"  // 26 in decimal
+      "01234567890123456789012345"
+      "\r\n";
+  HttpRequest::parseRequest(chunked, test);
+  checkHttpRequestEqual(expect2, test);
+
+  // testcase: chunked third
+  HttpRequest expect3(config::GET, "/html", "HTTP/1.1", headers, "",
+                      "0123456789abcdef01234567890123456789012345", HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string chunked2 = "0\r\n\r\n";
+  HttpRequest::parseRequest(chunked2, test);
+
+  checkHttpRequestEqual(expect3, test);
+}
+
+TEST(HttpRequest, chunk_hex_3) {
+  // testcase: client max body size = 0 means no limits
+  test::setupMaxBodySize(0);
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+      {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "",
+                     std::string("0123456789") + "0123456789" + "0123456789" + "0123456789" + "42",
+                     HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "2A\r\n"  // 42 in decimal
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "42\r\n"
+      "0\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+  test::teardownMaxBodySize();
+}
+/* -------------- body chunk test end -------------- */
+
+TEST(HttpRequest, client_max_body_size_1) {
+  // testcase: client max body size = 0 means no limits
+  test::setupMaxBodySize(0);
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"},
+                                                                               {"content-length", "42"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "",
+                     std::string("0123456789") + "0123456789" + "0123456789" + "0123456789" + "42",
+                     HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "content-length: 42\r\n"
+      "\r\n"
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "42";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+  test::teardownMaxBodySize();
+}

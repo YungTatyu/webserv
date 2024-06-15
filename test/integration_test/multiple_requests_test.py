@@ -83,7 +83,8 @@ def test(conf):
             f"GET /{ROOT}/not_found.html HTTP/1.1\nhost:tt\n\nGET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n",  # error status code
             f"POST /{ROOT}/index.py HTTP/1.1\nhost:tt\ncontent-length: 12\n\nthis is test"
             + f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n"
-            + f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\n13\nthis is body.\n0\n\n",  # three requests test
+            + f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\nd\nthis is body.\n0\n\n",  # d is 13 bytes in hex
+            # three requests test
         ],
         REQUEST_NUM: [
             2,

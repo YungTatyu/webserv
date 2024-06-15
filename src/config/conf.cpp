@@ -32,6 +32,7 @@ const char *config::AccessLog::kDefaultFile_ = "logs/access.log";
 const char *config::ErrorLog::kDefaultFile_ = "logs/error.log";
 const unsigned long config::KeepaliveTimeout::kDefaultTime_ = 60 * Time::seconds;  // 60s
 const char *config::Index::kDefaultFile_ = "index.html";
+const unsigned long config::ClientMaxBodySize::kDefaultSize_;
 
 config::Main *config::initConfig(const std::string &file_path) {
   std::string absolute_path;
