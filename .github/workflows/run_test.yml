@@ -30,7 +30,6 @@ jobs:
 
     - name: Install dependencies (macOS)
       run:  |
-        brew install procps-ng # pkill
         python3 -m venv venv
         venv/bin/pip install -r requirements.txt
 
