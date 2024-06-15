@@ -244,8 +244,8 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
       int client_sock = cgi_handler.getCliSocket();
 
       cgi_handler.killCgiProcess();
-      connManager.resetSentBytes(cgi_sock);
       ioHandler.closeConnection(connManager, timerTree, cgi_sock);
+      connManager.clearResData(client_sock);
 
       // 504 error responseを生成
       HttpResponse &response = connManager.getResponse(client_sock);
