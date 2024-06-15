@@ -759,7 +759,7 @@ bool HttpRequest::parseHost(std::string &host, HttpRequest &request) {
   size_t i = host.find(':');
   if (i != std::string::npos) {
     request.port_in_host = host.substr(i + 1);
-    host = host.substr(0, i + 1);
+    host = host.substr(0, i);
   }
   return true;
 }
