@@ -80,7 +80,7 @@ def run_server(conf):
         g_webserv_pid = subprocess.Popen(
             [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        time.sleep(0.5)
+        time.sleep(1)
     except Exception as e:
         print(f"{e}", file=sys.stderr)
         sys.exit(1)
@@ -250,7 +250,7 @@ def main():
             "/no-send/",
             body_path,
             4600,
-            2,
+            1,
             STAY_CONNECT,
             CLIENT_PATH,
             "request_sender.py",
