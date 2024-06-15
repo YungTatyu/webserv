@@ -32,7 +32,7 @@ class HttpRequest {
               const std::string &version = "",
               const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers =
                   std::map<std::string, std::string, Utils::CaseInsensitiveCompare>(),
-              const std::string &queries = "", const std::string &body = "",
+              const std::string &queries = "", const std::string &body = "", const std::string &port = "",
               const ParseState parseState = PARSE_BEFORE);
   ~HttpRequest();
 

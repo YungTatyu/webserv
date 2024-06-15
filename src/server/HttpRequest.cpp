@@ -14,13 +14,15 @@ const static char *kChunk = "chunked";
 HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string &uri,
                          const std::string &version,
                          const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers,
-                         const std::string &queries, const std::string &body, const ParseState parseState)
+                         const std::string &queries, const std::string &body, const std::string &port,
+                         const ParseState parseState)
     : method(method),
       uri(uri),
       version(version),
       headers(headers),
       queries(queries),
       body(body),
+      port_in_host(port),
       parseState(parseState),
       state_(0) {}
 
