@@ -131,7 +131,7 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
                    Timer::TMO_RECV);  // cgiからrecvする間のtimeout
     return RequestHandler::UPDATE_NONE;
   }
-  if (!WEXITSTATUS(status)) {  // 正常にcgiが終了した場合
+  if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {  // 正常にcgiが終了した場合
     const std::vector<unsigned char> &v = connManager.getCgiResponse(sockfd);
     std::string res(v.begin(), v.end());
     bool parse_suc = connManager.callCgiParser(sockfd, response, res);
