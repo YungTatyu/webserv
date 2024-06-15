@@ -136,7 +136,7 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
         break;
 
       case RequestHandler::UPDATE_CLOSE:
-        deleteEvent(active_events[i]);
+        // closeConnectionをした後なのでdeleteEventする必要はない
         break;
 
       case RequestHandler::UPDATE_CGI_READ:
