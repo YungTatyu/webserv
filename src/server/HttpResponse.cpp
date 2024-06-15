@@ -450,8 +450,14 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
       break;
     case RES_PARSED_CGI:
       return sw_end_phase;
-    case RES_CGI_ERROR:
-      response.setStatusCode(502);  // bad gate error
+    case RES_CGI_EXIT_FAILURE:  // cgi exited non zero value
+      response.setStatusCode(500);
+      return sw_error_page_phase;
+    case RES_CGI_ERROR:  // fork childp error or parse error
+      response.setStatusCode(502);
+      return sw_error_page_phase;
+    case RES_CGI_TIMEOUT:  // cgi timeout
+      response.setStatusCode(504);
       return sw_error_page_phase;
     default:
       break;
