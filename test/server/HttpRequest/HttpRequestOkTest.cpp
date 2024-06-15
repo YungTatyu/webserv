@@ -1939,3 +1939,29 @@ TEST(HttpRequest, chunk_hex_3) {
   test::teardownMaxBodySize();
 }
 /* -------------- body chunk test end -------------- */
+
+TEST(HttpRequest, client_max_body_size_1) {
+  // testcase: client max body size = 0 means no limits
+  test::setupMaxBodySize(0);
+  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"},
+                                                                               {"content-length", "42"}};
+  HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "",
+                     std::string("0123456789") + "0123456789" + "0123456789" + "0123456789" + "42",
+                     HttpRequest::PARSE_COMPLETE);
+
+  // test
+  std::string rawRequest =
+      "GET /html HTTP/1.1\r\n"
+      "Host: aa\r\n"
+      "content-length: 42\r\n"
+      "\r\n"
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "0123456789"
+      "42";
+  HttpRequest test;
+  HttpRequest::parseRequest(rawRequest, test);
+  checkHttpRequestEqual(expect, test);
+  test::teardownMaxBodySize();
+}
