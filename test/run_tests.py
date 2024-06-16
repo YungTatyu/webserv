@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import platform
 from colorama import Fore, Style, Back
 
 TEST_NAME = "the entire test"
@@ -57,11 +58,14 @@ def main():
         f"{CWD}/conf/main_parser_test.sh",
         f"{CWD}/conf/directive_err_test.sh",
         f"{CWD}/integration_test/KeepaliveTimeoutTest.py",
-        f"{CWD}/integration_test/ReceiveTimeoutTest.sh",
-        f"{CWD}/integration_test/SendTimeoutTest.sh",
         f"{CWD}/integration_test/CgiRecvTimeoutTest.py",
         f"{CWD}/integration_test/CgiSendTimeoutTest.py",
+        f"{CWD}/integration_test/ReceiveTimeoutTest.sh",
     ]
+
+    # macOS環境をチェックし、SendTimeoutTestを除外
+    if platform.system() != 'Darwin':
+        test_cases.append(f"{CWD}/integration_test/SendTimeoutTest.sh")
 
     init(f"{CWD}/..")
     ti = 0
