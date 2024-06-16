@@ -56,12 +56,16 @@ def kill_process(target_name, target_process, color):
 
 def kill_by_name(target_name):
     try:
-        ps = subprocess.Popen(['ps'], stdout=subprocess.PIPE)
-        grep = subprocess.Popen(['grep', target_name], stdin=ps.stdout, stdout=subprocess.PIPE)
-        grep_v = subprocess.Popen(['grep', '-v', 'grep'], stdin=grep.stdout, stdout=subprocess.PIPE)
+        ps = subprocess.Popen(["ps"], stdout=subprocess.PIPE)
+        grep = subprocess.Popen(
+            ["grep", target_name], stdin=ps.stdout, stdout=subprocess.PIPE
+        )
+        grep_v = subprocess.Popen(
+            ["grep", "-v", "grep"], stdin=grep.stdout, stdout=subprocess.PIPE
+        )
         ps.stdout.close()
         grep.stdout.close()
-        output, _ = grep_v.communicate() # stderrは捨てる
+        output, _ = grep_v.communicate()  # stderrは捨てる
 
         # 出力されたプロセスIDを取得し、それらをkillする
         for line in output.splitlines():
@@ -165,8 +169,8 @@ def assert_test(
             print_err(f"{RED}failed.{RESET}\nServer closed the connection")
             g_failed_tests += 1
     else:
-        kill_by_name(f"{executable_name}");
-        kill_by_name(f"{cgi_name}");
+        kill_by_name(f"{executable_name}")
+        kill_by_name(f"{cgi_name}")
         if expect_result:
             print_err(f"{RED}failed.{RESET}\nServer did not timeout")
             g_failed_tests += 1
