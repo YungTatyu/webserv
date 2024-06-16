@@ -24,6 +24,8 @@ from CgiRecvTimeoutTest import (
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 CLIENT_PATH = os.path.join(ROOT_PATH, "test_files/TimeoutTestFiles/request_sender.py")
 FILE_PATH = os.path.join(ROOT_PATH, "test_files/TimeoutTestFiles/html/big_buf.html")
+CLIENT_NAME = "request_sender.py"
+CGI_NAME = "recv_nothing.py"
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -46,8 +48,8 @@ def main():
             2,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "recv_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME,
         ),
         (
             "POST",
@@ -57,8 +59,8 @@ def main():
             3,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "recv_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME,
         ),
         (
             "POST",
@@ -68,8 +70,8 @@ def main():
             6,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "recv_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME,
         ),
         (
             "POST",
@@ -79,8 +81,8 @@ def main():
             2,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "recv_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME,
         ),
         (
             "POST",
@@ -90,8 +92,8 @@ def main():
             4,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "recv_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME,
         ),
     ]
 

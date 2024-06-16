@@ -17,6 +17,9 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBSERV_PATH = os.path.join(SCRIPT_DIR, "../../webserv")
 CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_sender.py")
+CLIENT_NAME = "request_sender.py"
+CGI_NAME1 = "send_partial.py"
+CGI_NAME2 = "send_nothing.py"
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -209,8 +212,8 @@ def main():
             2,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -220,8 +223,8 @@ def main():
             3,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -231,8 +234,8 @@ def main():
             6,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -242,8 +245,8 @@ def main():
             2,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -253,8 +256,8 @@ def main():
             4,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -264,8 +267,8 @@ def main():
             3,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME2,
         ),
         (
             "GET",
@@ -275,8 +278,8 @@ def main():
             1,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME2,
         ),
     ]
 
