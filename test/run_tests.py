@@ -64,7 +64,7 @@ def main():
     ]
 
     # macOS環境をチェックし、SendTimeoutTestを除外
-    if platform.system() != 'Darwin':
+    if platform.system() != "Darwin":
         test_cases.append(f"{CWD}/integration_test/SendTimeoutTest.sh")
 
     init(f"{CWD}/..")
