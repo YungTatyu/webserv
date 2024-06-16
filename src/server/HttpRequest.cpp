@@ -913,6 +913,7 @@ void HttpRequest::clear(HttpRequest &request) {
   request.version.clear();
   request.headers.clear();
   request.body.clear();
+  request.port_in_host.clear();
   request.resetBufs(request);
   request.parseState = PARSE_BEFORE;
 }
