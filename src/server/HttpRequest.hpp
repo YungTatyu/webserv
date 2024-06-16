@@ -32,7 +32,7 @@ class HttpRequest {
               const std::string &version = "",
               const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers =
                   std::map<std::string, std::string, Utils::CaseInsensitiveCompare>(),
-              const std::string &queries = "", const std::string &body = "",
+              const std::string &queries = "", const std::string &body = "", const std::string &port = "",
               const ParseState parseState = PARSE_BEFORE);
   ~HttpRequest();
 
@@ -47,6 +47,7 @@ class HttpRequest {
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
   std::string queries;  // mapでもっていたが、子プロセスにQUERY_STRINGとして渡すからstringの方が良さげ。
   std::string body;
+  std::string port_in_host;  // headerのhostにportの情報が格納されている場合がある
 
   ParseState parseState;
 
@@ -62,6 +63,7 @@ class HttpRequest {
   static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &request);
   static ParseState parseHeaders(std::string &rawRequest, HttpRequest &request);
   static ParseState parseBody(std::string &rawRequest, HttpRequest &request);
+  static bool parseHost(std::string &host, HttpRequest &request);
   static std::string urlDecode(const std::string &encoded);
   static void resetBufs(HttpRequest &request);
   static bool isUniqHeaderDup(const HttpRequest &request, const std::string &header);

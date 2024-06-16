@@ -823,3 +823,49 @@ TEST(HttpRequest, error_chunked_body_3) {
   EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
 }
 /* -------------- chunked body test end -------------- */
+
+/* -------------- host with port test -------------- */
+TEST(HttpRequest, error_host_1) {
+  // test: value is :
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: :\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_host_2) {
+  // test: value is :
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host::\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_host_3) {
+  // test: value starts with :
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: :hostname\r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+
+TEST(HttpRequest, error_host_4) {
+  // test: value starts with :
+  std::string req =
+      "GET / HTTP/1.1\r\n"
+      "Host: :::  \r\n"
+      "\r\n";
+  HttpRequest test;
+  HttpRequest::parseRequest(req, test);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+}
+/* -------------- host with port test end -------------- */

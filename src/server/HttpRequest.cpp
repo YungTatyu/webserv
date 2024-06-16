@@ -14,13 +14,15 @@ const static char *kChunk = "chunked";
 HttpRequest::HttpRequest(const config::REQUEST_METHOD &method, const std::string &uri,
                          const std::string &version,
                          const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers,
-                         const std::string &queries, const std::string &body, const ParseState parseState)
+                         const std::string &queries, const std::string &body, const std::string &port,
+                         const ParseState parseState)
     : method(method),
       uri(uri),
       version(version),
       headers(headers),
       queries(queries),
       body(body),
+      port_in_host(port),
       parseState(parseState),
       state_(0) {}
 
@@ -691,7 +693,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
       case sw_header_done:
         if (ch != '\n') return PARSE_ERROR;
         if (isUniqHeaderDup(request, cur_name)) return PARSE_ERROR;
-        if (Utils::compareIgnoreCase(kHost, cur_name) && !isValidHost(cur_value)) return PARSE_ERROR;
+        if (Utils::compareIgnoreCase(kHost, cur_name) && !parseHost(cur_value, request)) return PARSE_ERROR;
         if (Utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value))
           return PARSE_ERROR;
         // headerが重複している場合は、一番初めに登場したものを優先する
@@ -743,6 +745,23 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
 
   if (te_it == end_it && cl_it == end_it) return PARSE_COMPLETE;  // bodyなし
   return PARSE_HEADER_DONE;
+}
+
+/**
+ * @brief host headerをhost部とport部に分けて、parseする
+ *
+ * ex) host: localhost:8000  -> localhost, 8000
+ */
+bool HttpRequest::parseHost(std::string &host, HttpRequest &request) {
+  if (!isValidHost(host)) return false;
+  // すでにhostをparse済みの場合は、何もしない
+  if (request.headers.find(kHost) != request.headers.end()) return true;
+  size_t i = host.find(':');
+  if (i != std::string::npos) {
+    request.port_in_host = host.substr(i + 1);
+    host = host.substr(0, i);
+  }
+  return true;
 }
 
 /**
@@ -820,14 +839,17 @@ bool HttpRequest::isUniqHeaderDup(const HttpRequest &request, const std::string 
 bool HttpRequest::isInvalidLetter(unsigned char ch) { return ch <= ' ' || ch == 127; }
 
 /**
- * @brief hostが空またはspaceが含まれているといけない
+ * @brief hostの値が正当かチェック
+ * 値が空はerror
+ * spaceが含まれているとerror
+ * 値が:で始まるとerror
  *
  * @param str
  * @return true
  * @return false
  */
 bool HttpRequest::isValidHost(const std::string &str) {
-  return !str.empty() && str.find(' ') == std::string::npos;
+  return !str.empty() && str.find(' ') == std::string::npos && str.find(':') != 0;
 }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
@@ -891,6 +913,7 @@ void HttpRequest::clear(HttpRequest &request) {
   request.version.clear();
   request.headers.clear();
   request.body.clear();
+  request.port_in_host.clear();
   request.resetBufs(request);
   request.parseState = PARSE_BEFORE;
 }
