@@ -51,7 +51,7 @@ def run_test(conf, req_data, expect):
 # テストの引数に渡される
 @pytest.mark.parametrize(
     "conf1",
-    ["all_meta_vars1.conf", "all_meta_vars1_poll.conf", "all_meta_vars1_select.conf"],
+    ["all_meta_vars.conf", "all_meta_vars_poll.conf", "all_meta_vars_select.conf"],
 )
 # 関数名がtestで始まる関数がテスト実行時に呼ばれる
 def test_all_meta_vars1(conf1):
@@ -90,7 +90,7 @@ def test_all_meta_vars1(conf1):
 
 @pytest.mark.parametrize(
     "conf2",
-    ["all_meta_vars2.conf", "all_meta_vars2_poll.conf", "all_meta_vars2_select.conf"],
+    ["all_meta_vars.conf", "all_meta_vars_poll.conf", "all_meta_vars_select.conf"],
 )
 def test_all_meta_vars2(conf2):
     req_data = {
@@ -98,7 +98,7 @@ def test_all_meta_vars2(conf2):
         "content_type": "text/html",
         "body": "body body body   body body body   body body body   body body body",
         "query_string": "location=japan&user=guest",
-        "port": 4343,
+        "port": 4242,
         "cgi_file": "all_meta_vars.py",
         "path_info": "",
     }
@@ -128,7 +128,7 @@ def test_all_meta_vars2(conf2):
 
 @pytest.mark.parametrize(
     "conf3",
-    ["all_meta_vars3.conf", "all_meta_vars3_poll.conf", "all_meta_vars3_select.conf"],
+    ["all_meta_vars.conf", "all_meta_vars_poll.conf", "all_meta_vars_select.conf"],
 )
 def test_all_meta_vars3(conf3):
     req_data = {
@@ -136,7 +136,7 @@ def test_all_meta_vars3(conf3):
         "content_type": "text/plain",
         "body": "\n\n\n\n\n\n\n\n",
         "query_string": "key1=&key2=value2",  # key1の値は空
-        "port": 4444,
+        "port": 4242,
         "cgi_file": "all_meta_vars.py",
         "path_info": "/path/info",
     }
