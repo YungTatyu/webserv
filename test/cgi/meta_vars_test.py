@@ -22,6 +22,11 @@ def run_server(webserv, conf):
 
 def send_request(req_data):
     headers = {"host": req_data["host"], "content-type": req_data["content_type"]}
+    try:
+        for key, value in req_data["headers"].items():
+            headers[key] = value
+    except KeyError:
+        pass
     req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}{req_data['path_info']}?{req_data['query_string']}"
     r = requests.get(req, headers=headers, data=f"{req_data['body']}", timeout=0.5)
     return r
@@ -160,5 +165,40 @@ def test_all_meta_vars3(conf3):
             f"SERVER_PORT={req_data['port']}\n"
             f"SERVER_PROTOCOL=HTTP/1.1\n"
             f"SERVER_SOFTWARE=webserv/1.0\n"
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    "conf4",
+    ["all_meta_vars.conf", "all_meta_vars_poll.conf", "all_meta_vars_select.conf"],
+)
+def test_all_meta_vars4(conf4):
+    req_data = {
+        "host": "test::::test",
+        "content_type": "text/plain",
+        "body": "",
+        "query_string": "",  # key1の値は空
+        "port": 4242,
+        "cgi_file": "http_meta_vars.py",
+        "path_info": "/path/info",
+        "headers": {
+            "test": "test",
+            "TEST-": "TEST-",
+            "t-e-S_T": "t-e-S_T",
+            "test-test": "test-test",
+            "a-bc_DEF": "a-bc_DEF",
+        },
+    }
+    run_test(
+        conf4,
+        req_data,
+        (
+            f"HTTP_HOST=test::::test\n"
+            f"HTTP_TEST=test\n"
+            f"HTTP_TEST_=TEST-\n"
+            f"HTTP_T_E_S_T=t-e-S_T\n"
+            f"HTTP_TEST_TEST=test-test\n"
+            f"HTTP_A_BC_DEF=a-bc_DEF\n"
         ),
     )
