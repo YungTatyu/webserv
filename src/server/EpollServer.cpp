@@ -127,7 +127,7 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
 
       case RequestHandler::UPDATE_WRITE:
         if (is_cgi_sock) {
-          deleteEvent(active_events[i]);  // cgi socketを監視から削除する: cgi
+          // deleteEvent(active_events[i]);  // cgi socketを監視から削除する: cgi
                                           // socketをcloseした後だから呼ばなくてもいい
           addNewEvent(cli_sock, EPOLLOUT);
           break;
