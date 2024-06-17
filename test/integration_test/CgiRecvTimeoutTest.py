@@ -62,7 +62,6 @@ def kill_by_name(target_name):
         result = subprocess.run(["pgrep", "-f", target_name], stdout=subprocess.PIPE)
         pids = result.stdout.decode().split()
         for pid in pids:
-            print(f"Killing process {pid} with name {target_name}")
             os.kill(int(pid), signal.SIGKILL)
 
     except Exception as e:
