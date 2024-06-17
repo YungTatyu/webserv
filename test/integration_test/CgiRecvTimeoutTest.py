@@ -59,21 +59,11 @@ def kill_process(target_name, target_process, color):
 
 def kill_by_name(target_name):
     try:
-        ps = subprocess.Popen(["ps"], stdout=subprocess.PIPE)
-        grep = subprocess.Popen(
-            ["grep", target_name], stdin=ps.stdout, stdout=subprocess.PIPE
-        )
-        grep_v = subprocess.Popen(
-            ["grep", "-v", "grep"], stdin=grep.stdout, stdout=subprocess.PIPE
-        )
-        ps.stdout.close()
-        grep.stdout.close()
-        output, _ = grep_v.communicate()  # stderrは捨てる
-
-        # 出力されたプロセスIDを取得し、それらをkillする
-        for line in output.splitlines():
-            pid = int(line.split()[0])
-            os.kill(pid, signal.SIGKILL)
+        result = subprocess.run(["pgrep", "-f", target_name], stdout=subprocess.PIPE)
+        pids = result.stdout.decode().split()
+        for pid in pids:
+            print(f"Killing process {pid} with name {target_name}")
+            os.kill(int(pid), signal.SIGKILL)
 
     except Exception as e:
         print(f"{RED}Failed to kill process {target_name}: {e}{RESET}")
@@ -164,6 +154,7 @@ def assert_test(
         ).returncode
         == 0
     )
+
     if not client_running:  # client does't exist
         if expect_result:
             print(f"{GREEN}passed.{RESET}\nServer closed the connection")
