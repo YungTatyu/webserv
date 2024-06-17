@@ -145,12 +145,8 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
 }
 
 bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
-  try {
-    this->listenfd_map_.at(listen_fd);
-    return true;
-  } catch (const std::out_of_range& e) {
-    return false;
-  }
+  if (this->listenfd_map_.find(listen_fd) == this->listenfd_map_.end()) return false;
+  return true;
 }
 
 /**
