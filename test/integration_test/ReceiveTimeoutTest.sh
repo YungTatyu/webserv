@@ -90,7 +90,7 @@ function runServer {
   local conf=$1
   ${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
   # debug 出力する場合
-  #$WEBSERV_PATH "$conf" &
+  #${WEBSERV_PATH} "${conf}" &
   sleep 1
   WEBSERV_PID=$!
 }
@@ -104,7 +104,7 @@ function runClient {
   local request2=$6
   ${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
   # debug 出力する場合
-  #${client_executable} "$server_ip" "$server_port" "$request" "$sleep_time"
+  #${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" &
   CLIENT_PID=$!
 }
 
@@ -122,7 +122,7 @@ function assert {
   printf "[  test$TOTAL_TESTS  ]\n${url}: "
 
   # program 実行
-  runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}" &
+  runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}"
   sleep $(bc <<<"${expect_sec} + 1")
 
   # 判定
@@ -186,7 +186,7 @@ declare -a timeout3_cases=(
 function main {
   init
 
-  # receive_timeout 3;
+  # receive_timeout 0;
   runTest "receive_timeout0.conf" "kqueue or epoll timeout 0" timeout0_cases[@] # kqueue or epoll
   runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases[@]       # poll
   runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases[@]   # select
