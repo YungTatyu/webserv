@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ConnectionManager.cpp                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: 0 <0>                                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/17 19:32:30 by 0                 #+#    #+#             */
-/*   Updated: 2024/06/17 19:34:55 by 0                ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "ConnectionManager.hpp"
 
 #include <unistd.h>
@@ -201,7 +189,6 @@ void ConnectionManager::closeAllConnections() {
     close(it->first);
     delete it->second;
   }
-  this->connections_.clear();
 }
 
 connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_; }
