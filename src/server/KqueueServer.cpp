@@ -144,15 +144,14 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
         break;
       case RequestHandler::UPDATE_WRITE:
         if (is_cgi_sock) {
-          // deleteEvent(active_events[i]); // cgi socketを監視から削除する: cgi
-          // socketをcloseした後だから呼ばなくてもいい
+          // closeConnectionをした後なのでdeleteEventする必要はない
           addNewEvent(cli_sock, EVFILT_WRITE);
           break;
         }
         updateEvent(active_events[i], EVFILT_WRITE);
         break;
       case RequestHandler::UPDATE_CLOSE:
-        // deleteEvent(active_events[i]); // socketをcloseした後だから呼ばなくてもいい
+        // closeConnectionをした後なのでdeleteEventする必要はない
         break;
       case RequestHandler::UPDATE_CGI_READ:
         if (is_cgi_sock) {
