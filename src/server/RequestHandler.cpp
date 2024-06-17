@@ -247,9 +247,6 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
 
       // timeoutしたcgiの処理
       cgi_handler.killCgiProcess();
-      int status = -1;
-      while (1)
-        if (cgiProcessExited(cgi_handler.getCgiProcessId(), status)) break;
       ioHandler.closeConnection(connManager, timerTree, cgi_sock);
       connManager.clearResData(client_sock);
 
