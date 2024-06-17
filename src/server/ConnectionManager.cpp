@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ConnectionManager.cpp                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: 0 <0>                                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/17 19:32:30 by 0                 #+#    #+#             */
+/*   Updated: 2024/06/17 19:34:55 by 0                ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ConnectionManager.hpp"
 
 #include <unistd.h>
@@ -175,6 +187,15 @@ bool ConnectionManager::isCgiSocket(const int fd) const {
 }
 
 void ConnectionManager::closeAllConnections() {
+  for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
+       it != this->connections_.end();) {
+    std::map<int, ConnectionData*>::iterator tmp = it;
+    ++it;
+    if (isCgiSocket(tmp->first)) {
+      close(tmp->first);
+      connections_.erase(tmp->first);
+    }
+  }
   for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
        it != this->connections_.end(); ++it) {
     close(it->first);
