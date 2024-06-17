@@ -41,6 +41,7 @@ std::string ipToStr(const uint32_t ip);
 uint32_t StrToIPAddress(const std::string& ip);
 int resolveConnectedPort(const int sock);
 std::string toLower(std::string str);
+std::string toUpper(std::string str);
 bool isSpace(const unsigned char ch);
 bool compareIgnoreCase(std::string lhs, std::string rhs);
 int setNonBlockingCloExec(const int fd);
@@ -48,6 +49,7 @@ size_t strToSizet(const std::string& str);
 size_t hexToDec(const std::string& str);
 bool isSign(unsigned char ch);
 std::string normalizePath(const std::string& full_path);
+std::string replace(const std::string& str, char old_c, char new_c);
 template <typename T>
 std::string toStr(const T value);
 bool isNumeric(const std::string& str);

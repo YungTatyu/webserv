@@ -750,7 +750,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &rawRequest, HttpR
 /**
  * @brief host headerをhost部とport部に分けて、parseする
  *
- * ex) host: localhost:8000  -> localhost, 8000
+ * ex) host: localhost:8000  -> localhost, :8000
  */
 bool HttpRequest::parseHost(std::string &host, HttpRequest &request) {
   if (!isValidHost(host)) return false;
@@ -758,7 +758,7 @@ bool HttpRequest::parseHost(std::string &host, HttpRequest &request) {
   if (request.headers.find(kHost) != request.headers.end()) return true;
   size_t i = host.find(':');
   if (i != std::string::npos) {
-    request.port_in_host = host.substr(i + 1);
+    request.port_in_host = host.substr(i);  // :も含んだ値で保持する
     host = host.substr(0, i);
   }
   return true;

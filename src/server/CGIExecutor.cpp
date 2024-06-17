@@ -99,6 +99,19 @@ void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const HttpResp
 
   this->meta_vars_.push_back("SERVER_SOFTWARE=webserv/1.0");
 
+  for (std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator it =
+           request.headers.begin();
+       it != request.headers.end(); ++it) {
+    if (Utils::compareIgnoreCase(it->first, kContentType) ||
+        Utils::compareIgnoreCase(it->first, "content-length"))
+      continue;
+    std::string meta_var = "HTTP_";
+    meta_var = meta_var + Utils::replace(Utils::toUpper(it->first), '-', '_') + "=" + it->second;
+    // hostの場合はrequestをraw dataのhostヘッダーのvalueとして渡さないといけない（portの情報を復活させる）
+    if (Utils::compareIgnoreCase(it->first, "host")) meta_var += request.port_in_host;
+    this->meta_vars_.push_back(strdup(meta_var));
+  }
+
   this->meta_vars_.push_back(NULL);
 }
 
@@ -144,6 +157,13 @@ bool cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& request, const i
   }
   close(socket);
   return true;
+}
+
+char* cgi::CGIExecutor::strdup(const std::string& str) const {
+  size_t size = str.size() + 1;
+  char* new_cstr = new char[size];
+  std::memcpy(new_cstr, str.c_str(), size);
+  return new_cstr;
 }
 
 const std::string& cgi::CGIExecutor::getScriptPath() const { return this->script_path_; }

@@ -19,6 +19,7 @@ class CGIExecutor {
   void createMetaVars(const HttpRequest& request, const HttpResponse& response, const int cli_sock);
   std::vector<std::string> split(const std::string& s, char delimiter) const;
   bool isExecutableFile(const std::string& path) const;
+  char* strdup(const std::string&) const;
 
  public:
   CGIExecutor();
