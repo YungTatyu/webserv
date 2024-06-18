@@ -190,7 +190,7 @@ def test_all_meta_vars4(conf4):
         QUERY_STRING: "",  # key1の値は空
         PORT: 4242,
         CGI_FILE: "http_meta_vars.py",
-        PATH_INFO: "/path/info",
+        PATH_INFO: "",
         HEADERS: {
             "test": "test",
             "TEST-": "TEST-",
