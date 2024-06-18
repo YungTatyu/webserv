@@ -8,6 +8,15 @@ import requests
 import pytest
 
 ROOT = "test/cgi/cgi_files/executor"  # test file dir
+HOST = "host"
+CONTENT_TYPE = "content-type"
+CONTENT_LENGTH = "content-length"
+BODY = "body"
+QUERY_STRING = "query-string"
+PORT = "port"
+CGI_FILE = "cgi-file"
+PATH_INFO = "path-info"
+HEADERS = "headers"
 
 
 def run_server(webserv, conf):
@@ -21,14 +30,14 @@ def run_server(webserv, conf):
 
 
 def send_request(req_data):
-    headers = {"host": req_data["host"], "content-type": req_data["content_type"]}
+    headers = {HOST: req_data[HOST], CONTENT_TYPE: req_data[CONTENT_TYPE]}
     try:
-        for key, value in req_data["headers"].items():
+        for key, value in req_data[HEADERS].items():
             headers[key] = value
     except KeyError:
         pass
-    req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['cgi_file']}{req_data['path_info']}?{req_data['query_string']}"
-    r = requests.get(req, headers=headers, data=f"{req_data['body']}", timeout=0.5)
+    req = f"http://localhost:{req_data[PORT]}/{ROOT}/{req_data[CGI_FILE]}{req_data[PATH_INFO]}?{req_data[QUERY_STRING]}"
+    r = requests.get(req, headers=headers, data=f"{req_data[BODY]}", timeout=0.5)
     return r
 
 
@@ -61,32 +70,32 @@ def run_test(conf, req_data, expect):
 # 関数名がtestで始まる関数がテスト実行時に呼ばれる
 def test_all_meta_vars1(conf1):
     req_data = {
-        "host": "test",
-        "content_type": "text",
-        "body": "this is body message",
-        "query_string": "a=a&b=b&c=c",
-        "port": 4242,
-        "cgi_file": "all_meta_vars.py",
-        "path_info": "",
+        HOST: "test",
+        CONTENT_TYPE: "text",
+        BODY: "this is body message",
+        QUERY_STRING: "a=a&b=b&c=c",
+        PORT: 4242,
+        CGI_FILE: "all_meta_vars.py",
+        PATH_INFO: "",
     }
     run_test(
         conf1,
         req_data,
         (
             f"AUTH_TYPE=\n"
-            f"CONTENT_LENGTH={len(req_data['body'])}\n"
-            f"CONTENT_TYPE={req_data['content_type']}\n"
+            f"CONTENT_LENGTH={len(req_data[BODY])}\n"
+            f"CONTENT_TYPE={req_data[CONTENT_TYPE]}\n"
             f"GATEWAY_INTERFACE=CGI/1.1\n"
-            f"PATH_INFO={req_data['path_info']}\n"
+            f"PATH_INFO={req_data[PATH_INFO]}\n"
             f"PATH_TRANSLATED=\n"
-            f"QUERY_STRING={req_data['query_string']}\n"
+            f"QUERY_STRING={req_data[QUERY_STRING]}\n"
             f"REMOTE_ADDR=127.0.0.1\n"
             f"REMOTE_HOST=127.0.0.1\n"
             # f"REQUEST_METHOD={req_data['method']}\n"
             f"REQUEST_METHOD=GET\n"
-            f"SCRIPT_NAME=/{ROOT}/{req_data['cgi_file']}\n"
-            f"SERVER_NAME={req_data['host']}\n"
-            f"SERVER_PORT={req_data['port']}\n"
+            f"SCRIPT_NAME=/{ROOT}/{req_data[CGI_FILE]}\n"
+            f"SERVER_NAME={req_data[HOST]}\n"
+            f"SERVER_PORT={req_data[PORT]}\n"
             f"SERVER_PROTOCOL=HTTP/1.1\n"
             f"SERVER_SOFTWARE=webserv/1.0\n"
         ),
@@ -99,32 +108,32 @@ def test_all_meta_vars1(conf1):
 )
 def test_all_meta_vars2(conf2):
     req_data = {
-        "host": "tachu",
-        "content_type": "text/html",
-        "body": "body body body   body body body   body body body   body body body",
-        "query_string": "location=japan&user=guest",
-        "port": 4242,
-        "cgi_file": "all_meta_vars.py",
-        "path_info": "",
+        HOST: "tachu",
+        CONTENT_TYPE: "text/html",
+        BODY: "body body body   body body body   body body body   body body body",
+        QUERY_STRING: "location=japan&user=guest",
+        PORT: 4242,
+        CGI_FILE: "all_meta_vars.py",
+        PATH_INFO: "",
     }
     run_test(
         conf2,
         req_data,
         (
             f"AUTH_TYPE=\n"
-            f"CONTENT_LENGTH={len(req_data['body'])}\n"
-            f"CONTENT_TYPE={req_data['content_type']}\n"
+            f"CONTENT_LENGTH={len(req_data[BODY])}\n"
+            f"CONTENT_TYPE={req_data[CONTENT_TYPE]}\n"
             f"GATEWAY_INTERFACE=CGI/1.1\n"
-            f"PATH_INFO={req_data['path_info']}\n"
+            f"PATH_INFO={req_data[PATH_INFO]}\n"
             f"PATH_TRANSLATED=\n"
-            f"QUERY_STRING={req_data['query_string']}\n"
+            f"QUERY_STRING={req_data[QUERY_STRING]}\n"
             f"REMOTE_ADDR=127.0.0.1\n"
             f"REMOTE_HOST=127.0.0.1\n"
             # f"REQUEST_METHOD={req_data['method']}\n"
             f"REQUEST_METHOD=GET\n"
-            f"SCRIPT_NAME=/{ROOT}/{req_data['cgi_file']}\n"
-            f"SERVER_NAME={req_data['host']}\n"
-            f"SERVER_PORT={req_data['port']}\n"
+            f"SCRIPT_NAME=/{ROOT}/{req_data[CGI_FILE]}\n"
+            f"SERVER_NAME={req_data[HOST]}\n"
+            f"SERVER_PORT={req_data[PORT]}\n"
             f"SERVER_PROTOCOL=HTTP/1.1\n"
             f"SERVER_SOFTWARE=webserv/1.0\n"
         ),
@@ -137,32 +146,32 @@ def test_all_meta_vars2(conf2):
 )
 def test_all_meta_vars3(conf3):
     req_data = {
-        "host": "_",
-        "content_type": "text/plain",
-        "body": "\n\n\n\n\n\n\n\n",
-        "query_string": "key1=&key2=value2",  # key1の値は空
-        "port": 4242,
-        "cgi_file": "all_meta_vars.py",
-        "path_info": "/path/info",
+        HOST: "_",
+        CONTENT_TYPE: "text/plain",
+        BODY: "\n\n\n\n\n\n\n\n",
+        QUERY_STRING: "key1=&key2=value2",  # key1の値は空
+        PORT: 4242,
+        CGI_FILE: "all_meta_vars.py",
+        PATH_INFO: "/path/info",
     }
     run_test(
         conf3,
         req_data,
         (
             f"AUTH_TYPE=\n"
-            f"CONTENT_LENGTH={len(req_data['body'])}\n"
-            f"CONTENT_TYPE={req_data['content_type']}\n"
+            f"CONTENT_LENGTH={len(req_data[BODY])}\n"
+            f"CONTENT_TYPE={req_data[CONTENT_TYPE]}\n"
             f"GATEWAY_INTERFACE=CGI/1.1\n"
-            f"PATH_INFO={req_data['path_info']}\n"
+            f"PATH_INFO={req_data[PATH_INFO]}\n"
             f"PATH_TRANSLATED=\n"
-            f"QUERY_STRING={req_data['query_string']}\n"
+            f"QUERY_STRING={req_data[QUERY_STRING]}\n"
             f"REMOTE_ADDR=127.0.0.1\n"
             f"REMOTE_HOST=127.0.0.1\n"
             # f"REQUEST_METHOD={req_data['method']}\n"
             f"REQUEST_METHOD=GET\n"
-            f"SCRIPT_NAME=/{ROOT}/{req_data['cgi_file']}\n"
-            f"SERVER_NAME={req_data['host']}\n"
-            f"SERVER_PORT={req_data['port']}\n"
+            f"SCRIPT_NAME=/{ROOT}/{req_data[CGI_FILE]}\n"
+            f"SERVER_NAME={req_data[HOST]}\n"
+            f"SERVER_PORT={req_data[PORT]}\n"
             f"SERVER_PROTOCOL=HTTP/1.1\n"
             f"SERVER_SOFTWARE=webserv/1.0\n"
         ),
@@ -175,14 +184,14 @@ def test_all_meta_vars3(conf3):
 )
 def test_all_meta_vars4(conf4):
     req_data = {
-        "host": "test::::test",
-        "content_type": "text/plain",
-        "body": "",
-        "query_string": "",  # key1の値は空
-        "port": 4242,
-        "cgi_file": "http_meta_vars.py",
-        "path_info": "/path/info",
-        "headers": {
+        HOST: "test::::test",
+        CONTENT_TYPE: "text/plain",
+        BODY: "",
+        QUERY_STRING: "",  # key1の値は空
+        PORT: 4242,
+        CGI_FILE: "http_meta_vars.py",
+        PATH_INFO: "/path/info",
+        HEADERS: {
             "test": "test",
             "TEST-": "TEST-",
             "t-e-S_T": "t-e-S_T",
