@@ -23,9 +23,10 @@ class EpollServer : public IServer {
                         ConfigHandler* config_handler, TimerTree* timer_tree);
   int addSocketToSets(const std::map<int, ConnectionData>& connections);
   void addActiveEvents(const std::map<int, ConnectionData>& connections, IActiveEventManager* event_manager);
+  static int deleteEvent(int fd);
 
  private:
-  int epfd_;  // epoll instance
+  static int epfd_;  // epoll instance
   bool initEpollServer();
   bool initEpollEvent(const std::map<int, ConnectionData*>& connections);
   int addNewEvent(const int fd, const uint32_t event_filter);

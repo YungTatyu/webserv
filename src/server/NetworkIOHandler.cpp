@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "ConnectionManager.hpp"
+#include "EpollServer.hpp"
 #include "SysCallWrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
@@ -160,6 +161,9 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @param sock
  */
 void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock) {
+#ifdef USE_EPOLL
+  EpollServer::deleteEvent(sock);
+#endif  // !USE_EPOLL
   close(sock);
   timerTree.deleteTimer(sock);
   bool cgi = connManager.isCgiSocket(sock);

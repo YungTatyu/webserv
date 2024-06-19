@@ -207,6 +207,10 @@ bool config::Parser::parse() {
               << config::WorkerConnections::kSelectMaxConnections << std::endl;
     return false;
   }
+  bool use_epoll = this->config_.events.use.getConnectionMethod() == config::EPOLL ? true : false;
+#if (use_epoll)
+#define USE_EPOLL
+#endif
   return true;
 }
 

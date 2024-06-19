@@ -11,9 +11,11 @@
 #include "EpollActiveEventManager.hpp"
 #include "EpollServer.hpp"
 
+int EpollServer::epfd_;
+
 EpollServer::EpollServer() {}
 
-EpollServer::~EpollServer() { close(this->epfd_); }
+EpollServer::~EpollServer() { close(epfd_); }
 
 void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                             NetworkIOHandler* io_handler, RequestHandler* request_handler,
@@ -36,8 +38,8 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
 bool EpollServer::initEpollServer() {
   // epoll instance 初期化
   // epoll1_create(EPOLL_CLOEXEC);を使用することで、forkでこのfdのオープンを防げる。
-  this->epfd_ = epoll_create1(EPOLL_CLOEXEC);
-  if (this->epfd_ == -1) {
+  epfd_ = epoll_create1(EPOLL_CLOEXEC);
+  if (epfd_ == -1) {
     std::cerr << error::strSysCallError("epoll_create1") << "\n";
     return false;
   }
@@ -52,7 +54,7 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
     ep.events = it->second->event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
     ep.data.fd = it->first;
 
-    if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1) {
+    if (epoll_ctl(epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1) {
       std::cerr << error::strSysCallError("epoll_ctl") << "\n";
       return false;
     }
@@ -127,8 +129,8 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
 
       case RequestHandler::UPDATE_WRITE:
         if (is_cgi_sock) {
-          deleteEvent(active_events[i]);  // cgi socketを監視から削除する: cgi
-                                          // socketをcloseした後だから呼ばなくてもいい
+          // cgi socketを監視から削除する: cgisocketをcloseした後だから呼ばなくてもいい
+          // deleteEvent(active_events[i]);
           addNewEvent(cli_sock, EPOLLOUT);
           break;
         }
@@ -136,7 +138,7 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
         break;
 
       case RequestHandler::UPDATE_CLOSE:
-        deleteEvent(active_events[i]);
+        // deleteEvent(active_events[i]);
         break;
 
       case RequestHandler::UPDATE_CGI_READ:
@@ -179,7 +181,7 @@ int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManag
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
-  int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
+  int size = epoll_wait(epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
   event_manager->setActiveEventsNum(size);
   if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait") + "\n");
   return size;
@@ -189,20 +191,26 @@ int EpollServer::addNewEvent(const int fd, const uint32_t event_filter) {
   struct epoll_event new_event;
   new_event.events = event_filter;
   new_event.data.fd = fd;
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
+  int re = epoll_ctl(epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 
 int EpollServer::updateEvent(struct epoll_event& old_event, const uint32_t event_filter) {
   old_event.events = event_filter;
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
+  int re = epoll_ctl(epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 
 int EpollServer::deleteEvent(struct epoll_event& old_event) {
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, old_event.data.fd, NULL);
+  int re = epoll_ctl(epfd_, EPOLL_CTL_DEL, old_event.data.fd, NULL);
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  return re;
+}
+
+int EpollServer::deleteEvent(int fd) {
+  int re = epoll_ctl(epfd_, EPOLL_CTL_DEL, fd, NULL);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }

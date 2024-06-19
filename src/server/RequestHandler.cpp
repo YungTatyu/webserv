@@ -125,7 +125,7 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
 
-  if (!cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {
+  if (re != 0 || !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {
     addTimerByType(connManager, configHandler, timerTree, sockfd,
                    Timer::TMO_RECV);  // cgiからrecvする間のtimeout
     return RequestHandler::UPDATE_NONE;
