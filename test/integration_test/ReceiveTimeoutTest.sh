@@ -88,9 +88,9 @@ function printErr {
 
 function runServer {
   local conf=$1
-  ${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
+  #${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
   # debug 出力する場合
-  #${WEBSERV_PATH} "${conf}" &
+  ${WEBSERV_PATH} "${conf}" &
   sleep 1
   WEBSERV_PID=$!
 }
@@ -102,9 +102,9 @@ function runClient {
   local sleep_time=$4
   local request1=$5
   local request2=$6
-  ${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
+  #${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
   # debug 出力する場合
-  #${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" &
+  ${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" &
   CLIENT_PID=$!
 }
 

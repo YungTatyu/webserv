@@ -92,7 +92,8 @@ def run_server(conf):
     global g_webserv_pid
     try:
         g_webserv_pid = subprocess.Popen(
-            [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            [WEBSERV_PATH, conf]
+            #, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         time.sleep(1)
     except Exception as e:
@@ -111,9 +112,9 @@ def run_client(client_executable, server_ip, server_port, request, body_path):
                 str(server_port),
                 request,
                 body_path,
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            ]
+            #stdout=subprocess.DEVNULL,
+            #stderr=subprocess.DEVNULL,
         )
     except Exception as e:
         print(f"{e}", file=sys.stderr)
@@ -142,7 +143,7 @@ def assert_test(
 
     # program 実行
     run_client(client_executable, host, port, request, body_path)
-    time.sleep(expect_sec + 1)
+    time.sleep(expect_sec + 1.5)
 
     # 判定
     client_running = (
