@@ -159,10 +159,15 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
     return RequestHandler::UPDATE_CLOSE;
   }
   const std::vector<unsigned char> &final_response = connManager.getFinalResponse(sockfd);
-  // 引き続きresponseを送信
+  /**
+   * non-blockingでsendした場合、responseを全て送り切っていなかったとしても、指定したbyte数よりも少ないbyteをsendする場合がある
+   * この現象はsocketが詰まった時に起こる
+   * ex) ssize_t re = send(sock, buff, 1024) => re could be 1 to 1024
+   * なので、responseを全て送り切ったか必ず確認する必要がある
+   */
   if (connManager.getSentBytes(sockfd) != final_response.size()) {
     addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
-    return RequestHandler::UPDATE_NONE;
+    return RequestHandler::UPDATE_NONE;  // 引き続きresponseを送信
   }
 
   const HttpResponse &response = connManager.getResponse(sockfd);
@@ -191,8 +196,8 @@ int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionM
                                         const int sockfd) {
   ioHandler.sendRequestBody(connManager, sockfd);
 
-  const std::string body = connManager.getRequest(sockfd).body;
-  const cgi::CGIHandler cgi_handler = connManager.getCgiHandler(sockfd);
+  const std::string &body = connManager.getRequest(sockfd).body;
+  const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   int status = -1;
   if (connManager.getSentBytes(sockfd) == body.size() ||          // bodyを全て送ったら
       cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processがすでに死んでいたら
