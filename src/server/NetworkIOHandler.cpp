@@ -162,9 +162,11 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @param sock
  */
 void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock) {
-#if defined (EPOLL_AVAILABLE)
+#if defined(EPOLL_AVAILABLE)
   // closeする前にイベントを削除したい
-  if (WebServer::getConnectionMethod() == config::EPOLL) EpollServer::deleteEvent(sock);
+  const ConfigHandler& config_handler = WebServer::getConfigHandler();
+  if (config_handler.config_->events.use.getConnectionMethod() == config::EPOLL)
+    EpollServer::deleteEvent(sock);
 #endif  // EPOLL_AVAILABLE
   close(sock);
   timerTree.deleteTimer(sock);

@@ -24,7 +24,6 @@ class WebServer {
   void run();
   static const ConfigHandler &getConfigHandler();
   static void writeErrorlog(const std::string &msg);
-  static config::CONNECTION_METHOD getConnectionMethod();
 
  private:
   static ConfigHandler config_handler_;
