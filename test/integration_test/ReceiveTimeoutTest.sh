@@ -99,12 +99,11 @@ function runClient {
   local client_executable=$1
   local server_ip=$2
   local server_port=$3
-  local sleep_time=$4
-  local request1=$5
-  local request2=$6
+  local request1=$4
+  local request2=$5
   #${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
   # debug 出力する場合
-  ${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" &
+  ${client_executable} "$server_ip" "$server_port" "$request1" "$request2" &
   CLIENT_PID=$!
 }
 
@@ -122,12 +121,12 @@ function assert {
   printf "[  test$TOTAL_TESTS  ]\n${url}: "
 
   # program 実行
-  runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}"
+  runClient "${client_executable}" "${Host}" "${Port}" "${request1}" "${request2}"
   sleep $(bc <<<"${expect_sec} + 1")
 
   # 判定
-  #ps | grep "${executable_name}" | grep -v grep
-  ps | grep "${executable_name}" | grep -v grep >/dev/null 2>&1
+  ps | grep "${executable_name}" | grep -v grep
+  #ps | grep "${executable_name}" | grep -v grep >/dev/null 2>&1
   local client_running=$?
   if [ "$client_running" -eq 1 ]; then
     if [ "$expect_result" = ${DISCONNECT} ]; then

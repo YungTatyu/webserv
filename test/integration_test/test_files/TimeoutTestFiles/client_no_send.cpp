@@ -12,14 +12,13 @@
 #define BUF_SIZE 1024
 
 int main(int ac, char *av[]) {
-  if (ac < 3) {
-    std::cout << "Usage: " << av[0] << " <ip address> <port> <sleep time> <request> ..." << std::endl;
+  if (ac < 2) {
+    std::cout << "Usage: " << av[0] << " <ip address> <port> [<request>] ..." << std::endl;
     return (0);
   }
 
   const char *server_addr = av[1];
   uint16_t server_port = atoi(av[2]);
-  int sleep_time = atoi(av[3]);
 
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd == -1) {
@@ -39,26 +38,21 @@ int main(int ac, char *av[]) {
     exit(1);
   }
 
-  // 送信しないでsend_timeout + 1秒待機
-  sleep(sleep_time + 1);
-
-  // 一度目のsendはserver側で接続がcloseされていても成功する
-  // close されている場合RESETパケットが送られる。
-  char request[] = "request";
-  int ret = send(sockfd, request, strlen(request), 0);
-  std::cout << "send byte: " << ret << std::endl;
-  // 2回目のsendはcloseされていればsendは失敗する。
-  ret = send(sockfd, request, strlen(request), 0);
-  std::cout << "send byte: " << ret << std::endl;
-  if (errno == ECONNRESET || errno == EPIPE) {
-    std::cout << "connection timed out." << std::endl;
-    close(sockfd);
-    exit(1);
+  // サーバーに切断されるまでブロック
+  std::vector<unsigned char> buffer(1024);
+  while (1) {
+    int ret = recv(sockfd, buffer.data(), 1024, 0);
+    if (ret == -1) {
+      std::cerr << "Error: recv: " << std::strerror(errno) << std::endl;
+      break;
+    } else if (ret == 0) {
+      std::cout << "Connection closed by peer" << std::endl;
+      break;
+    } else {
+      std::cout << "Received " << ret << " bytes" << std::endl;
+    }
   }
-  std::cout << "connection didn't timeout." << std::endl;
 
-  // send_timeoutで死ななかった場合は10秒だけ待ってcloseする
-  sleep(10);
   close(sockfd);
 
   return (0);
