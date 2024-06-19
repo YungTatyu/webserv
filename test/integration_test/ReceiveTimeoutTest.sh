@@ -125,7 +125,8 @@ function assert {
   sleep $(bc <<<"${expect_sec} + 1")
 
   # 判定
-  ps | grep "${executable_name}" | grep -v grep
+  pgrep "${executable_name}"
+  #ps | grep "${executable_name}" | grep -v grep
   #ps | grep "${executable_name}" | grep -v grep >/dev/null 2>&1
   local client_running=$?
   if [ "$client_running" -eq 1 ]; then
@@ -138,7 +139,8 @@ function assert {
     fi
   else # clientが正常にタイムアウトする前にsleepが終了
     #kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}') >/dev/null 2>&1
-    kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
+    #kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
+    kill $(pgrep "${executable_name}")
     if [ "$expect_result" = ${DISCONNECT} ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
