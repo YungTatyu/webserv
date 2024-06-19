@@ -14,6 +14,8 @@
 #include "SysCallWrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
+#include "WebServer.hpp"
+#include "conf.hpp"
 #include "error.hpp"
 
 const size_t NetworkIOHandler::buffer_size_;
@@ -94,7 +96,6 @@ ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int
   size_t res_size = response.size();
   size_t sent_bytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t cur_chunk_size = std::min(buffer_size_, res_size - sent_bytes);
-  if (cur_chunk_size == 0) return 1;  // すでにresponseを全て送信しきっていたら、send終了
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
@@ -161,9 +162,11 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @param sock
  */
 void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock) {
-#ifdef USE_EPOLL
-  EpollServer::deleteEvent(sock);
-#endif  // !USE_EPOLL
+  if (WebServer::getConnectionMethod() == config::EPOLL) {
+#ifdef EPOLL_AVAILABLE
+    EpollServer::deleteEvent(sock);
+#endif  // EPOLL_AVAILABLE
+  }
   close(sock);
   timerTree.deleteTimer(sock);
   bool cgi = connManager.isCgiSocket(sock);

@@ -151,7 +151,6 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
   ssize_t re = ioHandler.sendResponse(connManager, sockfd);
 
-  ssize_t buff_size = static_cast<ssize_t>(ioHandler.getBufferSize());
   // error
   if (re == -1) return RequestHandler::UPDATE_NONE;
   // client connection closed
@@ -159,8 +158,9 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
     ioHandler.closeConnection(connManager, timerTree, sockfd);
     return RequestHandler::UPDATE_CLOSE;
   }
+  const std::vector<unsigned char> &final_response = connManager.getFinalResponse(sockfd);
   // 引き続きresponseを送信
-  if (re == buff_size) {
+  if (connManager.getSentBytes(sockfd) != final_response.size()) {
     addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);
     return RequestHandler::UPDATE_NONE;
   }

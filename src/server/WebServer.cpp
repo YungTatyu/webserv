@@ -109,6 +109,10 @@ void WebServer::initializeConnManager() {
 
 const ConfigHandler &WebServer::getConfigHandler() { return config_handler_; }
 
+config::CONNECTION_METHOD WebServer::getConnectionMethod() {
+  return config_handler_.config_->events.use.getConnectionMethod();
+}
+
 void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
 
 WebServer::~WebServer() {
