@@ -1982,7 +1982,7 @@ TEST(HttpRequest, client_max_body_size_1) {
 
 /* -------------- hostname with port test -------------- */
 TEST(HttpRequest, hostport_test_1) {
-  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", "8000",
+  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", ":8000",
                      HttpRequest::PARSE_COMPLETE);
 
   std::string req =
@@ -1995,7 +1995,7 @@ TEST(HttpRequest, hostport_test_1) {
 }
 
 TEST(HttpRequest, hostport_test_2) {
-  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", ":8000",
+  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", "::8000",
                      HttpRequest::PARSE_COMPLETE);
 
   std::string req =
@@ -2008,7 +2008,7 @@ TEST(HttpRequest, hostport_test_2) {
 }
 
 TEST(HttpRequest, hostport_test_3) {
-  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", "",
+  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", ":",
                      HttpRequest::PARSE_COMPLETE);
 
   std::string req =
@@ -2022,7 +2022,7 @@ TEST(HttpRequest, hostport_test_3) {
 
 TEST(HttpRequest, hostport_test_4) {
   HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "",
-                     ":::", HttpRequest::PARSE_COMPLETE);
+                     "::::", HttpRequest::PARSE_COMPLETE);
 
   std::string req =
       "GET /test HTTP/1.1\r\n"
@@ -2034,8 +2034,8 @@ TEST(HttpRequest, hostport_test_4) {
 }
 
 TEST(HttpRequest, hostport_test_5) {
-  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "", ":",
-                     HttpRequest::PARSE_COMPLETE);
+  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "localhost"}}, "", "",
+                     "::", HttpRequest::PARSE_COMPLETE);
 
   std::string req =
       "GET /test HTTP/1.1\r\n"
@@ -2047,7 +2047,7 @@ TEST(HttpRequest, hostport_test_5) {
 }
 
 TEST(HttpRequest, hostport_test_6) {
-  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "t"}}, "", "", "",
+  HttpRequest expect(config::GET, "/test", "HTTP/1.1", {{"Host", "t"}}, "", "", ":",
                      HttpRequest::PARSE_COMPLETE);
 
   std::string req =

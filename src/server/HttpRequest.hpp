@@ -47,7 +47,8 @@ class HttpRequest {
   std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
   std::string queries;  // mapでもっていたが、子プロセスにQUERY_STRINGとして渡すからstringの方が良さげ。
   std::string body;
-  std::string port_in_host;  // headerのhostにportの情報が格納されている場合がある
+  std::string
+      port_in_host;  // headerのhostにportの情報が格納されている場合がある、[:]も含んだ値で保管する(cgiのメタ変数で使用するため)
 
   ParseState parseState;
 

@@ -180,6 +180,11 @@ std::string Utils::toLower(std::string str) {
   return str;
 }
 
+std::string Utils::toUpper(std::string str) {
+  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+  return str;
+}
+
 bool Utils::isSpace(const unsigned char ch) { return ch == ' '; }
 
 /**
@@ -265,4 +270,16 @@ std::string Utils::normalizePath(const std::string& full_path) {
   }
   if (end_with_sl && result != "/") result += "/";
   return result;
+}
+
+std::string Utils::replace(const std::string& str, char old_c, char new_c) {
+  std::string new_str;
+  for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+    if (*it == old_c) {
+      new_str += new_c;
+      continue;
+    }
+    new_str += *it;
+  }
+  return new_str;
 }
