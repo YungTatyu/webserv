@@ -101,7 +101,7 @@ function runClient {
   local server_port=$3
   local request1=$4
   local request2=$5
-  ${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
+  ${client_executable} "$server_ip" "$server_port" "$request1" "$request2" >/dev/null 2>&1 &
   # debug 出力する場合
   #${client_executable} "$server_ip" "$server_port" "$request1" "$request2" &
   CLIENT_PID=$!

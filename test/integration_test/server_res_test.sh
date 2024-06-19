@@ -49,7 +49,8 @@ function printLog {
 function runServer {
   # ${WEBSERV_PATH} $1 >/dev/null 2>&1 &
   # エラー出力する場合
-  $WEBSERV_PATH $1 >/dev/null &
+  #$WEBSERV_PATH $1 >/dev/null &
+  $WEBSERV_PATH $1 &
   webserv_pid=$!
   sleep 1
 }
