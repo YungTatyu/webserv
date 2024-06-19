@@ -93,7 +93,7 @@ def run_server(conf):
     try:
         g_webserv_pid = subprocess.Popen(
             [WEBSERV_PATH, conf]
-            #, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            # , stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         time.sleep(1)
     except Exception as e:
@@ -113,8 +113,8 @@ def run_client(client_executable, server_ip, server_port, request, body_path):
                 request,
                 body_path,
             ]
-            #stdout=subprocess.DEVNULL,
-            #stderr=subprocess.DEVNULL,
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL,
         )
     except Exception as e:
         print(f"{e}", file=sys.stderr)
