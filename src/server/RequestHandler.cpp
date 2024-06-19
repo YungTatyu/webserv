@@ -76,7 +76,7 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
       request, response, connManager.getTiedServer(sockfd), sockfd, configHandler);
 
   if (response.state_ == HttpResponse::RES_EXECUTE_CGI) {
-    // cgi処理前にclientのtimerを消さないと、stress test後にセグフォする
+    // client側のtimerを消してからcgiの処理へ進む
     timerTree.deleteTimer(sockfd);
     return handleCgi(connManager, configHandler, timerTree, sockfd);
   }
