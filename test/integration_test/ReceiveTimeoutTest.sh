@@ -88,9 +88,9 @@ function printErr {
 
 function runServer {
   local conf=$1
-  #${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
+  ${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
   # debug 出力する場合
-  ${WEBSERV_PATH} "${conf}" &
+  #${WEBSERV_PATH} "${conf}" &
   sleep 1
   WEBSERV_PID=$!
 }
@@ -101,9 +101,9 @@ function runClient {
   local server_port=$3
   local request1=$4
   local request2=$5
-  #${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
+  ${client_executable} "$server_ip" "$server_port" "$sleep_time" "$request1" "$request2" >/dev/null 2>&1 &
   # debug 出力する場合
-  ${client_executable} "$server_ip" "$server_port" "$request1" "$request2" &
+  #${client_executable} "$server_ip" "$server_port" "$request1" "$request2" &
   CLIENT_PID=$!
 }
 
@@ -126,8 +126,6 @@ function assert {
 
   # 判定
   pgrep "${executable_name}"
-  #ps | grep "${executable_name}" | grep -v grep
-  #ps | grep "${executable_name}" | grep -v grep >/dev/null 2>&1
   local client_running=$?
   if [ "$client_running" -eq 1 ]; then
     if [ "$expect_result" = ${DISCONNECT} ]; then
@@ -138,9 +136,7 @@ function assert {
       ((FAILED_TESTS++))
     fi
   else # clientが正常にタイムアウトする前にsleepが終了
-    #kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}') >/dev/null 2>&1
-    #kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
-    kill $(pgrep "${executable_name}")
+    kill $(pgrep "${executable_name}") >/dev/null 2>&1
     if [ "$expect_result" = ${DISCONNECT} ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
@@ -158,7 +154,7 @@ function runTest {
   local cases=("${!3}")
   local root="${SCRIPT_DIR}/test_files/TimeoutTestFiles"
 
-  printf "\n${GREEN}<<< ${server_name} server test >>>${RESET}\n"
+  printf "\n${GREEN}<<< ${server_name} test >>>${RESET}\n"
   runServer "${root}/${conf}"
 
   # テスト実行
@@ -192,9 +188,9 @@ function main {
   runTest "receive_timeout0_poll.conf" "poll timeout 0" timeout0_cases[@]       # poll
   runTest "receive_timeout0_select.conf" "select timeout 0" timeout0_cases[@]   # select
   # receive_timeout 3;
-  runTest "receive_timeout3.conf" "kqueue or epoll timeout 3" timeout3_cases[@] # kqueue or epoll
-  runTest "receive_timeout3_poll.conf" "poll timeout 3" timeout3_cases[@]       # poll
-  runTest "receive_timeout3_select.conf" "select timeout 3" timeout3_cases[@]   # select
+  runTest "receive_timeout3.conf" "kqueue or epoll timeout 3s" timeout3_cases[@] # kqueue or epoll
+  runTest "receive_timeout3_poll.conf" "poll timeout 3s" timeout3_cases[@]       # poll
+  runTest "receive_timeout3_select.conf" "select timeout 3s" timeout3_cases[@]   # select
 
   printLog
 
