@@ -34,9 +34,9 @@ def init(test_name):
     # make webserv
     print(f"{GREEN}make executable ......{RESET}\n")
     subprocess.run(
-        ["make", "-j", "-C", f"{SCRIPT_DIR}/../../"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        ["make", "-j", "-C", f"{SCRIPT_DIR}/../../"]
+        # stdout=subprocess.DEVNULL,
+        # stderr=subprocess.DEVNULL,
     )
     if not os.path.exists(WEBSERV_PATH):
         print("Build webserv failed")
