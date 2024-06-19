@@ -78,7 +78,7 @@ def main():
             "/timeout3/",
             body_path,
             4700,
-            2,
+            1,
             STAY_CONNECT,
             CLIENT_PATH,
             CLIENT_NAME,
