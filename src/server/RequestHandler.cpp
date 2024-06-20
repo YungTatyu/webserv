@@ -34,9 +34,6 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     return new_sock;
   }
 
-  // keepalive_timeout消す。
-  timerTree.deleteTimer(sockfd);
-
   // クライアントソケットへのリクエスト（既存コネクション）
   ssize_t re = ioHandler.receiveRequest(connManager, sockfd);
   // ソケット使用不可。
@@ -46,6 +43,8 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
     ioHandler.closeConnection(connManager, timerTree, sockfd);
     return RequestHandler::UPDATE_CLOSE;
   }
+  // 2つのrecv間のtimeout設定
+  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_RECV);
   return handleRequest(connManager, configHandler, timerTree, sockfd);
 }
 
@@ -77,6 +76,8 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, ConfigHandler
       request, response, connManager.getTiedServer(sockfd), sockfd, configHandler);
 
   if (response.state_ == HttpResponse::RES_EXECUTE_CGI) {
+    // client側のtimerを消してからcgiの処理へ進む
+    timerTree.deleteTimer(sockfd);
     return handleCgi(connManager, configHandler, timerTree, sockfd);
   }
   connManager.setFinalResponse(sockfd,
@@ -249,8 +250,11 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
       const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
       int client_sock = cgi_handler.getCliSocket();
 
+      // timeoutしたcgiの処理
       cgi_handler.killCgiProcess();
       ioHandler.closeConnection(connManager, timerTree, cgi_sock);
+      connManager.clearResData(client_sock);
+
       // 504 error responseを生成
       HttpResponse &response = connManager.getResponse(client_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;

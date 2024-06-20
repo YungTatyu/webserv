@@ -28,6 +28,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Run gtest (macOS)
-      run: make gtest
+    - name: Install dependencies (macOS)
+      run:  |
+        python3 -m venv .venv
+        . .venv/bin/activate
+        python3 -m pip install -r requirements.txt
 
+    - name: Run gtest (macOS)
+      run: |
+        make gtest
+        . .venv/bin/activate
+        python3 ./test/run_tests.py
