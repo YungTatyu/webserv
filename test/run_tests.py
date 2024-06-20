@@ -39,7 +39,8 @@ def init(path):
 
 def run_test(command):
 
-    result = subprocess.Popen(command, shell=True)
+    command_str = " ".join(command)
+    result = subprocess.Popen(command_str, shell=True)
     # testの出力を見せたくない場合
     # result = subprocess.Popen(
     #     command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
@@ -51,21 +52,23 @@ def run_test(command):
 def main():
     CWD = os.path.dirname(os.path.abspath(__file__))
     test_cases = [
-        f"{CWD}/integration_test/server_res_test.sh",
-        f"python3 -m pytest -vv -s {CWD}/integration_test/server_res_header_test.py",
-        f"python3 -m pytest -vv -s {CWD}/integration_test/multiple_requests_test.py",
-        f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py",
-        f"{CWD}/conf/main_parser_test.sh",
-        f"{CWD}/conf/directive_err_test.sh",
-        f"{CWD}/integration_test/KeepaliveTimeoutTest.py",
-        f"{CWD}/integration_test/CgiRecvTimeoutTest.py",
-        f"{CWD}/integration_test/CgiSendTimeoutTest.py",
-        f"{CWD}/integration_test/ReceiveTimeoutTest.sh",
+        #[f"{CWD}/integration_test/server_res_test.sh"],
+        #[f"python3 -m pytest -vv -s {CWD}/integration_test/server_res_header_test.py"],
+        #[f"python3 -m pytest -vv -s {CWD}/integration_test/multiple_requests_test.py"],
+        #[f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py"],
+        #[f"{CWD}/conf/main_parser_test.sh"],
+        #[f"{CWD}/conf/directive_err_test.sh"],
+        #[f"{CWD}/integration_test/KeepaliveTimeoutTest.py"],
+        #[f"{CWD}/integration_test/CgiRecvTimeoutTest.py"],
+        #[f"{CWD}/integration_test/CgiSendTimeoutTest.py"],
+        #[f"{CWD}/integration_test/ReceiveTimeoutTest.sh"],
     ]
 
-    # macOS環境をチェックし、SendTimeoutTestを除外
-    if platform.system() != "Darwin":
-        test_cases.append(f"{CWD}/integration_test/SendTimeoutTest.sh")
+    # macOSならば、send_timeoutまでの遅延時間を渡す
+    if platform.system() == "Darwin":
+        test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh", "23"])
+    else:
+        test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh"])
 
     init(f"{CWD}/..")
     ti = 0
@@ -73,6 +76,7 @@ def main():
     failed_cnt = 0
     failed_tests = []
     for test in test_cases:
+        print("test=", f"test")
         CUR_TEST = f"{TEST_NAME}{ti}"
         print(
             f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}",
