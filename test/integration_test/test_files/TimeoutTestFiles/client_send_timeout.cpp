@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <netinet/tcp.h>
 
 #include <cstring>
 #include <iostream>
@@ -20,6 +21,7 @@ int main(int ac, char *av[]) {
   const char *server_addr = av[1];
   uint16_t server_port = atoi(av[2]);
   int sleep_time = atoi(av[3]);
+  std::cout << "sleep_time = " << sleep_time << std::endl;
   // request作成
   std::string str;
   for (int i = 4; i < ac; i++) {
@@ -75,22 +77,16 @@ int main(int ac, char *av[]) {
   // send_timeout + 1秒待機
   sleep(sleep_time + 1);
 
-  // 一度目のsendはserver側で接続がcloseされていても成功する
-  // close されている場合RESETパケットが送られる。
-  ret = send(sockfd, request.data(), request.size(), 0);
-  std::cout << "send byte: " << ret << std::endl;
-  // 2回目のsendはcloseされていればsendは失敗する。
-  ret = send(sockfd, request.data(), request.size(), 0);
-  std::cout << "send byte: " << ret << std::endl;
-  if (errno == ECONNRESET || errno == EPIPE) {
-    std::cout << "connection timed out." << std::endl;
-    close(sockfd);
-    exit(1);
+  // 相手が切断してるか確認する
+  // されてなければrecvがbufferをすべて読み込んだらブロックされる
+  while (1) {
+    ret = recv(sockfd, r_str, BUF_SIZE, 0);
+    if (ret ==0) {
+      std::cout << "connection timed out." << std::endl;
+      close(sockfd);
+      exit(1);
+    }
   }
-  std::cout << "connection didn't timeout." << std::endl;
-
-  // send_timeoutで死ななかった場合は10秒だけ待ってcloseする
-  sleep(10);
   close(sockfd);
 
   return (0);
