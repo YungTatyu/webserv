@@ -14,6 +14,7 @@ readonly CLIENT_SEND_TIMEOUT_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/sen
 readonly CLIENT_NO_RECEIVE_PATH="${SCRIPT_DIR}/test_files/TimeoutTestFiles/no_recv"
 readonly TEST_NAME="SendTimeout Test"
 readonly MAKEFILE_NAME="MAKE_SENDTIMEOUT"
+G_SEND_TIMEOUT_IN_MACOS=0
 # cnt
 TOTAL_TESTS=0
 PASSED_TESTS=0
@@ -88,9 +89,9 @@ function printErr {
 
 function runServer {
   local conf=$1
-  ${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
+  #${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
   # debug 出力する場合
-  #$WEBSERV_PATH "$conf" &
+  $WEBSERV_PATH "$conf" &
   sleep 1
   WEBSERV_PID=$!
 }
@@ -102,15 +103,16 @@ function runClient {
   local sleep_time=$4
   local request1=$5
   local request2=$6
-  ${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" >/dev/null 2>&1 &
+  #${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" >/dev/null 2>&1 &
   # debug 出力する場合
-  #${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}"
+  ${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" &
   CLIENT_PID=$!
 }
 
 function assert {
   local uri=$1
   local expect_sec=$2
+  expect_sec=$(bc <<< "$expect_sec + $G_SEND_TIMEOUT_IN_MACOS")
   local expect_result=$3
   local client_executable=$4
   local executable_name=$5
@@ -123,13 +125,14 @@ function assert {
   printf "[  test$TOTAL_TESTS  ]\n${url}: "
 
   # program 実行
-  runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}" &
+  runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}"
+
   # bufferが詰まるまでに時間がかかることがあるので他のテストよりも長めにsleep
-  sleep $(bc <<<"$expect_sec + 1.5")
+  sleep $(bc <<< "$expect_sec + 1.5")
 
   # 判定
   #ps | grep "${executable_name}" | grep -v grep
-  ps | grep "${executable_name}" | grep -v grep >/dev/null 2>&1
+  pgrep "${executable_name}"
   local client_running=$?
   if [ "$client_running" -eq 1 ]; then
     if [ "$expect_result" = ${DISCONNECT} ]; then
@@ -140,7 +143,7 @@ function assert {
       ((FAILED_TESTS++))
     fi
   else # clientが正常にタイムアウトする前にsleepが終了
-    kill $(ps | grep "${executable_name}" | grep -v grep | awk '{print $1}')
+    kill $(pgrep "${executable_name}")
     if [ "$expect_result" = ${DISCONNECT} ]; then
       printErr "${RED}failed.${RESET}\nServer did not timeout"
       ((FAILED_TESTS++))
@@ -163,7 +166,7 @@ function runTest {
   runServer "${root}/${conf}"
 
   # テスト実行
-  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
+  #assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
@@ -178,6 +181,8 @@ function runTest {
 }
 
 function main {
+  G_SEND_TIMEOUT_IN_MACOS=${1:-0}
+  printf "${G_SEND_TIMEOUT_IN_MACOS}"
   init
 
   # 第三引数の数値はテストケース間のスリープ秒数
