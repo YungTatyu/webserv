@@ -112,7 +112,7 @@ function runClient {
 function assert {
   local uri=$1
   local expect_sec=$2
-  expect_sec=$(bc <<< "$expect_sec + $G_SEND_TIMEOUT_IN_MACOS")
+  expect_sec=$(bc <<<"$expect_sec + $G_SEND_TIMEOUT_IN_MACOS")
   local expect_result=$3
   local client_executable=$4
   local executable_name=$5
@@ -128,7 +128,7 @@ function assert {
   runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}"
 
   # bufferが詰まるまでに時間がかかることがあるので他のテストよりも長めにsleep
-  sleep $(bc <<< "$expect_sec + 1.5")
+  sleep $(bc <<<"$expect_sec + 1.5")
 
   # 判定
   #ps | grep "${executable_name}" | grep -v grep
@@ -166,7 +166,7 @@ function runTest {
   runServer "${root}/${conf}"
 
   # テスト実行
-  #assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
+  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
