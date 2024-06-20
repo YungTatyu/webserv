@@ -66,7 +66,7 @@ def main():
 
     # macOSならば、send_timeoutまでの遅延時間を渡す
     if platform.system() == "Darwin":
-        test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh", "26"])
+        test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh", "30"])
     else:
         test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh"])
 
