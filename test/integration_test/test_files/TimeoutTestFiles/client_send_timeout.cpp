@@ -1,10 +1,10 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <netinet/tcp.h>
 
 #include <cstring>
 #include <iostream>
@@ -81,7 +81,7 @@ int main(int ac, char *av[]) {
   // されてなければrecvがbufferをすべて読み込んだらブロックされる
   while (1) {
     ret = recv(sockfd, r_str, BUF_SIZE, 0);
-    if (ret ==0) {
+    if (ret == 0) {
       std::cout << "connection timed out." << std::endl;
       close(sockfd);
       exit(1);
