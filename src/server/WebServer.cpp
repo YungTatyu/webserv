@@ -6,6 +6,7 @@
 #include "LogFd.hpp"
 
 ConfigHandler WebServer::config_handler_;
+IServer *WebServer::server;
 
 WebServer::WebServer(const config::Main *config) {
   this->configHandler = &(config_handler_);
@@ -35,22 +36,22 @@ void WebServer::initializeServer() {
   switch (method) {
 #if defined(KQUEUE_AVAILABLE)
     case config::KQUEUE:
-      this->server = new KqueueServer();
+      server = new KqueueServer();
       this->eventManager = new KqueueActiveEventManager();
       break;
 #endif
 #if defined(EPOLL_AVAILABLE)
     case config::EPOLL:
-      this->server = new EpollServer();
+      server = new EpollServer();
       this->eventManager = new EpollActiveEventManager();
       break;
 #endif
     case config::POLL:
-      this->server = new PollServer();
+      server = new PollServer();
       this->eventManager = new PollActiveEventManager();
       break;
     case config::SELECT:
-      this->server = new SelectServer();
+      server = new SelectServer();
       this->eventManager = new SelectActiveEventManager();
       break;
     default:  // kqueueとepoll両方使えない場合は、defaultが必要
@@ -109,6 +110,8 @@ void WebServer::initializeConnManager() {
 
 const ConfigHandler &WebServer::getConfigHandler() { return config_handler_; }
 
+IServer *WebServer::getServer() { return server; }
+
 void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
 
 WebServer::~WebServer() {
@@ -123,10 +126,10 @@ void WebServer::deleteObjects() {
   delete this->requestHandler;
   delete this->connManager;
   delete this->eventManager;
-  delete this->server;
+  delete server;
 }
 
 void WebServer::run() {
-  this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler,
-                          this->configHandler, this->timerTree);
+  server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler,
+                    this->configHandler, this->timerTree);
 }
