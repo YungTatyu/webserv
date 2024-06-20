@@ -19,6 +19,9 @@ class PollServer : public IServer {
   void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                         NetworkIOHandler* io_handler, RequestHandler* request_handler,
                         ConfigHandler* config_handler, TimerTree* timer_tree);
+  int addNewEvent(int fd, ConnectionData::EVENT event);
+  int updateEvent(int fd, ConnectionData::EVENT event);
+  int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
   void addActiveEvents(const std::vector<struct pollfd>& pollfds, IActiveEventManager* event_manager);

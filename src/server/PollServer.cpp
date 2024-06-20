@@ -122,3 +122,21 @@ std::vector<struct pollfd> PollServer::convertToPollfds(const ConnectionManager&
   }
   return list;
 }
+
+int PollServer::addNewEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(fd);
+  static_cast<void>(event);
+  return 0;
+}
+
+int PollServer::updateEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(fd);
+  static_cast<void>(event);
+  return 0;
+}
+
+int PollServer::deleteEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(fd);
+  static_cast<void>(event);
+  return 0;
+}

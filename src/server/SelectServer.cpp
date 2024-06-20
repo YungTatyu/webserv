@@ -112,3 +112,21 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
   }
   request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
 }
+
+int SelectServer::addNewEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(fd);
+  static_cast<void>(event);
+  return 0;
+}
+
+int SelectServer::updateEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(fd);
+  static_cast<void>(event);
+  return 0;
+}
+
+int SelectServer::deleteEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(fd);
+  static_cast<void>(event);
+  return 0;
+}

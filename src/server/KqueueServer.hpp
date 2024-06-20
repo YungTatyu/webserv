@@ -26,14 +26,14 @@ class KqueueServer : public IServer {
   void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                         NetworkIOHandler* io_handler, RequestHandler* request_handler,
                         ConfigHandler* config_handler, TimerTree* timer_tree);
+  int addNewEvent(int fd, ConnectionData::EVENT event);
+  int updateEvent(int fd, ConnectionData::EVENT event);
+  int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
   int kq_;  // kqueue fd
   bool initKqueueServer();
   bool initKevents(const std::map<int, ConnectionData*>& connections);
-  int updateEvent(struct kevent& event, const short event_filter);
-  int deleteEvent(struct kevent& event);
-  int addNewEvent(const int fd, const short event_filter);
   void addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map);
 };
 

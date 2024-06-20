@@ -19,6 +19,9 @@ class IServer {
   virtual void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                                 NetworkIOHandler* io_handler, RequestHandler* request_handler,
                                 ConfigHandler* config_handler, TimerTree* timer_tree) = 0;
+  virtual int addNewEvent(int fd, ConnectionData::EVENT event) = 0;
+  virtual int updateEvent(int fd, ConnectionData::EVENT event) = 0;
+  virtual int deleteEvent(int fd, ConnectionData::EVENT event) = 0;
 };
 
 #endif
