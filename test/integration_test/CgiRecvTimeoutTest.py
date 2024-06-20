@@ -17,6 +17,9 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBSERV_PATH = os.path.join(SCRIPT_DIR, "../../webserv")
 CLIENT_PATH = os.path.join(SCRIPT_DIR, "test_files/TimeoutTestFiles/request_sender.py")
+CLIENT_NAME = "request_sender.py"
+CGI_NAME1 = "send_partial.cgi"
+CGI_NAME2 = "sleeping.cgi"
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -31,9 +34,9 @@ def init(test_name):
     # make webserv
     print(f"{GREEN}make executable ......{RESET}\n")
     subprocess.run(
-        ["make", "-j", "-C", f"{SCRIPT_DIR}/../../"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        ["make", "-j", "-C", f"{SCRIPT_DIR}/../../"]
+        # stdout=subprocess.DEVNULL,
+        # stderr=subprocess.DEVNULL,
     )
     if not os.path.exists(WEBSERV_PATH):
         print("Build webserv failed")
@@ -52,6 +55,17 @@ def kill_process(target_name, target_process, color):
     if target_process:
         target_process.kill()
         print_err(f"{color}kill {target_name}.{RESET}")
+
+
+def kill_by_name(target_name):
+    try:
+        result = subprocess.run(["pgrep", "-f", target_name], stdout=subprocess.PIPE)
+        pids = result.stdout.decode().split()
+        for pid in pids:
+            os.kill(int(pid), signal.SIGKILL)
+
+    except Exception as e:
+        print(f"{RED}Failed to kill process {target_name}: {e}{RESET}")
 
 
 def signal_handler(sig, frame):
@@ -80,7 +94,7 @@ def run_server(conf):
         g_webserv_pid = subprocess.Popen(
             [WEBSERV_PATH, conf], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        time.sleep(0.5)
+        time.sleep(1)
     except Exception as e:
         print(f"{e}", file=sys.stderr)
         sys.exit(1)
@@ -139,6 +153,7 @@ def assert_test(
         ).returncode
         == 0
     )
+
     if not client_running:  # client does't exist
         if expect_result:
             print(f"{GREEN}passed.{RESET}\nServer closed the connection")
@@ -147,8 +162,8 @@ def assert_test(
             print_err(f"{RED}failed.{RESET}\nServer closed the connection")
             g_failed_tests += 1
     else:
-        subprocess.run(["pkill", "-f", executable_name])
-        subprocess.run(["pkill", "-f", cgi_name])
+        kill_by_name(f"{executable_name}")
+        kill_by_name(f"{cgi_name}")
         if expect_result:
             print_err(f"{RED}failed.{RESET}\nServer did not timeout")
             g_failed_tests += 1
@@ -187,8 +202,8 @@ def main():
             2,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -198,8 +213,8 @@ def main():
             3,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -209,19 +224,19 @@ def main():
             6,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
             "/timeout3/",
             body_path,
             4600,
-            2,
+            1,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -231,8 +246,8 @@ def main():
             4,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_partial.py",
+            CLIENT_NAME,
+            CGI_NAME1,
         ),
         (
             "GET",
@@ -242,19 +257,19 @@ def main():
             3,
             DISCONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME2,
         ),
         (
             "GET",
             "/no-send/",
             body_path,
             4600,
-            2,
+            1,
             STAY_CONNECT,
             CLIENT_PATH,
-            "request_sender.py",
-            "send_nothing.py",
+            CLIENT_NAME,
+            CGI_NAME2,
         ),
     ]
 

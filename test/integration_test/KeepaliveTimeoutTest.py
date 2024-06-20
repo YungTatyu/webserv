@@ -23,6 +23,7 @@ from CgiRecvTimeoutTest import (
 # init variable
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 CLIENT_PATH = os.path.join(ROOT_PATH, "test_files/TimeoutTestFiles/client.py")
+CLIENT_NAME = "client.py"
 GREEN = "\033[32m"
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -45,7 +46,7 @@ def main():
             0,
             DISCONNECT,
             CLIENT_PATH,
-            "client.py",
+            CLIENT_NAME,
         ),
         (
             "GET",
@@ -55,7 +56,7 @@ def main():
             3,
             DISCONNECT,
             CLIENT_PATH,
-            "client.py",
+            CLIENT_NAME,
         ),
         (
             "GET",
@@ -65,7 +66,7 @@ def main():
             6,
             DISCONNECT,
             CLIENT_PATH,
-            "client.py",
+            CLIENT_NAME,
         ),
         (
             "GET",
@@ -75,7 +76,7 @@ def main():
             1,
             STAY_CONNECT,
             CLIENT_PATH,
-            "client.py",
+            CLIENT_NAME,
         ),
         (
             "GET",
@@ -85,7 +86,7 @@ def main():
             4,
             STAY_CONNECT,
             CLIENT_PATH,
-            "client.py",
+            CLIENT_NAME,
         ),
     ]
 
