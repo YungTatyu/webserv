@@ -52,21 +52,21 @@ def run_test(command):
 def main():
     CWD = os.path.dirname(os.path.abspath(__file__))
     test_cases = [
-        # [f"{CWD}/integration_test/server_res_test.sh"],
-        # [f"python3 -m pytest -vv -s {CWD}/integration_test/server_res_header_test.py"],
-        # [f"python3 -m pytest -vv -s {CWD}/integration_test/multiple_requests_test.py"],
-        # [f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py"],
-        # [f"{CWD}/conf/main_parser_test.sh"],
-        # [f"{CWD}/conf/directive_err_test.sh"],
-        # [f"{CWD}/integration_test/KeepaliveTimeoutTest.py"],
-        # [f"{CWD}/integration_test/CgiRecvTimeoutTest.py"],
-        # [f"{CWD}/integration_test/CgiSendTimeoutTest.py"],
-        # [f"{CWD}/integration_test/ReceiveTimeoutTest.sh"],
+        [f"{CWD}/integration_test/server_res_test.sh"],
+        [f"python3 -m pytest -vv -s {CWD}/integration_test/server_res_header_test.py"],
+        [f"python3 -m pytest -vv -s {CWD}/integration_test/multiple_requests_test.py"],
+        [f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py"],
+        [f"{CWD}/conf/main_parser_test.sh"],
+        [f"{CWD}/conf/directive_err_test.sh"],
+        [f"{CWD}/integration_test/KeepaliveTimeoutTest.py"],
+        [f"{CWD}/integration_test/CgiRecvTimeoutTest.py"],
+        [f"{CWD}/integration_test/CgiSendTimeoutTest.py"],
+        [f"{CWD}/integration_test/ReceiveTimeoutTest.sh"],
     ]
 
     # macOSならば、send_timeoutまでの遅延時間を渡す
     if platform.system() == "Darwin":
-        test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh", "30"])
+        test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh", "28"])
     else:
         test_cases.append([f"{CWD}/integration_test/SendTimeoutTest.sh"])
 
