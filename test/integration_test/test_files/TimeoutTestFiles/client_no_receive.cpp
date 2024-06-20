@@ -76,22 +76,6 @@ int main(int ac, char *av[]) {
     }
   }
 
-  // 一度目のsendはserver側で接続がcloseされていても成功する
-  // close されている場合RESETパケットが送られる。
-  // int ret = send(sockfd, request.data(), request.size(), 0);
-  // std::cout << "send byte: " << ret << std::endl;
-  //// 2回目のsendはcloseされていればsendは失敗する。
-  // ret = send(sockfd, request.data(), request.size(), 0);
-  // std::cout << "send byte: " << ret << std::endl;
-  // if (errno == ECONNRESET || errno == EPIPE) {
-  //   std::cout << "connection timed out." << std::endl;
-  //   close(sockfd);
-  //   exit(1);
-  // }
-  // std::cout << "connection didn't timeout." << std::endl;
-
-  //// send_timeoutで死ななかった場合は10秒だけ待ってcloseする
-  // sleep(10);
   close(sockfd);
 
   return (0);
