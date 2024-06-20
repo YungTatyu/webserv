@@ -70,7 +70,6 @@ def main():
     failed_cnt = 0
     failed_tests = []
     for test in test_cases:
-        print("test=", f"test")
         CUR_TEST = f"{TEST_NAME}{ti}"
         print(
             f"{BOLD}{BG_GREEN}[ RUN      ]{RESET} {CUR_TEST}: {test}",

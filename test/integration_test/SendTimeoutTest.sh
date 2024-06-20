@@ -89,9 +89,9 @@ function printErr {
 
 function runServer {
   local conf=$1
-  #${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
+  ${WEBSERV_PATH} "${conf}" >/dev/null 2>&1 &
   # debug 出力する場合
-  $WEBSERV_PATH "$conf" &
+  #$WEBSERV_PATH "$conf" &
   sleep 1
   WEBSERV_PID=$!
 }
@@ -103,9 +103,9 @@ function runClient {
   local sleep_time=$4
   local request1=$5
   local request2=$6
-  #${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" >/dev/null 2>&1 &
+  ${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" >/dev/null 2>&1 &
   # debug 出力する場合
-  ${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" &
+  #${client_executable} "${server_ip}" "${server_port}" "${sleep_time}" "${request1}" "${request2}" &
   CLIENT_PID=$!
 }
 
@@ -171,7 +171,7 @@ function runTest {
   assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout10/" "8" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
-  # このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でとりあえずこちらで行っています。
+  # このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でこちらで行っている。
   assert "/no-recv/" "3" ${DISCONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv" ${sleep_between_case}
   assert "/no-recv/" "1" ${STAY_CONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv" ${sleep_between_case}
 
@@ -181,12 +181,15 @@ function runTest {
 }
 
 function main {
+  # 環境によってはsocketが詰まるまでに時間がかかるので、その遅延分を引数で受け取る。
+  # mac os では大体22秒くらい、場合によっては40秒かかる
+  # linuxでは渡す必要はない
+  # 何も渡されなければ0
   G_SEND_TIMEOUT_IN_MACOS=${1:-0}
-  printf "${G_SEND_TIMEOUT_IN_MACOS}"
   init
 
   # 第三引数の数値はテストケース間のスリープ秒数
-  # selectはeofを感知できないので、timeoutが終わるまで待たないといけません。
+  # selectはeofを感知できないので、timeoutが終わるまで待たないといけない。
   runTest "send_timeout.conf" "kqueue or epoll" "0" # kqueue or epoll
   runTest "send_timeout_poll.conf" "poll" "0"       # poll
   runTest "send_timeout_select.conf" "select" "3"   # select
@@ -196,7 +199,7 @@ function main {
   clean "${RESET}"
 
   if [ $(uname) == "Darwin" ]; then
-    ((FAILED_TESTS != 0)) && err "The test failed on Darwin, but this is expected.\nIf you want to know the details, please run this test individually with send_timeout time."
+    ((FAILED_TESTS != 0)) && printErr "The test failed on Darwin, but this is expected.\nIf you want to know the details, please run this test individually with send_timeout time."
     return 0
   fi
   if [ ${FAILED_TESTS} -ne 0 ]; then
