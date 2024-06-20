@@ -112,7 +112,7 @@ function runClient {
 function assert {
   local uri=$1
   local expect_sec=$2
-  expect_sec=$(bc <<< "$expect_sec + $G_SEND_TIMEOUT_IN_MACOS")
+  expect_sec=$(bc <<<"$expect_sec + $G_SEND_TIMEOUT_IN_MACOS")
   local expect_result=$3
   local client_executable=$4
   local executable_name=$5
@@ -128,7 +128,7 @@ function assert {
   runClient "${client_executable}" "${Host}" "${Port}" "${expect_sec}" "${request1}" "${request2}"
 
   # bufferが詰まるまでに時間がかかることがあるので他のテストよりも長めにsleep
-  sleep $(bc <<< "$expect_sec + 1.5")
+  sleep $(bc <<<"$expect_sec + 1.5")
 
   # 判定
   #ps | grep "${executable_name}" | grep -v grep
