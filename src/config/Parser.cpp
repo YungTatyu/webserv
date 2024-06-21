@@ -512,12 +512,7 @@ bool config::Parser::parseAccessLog() {
     return true;
   }
 
-  if (context == config::CONF_HTTP)
-    this->config_.http.directives_set.insert(kACCESS_LOG);
-  else if (context == config::CONF_HTTP_SERVER)
-    this->config_.http.server_list.back().directives_set.insert(kACCESS_LOG);
-  else if (context == config::CONF_HTTP_LOCATION)
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kACCESS_LOG);
+  updateDirectivesSet(kACCESS_LOG);
 
   if (path == "off")
     tmp_acs_log.setIsAccesslogOn(false);
@@ -549,19 +544,16 @@ bool config::Parser::parseErrorLog() {
 
   tmp_err_log.setFile(path);
 
-  if (context == config::CONF_MAIN) {
+  if (context == config::CONF_MAIN)
     this->config_.error_log_list.push_back(tmp_err_log);
-    this->config_.directives_set.insert(kERROR_LOG);
-  } else if (context == config::CONF_HTTP) {
+  else if (context == config::CONF_HTTP)
     this->config_.http.error_log_list.push_back(tmp_err_log);
-    this->config_.http.directives_set.insert(kERROR_LOG);
-  } else if (context == config::CONF_HTTP_SERVER) {
+  else if (context == config::CONF_HTTP_SERVER)
     this->config_.http.server_list.back().error_log_list.push_back(tmp_err_log);
-    this->config_.http.server_list.back().directives_set.insert(kERROR_LOG);
-  } else if (context == config::CONF_HTTP_LOCATION) {
+  else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_LOG);
-  }
+
+  updateDirectivesSet(kERROR_LOG);
 
   ti_ += 2;
   return true;
@@ -617,7 +609,7 @@ bool config::Parser::parseUse() {
   method = method_map.find(token_value)->second;
 
   this->config_.events.use.setConnectionMethod(method);
-  this->config_.events.directives_set.insert(kUSE);
+  updateDirectivesSet(kUSE);
 
   ti_ += 2;
   return true;
@@ -653,7 +645,7 @@ bool config::Parser::parseWorkerConnections() {
   }
 
   this->config_.events.worker_connections.setWorkerConnections(value);
-  this->config_.events.directives_set.insert(kWORKER_CONNECTIONS);
+  updateDirectivesSet(kWORKER_CONNECTIONS);
 
   ti_ += 2;
   return true;
@@ -741,16 +733,14 @@ bool config::Parser::parseSendTimeout() {
 
   config::CONTEXT context = this->current_context_.top();
 
-  if (context == config::CONF_HTTP) {
+  if (context == config::CONF_HTTP)
     this->config_.http.send_timeout.setTime(ret);
-    this->config_.http.directives_set.insert(kSEND_TIMEOUT);
-  } else if (context == config::CONF_HTTP_SERVER) {
+  else if (context == config::CONF_HTTP_SERVER)
     this->config_.http.server_list.back().send_timeout.setTime(ret);
-    this->config_.http.server_list.back().directives_set.insert(kSEND_TIMEOUT);
-  } else if (context == config::CONF_HTTP_LOCATION) {
+  else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().send_timeout.setTime(ret);
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kSEND_TIMEOUT);
-  }
+
+  updateDirectivesSet(kSEND_TIMEOUT);
 
   ti_ += 2;
   return true;
@@ -770,22 +760,22 @@ bool config::Parser::parseKeepaliveTimeout() {
   switch (context) {
     case config::CONF_HTTP:
       this->config_.http.keepalive_timeout.setTime(ret);
-      this->config_.http.directives_set.insert(kKEEPALIVE_TIMEOUT);
       break;
 
     case config::CONF_HTTP_SERVER:
       this->config_.http.server_list.back().keepalive_timeout.setTime(ret);
-      this->config_.http.server_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
       break;
 
     case config::CONF_HTTP_LOCATION:
       this->config_.http.server_list.back().location_list.back().keepalive_timeout.setTime(ret);
-      this->config_.http.server_list.back().location_list.back().directives_set.insert(kKEEPALIVE_TIMEOUT);
       break;
 
     default:
       break;
   }
+
+  updateDirectivesSet(kKEEPALIVE_TIMEOUT);
+
   ti_ += 2;
   return true;
 }
@@ -804,22 +794,22 @@ bool config::Parser::parseReceiveTimeout() {
   switch (context) {
     case config::CONF_HTTP:
       this->config_.http.receive_timeout.setTime(ret);
-      this->config_.http.directives_set.insert(kRECEIVE_TIMEOUT);
       break;
 
     case config::CONF_HTTP_SERVER:
       this->config_.http.server_list.back().receive_timeout.setTime(ret);
-      this->config_.http.server_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
       break;
 
     case config::CONF_HTTP_LOCATION:
       this->config_.http.server_list.back().location_list.back().receive_timeout.setTime(ret);
-      this->config_.http.server_list.back().location_list.back().directives_set.insert(kRECEIVE_TIMEOUT);
       break;
 
     default:
       break;
   }
+
+  updateDirectivesSet(kRECEIVE_TIMEOUT);
+
   ti_ += 2;
   return true;
 }
@@ -829,24 +819,21 @@ bool config::Parser::parseRoot() {
   std::string path = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
 
-  if (context == config::CONF_HTTP) {
+  if (context == config::CONF_HTTP)
     this->config_.http.root.setPath(path);
-    this->config_.http.directives_set.insert(kROOT);
-  } else if (context == config::CONF_HTTP_SERVER) {
+  else if (context == config::CONF_HTTP_SERVER)
     this->config_.http.server_list.back().root.setPath(path);
-    this->config_.http.server_list.back().directives_set.insert(kROOT);
-  } else if (context == config::CONF_HTTP_LOCATION) {
+  else if (context == config::CONF_HTTP_LOCATION) {
     std::set<std::string> &location_directives =
         this->config_.http.server_list.back().location_list.back().directives_set;
     if (location_directives.find(kALIAS) != location_directives.end()) {
-      std::cerr
-          << "webserv: [emerg] \"root\" directive is duplicate, \"alias\" directive was specified earlier in "
-          << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printError("\"root\" directive is duplicate, \"alias\" directive was specified earlier in ", this->tokens_[ti_]);
       return false;
     }
     this->config_.http.server_list.back().location_list.back().root.setPath(path);
-    location_directives.insert(kROOT);
   }
+
+  updateDirectivesSet(kROOT);
 
   ti_ += 2;
   return true;
@@ -863,7 +850,7 @@ bool config::Parser::parseClientMaxBodySize() {
   }
 
   this->config_.http.client_max_body_size.setSize(ret);
-  this->config_.http.directives_set.insert(kCLIENT_MAX_BODY_SIZE);
+  updateDirectivesSet(kCLIENT_MAX_BODY_SIZE);
 
   ti_ += 2;
   return true;
@@ -897,12 +884,8 @@ bool config::Parser::parseIndex() {
     ti_++;
   }
 
-  if (context == config::CONF_HTTP)
-    this->config_.http.directives_set.insert(kINDEX);
-  else if (context == config::CONF_HTTP_SERVER)
-    this->config_.http.server_list.back().directives_set.insert(kINDEX);
-  else if (context == config::CONF_HTTP_LOCATION)
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kINDEX);
+  updateDirectivesSet(kINDEX);
+
   ti_++;
   return true;
 }
@@ -920,12 +903,7 @@ bool config::Parser::parseAutoindex() {
 
   config::CONTEXT context = this->current_context_.top();
 
-  if (context == config::CONF_HTTP)
-    this->config_.http.directives_set.insert(kAUTOINDEX);
-  else if (context == config::CONF_HTTP_SERVER)
-    this->config_.http.server_list.back().directives_set.insert(kAUTOINDEX);
-  else if (context == config::CONF_HTTP_LOCATION)
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kAUTOINDEX);
+  updateDirectivesSet(kAUTOINDEX);
 
   if (tmp_switch == "on") {
     if (context == config::CONF_HTTP)
@@ -1015,16 +993,14 @@ bool config::Parser::parseErrorPage() {
 
   tmp_err_pg.setUri(this->tokens_[ti_].value_);
 
-  if (this->current_context_.top() == config::CONF_HTTP) {
+  if (this->current_context_.top() == config::CONF_HTTP)
     this->config_.http.error_page_list.push_back(tmp_err_pg);
-    this->config_.http.directives_set.insert(kERROR_PAGE);
-  } else if (this->current_context_.top() == config::CONF_HTTP_SERVER) {
+  else if (this->current_context_.top() == config::CONF_HTTP_SERVER)
     this->config_.http.server_list.back().error_page_list.push_back(tmp_err_pg);
-    this->config_.http.server_list.back().directives_set.insert(kERROR_PAGE);
-  } else if (this->current_context_.top() == config::CONF_HTTP_LOCATION) {
+  else if (this->current_context_.top() == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().error_page_list.push_back(tmp_err_pg);
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kERROR_PAGE);
-  }
+
+  updateDirectivesSet(kERROR_PAGE);
 
   ti_ += 2;
   return true;
@@ -1192,28 +1168,25 @@ bool config::Parser::parseAllowDeny() {
   switch (this->current_context_.top()) {
     case config::CONF_HTTP:
       this->config_.http.allow_deny_list.push_back(tmp);
-      this->config_.http.directives_set.insert(directive_name);
       break;
 
     case config::CONF_HTTP_SERVER:
       this->config_.http.server_list.back().allow_deny_list.push_back(tmp);
-      this->config_.http.server_list.back().directives_set.insert(directive_name);
       break;
 
     case config::CONF_HTTP_LOCATION:
       this->config_.http.server_list.back().location_list.back().allow_deny_list.push_back(tmp);
-      this->config_.http.server_list.back().location_list.back().directives_set.insert(directive_name);
       break;
 
     case config::CONF_HTTP_LIMIT_EXCEPT:
       this->config_.http.server_list.back().location_list.back().limit_except.allow_deny_list.push_back(tmp);
-      this->config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(
-          directive_name);
       break;
 
     default:
       break;
   }
+
+  updateDirectivesSet(directive_name);
 
   ti_ += 2;
   return true;
@@ -1355,7 +1328,7 @@ bool config::Parser::parseListen() {
   }
 
   this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
-  this->config_.http.server_list.back().directives_set.insert(kLISTEN);
+  updateDirectivesSet(kLISTEN);
 
   ti_ += 2;
   return true;
@@ -1391,7 +1364,7 @@ bool config::Parser::parseServerName() {
     ti_++;
   }
 
-  this->config_.http.server_list.back().directives_set.insert(kSERVER_NAME);
+  updateDirectivesSet(kSERVER_NAME);
   ti_++;
   return true;
 }
@@ -1452,10 +1425,7 @@ bool config::Parser::parseTryFiles() {
       this->config_.http.server_list.back().location_list.back().try_files.setUri(uri);
   }
 
-  if (context == config::CONF_HTTP_SERVER)
-    this->config_.http.server_list.back().directives_set.insert(kTRY_FILES);
-  else if (context == config::CONF_HTTP_LOCATION)
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kTRY_FILES);
+  updateDirectivesSet(kTRY_FILES);
 
   ti_ += 2;
   return true;
@@ -1475,7 +1445,7 @@ bool config::Parser::parseAlias() {
   }
 
   this->config_.http.server_list.back().location_list.back().alias.setPath(path);
-  location_directives.insert(kALIAS);
+  updateDirectivesSet(kALIAS);
 
   ti_ += 2;
   return true;
@@ -1515,7 +1485,7 @@ bool config::Parser::parseReturn() {
   }
 
   this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
-  this->config_.http.server_list.back().location_list.back().directives_set.insert(kRETURN);
+  updateDirectivesSet(kRETURN);
 
   ti_ += 1;
   return true;
@@ -1536,12 +1506,7 @@ bool config::Parser::parseUserid() {
   config::CONTEXT context = this->current_context_.top();
 
   // directives_setにセット
-  if (context == config::CONF_HTTP)
-    this->config_.http.directives_set.insert(kUSERID);
-  else if (context == config::CONF_HTTP_SERVER)
-    this->config_.http.server_list.back().directives_set.insert(kUSERID);
-  else if (context == config::CONF_HTTP_LOCATION)
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID);
+  updateDirectivesSet(kUSERID);
 
   // もし、onであれば、trueにする
   if (tmp_switch == "on") {
@@ -1562,16 +1527,14 @@ bool config::Parser::parseUseridDomain() {
   std::string name = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
 
-  if (context == config::CONF_HTTP) {
+  if (context == config::CONF_HTTP)
     this->config_.http.userid_domain.setName(name);
-    this->config_.http.directives_set.insert(kUSERID_DOMAIN);
-  } else if (context == config::CONF_HTTP_SERVER) {
+  else if (context == config::CONF_HTTP_SERVER)
     this->config_.http.server_list.back().userid_domain.setName(name);
-    this->config_.http.server_list.back().directives_set.insert(kUSERID_DOMAIN);
-  } else if (context == config::CONF_HTTP_LOCATION) {
+  else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().userid_domain.setName(name);
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_DOMAIN);
-  }
+
+  updateDirectivesSet(kUSERID_DOMAIN);
 
   ti_ += 2;
   return true;
@@ -1584,13 +1547,7 @@ bool config::Parser::parseUseridExpires() {
 
   // off であれば、なにもしない
   if (tmp_switch == "off") {
-    if (context == config::CONF_HTTP)
-      this->config_.http.directives_set.insert(kUSERID_EXPIRES);
-    else if (context == config::CONF_HTTP_SERVER)
-      this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
-    else if (context == config::CONF_HTTP_LOCATION)
-      this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
-
+    updateDirectivesSet(kUSERID_EXPIRES);
     ti_ += 2;
     return true;
   }
@@ -1605,16 +1562,15 @@ bool config::Parser::parseUseridExpires() {
   if (context == config::CONF_HTTP) {
     this->config_.http.userid_expires.setTime(time);
     this->config_.http.userid_expires.setIsUseridExpiresOn(true);
-    this->config_.http.directives_set.insert(kUSERID_EXPIRES);
   } else if (context == config::CONF_HTTP_SERVER) {
     this->config_.http.server_list.back().userid_expires.setTime(time);
     this->config_.http.server_list.back().userid_expires.setIsUseridExpiresOn(true);
-    this->config_.http.server_list.back().directives_set.insert(kUSERID_EXPIRES);
   } else if (context == config::CONF_HTTP_LOCATION) {
     this->config_.http.server_list.back().location_list.back().userid_expires.setTime(time);
     this->config_.http.server_list.back().location_list.back().userid_expires.setIsUseridExpiresOn(true);
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_EXPIRES);
   }
+
+  updateDirectivesSet(kUSERID_EXPIRES);
 
   ti_ += 2;
   return true;
@@ -1629,15 +1585,14 @@ bool config::Parser::parseUseridPath() {
   if (!path.empty()) {
     if (context == config::CONF_HTTP) {
       this->config_.http.userid_path.setPath(path);
-      this->config_.http.directives_set.insert(kUSERID_PATH);
     } else if (context == config::CONF_HTTP_SERVER) {
       this->config_.http.server_list.back().userid_path.setPath(path);
-      this->config_.http.server_list.back().directives_set.insert(kUSERID_PATH);
     } else if (context == config::CONF_HTTP_LOCATION) {
       this->config_.http.server_list.back().location_list.back().userid_path.setPath(path);
-      this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_PATH);
     }
   }
+
+  updateDirectivesSet(kUSERID_PATH);
 
   ti_ += 2;
   return true;
@@ -1664,19 +1619,40 @@ bool config::Parser::parseUseridService() {
 
   config::CONTEXT context = this->current_context_.top();
 
-  if (context == config::CONF_HTTP) {
+  if (context == config::CONF_HTTP)
     this->config_.http.userid_service.setUseridService(user_id);
-    this->config_.http.directives_set.insert(kUSERID_SERVICE);
-  } else if (context == config::CONF_HTTP_SERVER) {
+  else if (context == config::CONF_HTTP_SERVER)
     this->config_.http.server_list.back().userid_service.setUseridService(user_id);
-    this->config_.http.server_list.back().directives_set.insert(kUSERID_SERVICE);
-  } else if (context == config::CONF_HTTP_LOCATION) {
+  else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().userid_service.setUseridService(user_id);
-    this->config_.http.server_list.back().location_list.back().directives_set.insert(kUSERID_SERVICE);
-  }
+
+  updateDirectivesSet(kUSERID_PATH);
 
   ti_ += 2;
   return true;
 }
 
 const config::Main &config::Parser::getConfig() const { return this->config_; }
+
+void config::Parser::updateDirectivesSet(const std::string& directive) {
+  switch (current_context_.top()) {
+    case CONF_MAIN:
+      config_.directives_set.insert(directive);
+      break;
+    case CONF_EVENTS:
+      config_.events.directives_set.insert(directive);
+      break;
+    case CONF_HTTP:
+      config_.http.directives_set.insert(directive);
+      break;
+    case CONF_HTTP_SERVER:
+      config_.http.server_list.back().directives_set.insert(directive);
+      break;
+    case CONF_HTTP_LOCATION:
+      config_.http.server_list.back().location_list.back().directives_set.insert(directive);
+      break;
+    case CONF_HTTP_LIMIT_EXCEPT:
+      config_.http.server_list.back().location_list.back().limit_except.directives_set.insert(directive);
+      break;
+  }
+}
