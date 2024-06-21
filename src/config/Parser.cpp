@@ -372,7 +372,7 @@ size_t config::Parser::countArgs(const TK_TYPE terminating_token) const {
   return args_num;
 }
 
-void config::Parser::printFormatedError(const std::string& message, const Token& token) const {
+void config::Parser::printFormatedError(const std::string &message, const Token &token) const {
   printError(message + " \"" + token.value_ + "\"", token);
 }
 
@@ -400,9 +400,9 @@ bool config::Parser::validFinalState() const {
 
 bool config::Parser::validWorkerConnections() const {
   // use directiveにselectが設定されている場合にのみ最大値を超えていないか確認
-if (this->config_.events.use.getConnectionMethod() == config::SELECT &&
-    this->config_.events.worker_connections.getWorkerConnections() >
-    config::WorkerConnections::kSelectMaxConnections) {
+  if (this->config_.events.use.getConnectionMethod() == config::SELECT &&
+      this->config_.events.worker_connections.getWorkerConnections() >
+          config::WorkerConnections::kSelectMaxConnections) {
     std::cerr << "webserv: [emerg] the maximum number of files supported by select() is "
               << config::WorkerConnections::kSelectMaxConnections << std::endl;
     return false;
@@ -463,7 +463,7 @@ bool config::Parser::parseLimitExcept() {
   do {
     const std::string upper_case_method = toUpper(tokens[ti_].value_);
     if (!(upper_case_method == "GET" || upper_case_method == "HEAD" || upper_case_method == "POST" ||
-        upper_case_method == "DELETE")) {
+          upper_case_method == "DELETE")) {
       printFormatedError("invalid method", tokens[ti_]);
       return false;
     }
@@ -472,7 +472,8 @@ bool config::Parser::parseLimitExcept() {
     ++ti_;
   } while (tokens[ti_].type_ != TK_OPEN_CURLY_BRACE);
 
-  updateContext(this->config_.http.server_list.back().location_list.back(), CONF_HTTP_LIMIT_EXCEPT, kLIMIT_EXCEPT);
+  updateContext(this->config_.http.server_list.back().location_list.back(), CONF_HTTP_LIMIT_EXCEPT,
+                kLIMIT_EXCEPT);
 
   ++ti_;
   return true;

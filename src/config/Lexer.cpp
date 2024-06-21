@@ -47,9 +47,7 @@ const std::string config::Lexer::getFileContent(const std::string file_path) con
   return content;
 }
 
-bool config::Lexer::isEndOfFile() const {
-  return (file_iterator_ == file_content_.size());
-}
+bool config::Lexer::isEndOfFile() const { return (file_iterator_ == file_content_.size()); }
 
 void config::Lexer::skipSpaces() {
   if (isEndOfFile()) return;
