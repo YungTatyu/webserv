@@ -102,11 +102,11 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->all_directives_.insert(std::make_pair(kSERVER_NAME, config::ServerName::kType_));
   this->all_directives_.insert(std::make_pair(kTRY_FILES, config::TryFiles::kType_));
   this->all_directives_.insert(std::make_pair(kUSE, config::Use::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
+  //this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
+  //this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
+  //this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
+  //this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
+  //this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
   this->all_directives_.insert(std::make_pair(kWORKER_CONNECTIONS, config::WorkerConnections::kType_));
 
   // parser
@@ -134,11 +134,11 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
   this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
   this->parser_map_[kUSE] = &config::Parser::parseUse;
-  this->parser_map_[kUSERID] = &config::Parser::parseUserid;
-  this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
-  this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
-  this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
-  this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
+  //this->parser_map_[kUSERID] = &config::Parser::parseUserid;
+  //this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
+  //this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
+  //this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
+  //this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
   this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
 }
 
