@@ -178,7 +178,7 @@ bool config::Parser::parse() {
 
     // 存在するcontextまたはdirectiveか
     if (!(isDirective(current_token) || isContext(current_token))) {
-      printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
+      printFormatedError("unknown directive", current_token);
       return false;
     }
 
@@ -301,7 +301,7 @@ const std::set<std::string> *config::Parser::findDirectivesSet(const CONTEXT con
 
 bool config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const {
   if (type != token.type_) {
-    printError(std::string("unexpected ") + "\"" + token.value_ + "\"", token);
+    printFormatedError("unexpected", token);
     return false;
   }
   return true;
@@ -372,6 +372,10 @@ size_t config::Parser::countArgs(const TK_TYPE terminating_token) const {
   return args_num;
 }
 
+void config::Parser::printFormatedError(const std::string& message, const Token& token) const {
+  printError(message + " \"" + token.value_ + "\"", token);
+}
+
 void config::Parser::printError(const std::string &err_msg, const Token &token) const {
   std::cerr << "webserv: [emerg] " << err_msg << " in " + this->filepath_ << ":" << token.line_ << '\n';
 }
@@ -439,7 +443,7 @@ bool config::Parser::parseLocation() {
   std::vector<Location> &list = this->config_.http.server_list.back().location_list;
   for (std::vector<Location>::iterator it = list.begin(); it != list.end(); ++it) {
     if (it->uri == uri) {
-      printError(std::string("duplicate location \"") + tokens[ti_].value_ + "\"", tokens[ti_]);
+      printFormatedError("duplicate location", tokens[ti_]);
       return false;
     }
   }
@@ -460,7 +464,7 @@ bool config::Parser::parseLimitExcept() {
     const std::string upper_case_method = toUpper(tokens[ti_].value_);
     if (!(upper_case_method == "GET" || upper_case_method == "HEAD" || upper_case_method == "POST" ||
         upper_case_method == "DELETE")) {
-      printError(std::string("invalid method \"" + tokens[ti_].value_ + "\""), tokens[ti_]);
+      printFormatedError("invalid method", tokens[ti_]);
       return false;
     }
     const REQUEST_METHOD method = convertToRequestMethod(upper_case_method);
@@ -1485,8 +1489,7 @@ bool config::Parser::parseReturn() {
 
   if (Utils::isNumeric(this->tokens_[ti_].value_)) {
     if (!isNumInRange(this->tokens_[ti_].value_, 0, 999)) {
-      printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"",
-                 this->tokens_[ti_]);
+      printFormatedError("invalid return code", this->tokens_[ti_]);
       return false;
     }
     std::istringstream iss(this->tokens_[ti_].value_);
@@ -1500,8 +1503,7 @@ bool config::Parser::parseReturn() {
   if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && code == config::Return::kCodeUnset) {
     const std::string url = this->tokens_[ti_].value_;
     if (url.substr(0, http.length()) != http && url.substr(0, https.length()) != https) {
-      printError(std::string("invalid return code \"") + this->tokens_[ti_].value_ + "\"",
-                 this->tokens_[ti_]);
+      printFormatedError("invalid return code", this->tokens_[ti_]);
       return false;
     }
     tmp_return.setUrl(this->tokens_[ti_].value_);

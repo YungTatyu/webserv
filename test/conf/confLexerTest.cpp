@@ -18,7 +18,7 @@ namespace test {
 
   const config::Token& getToken(const std::vector<config::Token>& tokens, int key) { return tokens[key]; }
 
-};
+} // namespace config
 
 TEST(ConfigTest, no_file) {
   std::string filePath = "";

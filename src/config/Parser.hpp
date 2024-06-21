@@ -38,6 +38,7 @@ class Parser {
   bool isDirective(const Token &token) const;
   const std::set<std::string> *findDirectivesSet(const CONTEXT context) const;
   void printError(const std::string &err_msg, const Token &token) const;
+  void printFormatedError(const std::string& message, const Token& token) const;
   size_t countArgs(const TK_TYPE terminating_token) const;
   bool validFinalState() const;
   bool validWorkerConnections() const;
