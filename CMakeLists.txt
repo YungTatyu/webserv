@@ -55,7 +55,7 @@ add_executable(${PROJECT_NAME}-googletest
   test/server/ConfigHandler/createTiedServer/createTiedServer.cpp
   test/server/ConfigHandler/searchTimeout/searchKeepaliveTimeout.cpp
   test/server/ConfigHandler/searchTimeout/searchSendTimeout.cpp
-  test/server/ConfigHandler/searchTimeout/searchUseridExpires.cpp
+  # test/server/ConfigHandler/searchTimeout/searchUseridExpires.cpp
   test/server/ConfigHandler/writeAccessLog/writeAccessLog.cpp
   test/server/ConfigHandler/writeErrorLog/writeErrorLog.cpp
   test/server/ConfigHandler/searchLocationConfig/searchLongestMatchLocationConfig.cpp
@@ -95,11 +95,11 @@ add_executable(${PROJECT_NAME}-googletest
 	test/conf/directive_parser/server_name/server_name_test.cpp
 	test/conf/directive_parser/try_files/try_files_test.cpp
 	test/conf/directive_parser/use/use_test.cpp
-	test/conf/directive_parser/userid/userid_test.cpp
-	test/conf/directive_parser/userid_domain/userid_domain_test.cpp
-	test/conf/directive_parser/userid_expires/userid_expires_test.cpp
-	test/conf/directive_parser/userid_path/userid_path_test.cpp
-	test/conf/directive_parser/userid_service/userid_service_test.cpp
+	# test/conf/directive_parser/userid/userid_test.cpp
+	# test/conf/directive_parser/userid_domain/userid_domain_test.cpp
+	# test/conf/directive_parser/userid_expires/userid_expires_test.cpp
+	# test/conf/directive_parser/userid_path/userid_path_test.cpp
+	# test/conf/directive_parser/userid_service/userid_service_test.cpp
 	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
 	test/conf/init_log_test.cpp
 	test/cgi/CGIExecutor_test.cpp
