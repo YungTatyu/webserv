@@ -136,7 +136,6 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);
-  connManager.setEvent(connfd, ConnectionData::EV_READ);
   connManager.setTiedServer(connfd, &this->listenfd_map_[listen_fd]);
 
   // show ip address of newly connected client.

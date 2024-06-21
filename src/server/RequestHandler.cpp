@@ -21,11 +21,9 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   // リスニングソケットへの新規リクエスト
   if (ioHandler.isListenSocket(sockfd)) {
     int new_sock = ioHandler.acceptConnection(connManager, sockfd);
-    if (new_sock == -1) {
-      server->addNewEvent(new_sock, ConnectionData::EV_READ);
-      return new_sock;
-    }
-
+    if (new_sock == -1) return new_sock;
+    server->addNewEvent(new_sock, ConnectionData::EV_READ);
+    connManager.setEvent(new_sock, ConnectionData::EV_READ);
     addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_RECV);
     if (!isOverWorkerConnections(connManager, configHandler)) return new_sock;
     int timeout_fd = timerTree.getClosestTimeout();
@@ -89,7 +87,11 @@ int RequestHandler::handleResponse(ConnectionManager &connManager, const ConfigH
   int client = connManager.isCgiSocket(sockfd) ? connManager.getCgiHandler(sockfd).getCliSocket() : sockfd;
   addTimerByType(connManager, configHandler, timerTree, client, Timer::TMO_KEEPALIVE);
 
-  connManager.setEvent(sockfd, ConnectionData::EV_WRITE);  // writeイベントに更新
+  if (connManager.isCgiSocket(sockfd))  // cgi socketの場合は、クライアントをイベントとして登録する
+    server->addNewEvent(client, ConnectionData::EV_WRITE);
+  else
+    server->updateEvent(client, ConnectionData::EV_WRITE);
+  connManager.setEvent(client, ConnectionData::EV_WRITE);  // writeイベントに更新
   return RequestHandler::UPDATE_WRITE;
 }
 
@@ -107,11 +109,15 @@ int RequestHandler::handleCgi(ConnectionManager &connManager, const ConfigHandle
   // bodyが空なら、bodyをsendしない
   int cgi_sock = connManager.getCgiHandler(sockfd).getCgiSocket();
   if (request.body.empty()) {
+    server->deleteEvent(sockfd, connManager.getEvent(sockfd));
+    server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_READ);
     connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_READ);
     // 最初にcgiのレスポンスをrecvするまでのtimeout
     addTimerByType(connManager, configHandler, timerTree, cgi_sock, Timer::TMO_RECV);
     return RequestHandler::UPDATE_CGI_READ;
   }
+  server->deleteEvent(sockfd, connManager.getEvent(sockfd));
+  server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_WRITE);
   connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_WRITE);
   // 最初にcgiにbodyをsendするまでのtimeout
   addTimerByType(connManager, configHandler, timerTree, cgi_sock, Timer::TMO_SEND);
@@ -189,6 +195,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_KEEPALIVE);
 
   // readイベントに更新
+  server->updateEvent(sockfd, ConnectionData::EV_READ);
   connManager.setEvent(sockfd, ConnectionData::EV_READ);
   // connection dataを削除
   connManager.clearConnectionData(sockfd);
@@ -197,28 +204,28 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
 int RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         IServer *server, TimerTree &timerTree, const int sockfd) const {
-  (void)server;
   const ConfigHandler &configHandler = WebServer::getConfigHandler();
   ioHandler.sendRequestBody(connManager, sockfd);
 
   const std::string &body = connManager.getRequest(sockfd).body;
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   int status = -1;
-  if (connManager.getSentBytes(sockfd) == body.size() ||          // bodyを全て送ったら
-      cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processがすでに死んでいたら
-    connManager.resetSentBytes(sockfd);
-    connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+  if (connManager.getSentBytes(sockfd) != body.size() &&           // bodyをまだ送る必要がある
+      !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processが生きている
     addTimerByType(connManager, configHandler, timerTree, sockfd,
-                   Timer::TMO_RECV);  // cgiのレスポンスをreadするまでのtimeout
-    return RequestHandler::UPDATE_CGI_READ;
+                   Timer::TMO_SEND);  // cgiにsendする間のtimeout
+    return RequestHandler::UPDATE_NONE;
   }
-  addTimerByType(connManager, configHandler, timerTree, sockfd, Timer::TMO_SEND);  // cgiにsendする間のtimeout
-  return RequestHandler::UPDATE_NONE;
+  connManager.resetSentBytes(sockfd);
+  server->updateEvent(sockfd, ConnectionData::EV_CGI_READ);
+  connManager.setEvent(sockfd, ConnectionData::EV_CGI_READ);
+  addTimerByType(connManager, configHandler, timerTree, sockfd,
+                 Timer::TMO_RECV);  // cgiのレスポンスをreadするまでのtimeout
+  return RequestHandler::UPDATE_CGI_READ;
 }
 
 int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                    IServer *server, TimerTree &timerTree, const int sockfd) const {
-  (void)server;
   // const ConfigHandler &configHandler = WebServer::getConfigHandler();
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ) {
     return handleCgiReadEvent(ioHandler, connManager, server, timerTree, sockfd);
@@ -231,7 +238,6 @@ int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManage
 
 int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      IServer *server, TimerTree &timerTree, const int sockfd) const {
-  (void)server;
   // cgiならすぐには接続切らず、timoutに任せる
   if (connManager.isCgiSocket(sockfd)) return RequestHandler::UPDATE_NONE;
   ioHandler.closeConnection(connManager, server, timerTree, sockfd);
