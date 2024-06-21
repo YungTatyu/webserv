@@ -41,7 +41,11 @@ bool cgi::CGIHandler::isCgi(const std::string& script_path) {
  */
 bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const HttpResponse& response) {
   pid_t pid = SysCallWrapper::Fork();
-  if (pid == -1) return false;
+  if (pid == -1) {
+    close(this->sockets_[SOCKET_PARENT]);
+    close(this->sockets_[SOCKET_CHILD]);
+    return false;
+  }
   if (pid == 0) {
     close(this->sockets_[SOCKET_PARENT]);
     this->cgi_executor_.executeCgiScript(request, response, this->sockets_[SOCKET_CHILD], this->cli_socket_);

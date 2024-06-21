@@ -102,11 +102,11 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->all_directives_.insert(std::make_pair(kSERVER_NAME, config::ServerName::kType_));
   this->all_directives_.insert(std::make_pair(kTRY_FILES, config::TryFiles::kType_));
   this->all_directives_.insert(std::make_pair(kUSE, config::Use::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
-  this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
+  // this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
+  // this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
+  // this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
+  // this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
+  // this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
   this->all_directives_.insert(std::make_pair(kWORKER_CONNECTIONS, config::WorkerConnections::kType_));
 
   // parser
@@ -134,11 +134,11 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
   this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
   this->parser_map_[kUSE] = &config::Parser::parseUse;
-  this->parser_map_[kUSERID] = &config::Parser::parseUserid;
-  this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
-  this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
-  this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
-  this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
+  // this->parser_map_[kUSERID] = &config::Parser::parseUserid;
+  // this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
+  // this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
+  // this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
+  // this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
   this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
 }
 
@@ -1029,7 +1029,7 @@ bool config::Parser::isIPv4(const std::string &ipv4) const {
     return false;
   }
 
-  // 2. IPv6アドレスとサブネットマスクを分割
+  // 2. IPv4アドレスとサブネットマスクを分割
   size_t mask_pos = ipv4.find('/');
   std::string address_part = ipv4.substr(0, mask_pos);
   std::string mask_part = (mask_pos != std::string::npos) ? ipv4.substr(mask_pos + 1) : "";
@@ -1175,7 +1175,8 @@ bool config::Parser::parseAllowDeny() {
   ++ti_;
   const std::string address = this->tokens_[ti_].value_;
 
-  if (address != "all" && !isIPv4(address) && !isIPv6(address) && !isMixedIPAddress(address)) {
+  // ipv6にも対応するならば、!isIPv6()と!isMixedIPAddress()も条件に追加してください。
+  if (address != "all" && !isIPv4(address)) {
     printError(std::string("invalid parameter \"" + address + "\""), this->tokens_[ti_]);
     return false;
   }
@@ -1265,7 +1266,8 @@ bool config::Parser::parseListen() {
                 << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
       return false;
     }
-    if (!isIPv4(segments[0]) && !isIPv6(segments[0])) {
+    // ipv6にも対応するならば、!isIPv6()も条件に加えてください。
+    if (!isIPv4(segments[0])) {
       std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in "
                 << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
       return false;
@@ -1313,7 +1315,8 @@ bool config::Parser::parseListen() {
     iss.str(segments[0].c_str());
 
     // ip addressかportであればセット
-    if (isIPv4(segments[0]) || isIPv6(segments[0]))
+    // ipv6も対応するならば、isIPv6())も条件に加えてください。
+    if (isIPv4(segments[0]))
       tmp_listen.setAddress(segments[0]);
     else if (iss >> port) {
       if (iss >> remaining_char || port < 0 || 65535 < port) {

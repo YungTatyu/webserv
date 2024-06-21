@@ -176,11 +176,19 @@ bool ConnectionManager::isCgiSocket(const int fd) const {
 
 void ConnectionManager::closeAllConnections() {
   for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
+       it != this->connections_.end();) {
+    std::map<int, ConnectionData*>::iterator tmp = it;
+    ++it;
+    if (isCgiSocket(tmp->first)) {
+      close(tmp->first);
+      connections_.erase(tmp->first);
+    }
+  }
+  for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
        it != this->connections_.end(); ++it) {
     close(it->first);
     delete it->second;
   }
-  this->connections_.clear();
 }
 
 connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_; }
