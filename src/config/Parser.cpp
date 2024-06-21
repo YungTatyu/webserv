@@ -567,36 +567,25 @@ const config::OS currentOS = config::OS_LINUX;
 const config::OS currentOS = config::OS_OTHER;
 #endif
 
+bool config::Parser::validEventType(const std::string& eventType) const {
+    switch (currentOS) {
+        case config::OS_BSD_BASED:
+            return eventType == kSELECT || eventType == kPOLL || eventType == kKQUEUE;
+        case config::OS_LINUX:
+            return eventType == kSELECT || eventType == kPOLL || eventType == kEPOLL;
+        case config::OS_OTHER:
+            return eventType == kSELECT || eventType == kPOLL;
+    }
+}
+
 bool config::Parser::parseUse() {
   ti_++;
 
   std::string token_value = this->tokens_[ti_].value_;
 
-  switch (currentOS) {
-    case config::OS_BSD_BASED:
-      if (token_value != kSELECT && token_value != kPOLL && token_value != kKQUEUE) {
-        std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_
-                  << ":" << this->tokens_[ti_].line_ << std::endl;
-        return false;
-      }
-      break;
-    case config::OS_LINUX:
-      if (token_value != kSELECT && token_value != kPOLL && token_value != kEPOLL) {
-        std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_
-                  << ":" << this->tokens_[ti_].line_ << std::endl;
-        return false;
-      }
-      break;
-    case config::OS_OTHER:
-      if (token_value != kSELECT && token_value != kPOLL) {
-        std::cerr << "webserv: [emerg] invalid event type \"" << token_value << "\" in " << this->filepath_
-                  << ":" << this->tokens_[ti_].line_ << std::endl;
-        return false;
-      }
-      break;
-    default:
-      return false;
-      break;
+  if (!validEventType(token_value)) {
+    printError(static_cast<std::string>("invalid event type \"" + token_value + "\""), tokens_[ti_]);
+    return false;
   }
 
   std::map<std::string, config::CONNECTION_METHOD> method_map;
@@ -630,15 +619,10 @@ bool config::Parser::parseWorkerConnections() {
   }
 
   std::istringstream iss(str);
+  iss >> value;
 
   // 値が正の数かつLONG_MAX以内でなければエラー
-  if (iss >> value) {
-    if (value < 0) {
-      std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti_].value_ << "\" in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-      return false;
-    }
-  } else {
+  if (iss.fail() || iss.bad() || !iss.eof() || value < 0) {
     std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti_].value_ << "\" in "
               << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
     return false;
@@ -652,6 +636,7 @@ bool config::Parser::parseWorkerConnections() {
 }
 
 bool config::Parser::canConvertMinTime(long &value, const std::string &unit) {
+  if (value == 0) return true;
   if (unit == "" || unit == "s") {
     if (config::Time::seconds > (config::Time::kMaxTimeInMilliseconds_ / value)) return false;
     value *= config::Time::seconds;
@@ -669,6 +654,7 @@ bool config::Parser::canConvertMinTime(long &value, const std::string &unit) {
 }
 
 bool config::Parser::canConvertMinSize(long &value, const std::string &unit) {
+  if (value == 0) return true;
   if (unit == "k" || unit == "K") {
     if (config::Size::kilobytes > (config::Size::kMaxSizeInBytes_ / value)) return false;
     value *= config::Size::kilobytes;
@@ -679,46 +665,60 @@ bool config::Parser::canConvertMinSize(long &value, const std::string &unit) {
   return true;
 }
 
-long config::Parser::parseTime() {
+std::pair<long, std::string> config::Parser::parseValueWithUnit(const std::set<std::string>& units) const {
   long num;
   std::string unit;  // 単位
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
 
-  if (iss >> num) {
-    if (iss >> unit) {
-      if (unit != "ms" && unit != "m" && unit != "s" && unit != "h" && unit != "d") {
-        return -1;
-      }
-    } else
-      unit = "";
+  iss >> num;
+  if (iss.fail() || iss.bad()) return std::make_pair(-1, "");
 
-    if (num == 0) return 0;
-    if (num < 0 || !canConvertMinTime(num, unit))  // ms 変更できればOK
-    {
-      return -1;
-    }
-  } else
-    return -1;
-  return num;
+  // 残りをunitとして受け付ける
+  if (iss.eof())
+    unit = "";
+  else {
+    iss >> unit;
+    if (iss.fail() || iss.bad() || !iss.eof()) return std::make_pair(-1, "");
+  }
+
+  // そのunitを受け付けているか
+  if (!unit.empty() && units.find(unit) == units.end()) return std::make_pair(-1, "");
+
+  if (num < 0) return std::make_pair(-1, "");
+
+  return std::make_pair(num, unit);
+}
+
+long config::Parser::parseTime() {
+  std::set<std::string> units;
+  units.insert("ms");
+  units.insert("m");
+  units.insert("s");
+  units.insert("h");
+  units.insert("d");
+
+  std::pair<long, std::string> time = parseValueWithUnit(units);
+
+  // ms に変更できないとinvalid
+  if (time.first == -1 || !canConvertMinTime(time.first, time.second)) return -1;
+
+  return time.first;
 }
 
 long config::Parser::parseSize() {
-  long num;
-  std::string unit;
-  std::istringstream iss(this->tokens_[ti_].value_.c_str());
+  std::set<std::string> units;
+  units.insert("k");
+  units.insert("K");
+  units.insert("m");
+  units.insert("M");
 
-  if (iss >> num) {
-    if (iss >> unit) {
-      if (unit != "k" && unit != "K" && unit != "m" && unit != "M") return -1;
-    } else
-      unit = "";
+  std::pair<long, std::string> size = parseValueWithUnit(units);
 
-    if (num == 0) return 0;
-    if (num < 0 || !canConvertMinSize(num, unit))  // ms 変更できればOK
-      return -1;
-  } else
-    return -1;
-  return num;
+  // ms に変更できないとinvalid
+  // k に変更できないとinvalid
+  if (size.first == -1 || !canConvertMinSize(size.first, size.second)) return -1;
+
+  return size.first;
 }
 
 bool config::Parser::parseSendTimeout() {
