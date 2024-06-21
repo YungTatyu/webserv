@@ -21,20 +21,17 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   // リスニングソケットへの新規リクエスト
   if (ioHandler.isListenSocket(sockfd)) {
     int new_sock = ioHandler.acceptConnection(connManager, sockfd);
-    if (new_sock == -1) return new_sock;
+    if (new_sock == -1) {
+      server->addNewEvent(new_sock, ConnectionData::EV_READ);
+      return new_sock;
+    }
 
     addTimerByType(connManager, configHandler, timerTree, new_sock, Timer::TMO_RECV);
     if (!isOverWorkerConnections(connManager, configHandler)) return new_sock;
     int timeout_fd = timerTree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
-    if (connManager.isCgiSocket(timeout_fd)) {
-      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(timeout_fd);
-      int client = cgi_handler.getCliSocket();
-      ioHandler.closeConnection(connManager, timerTree, timeout_fd);  // cgiから削除する
-      ioHandler.closeConnection(connManager, timerTree, client);
-      return new_sock;
-    }
-    ioHandler.closeConnection(connManager, timerTree, timeout_fd);
+    // cgiの時は、clientとcgi両方削除しないといけない
+    ioHandler.purgeConnection(connManager, server, timerTree, timeout_fd);
     return new_sock;
   }
 
@@ -44,7 +41,7 @@ int RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManag
   if (re == -1) return RequestHandler::UPDATE_READ;
   if (re == 0)  // クライアントが接続を閉じる
   {
-    ioHandler.closeConnection(connManager, timerTree, sockfd);
+    ioHandler.closeConnection(connManager, server, timerTree, sockfd);
     return RequestHandler::UPDATE_CLOSE;
   }
   // 2つのrecv間のtimeout設定
@@ -146,7 +143,7 @@ int RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionMa
   }
 
   re = handleResponse(connManager, configHandler, server, timerTree, sockfd);
-  ioHandler.closeConnection(connManager, timerTree, sockfd);  // delete cgi event
+  ioHandler.closeConnection(connManager, server, timerTree, sockfd);  // delete cgi event
   return re;
 }
 
@@ -162,7 +159,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
   if (re == -1) return RequestHandler::UPDATE_NONE;
   // client connection closed
   if (re == 0) {
-    ioHandler.closeConnection(connManager, timerTree, sockfd);
+    ioHandler.closeConnection(connManager, server, timerTree, sockfd);
     return RequestHandler::UPDATE_CLOSE;
   }
   const std::vector<unsigned char> &final_response = connManager.getFinalResponse(sockfd);
@@ -179,7 +176,7 @@ int RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMana
 
   const HttpResponse &response = connManager.getResponse(sockfd);
   if (!HttpResponse::isKeepaliveConnection(response)) {
-    ioHandler.closeConnection(connManager, timerTree, sockfd);
+    ioHandler.closeConnection(connManager, server, timerTree, sockfd);
     return UPDATE_CLOSE;
   }
   const std::vector<unsigned char> &context = connManager.getRawRequest(sockfd);
@@ -228,7 +225,7 @@ int RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManage
   } else if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE) {
     return RequestHandler::UPDATE_CGI_READ;
   }
-  ioHandler.closeConnection(connManager, timerTree, sockfd);
+  ioHandler.closeConnection(connManager, server, timerTree, sockfd);
   return RequestHandler::UPDATE_CLOSE;
 }
 
@@ -237,7 +234,7 @@ int RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionMana
   (void)server;
   // cgiならすぐには接続切らず、timoutに任せる
   if (connManager.isCgiSocket(sockfd)) return RequestHandler::UPDATE_NONE;
-  ioHandler.closeConnection(connManager, timerTree, sockfd);
+  ioHandler.closeConnection(connManager, server, timerTree, sockfd);
   return RequestHandler::UPDATE_CLOSE;
 }
 
@@ -263,7 +260,7 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
 
       // timeoutしたcgiの処理
       cgi_handler.killCgiProcess();
-      ioHandler.closeConnection(connManager, timerTree, cgi_sock);
+      ioHandler.closeConnection(connManager, server, timerTree, cgi_sock);
       connManager.clearResData(client_sock);
 
       // 504 error responseを生成
@@ -275,7 +272,7 @@ std::map<int, RequestHandler::UPDATE_STATUS> RequestHandler::handleTimeoutEvent(
       it = next;
       continue;
     }
-    ioHandler.closeConnection(connManager, timerTree, it->getFd());
+    ioHandler.closeConnection(connManager, server, timerTree, it->getFd());
     configHandler.writeErrorLog("webserv: [info] client timed out\n");  // debug
     it = next;
   }

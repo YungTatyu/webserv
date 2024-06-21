@@ -21,6 +21,7 @@
 
 class ConfigHandler;
 class ConnectionManager;
+class IServer;
 
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer {
@@ -52,7 +53,8 @@ class NetworkIOHandler {
   ssize_t receiveCgiResponse(ConnectionManager& connManager, const int sock);
   ssize_t sendRequestBody(ConnectionManager& connManager, const int sock);
   int acceptConnection(ConnectionManager& connManager, const int listen_fd);
-  void closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock);
+  void closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree, const int sock);
+  void purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree, const int sock);
   void closeAllListenSockets();
   const std::map<int, TiedServer>& getListenfdMap();
   void addVServer(const int listen_fd, const TiedServer server);

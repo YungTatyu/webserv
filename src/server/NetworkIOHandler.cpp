@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "ConnectionManager.hpp"
-#include "EpollServer.hpp"
+#include "IServer.hpp"
 #include "SysCallWrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
@@ -161,18 +161,38 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @param connManager
  * @param sock
  */
-void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock) {
-#if defined(EPOLL_AVAILABLE)
-  // closeする前にイベントを削除したい
-  const ConfigHandler& config_handler = WebServer::getConfigHandler();
-  if (config_handler.config_->events.use.getConnectionMethod() == config::EPOLL)
-    EpollServer::deleteEvent(sock);
-#endif  // EPOLL_AVAILABLE
+void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
+                                       const int sock) {
+  server->deleteEvent(sock, connManager.getEvent(sock));
   close(sock);
   timerTree.deleteTimer(sock);
   bool cgi = connManager.isCgiSocket(sock);
   if (cgi) connManager.resetCgiSockets(sock);
   connManager.removeConnection(sock, cgi);
+}
+
+/**
+ * @brief clientとのコネクションを完全に削除する
+ * client, cgi socket, timerを全て削除
+ *
+ */
+void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
+                                       const int sock) {
+  server->deleteEvent(sock, connManager.getEvent(sock));
+  close(sock);
+  timerTree.deleteTimer(sock);
+  bool cgi = connManager.isCgiSocket(sock);
+  if (!cgi) {
+    connManager.removeConnection(sock, cgi);
+    return;
+  }
+  // cgi socketの場合は、clientのデータも削除する
+  const cgi::CGIHandler& cgi_handler = connManager.getCgiHandler(sock);
+  int client = cgi_handler.getCliSocket();
+  close(client);
+  // cgiのコネクションを最初に削除する
+  connManager.removeConnection(sock, cgi);
+  connManager.removeConnection(client, false);
 }
 
 const std::map<int, TiedServer>& NetworkIOHandler::getListenfdMap() { return this->listenfd_map_; }
