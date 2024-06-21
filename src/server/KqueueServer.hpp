@@ -33,7 +33,6 @@ class KqueueServer : public IServer {
   int kq_;  // kqueue fd
   bool initKqueueServer();
   bool initKevents(const std::map<int, ConnectionData*>& connections);
-  void addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map);
 };
 
 #endif
