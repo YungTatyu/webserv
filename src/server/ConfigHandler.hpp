@@ -27,9 +27,10 @@ class ConfigHandler {
   void loadConfiguration(const config::Main* config);
 
   // method
-  // とりあえずipv4だけ想定
+  // ipv4のみ対応
   int allowRequest(const config::Server& server, const config::Location* location, const HttpRequest& request,
                    struct sockaddr_in client_addr) const;
+
   // log出力
   void writeAccessLog(const struct TiedServer& tied_servers, const std::string& server_name,
                       const std::string& uri, const std::string& msg) const;
@@ -40,6 +41,7 @@ class ConfigHandler {
   void writeErrorLog(const config::Server& server, const config::Location* location,
                      const std::string& msg) const;
   void writeErrorLog(const std::string& msg) const;
+
   // timeout値の取得
   const config::Time& searchKeepaliveTimeout(const struct TiedServer& tied_servers,
                                              const std::string& server_name, const std::string& uri) const;
@@ -49,19 +51,26 @@ class ConfigHandler {
                                         const std::string& uri) const;
   const config::Time& searchUseridExpires(const struct TiedServer& tied_servers,
                                           const std::string& server_name, const std::string& uri) const;
+
   // TiedServerの作成
   struct TiedServer createTiedServer(const std::string addr, const unsigned int port) const;
-  const config::ErrorPage* searchErrorPage(const config::Server& server, const config::Location* location,
-                                           const unsigned int code) const;
+
+  // directiveの値取得系
   const config::Server& searchServerConfig(const struct TiedServer& tied_servers,
                                            const std::string& server_name) const;
   const config::Location* searchLongestMatchLocationConfig(const config::Server& server_config,
                                                            const std::string& uri) const;
   std::string searchRootPath(const config::Server& server, const config::Location* location) const;
+  unsigned long searchCliMaxBodySize() const;
+
+  // directive検索系
+  const config::ErrorPage* searchErrorPage(const config::Server& server, const config::Location* location,
+                                           const unsigned int code) const;
   bool isAutoIndexOn(const config::Server& server, const config::Location* location) const;
+
+  // utillity系
   std::string createAcsLogMsg(const uint32_t ip, const long status, const size_t resSize,
                               const HttpRequest& request) const;
-  unsigned long searchCliMaxBodySize() const;
 
   // const variable
   static const int ACCESS_ALLOW = 1;
@@ -73,6 +82,7 @@ class ConfigHandler {
   // 必要なメソッド追加
   bool limitLoop(const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr) const;
   bool addressInLimit(const std::string& ip_str, const uint32_t cli_addr) const;
+  const std::string getCurrentTimeByLogFormat() const;
 };
 
 /**
