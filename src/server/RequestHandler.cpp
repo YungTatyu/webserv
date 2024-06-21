@@ -255,17 +255,14 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
     // timer treeから削除
     if (connManager.isCgiSocket(it->getFd())) {
       int cgi_sock = it->getFd();
-      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
-      int client_sock = cgi_handler.getCliSocket();
-
-      // timeoutしたcgiの処理
-      cgi_handler.killCgiProcess();
-      connManager.clearResData(client_sock);
-
       // 504 error responseを生成
-      HttpResponse &response = connManager.getResponse(client_sock);
+      HttpResponse &response = connManager.getResponse(cgi_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
       handleResponse(connManager, configHandler, server, timerTree, cgi_sock);  // 中でsetEvent
+      // timeoutしたcgiの処理
+      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
+      cgi_handler.killCgiProcess();
+      connManager.clearResData(cgi_sock);
       ioHandler.closeConnection(connManager, server, timerTree, cgi_sock);
       configHandler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
       it = next;
