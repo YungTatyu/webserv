@@ -90,7 +90,7 @@ void RequestHandler::handleResponse(ConnectionManager &connManager, const Config
   if (connManager.isCgiSocket(sockfd))  // cgi socketの場合は、クライアントをイベントとして登録する
     server->addNewEvent(client, ConnectionData::EV_WRITE);
   else
-    server->updateEvent(client, ConnectionData::EV_WRITE);
+    server->updateEvent(sockfd, ConnectionData::EV_WRITE);
   connManager.setEvent(client, ConnectionData::EV_WRITE);  // writeイベントに更新
 }
 
@@ -145,7 +145,6 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionM
   } else {  // cgiが異常終了した場合
     response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
   }
-
   handleResponse(connManager, configHandler, server, timerTree, sockfd);
   ioHandler.closeConnection(connManager, server, timerTree, sockfd);  // delete cgi event
 }
@@ -261,14 +260,14 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
 
       // timeoutしたcgiの処理
       cgi_handler.killCgiProcess();
-      ioHandler.closeConnection(connManager, server, timerTree, cgi_sock);
       connManager.clearResData(client_sock);
 
       // 504 error responseを生成
       HttpResponse &response = connManager.getResponse(client_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      handleResponse(connManager, configHandler, server, timerTree, client_sock);  // 中でsetEvent
-      configHandler.writeErrorLog("webserv: [info] cgi timed out\n");              // debug
+      handleResponse(connManager, configHandler, server, timerTree, cgi_sock);  // 中でsetEvent
+      ioHandler.closeConnection(connManager, server, timerTree, cgi_sock);
+      configHandler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
       it = next;
       continue;
     }
