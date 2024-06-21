@@ -612,8 +612,7 @@ bool config::Parser::parseWorkerConnections() {
   // 数値でなければエラー
   for (int i = 0; str[i] != '\0'; i++) {
     if (!std::isdigit(str[i])) {
-      std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti_].value_ << "\" in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printFormatedError("invalid number",  this->tokens_[ti_]);
       return false;
     }
   }
@@ -623,8 +622,7 @@ bool config::Parser::parseWorkerConnections() {
 
   // 値が正の数かつLONG_MAX以内でなければエラー
   if (iss.fail() || iss.bad() || !iss.eof() || value < 0) {
-    std::cerr << "webserv: [emerg] invalid number \"" << this->tokens_[ti_].value_ << "\" in "
-              << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+    printFormatedError("invalid number",  this->tokens_[ti_]);
     return false;
   }
 
@@ -726,8 +724,7 @@ bool config::Parser::parseSendTimeout() {
 
   long ret = parseTime();
   if (ret == -1) {
-    std::cerr << "webserv: [emerg] \"send_timeout\" directive invalid value in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+    printError("\"send_timeout\" directive invalid value",  this->tokens_[ti_]);
     return false;
   }
 
@@ -751,8 +748,7 @@ bool config::Parser::parseKeepaliveTimeout() {
 
   long ret = parseTime();
   if (ret == -1) {
-    std::cerr << "webserv: [emerg] \"keepalive_timeout\" directive invalid value in " << this->filepath_
-              << ":" << this->tokens_[ti_].line_ << std::endl;
+    printError("\"keepalive_timeout\" directive invalid value",  this->tokens_[ti_]);
     return false;
   }
 
@@ -785,8 +781,7 @@ bool config::Parser::parseReceiveTimeout() {
 
   long ret = parseTime();
   if (ret == -1) {
-    std::cerr << "webserv: [emerg] \"receive_timeout\" directive invalid value in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+    printError("\"receive_timeout\" directive invalid value",  this->tokens_[ti_]);
     return false;
   }
 
@@ -844,8 +839,7 @@ bool config::Parser::parseClientMaxBodySize() {
 
   long ret = parseSize();
   if (ret == -1) {
-    std::cerr << "webserv: [emerg] \"client_max_body_size\" directive invalid value in " << this->filepath_
-              << ":" << this->tokens_[ti_].line_ << std::endl;
+    printError("\"client_max_body_size\" directive invalid value",  this->tokens_[ti_]);
     return false;
   }
 
@@ -867,8 +861,7 @@ bool config::Parser::parseIndex() {
 
     // 空文字列があればエラー
     if (file.empty()) {
-      std::cerr << "webserv: [emerg] index \"" << file << "\" in \"index\" directive is invalid in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printError(static_cast<std::string>("index \"" + file + "\" in \"index\" directive is invalid"),  this->tokens_[ti_]);
       return false;
     }
 
@@ -895,9 +888,7 @@ bool config::Parser::parseAutoindex() {
   std::string tmp_switch = this->tokens_[ti_].value_;
 
   if (tmp_switch != "on" && tmp_switch != "off") {
-    std::cerr << "webserv: [emerg] invalid value \"" << tmp_switch
-              << "\" in \"autoindex\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+    printError(static_cast<std::string>("invalid value \"" + tmp_switch + "\" in \"autoindex\" directive, it must be \"on\" or \"off\""), this->tokens_[ti_]);
     return false;
   }
 
@@ -921,48 +912,32 @@ bool config::Parser::parseAutoindex() {
 unsigned int config::Parser::retCodeIfValid() {
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
   long code;
-  char remaining_char;
 
-  if (iss >> code) {
-    if (iss >> remaining_char) {
-      std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-      return 0;
-    }
-    if (300 <= code && code <= 599)
-      return static_cast<unsigned int>(code);
-    else {
-      std::cerr << "webserv: [emerg] value \"" << code << "\" must be between 300 and 599 in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-      return 0;
-    }
-  } else  // LONG_MAX/MINを超えたり、数値ではなければエラー
-  {
-    std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in "
-              << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+  iss >> code;
+  if (iss.fail() || iss.bad() || !iss.eof()) {
+    printFormatedError("invalid value", this->tokens_[ti_]);
     return 0;
   }
+
+  if (!(300 <= code && code <= 599)) {
+    printError(static_cast<std::string>("value \"" + Utils::toStr(code) + "\" must be between 300 and 599"), this->tokens_[ti_]);
+    return 0;
+  }
+
+  return static_cast<unsigned int>(code);
 }
 
 long config::Parser::retErrorPageOptNumIfValid() {
   std::istringstream iss(this->tokens_[ti_].value_.substr(1));
   long tmp_code;
-  char remaining_char;
 
-  // responseの値の確認
-  if (iss >> tmp_code) {
-    if (iss >> remaining_char || tmp_code < 0) {
-      std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-      return -1;
-    }
-    return tmp_code;
-  } else  // LONG_MAX/MIN を超えたり、数値ではなければエラー
-  {
-    std::cerr << "webserv: [emerg] invalid value \"" << this->tokens_[ti_].value_ << "\" in "
-              << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+  // LONG_MAX/MIN を超えたり、数値ではなければエラー
+  iss >> tmp_code;
+  if (iss.fail() || iss.bad() || !iss.eof() || tmp_code < 0) {
+    printFormatedError("invalid value", this->tokens_[ti_]);
     return -1;
   }
+  return tmp_code;
 }
 
 bool config::Parser::parseErrorPage() {
@@ -1197,15 +1172,13 @@ bool config::Parser::parseListen() {
   std::string ori_val = this->tokens_[ti_].value_;
   config::Listen tmp_listen;
   std::istringstream iss;
-  char remaining_char;
   long port = 80;
   std::string segment;
   std::vector<std::string> segments;
 
   // 1. もし空文字列ならエラー
   if (ori_val.empty()) {
-    std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in "
-              << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+    printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
     return false;
   }
 
@@ -1213,8 +1186,7 @@ bool config::Parser::parseListen() {
   // ':'の領域が空なら空文字列を入れる。
   // ':'だけの場合はエラー
   if (ori_val == ":") {
-    std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in "
-              << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+    printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
     return false;
   }
 
@@ -1229,84 +1201,66 @@ bool config::Parser::parseListen() {
 
   // 3. 2つ以上に分かれてしまっていたらエラー
   if (segments.size() > 2) {
-    std::cerr << "webserv: [emerg] invalid parameter \"" << ori_val << "\" in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+    printError(static_cast<std::string>("invalid parameter \"" + Utils::toStr(ori_val) + "\""), this->tokens_[ti_]);
     return false;
   }
 
-  // 4. ip address と portがある場合
+  // 4. ip address とportの両方がある場合
   if (segments.size() == 2) {
     // ip addressがあれば値を確認する。
     if (segments[0].empty()) {
-      std::cerr << "webserv: [emerg] no host in \"" << ori_val << "\" of the \"listen\" directive in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printError(static_cast<std::string>("no host in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
       return false;
     }
     // ipv6にも対応するならば、!isIPv6()も条件に加えてください。
     if (!isIPv4(segments[0])) {
-      std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
       return false;
     }
     if (segments[0].find('/') != std::string::npos) {
-      std::cerr << "webserv: [emerg] invalid host in \"" << ori_val << "\" of the \"listen\" directive in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printError(static_cast<std::string>("invalid host in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
       return false;
     }
     tmp_listen.setAddress(segments[0]);
 
     // port番号があれば値を確認しする。
-
     if (segments[1].empty()) {
-      std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+        printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
       return false;
-    } else {
-      iss.clear();
-      iss.str(segments[1].c_str());
-      if (iss >> port) {
-        if (iss >> remaining_char) {
-          std::cerr << "webserv: [emerg] host not found in \"" << ori_val
-                    << "\" of the \"listen\" directive in " << this->filepath_ << ":"
-                    << this->tokens_[ti_].line_ << std::endl;
-          return false;
-        }
-        if (port < 0 || 65535 < port) {
-          std::cerr << "webserv: [emerg] invalid port in \"" << ori_val
-                    << "\" of the \"listen\" directive in " << this->filepath_ << ":"
-                    << this->tokens_[ti_].line_ << std::endl;
-          return false;
-        }
-      } else {
-        std::cerr << "webserv: [emerg] host not found in \"" << ori_val
-                  << "\" of the \"listen\" directive in " << this->filepath_ << ":"
-                  << this->tokens_[ti_].line_ << std::endl;
-        return false;
-      }
+    }
+
+    iss.clear();
+    iss.str(segments[1].c_str());
+    iss >> port;
+    if (iss.fail() || iss.bad() || !iss.eof()) {
+      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      return false;
+    }
+
+    if (port < 0 || 65535 < port) {
+      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      return false;
     }
     tmp_listen.setPort(port);
   } else {
     // 5. ip addressかportのどちらかしかない場合
     iss.clear();
     iss.str(segments[0].c_str());
+    long tmp_port;
+    iss >> tmp_port;
 
     // ip addressかportであればセット
     // ipv6も対応するならば、isIPv6())も条件に加えてください。
     if (isIPv4(segments[0]))
       tmp_listen.setAddress(segments[0]);
-    else if (iss >> port) {
-      if (iss >> remaining_char || port < 0 || 65535 < port) {
-        std::cerr << "webserv: [emerg] invalid port in \"" << ori_val << "\" of the \"listen\" directive in "
-                  << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-        return false;
-      }
-      tmp_listen.setPort(port);
-    } else {
-      // addressでもportでもなければエラー
-      std::cerr << "webserv: [emerg] host not found in \"" << ori_val << "\" of the \"listen\" directive in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+    else if (iss.fail() || iss.bad() || !iss.eof()) {
+      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
       return false;
-    }
+    } else if (tmp_port < 0 || 65535 < tmp_port) {
+      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      return false;
+    } else // 有効なport
+      tmp_listen.setPort(tmp_port);
   }
 
   // 6. defalt_serverがあるばあい
@@ -1315,13 +1269,11 @@ bool config::Parser::parseListen() {
     // tmp_listen.setPort(port);
 
     if (this->tokens_[ti_].value_ != "default_server") {
-      std::cerr << "webserv: [emerg] invalid parameter \"" << this->tokens_[ti_].value_ << "\" in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printFormatedError("invalid parameter", this->tokens_[ti_]);
       return false;
     }
     if (isDuplicateDefaultServer(tmp_listen)) {
-      std::cerr << "webserv: [emerg] a duplicate default server for " << this->tokens_[ti_ - 1].value_
-                << " in " << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+      printError(static_cast<std::string>("a duplicate default server for " + Utils::toStr(this->tokens_[ti_ - 1].value_)), this->tokens_[ti_]);
       return false;
     }
     tmp_listen.setIsDefaultServer(true);
@@ -1390,22 +1342,15 @@ bool config::Parser::parseTryFiles() {
   std::string uri;
   int code;
   std::istringstream iss;
-  char remaining_char;
 
   if (this->tokens_[ti_].value_[0] == '=') {
     // code
     iss.str(this->tokens_[ti_].value_.substr(1));
 
     // code が正しいか判定
-    if (iss >> code) {
-      if (iss >> remaining_char || code < 0 || 999 < code) {
-        std::cerr << "webserv: [emerg] invalid code \"" << this->tokens_[ti_].value_ << "\" in "
-                  << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
-        return false;
-      }
-    } else {
-      std::cerr << "webserv: [emerg] invalid code \"" << this->tokens_[ti_].value_ << "\" in "
-                << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+    iss >> code;
+    if (iss.fail() || iss.bad() || !iss.eof() || code < 0 || 999 < code) {
+      printFormatedError("invalid code",  this->tokens_[ti_]);
       return false;
     }
 
@@ -1438,9 +1383,7 @@ bool config::Parser::parseAlias() {
   std::set<std::string> &location_directives =
       this->config_.http.server_list.back().location_list.back().directives_set;
   if (location_directives.find(kROOT) != location_directives.end()) {
-    std::cerr
-        << "webserv: [emerg] \"alias\" directive is duplicate, \"root\" directive was specified earlier in "
-        << this->filepath_ << ":" << this->tokens_[ti_].line_ << std::endl;
+    printError("\"alias\" directive is duplicate, \"root\" directive was specified earlier",  this->tokens_[ti_]);
     return false;
   }
 
@@ -1497,9 +1440,7 @@ bool config::Parser::parseUserid() {
 
   // もし、on/offではなかったらエラー
   if (tmp_switch != "on" && tmp_switch != "off") {
-    std::cerr << "webserv: [emerg] invalid value \"" << tmp_switch
-              << "\" in \"userid\" directive, it must be \"on\" or \"off\" in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+    printError(static_cast<std::string>("invalid value" + tmp_switch + "\" in \"userid\" directive, it must be \"on\" or \"off\""),  this->tokens_[ti_]);
     return false;
   }
 
@@ -1554,8 +1495,7 @@ bool config::Parser::parseUseridExpires() {
 
   long time = parseTime();
   if (time == -1) {
-    std::cerr << "webserv: [emerg] \"userid_expires\" directive invalid value in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+    printError("\"userid_expires\" directive invalid value",  this->tokens_[ti_]);
     return false;
   }
 
@@ -1602,18 +1542,10 @@ bool config::Parser::parseUseridService() {
   ti_++;
   long user_id;
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
-  char remaining_char;
 
-  if (iss >> user_id) {
-    if (iss >> remaining_char) {
-      std::cerr << "webserv: [emerg] \"userid_service\" directive invalid value in " << this->filepath_ << ":"
-                << this->tokens_[ti_].line_ << std::endl;
-      return false;
-    }
-
-  } else {
-    std::cerr << "webserv: [emerg] \"userid_service\" directive invalid value in " << this->filepath_ << ":"
-              << this->tokens_[ti_].line_ << std::endl;
+  iss >> user_id;
+  if (iss.fail() || iss.bad() || !iss.eof()) {
+    printError("\"userid_service\" directive invalid value",  this->tokens_[ti_]);
     return false;
   }
 
