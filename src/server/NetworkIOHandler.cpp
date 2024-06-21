@@ -145,8 +145,7 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
 }
 
 bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
-  if (this->listenfd_map_.find(listen_fd) == this->listenfd_map_.end()) return false;
-  return true;
+  return this->listenfd_map_.find(listen_fd) != this->listenfd_map_.end();
 }
 
 /**

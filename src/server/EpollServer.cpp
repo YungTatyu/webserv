@@ -49,7 +49,7 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
   for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end();
        ++it) {
     struct epoll_event ep;
-    memset(&ep, 0, sizeof(ep));
+    std::memset(&ep, 0, sizeof(ep));
     ep.events = it->second->event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
     ep.data.fd = it->first;
 
@@ -184,7 +184,7 @@ int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManag
 
 int EpollServer::addNewEvent(const int fd, const uint32_t event_filter) {
   struct epoll_event new_event;
-  memset(&new_event, 0, sizeof(new_event));
+  std::memset(&new_event, 0, sizeof(new_event));
   new_event.events = event_filter;
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
