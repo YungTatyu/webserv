@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 
@@ -10,12 +11,11 @@ SelectServer::SelectServer() {}
 SelectServer::~SelectServer() {}
 
 void SelectServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                             NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                             ConfigHandler* config_handler, TimerTree* timer_tree) {
+                             NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
   for (;;) {
     waitForEvent(conn_manager, event_manager, timer_tree);
 
-    callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, server, timer_tree);
 
     event_manager->clearAllEvents();
   }
@@ -87,30 +87,27 @@ void SelectServer::addActiveEvents(const std::map<int, ConnectionData*>& connect
 }
 
 void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                    NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                                    ConfigHandler* config_handler, TimerTree* timer_tree) {
+                                    NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
   const std::vector<SelectEvent>* active_events_ptr =
       static_cast<std::vector<SelectEvent>*>(event_manager->getActiveEvents());
   const std::vector<SelectEvent> active_events = *active_events_ptr;
-
+  const RequestHandler& request_handler = WebServer::getRequestHandler();
   // 現在時刻を更新
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
     return;
   }
 
   for (size_t i = 0; i < active_events.size(); ++i) {
     if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
-      request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                       active_events[i].fd_);
+      request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].fd_);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-      request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                        active_events[i].fd_);
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].fd_);
   }
-  request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
 }
 
 int SelectServer::addNewEvent(int fd, ConnectionData::EVENT event) {

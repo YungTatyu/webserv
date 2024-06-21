@@ -4,9 +4,10 @@
 #include <vector>
 
 #include "LogFd.hpp"
+#include "RequestHandler.hpp"
 
 ConfigHandler WebServer::config_handler_;
-IServer *WebServer::server;
+RequestHandler WebServer::request_handler_;
 
 WebServer::WebServer(const config::Main *config) {
   this->configHandler = &(config_handler_);
@@ -28,7 +29,6 @@ void WebServer::initializeServer() {
   this->ioHandler = new NetworkIOHandler();
   initializeVServers();
 
-  this->requestHandler = new RequestHandler();
   this->connManager = new ConnectionManager();
   initializeConnManager();
 
@@ -36,22 +36,22 @@ void WebServer::initializeServer() {
   switch (method) {
 #if defined(KQUEUE_AVAILABLE)
     case config::KQUEUE:
-      server = new KqueueServer();
+      this->server = new KqueueServer();
       this->eventManager = new KqueueActiveEventManager();
       break;
 #endif
 #if defined(EPOLL_AVAILABLE)
     case config::EPOLL:
-      server = new EpollServer();
+      this->server = new EpollServer();
       this->eventManager = new EpollActiveEventManager();
       break;
 #endif
     case config::POLL:
-      server = new PollServer();
+      this->server = new PollServer();
       this->eventManager = new PollActiveEventManager();
       break;
     case config::SELECT:
-      server = new SelectServer();
+      this->server = new SelectServer();
       this->eventManager = new SelectActiveEventManager();
       break;
     default:  // kqueueとepoll両方使えない場合は、defaultが必要
@@ -110,7 +110,7 @@ void WebServer::initializeConnManager() {
 
 const ConfigHandler &WebServer::getConfigHandler() { return config_handler_; }
 
-IServer *WebServer::getServer() { return server; }
+const RequestHandler &WebServer::getRequestHandler() { return request_handler_; }
 
 void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
 
@@ -123,13 +123,11 @@ void WebServer::deleteObjects() {
   config::terminateLogFds(this->configHandler->config_);
   delete this->timerTree;
   delete this->ioHandler;
-  delete this->requestHandler;
   delete this->connManager;
   delete this->eventManager;
   delete server;
 }
 
 void WebServer::run() {
-  server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler,
-                    this->configHandler, this->timerTree);
+  server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->server, this->timerTree);
 }

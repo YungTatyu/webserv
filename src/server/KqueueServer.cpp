@@ -1,6 +1,9 @@
 #include "KqueueServer.hpp"
 
+#include "ConfigHandler.hpp"
 #include "ConnectionManager.hpp"
+#include "IServer.hpp"
+#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #if defined(KQUEUE_AVAILABLE)
@@ -12,15 +15,14 @@ KqueueServer::KqueueServer() {}
 KqueueServer::~KqueueServer() { close(this->kq_); }
 
 void KqueueServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                             NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                             ConfigHandler* config_handler, TimerTree* timer_tree) {
+                             NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
   if (!initKqueueServer()) return;
   if (!initKevents(conn_manager->getConnections())) return;
   for (;;) {
     waitForEvent(conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandleする
-    callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, server, timer_tree);
 
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
@@ -95,20 +97,19 @@ void KqueueServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_
 }
 
 void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                    NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                                    ConfigHandler* config_handler, TimerTree* timer_tree) {
+                                    NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
   std::vector<struct kevent>* active_events_ptr =
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
   std::vector<struct kevent>& active_events = *active_events_ptr;
   std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
+  const RequestHandler& request_handler = WebServer::getRequestHandler();
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    timeout_sock_map =
-        request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+    timeout_sock_map = request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
     addClientNewEvent(timeout_sock_map);
     return;
   }
@@ -126,16 +127,16 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     // TODO: kqueueはeofもevnetとして感知できるので、最適化の余地あり
     // int status = RequestHandler::UPDATE_NONE;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                       active_events[i].ident);
-    else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                        active_events[i].ident);
-    else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler->handleEofEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
+      request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree,
                                       active_events[i].ident);
+    else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, server, *timer_tree,
+                                       active_events[i].ident);
+    else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
+      request_handler.handleEofEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].ident);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].ident);
+      request_handler.handleErrorEvent(*io_handler, *conn_manager, server, *timer_tree,
+                                       active_events[i].ident);
 
     // kqueueで監視しているイベント情報を更新
     //   switch (status) {
@@ -172,8 +173,7 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     //       break;
     //   }
   }
-  timeout_sock_map =
-      request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
+  timeout_sock_map = request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
   addClientNewEvent(timeout_sock_map);
 }
 
