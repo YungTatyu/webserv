@@ -76,8 +76,8 @@ class Parser {
   bool isNumInRange(const std::string &num, long min, long max) const;
   bool canConvertMinTime(long &value, const std::string &unit);
   bool canConvertMinSize(long &value, const std::string &unit);
-  bool validEventType(const std::string& eventType) const;
-  std::pair<long, std::string> parseValueWithUnit(const std::set<std::string>& units) const;
+  bool validEventType(const std::string &eventType) const;
+  std::pair<long, std::string> parseValueWithUnit(const std::set<std::string> &units) const;
   long parseTime();
   long parseSize();
   unsigned int retCodeIfValid();
@@ -85,7 +85,7 @@ class Parser {
   REQUEST_METHOD convertToRequestMethod(const std::string &method) const;
   std::string toUpper(std::string) const;
   bool isDuplicateDefaultServer(const config::Listen &this_listen);
-  void updateDirectivesSet(const std::string& directive);
+  void updateDirectivesSet(const std::string &directive);
   Parser();
   void operator=(const Parser &other);
 
@@ -108,12 +108,12 @@ void config::Parser::updateContext(T &context, CONTEXT new_context, const std::s
   context.directives_set.insert(context_name);
 }
 
-//template<typename Func>
-//bool Parser::parseDirective(const std::string& directiveName, Func parseFunc) {
-//  ++ti_;
-//  bool result = parseFunc();
-//  ti_ += 2;
-//  return result;
-//}
+// template<typename Func>
+// bool Parser::parseDirective(const std::string& directiveName, Func parseFunc) {
+//   ++ti_;
+//   bool result = parseFunc();
+//   ti_ += 2;
+//   return result;
+// }
 
 #endif

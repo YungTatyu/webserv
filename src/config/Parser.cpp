@@ -567,15 +567,15 @@ const config::OS currentOS = config::OS_LINUX;
 const config::OS currentOS = config::OS_OTHER;
 #endif
 
-bool config::Parser::validEventType(const std::string& eventType) const {
-    switch (currentOS) {
-        case config::OS_BSD_BASED:
-            return eventType == kSELECT || eventType == kPOLL || eventType == kKQUEUE;
-        case config::OS_LINUX:
-            return eventType == kSELECT || eventType == kPOLL || eventType == kEPOLL;
-        case config::OS_OTHER:
-            return eventType == kSELECT || eventType == kPOLL;
-    }
+bool config::Parser::validEventType(const std::string &eventType) const {
+  switch (currentOS) {
+    case config::OS_BSD_BASED:
+      return eventType == kSELECT || eventType == kPOLL || eventType == kKQUEUE;
+    case config::OS_LINUX:
+      return eventType == kSELECT || eventType == kPOLL || eventType == kEPOLL;
+    case config::OS_OTHER:
+      return eventType == kSELECT || eventType == kPOLL;
+  }
 }
 
 bool config::Parser::parseUse() {
@@ -612,7 +612,7 @@ bool config::Parser::parseWorkerConnections() {
   // 数値でなければエラー
   for (int i = 0; str[i] != '\0'; i++) {
     if (!std::isdigit(str[i])) {
-      printFormatedError("invalid number",  this->tokens_[ti_]);
+      printFormatedError("invalid number", this->tokens_[ti_]);
       return false;
     }
   }
@@ -622,7 +622,7 @@ bool config::Parser::parseWorkerConnections() {
 
   // 値が正の数かつLONG_MAX以内でなければエラー
   if (iss.fail() || iss.bad() || !iss.eof() || value < 0) {
-    printFormatedError("invalid number",  this->tokens_[ti_]);
+    printFormatedError("invalid number", this->tokens_[ti_]);
     return false;
   }
 
@@ -663,7 +663,7 @@ bool config::Parser::canConvertMinSize(long &value, const std::string &unit) {
   return true;
 }
 
-std::pair<long, std::string> config::Parser::parseValueWithUnit(const std::set<std::string>& units) const {
+std::pair<long, std::string> config::Parser::parseValueWithUnit(const std::set<std::string> &units) const {
   long num;
   std::string unit;  // 単位
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
@@ -724,7 +724,7 @@ bool config::Parser::parseSendTimeout() {
 
   long ret = parseTime();
   if (ret == -1) {
-    printError("\"send_timeout\" directive invalid value",  this->tokens_[ti_]);
+    printError("\"send_timeout\" directive invalid value", this->tokens_[ti_]);
     return false;
   }
 
@@ -748,7 +748,7 @@ bool config::Parser::parseKeepaliveTimeout() {
 
   long ret = parseTime();
   if (ret == -1) {
-    printError("\"keepalive_timeout\" directive invalid value",  this->tokens_[ti_]);
+    printError("\"keepalive_timeout\" directive invalid value", this->tokens_[ti_]);
     return false;
   }
 
@@ -781,7 +781,7 @@ bool config::Parser::parseReceiveTimeout() {
 
   long ret = parseTime();
   if (ret == -1) {
-    printError("\"receive_timeout\" directive invalid value",  this->tokens_[ti_]);
+    printError("\"receive_timeout\" directive invalid value", this->tokens_[ti_]);
     return false;
   }
 
@@ -822,7 +822,8 @@ bool config::Parser::parseRoot() {
     std::set<std::string> &location_directives =
         this->config_.http.server_list.back().location_list.back().directives_set;
     if (location_directives.find(kALIAS) != location_directives.end()) {
-      printError("\"root\" directive is duplicate, \"alias\" directive was specified earlier in ", this->tokens_[ti_]);
+      printError("\"root\" directive is duplicate, \"alias\" directive was specified earlier in ",
+                 this->tokens_[ti_]);
       return false;
     }
     this->config_.http.server_list.back().location_list.back().root.setPath(path);
@@ -839,7 +840,7 @@ bool config::Parser::parseClientMaxBodySize() {
 
   long ret = parseSize();
   if (ret == -1) {
-    printError("\"client_max_body_size\" directive invalid value",  this->tokens_[ti_]);
+    printError("\"client_max_body_size\" directive invalid value", this->tokens_[ti_]);
     return false;
   }
 
@@ -861,7 +862,8 @@ bool config::Parser::parseIndex() {
 
     // 空文字列があればエラー
     if (file.empty()) {
-      printError(static_cast<std::string>("index \"" + file + "\" in \"index\" directive is invalid"),  this->tokens_[ti_]);
+      printError(static_cast<std::string>("index \"" + file + "\" in \"index\" directive is invalid"),
+                 this->tokens_[ti_]);
       return false;
     }
 
@@ -888,7 +890,9 @@ bool config::Parser::parseAutoindex() {
   std::string tmp_switch = this->tokens_[ti_].value_;
 
   if (tmp_switch != "on" && tmp_switch != "off") {
-    printError(static_cast<std::string>("invalid value \"" + tmp_switch + "\" in \"autoindex\" directive, it must be \"on\" or \"off\""), this->tokens_[ti_]);
+    printError(static_cast<std::string>("invalid value \"" + tmp_switch +
+                                        "\" in \"autoindex\" directive, it must be \"on\" or \"off\""),
+               this->tokens_[ti_]);
     return false;
   }
 
@@ -920,7 +924,8 @@ unsigned int config::Parser::retCodeIfValid() {
   }
 
   if (!(300 <= code && code <= 599)) {
-    printError(static_cast<std::string>("value \"" + Utils::toStr(code) + "\" must be between 300 and 599"), this->tokens_[ti_]);
+    printError(static_cast<std::string>("value \"" + Utils::toStr(code) + "\" must be between 300 and 599"),
+               this->tokens_[ti_]);
     return 0;
   }
 
@@ -1178,7 +1183,9 @@ bool config::Parser::parseListen() {
 
   // 1. もし空文字列ならエラー
   if (ori_val.empty()) {
-    printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+    printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+                                        "\" of the \"listen\" directive"),
+               this->tokens_[ti_]);
     return false;
   }
 
@@ -1186,7 +1193,9 @@ bool config::Parser::parseListen() {
   // ':'の領域が空なら空文字列を入れる。
   // ':'だけの場合はエラー
   if (ori_val == ":") {
-    printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+    printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+                                        "\" of the \"listen\" directive"),
+               this->tokens_[ti_]);
     return false;
   }
 
@@ -1201,7 +1210,8 @@ bool config::Parser::parseListen() {
 
   // 3. 2つ以上に分かれてしまっていたらエラー
   if (segments.size() > 2) {
-    printError(static_cast<std::string>("invalid parameter \"" + Utils::toStr(ori_val) + "\""), this->tokens_[ti_]);
+    printError(static_cast<std::string>("invalid parameter \"" + Utils::toStr(ori_val) + "\""),
+               this->tokens_[ti_]);
     return false;
   }
 
@@ -1209,23 +1219,31 @@ bool config::Parser::parseListen() {
   if (segments.size() == 2) {
     // ip addressがあれば値を確認する。
     if (segments[0].empty()) {
-      printError(static_cast<std::string>("no host in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("no host in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     }
     // ipv6にも対応するならば、!isIPv6()も条件に加えてください。
     if (!isIPv4(segments[0])) {
-      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     }
     if (segments[0].find('/') != std::string::npos) {
-      printError(static_cast<std::string>("invalid host in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("invalid host in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     }
     tmp_listen.setAddress(segments[0]);
 
     // port番号があれば値を確認しする。
     if (segments[1].empty()) {
-        printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     }
 
@@ -1233,12 +1251,16 @@ bool config::Parser::parseListen() {
     iss.str(segments[1].c_str());
     iss >> port;
     if (iss.fail() || iss.bad() || !iss.eof()) {
-      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     }
 
     if (port < 0 || 65535 < port) {
-      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     }
     tmp_listen.setPort(port);
@@ -1254,12 +1276,16 @@ bool config::Parser::parseListen() {
     if (isIPv4(segments[0]))
       tmp_listen.setAddress(segments[0]);
     else if (iss.fail() || iss.bad() || !iss.eof()) {
-      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
     } else if (tmp_port < 0 || 65535 < tmp_port) {
-      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) + "\" of the \"listen\" directive"), this->tokens_[ti_]);
+      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+                                          "\" of the \"listen\" directive"),
+                 this->tokens_[ti_]);
       return false;
-    } else // 有効なport
+    } else  // 有効なport
       tmp_listen.setPort(tmp_port);
   }
 
@@ -1273,7 +1299,9 @@ bool config::Parser::parseListen() {
       return false;
     }
     if (isDuplicateDefaultServer(tmp_listen)) {
-      printError(static_cast<std::string>("a duplicate default server for " + Utils::toStr(this->tokens_[ti_ - 1].value_)), this->tokens_[ti_]);
+      printError(static_cast<std::string>("a duplicate default server for " +
+                                          Utils::toStr(this->tokens_[ti_ - 1].value_)),
+                 this->tokens_[ti_]);
       return false;
     }
     tmp_listen.setIsDefaultServer(true);
@@ -1350,7 +1378,7 @@ bool config::Parser::parseTryFiles() {
     // code が正しいか判定
     iss >> code;
     if (iss.fail() || iss.bad() || !iss.eof() || code < 0 || 999 < code) {
-      printFormatedError("invalid code",  this->tokens_[ti_]);
+      printFormatedError("invalid code", this->tokens_[ti_]);
       return false;
     }
 
@@ -1383,7 +1411,8 @@ bool config::Parser::parseAlias() {
   std::set<std::string> &location_directives =
       this->config_.http.server_list.back().location_list.back().directives_set;
   if (location_directives.find(kROOT) != location_directives.end()) {
-    printError("\"alias\" directive is duplicate, \"root\" directive was specified earlier",  this->tokens_[ti_]);
+    printError("\"alias\" directive is duplicate, \"root\" directive was specified earlier",
+               this->tokens_[ti_]);
     return false;
   }
 
@@ -1440,7 +1469,9 @@ bool config::Parser::parseUserid() {
 
   // もし、on/offではなかったらエラー
   if (tmp_switch != "on" && tmp_switch != "off") {
-    printError(static_cast<std::string>("invalid value" + tmp_switch + "\" in \"userid\" directive, it must be \"on\" or \"off\""),  this->tokens_[ti_]);
+    printError(static_cast<std::string>("invalid value" + tmp_switch +
+                                        "\" in \"userid\" directive, it must be \"on\" or \"off\""),
+               this->tokens_[ti_]);
     return false;
   }
 
@@ -1495,7 +1526,7 @@ bool config::Parser::parseUseridExpires() {
 
   long time = parseTime();
   if (time == -1) {
-    printError("\"userid_expires\" directive invalid value",  this->tokens_[ti_]);
+    printError("\"userid_expires\" directive invalid value", this->tokens_[ti_]);
     return false;
   }
 
@@ -1545,7 +1576,7 @@ bool config::Parser::parseUseridService() {
 
   iss >> user_id;
   if (iss.fail() || iss.bad() || !iss.eof()) {
-    printError("\"userid_service\" directive invalid value",  this->tokens_[ti_]);
+    printError("\"userid_service\" directive invalid value", this->tokens_[ti_]);
     return false;
   }
 
@@ -1566,7 +1597,7 @@ bool config::Parser::parseUseridService() {
 
 const config::Main &config::Parser::getConfig() const { return this->config_; }
 
-void config::Parser::updateDirectivesSet(const std::string& directive) {
+void config::Parser::updateDirectivesSet(const std::string &directive) {
   switch (current_context_.top()) {
     case CONF_MAIN:
       config_.directives_set.insert(directive);
