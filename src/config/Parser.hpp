@@ -39,6 +39,10 @@ class Parser {
   const std::set<std::string> *findDirectivesSet(const CONTEXT context) const;
   void printError(const std::string &err_msg, const Token &token) const;
   size_t countArgs(const TK_TYPE terminating_token) const;
+  bool validFinalState() const;
+  bool validWorkerConnections() const;
+  template<typename T>
+  void  updateContext(T& context, CONTEXT new_context, const std::string& context_name);
   bool parseHttpServerEvents();
   bool parseLocation();
   bool parseLimitExcept();
@@ -89,5 +93,15 @@ class Parser {
   const Main &getConfig() const;
 };
 }  // namespace config
+
+/**
+ * current_contextを更新し、directives_setにもcontextを追加する。
+ *
+ */
+template<typename T>
+void  config::Parser::updateContext(T& context, CONTEXT new_context, const std::string& context_name) {
+  this->current_context_.push(new_context);
+  context.directives_set.insert(context_name);
+}
 
 #endif

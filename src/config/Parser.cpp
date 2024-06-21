@@ -177,7 +177,7 @@ bool config::Parser::parse() {
     if (!expectTerminatingToken()) return false;
 
     // 存在するcontextまたはdirectiveか
-    if (!isDirective(current_token) && !isContext(current_token)) {
+    if (!(isDirective(current_token) || isContext(current_token))) {
       printError(std::string("unknown directive ") + "\"" + current_token.value_ + "\"", current_token);
       return false;
     }
@@ -190,24 +190,7 @@ bool config::Parser::parse() {
     if (!(this->*directive_parser)()) return false;
   }
 
-  // current contextがmainでないとerror
-  if (this->current_context_.top() != CONF_MAIN) {
-    printError("unexpected end of file, expecting \"}\"", this->tokens_[ti_]);
-    return false;
-  }
-  // events contextが設定されていないとerror
-  if (this->config_.directives_set.find(kEVENTS) == this->config_.directives_set.end()) {
-    std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
-    return false;
-  }
-  if (this->config_.events.use.getConnectionMethod() == config::SELECT &&
-      this->config_.events.worker_connections.getWorkerConnections() >
-          config::WorkerConnections::kSelectMaxConnections) {
-    std::cerr << "webserv: [emerg] the maximum number of files supported by select() is "
-              << config::WorkerConnections::kSelectMaxConnections << std::endl;
-    return false;
-  }
-  return true;
+  return validFinalState();
 }
 
 /**
@@ -394,6 +377,36 @@ void config::Parser::printError(const std::string &err_msg, const Token &token) 
 }
 
 /**
+ * parse終了後の状態が正しいか確認する関数。
+ *
+ */
+bool config::Parser::validFinalState() const {
+  // current contextがmainでないとerror
+  if (this->current_context_.top() != CONF_MAIN) {
+    printError("unexpected end of file, expecting \"}\"", this->tokens_[ti_]);
+    return false;
+  }
+  // events contextが設定されていないとerror
+  if (!Utils::hasDirective(this->config_, kEVENTS)) {
+    std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
+    return false;
+  }
+  return validWorkerConnections();
+}
+
+bool config::Parser::validWorkerConnections() const {
+  // use directiveにselectが設定されている場合にのみ最大値を超えていないか確認
+if (this->config_.events.use.getConnectionMethod() == config::SELECT &&
+    this->config_.events.worker_connections.getWorkerConnections() >
+    config::WorkerConnections::kSelectMaxConnections) {
+    std::cerr << "webserv: [emerg] the maximum number of files supported by select() is "
+              << config::WorkerConnections::kSelectMaxConnections << std::endl;
+    return false;
+  }
+  return true;
+}
+
+/**
  * http, server, eventsをparse
  */
 bool config::Parser::parseHttpServerEvents() {
@@ -404,16 +417,13 @@ bool config::Parser::parseHttpServerEvents() {
 
   // current contextをupdate
   if (context == kHTTP) {
-    this->current_context_.push(CONF_HTTP);
-    this->config_.directives_set.insert(kHTTP);
+    updateContext(this->config_, CONF_HTTP, kHTTP);
   } else if (context == kSERVER) {
     // 新たなserver contextを追加
     this->config_.http.server_list.push_back(Server());
-    this->current_context_.push(CONF_HTTP_SERVER);
-    this->config_.http.directives_set.insert(kSERVER);
+    updateContext(this->config_.http, CONF_HTTP_SERVER, kSERVER);
   } else if (context == kEVENTS) {
-    this->current_context_.push(CONF_EVENTS);
-    this->config_.directives_set.insert(kEVENTS);
+    updateContext(this->config_, CONF_EVENTS, kEVENTS);
   }
 
   ++ti_;  // 次のtokenに進める
@@ -435,11 +445,7 @@ bool config::Parser::parseLocation() {
   }
   list.push_back(Location(uri));
 
-  // current contextをupdate
-  this->current_context_.push(CONF_HTTP_LOCATION);
-
-  // serverにlocationをset
-  this->config_.http.server_list.back().directives_set.insert(kLOCATION);
+  updateContext(this->config_.http.server_list.back(), CONF_HTTP_LOCATION, kLOCATION);
 
   ti_ += 2;  // "{" を飛ばして、次のtokenへ進む
   return true;
@@ -452,8 +458,8 @@ bool config::Parser::parseLimitExcept() {
   ++ti_;  // tokenをcontextの引数に進める
   do {
     const std::string upper_case_method = toUpper(tokens[ti_].value_);
-    if (upper_case_method != "GET" && upper_case_method != "HEAD" && upper_case_method != "POST" &&
-        upper_case_method != "DELETE") {
+    if (!(upper_case_method == "GET" || upper_case_method == "HEAD" || upper_case_method == "POST" ||
+        upper_case_method == "DELETE")) {
       printError(std::string("invalid method \"" + tokens[ti_].value_ + "\""), tokens[ti_]);
       return false;
     }
@@ -462,11 +468,7 @@ bool config::Parser::parseLimitExcept() {
     ++ti_;
   } while (tokens[ti_].type_ != TK_OPEN_CURLY_BRACE);
 
-  // current contextをupdate
-  this->current_context_.push(CONF_HTTP_LIMIT_EXCEPT);
-
-  // locationにlimit_exceptをset
-  this->config_.http.server_list.back().location_list.back().directives_set.insert(kLIMIT_EXCEPT);
+  updateContext(this->config_.http.server_list.back().location_list.back(), CONF_HTTP_LIMIT_EXCEPT, kLIMIT_EXCEPT);
 
   ++ti_;
   return true;
@@ -1024,17 +1026,16 @@ bool config::Parser::parseErrorPage() {
 }
 
 bool config::Parser::isIPv4(const std::string &ipv4) const {
-  // 1.文字列が空でないかを確認
   if (ipv4.empty()) {
     return false;
   }
 
-  // 2. IPv4アドレスとサブネットマスクを分割
+  // IPv4アドレスとサブネットマスクを分割
   size_t mask_pos = ipv4.find('/');
   std::string address_part = ipv4.substr(0, mask_pos);
   std::string mask_part = (mask_pos != std::string::npos) ? ipv4.substr(mask_pos + 1) : "";
 
-  // 3. 文字列がIPv4の基本的な構造に従っているかを確認
+  // 文字列がIPv4の基本的な構造に従っているかを確認
   std::istringstream iss(address_part);
   std::string field;
   std::vector<std::string> fields;
@@ -1047,7 +1048,6 @@ bool config::Parser::isIPv4(const std::string &ipv4) const {
       }
     }
 
-    // フィールドを保存
     fields.push_back(field);
   }
 
@@ -1068,25 +1068,24 @@ bool config::Parser::isIPv4(const std::string &ipv4) const {
     }
   }
 
-  // 4. subnetmaskの値が正しいか確認
-  if (!mask_part.empty() && !isNumInRange(mask_part, 0, 32)) return false;
+  // subnetmaskの値が正しいか確認
+  if (!(mask_part.empty() || isNumInRange(mask_part, 0, 32))) return false;
 
   // 全ての条件を満たす場合、IPv4アドレスと見なす
   return true;
 }
 
 bool config::Parser::isIPv6(const std::string &ipv6) const {
-  // 1.文字列が空でないかを確認
   if (ipv6.empty()) {
     return false;
   }
 
-  // 2. IPv6アドレスとサブネットマスクを分割
+  // IPv6アドレスとサブネットマスクを分割
   size_t mask_pos = ipv6.find('/');
   std::string address_part = (mask_pos != std::string::npos) ? ipv6.substr(0, mask_pos) : ipv6;
   std::string mask_part = (mask_pos != std::string::npos) ? ipv6.substr(mask_pos + 1) : "";
 
-  // 3. 文字列がIPv6の基本的な構造に従っているかを確認
+  // 文字列がIPv6の基本的な構造に従っているかを確認
   std::istringstream iss(address_part);
   std::string field;
   std::vector<std::string> fields;
@@ -1099,7 +1098,6 @@ bool config::Parser::isIPv6(const std::string &ipv6) const {
       }
     }
 
-    // フィールドを保存
     fields.push_back(field);
   }
 
@@ -1122,7 +1120,7 @@ bool config::Parser::isIPv6(const std::string &ipv6) const {
     }
   }
 
-  // 4. subnetmaskの値が正しいか確認
+  // subnetmaskの値が正しいか確認
   if (!mask_part.empty() && !isNumInRange(mask_part, 0, 128)) return false;
 
   // 全ての条件を満たす場合、IPv6アドレスと見なす
@@ -1176,7 +1174,7 @@ bool config::Parser::parseAllowDeny() {
   const std::string address = this->tokens_[ti_].value_;
 
   // ipv6にも対応するならば、!isIPv6()と!isMixedIPAddress()も条件に追加してください。
-  if (address != "all" && !isIPv4(address)) {
+  if (!(address == "all" || isIPv4(address))) {
     printError(std::string("invalid parameter \"" + address + "\""), this->tokens_[ti_]);
     return false;
   }
