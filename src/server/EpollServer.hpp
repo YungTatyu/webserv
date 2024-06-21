@@ -22,18 +22,11 @@ class EpollServer : public IServer {
   int addNewEvent(int fd, ConnectionData::EVENT event);
   int updateEvent(int fd, ConnectionData::EVENT event);
   int deleteEvent(int fd, ConnectionData::EVENT event);
-  int addSocketToSets(const std::map<int, ConnectionData>& connections);
-  void addActiveEvents(const std::map<int, ConnectionData>& connections, IActiveEventManager* event_manager);
-  static int deleteEvent(int fd);
 
  private:
-  static int epfd_;  // epoll instance
+  int epfd_;  // epoll instance
   bool initEpollServer();
   bool initEpollEvent(const std::map<int, ConnectionData*>& connections);
-  int addNewEvent(const int fd, const uint32_t event_filter);
-  int updateEvent(struct epoll_event& old_event, const uint32_t event_filter);
-  int deleteEvent(struct epoll_event& old_event);
-  void addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map);
 };
 
 #endif
