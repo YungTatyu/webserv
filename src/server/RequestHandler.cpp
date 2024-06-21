@@ -101,7 +101,6 @@ void RequestHandler::handleCgi(ConnectionManager &connManager, const ConfigHandl
 
   bool re = connManager.callCgiExecutor(sockfd, response, request);
   if (!re) {
-    connManager.resetCgiSockets(sockfd);
     response.state_ = HttpResponse::RES_CGI_ERROR;
     return handleResponse(connManager, configHandler, server, timerTree, sockfd);
   }
