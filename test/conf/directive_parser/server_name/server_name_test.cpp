@@ -27,14 +27,14 @@ TEST(ServerNameTest, allContext) {
 
   // server
   test::test_value(server_list[0].server_name.getName(), {
-                                                                  "tachu",
-                                                                  "",
-                                                                  "1",
-                                                                  "2",
-                                                                  "3",
-                                                                  "server name",
-                                                                  "sn:8000",
-                                                              });
+                                                             "tachu",
+                                                             "",
+                                                             "1",
+                                                             "2",
+                                                             "3",
+                                                             "server name",
+                                                             "sn:8000",
+                                                         });
   test::test_directives_set(server_list[0].directives_set, kServerName, true);
 }
 

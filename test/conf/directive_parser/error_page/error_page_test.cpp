@@ -22,12 +22,11 @@ void test_value(const std::vector<config::ErrorPage> &error_page_list,
                   int ci = 0;  // code list index
 
                   // test code_list
-                  std::for_each(expect_code.begin(), expect_code.end(),
-                                [&code_list, &ci](unsigned int code) {
-                                  // EXPECT_EQ(code, expect_code[ci]);
-                                  EXPECT_NE(code_list.find(code), code_list.end());
-                                  ++ci;
-                                });
+                  std::for_each(expect_code.begin(), expect_code.end(), [&code_list, &ci](unsigned int code) {
+                    // EXPECT_EQ(code, expect_code[ci]);
+                    EXPECT_NE(code_list.find(code), code_list.end());
+                    ++ci;
+                  });
 
                   // test response
                   EXPECT_EQ(error_page.getResponse(), expect_response[ei]);

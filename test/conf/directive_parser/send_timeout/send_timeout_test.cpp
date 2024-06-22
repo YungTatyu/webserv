@@ -41,11 +41,11 @@ TEST(sendTimeoutTest, max) {
 
   // location
   test::test_st_value(server_list[0].location_list, {
-                                                             9223372036854775 * config::Time::seconds,
-                                                             153722867280912 * config::Time::minutes,
-                                                             2562047788015 * config::Time::hours,
-                                                             106751991167 * config::Time::days,
-                                                         });
+                                                        9223372036854775 * config::Time::seconds,
+                                                        153722867280912 * config::Time::minutes,
+                                                        2562047788015 * config::Time::hours,
+                                                        106751991167 * config::Time::days,
+                                                    });
 }
 
 TEST(SendTimeoutTest, zero) {

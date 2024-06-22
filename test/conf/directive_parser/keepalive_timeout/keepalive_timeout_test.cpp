@@ -36,17 +36,16 @@ TEST(KeepaliveTimeoutTest, max) {
   test::test_directives_set(http.directives_set, kKeepaliveTimeout, true);
 
   // server
-  EXPECT_EQ(server_list[0].keepalive_timeout.getTime().time_in_ms_,
-            9223372036854775 * config::Time::seconds);
+  EXPECT_EQ(server_list[0].keepalive_timeout.getTime().time_in_ms_, 9223372036854775 * config::Time::seconds);
   test::test_directives_set(server_list[0].directives_set, kKeepaliveTimeout, true);
 
   // location
   test::test_value(server_list[0].location_list, {
-                                                          9223372036854775 * config::Time::seconds,
-                                                          153722867280912 * config::Time::minutes,
-                                                          2562047788015 * config::Time::hours,
-                                                          106751991167 * config::Time::days,
-                                                      });
+                                                     9223372036854775 * config::Time::seconds,
+                                                     153722867280912 * config::Time::minutes,
+                                                     2562047788015 * config::Time::hours,
+                                                     106751991167 * config::Time::days,
+                                                 });
 }
 
 TEST(KeepaliveTimeoutTest, zero) {

@@ -166,8 +166,8 @@ class ResponseTest {
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
                                    &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                   (void)method;
-                                   (void)tied_server;
+                                    (void)method;
+                                    (void)tied_server;
                                     EXPECT_EQ(this->responses_[i].body_, expect);
                                     ++i;
                                   });
