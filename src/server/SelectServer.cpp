@@ -10,11 +10,11 @@ SelectServer::SelectServer() {}
 SelectServer::~SelectServer() {}
 
 void SelectServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                             NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
+                             NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   for (;;) {
     waitForEvent(conn_manager, event_manager, timer_tree);
 
-    callEventHandler(conn_manager, event_manager, io_handler, server, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
     event_manager->clearAllEvents();
   }
@@ -86,7 +86,7 @@ void SelectServer::addActiveEvents(const std::map<int, ConnectionData*>& connect
 }
 
 void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                    NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
+                                    NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   const std::vector<SelectEvent>* active_events_ptr =
       static_cast<std::vector<SelectEvent>*>(event_manager->getActiveEvents());
   const std::vector<SelectEvent> active_events = *active_events_ptr;
@@ -96,7 +96,7 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
     return;
   }
 
@@ -104,11 +104,11 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     // 他のイベントハンドラーにconnectionが切断される可能性がある
     if (conn_manager->isClosedConnection(active_events[i].fd_)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
-      request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].fd_);
+      request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].fd_);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
-      request_handler.handleWriteEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].fd_);
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].fd_);
   }
-  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
   conn_manager->clearClosedConnections();
 }
 

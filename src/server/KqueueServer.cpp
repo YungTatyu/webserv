@@ -1,9 +1,5 @@
 #include "KqueueServer.hpp"
 
-#include "ConfigHandler.hpp"
-#include "ConnectionManager.hpp"
-#include "IServer.hpp"
-#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #if defined(KQUEUE_AVAILABLE)
@@ -15,14 +11,14 @@ KqueueServer::KqueueServer() {}
 KqueueServer::~KqueueServer() { close(this->kq_); }
 
 void KqueueServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                             NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
+                             NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   if (!initKqueueServer()) return;
   if (!initKevents(conn_manager->getConnections())) return;
   for (;;) {
     waitForEvent(conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandleする
-    callEventHandler(conn_manager, event_manager, io_handler, server, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
@@ -79,7 +75,7 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
 }
 
 void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                    NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
+                                    NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   std::vector<struct kevent>* active_events_ptr =
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
   std::vector<struct kevent>& active_events = *active_events_ptr;
@@ -90,7 +86,7 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
     return;
   }
 
@@ -100,18 +96,15 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     if (conn_manager->isClosedConnection(active_events[i].ident)) continue;
     std::cerr << "event=" << active_events[i].ident << "\n";
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree,
-                                      active_events[i].ident);
+      request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleWriteEvent(*io_handler, *conn_manager, server, *timer_tree,
-                                       active_events[i].ident);
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleEofEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].ident);
+      request_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleErrorEvent(*io_handler, *conn_manager, server, *timer_tree,
-                                       active_events[i].ident);
+      request_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
   }
-  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
   conn_manager->clearClosedConnections();
 }
 

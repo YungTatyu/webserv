@@ -14,11 +14,11 @@ class SelectServer : public IServer {
   SelectServer();
   ~SelectServer();
   void eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                 NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree);
+                 NetworkIOHandler* io_handler, TimerTree* timer_tree);
   int waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                    TimerTree* timer_tree);
   void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                        NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree);
+                        NetworkIOHandler* io_handler, TimerTree* timer_tree);
   int addNewEvent(int fd, ConnectionData::EVENT event);
   int updateEvent(int fd, ConnectionData::EVENT event);
   int deleteEvent(int fd, ConnectionData::EVENT event);

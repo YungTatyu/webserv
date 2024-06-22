@@ -1,8 +1,5 @@
 #include <cstring>
 
-#include "ConnectionManager.hpp"
-#include "NetworkIOHandler.hpp"
-#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #if defined(EPOLL_AVAILABLE)
@@ -16,7 +13,7 @@ EpollServer::EpollServer() {}
 EpollServer::~EpollServer() { close(this->epfd_); }
 
 void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                            NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
+                            NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   if (!initEpollServer()) return;
 
   if (!initEpollEvent(conn_manager->getConnections())) return;
@@ -25,7 +22,7 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
     waitForEvent(conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandle
-    callEventHandler(conn_manager, event_manager, io_handler, server, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
@@ -61,7 +58,7 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
 }
 
 void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                   NetworkIOHandler* io_handler, IServer* server, TimerTree* timer_tree) {
+                                   NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   // event handling
   std::vector<struct epoll_event>* active_events_ptr =
       static_cast<std::vector<struct epoll_event>*>(event_manager->getActiveEvents());
@@ -73,7 +70,7 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
     return;
   }
 
@@ -82,19 +79,18 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
     // 他のイベントハンドラーにconnectionが切断される可能性がある
     if (conn_manager->isClosedConnection(active_events[i].data.fd)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree,
+      request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree,
                                       active_events[i].data.fd);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleWriteEvent(*io_handler, *conn_manager, server, *timer_tree,
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree,
                                        active_events[i].data.fd);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleEofEvent(*io_handler, *conn_manager, server, *timer_tree,
-                                     active_events[i].data.fd);
+      request_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].data.fd);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleErrorEvent(*io_handler, *conn_manager, server, *timer_tree,
+      request_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree,
                                        active_events[i].data.fd);
   }
-  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
   conn_manager->clearClosedConnections();
 }
 
