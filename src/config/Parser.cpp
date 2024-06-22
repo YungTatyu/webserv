@@ -72,7 +72,7 @@ const static std::string kEPOLL = "epoll";
 const static std::string kKQUEUE = "kqueue";
 
 config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath)
-    : config_(config), tokens_(tokens), filepath_(filepath), ti_(0) {
+    : config_(config), tokens_(tokens), filepath_(filepath), ti_(0), current_directive_("") {
   // 現在のcontextをセット
   this->current_context_.push(CONF_MAIN);
 
@@ -185,9 +185,10 @@ bool config::Parser::parse() {
     // directiveのtypeを確認
     if (!parseType(current_token)) return false;
 
+    this->current_directive_ = current_token.value_;
     // directiveのargsの値を確認
-    bool (config::Parser::*directive_parser)() = this->parser_map_[current_token.value_];
-    if (!(this->*directive_parser)()) return false;
+    bool (config::Parser::*directive_parser)() = this->parser_map_[current_directive_];
+    if (!parseDirective(directive_parser)) return false;
   }
 
   return validFinalState();
@@ -411,6 +412,25 @@ bool config::Parser::validWorkerConnections() const {
 }
 
 /**
+ * すべてのdirective(contextも含めて)のparserをこの関数を通して呼ぶ
+ *
+ */
+bool config::Parser::parseDirective(bool (config::Parser::*directive_parser)()) {
+  // contextの場合
+  if (isContext(this->tokens_[ti_]))
+    return (this->*directive_parser)();
+
+  // directiveの場合
+  ++ti_; // argumentsに進む
+  bool result = (this->*directive_parser)();
+  if (!result) return false;
+  if (!current_directive_.empty())
+    updateDirectivesSet(current_directive_);
+  ti_ += 2; // セミコロンを飛ばして次のdirectiveに進む
+  return result;
+}
+
+/**
  * http, server, eventsをparse
  */
 bool config::Parser::parseHttpServerEvents() {
@@ -501,18 +521,16 @@ std::string config::Parser::toUpper(std::string str) const {
 }
 
 bool config::Parser::parseAccessLog() {
-  ti_++;
   std::string path = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
   config::AccessLog tmp_acs_log;
 
   // 文字列が空の場合はobjectを追加しない
   if (path.empty()) {
-    ti_ += 2;
+    // directive_setに追加しない。
+    this->current_directive_.clear();
     return true;
   }
-
-  updateDirectivesSet(kACCESS_LOG);
 
   if (path == "off")
     tmp_acs_log.setIsAccesslogOn(false);
@@ -526,19 +544,17 @@ bool config::Parser::parseAccessLog() {
   else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().access_log_list.push_back(tmp_acs_log);
 
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseErrorLog() {
-  ti_++;
   std::string path = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
   config::ErrorLog tmp_err_log;
 
   // 文字列が空の場合はobjectを追加しない
   if (path.empty()) {
-    ti_ += 2;
+    current_directive_.clear();
     return true;
   }
 
@@ -553,9 +569,6 @@ bool config::Parser::parseErrorLog() {
   else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().error_log_list.push_back(tmp_err_log);
 
-  updateDirectivesSet(kERROR_LOG);
-
-  ti_ += 2;
   return true;
 }
 
@@ -579,8 +592,6 @@ bool config::Parser::validEventType(const std::string &eventType) const {
 }
 
 bool config::Parser::parseUse() {
-  ti_++;
-
   std::string token_value = this->tokens_[ti_].value_;
 
   if (!validEventType(token_value)) {
@@ -598,14 +609,11 @@ bool config::Parser::parseUse() {
   method = method_map.find(token_value)->second;
 
   this->config_.events.use.setConnectionMethod(method);
-  updateDirectivesSet(kUSE);
 
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseWorkerConnections() {
-  ti_++;
   long value;
   std::string str = this->tokens_[ti_].value_;
 
@@ -627,9 +635,7 @@ bool config::Parser::parseWorkerConnections() {
   }
 
   this->config_.events.worker_connections.setWorkerConnections(value);
-  updateDirectivesSet(kWORKER_CONNECTIONS);
 
-  ti_ += 2;
   return true;
 }
 
@@ -720,8 +726,6 @@ long config::Parser::parseSize() {
 }
 
 bool config::Parser::parseSendTimeout() {
-  ti_++;
-
   long ret = parseTime();
   if (ret == -1) {
     printError("\"send_timeout\" directive invalid value", this->tokens_[ti_]);
@@ -737,15 +741,10 @@ bool config::Parser::parseSendTimeout() {
   else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().send_timeout.setTime(ret);
 
-  updateDirectivesSet(kSEND_TIMEOUT);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseKeepaliveTimeout() {
-  ti_++;
-
   long ret = parseTime();
   if (ret == -1) {
     printError("\"keepalive_timeout\" directive invalid value", this->tokens_[ti_]);
@@ -770,15 +769,10 @@ bool config::Parser::parseKeepaliveTimeout() {
       break;
   }
 
-  updateDirectivesSet(kKEEPALIVE_TIMEOUT);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseReceiveTimeout() {
-  ti_++;
-
   long ret = parseTime();
   if (ret == -1) {
     printError("\"receive_timeout\" directive invalid value", this->tokens_[ti_]);
@@ -803,14 +797,10 @@ bool config::Parser::parseReceiveTimeout() {
       break;
   }
 
-  updateDirectivesSet(kRECEIVE_TIMEOUT);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseRoot() {
-  ti_++;
   std::string path = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
 
@@ -829,15 +819,10 @@ bool config::Parser::parseRoot() {
     this->config_.http.server_list.back().location_list.back().root.setPath(path);
   }
 
-  updateDirectivesSet(kROOT);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseClientMaxBodySize() {
-  ti_++;
-
   long ret = parseSize();
   if (ret == -1) {
     printError("\"client_max_body_size\" directive invalid value", this->tokens_[ti_]);
@@ -845,14 +830,11 @@ bool config::Parser::parseClientMaxBodySize() {
   }
 
   this->config_.http.client_max_body_size.setSize(ret);
-  updateDirectivesSet(kCLIENT_MAX_BODY_SIZE);
 
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseIndex() {
-  ti_++;
   std::string file;
   config::CONTEXT context = this->current_context_.top();
   config::Index tmp_index;
@@ -876,17 +858,14 @@ bool config::Parser::parseIndex() {
     else if (context == config::CONF_HTTP_LOCATION)
       this->config_.http.server_list.back().location_list.back().index_list.push_back(tmp_index);
 
-    ti_++;
+    ++ti_;
   }
 
-  updateDirectivesSet(kINDEX);
-
-  ti_++;
+  --ti_; // parseDirectiveで2進めるので1戻す
   return true;
 }
 
 bool config::Parser::parseAutoindex() {
-  ti_++;
   std::string tmp_switch = this->tokens_[ti_].value_;
 
   if (tmp_switch != "on" && tmp_switch != "off") {
@@ -898,8 +877,6 @@ bool config::Parser::parseAutoindex() {
 
   config::CONTEXT context = this->current_context_.top();
 
-  updateDirectivesSet(kAUTOINDEX);
-
   if (tmp_switch == "on") {
     if (context == config::CONF_HTTP)
       this->config_.http.autoindex.setIsAutoindexOn(true);
@@ -909,7 +886,6 @@ bool config::Parser::parseAutoindex() {
       this->config_.http.server_list.back().location_list.back().autoindex.setIsAutoindexOn(true);
   }
 
-  ti_ += 2;
   return true;
 }
 
@@ -946,7 +922,6 @@ long config::Parser::retErrorPageOptNumIfValid() {
 }
 
 bool config::Parser::parseErrorPage() {
-  ti_++;
   config::ErrorPage tmp_err_pg;
   unsigned int code;
   unsigned int tmp_ti = ti_;
@@ -968,7 +943,7 @@ bool config::Parser::parseErrorPage() {
 
     tmp_err_pg.addCode(code);
 
-    ti_++;
+    ++ti_;
   }
 
   tmp_err_pg.setUri(this->tokens_[ti_].value_);
@@ -980,9 +955,6 @@ bool config::Parser::parseErrorPage() {
   else if (this->current_context_.top() == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().error_page_list.push_back(tmp_err_pg);
 
-  updateDirectivesSet(kERROR_PAGE);
-
-  ti_ += 2;
   return true;
 }
 
@@ -1130,8 +1102,7 @@ bool config::Parser::isNumInRange(const std::string &num, long min, long max) co
  */
 bool config::Parser::parseAllowDeny() {
   const config::ACCESS_DIRECTIVE directive_type =
-      this->tokens_[ti_].value_ == kALLOW ? config::ALLOW : config::DENY;
-  ++ti_;
+      current_directive_ == kALLOW ? config::ALLOW : config::DENY;
   const std::string address = this->tokens_[ti_].value_;
 
   // ipv6にも対応するならば、!isIPv6()と!isMixedIPAddress()も条件に追加してください。
@@ -1166,14 +1137,10 @@ bool config::Parser::parseAllowDeny() {
       break;
   }
 
-  updateDirectivesSet(directive_name);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseListen() {
-  ti_++;
   std::string ori_val = this->tokens_[ti_].value_;
   config::Listen tmp_listen;
   std::istringstream iss;
@@ -1308,9 +1275,7 @@ bool config::Parser::parseListen() {
   }
 
   this->config_.http.server_list.back().listen_list.push_back(tmp_listen);
-  updateDirectivesSet(kLISTEN);
 
-  ti_ += 2;
   return true;
 }
 
@@ -1331,8 +1296,6 @@ bool config::Parser::isDuplicateDefaultServer(const config::Listen &this_listen)
 }
 
 bool config::Parser::parseServerName() {
-  ti_++;
-
   // 最初のserver_nameディレクティブであれば、デフォルト値を削除する
   if (this->config_.http.server_list.back().directives_set.find(kSERVER_NAME) ==
       this->config_.http.server_list.back().directives_set.end())
@@ -1341,16 +1304,14 @@ bool config::Parser::parseServerName() {
   while (this->tokens_[ti_].type_ != config::TK_SEMICOLON) {
     this->config_.http.server_list.back().server_name.addName(this->tokens_[ti_].value_);
 
-    ti_++;
+    ++ti_;
   }
 
-  updateDirectivesSet(kSERVER_NAME);
-  ti_++;
+  --ti_;
   return true;
 }
 
 bool config::Parser::parseTryFiles() {
-  ti_++;
   config::CONTEXT context = this->current_context_.top();
   std::string file;
 
@@ -1363,7 +1324,7 @@ bool config::Parser::parseTryFiles() {
     else if (context == config::CONF_HTTP_LOCATION)
       this->config_.http.server_list.back().location_list.back().try_files.addFile(file);
 
-    ti_++;
+    ++ti_;
   }
 
   // codeかuriか判定
@@ -1398,14 +1359,10 @@ bool config::Parser::parseTryFiles() {
       this->config_.http.server_list.back().location_list.back().try_files.setUri(uri);
   }
 
-  updateDirectivesSet(kTRY_FILES);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseAlias() {
-  ti_++;
   std::string path = this->tokens_[ti_].value_;
 
   std::set<std::string> &location_directives =
@@ -1417,14 +1374,11 @@ bool config::Parser::parseAlias() {
   }
 
   this->config_.http.server_list.back().location_list.back().alias.setPath(path);
-  updateDirectivesSet(kALIAS);
 
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseReturn() {
-  ti_++;
   long code;
   config::Return tmp_return;
   const std::string http = "http://";
@@ -1457,14 +1411,12 @@ bool config::Parser::parseReturn() {
   }
 
   this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
-  updateDirectivesSet(kRETURN);
 
-  ti_ += 1;
+  --ti_; // parseDirectiveで2進めるので1戻す
   return true;
 }
 
 bool config::Parser::parseUserid() {
-  ti_++;
   std::string tmp_switch = this->tokens_[ti_].value_;
 
   // もし、on/offではなかったらエラー
@@ -1477,9 +1429,6 @@ bool config::Parser::parseUserid() {
 
   config::CONTEXT context = this->current_context_.top();
 
-  // directives_setにセット
-  updateDirectivesSet(kUSERID);
-
   // もし、onであれば、trueにする
   if (tmp_switch == "on") {
     if (context == config::CONF_HTTP)
@@ -1490,12 +1439,10 @@ bool config::Parser::parseUserid() {
       this->config_.http.server_list.back().location_list.back().userid.setIsUseridOn(true);
   }
 
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseUseridDomain() {
-  ti_++;
   std::string name = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
 
@@ -1506,21 +1453,15 @@ bool config::Parser::parseUseridDomain() {
   else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().userid_domain.setName(name);
 
-  updateDirectivesSet(kUSERID_DOMAIN);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseUseridExpires() {
-  ti_++;
   std::string tmp_switch = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
 
   // off であれば、なにもしない
   if (tmp_switch == "off") {
-    updateDirectivesSet(kUSERID_EXPIRES);
-    ti_ += 2;
     return true;
   }
 
@@ -1541,14 +1482,10 @@ bool config::Parser::parseUseridExpires() {
     this->config_.http.server_list.back().location_list.back().userid_expires.setIsUseridExpiresOn(true);
   }
 
-  updateDirectivesSet(kUSERID_EXPIRES);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseUseridPath() {
-  ti_++;
   std::string path = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
 
@@ -1563,14 +1500,10 @@ bool config::Parser::parseUseridPath() {
     }
   }
 
-  updateDirectivesSet(kUSERID_PATH);
-
-  ti_ += 2;
   return true;
 }
 
 bool config::Parser::parseUseridService() {
-  ti_++;
   long user_id;
   std::istringstream iss(this->tokens_[ti_].value_.c_str());
 
@@ -1589,9 +1522,6 @@ bool config::Parser::parseUseridService() {
   else if (context == config::CONF_HTTP_LOCATION)
     this->config_.http.server_list.back().location_list.back().userid_service.setUseridService(user_id);
 
-  updateDirectivesSet(kUSERID_PATH);
-
-  ti_ += 2;
   return true;
 }
 

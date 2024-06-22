@@ -28,6 +28,7 @@ class Parser {
   const std::vector<Token> &tokens_;
   const std::string filepath_;
   size_t ti_;  // token index
+  std::string current_directive_;
   std::stack<CONTEXT> current_context_;
   std::map<std::string, bool (config::Parser::*)()> parser_map_;
   bool parseType(const Token &token);
@@ -44,6 +45,7 @@ class Parser {
   bool validWorkerConnections() const;
   template <typename T>
   void updateContext(T &context, CONTEXT new_context, const std::string &context_name);
+  bool parseDirective(bool (config::Parser::*directive_parser)());
   bool parseHttpServerEvents();
   bool parseLocation();
   bool parseLimitExcept();
@@ -104,16 +106,9 @@ class Parser {
  */
 template <typename T>
 void config::Parser::updateContext(T &context, CONTEXT new_context, const std::string &context_name) {
-  this->current_context_.push(new_context);
+  current_context_.push(new_context);
   context.directives_set.insert(context_name);
 }
 
-// template<typename Func>
-// bool Parser::parseDirective(const std::string& directiveName, Func parseFunc) {
-//   ++ti_;
-//   bool result = parseFunc();
-//   ti_ += 2;
-//   return result;
-// }
 
 #endif
