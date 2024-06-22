@@ -128,5 +128,6 @@ void WebServer::deleteObjects() {
 }
 
 void WebServer::run() {
-  server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->server, this->timerTree);
+  this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->server,
+                          this->timerTree);
 }

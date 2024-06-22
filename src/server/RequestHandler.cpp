@@ -5,10 +5,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "ConfigHandler.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-#include "IServer.hpp"
 #include "WebServer.hpp"
 
 RequestHandler::RequestHandler() {}

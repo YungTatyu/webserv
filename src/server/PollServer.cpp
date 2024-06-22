@@ -1,6 +1,5 @@
 #include "PollServer.hpp"
 
-#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 

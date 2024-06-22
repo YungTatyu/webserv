@@ -167,7 +167,7 @@ void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* 
 
 /**
  * @brief clientとのコネクションを完全に削除する
- * client, cgi socket, timerを全て削除
+ * client, cgi socket, timerを全て削除: clientとcgiの両方を削除しなければいけない時に、この関数を呼ぶ
  *
  */
 void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
