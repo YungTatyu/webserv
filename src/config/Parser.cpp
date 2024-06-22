@@ -417,16 +417,14 @@ bool config::Parser::validWorkerConnections() const {
  */
 bool config::Parser::parseDirective(bool (config::Parser::*directive_parser)()) {
   // contextの場合
-  if (isContext(this->tokens_[ti_]))
-    return (this->*directive_parser)();
+  if (isContext(this->tokens_[ti_])) return (this->*directive_parser)();
 
   // directiveの場合
-  ++ti_; // argumentsに進む
+  ++ti_;  // argumentsに進む
   bool result = (this->*directive_parser)();
   if (!result) return false;
-  if (!current_directive_.empty())
-    updateDirectivesSet(current_directive_);
-  ti_ += 2; // セミコロンを飛ばして次のdirectiveに進む
+  if (!current_directive_.empty()) updateDirectivesSet(current_directive_);
+  ti_ += 2;  // セミコロンを飛ばして次のdirectiveに進む
   return result;
 }
 
@@ -861,7 +859,7 @@ bool config::Parser::parseIndex() {
     ++ti_;
   }
 
-  --ti_; // parseDirectiveで2進めるので1戻す
+  --ti_;  // parseDirectiveで2進めるので1戻す
   return true;
 }
 
@@ -1101,8 +1099,7 @@ bool config::Parser::isNumInRange(const std::string &num, long min, long max) co
  * @return false
  */
 bool config::Parser::parseAllowDeny() {
-  const config::ACCESS_DIRECTIVE directive_type =
-      current_directive_ == kALLOW ? config::ALLOW : config::DENY;
+  const config::ACCESS_DIRECTIVE directive_type = current_directive_ == kALLOW ? config::ALLOW : config::DENY;
   const std::string address = this->tokens_[ti_].value_;
 
   // ipv6にも対応するならば、!isIPv6()と!isMixedIPAddress()も条件に追加してください。
@@ -1412,7 +1409,7 @@ bool config::Parser::parseReturn() {
 
   this->config_.http.server_list.back().location_list.back().return_list.push_back(tmp_return);
 
-  --ti_; // parseDirectiveで2進めるので1戻す
+  --ti_;  // parseDirectiveで2進めるので1戻す
   return true;
 }
 

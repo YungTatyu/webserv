@@ -110,5 +110,4 @@ void config::Parser::updateContext(T &context, CONTEXT new_context, const std::s
   context.directives_set.insert(context_name);
 }
 
-
 #endif
