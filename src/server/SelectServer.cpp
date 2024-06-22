@@ -102,12 +102,15 @@ void SelectServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
   }
 
   for (size_t i = 0; i < active_events.size(); ++i) {
+    // 他のイベントハンドラーにconnectionが切断される可能性がある
+    if (conn_manager->isClosedConnection(active_events[i].fd_)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&active_events[i])))
       request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].fd_);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&active_events[i])))
       request_handler.handleWriteEvent(*io_handler, *conn_manager, server, *timer_tree, active_events[i].fd_);
   }
   request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+  conn_manager->clearClosedConnections();
 }
 
 int SelectServer::addNewEvent(int fd, ConnectionData::EVENT event) {

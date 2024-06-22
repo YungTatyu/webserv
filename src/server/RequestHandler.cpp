@@ -15,7 +15,6 @@ RequestHandler::RequestHandler() {}
 
 void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                      IServer *server, TimerTree &timerTree, const int sockfd) const {
-  std::cerr << "read event\n";
   const ConfigHandler &configHandler = WebServer::getConfigHandler();
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ)
     return handleCgiReadEvent(ioHandler, connManager, server, timerTree, sockfd);
@@ -29,8 +28,14 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
     if (!isOverWorkerConnections(connManager, configHandler)) return;
     int timeout_fd = timerTree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
+    // cgiのイベントを監視している場合は、cgiプロセスをkillしないといけない
+    if (connManager.isCgiSocket(sockfd)) {
+      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
+      cgi_handler.killCgiProcess();
+    }
     // cgiの時は、clientとcgi両方削除しないといけない
     ioHandler.purgeConnection(connManager, server, timerTree, timeout_fd);
+
     return;
   }
 
@@ -124,11 +129,9 @@ void RequestHandler::handleCgi(ConnectionManager &connManager, const ConfigHandl
 
 void RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                         IServer *server, TimerTree &timerTree, const int sockfd) const {
-  std::cerr << "cgi read event\n";
   const ConfigHandler &configHandler = WebServer::getConfigHandler();
   ssize_t re = ioHandler.receiveCgiResponse(connManager, sockfd);
   int status = -1;
-  std::cerr << "re=" << re << "\n";
   // recv error
   if (re == -1) return;
   const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
@@ -148,13 +151,11 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionM
     response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
   }
   handleResponse(connManager, configHandler, server, timerTree, sockfd);
-  std::cerr << "cgi read response\n";
   ioHandler.closeConnection(connManager, server, timerTree, sockfd);  // delete cgi event
 }
 
 void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                       IServer *server, TimerTree &timerTree, const int sockfd) const {
-  std::cerr << "write event\n";
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_WRITE)
     return handleCgiWriteEvent(ioHandler, connManager, server, timerTree, sockfd);
 
@@ -203,7 +204,6 @@ void RequestHandler::handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionMan
 
 void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                          IServer *server, TimerTree &timerTree, const int sockfd) const {
-  std::cerr << "cgi write event\n";
   const ConfigHandler &configHandler = WebServer::getConfigHandler();
   ioHandler.sendRequestBody(connManager, sockfd);
 
@@ -225,7 +225,6 @@ void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, Connection
 
 void RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                     IServer *server, TimerTree &timerTree, const int sockfd) const {
-  std::cerr << "eof event\n";
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   if (connManager.getEvent(sockfd) == ConnectionData::EV_CGI_READ) {
     return handleCgiReadEvent(ioHandler, connManager, server, timerTree, sockfd);
@@ -241,7 +240,6 @@ void RequestHandler::handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManag
 
 void RequestHandler::handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager,
                                       IServer *server, TimerTree &timerTree, const int sockfd) const {
-  std::cerr << "error event\n";
   // cgiならすぐには接続切らず、timoutに任せる
   if (connManager.isCgiSocket(sockfd)) return;
   ioHandler.closeConnection(connManager, server, timerTree, sockfd);
@@ -254,7 +252,6 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
   Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timerTree.getTimerTree().upper_bound(current_time);
 
-  std::cerr << "timeout event\n";
   // timeout している接続をすべて削除
   for (std::multiset<Timer>::iterator it = timerTree.getTimerTree().begin(); it != upper_bound;) {
     // next iterator を保存

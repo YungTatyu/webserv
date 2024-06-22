@@ -72,10 +72,15 @@ class ConnectionManager {
   void clearConnectionData(const int fd);
   void closeAllConnections();
   bool isCgiSocket(const int fd) const;
+  void addClosedConnection(int fd);
+  bool isClosedConnection(int fd) const;
+  void clearClosedConnections();
   connection_size getCgiSockNum() const;
 
  private:
   std::map<int, ConnectionData*> connections_;
+  std::set<int> closed_connections_;  // event handlerによって、接続を切られたfdを管理する
+                                      // 発生したイベントのハンドラーが全て呼ばれたら毎回リセットされる
   connection_size cgi_sock_num_;
 };
 

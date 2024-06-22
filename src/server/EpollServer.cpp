@@ -79,6 +79,8 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
 
   // 発生したイベントの数だけloopする
   for (int i = 0; i < event_manager->getActiveEventsNum(); ++i) {
+    // 他のイベントハンドラーにconnectionが切断される可能性がある
+    if (conn_manager->isClosedConnection(active_events[i].data.fd)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
       request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree,
                                       active_events[i].data.fd);
@@ -93,6 +95,7 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
                                        active_events[i].data.fd);
   }
   request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+  conn_manager->clearClosedConnections();
 }
 
 int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,

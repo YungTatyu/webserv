@@ -65,8 +65,8 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
 
   // 発生したイベントの数だけloopする
   for (std::vector<pollfd>::const_iterator it = active_events->begin(); it != active_events->end(); ++it) {
-    // 発生したeventに対するhandlerを呼ぶ
-    // interfaceを実装したことにより、関数ポインタのmapが使えなくなった・・・　どうしよう？？？
+    // 他のイベントハンドラーにconnectionが切断される可能性がある
+    if (conn_manager->isClosedConnection(it->fd)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(*it))))
       request_handler.handleReadEvent(*io_handler, *conn_manager, server, *timer_tree, it->fd);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(*it))))
@@ -77,6 +77,7 @@ void PollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventM
       request_handler.handleErrorEvent(*io_handler, *conn_manager, server, *timer_tree, it->fd);
   }
   request_handler.handleTimeoutEvent(*io_handler, *conn_manager, server, *timer_tree);
+  conn_manager->clearClosedConnections();
 }
 
 /**
