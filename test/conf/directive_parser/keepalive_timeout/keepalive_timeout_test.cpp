@@ -27,7 +27,6 @@ TEST(KeepaliveTimeoutTest, max) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   const long kLongMax = std::numeric_limits<long>::max();
@@ -37,12 +36,12 @@ TEST(KeepaliveTimeoutTest, max) {
   test::test_directives_set(http.directives_set, kKeepaliveTimeout, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].keepalive_timeout.getTime().time_in_ms_,
+  EXPECT_EQ(server_list[0].keepalive_timeout.getTime().time_in_ms_,
             9223372036854775 * config::Time::seconds);
-  test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
+  test::test_directives_set(server_list[0].directives_set, kKeepaliveTimeout, true);
 
   // location
-  test::test_value(http.server_list[0].location_list, {
+  test::test_value(server_list[0].location_list, {
                                                           9223372036854775 * config::Time::seconds,
                                                           153722867280912 * config::Time::minutes,
                                                           2562047788015 * config::Time::hours,
@@ -55,7 +54,6 @@ TEST(KeepaliveTimeoutTest, zero) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -63,11 +61,11 @@ TEST(KeepaliveTimeoutTest, zero) {
   test::test_directives_set(http.directives_set, kKeepaliveTimeout, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].keepalive_timeout.getTime().time_in_ms_, 0);
-  test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
+  EXPECT_EQ(server_list[0].keepalive_timeout.getTime().time_in_ms_, 0);
+  test::test_directives_set(server_list[0].directives_set, kKeepaliveTimeout, true);
 
   // location
-  test::test_value(http.server_list[0].location_list, {0, 0, 0, 0});
+  test::test_value(server_list[0].location_list, {0, 0, 0, 0});
 }
 
 TEST(KeepaliveTimeoutTest, random) {
@@ -75,7 +73,6 @@ TEST(KeepaliveTimeoutTest, random) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -83,11 +80,11 @@ TEST(KeepaliveTimeoutTest, random) {
   test::test_directives_set(http.directives_set, kKeepaliveTimeout, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].keepalive_timeout.getTime().time_in_ms_, 1000);
-  test::test_directives_set(http.server_list[0].directives_set, kKeepaliveTimeout, true);
+  EXPECT_EQ(server_list[0].keepalive_timeout.getTime().time_in_ms_, 1000);
+  test::test_directives_set(server_list[0].directives_set, kKeepaliveTimeout, true);
 
   // location
-  test::test_value(http.server_list[0].location_list, {1000, 1000 * 60, 1000 * 60 * 60, 1000 * 60 * 60 * 24});
+  test::test_value(server_list[0].location_list, {1000, 1000 * 60, 1000 * 60 * 60, 1000 * 60 * 60 * 24});
 }
 
 TEST(KeepaliveTimeoutTest, notFound) {
@@ -95,8 +92,8 @@ TEST(KeepaliveTimeoutTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
+  (void)server_list;
 
   test::test_directives_set(http.directives_set, kKeepaliveTimeout, false);
 }

@@ -67,8 +67,8 @@ TEST(accesslogTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
+  (void)server_list;
 
   // http
   test::test_value(http.access_log_list, {"/tmp", "/tmp/tmp"});
@@ -98,8 +98,8 @@ TEST(accesslogTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
+  (void)server_list;
 
   test::test_directives_set(http.directives_set, kAccessLog, false);
   test::test_directives_set(http.server_list[0].directives_set, kAccessLog, false);

@@ -20,6 +20,7 @@ TEST(mainParserTest, allContexts) {
   const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
   int i;
+  (void)events;
 
   // http
   EXPECT_NE(config->directives_set.find(HTTP), config->directives_set.end());
@@ -73,9 +74,8 @@ TEST(mainParserTest, allContexts) {
       config::DELETE,
       config::HEAD,
   };
-  i = 0;
   std::for_each(expect_methods.begin(), expect_methods.end(),
-                [&server_list, &i](config::REQUEST_METHOD expect) {
+                [&server_list](config::REQUEST_METHOD expect) {
                   EXPECT_NE(server_list[0].location_list[0].limit_except.excepted_methods.find(expect),
                             server_list[0].location_list[0].limit_except.excepted_methods.end());
                 });

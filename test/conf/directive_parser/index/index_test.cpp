@@ -25,7 +25,6 @@ TEST(indexTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -33,14 +32,14 @@ TEST(indexTest, allContext) {
   test::test_directives_set(http.directives_set, kIndex, true);
 
   // server
-  test::test_value(http.server_list[0].index_list, {"index.html", "server1", "server2"});
-  test::test_directives_set(http.server_list[0].directives_set, kIndex, true);
+  test::test_value(server_list[0].index_list, {"index.html", "server1", "server2"});
+  test::test_directives_set(server_list[0].directives_set, kIndex, true);
 
   // location
   test::test_value(
-      http.server_list[0].location_list[0].index_list,
+      server_list[0].location_list[0].index_list,
       {"location1", "location2", "location3", "index1.html", "index2.html", "index3.html", "index4.html"});
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kIndex, true);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kIndex, true);
 }
 
 TEST(indexTest, notFound) {
@@ -48,10 +47,9 @@ TEST(indexTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
-  test::test_directives_set(http.server_list[0].directives_set, kIndex, false);
-  test::test_directives_set(http.server_list[1].directives_set, kIndex, false);
-  test::test_directives_set(http.server_list[2].directives_set, kIndex, false);
+  test::test_directives_set(server_list[0].directives_set, kIndex, false);
+  test::test_directives_set(server_list[1].directives_set, kIndex, false);
+  test::test_directives_set(server_list[2].directives_set, kIndex, false);
 }

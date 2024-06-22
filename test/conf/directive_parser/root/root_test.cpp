@@ -15,7 +15,6 @@ TEST(RootTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -23,12 +22,12 @@ TEST(RootTest, allContext) {
   test::test_directives_set(http.directives_set, kRoot, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].root.getPath(), "123");
-  test::test_directives_set(http.server_list[0].directives_set, kRoot, true);
+  EXPECT_EQ(server_list[0].root.getPath(), "123");
+  test::test_directives_set(server_list[0].directives_set, kRoot, true);
 
   // location
-  EXPECT_EQ(http.server_list[0].location_list[0].root.getPath(), "/tmp");
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kRoot, true);
+  EXPECT_EQ(server_list[0].location_list[0].root.getPath(), "/tmp");
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kRoot, true);
 }
 
 TEST(RootTest, notFound) {
@@ -36,10 +35,9 @@ TEST(RootTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kRoot, false);
-  test::test_directives_set(http.server_list[0].directives_set, kRoot, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kRoot, false);
+  test::test_directives_set(server_list[0].directives_set, kRoot, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kRoot, false);
 }

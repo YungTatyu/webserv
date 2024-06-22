@@ -15,9 +15,7 @@ TEST(UseTest, select) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/use/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
   const config::Events &events = config->events;
-  const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(events.use.getConnectionMethod(), config::CONNECTION_METHOD::SELECT);
   test::test_directives_set(events.directives_set, kUse, true);
@@ -27,9 +25,7 @@ TEST(UseTest, poll) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/use/2.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
   const config::Events &events = config->events;
-  const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(events.use.getConnectionMethod(), config::CONNECTION_METHOD::POLL);
   test::test_directives_set(events.directives_set, kUse, true);
@@ -46,9 +42,7 @@ TEST(UseTest, kqueue) {
   return;
 #endif
 
-  const config::Http &http = config->http;
   const config::Events &events = config->events;
-  const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(events.use.getConnectionMethod(), config::CONNECTION_METHOD::KQUEUE);
   test::test_directives_set(events.directives_set, kUse, true);
@@ -65,9 +59,7 @@ TEST(UseTest, epoll) {
   return;
 #endif
 
-  const config::Http &http = config->http;
   const config::Events &events = config->events;
-  const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(events.use.getConnectionMethod(), config::CONNECTION_METHOD::EPOLL);
   test::test_directives_set(events.directives_set, kUse, true);
@@ -77,9 +69,7 @@ TEST(UseTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
   const config::Events &events = config->events;
-  const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(events.directives_set, kUse, false);
 }

@@ -25,7 +25,6 @@ TEST(autoindexTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -33,13 +32,13 @@ TEST(autoindexTest, allContext) {
   test::test_directives_set(http.directives_set, kAutoindex, true);
 
   // server
-  test::test_value(http.server_list, {false, true});
-  test::test_directives_set(http.server_list[0].directives_set, kAutoindex, true);
-  test::test_directives_set(http.server_list[1].directives_set, kAutoindex, true);
+  test::test_value(server_list, {false, true});
+  test::test_directives_set(server_list[0].directives_set, kAutoindex, true);
+  test::test_directives_set(server_list[1].directives_set, kAutoindex, true);
 
   // location
-  EXPECT_EQ(http.server_list[0].location_list[0].autoindex.getIsAutoindexOn(), true);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAutoindex, true);
+  EXPECT_EQ(server_list[0].location_list[0].autoindex.getIsAutoindexOn(), true);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kAutoindex, true);
 }
 
 TEST(autoindexTest, notFound) {
@@ -47,12 +46,11 @@ TEST(autoindexTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kAutoindex, false);
-  test::test_directives_set(http.server_list[0].directives_set, kAutoindex, false);
-  test::test_directives_set(http.server_list[1].directives_set, kAutoindex, false);
-  test::test_directives_set(http.server_list[2].directives_set, kAutoindex, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAutoindex, false);
+  test::test_directives_set(server_list[0].directives_set, kAutoindex, false);
+  test::test_directives_set(server_list[1].directives_set, kAutoindex, false);
+  test::test_directives_set(server_list[2].directives_set, kAutoindex, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kAutoindex, false);
 }

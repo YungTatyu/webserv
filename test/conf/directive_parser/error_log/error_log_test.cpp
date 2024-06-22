@@ -31,7 +31,6 @@ TEST(ErrorLogTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // main
@@ -44,11 +43,11 @@ TEST(ErrorLogTest, allContext) {
 
   // server
   test::test_value(http.server_list[0].error_log_list, {"path1", "path2", "path3"});
-  test::test_directives_set(http.server_list[0].directives_set, kErrorLog, true);
+  test::test_directives_set(server_list[0].directives_set, kErrorLog, true);
 
   // location
-  test::test_value(http.server_list[0].location_list[0].error_log_list, {"/server1", "/server2", "/server3"});
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kErrorLog, true);
+  test::test_value(server_list[0].location_list[0].error_log_list, {"/server1", "/server2", "/server3"});
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorLog, true);
 }
 
 TEST(ErrorLogTest, notFound) {
@@ -56,11 +55,10 @@ TEST(ErrorLogTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(config->directives_set, kErrorLog, false);
   test::test_directives_set(http.directives_set, kErrorLog, false);
-  test::test_directives_set(http.server_list[0].directives_set, kErrorLog, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kErrorLog, false);
+  test::test_directives_set(server_list[0].directives_set, kErrorLog, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorLog, false);
 }
