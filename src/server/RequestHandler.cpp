@@ -91,7 +91,7 @@ void RequestHandler::handleResponse(ConnectionManager &connManager, const Config
     server->addNewEvent(client, ConnectionData::EV_WRITE);
   else
     server->updateEvent(sockfd, ConnectionData::EV_WRITE);
-  connManager.setEvent(client, ConnectionData::EV_WRITE);  // writeイベントに更新
+  connManager.setEvent(sockfd, ConnectionData::EV_WRITE);  // writeイベントに更新
 }
 
 void RequestHandler::handleCgi(ConnectionManager &connManager, const ConfigHandler &configHandler,
@@ -261,8 +261,8 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
       // timeoutしたcgiの処理
       const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();
-      connManager.clearResData(cgi_sock);
       ioHandler.closeConnection(connManager, server, timerTree, cgi_sock);
+      connManager.clearResData(cgi_handler.getCliSocket());
       configHandler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
       it = next;
       continue;
