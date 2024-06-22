@@ -94,7 +94,6 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
   for (int i = 0; i < event_manager->getActiveEventsNum(); ++i) {
     // 他のイベントハンドラーにconnectionが切断される可能性がある
     if (conn_manager->isClosedConnection(active_events[i].ident)) continue;
-    std::cerr << "event=" << active_events[i].ident << "\n";
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
       request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
