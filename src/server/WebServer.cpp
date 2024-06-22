@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "LogFd.hpp"
-#include "RequestHandler.hpp"
 
 ConfigHandler WebServer::config_handler_;
 RequestHandler WebServer::request_handler_;
@@ -125,7 +124,7 @@ void WebServer::deleteObjects() {
   delete this->ioHandler;
   delete this->connManager;
   delete this->eventManager;
-  delete server;
+  delete this->server;
 }
 
 void WebServer::run() {
