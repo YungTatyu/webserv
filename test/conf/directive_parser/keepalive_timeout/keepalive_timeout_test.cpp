@@ -92,7 +92,6 @@ TEST(KeepaliveTimeoutTest, notFound) {
 
   const config::Http &http = config->http;
   const std::vector<config::Server> &server_list = http.server_list;
-  (void)server_list;
 
   test::test_directives_set(http.directives_set, kKeepaliveTimeout, false);
 }

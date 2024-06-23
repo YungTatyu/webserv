@@ -163,11 +163,11 @@ class ResponseTest {
     int i = 0;
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
                   [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    (void)tied_server;
                     std::for_each(this->methods_.begin(), this->methods_.end(),
-                                  [this, &i, &tied_server,
+                                  [this, &i,
                                    &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
                                     (void)method;
-                                    (void)tied_server;
                                     EXPECT_EQ(this->responses_[i].body_, expect);
                                     ++i;
                                   });

@@ -16,7 +16,6 @@ void test_value(const std::vector<config::ErrorPage> &error_page_list,
   int ei = 0;  // error page index
   std::for_each(error_page_list.begin(), error_page_list.end(),
                 [&ei, &expect_codes, &expect_response, &expect_uri](config::ErrorPage error_page) {
-                  (void)error_page;
                   const std::set<unsigned int> &code_list = error_page.getCodeList();
                   const std::vector<unsigned int> &expect_code = expect_codes[ei];
                   int ci = 0;  // code list index
