@@ -13,7 +13,7 @@ ConnectionManager::~ConnectionManager() { closeAllConnections(); }
  *
  * @param fd
  */
-void ConnectionManager::setConnection(const int fd) {
+void ConnectionManager::setConnection( int fd) {
   connections_[fd] = new ConnectionData();
   std::cout << "new connection:" << fd << "\n";
 }
@@ -22,14 +22,14 @@ void ConnectionManager::setConnection(const int fd) {
  * @brief cgiのsocketを登録する
  *
  * @param cli_sock cgiのsocketに紐づいているクライアントのソケット
- * @param event
+ * @param event_
  */
-void ConnectionManager::setCgiConnection(const int cli_sock, const ConnectionData::EVENT event) {
+void ConnectionManager::setCgiConnection( int cli_sock,  ConnectionData::EVENT event) {
   ConnectionData* cd = this->connections_.at(cli_sock);
-  const int cgi_sock = cd->cgi_handler_.getCgiSocket();
+   int cgi_sock = cd->cgi_handler_.getCgiSocket();
   this->connections_.insert(std::make_pair(cgi_sock, cd));
   // cgi のイベントに更新
-  this->connections_.at(cli_sock)->event = event;
+  this->connections_.at(cli_sock)->event_ = event;
   this->cgi_sock_num_++;
 }
 
@@ -42,7 +42,7 @@ void ConnectionManager::setCgiConnection(const int cli_sock, const ConnectionDat
  * @param fd
  * @param cgi
  */
-void ConnectionManager::removeConnection(const int fd, const bool cgi) {
+void ConnectionManager::removeConnection( int fd,  bool cgi) {
   if (!cgi) {
     std::cerr << "delete connection:" << fd << "\n";
     delete connections_.at(fd);
@@ -52,32 +52,32 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
   closed_connections_.insert(fd);
 }
 
-ConnectionData* ConnectionManager::getConnection(const int fd) { return connections_.at(fd); }
+ConnectionData* ConnectionManager::getConnection( int fd) { return connections_.at(fd); }
 
-void ConnectionManager::setRawRequest(const int fd, const std::vector<unsigned char>& rawRequest) {
+void ConnectionManager::setRawRequest( int fd, const std::vector<unsigned char>& rawRequest) {
   connections_[fd]->raw_request_ = rawRequest;
 }
 
-void ConnectionManager::addRawRequest(const int fd, const std::vector<unsigned char>& rawRequest,
-                                      const ssize_t read_bytes) {
+void ConnectionManager::addRawRequest( int fd, const std::vector<unsigned char>& rawRequest,
+                                       ssize_t read_bytes) {
   connections_[fd]->raw_request_.insert(connections_[fd]->raw_request_.end(), rawRequest.begin(),
                                         rawRequest.begin() + read_bytes);
 }
 
-const std::vector<unsigned char>& ConnectionManager::getRawRequest(const int fd) const {
+const std::vector<unsigned char>& ConnectionManager::getRawRequest( int fd) const {
   return connections_.at(fd)->raw_request_;
 }
 
-void ConnectionManager::setFinalResponse(const int fd, const std::vector<unsigned char>& new_response) {
+void ConnectionManager::setFinalResponse( int fd, const std::vector<unsigned char>& new_response) {
   connections_.at(fd)->final_response_ = new_response;
 }
 
-void ConnectionManager::addFinalResponse(const int fd, const std::vector<unsigned char>& new_response) {
+void ConnectionManager::addFinalResponse( int fd, const std::vector<unsigned char>& new_response) {
   std::vector<unsigned char>& final_response = connections_.at(fd)->final_response_;
   final_response.insert(final_response.end(), new_response.begin(), new_response.end());
 }
 
-const std::vector<unsigned char>& ConnectionManager::getFinalResponse(const int fd) const {
+const std::vector<unsigned char>& ConnectionManager::getFinalResponse( int fd) const {
   return connections_.at(fd)->final_response_;
 }
 
@@ -87,68 +87,68 @@ const std::vector<unsigned char>& ConnectionManager::getFinalResponse(const int 
  * イベントをupdateする際にも使用
  *
  */
-void ConnectionManager::setEvent(const int fd, const ConnectionData::EVENT event) {
-  connections_[fd]->event = event;
+void ConnectionManager::setEvent( int fd,  ConnectionData::EVENT event) {
+  connections_[fd]->event_ = event;
 }
 
-ConnectionData::EVENT ConnectionManager::getEvent(const int fd) const { return connections_.at(fd)->event; }
+ConnectionData::EVENT ConnectionManager::getEvent( int fd) const { return connections_.at(fd)->event_; }
 
 const std::map<int, ConnectionData*>& ConnectionManager::getConnections() const { return this->connections_; }
 
-void ConnectionManager::setRequest(const int fd, const HttpRequest request) {
-  connections_[fd]->request = request;
+void ConnectionManager::setRequest( int fd, const HttpRequest& request) {
+  connections_[fd]->request_ = request;
 }
 
-HttpRequest& ConnectionManager::getRequest(const int fd) { return connections_.at(fd)->request; }
+HttpRequest& ConnectionManager::getRequest( int fd) { return connections_.at(fd)->request_; }
 
-void ConnectionManager::setResponse(const int fd, const HttpResponse response) {
+void ConnectionManager::setResponse( int fd, const HttpResponse& response) {
   connections_[fd]->response_ = response;
 }
 
-HttpResponse& ConnectionManager::getResponse(const int fd) { return connections_.at(fd)->response_; }
+HttpResponse& ConnectionManager::getResponse( int fd) { return connections_.at(fd)->response_; }
 
-const std::vector<unsigned char>& ConnectionManager::getCgiResponse(const int fd) const {
+const std::vector<unsigned char>& ConnectionManager::getCgiResponse( int fd) const {
   return this->connections_.at(fd)->cgi_response_;
 }
 
-bool ConnectionManager::callCgiExecutor(const int fd, const HttpResponse& response,
+bool ConnectionManager::callCgiExecutor( int fd, const HttpResponse& response,
                                         const HttpRequest& request) {
   return this->connections_.at(fd)->cgi_handler_.callCgiExecutor(response, request, fd);
 }
 
-bool ConnectionManager::callCgiParser(const int fd, HttpResponse& response, const std::string& cgi_response) {
+bool ConnectionManager::callCgiParser( int fd, HttpResponse& response, const std::string& cgi_response) {
   return this->connections_.at(fd)->cgi_handler_.callCgiParser(response, cgi_response);
 }
 
-void ConnectionManager::addCgiResponse(const int fd, const std::vector<unsigned char>& v,
-                                       const ssize_t read_bytes) {
+void ConnectionManager::addCgiResponse( int fd, const std::vector<unsigned char>& v,
+                                        ssize_t read_bytes) {
   connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(),
                                          v.begin() + read_bytes);
 }
 
-void ConnectionManager::setTiedServer(const int fd, const TiedServer* tied_server) {
+void ConnectionManager::setTiedServer( int fd, const TiedServer* tied_server) {
   connections_[fd]->tied_server_ = tied_server;
 }
 
-const TiedServer& ConnectionManager::getTiedServer(const int fd) const {
+const TiedServer& ConnectionManager::getTiedServer( int fd) const {
   return *(connections_.at(fd)->tied_server_);
 }
 
-const cgi::CgiHandler& ConnectionManager::getCgiHandler(const int fd) const {
+const cgi::CgiHandler& ConnectionManager::getCgiHandler( int fd) const {
   return connections_.at(fd)->cgi_handler_;
 }
 
-size_t ConnectionManager::getSentBytes(const int fd) const { return connections_.at(fd)->sent_bytes_; }
+size_t ConnectionManager::getSentBytes( int fd) const { return connections_.at(fd)->sent_bytes_; }
 
-void ConnectionManager::addSentBytes(const int fd, const size_t bytes) {
+void ConnectionManager::addSentBytes( int fd, const size_t bytes) {
   connections_.at(fd)->sent_bytes_ += bytes;
 }
 
-void ConnectionManager::resetSentBytes(const int fd) { connections_.at(fd)->sent_bytes_ = 0; }
+void ConnectionManager::resetSentBytes( int fd) { connections_.at(fd)->sent_bytes_ = 0; }
 
-void ConnectionManager::resetCgiSockets(const int fd) { connections_.at(fd)->cgi_handler_.resetSockets(); }
+void ConnectionManager::resetCgiSockets( int fd) { connections_.at(fd)->cgi_handler_.resetSockets(); }
 
-void ConnectionManager::clearRawRequest(const int fd) {
+void ConnectionManager::clearRawRequest( int fd) {
   ConnectionData* cd = this->connections_.at(fd);
   cd->raw_request_.clear();
 }
@@ -157,7 +157,7 @@ void ConnectionManager::clearRawRequest(const int fd) {
  * @brief リクエストデータ以外を削除する
  * 一人のクライアントからの複数のリクエストをさばく時に呼ぶ
  */
-void ConnectionManager::clearResData(const int fd) {
+void ConnectionManager::clearResData( int fd) {
   ConnectionData* cd = this->connections_.at(fd);
   cd->final_response_.clear();
   cd->cgi_response_.clear();
@@ -165,13 +165,13 @@ void ConnectionManager::clearResData(const int fd) {
   resetSentBytes(fd);
 }
 
-void ConnectionManager::clearConnectionData(const int fd) {
+void ConnectionManager::clearConnectionData( int fd) {
   clearRawRequest(fd);
   clearResData(fd);
 }
 
-bool ConnectionManager::isCgiSocket(const int fd) const {
-  const int cgi_sock = this->connections_.at(fd)->cgi_handler_.getCgiSocket();
+bool ConnectionManager::isCgiSocket( int fd) const {
+   int cgi_sock = this->connections_.at(fd)->cgi_handler_.getCgiSocket();
   return fd == cgi_sock;
 }
 
