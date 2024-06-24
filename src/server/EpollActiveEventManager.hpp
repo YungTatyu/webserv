@@ -15,7 +15,7 @@ class EpollActiveEventManager : public IActiveEventManager {
   ~EpollActiveEventManager();
   void *getActiveEvents();
   int getActiveEventsNum();
-  void setActiveEventsNum(const int num);
+  void setActiveEventsNum(int num);
   void addEvent(const void *event);
   void clearAllEvents();
   bool isReadEvent(const void *event);
