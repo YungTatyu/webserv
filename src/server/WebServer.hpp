@@ -23,15 +23,17 @@ class WebServer {
   ~WebServer();
   void run();
   static const ConfigHandler &getConfigHandler();
+  static const RequestHandler &getRequestHandler();
   static void writeErrorlog(const std::string &msg);
 
  private:
+  // メンバ変数を持たない、もしくは基本的に値を変更しないオブジェクトはstatic変数で管理する
   static ConfigHandler config_handler_;
+  static RequestHandler request_handler_;
+  IServer *server;
   NetworkIOHandler *ioHandler;
-  RequestHandler *requestHandler;
   ConnectionManager *connManager;
   IActiveEventManager *eventManager;
-  IServer *server;
   ConfigHandler *configHandler;
   TimerTree *timerTree;
   void initializeServer();

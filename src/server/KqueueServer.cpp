@@ -11,15 +11,14 @@ KqueueServer::KqueueServer() {}
 KqueueServer::~KqueueServer() { close(this->kq_); }
 
 void KqueueServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                             NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                             ConfigHandler* config_handler, TimerTree* timer_tree) {
+                             NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   if (!initKqueueServer()) return;
   if (!initKevents(conn_manager->getConnections())) return;
   for (;;) {
     waitForEvent(conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandleする
-    callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
@@ -75,136 +74,67 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   return re;
 }
 
-/*
- * cgi socketがtimeoutした場合にそれに紐づくclientのeventをWRITE EVENTに変更する関数。
- */
-void KqueueServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
-  std::map<int, RequestHandler::UPDATE_STATUS>::const_iterator it;
-
-  for (it = timeout_sock_map.begin(); it != timeout_sock_map.end(); ++it) {
-    switch (it->second) {
-      case RequestHandler::UPDATE_WRITE:
-        addNewEvent(it->first, EVFILT_WRITE);
-        break;
-
-      default:
-        break;
-    }
-  }
-}
-
 void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                    NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                                    ConfigHandler* config_handler, TimerTree* timer_tree) {
+                                    NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   std::vector<struct kevent>* active_events_ptr =
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
   std::vector<struct kevent>& active_events = *active_events_ptr;
-  std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
+  const RequestHandler& request_handler = WebServer::getRequestHandler();
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    timeout_sock_map =
-        request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-    addClientNewEvent(timeout_sock_map);
+    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
     return;
   }
 
   // 発生したイベントの数だけloopする
   for (int i = 0; i < event_manager->getActiveEventsNum(); ++i) {
-    /**
-     * 以下の変数は、event handlerを呼ぶ前に取得する必要がある
-     * event handlerでcgiのコネクションはクローズされる場合があるため
-     */
-    const cgi::CGIHandler& cgi_handler = conn_manager->getCgiHandler(active_events[i].ident);
-    const bool is_cgi_sock = conn_manager->isCgiSocket(active_events[i].ident);
-    const int cli_sock = cgi_handler.getCliSocket();  // cgi socketの場合に使用する
-
-    // TODO: kqueueはeofもevnetとして感知できるので、最適化の余地あり
-    int status = RequestHandler::UPDATE_NONE;
+    // 他のイベントハンドラーにconnectionが切断される可能性がある
+    if (conn_manager->isClosedConnection(active_events[i].ident)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                                active_events[i].ident);
+      request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                                 active_events[i].ident);
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleEofEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                               active_events[i].ident);
+      request_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      status =
-          request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree, active_events[i].ident);
-
-    // kqueueで監視しているイベント情報を更新
-    switch (status) {
-      case RequestHandler::UPDATE_READ:
-        updateEvent(active_events[i], EVFILT_READ);
-        break;
-      case RequestHandler::UPDATE_WRITE:
-        if (is_cgi_sock) {
-          // closeConnectionをした後なのでdeleteEventする必要はない
-          addNewEvent(cli_sock, EVFILT_WRITE);
-          break;
-        }
-        updateEvent(active_events[i], EVFILT_WRITE);
-        break;
-      case RequestHandler::UPDATE_CLOSE:
-        // closeConnectionをした後なのでdeleteEventする必要はない
-        break;
-      case RequestHandler::UPDATE_CGI_READ:
-        if (is_cgi_sock) {
-          updateEvent(active_events[i], EVFILT_READ);
-          break;
-        }
-        deleteEvent(active_events[i]);  // client socketを監視から一時的に削除する
-        addNewEvent(cgi_handler.getCgiSocket(), EVFILT_READ);
-        break;
-      case RequestHandler::UPDATE_CGI_WRITE:
-        deleteEvent(active_events[i]);  // client socketを監視から一時的に削除する
-        addNewEvent(cgi_handler.getCgiSocket(), EVFILT_WRITE);
-        break;
-      default:
-        if (status >= 0)  // fdだったら
-          addNewEvent(status, EVFILT_READ);
-        break;
-    }
+      request_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
   }
-  timeout_sock_map =
-      request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-  addClientNewEvent(timeout_sock_map);
+  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
+  conn_manager->clearClosedConnections();
 }
 
-/**
- * @brief kqueueで監視するイベントをupdate
- *
- * @param event
- * @param event_filter
- */
-int KqueueServer::updateEvent(struct kevent& old_event, const short event_filter) {
-  const int fd = old_event.ident;
-  deleteEvent(old_event);
-  return addNewEvent(fd, event_filter);
-}
-
-/**
- * @brief kqueueで監視するイベントから削除
- *
- * @param event
- */
-int KqueueServer::deleteEvent(struct kevent& event) {
-  EV_SET(&event, event.ident, event.filter, EV_DELETE, event.fflags, event.data, event.udata);
-  int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
+int KqueueServer::addNewEvent(int fd, ConnectionData::EVENT event) {
+  struct kevent kv;
+  short filter =
+      event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EVFILT_READ : EVFILT_WRITE;
+  EV_SET(&kv, fd, filter, EV_ADD | EV_ENABLE, 0, 0, 0);
+  int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
+  // TODO: errorのとき、再トライ？
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
   return re;
 }
 
-int KqueueServer::addNewEvent(const int fd, const short event_filter) {
-  struct kevent event;
-  EV_SET(&event, fd, event_filter, EV_ADD | EV_ENABLE, 0, 0, 0);
-  int re = kevent(this->kq_, &event, 1, NULL, 0, NULL);
-  // TODO: errorのとき、再トライ？
+int KqueueServer::updateEvent(int fd, ConnectionData::EVENT event) {
+  // 新しいイベントがreadならwriteイベントを削除
+  // 逆も然り
+  ConnectionData::EVENT old_event = event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ
+                                        ? ConnectionData::EV_WRITE
+                                        : ConnectionData::EV_READ;
+
+  deleteEvent(fd, old_event);
+  return addNewEvent(fd, event);
+}
+
+int KqueueServer::deleteEvent(int fd, ConnectionData::EVENT event) {
+  struct kevent kv;
+  short filter =
+      event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EVFILT_READ : EVFILT_WRITE;
+  EV_SET(&kv, fd, filter, EV_DELETE, 0, 0, 0);
+  int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
   return re;
 }

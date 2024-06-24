@@ -22,7 +22,6 @@ def print_log(passed, failed, failed_tests):
     print(f"{BOLD}{BG_GREEN}[==========]{RESET}  {passed + failed} tests ran.")
     print(f"{BOLD}{BG_GREEN}[  PASSED  ]{RESET}  {passed} tests.")
     if failed == 0:
-        print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}  {failed} tests.")
         return
     print(f"{BOLD}{BG_RED}[  FAILED  ]{RESET}  {failed} tests, listed below:")
     for test in failed_tests:

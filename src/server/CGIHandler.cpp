@@ -44,6 +44,7 @@ bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const HttpRespo
   if (pid == -1) {
     close(this->sockets_[SOCKET_PARENT]);
     close(this->sockets_[SOCKET_CHILD]);
+    resetSockets();
     return false;
   }
   if (pid == 0) {
@@ -101,6 +102,6 @@ void cgi::CGIHandler::killCgiProcess() const {
  *
  */
 void cgi::CGIHandler::resetSockets() {
-  this->sockets_[0] = -2;
-  this->sockets_[1] = -2;
+  this->sockets_[0] = -1;
+  this->sockets_[1] = -1;
 }

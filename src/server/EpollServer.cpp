@@ -1,8 +1,5 @@
 #include <cstring>
 
-#include "ConnectionManager.hpp"
-#include "NetworkIOHandler.hpp"
-#include "RequestHandler.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #if defined(EPOLL_AVAILABLE)
@@ -16,8 +13,7 @@ EpollServer::EpollServer() {}
 EpollServer::~EpollServer() { close(this->epfd_); }
 
 void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                            NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                            ConfigHandler* config_handler, TimerTree* timer_tree) {
+                            NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   if (!initEpollServer()) return;
 
   if (!initEpollEvent(conn_manager->getConnections())) return;
@@ -26,7 +22,7 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
     waitForEvent(conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandle
-    callEventHandler(conn_manager, event_manager, io_handler, request_handler, config_handler, timer_tree);
+    callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
@@ -49,7 +45,6 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
   for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end();
        ++it) {
     struct epoll_event ep;
-    std::memset(&ep, 0, sizeof(ep));
     ep.events = it->second->event == ConnectionData::EV_READ ? EPOLLIN : EPOLLOUT;
     ep.data.fd = it->first;
 
@@ -62,102 +57,41 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
   return true;
 }
 
-/*
- * cgi socketがtimeoutした場合にそれに紐づくclientのeventをWRITE EVENTに変更する関数。
- */
-void EpollServer::addClientNewEvent(const std::map<int, RequestHandler::UPDATE_STATUS>& timeout_sock_map) {
-  std::map<int, RequestHandler::UPDATE_STATUS>::const_iterator it;
-
-  for (it = timeout_sock_map.begin(); it != timeout_sock_map.end(); ++it) {
-    switch (it->second) {
-      case RequestHandler::UPDATE_WRITE:
-        addNewEvent(it->first, EPOLLOUT);
-        break;
-
-      default:
-        break;
-    }
-  }
-}
-
 void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                                   NetworkIOHandler* io_handler, RequestHandler* request_handler,
-                                   ConfigHandler* config_handler, TimerTree* timer_tree) {
+                                   NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   // event handling
   std::vector<struct epoll_event>* active_events_ptr =
       static_cast<std::vector<struct epoll_event>*>(event_manager->getActiveEvents());
   std::vector<struct epoll_event>& active_events = *active_events_ptr;
-  std::map<int, RequestHandler::UPDATE_STATUS> timeout_sock_map;
+  const RequestHandler& request_handler = WebServer::getRequestHandler();
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    timeout_sock_map =
-        request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-    addClientNewEvent(timeout_sock_map);
+    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
     return;
   }
 
   // 発生したイベントの数だけloopする
   for (int i = 0; i < event_manager->getActiveEventsNum(); ++i) {
-    const cgi::CGIHandler& cgi_handler = conn_manager->getCgiHandler(active_events[i].data.fd);
-    const bool is_cgi_sock = conn_manager->isCgiSocket(active_events[i].data.fd);
-    const int cli_sock = cgi_handler.getCliSocket();  // cgi socketの場合に使用する
-
-    int status = RequestHandler::UPDATE_NONE;
+    // 他のイベントハンドラーにconnectionが切断される可能性がある
+    if (conn_manager->isClosedConnection(active_events[i].data.fd)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleReadEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                                active_events[i].data.fd);
+      request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree,
+                                      active_events[i].data.fd);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleWriteEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                                 active_events[i].data.fd);
+      request_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree,
+                                       active_events[i].data.fd);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleEofEvent(*io_handler, *conn_manager, *config_handler, *timer_tree,
-                                               active_events[i].data.fd);
+      request_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].data.fd);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      status = request_handler->handleErrorEvent(*io_handler, *conn_manager, *timer_tree,
-                                                 active_events[i].data.fd);
-
-    // epoll_fdで監視しているイベント情報を更新
-    switch (status) {
-      case RequestHandler::UPDATE_READ:
-        updateEvent(active_events[i], EPOLLIN);
-        break;
-
-      case RequestHandler::UPDATE_WRITE:
-        if (is_cgi_sock) {
-          // closeConnectionをした後なのでdeleteEventする必要はない
-          addNewEvent(cli_sock, EPOLLOUT);
-          break;
-        }
-        updateEvent(active_events[i], EPOLLOUT);
-        break;
-
-      case RequestHandler::UPDATE_CLOSE:
-        // closeConnectionをした後なのでdeleteEventする必要はない
-        break;
-
-      case RequestHandler::UPDATE_CGI_READ:
-        deleteEvent(active_events[i]);  // client socketを監視から一時的に削除する
-        addNewEvent(cgi_handler.getCgiSocket(), EPOLLIN);
-        break;
-
-      case RequestHandler::UPDATE_CGI_WRITE:
-        deleteEvent(active_events[i]);  // client socketを監視から一時的に削除する
-        addNewEvent(cgi_handler.getCgiSocket(), EPOLLOUT);
-        break;
-
-      default:
-        if (status >= 0)  // fdだったら
-          addNewEvent(status, EPOLLIN);
-        break;
-    }
+      request_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree,
+                                       active_events[i].data.fd);
   }
-  timeout_sock_map =
-      request_handler->handleTimeoutEvent(*io_handler, *conn_manager, *config_handler, *timer_tree);
-  addClientNewEvent(timeout_sock_map);
+  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
+  conn_manager->clearClosedConnections();
 }
 
 int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
@@ -181,25 +115,29 @@ int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManag
   return size;
 }
 
-int EpollServer::addNewEvent(const int fd, const uint32_t event_filter) {
+int EpollServer::addNewEvent(int fd, ConnectionData::EVENT event) {
   struct epoll_event new_event;
-  std::memset(&new_event, 0, sizeof(new_event));
-  new_event.events = event_filter;
+  new_event.events =
+      event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 
-int EpollServer::updateEvent(struct epoll_event& old_event, const uint32_t event_filter) {
-  old_event.events = event_filter;
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, old_event.data.fd, &old_event);
+int EpollServer::updateEvent(int fd, ConnectionData::EVENT event) {
+  struct epoll_event new_event;
+  new_event.events =
+      event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
+  new_event.data.fd = fd;
+  int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, new_event.data.fd, &new_event);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }
 
-int EpollServer::deleteEvent(struct epoll_event& old_event) {
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, old_event.data.fd, NULL);
+int EpollServer::deleteEvent(int fd, ConnectionData::EVENT event) {
+  static_cast<void>(event);
+  int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, fd, NULL);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }

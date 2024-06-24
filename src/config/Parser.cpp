@@ -562,7 +562,7 @@ bool config::Parser::parseErrorLog() {
 
 #if defined(KQUEUE_AVAILABLE)
 const config::OS currentOS = config::OS_BSD_BASED;
-#elif defined(__linux__)
+#elif defined(EPOLL_AVAILABLE)
 const config::OS currentOS = config::OS_LINUX;
 #else
 const config::OS currentOS = config::OS_OTHER;

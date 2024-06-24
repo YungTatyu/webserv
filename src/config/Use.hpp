@@ -19,7 +19,7 @@ class Use {
   Use() {
 #if defined(KQUEUE_AVAILABLE)
     this->connection_method_ = KQUEUE;
-#elif defined(__linux__)
+#elif defined(EPOLL_AVAILABLE)
     this->connection_method_ = EPOLL;
 #else
     this->connection_method_ = POLL;

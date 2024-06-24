@@ -10,9 +10,12 @@
 #include <utility>
 
 #include "ConnectionManager.hpp"
+#include "IServer.hpp"
 #include "SysCallWrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
+#include "WebServer.hpp"
+#include "conf.hpp"
 #include "error.hpp"
 
 const size_t NetworkIOHandler::buffer_size_;
@@ -93,7 +96,6 @@ ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int
   size_t res_size = response.size();
   size_t sent_bytes = connManager.getConnection(cli_sock)->sent_bytes_;
   size_t cur_chunk_size = std::min(buffer_size_, res_size - sent_bytes);
-  if (cur_chunk_size == 0) return 1;  // すでにresponseを全て送信しきっていたら、send終了
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
@@ -134,7 +136,6 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
 
   // 新規クライントfdを追加
   connManager.setConnection(connfd);
-  connManager.setEvent(connfd, ConnectionData::EV_READ);
   connManager.setTiedServer(connfd, &this->listenfd_map_[listen_fd]);
 
   // show ip address of newly connected client.
@@ -154,12 +155,38 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @param connManager
  * @param sock
  */
-void NetworkIOHandler::closeConnection(ConnectionManager& connManager, TimerTree& timerTree, const int sock) {
+void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
+                                       const int sock) {
+  server->deleteEvent(sock, connManager.getEvent(sock));
   close(sock);
   timerTree.deleteTimer(sock);
   bool cgi = connManager.isCgiSocket(sock);
   if (cgi) connManager.resetCgiSockets(sock);
   connManager.removeConnection(sock, cgi);
+}
+
+/**
+ * @brief clientとのコネクションを完全に削除する
+ * client, cgi socket, timerを全て削除: clientとcgiの両方を削除しなければいけない時に、この関数を呼ぶ
+ *
+ */
+void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
+                                       const int sock) {
+  server->deleteEvent(sock, connManager.getEvent(sock));
+  close(sock);
+  timerTree.deleteTimer(sock);
+  bool cgi = connManager.isCgiSocket(sock);
+  if (!cgi) {
+    connManager.removeConnection(sock, cgi);
+    return;
+  }
+  // cgi socketの場合は、clientのデータも削除する
+  const cgi::CGIHandler& cgi_handler = connManager.getCgiHandler(sock);
+  int client = cgi_handler.getCliSocket();
+  close(client);
+  // cgiのコネクションを最初に削除する
+  connManager.removeConnection(sock, cgi);
+  connManager.removeConnection(client, false);
 }
 
 const std::map<int, TiedServer>& NetworkIOHandler::getListenfdMap() { return this->listenfd_map_; }

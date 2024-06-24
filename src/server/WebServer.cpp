@@ -6,6 +6,7 @@
 #include "LogFd.hpp"
 
 ConfigHandler WebServer::config_handler_;
+RequestHandler WebServer::request_handler_;
 
 WebServer::WebServer(const config::Main *config) {
   this->configHandler = &(config_handler_);
@@ -27,7 +28,6 @@ void WebServer::initializeServer() {
   this->ioHandler = new NetworkIOHandler();
   initializeVServers();
 
-  this->requestHandler = new RequestHandler();
   this->connManager = new ConnectionManager();
   initializeConnManager();
 
@@ -109,12 +109,12 @@ void WebServer::initializeConnManager() {
 
 const ConfigHandler &WebServer::getConfigHandler() { return config_handler_; }
 
+const RequestHandler &WebServer::getRequestHandler() { return request_handler_; }
+
 void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
 
 WebServer::~WebServer() {
   this->configHandler->writeErrorLog("webserv: [debug] Close webserv.\n\n");
-  // close( this->connManager->getConnection() ); //
-  // 一応eventLoop()でもクローズしているけど、シグナルで終了した時、逐次処理で行なっているクライアントソケットのクローズが行われていない可能性があるので入れた。
   this->deleteObjects();
 }
 
@@ -122,13 +122,11 @@ void WebServer::deleteObjects() {
   config::terminateLogFds(this->configHandler->config_);
   delete this->timerTree;
   delete this->ioHandler;
-  delete this->requestHandler;
   delete this->connManager;
   delete this->eventManager;
   delete this->server;
 }
 
 void WebServer::run() {
-  this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->requestHandler,
-                          this->configHandler, this->timerTree);
+  this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->timerTree);
 }

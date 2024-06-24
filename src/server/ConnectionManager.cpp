@@ -49,6 +49,7 @@ void ConnectionManager::removeConnection(const int fd, const bool cgi) {
   } else
     this->cgi_sock_num_--;
   connections_.erase(fd);
+  closed_connections_.insert(fd);
 }
 
 ConnectionData* ConnectionManager::getConnection(const int fd) { return connections_.at(fd); }
@@ -173,6 +174,17 @@ bool ConnectionManager::isCgiSocket(const int fd) const {
   const int cgi_sock = this->connections_.at(fd)->cgi_handler_.getCgiSocket();
   return fd == cgi_sock;
 }
+
+void ConnectionManager::addClosedConnection(int fd) { this->closed_connections_.insert(fd); }
+
+/**
+ * @ brief event handlerによって、閉じれたconectionかを確認する
+ */
+bool ConnectionManager::isClosedConnection(int fd) const {
+  return this->closed_connections_.find(fd) != this->closed_connections_.end();
+}
+
+void ConnectionManager::clearClosedConnections() { this->closed_connections_.clear(); }
 
 void ConnectionManager::closeAllConnections() {
   for (std::map<int, ConnectionData*>::iterator it = this->connections_.begin();
