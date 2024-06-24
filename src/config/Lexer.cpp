@@ -20,8 +20,6 @@ void config::Lexer::tokenize() {
 
 const std::vector<config::Token>& config::Lexer::getTokens() const { return this->tokens_; }
 
-const config::Token& config::Lexer::getToken(int key) { return this->tokens_[key]; }
-
 const std::string config::Lexer::getFileContent(const std::string file_path) const {
   // ファイルを開く
   std::ifstream file(file_path.c_str());
@@ -48,6 +46,8 @@ const std::string config::Lexer::getFileContent(const std::string file_path) con
 
   return content;
 }
+
+bool config::Lexer::isEndOfFile() const { return (file_iterator_ == file_content_.size()); }
 
 void config::Lexer::skipSpaces() {
   if (isEndOfFile()) return;
@@ -76,8 +76,7 @@ void config::Lexer::skipComment() {
 const char& config::Lexer::getChar() const { return file_content_[file_iterator_]; }
 
 bool config::Lexer::isMetaChar() const {
-  if (std::isspace(getChar()) || getChar() == '{' || getChar() == '}' || getChar() == ';') return true;
-  return false;
+  return (std::isspace(getChar()) || getChar() == '{' || getChar() == '}' || getChar() == ';');
 }
 
 void config::Lexer::addToken() {
@@ -94,16 +93,19 @@ void config::Lexer::addToken() {
       tmp_type = config::TK_OPEN_CURLY_BRACE;
       file_iterator_++;
       break;
+
     case '}':
       tmp_value += getChar();
       tmp_type = config::TK_CLOSE_CURLY_BRACE;
       file_iterator_++;
       break;
+
     case ';':
       tmp_value += getChar();
       tmp_type = config::TK_SEMICOLON;
       file_iterator_++;
       break;
+
     case '\'':
     case '"':
       tmp_quote = getChar();
@@ -117,6 +119,7 @@ void config::Lexer::addToken() {
       if (getChar() == tmp_quote) file_iterator_++;
       tmp_line = this->current_line_;
       break;
+
     default:
       while (!isEndOfFile() && !isMetaChar()) {
         tmp_value += getChar();
@@ -128,9 +131,4 @@ void config::Lexer::addToken() {
 
   config::Token new_token(tmp_value, tmp_type, tmp_line);
   tokens_.push_back(new_token);
-}
-
-bool config::Lexer::isEndOfFile() const {
-  if (file_iterator_ == file_content_.size()) return true;
-  return false;
 }

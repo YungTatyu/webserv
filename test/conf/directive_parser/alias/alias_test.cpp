@@ -25,12 +25,11 @@ TEST(aliasTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // location
-  test::test_value(http.server_list[0].location_list, {"/", "/tmp"});
-  test::test_value(http.server_list[1].location_list, {"/path/to/file", "/file"});
+  test::test_value(server_list[0].location_list, {"/", "/tmp"});
+  test::test_value(server_list[1].location_list, {"/path/to/file", "/file"});
   test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAlias, true);
   test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAlias, true);
   test::test_directives_set(http.server_list[1].location_list[0].directives_set, kAlias, true);
@@ -42,10 +41,9 @@ TEST(aliasTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
-  test::test_directives_set(http.server_list[0].directives_set, kAlias, false);
-  test::test_directives_set(http.server_list[1].directives_set, kAlias, false);
-  test::test_directives_set(http.server_list[2].directives_set, kAlias, false);
+  test::test_directives_set(server_list[0].directives_set, kAlias, false);
+  test::test_directives_set(server_list[1].directives_set, kAlias, false);
+  test::test_directives_set(server_list[2].directives_set, kAlias, false);
 }

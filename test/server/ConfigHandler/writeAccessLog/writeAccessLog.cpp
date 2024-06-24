@@ -9,7 +9,7 @@ TEST(ConfigHandlerTestWriteAccessLog, off) {
 
   test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
                                       msg);
-  test.EXPECT_NO_FILE(file_path, msg);
+  test.EXPECT_NO_FILE(file_path);
 }
 
 TEST(ConfigHandlerTestWriteAccessLog, location) {

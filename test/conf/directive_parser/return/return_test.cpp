@@ -32,15 +32,14 @@ TEST(ReturnTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // location
-  test::test_value(http.server_list[0].location_list[0].return_list,
+  test::test_value(server_list[0].location_list[0].return_list,
                    {300, -1, -1, 999, 998, 0, 0, 301, 302, 303, 307, 308},
                    {"url", "https://www.tachu.com", "http://", "url999", "1000", "", "", "https://",
                     "http://a", "http://b", "http://c", "http://d"});
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kReturn, true);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kReturn, true);
 }
 
 TEST(ReturnTest, notFound) {
@@ -48,8 +47,7 @@ TEST(ReturnTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kReturn, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kReturn, false);
 }

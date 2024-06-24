@@ -17,7 +17,6 @@ TEST(clientMaxBodySizeTest, longMax) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, kLongMax);
@@ -29,7 +28,6 @@ TEST(clientMaxBodySizeTest, longMaxKilo) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, 9007199254740991 * config::Size::kilobytes);
@@ -41,7 +39,6 @@ TEST(clientMaxBodySizeTest, longMaxMega) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, 8796093022207 * config::Size::megabytes);
@@ -53,7 +50,6 @@ TEST(clientMaxBodySizeTest, zero) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   EXPECT_EQ(http.client_max_body_size.getSize().size_in_bytes_, 0);
@@ -65,7 +61,6 @@ TEST(clientMaxBodySizeTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kClientMaxBodySize, false);

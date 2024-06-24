@@ -163,9 +163,11 @@ class ResponseTest {
     int i = 0;
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
                   [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    (void)tied_server;
                     std::for_each(this->methods_.begin(), this->methods_.end(),
-                                  [this, &i, &tied_server,
+                                  [this, &i,
                                    &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    (void)method;
                                     EXPECT_EQ(this->responses_[i].body_, expect);
                                     ++i;
                                   });
@@ -176,9 +178,11 @@ class ResponseTest {
     int i = 0;
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
                   [this, &i, &expect](TiedServer tied_server) {  // testするip adressの数だけloop
+                    (void)tied_server;
                     std::for_each(this->methods_.begin(), this->methods_.end(),
-                                  [this, &i, &tied_server,
+                                  [this, &i,
                                    &expect](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
+                                    (void)method;
                                     EXPECT_EQ(this->final_responses_[i], expect);
                                     ++i;
                                   });
@@ -401,7 +405,7 @@ class ResponseTest {
   void testPathInfo(HttpResponse::RES_STATE state, const std::string &res_file_path,
                     const std::string &path_info) {
     std::for_each(this->responses_.begin(), this->responses_.end(),
-                  [this, &state, &res_file_path, &path_info](HttpResponse response) {
+                  [&state, &res_file_path, &path_info](HttpResponse response) {
                     EXPECT_EQ(response.state_, state);
                     EXPECT_EQ(response.res_file_path_, res_file_path);
                     EXPECT_EQ(response.path_info_, path_info);

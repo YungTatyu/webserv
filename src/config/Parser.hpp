@@ -28,6 +28,7 @@ class Parser {
   const std::vector<Token> &tokens_;
   const std::string filepath_;
   size_t ti_;  // token index
+  std::string current_directive_;
   std::stack<CONTEXT> current_context_;
   std::map<std::string, bool (config::Parser::*)()> parser_map_;
   bool parseType(const Token &token);
@@ -38,7 +39,13 @@ class Parser {
   bool isDirective(const Token &token) const;
   const std::set<std::string> *findDirectivesSet(const CONTEXT context) const;
   void printError(const std::string &err_msg, const Token &token) const;
+  void printFormatedError(const std::string &message, const Token &token) const;
   size_t countArgs(const TK_TYPE terminating_token) const;
+  bool validFinalState() const;
+  bool validWorkerConnections() const;
+  template <typename T>
+  void updateContext(T &context, CONTEXT new_context, const std::string &context_name);
+  bool parseDirective(bool (config::Parser::*directive_parser)());
   bool parseHttpServerEvents();
   bool parseLocation();
   bool parseLimitExcept();
@@ -71,6 +78,8 @@ class Parser {
   bool isNumInRange(const std::string &num, long min, long max) const;
   bool canConvertMinTime(long &value, const std::string &unit);
   bool canConvertMinSize(long &value, const std::string &unit);
+  bool validEventType(const std::string &eventType) const;
+  std::pair<long, std::string> parseValueWithUnit(const std::set<std::string> &units) const;
   long parseTime();
   long parseSize();
   unsigned int retCodeIfValid();
@@ -78,6 +87,7 @@ class Parser {
   REQUEST_METHOD convertToRequestMethod(const std::string &method) const;
   std::string toUpper(std::string) const;
   bool isDuplicateDefaultServer(const config::Listen &this_listen);
+  void updateDirectivesSet(const std::string &directive);
   Parser();
   void operator=(const Parser &other);
 
@@ -89,5 +99,15 @@ class Parser {
   const Main &getConfig() const;
 };
 }  // namespace config
+
+/**
+ * current_contextを更新し、directives_setにもcontextを追加する。
+ *
+ */
+template <typename T>
+void config::Parser::updateContext(T &context, CONTEXT new_context, const std::string &context_name) {
+  current_context_.push(new_context);
+  context.directives_set.insert(context_name);
+}
 
 #endif

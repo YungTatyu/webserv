@@ -31,7 +31,6 @@ TEST(useridExpiresTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   const long kLongMax = std::numeric_limits<long>::max();
@@ -41,12 +40,12 @@ TEST(useridExpiresTest, allContext) {
   test::test_directives_set(http.directives_set, kUseridExpires, true);
 
   // server
-  EXPECT_TRUE(http.server_list[0].userid_expires.getIsUseridExpiresOn());
-  EXPECT_EQ(http.server_list[0].userid_expires.getTime().time_in_ms_, kLongMax);
-  test::test_directives_set(http.server_list[0].directives_set, kUseridExpires, true);
+  EXPECT_TRUE(server_list[0].userid_expires.getIsUseridExpiresOn());
+  EXPECT_EQ(server_list[0].userid_expires.getTime().time_in_ms_, kLongMax);
+  test::test_directives_set(server_list[0].directives_set, kUseridExpires, true);
 
   // location
-  test::test_value(http.server_list[0].location_list, {9223372036854775 * 1000, 0, 3 * 1000 * 60},
+  test::test_value(server_list[0].location_list, {9223372036854775 * 1000, 0, 3 * 1000 * 60},
                    {true, true, true});
 }
 
@@ -55,10 +54,9 @@ TEST(useridExpiresTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kUseridExpires, false);
-  test::test_directives_set(http.server_list[0].directives_set, kUseridExpires, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kUseridExpires, false);
+  test::test_directives_set(server_list[0].directives_set, kUseridExpires, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kUseridExpires, false);
 }

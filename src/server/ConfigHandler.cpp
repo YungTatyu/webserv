@@ -365,7 +365,7 @@ bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Lo
   return false;
 }
 
-const std::string getCurrentTimeLogFormat() {
+const std::string ConfigHandler::getCurrentTimeByLogFormat() const {
   std::time_t currentTime = std::time(NULL);
   std::tm* gmTime = std::gmtime(&currentTime);
 
@@ -395,7 +395,7 @@ std::string ConfigHandler::createAcsLogMsg(const uint32_t ip, const long status,
   else
     userAgent = "-";
 
-  ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeLogFormat() << "] \"" << requestMethod << " "
+  ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeByLogFormat() << "] \"" << requestMethod << " "
      << request.uri << " HTTP/1.1\" " << status << " " << resSize << " \"" << userAgent << "\"" << std::endl;
 
   return ss.str();

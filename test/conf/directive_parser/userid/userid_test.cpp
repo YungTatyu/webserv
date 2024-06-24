@@ -16,7 +16,6 @@ TEST(useridTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -25,11 +24,11 @@ TEST(useridTest, allContext) {
 
   // server
   EXPECT_FALSE(http.server_list[0].userid.getIsUseridOn());
-  test::test_directives_set(http.server_list[0].directives_set, kUserid, true);
+  test::test_directives_set(server_list[0].directives_set, kUserid, true);
 
   // location
-  EXPECT_TRUE(http.server_list[0].location_list[0].userid.getIsUseridOn());
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kUserid, true);
+  EXPECT_TRUE(server_list[0].location_list[0].userid.getIsUseridOn());
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kUserid, true);
 }
 
 TEST(useridTest, notFound) {
@@ -37,10 +36,9 @@ TEST(useridTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kUserid, false);
-  test::test_directives_set(http.server_list[0].directives_set, kUserid, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kUserid, false);
+  test::test_directives_set(server_list[0].directives_set, kUserid, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kUserid, false);
 }

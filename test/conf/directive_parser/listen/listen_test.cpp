@@ -35,15 +35,14 @@ TEST(ListenTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // server
   test::test_value(
-      http.server_list[0].listen_list,
+      server_list[0].listen_list,
       {"1.1.1.1", "127.0.0.1", "2.2.2.2", "3.3.3.3", "127.0.0.1", "127.0.0.1", "127.0.0.2", "127.0.0.1"},
       {80, 1, 2000, 80, 2400, 80, 0, 65535}, {false, false, false, true, true, false, false, true});
-  test::test_directives_set(http.server_list[0].directives_set, kListen, true);
+  test::test_directives_set(server_list[0].directives_set, kListen, true);
 }
 
 TEST(ListenTest, notFound) {
@@ -51,8 +50,7 @@ TEST(ListenTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
-  test::test_directives_set(http.server_list[0].directives_set, kListen, false);
+  test::test_directives_set(server_list[0].directives_set, kListen, false);
 }

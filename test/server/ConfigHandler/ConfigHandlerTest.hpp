@@ -145,7 +145,7 @@ class ConfigHandlerTest {
     EXPECT_FALSE(getWriteResult(file_path, msg));
   }
 
-  void EXPECT_NO_FILE(std::string file_path, const std::string& msg) {
+  void EXPECT_NO_FILE(std::string file_path) {
     std::ifstream logFile(file_path.c_str());
     EXPECT_FALSE(logFile.is_open());
   }

@@ -36,9 +36,6 @@ class HttpResponseMix : public ::testing::Test {
 
   void TearDown() override {
     // テストケースのクリーンアップ処理
-    const testing::TestInfo *test_info = testing::UnitTest::GetInstance()->current_test_info();
-
-    // config handler　削除
     delete config_handler_.config_;
 
     // socket 処理

@@ -73,12 +73,10 @@ TEST(mainParserTest, allContexts) {
       config::DELETE,
       config::HEAD,
   };
-  i = 0;
-  std::for_each(expect_methods.begin(), expect_methods.end(),
-                [&server_list, &i](config::REQUEST_METHOD expect) {
-                  EXPECT_NE(server_list[0].location_list[0].limit_except.excepted_methods.find(expect),
-                            server_list[0].location_list[0].limit_except.excepted_methods.end());
-                });
+  std::for_each(expect_methods.begin(), expect_methods.end(), [&server_list](config::REQUEST_METHOD expect) {
+    EXPECT_NE(server_list[0].location_list[0].limit_except.excepted_methods.find(expect),
+              server_list[0].location_list[0].limit_except.excepted_methods.end());
+  });
 
   EXPECT_EQ(server_list[1].location_list[0].limit_except.excepted_methods.find(config::GET),
             server_list[1].location_list[0].limit_except.excepted_methods.end());

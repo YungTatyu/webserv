@@ -16,7 +16,6 @@ TEST(useridDomainTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -24,12 +23,12 @@ TEST(useridDomainTest, allContext) {
   test::test_directives_set(http.directives_set, kUseridDomain, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].userid_domain.getName(), "123");
-  test::test_directives_set(http.server_list[0].directives_set, kUseridDomain, true);
+  EXPECT_EQ(server_list[0].userid_domain.getName(), "123");
+  test::test_directives_set(server_list[0].directives_set, kUseridDomain, true);
 
   // location
-  EXPECT_EQ(http.server_list[0].location_list[0].userid_domain.getName(), "tachu");
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kUseridDomain, true);
+  EXPECT_EQ(server_list[0].location_list[0].userid_domain.getName(), "tachu");
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kUseridDomain, true);
 }
 
 TEST(useridDomainTest, notFound) {
@@ -37,10 +36,9 @@ TEST(useridDomainTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kUseridDomain, false);
-  test::test_directives_set(http.server_list[0].directives_set, kUseridDomain, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kUseridDomain, false);
+  test::test_directives_set(server_list[0].directives_set, kUseridDomain, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kUseridDomain, false);
 }

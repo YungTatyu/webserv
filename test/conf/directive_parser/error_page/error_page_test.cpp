@@ -21,12 +21,11 @@ void test_value(const std::vector<config::ErrorPage> &error_page_list,
                   int ci = 0;  // code list index
 
                   // test code_list
-                  std::for_each(expect_code.begin(), expect_code.end(),
-                                [&code_list, &error_page, &ci](unsigned int code) {
-                                  // EXPECT_EQ(code, expect_code[ci]);
-                                  EXPECT_NE(code_list.find(code), code_list.end());
-                                  ++ci;
-                                });
+                  std::for_each(expect_code.begin(), expect_code.end(), [&code_list, &ci](unsigned int code) {
+                    // EXPECT_EQ(code, expect_code[ci]);
+                    EXPECT_NE(code_list.find(code), code_list.end());
+                    ++ci;
+                  });
 
                   // test response
                   EXPECT_EQ(error_page.getResponse(), expect_response[ei]);
@@ -45,7 +44,6 @@ TEST(ErrorPageTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -54,15 +52,15 @@ TEST(ErrorPageTest, allContext) {
   test::test_directives_set(http.directives_set, kErrorPage, true);
 
   // server
-  test::test_value(http.server_list[0].error_page_list, {{400, 500}, {450, 550}, {401, 501}, {302}},
+  test::test_value(server_list[0].error_page_list, {{400, 500}, {450, 550}, {401, 501}, {302}},
                    {922337203685477586, 922337203685477587, 0, -1},
                    {"response1", "response2", "response3", "response4"});
-  test::test_directives_set(http.server_list[0].directives_set, kErrorPage, true);
+  test::test_directives_set(server_list[0].directives_set, kErrorPage, true);
 
-  test::test_value(http.server_list[0].location_list[0].error_page_list,
+  test::test_value(server_list[0].location_list[0].error_page_list,
                    {{400, 401, 402, 403, 404, 405}, {500, 501, 502, 503, 504, 505}}, {-1, -1},
                    {"=0", "=922337203685477588"});
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kErrorPage, true);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorPage, true);
 }
 
 TEST(ErrorPageTest, notFound) {
@@ -70,10 +68,9 @@ TEST(ErrorPageTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kErrorPage, false);
-  test::test_directives_set(http.server_list[0].directives_set, kErrorPage, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kErrorPage, false);
+  test::test_directives_set(server_list[0].directives_set, kErrorPage, false);
+  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorPage, false);
 }

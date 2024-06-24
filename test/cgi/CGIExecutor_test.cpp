@@ -53,8 +53,7 @@ HttpResponse initResponse(const std::string& root_path, const std::string& scrip
 
 std::string recvCgiResponse(cgi::CGIHandler& cgi_handler) {
   std::string response;
-  const size_t buffer_size = 1024;
-  ssize_t total_read_bytes = 0;
+  const ssize_t buffer_size = 1024;
 
   while (true) {
     char buffer[buffer_size + 1];
@@ -66,7 +65,6 @@ std::string recvCgiResponse(cgi::CGIHandler& cgi_handler) {
     buffer[bytes] = '\0';
     response += buffer;
     if (bytes < buffer_size) break;
-    total_read_bytes += bytes;
   }
   return response;
 }

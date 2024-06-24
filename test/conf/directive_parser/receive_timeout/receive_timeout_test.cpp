@@ -27,7 +27,6 @@ TEST(ReceiveTimeoutTest, max) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   const long kLongMax = std::numeric_limits<long>::max();
@@ -37,17 +36,16 @@ TEST(ReceiveTimeoutTest, max) {
   test::test_directives_set(http.directives_set, kReceiveTimeout, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].receive_timeout.getTime().time_in_ms_,
-            9223372036854775 * config::Time::seconds);
-  test::test_directives_set(http.server_list[0].directives_set, kReceiveTimeout, true);
+  EXPECT_EQ(server_list[0].receive_timeout.getTime().time_in_ms_, 9223372036854775 * config::Time::seconds);
+  test::test_directives_set(server_list[0].directives_set, kReceiveTimeout, true);
 
   // location
-  test::test_rtvalue(http.server_list[0].location_list, {
-                                                            9223372036854775 * config::Time::seconds,
-                                                            153722867280912 * config::Time::minutes,
-                                                            2562047788015 * config::Time::hours,
-                                                            106751991167 * config::Time::days,
-                                                        });
+  test::test_rtvalue(server_list[0].location_list, {
+                                                       9223372036854775 * config::Time::seconds,
+                                                       153722867280912 * config::Time::minutes,
+                                                       2562047788015 * config::Time::hours,
+                                                       106751991167 * config::Time::days,
+                                                   });
 }
 
 TEST(ReceiveTimeoutTest, zero) {
@@ -55,7 +53,6 @@ TEST(ReceiveTimeoutTest, zero) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -63,11 +60,11 @@ TEST(ReceiveTimeoutTest, zero) {
   test::test_directives_set(http.directives_set, kReceiveTimeout, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].receive_timeout.getTime().time_in_ms_, 0);
-  test::test_directives_set(http.server_list[0].directives_set, kReceiveTimeout, true);
+  EXPECT_EQ(server_list[0].receive_timeout.getTime().time_in_ms_, 0);
+  test::test_directives_set(server_list[0].directives_set, kReceiveTimeout, true);
 
   // location
-  test::test_rtvalue(http.server_list[0].location_list, {0, 0, 0, 0});
+  test::test_rtvalue(server_list[0].location_list, {0, 0, 0, 0});
 }
 
 TEST(ReceiveTimeoutTest, random) {
@@ -75,7 +72,6 @@ TEST(ReceiveTimeoutTest, random) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // http
@@ -83,12 +79,11 @@ TEST(ReceiveTimeoutTest, random) {
   test::test_directives_set(http.directives_set, kReceiveTimeout, true);
 
   // server
-  EXPECT_EQ(http.server_list[0].receive_timeout.getTime().time_in_ms_, 1000);
-  test::test_directives_set(http.server_list[0].directives_set, kReceiveTimeout, true);
+  EXPECT_EQ(server_list[0].receive_timeout.getTime().time_in_ms_, 1000);
+  test::test_directives_set(server_list[0].directives_set, kReceiveTimeout, true);
 
   // location
-  test::test_rtvalue(http.server_list[0].location_list,
-                     {1000, 1000 * 60, 1000 * 60 * 60, 1000 * 60 * 60 * 24});
+  test::test_rtvalue(server_list[0].location_list, {1000, 1000 * 60, 1000 * 60 * 60, 1000 * 60 * 60 * 24});
 }
 
 TEST(ReceiveTimeoutTest, notFound) {
@@ -96,7 +91,6 @@ TEST(ReceiveTimeoutTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   test::test_directives_set(http.directives_set, kReceiveTimeout, false);

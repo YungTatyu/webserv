@@ -23,20 +23,19 @@ TEST(ServerNameTest, allContext) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
   // server
-  test::test_value(http.server_list[0].server_name.getName(), {
-                                                                  "tachu",
-                                                                  "",
-                                                                  "1",
-                                                                  "2",
-                                                                  "3",
-                                                                  "server name",
-                                                                  "sn:8000",
-                                                              });
-  test::test_directives_set(http.server_list[0].directives_set, kServerName, true);
+  test::test_value(server_list[0].server_name.getName(), {
+                                                             "tachu",
+                                                             "",
+                                                             "1",
+                                                             "2",
+                                                             "3",
+                                                             "server name",
+                                                             "sn:8000",
+                                                         });
+  test::test_directives_set(server_list[0].directives_set, kServerName, true);
 }
 
 TEST(ServerNameTest, notFound) {
@@ -44,9 +43,8 @@ TEST(ServerNameTest, notFound) {
   ASSERT_NE(config, nullptr);
 
   const config::Http &http = config->http;
-  const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
 
-  test::test_directives_set(http.server_list[0].directives_set, kServerName, false);
-  test::test_directives_set(http.server_list[1].directives_set, kServerName, false);
+  test::test_directives_set(server_list[0].directives_set, kServerName, false);
+  test::test_directives_set(server_list[1].directives_set, kServerName, false);
 }

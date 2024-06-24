@@ -31,7 +31,6 @@ class Lexer {
  public:
   Lexer(const std::string& file_path);
   void tokenize();
-  const Token& getToken(int key);
   const std::vector<Token>& getTokens() const;
 
  private:
