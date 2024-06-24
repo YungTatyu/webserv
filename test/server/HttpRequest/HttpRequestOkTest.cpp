@@ -5,15 +5,15 @@
 #include "cli_max_body_size_test.hpp"
 
 void checkHttpRequestEqual(HttpRequest expect, HttpRequest test) {
-  EXPECT_EQ(expect.method, test.method);
-  EXPECT_EQ(expect.uri, test.uri);
-  EXPECT_EQ(expect.version, test.version);
-  EXPECT_EQ(expect.headers, test.headers);
-  EXPECT_EQ(expect.queries, test.queries);
-  EXPECT_EQ(expect.port_in_host, test.port_in_host);
-  EXPECT_EQ(expect.body, test.body);
+  EXPECT_EQ(expect.method_, test.method_);
+  EXPECT_EQ(expect.uri_, test.uri_);
+  EXPECT_EQ(expect.version_, test.version_);
+  EXPECT_EQ(expect.headers_, test.headers_);
+  EXPECT_EQ(expect.queries_, test.queries_);
+  EXPECT_EQ(expect.port_in_host_, test.port_in_host_);
+  EXPECT_EQ(expect.body_, test.body_);
 
-  EXPECT_EQ(expect.parseState, test.parseState);
+  EXPECT_EQ(expect.parse_state_, test.parse_state_);
 }
 
 TEST(HttpRequest, OkTest1) {
@@ -1344,95 +1344,95 @@ TEST(HttpRequest, chunk_chunked_body_1) {
 
   req = "3";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "b";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "d";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "6";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "1";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\t";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "1";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "e";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1",
                       {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "0bd\r\n1\n\r\te", "",
@@ -1471,73 +1471,73 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   // "   "
   req = "3\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "  ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\ne";  // 14 bytes in decimal
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   // this is a body
   req = "th";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "is";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = " i";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "s ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "a ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "bo";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "dy";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "3\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   // hey
   req = "he";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "y\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1",
                       {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "   this is a bodyhey",
@@ -1571,11 +1571,11 @@ TEST(HttpRequest, chunk_chunked_body_3) {
 
   req = "0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1",
                       {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", "",
@@ -1601,39 +1601,39 @@ TEST(HttpRequest, chunk_content_length_1) {
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "2";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "4";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\t";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = " ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "h";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "i";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "1"}},
                       "user=kh", "\r\n24\n\t hi\n", "", HttpRequest::PARSE_COMPLETE);
@@ -1659,27 +1659,27 @@ TEST(HttpRequest, chunk_content_length_2) {
   // this is a body
   req = "th";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "is";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = " i";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "s ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "a ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "bo";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "2"}},
                       "user=kh", "this is a body", "", HttpRequest::PARSE_COMPLETE);

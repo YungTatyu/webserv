@@ -95,11 +95,11 @@ class ConfigHandlerTest {
   void initRequest(const config::REQUEST_METHOD& method, const std::string& uri,
                    const std::map<std::string, std::string, Utils::CaseInsensitiveCompare>& headers,
                    const std::string& body, const HttpRequest::ParseState parseState) {
-    this->request_.method = method;
-    this->request_.uri = uri;
-    this->request_.headers = headers;
-    this->request_.body = body;
-    this->request_.parseState = parseState;
+    this->request_.method_ = method;
+    this->request_.uri_ = uri;
+    this->request_.headers_ = headers;
+    this->request_.body_ = body;
+    this->request_.parse_state_ = parseState;
   }
 
   void initTiedServer(std::vector<const config::Server*> server_list) {

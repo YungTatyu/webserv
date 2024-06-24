@@ -110,7 +110,7 @@ void RequestHandler::handleCgi(ConnectionManager &connManager, const ConfigHandl
   }
   // bodyが空なら、bodyをsendしない
   int cgi_sock = connManager.getCgiHandler(sockfd).getCgiSocket();
-  if (request.body.empty()) {
+  if (request.body_.empty()) {
     server->deleteEvent(sockfd, connManager.getEvent(sockfd));
     server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_READ);
     connManager.setCgiConnection(sockfd, ConnectionData::EV_CGI_READ);
@@ -205,7 +205,7 @@ void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, Connection
   const ConfigHandler &configHandler = WebServer::getConfigHandler();
   ioHandler.sendRequestBody(connManager, sockfd);
 
-  const std::string &body = connManager.getRequest(sockfd).body;
+  const std::string &body = connManager.getRequest(sockfd).body_;
   const cgi::CgiHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   int status = -1;
   if (connManager.getSentBytes(sockfd) != body.size() &&           // bodyをまだ送る必要がある
@@ -308,9 +308,9 @@ void RequestHandler::addTimerByType(ConnectionManager &connManager, const Config
   // Hostヘッダーがあるか確認
   // 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
   // このように探すdirectiveがほんとにこのクライアントが最後にアクセスしたコンテキストかは怪しい。
-  it = connManager.getRequest(sockfd).headers.find("Host");
+  it = connManager.getRequest(sockfd).headers_.find("Host");
   std::string host_name;
-  if (it == connManager.getRequest(sockfd).headers.end())
+  if (it == connManager.getRequest(sockfd).headers_.end())
     host_name = "";
   else
     host_name = it->second;
@@ -319,17 +319,17 @@ void RequestHandler::addTimerByType(ConnectionManager &connManager, const Config
   switch (type) {
     case Timer::TMO_KEEPALIVE:
       timeout = configHandler.searchKeepaliveTimeout(connManager.getTiedServer(sockfd), host_name,
-                                                     connManager.getRequest(sockfd).uri);
+                                                     connManager.getRequest(sockfd).uri_);
       break;
 
     case Timer::TMO_RECV:
       timeout = configHandler.searchReceiveTimeout(connManager.getTiedServer(sockfd), host_name,
-                                                   connManager.getRequest(sockfd).uri);
+                                                   connManager.getRequest(sockfd).uri_);
       break;
 
     case Timer::TMO_SEND:
       timeout = configHandler.searchSendTimeout(connManager.getTiedServer(sockfd), host_name,
-                                                connManager.getRequest(sockfd).uri);
+                                                connManager.getRequest(sockfd).uri_);
       break;
   }
 

@@ -106,7 +106,7 @@ ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int
 }
 
 ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const int sock) {
-  const std::string body = connManager.getRequest(sock).body;
+  const std::string& body = connManager.getRequest(sock).body_;
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
   size_t cur_chunk_size = std::min(buffer_size_, rest);

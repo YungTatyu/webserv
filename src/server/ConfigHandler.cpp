@@ -102,7 +102,7 @@ int ConfigHandler::allowRequest(const config::Server& server, const config::Loca
   if (location && Utils::hasDirective(*location, kLimitExcept)) {
     // 制限されたメソッドでなければ、スルー
     // HttpRequestでLIMIT_EXCEPTのenum使ってほしい
-    if (location->limit_except_.excepted_methods_.find(request.method) ==
+    if (location->limit_except_.excepted_methods_.find(request.method_) ==
         location->limit_except_.excepted_methods_.end()) {
       if (!limitLoop(location->limit_except_.allow_deny_list_, client_addr.sin_addr.s_addr))
         return METHOD_DENY;
@@ -387,17 +387,17 @@ std::string ConfigHandler::createAcsLogMsg( uint32_t ip,  long status, size_t re
 
   std::string requestMethod, requestUrl, userAgent;
 
-  requestMethod = config::LimitExcept::MethodToStr(request.method);
+  requestMethod = config::LimitExcept::MethodToStr(request.method_);
 
   // URLの表示をするかどうか？
-  std::map<std::string, std::string>::const_iterator it = request.headers.find("User-Agent");
-  if (it != request.headers.end())
+  std::map<std::string, std::string>::const_iterator it = request.headers_.find("User-Agent");
+  if (it != request.headers_.end())
     userAgent = it->second;
   else
     userAgent = "-";
 
   ss << Utils::ipToStr(ip) << " - - [" << getCurrentTimeByLogFormat() << "] \"" << requestMethod << " "
-     << request.uri << " HTTP/1.1\" " << status << " " << resSize << " \"" << userAgent << "\"" << std::endl;
+     << request.uri_ << " HTTP/1.1\" " << status << " " << resSize << " \"" << userAgent << "\"" << std::endl;
 
   return ss.str();
 }

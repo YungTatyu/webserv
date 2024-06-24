@@ -28,13 +28,13 @@ HttpRequest initRequest(const config::REQUEST_METHOD method, const std::string& 
                         const string_map& headers) {
   HttpRequest request;
 
-  request.method = method;
-  request.uri = uri;
-  request.version = version;
-  request.queries = queries;
-  request.body = body;
+  request.method_ = method;
+  request.uri_ = uri;
+  request.version_ = version;
+  request.queries_ = queries;
+  request.body_ = body;
   std::for_each(headers.begin(), headers.end(), [&request](const string_pair header) {
-    request.headers.insert(std::make_pair(header.first, header.second));
+    request.headers_.insert(std::make_pair(header.first, header.second));
   });
 
   return request;
@@ -98,7 +98,7 @@ void testCgiOutput(ConnectionData& cd, const std::string expect) {
   const HttpResponse& http_response = cd.response_;
 
   ASSERT_TRUE(cd.cgi_handler_.callCgiExecutor(http_response, http_request, 0));
-  if (!http_request.body.empty()) sendBody(http_request.body, cd.cgi_handler_.getCgiSocket());
+  if (!http_request.body_.empty()) sendBody(http_request.body_, cd.cgi_handler_.getCgiSocket());
   waitProcess(cd.cgi_handler_.getCgiProcessId());
   const std::string actual = test::recvCgiResponse(cd.cgi_handler_);
 
@@ -127,7 +127,7 @@ TEST(cgi_executor, document_response) {
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/document_response.py", "");
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
-  const std::string expect = !cd.request_.body.empty() ? (expect_header + cd.request_.body) : expect_header;
+  const std::string expect = !cd.request_.body_.empty() ? (expect_header + cd.request_.body_) : expect_header;
   test::testCgiOutput(cd, expect);
 }
 
@@ -185,7 +185,7 @@ TEST(cgi_executor, meta_vars) {
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = expect_header + "<h1>env vars list</h1>" + "<h2>AUTH_TYPE=</h2>" +
-                             "<h2>CONTENT_LENGTH=" + std::to_string(cd.request_.body.size()) + "</h2>" +
+                             "<h2>CONTENT_LENGTH=" + std::to_string(cd.request_.body_.size()) + "</h2>" +
                              "<h2>CONTENT_TYPE=text/html</h2>" + "<h2>GATEWAY_INTERFACE=CGI/1.1</h2>" +
                              "<h2>PATH_INFO=/a/b/c/d//e</h2>" + "<h2>PATH_TRANSLATED=</h2>" +
                              "<h2>QUERY_STRING=one=1&two=2&three=3</h2>"

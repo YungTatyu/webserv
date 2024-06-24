@@ -6,8 +6,8 @@ TEST(ConfigHandlerTestSearchKeepaliveTimeout, http) {
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[0]});
 
   test.sameTime(test.config_handler_.config_->http_.keepalive_timeout_.getTime(),
-                test.config_handler_.searchKeepaliveTimeout(test.tied_server_, test.request_.headers["Host"],
-                                                            test.request_.uri));
+                test.config_handler_.searchKeepaliveTimeout(test.tied_server_, test.request_.headers_["Host"],
+                                                            test.request_.uri_));
 }
 
 TEST(ConfigHandlerTestSearchKeepaliveTimeout, server) {
@@ -16,8 +16,8 @@ TEST(ConfigHandlerTestSearchKeepaliveTimeout, server) {
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[1]});
 
   test.sameTime(test.config_handler_.config_->http_.server_list_[1].keepalive_timeout_.getTime(),
-                test.config_handler_.searchKeepaliveTimeout(test.tied_server_, test.request_.headers["Host"],
-                                                            test.request_.uri));
+                test.config_handler_.searchKeepaliveTimeout(test.tied_server_, test.request_.headers_["Host"],
+                                                            test.request_.uri_));
 }
 
 TEST(ConfigHandlerTestSearchKeepAliveTimeout, location) {
@@ -28,6 +28,6 @@ TEST(ConfigHandlerTestSearchKeepAliveTimeout, location) {
 
   test.sameTime(
       test.config_handler_.config_->http_.server_list_[0].location_list_[1].keepalive_timeout_.getTime(),
-      test.config_handler_.searchKeepaliveTimeout(test.tied_server_, test.request_.headers["Host"],
-                                                  test.request_.uri));
+      test.config_handler_.searchKeepaliveTimeout(test.tied_server_, test.request_.headers_["Host"],
+                                                  test.request_.uri_));
 }

@@ -7,7 +7,7 @@ TEST(ConfigHandlerTestWriteErrorLog, off) {
   std::string file_path = "/dev/null";
   std::string msg = "aiueo\n";
 
-  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                      msg);
   test.WRITE_NONE(file_path, msg);
 }
@@ -19,7 +19,7 @@ TEST(ConfigHandlerTestWriteErrorLog, location) {
   std::string file_path = test.getAbsolutePath("logs/location_error.log");
   std::string msg = "kakikukeko\n";
 
-  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                      msg);
   test.WRITE_ACCURATE(file_path, msg);
 }
@@ -31,7 +31,7 @@ TEST(ConfigHandlerTestWriteErrorLog, Default) {
   std::string file_path = test.getAbsolutePath("logs/error.log");
   std::string msg = "sashisuseso\n";
 
-  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                      msg);
   test.WRITE_ACCURATE(file_path, msg);
 }
@@ -44,7 +44,7 @@ TEST(ConfigHandlerTestWriteErrorLog, add_default) {
   std::string msg = "tachitsuteto\n";
   std::string expect_msg = "sashisuseso\ntachitsuteto\n";
 
-  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                      msg);
   test.WRITE_ACCURATE(file_path, expect_msg);
 }
@@ -58,7 +58,7 @@ TEST(ConfigHandlerTestWriteErrorLog, multiple_file) {
   std::string file_path3 = test.getAbsolutePath("logs/multiple3.log");
   std::string msg = "naninuneno\n";
 
-  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                      msg);
   test.WRITE_ACCURATE(file_path1, msg);
   test.WRITE_ACCURATE(file_path2, msg);

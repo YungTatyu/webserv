@@ -17,7 +17,7 @@ void assert_allowRequest_loop(ConfigHandlerTest& test, int server_key, int loc_k
   method_it method = vec_method.begin();
   vec_expect_it vec_expect = vec_vec_expect.begin();
   for (; method != vec_method.end() && vec_expect != vec_vec_expect.end(); method++, vec_expect++) {
-    test.request_.method = *method;
+    test.request_.method_ = *method;
     ip_it ip = vec_ip.begin();
     expect_it expect = (*vec_expect).begin();
     for (; ip != vec_ip.end() && expect != (*vec_expect).end(); ip++, expect++) {
