@@ -320,9 +320,7 @@ bool config::Parser::expectTokenType(config::TK_TYPE type, const Token &token) c
  * actual: 1011
  *
  */
-bool config::Parser::expectArgsNum(unsigned int expect, unsigned int actual) const {
-  return expect & actual;
-}
+bool config::Parser::expectArgsNum(unsigned int expect, unsigned int actual) const { return expect & actual; }
 
 /**
  * directiveが ";"もしくは"{"で区切られているか確認
