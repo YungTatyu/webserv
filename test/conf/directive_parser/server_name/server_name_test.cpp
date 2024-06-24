@@ -22,11 +22,11 @@ TEST(ServerNameTest, allContext) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/server_name/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // server
-  test::test_value(server_list[0].server_name.getName(), {
+  test::test_value(server_list[0].server_name_.getName(), {
                                                              "tachu",
                                                              "",
                                                              "1",
@@ -35,16 +35,16 @@ TEST(ServerNameTest, allContext) {
                                                              "server name",
                                                              "sn:8000",
                                                          });
-  test::test_directives_set(server_list[0].directives_set, kServerName, true);
+  test::test_directives_set(server_list[0].directives_set_, kServerName, true);
 }
 
 TEST(ServerNameTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(server_list[0].directives_set, kServerName, false);
-  test::test_directives_set(server_list[1].directives_set, kServerName, false);
+  test::test_directives_set(server_list[0].directives_set_, kServerName, false);
+  test::test_directives_set(server_list[1].directives_set_, kServerName, false);
 }

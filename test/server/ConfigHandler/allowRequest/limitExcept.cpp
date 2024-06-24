@@ -10,9 +10,9 @@ typedef std::vector<int>::iterator expect_it;
 void assert_allowRequest_loop(ConfigHandlerTest& test, int server_key, int loc_key,
                               std::vector<config::REQUEST_METHOD> vec_method, std::vector<std::string> vec_ip,
                               std::vector<std::vector<int>> vec_vec_expect) {
-  const config::Server& server = test.config_handler_.config_->http.server_list[server_key];
+  const config::Server& server = test.config_handler_.config_->http_.server_list_[server_key];
   const config::Location* location =
-      &test.config_handler_.config_->http.server_list[server_key].location_list[loc_key];
+      &test.config_handler_.config_->http_.server_list_[server_key].location_list_[loc_key];
 
   method_it method = vec_method.begin();
   vec_expect_it vec_expect = vec_vec_expect.begin();

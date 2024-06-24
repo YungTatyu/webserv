@@ -374,7 +374,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
         config_handler.writeErrorLog("webserv: [debug] search location phase\n");
         phase = handleSearchLocationPhase(response, request, server, &location, config_handler);
         if (location)
-          config_handler.writeErrorLog("webserv: [debug] location found -> " + location->uri + "\n");
+          config_handler.writeErrorLog("webserv: [debug] location found -> " + location->uri_ + "\n");
         break;
 
       case sw_post_search_location_phase:
@@ -502,7 +502,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
   }
   ++(response.internal_redirect_cnt_);
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
-  if (*location) config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri + "\n");
+  if (*location) config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri_ + "\n");
   return sw_post_search_location_phase;
 }
 
@@ -547,7 +547,7 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
                                                             const ConfigHandler& config_handler) {
   if (!location || (location && !Utils::hasDirective(*location, kRETURN))) return sw_allow_phase;
 
-  prepareReturn(response, location->return_list[0]);
+  prepareReturn(response, location->return_list_[0]);
   config_handler.writeErrorLog("webserv: [debug] redirect occured\n");
   return sw_error_page_phase;
 }
@@ -748,21 +748,21 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
 
   // location context
   if (location && Utils::hasDirective(*location, kTRY_FILES))
-    return TryFiles(response, request, location->try_files);
+    return TryFiles(response, request, location->try_files_);
   else if (location && Utils::hasDirective(*location, kINDEX)) {
     if (Utils::hasDirective(*location, kALIAS)) is_alias = true;
-    return Index(response, request.uri, location->index_list, is_alias, is_autoindex_on);
+    return Index(response, request.uri, location->index_list_, is_alias, is_autoindex_on);
   }
 
   // server context
   if (Utils::hasDirective(server, kTRY_FILES))
-    return TryFiles(response, request, server.try_files);
+    return TryFiles(response, request, server.try_files_);
   else if (Utils::hasDirective(server, kINDEX))
-    return Index(response, request.uri, server.index_list, is_alias, is_autoindex_on);
+    return Index(response, request.uri, server.index_list_, is_alias, is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
   // なくとも、デフォルトのindexディレクティブを見る
-  return Index(response, request.uri, config_handler.config_->http.index_list, is_alias, is_autoindex_on);
+  return Index(response, request.uri, config_handler.config_->http_.index_list_, is_alias, is_autoindex_on);
 }
 
 /**

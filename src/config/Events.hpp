@@ -10,10 +10,10 @@
 
 namespace config {
 struct Events {
-  const static unsigned int type = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
-  std::set<std::string> directives_set;
-  WorkerConnections worker_connections;
-  Use use;
+  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
+  std::set<std::string> directives_set_;
+  WorkerConnections worker_connections_;
+  Use use_;
 };
 }  // namespace config
 

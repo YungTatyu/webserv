@@ -66,42 +66,42 @@ TEST(accesslogTest, allContext) {
   const config::Main *config = test::initConfigTest("test/conf/directive_parser/access_log/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // http
-  test::test_value(http.access_log_list, {"/tmp", "/tmp/tmp"});
-  test::test_directives_set(http.directives_set, kAccessLog, true);
+  test::test_value(http.access_log_list_, {"/tmp", "/tmp/tmp"});
+  test::test_directives_set(http.directives_set_, kAccessLog, true);
 
   // server
-  test::test_value(http.server_list[0].access_log_list, {"path/to/file1", "path/to/file2"});
-  test::test_value(http.server_list[1].access_log_list, {"server2path1", "server2path2"});
-  test::test_directives_set(http.server_list[0].directives_set, kAccessLog, true);
-  test::test_directives_set(http.server_list[1].directives_set, kAccessLog, true);
+  test::test_value(http.server_list_[0].access_log_list_, {"path/to/file1", "path/to/file2"});
+  test::test_value(http.server_list_[1].access_log_list_, {"server2path1", "server2path2"});
+  test::test_directives_set(http.server_list_[0].directives_set_, kAccessLog, true);
+  test::test_directives_set(http.server_list_[1].directives_set_, kAccessLog, true);
 
   // location
-  test::test_value(http.server_list[0].location_list[0].access_log_list, {
+  test::test_value(http.server_list_[0].location_list_[0].access_log_list_, {
                                                                              "path1",
                                                                              "path2",
                                                                              "path3",
                                                                              "path4",
                                                                              "path5",
                                                                          });
-  test::test_value(http.server_list[0].location_list[1].access_log_list, {"1", "2", "3"});
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAccessLog, true);
-  test::test_directives_set(http.server_list[0].location_list[1].directives_set, kAccessLog, true);
+  test::test_value(http.server_list_[0].location_list_[1].access_log_list_, {"1", "2", "3"});
+  test::test_directives_set(http.server_list_[0].location_list_[0].directives_set_, kAccessLog, true);
+  test::test_directives_set(http.server_list_[0].location_list_[1].directives_set_, kAccessLog, true);
 }
 
 TEST(accesslogTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(http.directives_set, kAccessLog, false);
-  test::test_directives_set(http.server_list[0].directives_set, kAccessLog, false);
-  test::test_directives_set(http.server_list[1].directives_set, kAccessLog, false);
-  test::test_directives_set(http.server_list[2].directives_set, kAccessLog, false);
-  test::test_directives_set(http.server_list[0].location_list[0].directives_set, kAccessLog, false);
+  test::test_directives_set(http.directives_set_, kAccessLog, false);
+  test::test_directives_set(http.server_list_[0].directives_set_, kAccessLog, false);
+  test::test_directives_set(http.server_list_[1].directives_set_, kAccessLog, false);
+  test::test_directives_set(http.server_list_[2].directives_set_, kAccessLog, false);
+  test::test_directives_set(http.server_list_[0].location_list_[0].directives_set_, kAccessLog, false);
 }

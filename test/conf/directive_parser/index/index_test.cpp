@@ -24,32 +24,32 @@ TEST(indexTest, allContext) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/index/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // http
-  test::test_value(http.index_list, {"1.html", "2.html", "3.html", "1", "2", "3", "4", "5"});
-  test::test_directives_set(http.directives_set, kIndex, true);
+  test::test_value(http.index_list_, {"1.html", "2.html", "3.html", "1", "2", "3", "4", "5"});
+  test::test_directives_set(http.directives_set_, kIndex, true);
 
   // server
-  test::test_value(server_list[0].index_list, {"index.html", "server1", "server2"});
-  test::test_directives_set(server_list[0].directives_set, kIndex, true);
+  test::test_value(server_list[0].index_list_, {"index.html", "server1", "server2"});
+  test::test_directives_set(server_list[0].directives_set_, kIndex, true);
 
   // location
   test::test_value(
-      server_list[0].location_list[0].index_list,
+      server_list[0].location_list_[0].index_list_,
       {"location1", "location2", "location3", "index1.html", "index2.html", "index3.html", "index4.html"});
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kIndex, true);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kIndex, true);
 }
 
 TEST(indexTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(server_list[0].directives_set, kIndex, false);
-  test::test_directives_set(server_list[1].directives_set, kIndex, false);
-  test::test_directives_set(server_list[2].directives_set, kIndex, false);
+  test::test_directives_set(server_list[0].directives_set_, kIndex, false);
+  test::test_directives_set(server_list[1].directives_set_, kIndex, false);
+  test::test_directives_set(server_list[2].directives_set_, kIndex, false);
 }

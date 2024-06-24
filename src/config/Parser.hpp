@@ -107,7 +107,7 @@ class Parser {
 template <typename T>
 void config::Parser::updateContext(T &context, CONTEXT new_context, const std::string &context_name) {
   current_context_.push(new_context);
-  context.directives_set.insert(context_name);
+  context.directives_set_.insert(context_name);
 }
 
 #endif
