@@ -37,7 +37,7 @@ void ConfigHandler::loadConfiguration(const config::Main* config) {
   this->config_ = config;
 }
 
-bool ConfigHandler::addressInLimit(const std::string& ip_addr_str, const uint32_t cli_addr) const {
+bool ConfigHandler::addressInLimit(const std::string& ip_addr_str,  uint32_t cli_addr) const {
   if (ip_addr_str == "all") return true;
   std::istringstream iss(ip_addr_str);
   std::string ip;
@@ -62,7 +62,7 @@ bool ConfigHandler::addressInLimit(const std::string& ip_addr_str, const uint32_
 }
 
 bool ConfigHandler::limitLoop(const std::vector<config::AllowDeny>& allow_deny_list,
-                              const uint32_t cli_addr) const {
+                               uint32_t cli_addr) const {
   // 上から順に制限適用する
   // 制限されているアドレスであれば、false
   // エラーページどのタイミングで返すか？
@@ -296,7 +296,7 @@ const config::Location* ConfigHandler::searchLongestMatchLocationConfig(const co
 
 const config::ErrorPage* ConfigHandler::searchErrorPage(const config::Server& server,
                                                         const config::Location* location,
-                                                        const unsigned int code) const {
+                                                        unsigned int code) const {
   if (location && Utils::hasDirective(*location, kErrorPage)) {
     const std::vector<config::ErrorPage>& ep_list = location->error_page_list_;
     for (size_t i = 0; i < ep_list.size(); i++) {
@@ -323,7 +323,7 @@ const config::ErrorPage* ConfigHandler::searchErrorPage(const config::Server& se
   return NULL;
 }
 
-struct TiedServer ConfigHandler::createTiedServer(const std::string addr, const unsigned int port) const {
+struct TiedServer ConfigHandler::createTiedServer(const std::string& addr, unsigned int port) const {
   struct TiedServer tied_server(addr, port);
 
   for (size_t i = 0; i < config_->http_.server_list_.size(); i++) {
@@ -366,9 +366,9 @@ bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Lo
   return false;
 }
 
-const std::string ConfigHandler::getCurrentTimeByLogFormat() const {
-  std::time_t currentTime = std::time(NULL);
-  std::tm* gmTime = std::gmtime(&currentTime);
+std::string ConfigHandler::getCurrentTimeByLogFormat() const {
+  std::time_t cur_time = std::time(NULL);
+  std::tm* gmTime = std::gmtime(&cur_time);
 
   const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
@@ -381,7 +381,7 @@ const std::string ConfigHandler::getCurrentTimeByLogFormat() const {
   return oss.str();
 }
 
-std::string ConfigHandler::createAcsLogMsg(const uint32_t ip, const long status, const size_t resSize,
+std::string ConfigHandler::createAcsLogMsg( uint32_t ip,  long status, size_t resSize,
                                            const HttpRequest& request) const {
   std::stringstream ss;
 

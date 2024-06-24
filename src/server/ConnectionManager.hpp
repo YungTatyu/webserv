@@ -4,12 +4,12 @@
 #include <map>
 #include <vector>
 
-#include "CGIHandler.hpp"
+#include "CgiHandler.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 
 struct TiedServer;
-class CGIHandler;
+class CgiHandler;
 
 class ConnectionData {
  public:
@@ -27,7 +27,7 @@ class ConnectionData {
   EVENT event;
   HttpRequest request;
   HttpResponse response_;
-  cgi::CGIHandler cgi_handler_;
+  cgi::CgiHandler cgi_handler_;
   const TiedServer* tied_server_;
   ConnectionData() : sent_bytes_(0) {}
 };
@@ -60,7 +60,7 @@ class ConnectionManager {
   const std::map<int, ConnectionData*>& getConnections() const;
   void setTiedServer(const int fd, const TiedServer* tied_server);
   const TiedServer& getTiedServer(const int fd) const;
-  const cgi::CGIHandler& getCgiHandler(const int fd) const;
+  const cgi::CgiHandler& getCgiHandler(const int fd) const;
   size_t getSentBytes(const int fd) const;
   void addSentBytes(const int fd, const size_t bytes);
   bool callCgiExecutor(const int fd, const HttpResponse& response, const HttpRequest& request);

@@ -134,7 +134,7 @@ const TiedServer& ConnectionManager::getTiedServer(const int fd) const {
   return *(connections_.at(fd)->tied_server_);
 }
 
-const cgi::CGIHandler& ConnectionManager::getCgiHandler(const int fd) const {
+const cgi::CgiHandler& ConnectionManager::getCgiHandler(const int fd) const {
   return connections_.at(fd)->cgi_handler_;
 }
 

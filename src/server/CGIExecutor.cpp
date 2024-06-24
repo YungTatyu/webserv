@@ -1,4 +1,4 @@
-#include "CGIExecutor.hpp"
+#include "CgiExecutor.hpp"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -15,12 +15,12 @@
 #include "WebServer.hpp"
 #include "error.hpp"
 
-cgi::CGIExecutor::CGIExecutor() {}
+cgi::CgiExecutor::CgiExecutor() {}
 
-cgi::CGIExecutor::~CGIExecutor() {}
+cgi::CgiExecutor::~CgiExecutor() {}
 
-void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpResponse& response,
-                                        const int cgi_sock, const int cli_sock) {
+void cgi::CgiExecutor::executeCgiScript(const HttpRequest& request, const HttpResponse& response,
+                                         int cgi_sock,  int cli_sock) {
   std::string full_path = response.root_path_ + response.res_file_path_;
   prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
@@ -29,24 +29,24 @@ void cgi::CGIExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
   std::exit(EXIT_FAILURE);
 }
 
-void cgi::CGIExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
-                                           const std::string& full_path, const int cgi_sock,
-                                           const int cli_sock) {
+void cgi::CgiExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
+                                           const std::string& full_path,  int cgi_sock,
+                                            int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
   this->script_path_ = full_path;
   createArgv(full_path);
   createMetaVars(request, response, cli_sock);
 }
 
-void cgi::CGIExecutor::createArgv(const std::string& script_path) {
+void cgi::CgiExecutor::createArgv(const std::string& script_path) {
   const std::string::size_type n = script_path.rfind("/");
   const std::string cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
   this->argv_.push_back(strdup_from_string(cgi_script));
   this->argv_.push_back(NULL);
 }
 
-void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const HttpResponse& response,
-                                      const int cli_sock) {
+void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResponse& response,
+                                       int cli_sock) {
   const static char* kContentType = "content-type";
 
   this->meta_vars_.push_back("AUTH_TYPE=");  // Authorizationをparseするロジックを実装しないため、値は空文字
@@ -114,7 +114,7 @@ void cgi::CGIExecutor::createMetaVars(const HttpRequest& request, const HttpResp
   this->meta_vars_.push_back(NULL);
 }
 
-std::vector<std::string> cgi::CGIExecutor::split(const std::string& s, char delimiter) const {
+std::vector<std::string> cgi::CgiExecutor::split(const std::string& s, char delimiter) const {
   std::vector<std::string> tokens;
   std::string token;
   std::istringstream is(s);
@@ -125,7 +125,7 @@ std::vector<std::string> cgi::CGIExecutor::split(const std::string& s, char deli
   return tokens;
 }
 
-bool cgi::CGIExecutor::isExecutableFile(const std::string& path) const {
+bool cgi::CgiExecutor::isExecutableFile(const std::string& path) const {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) return false;
   return S_ISREG(statbuf.st_mode) && access(path.c_str(), X_OK) == 0;
@@ -141,7 +141,7 @@ bool cgi::CGIExecutor::isExecutableFile(const std::string& path) const {
  * @return true
  * @return false
  */
-bool cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& request, const int socket) const {
+bool cgi::CgiExecutor::redirectStdIOToSocket(const HttpRequest& request,  int socket) const {
   if (SysCallWrapper::Dup2(socket, STDOUT_FILENO) == -1) {
     close(socket);
     return false;
@@ -158,15 +158,15 @@ bool cgi::CGIExecutor::redirectStdIOToSocket(const HttpRequest& request, const i
   return true;
 }
 
-char* cgi::CGIExecutor::strdup_from_string(const std::string& str) const {
+char* cgi::CgiExecutor::strdup_from_string(const std::string& str) const {
   size_t size = str.size() + 1;
   char* new_cstr = new char[size];
   std::memcpy(new_cstr, str.c_str(), sizeof(char) * size);
   return new_cstr;
 }
 
-const std::string& cgi::CGIExecutor::getScriptPath() const { return this->script_path_; }
+const std::string& cgi::CgiExecutor::getScriptPath() const { return this->script_path_; }
 
-const std::vector<const char*>& cgi::CGIExecutor::getArgv() const { return this->argv_; }
+const std::vector<const char*>& cgi::CgiExecutor::getArgv() const { return this->argv_; }
 
-const std::vector<const char*>& cgi::CGIExecutor::getMetaVars() const { return this->meta_vars_; }
+const std::vector<const char*>& cgi::CgiExecutor::getMetaVars() const { return this->meta_vars_; }

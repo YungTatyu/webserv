@@ -181,7 +181,7 @@ void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* 
     return;
   }
   // cgi socketの場合は、clientのデータも削除する
-  const cgi::CGIHandler& cgi_handler = connManager.getCgiHandler(sock);
+  const cgi::CgiHandler& cgi_handler = connManager.getCgiHandler(sock);
   int client = cgi_handler.getCliSocket();
   close(client);
   // cgiのコネクションを最初に削除する

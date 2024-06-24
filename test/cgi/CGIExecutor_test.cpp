@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "CGIHandler.hpp"
+#include "CgiHandler.hpp"
 #include "ConnectionManager.hpp"
 #include "LimitExcept.hpp"
 #include "Utils.hpp"
@@ -51,7 +51,7 @@ HttpResponse initResponse(const std::string& root_path, const std::string& scrip
   return response;
 }
 
-std::string recvCgiResponse(cgi::CGIHandler& cgi_handler) {
+std::string recvCgiResponse(cgi::CgiHandler& cgi_handler) {
   std::string response;
   const ssize_t buffer_size = 1024;
 

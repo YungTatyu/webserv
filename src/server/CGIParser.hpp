@@ -41,7 +41,7 @@ class CGIParser {
   CGIParser();
   ~CGIParser();
   PARSE_STATE state_;
-  bool parse(HttpResponse& http_response, const std::string& cgi_response, const PARSE_STATE init_state);
+  bool parse(HttpResponse& http_response, const std::string& cgi_response, PARSE_STATE init_state);
 };
 }  // namespace cgi
 

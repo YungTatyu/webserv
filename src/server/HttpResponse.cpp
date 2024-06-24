@@ -4,7 +4,7 @@
 #include <ctime>
 #include <iomanip>
 
-#include "CGIHandler.hpp"
+#include "CgiHandler.hpp"
 #include "SysCallWrapper.hpp"
 #include "Utils.hpp"
 
@@ -778,7 +778,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
-  if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
+  if (cgi::CgiHandler::isCgi(response.res_file_path_)) {
     if (!isExecutable(response.root_path_ + response.res_file_path_)) {
       response.setStatusCode(403);
       return sw_error_page_phase;
@@ -892,7 +892,7 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
     if (i != 0) path += "/";
     path += segments[i];
 
-    if (cgi::CGIHandler::isCgi(response.root_path_ + path) &&
+    if (cgi::CgiHandler::isCgi(response.root_path_ + path) &&
         Utils::isFile(response.root_path_ + path, false)) {
       response.separatePathinfo(request.uri, path.size());
       request.uri = path;

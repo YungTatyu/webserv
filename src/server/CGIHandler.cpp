@@ -1,4 +1,4 @@
-#include "CGIHandler.hpp"
+#include "CgiHandler.hpp"
 
 #include <signal.h>
 #include <stdio.h>
@@ -13,9 +13,9 @@
 #include "WebServer.hpp"
 #include "error.hpp"
 
-cgi::CGIHandler::CGIHandler() : cgi_process_id_(-1), cli_socket_(-1) { resetSockets(); }
+cgi::CgiHandler::CgiHandler() : cgi_process_id_(-1), cli_socket_(-1) { resetSockets(); }
 
-cgi::CGIHandler::~CGIHandler() {}
+cgi::CgiHandler::~CgiHandler() {}
 
 /**
  * @brief cgi実行fileか
@@ -28,7 +28,7 @@ cgi::CGIHandler::~CGIHandler() {}
  * @return true
  * @return false
  */
-bool cgi::CGIHandler::isCgi(const std::string& script_path) {
+bool cgi::CgiHandler::isCgi(const std::string& script_path) {
   return (Utils::isExtensionFile(script_path, ".php") || Utils::isExtensionFile(script_path, ".cgi") ||
           Utils::isExtensionFile(script_path, ".py"));
 }
@@ -39,7 +39,7 @@ bool cgi::CGIHandler::isCgi(const std::string& script_path) {
  * @return true
  * @return false
  */
-bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const HttpResponse& response) {
+bool cgi::CgiHandler::forkCgiProcess(const HttpRequest& request, const HttpResponse& response) {
   pid_t pid = SysCallWrapper::Fork();
   if (pid == -1) {
     close(this->sockets_[SOCKET_PARENT]);
@@ -56,8 +56,8 @@ bool cgi::CGIHandler::forkCgiProcess(const HttpRequest& request, const HttpRespo
   return true;
 }
 
-bool cgi::CGIHandler::callCgiExecutor(const HttpResponse& response, const HttpRequest& request,
-                                      const int cli_sock) {
+bool cgi::CgiHandler::callCgiExecutor(const HttpResponse& response, const HttpRequest& request,
+                                       int cli_sock) {
   this->cli_socket_ = cli_sock;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1) {
     WebServer::writeErrorlog(error::strSysCallError("socketpair") + "\n");
@@ -72,27 +72,27 @@ bool cgi::CGIHandler::callCgiExecutor(const HttpResponse& response, const HttpRe
   return forkCgiProcess(request, response);
 }
 
-bool cgi::CGIHandler::callCgiParser(HttpResponse& response, const std::string& cgi_response) {
+bool cgi::CgiHandler::callCgiParser(HttpResponse& response, const std::string& cgi_response) {
   return this->cgi_parser_.parse(response, cgi_response, cgi::PARSE_BEFORE);
 }
 
-const cgi::CGIParser& cgi::CGIHandler::getCgiParser() const { return this->cgi_parser_; }
+const cgi::CGIParser& cgi::CgiHandler::getCgiParser() const { return this->cgi_parser_; }
 
-const cgi::CGIExecutor& cgi::CGIHandler::getCgiExecutor() const { return this->cgi_executor_; }
+const cgi::CgiExecutor& cgi::CgiHandler::getCgiExecutor() const { return this->cgi_executor_; }
 
-pid_t cgi::CGIHandler::getCgiProcessId() const { return this->cgi_process_id_; }
+pid_t cgi::CgiHandler::getCgiProcessId() const { return this->cgi_process_id_; }
 
-int cgi::CGIHandler::getCliSocket() const { return this->cli_socket_; }
+int cgi::CgiHandler::getCliSocket() const { return this->cli_socket_; }
 
-void cgi::CGIHandler::setCliSocket(const int socket) { this->cli_socket_ = socket; }
+void cgi::CgiHandler::setCliSocket( int socket) { this->cli_socket_ = socket; }
 
-int cgi::CGIHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]; }
+int cgi::CgiHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]; }
 
 /**
  * @brief timeout eventが発生した場合、cgi processをkillする
  *
  */
-void cgi::CGIHandler::killCgiProcess() const {
+void cgi::CgiHandler::killCgiProcess() const {
   if (kill(this->cgi_process_id_, SIGINT) == -1)
     WebServer::writeErrorlog(error::strSysCallError("kill") + "\n");
 }
@@ -101,7 +101,7 @@ void cgi::CGIHandler::killCgiProcess() const {
  * @brief socketの値と被らないように初期化する
  *
  */
-void cgi::CGIHandler::resetSockets() {
+void cgi::CgiHandler::resetSockets() {
   this->sockets_[0] = -1;
   this->sockets_[1] = -1;
 }

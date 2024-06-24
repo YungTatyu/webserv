@@ -28,7 +28,7 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &ioHandler, ConnectionMana
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
     // cgiのイベントを監視している場合は、cgiプロセスをkillしないといけない
     if (connManager.isCgiSocket(sockfd)) {
-      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
+      const cgi::CgiHandler &cgi_handler = connManager.getCgiHandler(sockfd);
       cgi_handler.killCgiProcess();
     }
     // cgiの時は、clientとcgi両方削除しないといけない
@@ -132,7 +132,7 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionM
   int status = -1;
   // recv error
   if (re == -1) return;
-  const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
+  const cgi::CgiHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   HttpResponse &response = connManager.getResponse(sockfd);
 
   if (re != 0 || !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {
@@ -206,7 +206,7 @@ void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &ioHandler, Connection
   ioHandler.sendRequestBody(connManager, sockfd);
 
   const std::string &body = connManager.getRequest(sockfd).body;
-  const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(sockfd);
+  const cgi::CgiHandler &cgi_handler = connManager.getCgiHandler(sockfd);
   int status = -1;
   if (connManager.getSentBytes(sockfd) != body.size() &&           // bodyをまだ送る必要がある
       !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processが生きている
@@ -263,7 +263,7 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionM
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
       handleResponse(connManager, configHandler, server, timerTree, cgi_sock);  // 中でsetEvent
       // timeoutしたcgiの処理
-      const cgi::CGIHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
+      const cgi::CgiHandler &cgi_handler = connManager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();
       ioHandler.closeConnection(connManager, server, timerTree, cgi_sock);
       connManager.clearResData(cgi_handler.getCliSocket());
