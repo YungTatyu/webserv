@@ -20,7 +20,6 @@ TEST(mainParserTest, allContexts) {
   const config::Events &events = config->events;
   const std::vector<config::Server> &server_list = http.server_list;
   int i;
-  (void)events;
 
   // http
   EXPECT_NE(config->directives_set.find(HTTP), config->directives_set.end());
