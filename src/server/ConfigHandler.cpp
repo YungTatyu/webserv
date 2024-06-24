@@ -13,17 +13,17 @@
 #include "WebServer.hpp"
 #include "error.hpp"
 
-const static std::string kACCESS_FD = "access_fd";
-const static std::string kERROR_FD = "error_fd";
-const static std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
-const static std::string kRECEIVE_TIMEOUT = "receive_timeout";
-const static std::string kSEND_TIMEOUT = "send_timeout";
-const static std::string kUSERID_EXPIRES = "userid_expires";
-const static std::string kDENY = "deny";
-const static std::string kALIAS = "alias";
-const static std::string kAUTOINDEX = "autoindex";
-const static std::string kROOT = "root";
-const static std::string kERROR_PAGE = "error_page";
+const static std::string kAccessFd = "access_fd";
+const static std::string kErrorFd = "error_fd";
+const static std::string kKeepaliveTimeout = "keepalive_timeout";
+const static std::string kReceiveTimeout = "receive_timeout";
+const static std::string kSendTimeout = "send_timeout";
+const static std::string kUseridExpires = "userid_expires";
+const static std::string kDeny = "deny";
+const static std::string kAlias = "alias";
+const static std::string kAutoindex = "autoindex";
+const static std::string kRoot = "root";
+const static std::string kErrorPage = "error_page";
 const static std::string kLimitExcept = "limit_except";
 
 /** Configにあってほしい機能
@@ -89,11 +89,11 @@ int ConfigHandler::allowRequest(const config::Server& server, const config::Loca
                                 const HttpRequest& request, struct sockaddr_in client_addr) const {
   // ------ access の制限 ------
   // configからアドレス制限ディレクトリのあるcontext探す
-  if (location && Utils::hasDirective(*location, kDENY)) {
+  if (location && Utils::hasDirective(*location, kDeny)) {
     if (!limitLoop(location->allow_deny_list_, client_addr.sin_addr.s_addr)) return ACCESS_DENY;
-  } else if (Utils::hasDirective(server, kDENY)) {
+  } else if (Utils::hasDirective(server, kDeny)) {
     if (!limitLoop(server.allow_deny_list_, client_addr.sin_addr.s_addr)) return ACCESS_DENY;
-  } else if (Utils::hasDirective(this->config_->http_, kDENY)) {
+  } else if (Utils::hasDirective(this->config_->http_, kDeny)) {
     if (!limitLoop(this->config_->http_.allow_deny_list_, client_addr.sin_addr.s_addr)) return ACCESS_DENY;
   }
 
@@ -124,17 +124,17 @@ void ConfigHandler::writeAccessLog(const struct TiedServer& tied_servers, const 
 void ConfigHandler::writeAccessLog(const config::Server& server, const config::Location* location,
                                    const std::string& msg) const {
   // access_logがどのコンテキスがあれば出力する
-  if (location && Utils::hasDirective(*location, kACCESS_FD)) {
+  if (location && Utils::hasDirective(*location, kAccessFd)) {
     for (size_t i = 0; i < location->access_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(location->access_fd_list_[i], msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
     }
-  } else if (Utils::hasDirective(server, kACCESS_FD)) {
+  } else if (Utils::hasDirective(server, kAccessFd)) {
     for (size_t i = 0; i < server.access_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(server.access_fd_list_[i], msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
     }
-  } else if (Utils::hasDirective(this->config_->http_, kACCESS_FD)) {
+  } else if (Utils::hasDirective(this->config_->http_, kAccessFd)) {
     for (size_t i = 0; i < this->config_->http_.access_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http_.access_fd_list_[i], msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
@@ -144,12 +144,12 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
 
 void ConfigHandler::writeErrorLog(const std::string& msg) const {
   // http conterxtにerror_logディレクティブがあれば出力
-  if (Utils::hasDirective(this->config_->http_, kERROR_FD)) {
+  if (Utils::hasDirective(this->config_->http_, kErrorFd)) {
     for (size_t i = 0; i < this->config_->http_.error_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http_.error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
-  } else if (Utils::hasDirective(*this->config_, kERROR_FD)) {
+  } else if (Utils::hasDirective(*this->config_, kErrorFd)) {
     // main contextにerror_logディレクティブがなくてもデフォルトに出力する
     // fdがopenできずに追加できていない可能性があるので、一応条件文で確認している。
     for (size_t i = 0; i < this->config_->error_fd_list_.size(); i++) {
@@ -168,22 +168,22 @@ void ConfigHandler::writeErrorLog(const struct TiedServer& tied_servers, const s
 
 void ConfigHandler::writeErrorLog(const config::Server& server, const config::Location* location,
                                   const std::string& msg) const {
-  if (location && Utils::hasDirective(*location, kERROR_FD)) {
+  if (location && Utils::hasDirective(*location, kErrorFd)) {
     for (size_t i = 0; i < location->error_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(location->error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
-  } else if (Utils::hasDirective(server, kERROR_FD)) {
+  } else if (Utils::hasDirective(server, kErrorFd)) {
     for (size_t i = 0; i < server.error_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(server.error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
-  } else if (Utils::hasDirective(this->config_->http_, kERROR_FD)) {
+  } else if (Utils::hasDirective(this->config_->http_, kErrorFd)) {
     for (size_t i = 0; i < this->config_->http_.error_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(this->config_->http_.error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
-  } else if (Utils::hasDirective(*this->config_, kERROR_FD)) {
+  } else if (Utils::hasDirective(*this->config_, kErrorFd)) {
     for (size_t i = 0; i < this->config_->error_fd_list_.size(); i++) {
       if (Utils::wrapperWrite(this->config_->error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
@@ -197,9 +197,9 @@ const config::Time& ConfigHandler::searchKeepaliveTimeout(const struct TiedServe
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && Utils::hasDirective(*location, kKEEPALIVE_TIMEOUT)) {
+  if (location && Utils::hasDirective(*location, kKeepaliveTimeout)) {
     return location->keepalive_timeout_.getTime();
-  } else if (Utils::hasDirective(server, kKEEPALIVE_TIMEOUT)) {
+  } else if (Utils::hasDirective(server, kKeepaliveTimeout)) {
     return server.keepalive_timeout_.getTime();
   } else  // http兼default
   {
@@ -213,9 +213,9 @@ const config::Time& ConfigHandler::searchReceiveTimeout(const struct TiedServer&
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && Utils::hasDirective(*location, kRECEIVE_TIMEOUT)) {
+  if (location && Utils::hasDirective(*location, kReceiveTimeout)) {
     return location->receive_timeout_.getTime();
-  } else if (Utils::hasDirective(server, kRECEIVE_TIMEOUT)) {
+  } else if (Utils::hasDirective(server, kReceiveTimeout)) {
     return server.receive_timeout_.getTime();
   }
   // http兼default
@@ -228,9 +228,9 @@ const config::Time& ConfigHandler::searchSendTimeout(const TiedServer& tied_serv
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && Utils::hasDirective(*location, kSEND_TIMEOUT)) {
+  if (location && Utils::hasDirective(*location, kSendTimeout)) {
     return location->send_timeout_.getTime();
-  } else if (Utils::hasDirective(server, kSEND_TIMEOUT)) {
+  } else if (Utils::hasDirective(server, kSendTimeout)) {
     return server.send_timeout_.getTime();
   } else  // http兼default
   {
@@ -244,9 +244,9 @@ const config::Time& ConfigHandler::searchUseridExpires(const struct TiedServer& 
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
 
-  if (location && Utils::hasDirective(*location, kUSERID_EXPIRES)) {
+  if (location && Utils::hasDirective(*location, kUseridExpires)) {
     return location->userid_expires_.getTime();
-  } else if (Utils::hasDirective(server, kUSERID_EXPIRES)) {
+  } else if (Utils::hasDirective(server, kUseridExpires)) {
     return server.userid_expires_.getTime();
   } else  // http兼default
   {
@@ -297,21 +297,21 @@ const config::Location* ConfigHandler::searchLongestMatchLocationConfig(const co
 const config::ErrorPage* ConfigHandler::searchErrorPage(const config::Server& server,
                                                         const config::Location* location,
                                                         const unsigned int code) const {
-  if (location && Utils::hasDirective(*location, kERROR_PAGE)) {
+  if (location && Utils::hasDirective(*location, kErrorPage)) {
     const std::vector<config::ErrorPage>& ep_list = location->error_page_list_;
     for (size_t i = 0; i < ep_list.size(); i++) {
       if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end()) {
         return &ep_list[i];
       }
     }
-  } else if (Utils::hasDirective(server, kERROR_PAGE)) {
+  } else if (Utils::hasDirective(server, kErrorPage)) {
     const std::vector<config::ErrorPage>& ep_list = server.error_page_list_;
     for (size_t i = 0; i < ep_list.size(); i++) {
       if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end()) {
         return &ep_list[i];
       }
     }
-  } else if (Utils::hasDirective(this->config_->http_, kERROR_PAGE)) {
+  } else if (Utils::hasDirective(this->config_->http_, kErrorPage)) {
     const std::vector<config::ErrorPage>& ep_list = this->config_->http_.error_page_list_;
     for (size_t i = 0; i < ep_list.size(); i++) {
       if (ep_list[i].getCodeList().find(code) != ep_list[i].getCodeList().end()) {
@@ -340,12 +340,12 @@ struct TiedServer ConfigHandler::createTiedServer(const std::string addr, const 
 std::string ConfigHandler::searchRootPath(const config::Server& server,
                                           const config::Location* location) const {
   if (location) {
-    if (Utils::hasDirective(*location, kROOT)) return location->root_.getPath();
-    if (Utils::hasDirective(*location, kALIAS)) return location->alias_.getPath();
+    if (Utils::hasDirective(*location, kRoot)) return location->root_.getPath();
+    if (Utils::hasDirective(*location, kAlias)) return location->alias_.getPath();
   }
-  if (Utils::hasDirective(server, kROOT))
+  if (Utils::hasDirective(server, kRoot))
     return server.root_.getPath();
-  else if (Utils::hasDirective(this->config_->http_, kROOT))
+  else if (Utils::hasDirective(this->config_->http_, kRoot))
     return config_->http_.root_.getPath();
   // これいるか？上のやつと一緒でいいのでは？
   return config::Root::kDefaultPath_;
@@ -357,11 +357,11 @@ unsigned long ConfigHandler::searchCliMaxBodySize() const {
 }
 
 bool ConfigHandler::isAutoIndexOn(const config::Server& server, const config::Location* location) const {
-  if (location && Utils::hasDirective(*location, kAUTOINDEX)) {
+  if (location && Utils::hasDirective(*location, kAutoindex)) {
     return location->autoindex_.getIsAutoindexOn();
-  } else if (Utils::hasDirective(server, kAUTOINDEX)) {
+  } else if (Utils::hasDirective(server, kAutoindex)) {
     return server.autoindex_.getIsAutoindexOn();
-  } else if (Utils::hasDirective(config_->http_, kAUTOINDEX) && config_->http_.autoindex_.getIsAutoindexOn())
+  } else if (Utils::hasDirective(config_->http_, kAutoindex) && config_->http_.autoindex_.getIsAutoindexOn())
     return true;
   return false;
 }

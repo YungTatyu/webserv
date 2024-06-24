@@ -37,39 +37,39 @@ const unsigned int config::UseridPath::kType_;
 const unsigned int config::UseridService::kType_;
 const unsigned int config::WorkerConnections::kType_;
 
-const static std::string kHTTP = "http";
-const static std::string kEVENTS = "events";
-const static std::string kSERVER = "server";
-const static std::string kLOCATION = "location";
-const static std::string kLIMIT_EXCEPT = "limit_except";
-const static std::string kACCESS_LOG = "access_log";
-const static std::string kALIAS = "alias";
-const static std::string kALLOW = "allow";
-const static std::string kAUTOINDEX = "autoindex";
-const static std::string kCLIENT_MAX_BODY_SIZE = "client_max_body_size";
-const static std::string kDENY = "deny";
-const static std::string kERROR_LOG = "error_log";
-const static std::string kERROR_PAGE = "error_page";
-const static std::string kINDEX = "index";
-const static std::string kKEEPALIVE_TIMEOUT = "keepalive_timeout";
-const static std::string kLISTEN = "listen";
-const static std::string kRECEIVE_TIMEOUT = "receive_timeout";
-const static std::string kRETURN = "return";
-const static std::string kROOT = "root";
-const static std::string kSEND_TIMEOUT = "send_timeout";
-const static std::string kSERVER_NAME = "server_name";
-const static std::string kTRY_FILES = "try_files";
-const static std::string kUSE = "use";
-const static std::string kUSERID = "userid";
-const static std::string kUSERID_DOMAIN = "userid_domain";
-const static std::string kUSERID_EXPIRES = "userid_expires";
-const static std::string kUSERID_PATH = "userid_path";
-const static std::string kUSERID_SERVICE = "userid_service";
-const static std::string kWORKER_CONNECTIONS = "worker_connections";
-const static std::string kSELECT = "select";
-const static std::string kPOLL = "poll";
-const static std::string kEPOLL = "epoll";
-const static std::string kKQUEUE = "kqueue";
+const static std::string kHttp = "http";
+const static std::string kEvents = "events";
+const static std::string kServer = "server";
+const static std::string kLocation = "location";
+const static std::string kLimitExcept = "limit_except";
+const static std::string kAccessLog = "access_log";
+const static std::string kAlias = "alias";
+const static std::string kAllow = "allow";
+const static std::string kAutoindex = "autoindex";
+const static std::string kClientMaxBodySize = "client_max_body_size";
+const static std::string kDeny = "deny";
+const static std::string kErrorLog = "error_log";
+const static std::string kErrorPage = "error_page";
+const static std::string kIndex = "index";
+const static std::string kKeepaliveTimeout = "keepalive_timeout";
+const static std::string kListen = "listen";
+const static std::string kReceiveTimeout = "receive_timeout";
+const static std::string kReturn = "return";
+const static std::string kRoot = "root";
+const static std::string kSendTimeout = "send_timeout";
+const static std::string kServerName = "server_name";
+const static std::string kTryFiles = "try_files";
+const static std::string kUse = "use";
+const static std::string kUserid = "userid";
+const static std::string kUseridDomain = "userid_domain";
+const static std::string kUseridExpires = "userid_expires";
+const static std::string kUseridPath = "userid_path";
+const static std::string kUseridService = "userid_service";
+const static std::string kWorkerConnections = "worker_connections";
+const static std::string kSelect = "select";
+const static std::string kPoll = "poll";
+const static std::string kEpoll = "epoll";
+const static std::string kKqueue = "kqueue";
 
 config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath)
     : config_(config), tokens_(tokens), filepath_(filepath), ti_(0), current_directive_("") {
@@ -77,69 +77,69 @@ config::Parser::Parser(Main &config, const std::vector<Token> &tokens, const std
   this->current_context_.push(CONF_MAIN);
 
   // context
-  this->all_directives_.insert(std::make_pair(kEVENTS, config::Events::kType_));
-  this->all_directives_.insert(std::make_pair(kHTTP, config::Http::kType_));
-  this->all_directives_.insert(std::make_pair(kSERVER, config::Server::kType_));
-  this->all_directives_.insert(std::make_pair(kLOCATION, config::Location::kType_));
-  this->all_directives_.insert(std::make_pair(kLIMIT_EXCEPT, config::LimitExcept::kType_));
+  this->all_directives_.insert(std::make_pair(kEvents, config::Events::kType_));
+  this->all_directives_.insert(std::make_pair(kHttp, config::Http::kType_));
+  this->all_directives_.insert(std::make_pair(kServer, config::Server::kType_));
+  this->all_directives_.insert(std::make_pair(kLocation, config::Location::kType_));
+  this->all_directives_.insert(std::make_pair(kLimitExcept, config::LimitExcept::kType_));
 
   // directive
-  this->all_directives_.insert(std::make_pair(kACCESS_LOG, config::AccessLog::kType_));
-  this->all_directives_.insert(std::make_pair(kALIAS, config::Alias::kType_));
-  this->all_directives_.insert(std::make_pair(kALLOW, config::AllowDeny::kType_));
-  this->all_directives_.insert(std::make_pair(kAUTOINDEX, config::Autoindex::kType_));
-  this->all_directives_.insert(std::make_pair(kCLIENT_MAX_BODY_SIZE, config::ClientMaxBodySize::kType_));
-  this->all_directives_.insert(std::make_pair(kDENY, config::AllowDeny::kType_));
-  this->all_directives_.insert(std::make_pair(kERROR_LOG, config::ErrorLog::kType_));
-  this->all_directives_.insert(std::make_pair(kERROR_PAGE, config::ErrorPage::kType_));
-  this->all_directives_.insert(std::make_pair(kINDEX, config::Index::kType_));
-  this->all_directives_.insert(std::make_pair(kKEEPALIVE_TIMEOUT, config::KeepaliveTimeout::kType_));
-  this->all_directives_.insert(std::make_pair(kLISTEN, config::Listen::kType_));
-  this->all_directives_.insert(std::make_pair(kRECEIVE_TIMEOUT, config::ReceiveTimeout::kType_));
-  this->all_directives_.insert(std::make_pair(kRETURN, config::Return::kType_));
-  this->all_directives_.insert(std::make_pair(kROOT, config::Root::kType_));
-  this->all_directives_.insert(std::make_pair(kSEND_TIMEOUT, config::SendTimeout::kType_));
-  this->all_directives_.insert(std::make_pair(kSERVER_NAME, config::ServerName::kType_));
-  this->all_directives_.insert(std::make_pair(kTRY_FILES, config::TryFiles::kType_));
-  this->all_directives_.insert(std::make_pair(kUSE, config::Use::kType_));
-  // this->all_directives_.insert(std::make_pair(kUSERID, config::Userid::kType_));
-  // this->all_directives_.insert(std::make_pair(kUSERID_DOMAIN, config::UseridDomain::kType_));
-  // this->all_directives_.insert(std::make_pair(kUSERID_EXPIRES, config::UseridExpires::kType_));
-  // this->all_directives_.insert(std::make_pair(kUSERID_PATH, config::UseridPath::kType_));
-  // this->all_directives_.insert(std::make_pair(kUSERID_SERVICE, config::UseridService::kType_));
-  this->all_directives_.insert(std::make_pair(kWORKER_CONNECTIONS, config::WorkerConnections::kType_));
+  this->all_directives_.insert(std::make_pair(kAccessLog, config::AccessLog::kType_));
+  this->all_directives_.insert(std::make_pair(kAlias, config::Alias::kType_));
+  this->all_directives_.insert(std::make_pair(kAllow, config::AllowDeny::kType_));
+  this->all_directives_.insert(std::make_pair(kAutoindex, config::Autoindex::kType_));
+  this->all_directives_.insert(std::make_pair(kClientMaxBodySize, config::ClientMaxBodySize::kType_));
+  this->all_directives_.insert(std::make_pair(kDeny, config::AllowDeny::kType_));
+  this->all_directives_.insert(std::make_pair(kErrorLog, config::ErrorLog::kType_));
+  this->all_directives_.insert(std::make_pair(kErrorPage, config::ErrorPage::kType_));
+  this->all_directives_.insert(std::make_pair(kIndex, config::Index::kType_));
+  this->all_directives_.insert(std::make_pair(kKeepaliveTimeout, config::KeepaliveTimeout::kType_));
+  this->all_directives_.insert(std::make_pair(kListen, config::Listen::kType_));
+  this->all_directives_.insert(std::make_pair(kReceiveTimeout, config::ReceiveTimeout::kType_));
+  this->all_directives_.insert(std::make_pair(kReturn, config::Return::kType_));
+  this->all_directives_.insert(std::make_pair(kRoot, config::Root::kType_));
+  this->all_directives_.insert(std::make_pair(kSendTimeout, config::SendTimeout::kType_));
+  this->all_directives_.insert(std::make_pair(kServerName, config::ServerName::kType_));
+  this->all_directives_.insert(std::make_pair(kTryFiles, config::TryFiles::kType_));
+  this->all_directives_.insert(std::make_pair(kUse, config::Use::kType_));
+  // this->all_directives_.insert(std::make_pair(kUserid, config::Userid::kType_));
+  // this->all_directives_.insert(std::make_pair(kUseridDomain, config::UseridDomain::kType_));
+  // this->all_directives_.insert(std::make_pair(kUseridExpires, config::UseridExpires::kType_));
+  // this->all_directives_.insert(std::make_pair(kUseridPath, config::UseridPath::kType_));
+  // this->all_directives_.insert(std::make_pair(kUseridService, config::UseridService::kType_));
+  this->all_directives_.insert(std::make_pair(kWorkerConnections, config::WorkerConnections::kType_));
 
   // parser
-  this->parser_map_[kHTTP] = &config::Parser::parseHttpServerEvents;
-  this->parser_map_[kEVENTS] = &config::Parser::parseHttpServerEvents;
-  this->parser_map_[kSERVER] = &config::Parser::parseHttpServerEvents;
-  this->parser_map_[kLOCATION] = &config::Parser::parseLocation;
-  this->parser_map_[kLIMIT_EXCEPT] = &config::Parser::parseLimitExcept;
+  this->parser_map_[kHttp] = &config::Parser::parseHttpServerEvents;
+  this->parser_map_[kEvents] = &config::Parser::parseHttpServerEvents;
+  this->parser_map_[kServer] = &config::Parser::parseHttpServerEvents;
+  this->parser_map_[kLocation] = &config::Parser::parseLocation;
+  this->parser_map_[kLimitExcept] = &config::Parser::parseLimitExcept;
 
-  this->parser_map_[kACCESS_LOG] = &config::Parser::parseAccessLog;
-  this->parser_map_[kALIAS] = &config::Parser::parseAlias;
-  this->parser_map_[kALLOW] = &config::Parser::parseAllowDeny;
-  this->parser_map_[kAUTOINDEX] = &config::Parser::parseAutoindex;
-  this->parser_map_[kCLIENT_MAX_BODY_SIZE] = &config::Parser::parseClientMaxBodySize;
-  this->parser_map_[kDENY] = &config::Parser::parseAllowDeny;
-  this->parser_map_[kERROR_LOG] = &config::Parser::parseErrorLog;
-  this->parser_map_[kERROR_PAGE] = &config::Parser::parseErrorPage;
-  this->parser_map_[kINDEX] = &config::Parser::parseIndex;
-  this->parser_map_[kKEEPALIVE_TIMEOUT] = &config::Parser::parseKeepaliveTimeout;
-  this->parser_map_[kLISTEN] = &config::Parser::parseListen;
-  this->parser_map_[kRECEIVE_TIMEOUT] = &config::Parser::parseReceiveTimeout;
-  this->parser_map_[kROOT] = &config::Parser::parseRoot;
-  this->parser_map_[kSEND_TIMEOUT] = &config::Parser::parseSendTimeout;
-  this->parser_map_[kRETURN] = &config::Parser::parseReturn;
-  this->parser_map_[kSERVER_NAME] = &config::Parser::parseServerName;
-  this->parser_map_[kTRY_FILES] = &config::Parser::parseTryFiles;
-  this->parser_map_[kUSE] = &config::Parser::parseUse;
-  // this->parser_map_[kUSERID] = &config::Parser::parseUserid;
-  // this->parser_map_[kUSERID_DOMAIN] = &config::Parser::parseUseridDomain;
-  // this->parser_map_[kUSERID_EXPIRES] = &config::Parser::parseUseridExpires;
-  // this->parser_map_[kUSERID_PATH] = &config::Parser::parseUseridPath;
-  // this->parser_map_[kUSERID_SERVICE] = &config::Parser::parseUseridService;
-  this->parser_map_[kWORKER_CONNECTIONS] = &config::Parser::parseWorkerConnections;
+  this->parser_map_[kAccessLog] = &config::Parser::parseAccessLog;
+  this->parser_map_[kAlias] = &config::Parser::parseAlias;
+  this->parser_map_[kAllow] = &config::Parser::parseAllowDeny;
+  this->parser_map_[kAutoindex] = &config::Parser::parseAutoindex;
+  this->parser_map_[kClientMaxBodySize] = &config::Parser::parseClientMaxBodySize;
+  this->parser_map_[kDeny] = &config::Parser::parseAllowDeny;
+  this->parser_map_[kErrorLog] = &config::Parser::parseErrorLog;
+  this->parser_map_[kErrorPage] = &config::Parser::parseErrorPage;
+  this->parser_map_[kIndex] = &config::Parser::parseIndex;
+  this->parser_map_[kKeepaliveTimeout] = &config::Parser::parseKeepaliveTimeout;
+  this->parser_map_[kListen] = &config::Parser::parseListen;
+  this->parser_map_[kReceiveTimeout] = &config::Parser::parseReceiveTimeout;
+  this->parser_map_[kRoot] = &config::Parser::parseRoot;
+  this->parser_map_[kSendTimeout] = &config::Parser::parseSendTimeout;
+  this->parser_map_[kReturn] = &config::Parser::parseReturn;
+  this->parser_map_[kServerName] = &config::Parser::parseServerName;
+  this->parser_map_[kTryFiles] = &config::Parser::parseTryFiles;
+  this->parser_map_[kUse] = &config::Parser::parseUse;
+  // this->parser_map_[kUserid] = &config::Parser::parseUserid;
+  // this->parser_map_[kUseridDomain] = &config::Parser::parseUseridDomain;
+  // this->parser_map_[kUseridExpires] = &config::Parser::parseUseridExpires;
+  // this->parser_map_[kUseridPath] = &config::Parser::parseUseridPath;
+  // this->parser_map_[kUseridService] = &config::Parser::parseUseridService;
+  this->parser_map_[kWorkerConnections] = &config::Parser::parseWorkerConnections;
 }
 
 config::Parser::~Parser() {}
@@ -259,7 +259,7 @@ bool config::Parser::parseType(const Token &token) {
   return true;
 }
 
-const std::set<std::string> *config::Parser::findDirectivesSet(const CONTEXT context) const {
+const std::set<std::string> *config::Parser::findDirectivesSet(CONTEXT context) const {
   const std::set<std::string> *ret = NULL;
   switch (context) {
     case CONF_MAIN:
@@ -300,7 +300,7 @@ const std::set<std::string> *config::Parser::findDirectivesSet(const CONTEXT con
   return ret;
 }
 
-bool config::Parser::expectTokenType(const config::TK_TYPE type, const Token &token) const {
+bool config::Parser::expectTokenType(config::TK_TYPE type, const Token &token) const {
   if (type != token.type_) {
     printFormatedError("unexpected", token);
     return false;
@@ -320,7 +320,7 @@ bool config::Parser::expectTokenType(const config::TK_TYPE type, const Token &to
  * actual: 1011
  *
  */
-bool config::Parser::expectArgsNum(const unsigned int expect, const unsigned int actual) const {
+bool config::Parser::expectArgsNum(unsigned int expect, unsigned int actual) const {
   return expect & actual;
 }
 
@@ -346,8 +346,8 @@ bool config::Parser::expectTerminatingToken() const {
  */
 bool config::Parser::isContext(const config::Token &token) const {
   return token.type_ == config::TK_STR &&
-         (token.value_ == kEVENTS || token.value_ == kHTTP || token.value_ == kSERVER ||
-          token.value_ == kLOCATION || token.value_ == kLIMIT_EXCEPT);
+         (token.value_ == kEvents || token.value_ == kHttp || token.value_ == kServer ||
+          token.value_ == kLocation || token.value_ == kLimitExcept);
 }
 
 bool config::Parser::isDirective(const config::Token &token) const {
@@ -362,7 +362,7 @@ bool config::Parser::isDirective(const config::Token &token) const {
  * context   {
  *
  */
-size_t config::Parser::countArgs(const TK_TYPE terminating_token) const {
+size_t config::Parser::countArgs(TK_TYPE terminating_token) const {
   size_t i = this->ti_ + 1;
   size_t args_num = 0;
 
@@ -392,7 +392,7 @@ bool config::Parser::validFinalState() const {
     return false;
   }
   // events contextが設定されていないとerror
-  if (!Utils::hasDirective(this->config_, kEVENTS)) {
+  if (!Utils::hasDirective(this->config_, kEvents)) {
     std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
     return false;
   }
@@ -438,14 +438,14 @@ bool config::Parser::parseHttpServerEvents() {
   ++ti_;  // tokenをcontextの引数に進める
 
   // current contextをupdate
-  if (context == kHTTP) {
-    updateContext(this->config_, CONF_HTTP, kHTTP);
-  } else if (context == kSERVER) {
+  if (context == kHttp) {
+    updateContext(this->config_, CONF_HTTP, kHttp);
+  } else if (context == kServer) {
     // 新たなserver contextを追加
     this->config_.http_.server_list_.push_back(Server());
-    updateContext(this->config_.http_, CONF_HTTP_SERVER, kSERVER);
-  } else if (context == kEVENTS) {
-    updateContext(this->config_, CONF_EVENTS, kEVENTS);
+    updateContext(this->config_.http_, CONF_HTTP_SERVER, kServer);
+  } else if (context == kEvents) {
+    updateContext(this->config_, CONF_EVENTS, kEvents);
   }
 
   ++ti_;  // 次のtokenに進める
@@ -467,7 +467,7 @@ bool config::Parser::parseLocation() {
   }
   list.push_back(Location(uri));
 
-  updateContext(this->config_.http_.server_list_.back(), CONF_HTTP_LOCATION, kLOCATION);
+  updateContext(this->config_.http_.server_list_.back(), CONF_HTTP_LOCATION, kLocation);
 
   ti_ += 2;  // "{" を飛ばして、次のtokenへ進む
   return true;
@@ -491,7 +491,7 @@ bool config::Parser::parseLimitExcept() {
   } while (tokens[ti_].type_ != TK_OPEN_CURLY_BRACE);
 
   updateContext(this->config_.http_.server_list_.back().location_list_.back(), CONF_HTTP_LIMIT_EXCEPT,
-                kLIMIT_EXCEPT);
+                kLimitExcept);
 
   ++ti_;
   return true;
@@ -581,11 +581,11 @@ const config::OS currentOS = config::OS_OTHER;
 bool config::Parser::validEventType(const std::string &eventType) const {
   switch (currentOS) {
     case config::OS_BSD_BASED:
-      return eventType == kSELECT || eventType == kPOLL || eventType == kKQUEUE;
+      return eventType == kSelect || eventType == kPoll || eventType == kKqueue;
     case config::OS_LINUX:
-      return eventType == kSELECT || eventType == kPOLL || eventType == kEPOLL;
+      return eventType == kSelect || eventType == kPoll || eventType == kEpoll;
     case config::OS_OTHER:
-      return eventType == kSELECT || eventType == kPOLL;
+      return eventType == kSelect || eventType == kPoll;
   }
 }
 
@@ -600,10 +600,10 @@ bool config::Parser::parseUse() {
   std::map<std::string, config::CONNECTION_METHOD> method_map;
   config::CONNECTION_METHOD method;
 
-  method_map[kSELECT] = config::SELECT;
-  method_map[kPOLL] = config::POLL;
-  method_map[kEPOLL] = config::EPOLL;
-  method_map[kKQUEUE] = config::KQUEUE;
+  method_map[kSelect] = config::SELECT;
+  method_map[kPoll] = config::POLL;
+  method_map[kEpoll] = config::EPOLL;
+  method_map[kKqueue] = config::KQUEUE;
   method = method_map.find(token_value)->second;
 
   this->config_.events_.use_.setConnectionMethod(method);
@@ -809,7 +809,7 @@ bool config::Parser::parseRoot() {
   else if (context == config::CONF_HTTP_LOCATION) {
     std::set<std::string> &location_directives =
         this->config_.http_.server_list_.back().location_list_.back().directives_set_;
-    if (location_directives.find(kALIAS) != location_directives.end()) {
+    if (location_directives.find(kAlias) != location_directives.end()) {
       printError("\"root\" directive is duplicate, \"alias\" directive was specified earlier in ",
                  this->tokens_[ti_]);
       return false;
@@ -1099,7 +1099,7 @@ bool config::Parser::isNumInRange(const std::string &num, long min, long max) co
  * @return false
  */
 bool config::Parser::parseAllowDeny() {
-  const config::ACCESS_DIRECTIVE directive_type = current_directive_ == kALLOW ? config::ALLOW : config::DENY;
+  const config::ACCESS_DIRECTIVE directive_type = current_directive_ == kAllow ? config::ALLOW : config::DENY;
   const std::string address = this->tokens_[ti_].value_;
 
   // ipv6にも対応するならば、!isIPv6()と!isMixedIPAddress()も条件に追加してください。
@@ -1111,7 +1111,7 @@ bool config::Parser::parseAllowDeny() {
   config::AllowDeny tmp;
   tmp.setAccessDirective(directive_type);
   tmp.setAddress(address);
-  const std::string directive_name = directive_type == config::ALLOW ? kALLOW : kDENY;
+  const std::string directive_name = directive_type == config::ALLOW ? kAllow : kDeny;
 
   switch (this->current_context_.top()) {
     case config::CONF_HTTP:
@@ -1295,7 +1295,7 @@ bool config::Parser::isDuplicateDefaultServer(const config::Listen &this_listen)
 
 bool config::Parser::parseServerName() {
   // 最初のserver_nameディレクティブであれば、デフォルト値を削除する
-  if (this->config_.http_.server_list_.back().directives_set_.find(kSERVER_NAME) ==
+  if (this->config_.http_.server_list_.back().directives_set_.find(kServerName) ==
       this->config_.http_.server_list_.back().directives_set_.end())
     this->config_.http_.server_list_.back().server_name_.eraseDefaultName();
 
@@ -1365,7 +1365,7 @@ bool config::Parser::parseAlias() {
 
   std::set<std::string> &location_directives =
       this->config_.http_.server_list_.back().location_list_.back().directives_set_;
-  if (location_directives.find(kROOT) != location_directives.end()) {
+  if (location_directives.find(kRoot) != location_directives.end()) {
     printError("\"alias\" directive is duplicate, \"root\" directive was specified earlier",
                this->tokens_[ti_]);
     return false;
@@ -1395,7 +1395,7 @@ bool config::Parser::parseReturn() {
 
   // urlの場合のみ文字列をチェックする
   code = tmp_return.getCode();
-  if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && code == config::Return::kCodeUnset) {
+  if (this->tokens_[ti_].type_ != config::TK_SEMICOLON && code == config::Return::kCodeUnset_) {
     const std::string url = this->tokens_[ti_].value_;
     if (url.substr(0, http.length()) != http && url.substr(0, https.length()) != https) {
       printFormatedError("invalid return code", this->tokens_[ti_]);

@@ -8,10 +8,10 @@
 
 #include "Utils.hpp"
 
-const static std::string kACCESS_LOG = "access_log";
-const static std::string kACCESS_FD = "access_fd";
-const static std::string kERROR_LOG = "error_log";
-const static std::string kERROR_FD = "error_fd";
+const static std::string kAccessLog = "access_log";
+const static std::string kAccessFd = "access_fd";
+const static std::string kErrorLog = "error_log";
+const static std::string kErrorFd = "error_fd";
 
 /*
  * AddAcsFdList/AddErrFdListの返り値
@@ -23,7 +23,7 @@ const static std::string kERROR_FD = "error_fd";
 int config::addAcsFdList(std::set<std::string>& directives_set,
                          const std::vector<config::AccessLog>& access_log_list, std::vector<int>& fd_list) {
   // access_log directiveがなければ飛ばす。
-  if (directives_set.find(kACCESS_LOG) == directives_set.end()) return 0;
+  if (directives_set.find(kAccessLog) == directives_set.end()) return 0;
 
   std::string tmp_path;
   int tmp_fd;
@@ -46,14 +46,14 @@ int config::addAcsFdList(std::set<std::string>& directives_set,
     }
     fd_list.push_back(tmp_fd);
   }
-  directives_set.insert(kACCESS_FD);
+  directives_set.insert(kAccessFd);
   return 1;
 }
 
 int config::addErrFdList(std::set<std::string>& directives_set,
                          const std::vector<config::ErrorLog>& error_log_list, std::vector<int>& fd_list) {
   // error_log directiveがなければ飛ばす。
-  if (directives_set.find(kERROR_LOG) == directives_set.end()) return 0;
+  if (directives_set.find(kErrorLog) == directives_set.end()) return 0;
 
   std::string tmp_path;
   int tmp_fd;
@@ -71,7 +71,7 @@ int config::addErrFdList(std::set<std::string>& directives_set,
     fd_list.push_back(tmp_fd);
   }
 
-  directives_set.insert(kERROR_FD);
+  directives_set.insert(kErrorFd);
   return 1;
 }
 
@@ -97,7 +97,7 @@ bool config::initAcsLogFds(config::Main& config) {
       return false;
     }
     config.http_.access_fd_list_.push_back(tmp_fd);
-    config.http_.directives_set_.insert(kACCESS_FD);
+    config.http_.directives_set_.insert(kAccessFd);
   }
 
   // server context
@@ -140,7 +140,7 @@ bool config::initErrLogFds(config::Main& config) {
       return false;
     }
     config.error_fd_list_.push_back(tmp_fd);
-    config.directives_set_.insert(kERROR_FD);
+    config.directives_set_.insert(kErrorFd);
   }
 
   // http context
@@ -172,7 +172,7 @@ bool config::initLogFds(config::Main& config) {
   return true;
 }
 
-void config::closeLogFds(const std::vector<int> log_list) {
+void config::closeLogFds(const std::vector<int>& log_list) {
   for (size_t i = 0; i < log_list.size(); i++) close(log_list[i]);
 }
 
@@ -196,7 +196,7 @@ void config::terminateLogFds(const config::Main* config) {
   }
 }
 
-int config::openLogFd(std::string& log_path) {
+int config::openLogFd(const std::string& log_path) {
   return Utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT | O_NONBLOCK | O_CLOEXEC,
                             S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 }

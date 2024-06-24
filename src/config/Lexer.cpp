@@ -20,7 +20,7 @@ void config::Lexer::tokenize() {
 
 const std::vector<config::Token>& config::Lexer::getTokens() const { return this->tokens_; }
 
-const std::string config::Lexer::getFileContent(const std::string file_path) const {
+const std::string config::Lexer::getFileContent(const std::string& file_path) const {
   // ファイルを開く
   std::ifstream file(file_path.c_str());
 

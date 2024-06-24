@@ -16,8 +16,8 @@ class UseridExpires {
   const static bool kDefaultIsUseridExpiresOn = false;
   const Time &getTime() const { return this->time_; }
   bool getIsUseridExpiresOn() const { return this->is_userid_expires_on_; }
-  void setTime(const unsigned long &time_in_ms) { this->time_.time_in_ms_ = time_in_ms; }
-  void setIsUseridExpiresOn(const bool is_userid_expires_on) {
+  void setTime(unsigned long time_in_ms) { this->time_.time_in_ms_ = time_in_ms; }
+  void setIsUseridExpiresOn(bool is_userid_expires_on) {
     this->is_userid_expires_on_ = is_userid_expires_on;
   }
   const static unsigned int kType_ =

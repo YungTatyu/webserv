@@ -8,10 +8,10 @@
 #include "SysCallWrapper.hpp"
 #include "Utils.hpp"
 
-static const std::string kALIAS = "alias";
-static const std::string kTRY_FILES = "try_files";
-static const std::string kINDEX = "index";
-static const std::string kRETURN = "return";
+static const std::string kAlias = "alias";
+static const std::string kTryFiles = "try_files";
+static const std::string kIndex = "index";
+static const std::string kReturn = "return";
 static const char* kContentType = "Content-Type";
 static const char* kHtml = "text/html";
 static const char* kTextPlain = "text/plain";
@@ -528,7 +528,7 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
   std::string url = return_directive.getUrl();
   int code = return_directive.getCode();
 
-  if (code == config::Return::kCodeUnset) {
+  if (code == config::Return::kCodeUnset_) {
     response.setStatusCode(302);
     response.headers_[kLocation] = url;
     return;
@@ -546,7 +546,7 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
 HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& response,
                                                             const config::Location* location,
                                                             const ConfigHandler& config_handler) {
-  if (!location || (location && !Utils::hasDirective(*location, kRETURN))) return sw_allow_phase;
+  if (!location || (location && !Utils::hasDirective(*location, kReturn))) return sw_allow_phase;
 
   prepareReturn(response, location->return_list_[0]);
   config_handler.writeErrorLog("webserv: [debug] redirect occured\n");
@@ -600,7 +600,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
   }
 
   // uri
-  if (try_files.getCode() == config::TryFiles::kCodeUnset) {
+  if (try_files.getCode() == config::TryFiles::kCodeUnset_) {
     request.uri = try_files.getUri();
     return sw_search_location_phase;
   }
@@ -748,17 +748,17 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   bool is_alias = false;
 
   // location context
-  if (location && Utils::hasDirective(*location, kTRY_FILES))
+  if (location && Utils::hasDirective(*location, kTryFiles))
     return TryFiles(response, request, location->try_files_);
-  else if (location && Utils::hasDirective(*location, kINDEX)) {
-    if (Utils::hasDirective(*location, kALIAS)) is_alias = true;
+  else if (location && Utils::hasDirective(*location, kIndex)) {
+    if (Utils::hasDirective(*location, kAlias)) is_alias = true;
     return Index(response, request.uri, location->index_list_, is_alias, is_autoindex_on);
   }
 
   // server context
-  if (Utils::hasDirective(server, kTRY_FILES))
+  if (Utils::hasDirective(server, kTryFiles))
     return TryFiles(response, request, server.try_files_);
-  else if (Utils::hasDirective(server, kINDEX))
+  else if (Utils::hasDirective(server, kIndex))
     return Index(response, request.uri, server.index_list_, is_alias, is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
