@@ -13,10 +13,10 @@ WebServer::WebServer(const config::Main *config) {
   this->configHandler->loadConfiguration(config);
   this->initializeServer();
   if (this->ioHandler->getListenfdMap().size() >=
-      this->configHandler->config_->events.worker_connections.getWorkerConnections()) {
+      this->configHandler->config_->events_.worker_connections_.getWorkerConnections()) {
     std::stringstream ss;
     ss << "webserv: [emerg] "
-       << this->configHandler->config_->events.worker_connections.getWorkerConnections()
+       << this->configHandler->config_->events_.worker_connections_.getWorkerConnections()
        << " worker_connections are not enough for " << this->ioHandler->getListenfdMap().size()
        << " listening sockets";
     this->deleteObjects();
@@ -31,7 +31,7 @@ void WebServer::initializeServer() {
   this->connManager = new ConnectionManager();
   initializeConnManager();
 
-  config::CONNECTION_METHOD method = this->configHandler->config_->events.use.getConnectionMethod();
+  config::CONNECTION_METHOD method = this->configHandler->config_->events_.use_.getConnectionMethod();
   switch (method) {
 #if defined(KQUEUE_AVAILABLE)
     case config::KQUEUE:
@@ -56,7 +56,7 @@ void WebServer::initializeServer() {
     default:  // kqueueとepoll両方使えない場合は、defaultが必要
       break;
   }
-  configHandler->writeErrorLog("webserv: [debug] use " + config::Use::ConnectionMethodToStr(method) + "\n");
+  configHandler->writeErrorLog("webserv: [debug] use_ " + config::Use::ConnectionMethodToStr(method) + "\n");
 
   this->timerTree = new TimerTree();
 }
@@ -74,20 +74,20 @@ void WebServer::initializeListenSocket(std::set<std::pair<std::string, unsigned 
 
 void WebServer::initializeVServers() {
   const config::Main *conf = this->configHandler->config_;
-  const std::vector<config::Server> &server_list = conf->http.server_list;
+  const std::vector<config::Server> &server_list = conf->http_.server_list_;
   std::set<std::pair<std::string, unsigned int> > ip_address_set;
 
   for (std::vector<config::Server>::const_iterator sit = server_list.begin(); sit != server_list.end();
        ++sit  // server iterator
   ) {
     // listen directiveが設定されていない時は、default値を設定する
-    if (sit->directives_set.find("listen") == sit->directives_set.end()) {
+    if (sit->directives_set_.find("listen") == sit->directives_set_.end()) {
       initializeListenSocket(ip_address_set, config::Listen::kDefaultAddress_, config::Listen::kDefaultPort_);
       continue;
     }
 
-    for (std::vector<config::Listen>::const_iterator lit = sit->listen_list.begin();
-         lit != sit->listen_list.end(); ++lit  // listen iterator
+    for (std::vector<config::Listen>::const_iterator lit = sit->listen_list_.begin();
+         lit != sit->listen_list_.end(); ++lit  // listen iterator
     ) {
       initializeListenSocket(ip_address_set, lit->getAddress(), lit->getport());
     }

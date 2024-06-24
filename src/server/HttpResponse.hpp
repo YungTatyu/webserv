@@ -59,7 +59,7 @@ class HttpResponse {
 
  private:
   size_t internal_redirect_cnt_;
-  static const size_t kMaxInternalRedirect = 10;
+  const static size_t kMaxInternalRedirect = 10;
 
   std::string createResponse(const config::REQUEST_METHOD& method) const;
   // handle phase methods

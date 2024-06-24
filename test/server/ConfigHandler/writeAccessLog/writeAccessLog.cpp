@@ -3,7 +3,7 @@
 TEST(ConfigHandlerTestWriteAccessLog, off) {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf", "127.0.0.1", 8001);
   test.initRequest(config::GET, "/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
-  test.initTiedServer({&test.config_handler_.config_->http.server_list[0]});
+  test.initTiedServer({&test.config_handler_.config_->http_.server_list_[0]});
   std::string file_path = test.getAbsolutePath(".") + "/off";
   std::string msg = "aiueo";
 
@@ -15,7 +15,7 @@ TEST(ConfigHandlerTestWriteAccessLog, off) {
 TEST(ConfigHandlerTestWriteAccessLog, location) {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf", "127.0.0.1", 8001);
   test.initRequest(config::GET, "/hello/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
-  test.initTiedServer({&test.config_handler_.config_->http.server_list[0]});
+  test.initTiedServer({&test.config_handler_.config_->http_.server_list_[0]});
   std::string file_path = test.getAbsolutePath("./logs/location_access.log");
   std::string msg = "kakikukeko";
 
@@ -27,7 +27,7 @@ TEST(ConfigHandlerTestWriteAccessLog, location) {
 TEST(ConfigHandlerTestWriteAccessLog, parent_context) {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf", "127.0.0.1", 8001);
   test.initRequest(config::GET, "/goodnight/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
-  test.initTiedServer({&test.config_handler_.config_->http.server_list[0]});
+  test.initTiedServer({&test.config_handler_.config_->http_.server_list_[0]});
   std::string file_path = test.getAbsolutePath("./logs/server_access.log");
   std::string msg = "sashisuseso";
 
@@ -39,7 +39,7 @@ TEST(ConfigHandlerTestWriteAccessLog, parent_context) {
 TEST(ConfigHandlerTestWriteAccessLog, grand_parent_context) {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf", "127.0.0.2", 8002);
   test.initRequest(config::GET, "/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);
-  test.initTiedServer({&test.config_handler_.config_->http.server_list[1]});
+  test.initTiedServer({&test.config_handler_.config_->http_.server_list_[1]});
   std::string file_path = test.getAbsolutePath("./logs/http_access.log");
   std::string msg = "tachitsuteto";
 
@@ -51,7 +51,7 @@ TEST(ConfigHandlerTestWriteAccessLog, grand_parent_context) {
 TEST(ConfigHandlerTestWriteAccessLog, multiple_file) {
   test::ConfigHandlerTest test("writeAccessLog/writeAcsLog_test.conf", "127.0.0.2", 8002);
   test.initRequest(config::GET, "/multiple/", {{"Host", "second_server"}}, "", HttpRequest::PARSE_COMPLETE);
-  test.initTiedServer({&test.config_handler_.config_->http.server_list[1]});
+  test.initTiedServer({&test.config_handler_.config_->http_.server_list_[1]});
   std::string file_path1 = test.getAbsolutePath("./logs/multiple1.log");
   std::string file_path2 = test.getAbsolutePath("./logs/multiple2.log");
   std::string file_path3 = test.getAbsolutePath("./logs/multiple3.log");

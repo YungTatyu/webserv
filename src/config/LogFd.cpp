@@ -8,10 +8,10 @@
 
 #include "Utils.hpp"
 
-const static std::string kACCESS_LOG = "access_log";
-const static std::string kACCESS_FD = "access_fd";
-const static std::string kERROR_LOG = "error_log";
-const static std::string kERROR_FD = "error_fd";
+const static std::string kAccessLog = "access_log";
+const static std::string kAccessFd = "access_fd";
+const static std::string kErrorLog = "error_log";
+const static std::string kErrorFd = "error_fd";
 
 /*
  * AddAcsFdList/AddErrFdListの返り値
@@ -23,7 +23,7 @@ const static std::string kERROR_FD = "error_fd";
 int config::addAcsFdList(std::set<std::string>& directives_set,
                          const std::vector<config::AccessLog>& access_log_list, std::vector<int>& fd_list) {
   // access_log directiveがなければ飛ばす。
-  if (directives_set.find(kACCESS_LOG) == directives_set.end()) return 0;
+  if (directives_set.find(kAccessLog) == directives_set.end()) return 0;
 
   std::string tmp_path;
   int tmp_fd;
@@ -46,14 +46,14 @@ int config::addAcsFdList(std::set<std::string>& directives_set,
     }
     fd_list.push_back(tmp_fd);
   }
-  directives_set.insert(kACCESS_FD);
+  directives_set.insert(kAccessFd);
   return 1;
 }
 
 int config::addErrFdList(std::set<std::string>& directives_set,
                          const std::vector<config::ErrorLog>& error_log_list, std::vector<int>& fd_list) {
   // error_log directiveがなければ飛ばす。
-  if (directives_set.find(kERROR_LOG) == directives_set.end()) return 0;
+  if (directives_set.find(kErrorLog) == directives_set.end()) return 0;
 
   std::string tmp_path;
   int tmp_fd;
@@ -71,7 +71,7 @@ int config::addErrFdList(std::set<std::string>& directives_set,
     fd_list.push_back(tmp_fd);
   }
 
-  directives_set.insert(kERROR_FD);
+  directives_set.insert(kErrorFd);
   return 1;
 }
 
@@ -79,7 +79,8 @@ int config::addErrFdList(std::set<std::string>& directives_set,
  */
 bool config::initAcsLogFds(config::Main& config) {
   // http context
-  int ret = addAcsFdList(config.http.directives_set, config.http.access_log_list, config.http.access_fd_list);
+  int ret =
+      addAcsFdList(config.http_.directives_set_, config.http_.access_log_list_, config.http_.access_fd_list_);
   if (ret == -1)
     return false;
   else if (ret == 0) {
@@ -95,21 +96,22 @@ bool config::initAcsLogFds(config::Main& config) {
     if (tmp_fd == -1) {
       return false;
     }
-    config.http.access_fd_list.push_back(tmp_fd);
-    config.http.directives_set.insert(kACCESS_FD);
+    config.http_.access_fd_list_.push_back(tmp_fd);
+    config.http_.directives_set_.insert(kAccessFd);
   }
 
   // server context
-  for (size_t si = 0; si < config.http.server_list.size(); si++) {
-    if (addAcsFdList(config.http.server_list[si].directives_set, config.http.server_list[si].access_log_list,
-                     config.http.server_list[si].access_fd_list) == -1)
+  for (size_t si = 0; si < config.http_.server_list_.size(); si++) {
+    if (addAcsFdList(config.http_.server_list_[si].directives_set_,
+                     config.http_.server_list_[si].access_log_list_,
+                     config.http_.server_list_[si].access_fd_list_) == -1)
       return false;
 
     // location context
-    for (size_t li = 0; li < config.http.server_list[si].location_list.size(); li++) {
-      if (addAcsFdList(config.http.server_list[si].location_list[li].directives_set,
-                       config.http.server_list[si].location_list[li].access_log_list,
-                       config.http.server_list[si].location_list[li].access_fd_list) == -1)
+    for (size_t li = 0; li < config.http_.server_list_[si].location_list_.size(); li++) {
+      if (addAcsFdList(config.http_.server_list_[si].location_list_[li].directives_set_,
+                       config.http_.server_list_[si].location_list_[li].access_log_list_,
+                       config.http_.server_list_[si].location_list_[li].access_fd_list_) == -1)
         return false;
     }
   }
@@ -121,7 +123,7 @@ bool config::initAcsLogFds(config::Main& config) {
  */
 bool config::initErrLogFds(config::Main& config) {
   // main context
-  int ret = addErrFdList(config.directives_set, config.error_log_list, config.error_fd_list);
+  int ret = addErrFdList(config.directives_set_, config.error_log_list_, config.error_fd_list_);
   if (ret == -1)
     return false;
   else if (ret == 0) {
@@ -137,25 +139,27 @@ bool config::initErrLogFds(config::Main& config) {
     if (tmp_fd == -1) {
       return false;
     }
-    config.error_fd_list.push_back(tmp_fd);
-    config.directives_set.insert(kERROR_FD);
+    config.error_fd_list_.push_back(tmp_fd);
+    config.directives_set_.insert(kErrorFd);
   }
 
   // http context
-  if (addErrFdList(config.http.directives_set, config.http.error_log_list, config.http.error_fd_list) == -1)
+  if (addErrFdList(config.http_.directives_set_, config.http_.error_log_list_, config.http_.error_fd_list_) ==
+      -1)
     return false;
 
   // server context
-  for (size_t si = 0; si < config.http.server_list.size(); si++) {
-    if (addErrFdList(config.http.server_list[si].directives_set, config.http.server_list[si].error_log_list,
-                     config.http.server_list[si].error_fd_list) == -1)
+  for (size_t si = 0; si < config.http_.server_list_.size(); si++) {
+    if (addErrFdList(config.http_.server_list_[si].directives_set_,
+                     config.http_.server_list_[si].error_log_list_,
+                     config.http_.server_list_[si].error_fd_list_) == -1)
       return false;
 
     // location context
-    for (size_t li = 0; li < config.http.server_list[si].location_list.size(); li++) {
-      if (addErrFdList(config.http.server_list[si].location_list[li].directives_set,
-                       config.http.server_list[si].location_list[li].error_log_list,
-                       config.http.server_list[si].location_list[li].error_fd_list) == -1)
+    for (size_t li = 0; li < config.http_.server_list_[si].location_list_.size(); li++) {
+      if (addErrFdList(config.http_.server_list_[si].location_list_[li].directives_set_,
+                       config.http_.server_list_[si].location_list_[li].error_log_list_,
+                       config.http_.server_list_[si].location_list_[li].error_fd_list_) == -1)
         return false;
     }
   }
@@ -168,31 +172,31 @@ bool config::initLogFds(config::Main& config) {
   return true;
 }
 
-void config::closeLogFds(const std::vector<int> log_list) {
+void config::closeLogFds(const std::vector<int>& log_list) {
   for (size_t i = 0; i < log_list.size(); i++) close(log_list[i]);
 }
 
 void config::terminateLogFds(const config::Main* config) {
   // main context
-  closeLogFds(config->error_fd_list);
+  closeLogFds(config->error_fd_list_);
 
   // http context
-  closeLogFds(config->http.access_fd_list);
-  closeLogFds(config->http.error_fd_list);
+  closeLogFds(config->http_.access_fd_list_);
+  closeLogFds(config->http_.error_fd_list_);
 
   // server context
-  for (size_t i = 0; i < config->http.server_list.size(); i++) {
-    closeLogFds(config->http.server_list[i].access_fd_list);
-    closeLogFds(config->http.server_list[i].error_fd_list);
+  for (size_t i = 0; i < config->http_.server_list_.size(); i++) {
+    closeLogFds(config->http_.server_list_[i].access_fd_list_);
+    closeLogFds(config->http_.server_list_[i].error_fd_list_);
 
-    for (size_t j = 0; j < config->http.server_list[i].location_list.size(); j++) {
-      closeLogFds(config->http.server_list[i].location_list[j].access_fd_list);
-      closeLogFds(config->http.server_list[i].location_list[j].error_fd_list);
+    for (size_t j = 0; j < config->http_.server_list_[i].location_list_.size(); j++) {
+      closeLogFds(config->http_.server_list_[i].location_list_[j].access_fd_list_);
+      closeLogFds(config->http_.server_list_[i].location_list_[j].error_fd_list_);
     }
   }
 }
 
-int config::openLogFd(std::string& log_path) {
+int config::openLogFd(const std::string& log_path) {
   return Utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT | O_NONBLOCK | O_CLOEXEC,
                             S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 }

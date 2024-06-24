@@ -13,8 +13,8 @@ TEST(HttpResponseTestWriteAccessLog, log_format1) {
   std::string ipAddress = "127.0.0.1";
   inet_pton(AF_INET, ipAddress.c_str(), &addr);
   test.config_handler_.writeAccessLog(
-      test.config_handler_.config_->http.server_list[0],
-      &test.config_handler_.config_->http.server_list[0].location_list[0],
+      test.config_handler_.config_->http_.server_list_[0],
+      &test.config_handler_.config_->http_.server_list_[0].location_list_[0],
       test.config_handler_.createAcsLogMsg(addr.s_addr, 200, test.responses_[0].body_.size(), test.request_));
   std::string body = Utils::readFile("test/server/HttpResponse/AccessLog/file/index.html");
   test.testAccessLogEntry(file_path, "127.0.0.1", "GET", "/", 1.1, 200, body.size(), "Mozilla/5.0");
@@ -33,8 +33,8 @@ TEST(HttpResponseTestWriteAccessLog, log_format2) {
   std::string ipAddress = "127.0.0.1";
   inet_pton(AF_INET, ipAddress.c_str(), &addr);
   test.config_handler_.writeAccessLog(
-      test.config_handler_.config_->http.server_list[0],
-      &test.config_handler_.config_->http.server_list[0].location_list[1],
+      test.config_handler_.config_->http_.server_list_[0],
+      &test.config_handler_.config_->http_.server_list_[0].location_list_[1],
       test.config_handler_.createAcsLogMsg(addr.s_addr, 404, test.responses_[0].body_.size(), test.request_));
   std::string body = test.createDefaultErrorBody(404);
   test.testAccessLogEntry(file_path, "127.0.0.1", "GET", "/error/", 1.1, 404, body.size(), "curl/7.68.0");

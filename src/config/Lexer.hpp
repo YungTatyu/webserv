@@ -36,7 +36,7 @@ class Lexer {
  private:
   // private functions
   Lexer();
-  const std::string getFileContent(const std::string file_path) const;
+  const std::string getFileContent(const std::string& file_path) const;
   void skipSpaces();
   void skipComment();
   const char& getChar() const;

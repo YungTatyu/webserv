@@ -13,8 +13,6 @@
 
 namespace config {
 
-struct Main;
-
 /**
  *        AAAA  number of arguments
  *      FF      command flags
@@ -73,6 +71,7 @@ enum UNIQUE {
   CONF_NOT_UNIQUE = 0x00020000
 };
 
+struct Main;
 Main* initConfig(const std::string& file_path);
 
 }  // namespace config

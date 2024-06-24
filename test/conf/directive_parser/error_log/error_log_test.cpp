@@ -30,35 +30,35 @@ TEST(ErrorLogTest, allContext) {
   const config::Main *config = test::initConfigTest("test/conf/directive_parser/error_log/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // main
-  test::test_value(config->error_log_list, {"/tmp", "/tmp/path"});
-  test::test_directives_set(config->directives_set, kErrorLog, true);
+  test::test_value(config->error_log_list_, {"/tmp", "/tmp/path"});
+  test::test_directives_set(config->directives_set_, kErrorLog, true);
 
   // http
-  test::test_value(http.error_log_list, {"/", "/path/"});
-  test::test_directives_set(http.directives_set, kErrorLog, true);
+  test::test_value(http.error_log_list_, {"/", "/path/"});
+  test::test_directives_set(http.directives_set_, kErrorLog, true);
 
   // server
-  test::test_value(http.server_list[0].error_log_list, {"path1", "path2", "path3"});
-  test::test_directives_set(server_list[0].directives_set, kErrorLog, true);
+  test::test_value(http.server_list_[0].error_log_list_, {"path1", "path2", "path3"});
+  test::test_directives_set(server_list[0].directives_set_, kErrorLog, true);
 
   // location
-  test::test_value(server_list[0].location_list[0].error_log_list, {"/server1", "/server2", "/server3"});
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorLog, true);
+  test::test_value(server_list[0].location_list_[0].error_log_list_, {"/server1", "/server2", "/server3"});
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kErrorLog, true);
 }
 
 TEST(ErrorLogTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(config->directives_set, kErrorLog, false);
-  test::test_directives_set(http.directives_set, kErrorLog, false);
-  test::test_directives_set(server_list[0].directives_set, kErrorLog, false);
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorLog, false);
+  test::test_directives_set(config->directives_set_, kErrorLog, false);
+  test::test_directives_set(http.directives_set_, kErrorLog, false);
+  test::test_directives_set(server_list[0].directives_set_, kErrorLog, false);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kErrorLog, false);
 }

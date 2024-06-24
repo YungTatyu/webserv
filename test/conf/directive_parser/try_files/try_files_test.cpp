@@ -33,38 +33,38 @@ TEST(TryFilesTest, allContext) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/try_files/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // server
-  test::test_value(server_list[0].try_files, {"file1", "file2", "file3"}, "uri", -1);
-  test::test_directives_set(server_list[0].directives_set, kTryFiles, true);
+  test::test_value(server_list[0].try_files_, {"file1", "file2", "file3"}, "uri", -1);
+  test::test_directives_set(server_list[0].directives_set_, kTryFiles, true);
 
   // location
-  test::test_value(server_list[0].location_list[0].try_files, {"/index.html"}, "test", -1);
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kTryFiles, true);
+  test::test_value(server_list[0].location_list_[0].try_files_, {"/index.html"}, "test", -1);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kTryFiles, true);
 
-  test::test_value(server_list[0].location_list[1].try_files, {"/main.html"}, "1000", -1);
-  test::test_directives_set(server_list[0].location_list[1].directives_set, kTryFiles, true);
+  test::test_value(server_list[0].location_list_[1].try_files_, {"/main.html"}, "1000", -1);
+  test::test_directives_set(server_list[0].location_list_[1].directives_set_, kTryFiles, true);
 
-  test::test_value(server_list[0].location_list[2].try_files, {"/file1", "/file2", "/file3"}, "", 0);
-  test::test_directives_set(server_list[0].location_list[2].directives_set, kTryFiles, true);
+  test::test_value(server_list[0].location_list_[2].try_files_, {"/file1", "/file2", "/file3"}, "", 0);
+  test::test_directives_set(server_list[0].location_list_[2].directives_set_, kTryFiles, true);
 
-  test::test_value(server_list[0].location_list[3].try_files, {"/file_1", "/file_2"}, "", 999);
-  test::test_directives_set(server_list[0].location_list[3].directives_set, kTryFiles, true);
+  test::test_value(server_list[0].location_list_[3].try_files_, {"/file_1", "/file_2"}, "", 999);
+  test::test_directives_set(server_list[0].location_list_[3].directives_set_, kTryFiles, true);
 
-  test::test_value(server_list[0].location_list[4].try_files, {"file"}, "", 1);
-  test::test_directives_set(server_list[0].location_list[4].directives_set, kTryFiles, true);
+  test::test_value(server_list[0].location_list_[4].try_files_, {"file"}, "", 1);
+  test::test_directives_set(server_list[0].location_list_[4].directives_set_, kTryFiles, true);
 }
 
 TEST(TryFilesTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(http.directives_set, kTryFiles, false);
-  test::test_directives_set(server_list[0].directives_set, kTryFiles, false);
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kTryFiles, false);
+  test::test_directives_set(http.directives_set_, kTryFiles, false);
+  test::test_directives_set(server_list[0].directives_set_, kTryFiles, false);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kTryFiles, false);
 }

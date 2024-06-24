@@ -5,7 +5,7 @@ namespace config {
 class Size {
  public:
   Size() {}
-  Size(const unsigned long &size_in_bytes) : size_in_bytes_(size_in_bytes) {}
+  Size(unsigned long size_in_bytes) : size_in_bytes_(size_in_bytes) {}
   ~Size() {}
   unsigned long size_in_bytes_;
   const static unsigned int kilobytes = 1024;

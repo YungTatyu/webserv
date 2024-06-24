@@ -345,5 +345,5 @@ void RequestHandler::addTimerByType(ConnectionManager &connManager, const Config
 bool RequestHandler::isOverWorkerConnections(ConnectionManager &connManager,
                                              const ConfigHandler &configHandler) const {
   return (connManager.getConnections().size() - connManager.getCgiSockNum()) >=
-         configHandler.config_->events.worker_connections.getWorkerConnections();
+         configHandler.config_->events_.worker_connections_.getWorkerConnections();
 }

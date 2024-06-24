@@ -14,7 +14,7 @@ class ClientMaxBodySize {
   ClientMaxBodySize() : size_(kDefaultSize_) {}
   ~ClientMaxBodySize() {}
   const Size &getSize() const { return this->size_; }
-  void setSize(const unsigned long &size_in_bytes) { this->size_.size_in_bytes_ = size_in_bytes; }
+  void setSize(unsigned long size_in_bytes) { this->size_.size_in_bytes_ = size_in_bytes; }
   const static unsigned int kType_ = CONF_HTTP | CONF_TAKE1 | CONF_UNIQUE;
 };
 }  // namespace config

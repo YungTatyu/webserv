@@ -15,8 +15,8 @@ namespace test {
 void test_st_value(const std::vector<config::Location> &list, const std::vector<unsigned long> &expect) {
   int i = 0;
   std::for_each(list.begin(), list.end(), [&i, &expect](config::Location location) {
-    EXPECT_EQ(location.send_timeout.getTime().time_in_ms_, expect[i]);
-    test::test_directives_set(location.directives_set, kSendTimeout, true);
+    EXPECT_EQ(location.send_timeout_.getTime().time_in_ms_, expect[i]);
+    test::test_directives_set(location.directives_set_, kSendTimeout, true);
     ++i;
   });
 }
@@ -26,64 +26,64 @@ TEST(sendTimeoutTest, max) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/send_timeout/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   const long kLongMax = std::numeric_limits<long>::max();
 
   // http
-  EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, kLongMax);
-  test::test_directives_set(http.directives_set, kSendTimeout, true);
+  EXPECT_EQ(http.send_timeout_.getTime().time_in_ms_, kLongMax);
+  test::test_directives_set(http.directives_set_, kSendTimeout, true);
 
   // server
-  EXPECT_EQ(server_list[0].send_timeout.getTime().time_in_ms_, 9223372036854775 * config::Time::seconds);
-  test::test_directives_set(server_list[0].directives_set, kSendTimeout, true);
+  EXPECT_EQ(server_list[0].send_timeout_.getTime().time_in_ms_, 9223372036854775 * config::Time::seconds);
+  test::test_directives_set(server_list[0].directives_set_, kSendTimeout, true);
 
   // location
-  test::test_st_value(server_list[0].location_list, {
-                                                        9223372036854775 * config::Time::seconds,
-                                                        153722867280912 * config::Time::minutes,
-                                                        2562047788015 * config::Time::hours,
-                                                        106751991167 * config::Time::days,
-                                                    });
+  test::test_st_value(server_list[0].location_list_, {
+                                                         9223372036854775 * config::Time::seconds,
+                                                         153722867280912 * config::Time::minutes,
+                                                         2562047788015 * config::Time::hours,
+                                                         106751991167 * config::Time::days,
+                                                     });
 }
 
 TEST(SendTimeoutTest, zero) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/send_timeout/2.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // http
-  EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, 0);
-  test::test_directives_set(http.directives_set, kSendTimeout, true);
+  EXPECT_EQ(http.send_timeout_.getTime().time_in_ms_, 0);
+  test::test_directives_set(http.directives_set_, kSendTimeout, true);
 
   // server
-  EXPECT_EQ(server_list[0].send_timeout.getTime().time_in_ms_, 0);
-  test::test_directives_set(server_list[0].directives_set, kSendTimeout, true);
+  EXPECT_EQ(server_list[0].send_timeout_.getTime().time_in_ms_, 0);
+  test::test_directives_set(server_list[0].directives_set_, kSendTimeout, true);
 
   // location
-  test::test_st_value(server_list[0].location_list, {0, 0, 0, 0});
+  test::test_st_value(server_list[0].location_list_, {0, 0, 0, 0});
 }
 
 TEST(SendTimeoutTest, random) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/send_timeout/3.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // http
-  EXPECT_EQ(http.send_timeout.getTime().time_in_ms_, 2);
-  test::test_directives_set(http.directives_set, kSendTimeout, true);
+  EXPECT_EQ(http.send_timeout_.getTime().time_in_ms_, 2);
+  test::test_directives_set(http.directives_set_, kSendTimeout, true);
 
   // server
-  EXPECT_EQ(server_list[0].send_timeout.getTime().time_in_ms_, 2000);
-  test::test_directives_set(server_list[0].directives_set, kSendTimeout, true);
+  EXPECT_EQ(server_list[0].send_timeout_.getTime().time_in_ms_, 2000);
+  test::test_directives_set(server_list[0].directives_set_, kSendTimeout, true);
 
   // location
-  test::test_st_value(server_list[0].location_list,
+  test::test_st_value(server_list[0].location_list_,
                       {2 * 1000, 2 * 1000 * 60, 2 * 1000 * 60 * 60, 2 * 1000 * 60 * 60 * 24});
 }
 
@@ -91,8 +91,8 @@ TEST(SendTimeoutTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(http.directives_set, kSendTimeout, false);
+  test::test_directives_set(http.directives_set_, kSendTimeout, false);
 }

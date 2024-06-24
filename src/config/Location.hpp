@@ -28,32 +28,32 @@
 
 namespace config {
 struct Location {
-  Location(const std::string &_uri) : uri(_uri) {}
+  Location(const std::string &uri) : uri_(uri) {}
   ~Location() {}
-  const static unsigned int type = CONF_HTTP_SERVER | CONF_TAKE1 | CONF_NOT_UNIQUE;
-  std::set<std::string> directives_set;
-  const std::string uri;
-  LimitExcept limit_except;
-  std::vector<AccessLog> access_log_list;
-  std::vector<ErrorLog> error_log_list;
-  std::vector<ErrorPage> error_page_list;
-  Alias alias;
-  std::vector<AllowDeny> allow_deny_list;
-  std::vector<Index> index_list;
-  Autoindex autoindex;
-  KeepaliveTimeout keepalive_timeout;
-  ReceiveTimeout receive_timeout;
-  SendTimeout send_timeout;
-  std::vector<Return> return_list;
-  Root root;
-  TryFiles try_files;
-  Userid userid;
-  UseridDomain userid_domain;
-  UseridExpires userid_expires;
-  UseridPath userid_path;
-  UseridService userid_service;
-  std::vector<int> access_fd_list;
-  std::vector<int> error_fd_list;
+  const static unsigned int kType_ = CONF_HTTP_SERVER | CONF_TAKE1 | CONF_NOT_UNIQUE;
+  std::set<std::string> directives_set_;
+  const std::string uri_;
+  LimitExcept limit_except_;
+  std::vector<AccessLog> access_log_list_;
+  std::vector<ErrorLog> error_log_list_;
+  std::vector<ErrorPage> error_page_list_;
+  Alias alias_;
+  std::vector<AllowDeny> allow_deny_list_;
+  std::vector<Index> index_list_;
+  Autoindex autoindex_;
+  KeepaliveTimeout keepalive_timeout_;
+  ReceiveTimeout receive_timeout_;
+  SendTimeout send_timeout_;
+  std::vector<Return> return_list_;
+  Root root_;
+  TryFiles try_files_;
+  Userid userid_;
+  UseridDomain userid_domain_;
+  UseridExpires userid_expires_;
+  UseridPath userid_path_;
+  UseridService userid_service_;
+  std::vector<int> access_fd_list_;
+  std::vector<int> error_fd_list_;
 };
 }  // namespace config
 

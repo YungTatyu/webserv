@@ -26,7 +26,7 @@
 
 namespace test {
 
-static const std::string kConfigHandlerTestPath = "test/server/ConfigHandler/";
+const static std::string kConfigHandlerTestPath = "test/server/ConfigHandler/";
 
 class ConfigHandlerTest {
  public:
@@ -164,7 +164,7 @@ class ConfigHandlerTest {
 
   void sameLocation(const config::Location& expect, const config::Location* actual) {
     if (actual) {
-      EXPECT_EQ(expect.uri, actual->uri);
+      EXPECT_EQ(expect.uri_, actual->uri_);
       return;
     }
     FAIL() << "can't find location" << std::endl;

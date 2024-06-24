@@ -45,10 +45,10 @@ struct LimitExcept {
     }
     return re;
   }
-  const static unsigned int type = CONF_HTTP_LOCATION | CONF_1MORE | CONF_UNIQUE;
-  std::set<std::string> directives_set;
-  std::set<REQUEST_METHOD> excepted_methods;  // limit_exceptの制限から除外されるmethod
-  std::vector<AllowDeny> allow_deny_list;
+  const static unsigned int kType_ = CONF_HTTP_LOCATION | CONF_1MORE | CONF_UNIQUE;
+  std::set<std::string> directives_set_;
+  std::set<REQUEST_METHOD> excepted_methods_;  // limit_exceptの制限から除外されるmethod
+  std::vector<AllowDeny> allow_deny_list_;
 };
 }  // namespace config
 
