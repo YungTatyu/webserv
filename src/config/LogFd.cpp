@@ -79,7 +79,8 @@ int config::addErrFdList(std::set<std::string>& directives_set,
  */
 bool config::initAcsLogFds(config::Main& config) {
   // http context
-  int ret = addAcsFdList(config.http_.directives_set_, config.http_.access_log_list_, config.http_.access_fd_list_);
+  int ret =
+      addAcsFdList(config.http_.directives_set_, config.http_.access_log_list_, config.http_.access_fd_list_);
   if (ret == -1)
     return false;
   else if (ret == 0) {
@@ -101,7 +102,8 @@ bool config::initAcsLogFds(config::Main& config) {
 
   // server context
   for (size_t si = 0; si < config.http_.server_list_.size(); si++) {
-    if (addAcsFdList(config.http_.server_list_[si].directives_set_, config.http_.server_list_[si].access_log_list_,
+    if (addAcsFdList(config.http_.server_list_[si].directives_set_,
+                     config.http_.server_list_[si].access_log_list_,
                      config.http_.server_list_[si].access_fd_list_) == -1)
       return false;
 
@@ -142,12 +144,14 @@ bool config::initErrLogFds(config::Main& config) {
   }
 
   // http context
-  if (addErrFdList(config.http_.directives_set_, config.http_.error_log_list_, config.http_.error_fd_list_) == -1)
+  if (addErrFdList(config.http_.directives_set_, config.http_.error_log_list_, config.http_.error_fd_list_) ==
+      -1)
     return false;
 
   // server context
   for (size_t si = 0; si < config.http_.server_list_.size(); si++) {
-    if (addErrFdList(config.http_.server_list_[si].directives_set_, config.http_.server_list_[si].error_log_list_,
+    if (addErrFdList(config.http_.server_list_[si].directives_set_,
+                     config.http_.server_list_[si].error_log_list_,
                      config.http_.server_list_[si].error_fd_list_) == -1)
       return false;
 

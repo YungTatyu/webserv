@@ -26,7 +26,8 @@ TEST(ConfigHandlerTestSearchUseridExpires, location) {
   test.initRequest(config::GET, "/hello/", {{"Host", "first_server"}}, "", HttpRequest::PARSE_COMPLETE);
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[0]});
 
-  test.sameTime(test.config_handler_.config_->http_.server_list_[0].location_list_[1].userid_expires.getTime(),
-                test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers["Host"],
-                                                         test.request_.uri));
+  test.sameTime(
+      test.config_handler_.config_->http_.server_list_[0].location_list_[1].userid_expires.getTime(),
+      test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers["Host"],
+                                               test.request_.uri));
 }

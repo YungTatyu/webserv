@@ -81,12 +81,12 @@ TEST(accesslogTest, allContext) {
 
   // location
   test::test_value(http.server_list_[0].location_list_[0].access_log_list_, {
-                                                                             "path1",
-                                                                             "path2",
-                                                                             "path3",
-                                                                             "path4",
-                                                                             "path5",
-                                                                         });
+                                                                                "path1",
+                                                                                "path2",
+                                                                                "path3",
+                                                                                "path4",
+                                                                                "path5",
+                                                                            });
   test::test_value(http.server_list_[0].location_list_[1].access_log_list_, {"1", "2", "3"});
   test::test_directives_set(http.server_list_[0].location_list_[0].directives_set_, kAccessLog, true);
   test::test_directives_set(http.server_list_[0].location_list_[1].directives_set_, kAccessLog, true);

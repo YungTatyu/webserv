@@ -1127,7 +1127,8 @@ bool config::Parser::parseAllowDeny() {
       break;
 
     case config::CONF_HTTP_LIMIT_EXCEPT:
-      this->config_.http_.server_list_.back().location_list_.back().limit_except_.allow_deny_list_.push_back(tmp);
+      this->config_.http_.server_list_.back().location_list_.back().limit_except_.allow_deny_list_.push_back(
+          tmp);
       break;
 
     default:

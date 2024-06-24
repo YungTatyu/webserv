@@ -104,7 +104,8 @@ int ConfigHandler::allowRequest(const config::Server& server, const config::Loca
     // HttpRequestでLIMIT_EXCEPTのenum使ってほしい
     if (location->limit_except_.excepted_methods_.find(request.method) ==
         location->limit_except_.excepted_methods_.end()) {
-      if (!limitLoop(location->limit_except_.allow_deny_list_, client_addr.sin_addr.s_addr)) return METHOD_DENY;
+      if (!limitLoop(location->limit_except_.allow_deny_list_, client_addr.sin_addr.s_addr))
+        return METHOD_DENY;
     }
   }
 

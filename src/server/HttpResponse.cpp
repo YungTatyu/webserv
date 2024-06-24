@@ -502,7 +502,8 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
   }
   ++(response.internal_redirect_cnt_);
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
-  if (*location) config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri_ + "\n");
+  if (*location)
+    config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri_ + "\n");
   return sw_post_search_location_phase;
 }
 
