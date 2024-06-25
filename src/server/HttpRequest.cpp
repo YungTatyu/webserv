@@ -11,8 +11,7 @@ const static char *kContentLength = "Content-Length";
 const static char *kTransferEncoding = "Transfer-Encoding";
 const static char *kChunk = "chunked";
 
-HttpRequest::HttpRequest(config::REQUEST_METHOD method, const std::string &uri,
-                         const std::string &version,
+HttpRequest::HttpRequest(config::REQUEST_METHOD method, const std::string &uri, const std::string &version,
                          const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers,
                          const std::string &queries, const std::string &body, const std::string &port,
                          ParseState state)

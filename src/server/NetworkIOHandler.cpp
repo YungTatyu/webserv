@@ -11,12 +11,12 @@
 
 #include "ConnectionManager.hpp"
 #include "IServer.hpp"
-#include "syscall_wrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
 #include "conf.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 
 const size_t NetworkIOHandler::buffer_size_;
 
@@ -27,13 +27,13 @@ NetworkIOHandler::~NetworkIOHandler() {
 }
 
 /* NetworkIOHandlerクラスの実装 */
-int NetworkIOHandler::setupSocket(const std::string& address,  unsigned int port) {
+int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port) {
   try {
     // creation of the socket
 #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
-     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 #else
-     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM, 0);
+    int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM, 0);
     Utils::setNonBlockingCloExec(listen_fd);
 #endif
 
@@ -65,11 +65,11 @@ int NetworkIOHandler::setupSocket(const std::string& address,  unsigned int port
   }
 }
 
-void NetworkIOHandler::addVServer( int listen_fd, const TiedServer& server) {
+void NetworkIOHandler::addVServer(int listen_fd, const TiedServer& server) {
   this->listenfd_map_.insert(std::make_pair(listen_fd, server));
 }
 
-ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager,  int sock) {
+ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager, int sock) {
   std::vector<unsigned char> buffer(buffer_size_);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
@@ -80,7 +80,7 @@ ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager,  int so
   return re;
 }
 
-ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager,  int sock) {
+ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, int sock) {
   std::vector<unsigned char> buffer(buffer_size_);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
@@ -91,7 +91,7 @@ ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager,  in
   return re;
 }
 
-ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager,  int sock) {
+ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, int sock) {
   std::vector<unsigned char> response = connManager.getFinalResponse(sock);
   size_t res_size = response.size();
   size_t sent_bytes = connManager.getConnection(sock)->sent_bytes_;
@@ -105,7 +105,7 @@ ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager,  int sock
   return sent;
 }
 
-ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager,  int sock) {
+ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, int sock) {
   const std::string& body = connManager.getRequest(sock).body_;
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
@@ -120,7 +120,7 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager,  int s
   return re;
 }
 
-int NetworkIOHandler::acceptConnection(ConnectionManager& connManager,  int listen_fd) {
+int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, int listen_fd) {
   int connfd;
   struct sockaddr_in cliaddr;
   socklen_t client;
@@ -145,7 +145,7 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager,  int list
   return connfd;
 }
 
-bool NetworkIOHandler::isListenSocket( int listen_fd) const {
+bool NetworkIOHandler::isListenSocket(int listen_fd) const {
   return this->listenfd_map_.find(listen_fd) != this->listenfd_map_.end();
 }
 
@@ -156,7 +156,7 @@ bool NetworkIOHandler::isListenSocket( int listen_fd) const {
  * @param sock
  */
 void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
-                                        int sock) {
+                                       int sock) {
   server->deleteEvent(sock, connManager.getEvent(sock));
   close(sock);
   timerTree.deleteTimer(sock);
@@ -171,7 +171,7 @@ void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* 
  *
  */
 void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
-                                        int sock) {
+                                       int sock) {
   server->deleteEvent(sock, connManager.getEvent(sock));
   close(sock);
   timerTree.deleteTimer(sock);

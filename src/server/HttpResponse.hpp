@@ -34,7 +34,7 @@ class HttpResponse {
     sw_log_phase,
     sw_end_phase
   };
- 
+
   HttpResponse();
   static std::string generateResponse(HttpRequest& request, HttpResponse& response,
                                       const struct TiedServer& tied_servers, int socket,
@@ -58,7 +58,7 @@ class HttpResponse {
 
   std::string createResponse(config::REQUEST_METHOD method) const;
   static ResponsePhase handlePreSearchLocationPhase(HttpRequest::ParseState parse_state,
-                                                    HttpResponse& response,  int socket,
+                                                    HttpResponse& response, int socket,
                                                     struct sockaddr_in& client_addr);
   static ResponsePhase handleSearchLocationPhase(HttpResponse& response, const HttpRequest& request,
                                                  const config::Server& server,

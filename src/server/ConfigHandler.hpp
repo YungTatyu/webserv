@@ -63,8 +63,7 @@ class ConfigHandler {
                                            unsigned int code) const;
   bool isAutoIndexOn(const config::Server& server, const config::Location* location) const;
 
-  std::string createAcsLogMsg(uint32_t ip, long status, size_t res_size,
-                              const HttpRequest& request) const;
+  std::string createAcsLogMsg(uint32_t ip, long status, size_t res_size, const HttpRequest& request) const;
   const static int ACCESS_ALLOW = 1;
   const static int ACCESS_DENY = 0;
   const static int METHOD_DENY = -1;

@@ -24,8 +24,7 @@ class CgiExecutor {
  public:
   CgiExecutor();
   ~CgiExecutor();
-  void executeCgiScript(const HttpRequest& request, const HttpResponse& response, int cgi_sock,
-                        int cli_sock);
+  void executeCgiScript(const HttpRequest& request, const HttpResponse& response, int cgi_sock, int cli_sock);
   const std::string& getScriptPath() const;
   const std::vector<const char*>& getArgv() const;
   const std::vector<const char*>& getMetaVars() const;

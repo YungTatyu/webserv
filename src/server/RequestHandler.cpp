@@ -12,7 +12,7 @@
 RequestHandler::RequestHandler() {}
 
 void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                     IServer *server, TimerTree &timer_tree,  int sock) const {
+                                     IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ)
     return handleCgiReadEvent(io_handler, conn_manager, server, timer_tree, sock);
@@ -52,7 +52,7 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionMan
 }
 
 void RequestHandler::handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                   IServer *server, TimerTree &timer_tree,  int sock) const {
+                                   IServer *server, TimerTree &timer_tree, int sock) const {
   const std::vector<unsigned char> &context = conn_manager.getRawRequest(sock);
   // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
   std::string raw_request = std::string(context.begin(), context.end());
@@ -72,7 +72,7 @@ void RequestHandler::handleRequest(ConnectionManager &conn_manager, const Config
 }
 
 void RequestHandler::handleResponse(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                    IServer *server, TimerTree &timer_tree,  int sock) const {
+                                    IServer *server, TimerTree &timer_tree, int sock) const {
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
   std::string final_response = HttpResponse::generateResponse(
@@ -84,7 +84,7 @@ void RequestHandler::handleResponse(ConnectionManager &conn_manager, const Confi
     return handleCgi(conn_manager, config_handler, server, timer_tree, sock);
   }
   conn_manager.setFinalResponse(sock,
-                               std::vector<unsigned char>(final_response.begin(), final_response.end()));
+                                std::vector<unsigned char>(final_response.begin(), final_response.end()));
 
   // send開始するまでのtimout追加
   // cgiだったら紐づくclient_socketにタイマーを設定する
@@ -99,7 +99,7 @@ void RequestHandler::handleResponse(ConnectionManager &conn_manager, const Confi
 }
 
 void RequestHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                               IServer *server, TimerTree &timer_tree,  int sock) const {
+                               IServer *server, TimerTree &timer_tree, int sock) const {
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
@@ -126,7 +126,7 @@ void RequestHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHand
 }
 
 void RequestHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                        IServer *server, TimerTree &timer_tree,  int sock) const {
+                                        IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   ssize_t re = io_handler.receiveCgiResponse(conn_manager, sock);
   int status = -1;
@@ -153,7 +153,7 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, Connection
 }
 
 void RequestHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                      IServer *server, TimerTree &timer_tree,  int sock) const {
+                                      IServer *server, TimerTree &timer_tree, int sock) const {
   if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_WRITE)
     return handleCgiWriteEvent(io_handler, conn_manager, server, timer_tree, sock);
 
@@ -201,14 +201,14 @@ void RequestHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionMa
 }
 
 void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                         IServer *server, TimerTree &timer_tree,  int sock) const {
+                                         IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   io_handler.sendRequestBody(conn_manager, sock);
 
   const std::string &body = conn_manager.getRequest(sock).body_;
   const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
   int status = -1;
-  if (conn_manager.getSentBytes(sock) != body.size() &&           // bodyをまだ送る必要がある
+  if (conn_manager.getSentBytes(sock) != body.size() &&            // bodyをまだ送る必要がある
       !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processが生きている
     addTimerByType(conn_manager, config_handler, timer_tree, sock,
                    Timer::TMO_SEND);  // cgiにsendする間のtimeout
@@ -222,7 +222,7 @@ void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, Connectio
 }
 
 void RequestHandler::handleEofEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                    IServer *server, TimerTree &timer_tree,  int sock) const {
+                                    IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ) {
     return handleCgiReadEvent(io_handler, conn_manager, server, timer_tree, sock);
@@ -237,7 +237,7 @@ void RequestHandler::handleEofEvent(NetworkIOHandler &io_handler, ConnectionMana
 }
 
 void RequestHandler::handleErrorEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                      IServer *server, TimerTree &timer_tree,  int sock) const {
+                                      IServer *server, TimerTree &timer_tree, int sock) const {
   // cgiならすぐには接続切らず、timoutに任せる
   if (conn_manager.isCgiSocket(sock)) return;
   io_handler.closeConnection(conn_manager, server, timer_tree, sock);
@@ -300,8 +300,7 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id, int &status) const
  *
  */
 void RequestHandler::addTimerByType(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                    TimerTree &timer_tree,  int sock,
-                                    enum Timer::TimeoutType type) const {
+                                    TimerTree &timer_tree, int sock, enum Timer::TimeoutType type) const {
   config::Time timeout;
   std::map<std::string, std::string>::iterator it;
 
@@ -319,17 +318,17 @@ void RequestHandler::addTimerByType(ConnectionManager &conn_manager, const Confi
   switch (type) {
     case Timer::TMO_KEEPALIVE:
       timeout = config_handler.searchKeepaliveTimeout(conn_manager.getTiedServer(sock), host_name,
-                                                     conn_manager.getRequest(sock).uri_);
+                                                      conn_manager.getRequest(sock).uri_);
       break;
 
     case Timer::TMO_RECV:
       timeout = config_handler.searchReceiveTimeout(conn_manager.getTiedServer(sock), host_name,
-                                                   conn_manager.getRequest(sock).uri_);
+                                                    conn_manager.getRequest(sock).uri_);
       break;
 
     case Timer::TMO_SEND:
       timeout = config_handler.searchSendTimeout(conn_manager.getTiedServer(sock), host_name,
-                                                conn_manager.getRequest(sock).uri_);
+                                                 conn_manager.getRequest(sock).uri_);
       break;
   }
 

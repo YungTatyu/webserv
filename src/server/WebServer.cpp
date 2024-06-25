@@ -14,8 +14,7 @@ WebServer::WebServer(const config::Main *config) {
   if (this->io_handler_->getListenfdMap().size() >=
       config_handler_.config_->events_.worker_connections_.getWorkerConnections()) {
     std::stringstream ss;
-    ss << "webserv: [emerg] "
-       << config_handler_.config_->events_.worker_connections_.getWorkerConnections()
+    ss << "webserv: [emerg] " << config_handler_.config_->events_.worker_connections_.getWorkerConnections()
        << " worker_connections are not enough for " << this->io_handler_->getListenfdMap().size()
        << " listening sockets";
     this->deleteObjects();
@@ -40,7 +39,7 @@ void WebServer::initializeServer() {
 #endif
 #if defined(EPOLL_AVAILABLE)
     case config::EPOLL:
-      this->server = new EpollServer();
+      this->server_ = new EpollServer();
       this->event_manager_ = new EpollActiveEventManager();
       break;
 #endif
@@ -61,7 +60,7 @@ void WebServer::initializeServer() {
 }
 
 void WebServer::initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
-                                       const std::string& address, unsigned int port) {
+                                       const std::string &address, unsigned int port) {
   std::pair<std::string, unsigned int> new_pair(address, port);
   if (ip_address_set.find(new_pair) == ip_address_set.end())  // すでに作成したlisten socketは作成しない
   {

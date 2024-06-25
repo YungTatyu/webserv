@@ -8,10 +8,10 @@
 #include <cstring>
 #include <iostream>
 
-#include "syscall_wrapper.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 
 cgi::CgiHandler::CgiHandler() : cgi_process_id_(-1), cli_socket_(-1) { resetSockets(); }
 
@@ -57,7 +57,7 @@ bool cgi::CgiHandler::forkCgiProcess(const HttpRequest& request, const HttpRespo
 }
 
 bool cgi::CgiHandler::callCgiExecutor(const HttpResponse& response, const HttpRequest& request,
-                                       int cli_sock) {
+                                      int cli_sock) {
   this->cli_socket_ = cli_sock;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1) {
     WebServer::writeErrorlog(error::strSysCallError("socketpair") + "\n");
@@ -84,7 +84,7 @@ pid_t cgi::CgiHandler::getCgiProcessId() const { return this->cgi_process_id_; }
 
 int cgi::CgiHandler::getCliSocket() const { return this->cli_socket_; }
 
-void cgi::CgiHandler::setCliSocket( int socket) { this->cli_socket_ = socket; }
+void cgi::CgiHandler::setCliSocket(int socket) { this->cli_socket_ = socket; }
 
 int cgi::CgiHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]; }
 

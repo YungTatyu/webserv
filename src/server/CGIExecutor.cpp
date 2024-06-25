@@ -10,17 +10,17 @@
 
 #include "ConfigHandler.hpp"
 #include "LimitExcept.hpp"
-#include "syscall_wrapper.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 
 cgi::CgiExecutor::CgiExecutor() {}
 
 cgi::CgiExecutor::~CgiExecutor() {}
 
 void cgi::CgiExecutor::executeCgiScript(const HttpRequest& request, const HttpResponse& response,
-                                         int cgi_sock,  int cli_sock) {
+                                        int cgi_sock, int cli_sock) {
   std::string full_path = response.root_path_ + response.res_file_path_;
   prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
@@ -30,8 +30,7 @@ void cgi::CgiExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
 }
 
 void cgi::CgiExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
-                                           const std::string& full_path,  int cgi_sock,
-                                            int cli_sock) {
+                                           const std::string& full_path, int cgi_sock, int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
   this->script_path_ = full_path;
   createArgv(full_path);
@@ -46,7 +45,7 @@ void cgi::CgiExecutor::createArgv(const std::string& script_path) {
 }
 
 void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResponse& response,
-                                       int cli_sock) {
+                                      int cli_sock) {
   const static char* kContentType = "content-type";
 
   this->meta_vars_.push_back("AUTH_TYPE=");  // Authorizationをparseするロジックを実装しないため、値は空文字
@@ -141,7 +140,7 @@ bool cgi::CgiExecutor::isExecutableFile(const std::string& path) const {
  * @return true
  * @return false
  */
-bool cgi::CgiExecutor::redirectStdIOToSocket(const HttpRequest& request,  int socket) const {
+bool cgi::CgiExecutor::redirectStdIOToSocket(const HttpRequest& request, int socket) const {
   if (syscall_wrapper::Dup2(socket, STDOUT_FILENO) == -1) {
     close(socket);
     return false;

@@ -8,9 +8,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "syscall_wrapper.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 
 int Utils::wrapperOpen(const std::string path, int flags, mode_t modes) {
   int fd = open(path.c_str(), flags, modes);

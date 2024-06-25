@@ -19,7 +19,7 @@ class KqueueActiveEventManager : public IActiveEventManager {
   ~KqueueActiveEventManager();
   void *getActiveEvents();
   int getActiveEventsNum();
-  void setActiveEventsNum( int num);
+  void setActiveEventsNum(int num);
   void addEvent(const void *event);
   void clearAllEvents();
   bool isReadEvent(const void *event);

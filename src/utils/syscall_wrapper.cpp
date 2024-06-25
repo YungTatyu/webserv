@@ -17,7 +17,7 @@ int syscall_wrapper::Socket(int domain, int type, int protocol) {
 }
 
 int syscall_wrapper::Setsockopt(int socket, int level, int option_name, const void *option_value,
-                               socklen_t option_len) {
+                                socklen_t option_len) {
   int re = setsockopt(socket, level, option_name, option_value, option_len);
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("setsockopt") + "\n");
   return re;

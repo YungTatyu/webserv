@@ -16,8 +16,8 @@
 
 #include "Listen.hpp"
 #include "Server.hpp"
-#include "syscall_wrapper.hpp"
 #include "TimerTree.hpp"
+#include "syscall_wrapper.hpp"
 
 class ConfigHandler;
 class ConnectionManager;
@@ -31,7 +31,7 @@ struct TiedServer {
 
   TiedServer() : addr_(config::Listen::kDefaultAddress_), port_(config::Listen::kDefaultPort_){};
   TiedServer(const std::string& addr, unsigned int port) : addr_(addr), port_(port) {}
-  TiedServer(const TiedServer& other) :servers_(other.servers_), addr_(other.addr_), port_(other.port_)  {}
+  TiedServer(const TiedServer& other) : servers_(other.servers_), addr_(other.addr_), port_(other.port_) {}
   TiedServer& operator=(const TiedServer& other) {
     if (this != &other) {
       this->servers_ = other.servers_;
@@ -51,14 +51,14 @@ class NetworkIOHandler {
   ssize_t receiveRequest(ConnectionManager& connManager, int sock);
   ssize_t sendResponse(ConnectionManager& connManager, int sock);
   ssize_t receiveCgiResponse(ConnectionManager& connManager, int sock);
-  ssize_t sendRequestBody(ConnectionManager& connManager,  int sock);
+  ssize_t sendRequestBody(ConnectionManager& connManager, int sock);
   int acceptConnection(ConnectionManager& connManager, int listen_fd);
-  void closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,  int sock);
-  void purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,  int sock);
+  void closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree, int sock);
+  void purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree, int sock);
   void closeAllListenSockets();
   const std::map<int, TiedServer>& getListenfdMap();
-  void addVServer( int listen_fd, const TiedServer& server);
-  bool isListenSocket( int listen_fd) const;
+  void addVServer(int listen_fd, const TiedServer& server);
+  bool isListenSocket(int listen_fd) const;
   static size_t getBufferSize();
 
  private:

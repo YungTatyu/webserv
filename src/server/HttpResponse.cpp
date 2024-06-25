@@ -5,8 +5,8 @@
 #include <iomanip>
 
 #include "CgiHandler.hpp"
-#include "syscall_wrapper.hpp"
 #include "Utils.hpp"
+#include "syscall_wrapper.hpp"
 
 const static std::string kAlias = "alias";
 const static std::string kTryFiles = "try_files";
@@ -431,8 +431,8 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
   if (response.state_ == RES_EXECUTE_CGI) return "";
   config_handler.writeErrorLog("webserv: [debug] header filter\n");
-  headerFilterPhase(response,
-                    config_handler.searchKeepaliveTimeout(tied_servers, request.headers_[kHost], request.uri_));
+  headerFilterPhase(
+      response, config_handler.searchKeepaliveTimeout(tied_servers, request.headers_[kHost], request.uri_));
 
   config_handler.writeErrorLog("webserv: [debug] create final response\n");
   config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
@@ -441,9 +441,9 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   return response.createResponse(request.method_);
 }
 
-HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
-    HttpRequest::ParseState parse_state, HttpResponse& response, int socket,
-    struct sockaddr_in& client_addr) {
+HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(HttpRequest::ParseState parse_state,
+                                                                       HttpResponse& response, int socket,
+                                                                       struct sockaddr_in& client_addr) {
   switch (response.state_) {
     case RES_COMPLETE:
       clear(response);
@@ -481,7 +481,7 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
   if (syscall_wrapper::Getsockname(socket, reinterpret_cast<struct sockaddr*>(&client_addr),
-                                  &client_addrlen) != 0) {
+                                   &client_addrlen) != 0) {
     // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
   } else

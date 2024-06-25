@@ -46,8 +46,8 @@ int TimerTree::findTimer() const {
       it->getTimeout() > Timer::getCurrentTime() ? it->getTimeout() - Timer::getCurrentTime() : 3;
   // timeoutの値がintmaxを超えている場合は、intmaxを返す
   int timeout = timeout_raw >= static_cast<unsigned long>(std::numeric_limits<int>::max())
-                          ? std::numeric_limits<int>::max()
-                          : static_cast<int>(timeout_raw);
+                    ? std::numeric_limits<int>::max()
+                    : static_cast<int>(timeout_raw);
   return timeout;
 }
 

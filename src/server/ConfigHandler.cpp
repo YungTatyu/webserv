@@ -37,7 +37,7 @@ void ConfigHandler::loadConfiguration(const config::Main* config) {
   this->config_ = config;
 }
 
-bool ConfigHandler::addressInLimit(const std::string& ip_addr_str,  uint32_t cli_addr) const {
+bool ConfigHandler::addressInLimit(const std::string& ip_addr_str, uint32_t cli_addr) const {
   if (ip_addr_str == "all") return true;
   std::istringstream iss(ip_addr_str);
   std::string ip;
@@ -62,7 +62,7 @@ bool ConfigHandler::addressInLimit(const std::string& ip_addr_str,  uint32_t cli
 }
 
 bool ConfigHandler::limitLoop(const std::vector<config::AllowDeny>& allow_deny_list,
-                               uint32_t cli_addr) const {
+                              uint32_t cli_addr) const {
   // 上から順に制限適用する
   // 制限されているアドレスであれば、false
   // エラーページどのタイミングで返すか？
@@ -381,7 +381,7 @@ std::string ConfigHandler::getCurrentTimeByLogFormat() const {
   return oss.str();
 }
 
-std::string ConfigHandler::createAcsLogMsg( uint32_t ip,  long status, size_t resSize,
+std::string ConfigHandler::createAcsLogMsg(uint32_t ip, long status, size_t resSize,
                                            const HttpRequest& request) const {
   std::stringstream ss;
 
