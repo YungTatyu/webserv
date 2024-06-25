@@ -11,10 +11,6 @@
 
 class HttpResponse {
  public:
-  // initializer
-  HttpResponse();
-
-  // enum
   enum RES_STATE {
     RES_CREATING_STATIC,
     RES_EXECUTE_CGI,
@@ -24,7 +20,6 @@ class HttpResponse {
     RES_CGI_EXIT_FAILURE,
     RES_COMPLETE
   };
-
   enum ResponsePhase {
     sw_start_phase = 0,
     sw_pre_search_location_phase,
@@ -40,12 +35,12 @@ class HttpResponse {
     sw_end_phase
   };
 
+  HttpResponse();
   static std::string generateResponse(HttpRequest& request, HttpResponse& response,
-                                      const struct TiedServer& tied_servers, const int client_sock,
+                                      const struct TiedServer& tied_servers, int socket,
                                       const ConfigHandler& config_handler);
   static bool isKeepaliveConnection(const HttpResponse& response);
   static bool isErrorResponse(const HttpResponse& response);
-  // public variables
   std::string root_path_;
   std::string res_file_path_;
   std::string path_info_;
@@ -61,10 +56,9 @@ class HttpResponse {
   size_t internal_redirect_cnt_;
   const static size_t kMaxInternalRedirect = 10;
 
-  std::string createResponse(const config::REQUEST_METHOD& method) const;
-  // handle phase methods
-  static ResponsePhase handlePreSearchLocationPhase(const HttpRequest::ParseState parse_state,
-                                                    HttpResponse& response, const int client_sock,
+  std::string createResponse(config::REQUEST_METHOD method) const;
+  static ResponsePhase handlePreSearchLocationPhase(HttpRequest::ParseState parse_state,
+                                                    HttpResponse& response, int socket,
                                                     struct sockaddr_in& client_addr);
   static ResponsePhase handleSearchLocationPhase(HttpResponse& response, const HttpRequest& request,
                                                  const config::Server& server,
@@ -76,7 +70,7 @@ class HttpResponse {
   static ResponsePhase handleReturnPhase(HttpResponse& response, const config::Location* location,
                                          const ConfigHandler& config_handler);
   static ResponsePhase handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
-                                           const config::Location* location, const unsigned int request_port);
+                                           const config::Location* location, unsigned int request_port);
   static ResponsePhase handleSearchResFilePhase(HttpResponse& response, HttpRequest& request,
                                                 const config::Server& server,
                                                 const config::Location* location,

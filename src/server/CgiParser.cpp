@@ -1,4 +1,4 @@
-#include "CGIParser.hpp"
+#include "CgiParser.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -28,7 +28,7 @@ void cgi::CGIParser::init(HttpResponse& http_response) {
 }
 
 bool cgi::CGIParser::parse(HttpResponse& http_response, const std::string& cgi_response,
-                           const PARSE_STATE init_state) {
+                           PARSE_STATE init_state) {
   init(http_response);
   this->state_ = init_state;
   while (this->state_ != cgi::PARSE_COMPLETE) {

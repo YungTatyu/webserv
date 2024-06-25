@@ -11,12 +11,12 @@
 
 #include "ConnectionManager.hpp"
 #include "IServer.hpp"
-#include "SysCallWrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
 #include "conf.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 
 const size_t NetworkIOHandler::buffer_size_;
 
@@ -27,19 +27,19 @@ NetworkIOHandler::~NetworkIOHandler() {
 }
 
 /* NetworkIOHandlerクラスの実装 */
-int NetworkIOHandler::setupSocket(const std::string address, const unsigned int port) {
+int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port) {
   try {
     // creation of the socket
 #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
-    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 #else
-    const int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM, 0);
+    int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM, 0);
     Utils::setNonBlockingCloExec(listen_fd);
 #endif
 
     // socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
     int yes = 1;
-    int re = SysCallWrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    int re = syscall_wrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
     if (re != 0) std::exit(EXIT_FAILURE);
 
     // preparation of the socket address
@@ -51,11 +51,11 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
     servaddr.sin_port = htons(port);
 
     // 失敗したとき？
-    re = SysCallWrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    re = syscall_wrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
     if (re == -1)
       throw std::runtime_error(error::strSysCallError("bind", "to " + address + ":" + Utils::toStr(port)));
 
-    SysCallWrapper::Listen(listen_fd, SOMAXCONN);
+    syscall_wrapper::Listen(listen_fd, SOMAXCONN);
 
     std::cout << "Server running on port " << port << std::endl;
     return listen_fd;
@@ -65,22 +65,22 @@ int NetworkIOHandler::setupSocket(const std::string address, const unsigned int 
   }
 }
 
-void NetworkIOHandler::addVServer(const int listen_fd, const TiedServer server) {
+void NetworkIOHandler::addVServer(int listen_fd, const TiedServer& server) {
   this->listenfd_map_.insert(std::make_pair(listen_fd, server));
 }
 
-ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager, const int cli_sock) {
+ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager, int sock) {
   std::vector<unsigned char> buffer(buffer_size_);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
 #endif
-  ssize_t re = recv(cli_sock, buffer.data(), buffer_size_, flag);
-  if (re > 0) connManager.addRawRequest(cli_sock, buffer, re);
+  ssize_t re = recv(sock, buffer.data(), buffer_size_, flag);
+  if (re > 0) connManager.addRawRequest(sock, buffer, re);
   return re;
 }
 
-ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, const int sock) {
+ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, int sock) {
   std::vector<unsigned char> buffer(buffer_size_);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
@@ -91,22 +91,22 @@ ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, con
   return re;
 }
 
-ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, const int cli_sock) {
-  std::vector<unsigned char> response = connManager.getFinalResponse(cli_sock);
+ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, int sock) {
+  std::vector<unsigned char> response = connManager.getFinalResponse(sock);
   size_t res_size = response.size();
-  size_t sent_bytes = connManager.getConnection(cli_sock)->sent_bytes_;
+  size_t sent_bytes = connManager.getConnection(sock)->sent_bytes_;
   size_t cur_chunk_size = std::min(buffer_size_, res_size - sent_bytes);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
 #endif
-  ssize_t sent = send(cli_sock, response.data() + sent_bytes, cur_chunk_size, flag);
-  if (sent > 0) connManager.addSentBytes(cli_sock, sent);
+  ssize_t sent = send(sock, response.data() + sent_bytes, cur_chunk_size, flag);
+  if (sent > 0) connManager.addSentBytes(sock, sent);
   return sent;
 }
 
-ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const int sock) {
-  const std::string body = connManager.getRequest(sock).body;
+ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, int sock) {
+  const std::string& body = connManager.getRequest(sock).body_;
   const size_t sent_bytes = connManager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
   size_t cur_chunk_size = std::min(buffer_size_, rest);
@@ -120,18 +120,18 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, const 
   return re;
 }
 
-int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int listen_fd) {
+int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, int listen_fd) {
   int connfd;
   struct sockaddr_in cliaddr;
   socklen_t client;
 
   client = sizeof(cliaddr);
-  connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
+  connfd = syscall_wrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
   Utils::setNonBlockingCloExec(connfd);
 #if defined(SO_NOSIGPIPE)
   int opt = 1;
-  SysCallWrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+  syscall_wrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
 #endif
 
   // 新規クライントfdを追加
@@ -145,7 +145,7 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, const int
   return connfd;
 }
 
-bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
+bool NetworkIOHandler::isListenSocket(int listen_fd) const {
   return this->listenfd_map_.find(listen_fd) != this->listenfd_map_.end();
 }
 
@@ -156,7 +156,7 @@ bool NetworkIOHandler::isListenSocket(const int listen_fd) const {
  * @param sock
  */
 void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
-                                       const int sock) {
+                                       int sock) {
   server->deleteEvent(sock, connManager.getEvent(sock));
   close(sock);
   timerTree.deleteTimer(sock);
@@ -171,7 +171,7 @@ void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* 
  *
  */
 void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
-                                       const int sock) {
+                                       int sock) {
   server->deleteEvent(sock, connManager.getEvent(sock));
   close(sock);
   timerTree.deleteTimer(sock);
@@ -181,7 +181,7 @@ void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* 
     return;
   }
   // cgi socketの場合は、clientのデータも削除する
-  const cgi::CGIHandler& cgi_handler = connManager.getCgiHandler(sock);
+  const cgi::CgiHandler& cgi_handler = connManager.getCgiHandler(sock);
   int client = cgi_handler.getCliSocket();
   close(client);
   // cgiのコネクションを最初に削除する

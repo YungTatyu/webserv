@@ -15,7 +15,7 @@
 #include "RequestHandler.hpp"
 #include "SelectActiveEventManager.hpp"
 #include "SelectServer.hpp"
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 
 class WebServer {
  public:
@@ -30,16 +30,15 @@ class WebServer {
   // メンバ変数を持たない、もしくは基本的に値を変更しないオブジェクトはstatic変数で管理する
   static ConfigHandler config_handler_;
   static RequestHandler request_handler_;
-  IServer *server;
-  NetworkIOHandler *ioHandler;
-  ConnectionManager *connManager;
-  IActiveEventManager *eventManager;
-  ConfigHandler *configHandler;
-  TimerTree *timerTree;
+  IServer *server_;
+  NetworkIOHandler *io_handler_;
+  ConnectionManager *conn_manager_;
+  IActiveEventManager *event_manager_;
+  TimerTree *timer_tree_;
   void initializeServer();
   void initializeVServers();
   void initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
-                              const std::string address, const unsigned int port);
+                              const std::string &address, unsigned int port);
   void initializeConnManager();
   void deleteObjects();
 };

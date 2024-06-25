@@ -4,9 +4,9 @@
 #include <ctime>
 #include <iomanip>
 
-#include "CGIHandler.hpp"
-#include "SysCallWrapper.hpp"
+#include "CgiHandler.hpp"
 #include "Utils.hpp"
+#include "syscall_wrapper.hpp"
 
 const static std::string kAlias = "alias";
 const static std::string kTryFiles = "try_files";
@@ -317,7 +317,7 @@ std::string HttpResponse::transformLetter(const std::string& key_str) {
   return result;
 }
 
-std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) const {
+std::string HttpResponse::createResponse(config::REQUEST_METHOD method) const {
   std::stringstream stream;
 
   // status line
@@ -346,13 +346,13 @@ std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) c
  * HttpResponseオブジェクトを生成し、send用のresponseを生成する
  */
 std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& response,
-                                           const struct TiedServer& tied_servers, const int client_sock,
+                                           const struct TiedServer& tied_servers, int socket,
                                            const ConfigHandler& config_handler) {
   // chunkなどでparse途中の場合。
-  if (request.parseState == HttpRequest::PARSE_INPROGRESS) return std::string();
+  if (request.parse_state_ == HttpRequest::PARSE_INPROGRESS) return std::string();
 
   const config::Server& server =
-      config_handler.searchServerConfig(tied_servers, request.headers.find(kHost)->second);
+      config_handler.searchServerConfig(tied_servers, request.headers_.find(kHost)->second);
   const config::Location* location = NULL;
   struct sockaddr_in client_addr;
 
@@ -367,7 +367,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_pre_search_location_phase:
         config_handler.writeErrorLog("webserv: [debug] pre search location phase\n");
-        phase = handlePreSearchLocationPhase(request.parseState, response, client_sock, client_addr);
+        phase = handlePreSearchLocationPhase(request.parse_state_, response, socket, client_addr);
         break;
 
       case sw_search_location_phase:
@@ -431,19 +431,19 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
   if (response.state_ == RES_EXECUTE_CGI) return "";
   config_handler.writeErrorLog("webserv: [debug] header filter\n");
-  headerFilterPhase(response,
-                    config_handler.searchKeepaliveTimeout(tied_servers, request.headers[kHost], request.uri));
+  headerFilterPhase(
+      response, config_handler.searchKeepaliveTimeout(tied_servers, request.headers_[kHost], request.uri_));
 
   config_handler.writeErrorLog("webserv: [debug] create final response\n");
   config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
                                "\n\n");
   response.state_ = RES_COMPLETE;
-  return response.createResponse(request.method);
+  return response.createResponse(request.method_);
 }
 
-HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
-    const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock,
-    struct sockaddr_in& client_addr) {
+HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(HttpRequest::ParseState parse_state,
+                                                                       HttpResponse& response, int socket,
+                                                                       struct sockaddr_in& client_addr) {
   switch (response.state_) {
     case RES_COMPLETE:
       clear(response);
@@ -480,8 +480,8 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
-  if (SysCallWrapper::Getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr),
-                                  &client_addrlen) != 0) {
+  if (syscall_wrapper::Getsockname(socket, reinterpret_cast<struct sockaddr*>(&client_addr),
+                                   &client_addrlen) != 0) {
     // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
   } else
@@ -501,7 +501,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
     return sw_end_phase;
   }
   ++(response.internal_redirect_cnt_);
-  *location = config_handler.searchLongestMatchLocationConfig(server, request.uri);
+  *location = config_handler.searchLongestMatchLocationConfig(server, request.uri_);
   if (*location)
     config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri_ + "\n");
   return sw_post_search_location_phase;
@@ -555,21 +555,21 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
 
 HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                                               const config::Location* location,
-                                                              const unsigned int request_port) {
+                                                              unsigned int request_port) {
   // uriにcgi_pathがあれば、path info処理をする
   if (setPathinfoIfValidCgi(response, request)) {
     return sw_content_phase;
   }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri) != '/' && Utils::isDirectory(response.root_path_ + request.uri, false)) {
+  if (lastChar(request.uri_) != '/' && Utils::isDirectory(response.root_path_ + request.uri_, false)) {
     response.setStatusCode(301);
     response.headers_[kLocation] =
-        kScheme + request.headers[kHost] + ":" + Utils::toStr(request_port) + request.uri + "/";
+        kScheme + request.headers_[kHost] + ":" + Utils::toStr(request_port) + request.uri_ + "/";
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
-  if (lastChar(request.uri) == '/' && !location &&
-      !Utils::isDirectory(response.root_path_ + request.uri, false)) {
+  if (lastChar(request.uri_) == '/' && !location &&
+      !Utils::isDirectory(response.root_path_ + request.uri_, false)) {
     response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
     return sw_error_page_phase;
   }
@@ -601,7 +601,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
 
   // uri
   if (try_files.getCode() == config::TryFiles::kCodeUnset_) {
-    request.uri = try_files.getUri();
+    request.uri_ = try_files.getUri();
     return sw_search_location_phase;
   }
   // code
@@ -727,13 +727,13 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
                                                         const config::Location* location,
                                                         const ConfigHandler& config_handler) {
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
-  if (lastChar(request.uri) != '/') {
-    std::string full_path = response.root_path_ + request.uri;
+  if (lastChar(request.uri_) != '/') {
+    std::string full_path = response.root_path_ + request.uri_;
     if (isAccessibleFile(full_path)) {
-      response.res_file_path_ = request.uri;
+      response.res_file_path_ = request.uri_;
       return sw_content_phase;
     }
-    if (!Utils::isDirectory(response.root_path_ + request.uri, false)) {
+    if (!Utils::isDirectory(response.root_path_ + request.uri_, false)) {
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
@@ -752,18 +752,18 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
     return TryFiles(response, request, location->try_files_);
   else if (location && Utils::hasDirective(*location, kIndex)) {
     if (Utils::hasDirective(*location, kAlias)) is_alias = true;
-    return Index(response, request.uri, location->index_list_, is_alias, is_autoindex_on);
+    return Index(response, request.uri_, location->index_list_, is_alias, is_autoindex_on);
   }
 
   // server context
   if (Utils::hasDirective(server, kTryFiles))
     return TryFiles(response, request, server.try_files_);
   else if (Utils::hasDirective(server, kIndex))
-    return Index(response, request.uri, server.index_list_, is_alias, is_autoindex_on);
+    return Index(response, request.uri_, server.index_list_, is_alias, is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
   // なくとも、デフォルトのindexディレクティブを見る
-  return Index(response, request.uri, config_handler.config_->http_.index_list_, is_alias, is_autoindex_on);
+  return Index(response, request.uri_, config_handler.config_->http_.index_list_, is_alias, is_autoindex_on);
 }
 
 /**
@@ -778,7 +778,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchResFilePhase(HttpResponse&
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& response, HttpRequest& request) {
-  if (cgi::CGIHandler::isCgi(response.res_file_path_)) {
+  if (cgi::CgiHandler::isCgi(response.res_file_path_)) {
     if (!isExecutable(response.root_path_ + response.res_file_path_)) {
       response.setStatusCode(403);
       return sw_error_page_phase;
@@ -786,7 +786,7 @@ HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& respo
     response.state_ = RES_EXECUTE_CGI;
     return sw_end_phase;
   }
-  if (request.method == config::POST || request.method == config::DELETE) {
+  if (request.method_ == config::POST || request.method_ == config::DELETE) {
     response.setStatusCode(405);
     return sw_error_page_phase;
   }
@@ -810,7 +810,7 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
   // error page process
   long tmp_code;  // error_pageの=responseはlong_maxまで許容
   if ((tmp_code = ep->getResponse()) != config::ErrorPage::kResponseUnset) response.setStatusCode(tmp_code);
-  request.uri = ep->getUri();
+  request.uri_ = ep->getUri();
   return sw_search_location_phase;
 }
 
@@ -880,7 +880,7 @@ bool HttpResponse::isExecutable(const std::string& file_path) {
 }
 
 bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
-  std::istringstream uri_stream(request.uri);
+  std::istringstream uri_stream(request.uri_);
   std::vector<std::string> segments;
   std::string segment;
   while (std::getline(uri_stream, segment, '/')) {
@@ -892,10 +892,10 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
     if (i != 0) path += "/";
     path += segments[i];
 
-    if (cgi::CGIHandler::isCgi(response.root_path_ + path) &&
+    if (cgi::CgiHandler::isCgi(response.root_path_ + path) &&
         Utils::isFile(response.root_path_ + path, false)) {
-      response.separatePathinfo(request.uri, path.size());
-      request.uri = path;
+      response.separatePathinfo(request.uri_, path.size());
+      request.uri_ = path;
       return true;
     }
   }

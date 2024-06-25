@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "CGIHandler.hpp"
+#include "CgiHandler.hpp"
 #include "ConnectionManager.hpp"
 #include "LimitExcept.hpp"
 #include "Utils.hpp"
@@ -28,13 +28,13 @@ HttpRequest initRequest(const config::REQUEST_METHOD method, const std::string& 
                         const string_map& headers) {
   HttpRequest request;
 
-  request.method = method;
-  request.uri = uri;
-  request.version = version;
-  request.queries = queries;
-  request.body = body;
+  request.method_ = method;
+  request.uri_ = uri;
+  request.version_ = version;
+  request.queries_ = queries;
+  request.body_ = body;
   std::for_each(headers.begin(), headers.end(), [&request](const string_pair header) {
-    request.headers.insert(std::make_pair(header.first, header.second));
+    request.headers_.insert(std::make_pair(header.first, header.second));
   });
 
   return request;
@@ -51,7 +51,7 @@ HttpResponse initResponse(const std::string& root_path, const std::string& scrip
   return response;
 }
 
-std::string recvCgiResponse(cgi::CGIHandler& cgi_handler) {
+std::string recvCgiResponse(cgi::CgiHandler& cgi_handler) {
   std::string response;
   const ssize_t buffer_size = 1024;
 
@@ -94,11 +94,11 @@ int waitProcess(pid_t pid) {
 }
 
 void testCgiOutput(ConnectionData& cd, const std::string expect) {
-  const HttpRequest& http_request = cd.request;
+  const HttpRequest& http_request = cd.request_;
   const HttpResponse& http_response = cd.response_;
 
   ASSERT_TRUE(cd.cgi_handler_.callCgiExecutor(http_response, http_request, 0));
-  if (!http_request.body.empty()) sendBody(http_request.body, cd.cgi_handler_.getCgiSocket());
+  if (!http_request.body_.empty()) sendBody(http_request.body_, cd.cgi_handler_.getCgiSocket());
   waitProcess(cd.cgi_handler_.getCgiProcessId());
   const std::string actual = test::recvCgiResponse(cd.cgi_handler_);
 
@@ -122,18 +122,18 @@ std::string searchMetaVar(const std::vector<const char*> meta_vars, const std::s
 
 TEST(cgi_executor, document_response) {
   ConnectionData cd;
-  cd.request =
+  cd.request_ =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/document_response.py", "");
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
-  const std::string expect = !cd.request.body.empty() ? (expect_header + cd.request.body) : expect_header;
+  const std::string expect = !cd.request_.body_.empty() ? (expect_header + cd.request_.body_) : expect_header;
   test::testCgiOutput(cd, expect);
 }
 
 TEST(cgi_executor, local_redirect_res) {
   ConnectionData cd;
-  cd.request =
+  cd.request_ =
       test::initRequest(config::REQUEST_METHOD::GET, "test/cgi/cgi_files/executor/local_redirect_res.cgi",
                         "HTTP/1.1", "", "", {{"Host", "tt"}});
   cd.response_ = test::initResponse("./", "/test/cgi/cgi_files/executor/local_redirect_res.cgi", "");
@@ -144,7 +144,7 @@ TEST(cgi_executor, local_redirect_res) {
 
 TEST(cgi_executor, client_redirect_res) {
   ConnectionData cd;
-  cd.request =
+  cd.request_ =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/client_redirect_res.cgi", "");
 
@@ -154,7 +154,7 @@ TEST(cgi_executor, client_redirect_res) {
 
 TEST(cgi_executor, client_redirect_res_doc) {
   ConnectionData cd;
-  cd.request =
+  cd.request_ =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "", "", {{"Host", "tt"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/client_redirect_res_doc.cgi", "");
 
@@ -165,9 +165,9 @@ TEST(cgi_executor, client_redirect_res_doc) {
 
 TEST(cgi_executor, body) {
   ConnectionData cd;
-  cd.request = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "",
-                                 "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n",
-                                 {{"Host", "tt"}, {"Content-Length", "59"}});
+  cd.request_ = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "",
+                                  "<h1>cgi response</h1><h2>body<h2><p>this is body message\ntesting</p>\n",
+                                  {{"Host", "tt"}, {"Content-Length", "59"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/body.py", "");
 
   const std::string expect_header = "Status: 200\r\nContent-Type: text/html\r\n\r\n";
@@ -178,14 +178,14 @@ TEST(cgi_executor, body) {
 
 TEST(cgi_executor, meta_vars) {
   ConnectionData cd;
-  cd.request =
+  cd.request_ =
       test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3", "",
                         {{"Host", "tt"}, {"content-type", "text/html"}, {"CONTENT_LENGTH", "10"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/meta_vars.py", "/a/b/c/d//e");
 
   const std::string expect_header = "content-type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = expect_header + "<h1>env vars list</h1>" + "<h2>AUTH_TYPE=</h2>" +
-                             "<h2>CONTENT_LENGTH=" + std::to_string(cd.request.body.size()) + "</h2>" +
+                             "<h2>CONTENT_LENGTH=" + std::to_string(cd.request_.body_.size()) + "</h2>" +
                              "<h2>CONTENT_TYPE=text/html</h2>" + "<h2>GATEWAY_INTERFACE=CGI/1.1</h2>" +
                              "<h2>PATH_INFO=/a/b/c/d//e</h2>" + "<h2>PATH_TRANSLATED=</h2>" +
                              "<h2>QUERY_STRING=one=1&two=2&three=3</h2>"
@@ -201,8 +201,8 @@ TEST(cgi_executor, meta_vars) {
 
 TEST(cgi_executor, path_info_GET) {
   ConnectionData cd;
-  cd.request = test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1", "one=1&two=2&three=3",
-                                 "", {{"Host", "tt"}, {"content-type", "text/html"}});
+  cd.request_ = test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1",
+                                  "one=1&two=2&three=3", "", {{"Host", "tt"}, {"content-type", "text/html"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/path_info.py",
                                     "/test/cgi/cgi_files/executor/path_info_dir/");
 
@@ -216,8 +216,8 @@ TEST(cgi_executor, path_info_GET) {
 
 TEST(cgi_executor, path_info_POST) {
   ConnectionData cd;
-  cd.request = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "", "name=mahayase",
-                                 {{"Host", "tt"}, {"content-type", "text/html"}, {"Content-Length", "13"}});
+  cd.request_ = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "", "name=mahayase",
+                                  {{"Host", "tt"}, {"content-type", "text/html"}, {"Content-Length", "13"}});
   cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/post_and_pathinfo.py",
                                     "/test/cgi/cgi_files/executor/path_info_dir/");
 

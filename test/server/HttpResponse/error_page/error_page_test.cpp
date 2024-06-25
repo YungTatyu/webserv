@@ -53,13 +53,13 @@ class HttpResponseErrorPage : public ::testing::Test {
   void initRequest(const test::string_map_case_insensitive &headers, const config::REQUEST_METHOD &method,
                    const std::string &uri, const HttpRequest::ParseState state, const std::string &body = "",
                    const std::string &queries = "", const std::string &version = "HTTP/1.1") {
-    this->request_.headers = headers;
-    this->request_.uri = uri;
-    this->request_.parseState = state;
-    this->request_.body = body;
-    this->request_.queries = queries;
-    this->request_.version = version;
-    this->request_.method = method;
+    this->request_.headers_ = headers;
+    this->request_.uri_ = uri;
+    this->request_.parse_state_ = state;
+    this->request_.body_ = body;
+    this->request_.queries_ = queries;
+    this->request_.version_ = version;
+    this->request_.method_ = method;
   }
 
   std::string createHeader(const std::string &status_code_line) const {
