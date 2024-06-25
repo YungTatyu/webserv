@@ -317,7 +317,7 @@ std::string HttpResponse::transformLetter(const std::string& key_str) {
   return result;
 }
 
-std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) const {
+std::string HttpResponse::createResponse(config::REQUEST_METHOD method) const {
   std::stringstream stream;
 
   // status line
@@ -346,7 +346,7 @@ std::string HttpResponse::createResponse(const config::REQUEST_METHOD& method) c
  * HttpResponseオブジェクトを生成し、send用のresponseを生成する
  */
 std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& response,
-                                           const struct TiedServer& tied_servers, const int client_sock,
+                                           const struct TiedServer& tied_servers, int socket,
                                            const ConfigHandler& config_handler) {
   // chunkなどでparse途中の場合。
   if (request.parse_state_ == HttpRequest::PARSE_INPROGRESS) return std::string();
@@ -367,7 +367,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 
       case sw_pre_search_location_phase:
         config_handler.writeErrorLog("webserv: [debug] pre search location phase\n");
-        phase = handlePreSearchLocationPhase(request.parse_state_, response, client_sock, client_addr);
+        phase = handlePreSearchLocationPhase(request.parse_state_, response, socket, client_addr);
         break;
 
       case sw_search_location_phase:
@@ -442,7 +442,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
 }
 
 HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
-    const HttpRequest::ParseState parse_state, HttpResponse& response, const int client_sock,
+    HttpRequest::ParseState parse_state, HttpResponse& response, int socket,
     struct sockaddr_in& client_addr) {
   switch (response.state_) {
     case RES_COMPLETE:
@@ -480,7 +480,7 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
-  if (SysCallWrapper::Getsockname(client_sock, reinterpret_cast<struct sockaddr*>(&client_addr),
+  if (SysCallWrapper::Getsockname(socket, reinterpret_cast<struct sockaddr*>(&client_addr),
                                   &client_addrlen) != 0) {
     // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
@@ -555,7 +555,7 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
 
 HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& response, HttpRequest& request,
                                                               const config::Location* location,
-                                                              const unsigned int request_port) {
+                                                              unsigned int request_port) {
   // uriにcgi_pathがあれば、path info処理をする
   if (setPathinfoIfValidCgi(response, request)) {
     return sw_content_phase;
