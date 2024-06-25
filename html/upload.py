@@ -39,7 +39,9 @@ if "file" in form:
                         f.write(fileitem.file.read())
                     print(f"<p>The file '{fn}' was uploaded successfully</p>")
                 else:
-                    print(f"<p>You have to create a directory({save_dir}) to upload files.</p>")
+                    print(
+                        f"<p>You have to create a directory({save_dir}) to upload files.</p>"
+                    )
 
             except Exception as e:
                 print(f"<p>Error uploading file: {e}</p>")

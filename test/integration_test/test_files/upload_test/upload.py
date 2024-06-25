@@ -26,16 +26,22 @@ if "file" in form:
         fn = os.path.basename(fileitem.filename)
 
         # ファイルの拡張子を取得
-        ext = os.path.splitext(fn)[1][1:].strip().lower()
+        extension = os.path.splitext(fn)[1][1:].strip().lower()
 
         # 許可する拡張子かどうかチェック
-        if ext in ALLOWED_EXTENSIONS:
+        if extension in ALLOWED_EXTENSIONS:
             try:
-                # ファイルを保存
-                save_path = "test/integration_test/test_files/upload_test/uploads/" + fn
-                with open(save_path, "wb") as f:
-                    f.write(fileitem.file.read())
-                print(f"<p>The file '{fn}' was uploaded successfully</p>")
+                save_dir = "test/integration_test/test_files/upload_test/uploads"
+                if os.path.exists(save_dir):
+                    # ファイルを保存
+                    save_path = f"{save_dir}/{fn}"
+                    with open(save_path, "wb") as f:
+                        f.write(fileitem.file.read())
+                    print(f"<p>The file '{fn}' was uploaded successfully</p>")
+                else:
+                    print(
+                        f"<p>You have to create a directory({save_dir}) to upload files.</p>"
+                    )
 
             except Exception as e:
                 print(f"<p>Error uploading file: {e}</p>")
