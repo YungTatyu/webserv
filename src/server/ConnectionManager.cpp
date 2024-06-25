@@ -136,9 +136,7 @@ const cgi::CgiHandler& ConnectionManager::getCgiHandler(int fd) const {
 
 size_t ConnectionManager::getSentBytes(int fd) const { return connections_.at(fd)->sent_bytes_; }
 
-void ConnectionManager::addSentBytes(int fd, size_t bytes) {
-  connections_.at(fd)->sent_bytes_ += bytes;
-}
+void ConnectionManager::addSentBytes(int fd, size_t bytes) { connections_.at(fd)->sent_bytes_ += bytes; }
 
 void ConnectionManager::resetSentBytes(int fd) { connections_.at(fd)->sent_bytes_ = 0; }
 
