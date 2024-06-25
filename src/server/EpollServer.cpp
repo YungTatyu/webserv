@@ -30,6 +30,7 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
 }
 
 bool EpollServer::initEpollServer() {
+  const ConfigHandler& config_handler =  WebServer::getConfigHandler();
   // epoll instance 初期化
   // epoll1_create(EPOLL_CLOEXEC);を使用することで、forkでこのfdのオープンを防げる。
   this->epfd_ = epoll_create1(EPOLL_CLOEXEC);
@@ -120,8 +121,7 @@ int EpollServer::addNewEvent(int fd, ConnectionData::EVENT event) {
   new_event.events =
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
   new_event.data.fd = fd;
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  int re = retryEpollCtl(EPOLL_CTL_ADD, new_event.data.fd, &new_event);
   return re;
 }
 
@@ -130,16 +130,26 @@ int EpollServer::updateEvent(int fd, ConnectionData::EVENT event) {
   new_event.events =
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
   new_event.data.fd = fd;
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, new_event.data.fd, &new_event);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  int re = retryEpollCtl(EPOLL_CTL_MOD, new_event.data.fd, &new_event);
   return re;
 }
 
 int EpollServer::deleteEvent(int fd, ConnectionData::EVENT event) {
   static_cast<void>(event);
-  int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, fd, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  int re = retryEpollCtl(EPOLL_CTL_DEL, fd, NULL);
   return re;
 }
+
+int EpollServer::retryEpollCtl(int op, int fd, struct epoll_event *event) {
+  int ret;
+  for (int i = 0; i < kRetry; ++i) {
+    ret = epoll_ctl(this->epfd_, op, fd, event);
+    if (ret != -1) break;
+    // 起こりうるのはENOMEMかENOSPC
+    WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  }
+  return ret;
+}
+
 
 #endif

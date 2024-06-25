@@ -25,8 +25,10 @@ class EpollServer : public IServer {
 
  private:
   int epfd_;  // epoll instance
+  const static int kRetry = 5;
   bool initEpollServer();
   bool initEpollEvent(const std::map<int, ConnectionData*>& connections);
+  int retryEpollCtl(int op, int fd, struct epoll_event *event);
 };
 
 #endif

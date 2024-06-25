@@ -28,8 +28,13 @@ int PollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManage
   Timer::updateCurrentTime();
 
   // TODO: error起きたときどうしようか? 一定数retry? serverはdownしたらダメな気がする
-  int re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+  int re;
+  for (int i = 0; i < kRetry; ++i) {
+    re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
+    if (re != -1) break;
+    // 起こりうるのはENOMEM
+    WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+  }
   // 発生したイベントをActiveEventManagerにすべて追加
   addActiveEvents(pollfds, event_manager);
   return re;

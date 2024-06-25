@@ -23,6 +23,7 @@ class PollServer : public IServer {
   int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
+  const static int kRetry = 5;
   void addActiveEvents(const std::vector<struct pollfd>& pollfds, IActiveEventManager* event_manager);
   std::vector<struct pollfd> convertToPollfds(const ConnectionManager& conn_manager);
 };

@@ -31,8 +31,10 @@ class KqueueServer : public IServer {
 
  private:
   int kq_;  // kqueue fd
+  const static int kRetry = 5;
   bool initKqueueServer();
   bool initKevents(const std::map<int, ConnectionData*>& connections);
+  int retryKevent(const struct kevent* changelist, int nchanges, struct kevent *eventlist, int nevents, const struct timespec* timeout);
 };
 
 #endif

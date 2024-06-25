@@ -68,8 +68,9 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   struct timespec ts = timer_tree->findTimespec();
   struct timespec* tsp = &ts;
   if (ts.tv_sec == -1 && ts.tv_nsec == -1) tsp = NULL;
-  int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), tsp);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  //int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), tsp);
+  //if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  int re = retryKevent(NULL, 0, active_events->data(), active_events->size(), tsp);
   event_manager->setActiveEventsNum(re);
   return re;
 }
@@ -112,9 +113,10 @@ int KqueueServer::addNewEvent(int fd, ConnectionData::EVENT event) {
   short filter =
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EVFILT_READ : EVFILT_WRITE;
   EV_SET(&kv, fd, filter, EV_ADD | EV_ENABLE, 0, 0, 0);
-  int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
-  // TODO: errorのとき、再トライ？
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  //int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
+  //// TODO: errorのとき、再トライ？
+  //if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  int re = retryKevent(&kv, 1, NULL, 0, NULL);
   return re;
 }
 
@@ -134,9 +136,21 @@ int KqueueServer::deleteEvent(int fd, ConnectionData::EVENT event) {
   short filter =
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EVFILT_READ : EVFILT_WRITE;
   EV_SET(&kv, fd, filter, EV_DELETE, 0, 0, 0);
-  int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  // int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
+  // if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  int re = retryKevent(&kv, 1, NULL, 0, NULL);
   return re;
+}
+
+int KqueueServer::retryKevent(const struct kevent* changelist, int nchanges, struct kevent *eventlist, int nevents, const struct timespec* timeout) {
+  int ret;
+  for (int i = 0; i < kRetry; ++i) {
+    ret = kevent(this->kq_, changelist, nchanges, eventlist, nevents, timeout);
+    if (ret != -1) break;
+    // 起こりうるのはENOMEM
+    WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  }
+  return ret;
 }
 
 #endif
