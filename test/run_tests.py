@@ -53,6 +53,7 @@ def main():
         f"{CWD}/integration_test/server_res_test.sh",
         f"python3 -m pytest -vv -s {CWD}/integration_test/server_res_header_test.py",
         f"python3 -m pytest -vv -s {CWD}/integration_test/multiple_requests_test.py",
+        f"python3 -m pytest -vv -s {CWD}/integration_test/upload_test.py",
         f"python3 -m pytest -vv -s {CWD}/cgi/meta_vars_test.py",
         f"{CWD}/conf/main_parser_test.sh",
         f"{CWD}/conf/directive_err_test.sh",
