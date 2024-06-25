@@ -9,15 +9,14 @@ ConfigHandler WebServer::config_handler_;
 RequestHandler WebServer::request_handler_;
 
 WebServer::WebServer(const config::Main *config) {
-  this->configHandler = &(config_handler_);
-  this->configHandler->loadConfiguration(config);
+  config_handler_.loadConfiguration(config);
   this->initializeServer();
-  if (this->ioHandler->getListenfdMap().size() >=
-      this->configHandler->config_->events_.worker_connections_.getWorkerConnections()) {
+  if (this->io_handler_->getListenfdMap().size() >=
+      config_handler_.config_->events_.worker_connections_.getWorkerConnections()) {
     std::stringstream ss;
     ss << "webserv: [emerg] "
-       << this->configHandler->config_->events_.worker_connections_.getWorkerConnections()
-       << " worker_connections are not enough for " << this->ioHandler->getListenfdMap().size()
+       << config_handler_.config_->events_.worker_connections_.getWorkerConnections()
+       << " worker_connections are not enough for " << this->io_handler_->getListenfdMap().size()
        << " listening sockets";
     this->deleteObjects();
     throw std::runtime_error(ss.str());
@@ -25,55 +24,55 @@ WebServer::WebServer(const config::Main *config) {
 }
 
 void WebServer::initializeServer() {
-  this->ioHandler = new NetworkIOHandler();
+  this->io_handler_ = new NetworkIOHandler();
   initializeVServers();
 
-  this->connManager = new ConnectionManager();
+  this->conn_manager_ = new ConnectionManager();
   initializeConnManager();
 
-  config::CONNECTION_METHOD method = this->configHandler->config_->events_.use_.getConnectionMethod();
+  config::CONNECTION_METHOD method = config_handler_.config_->events_.use_.getConnectionMethod();
   switch (method) {
 #if defined(KQUEUE_AVAILABLE)
     case config::KQUEUE:
-      this->server = new KqueueServer();
-      this->eventManager = new KqueueActiveEventManager();
+      this->server_ = new KqueueServer();
+      this->event_manager_ = new KqueueActiveEventManager();
       break;
 #endif
 #if defined(EPOLL_AVAILABLE)
     case config::EPOLL:
       this->server = new EpollServer();
-      this->eventManager = new EpollActiveEventManager();
+      this->event_manager_ = new EpollActiveEventManager();
       break;
 #endif
     case config::POLL:
-      this->server = new PollServer();
-      this->eventManager = new PollActiveEventManager();
+      this->server_ = new PollServer();
+      this->event_manager_ = new PollActiveEventManager();
       break;
     case config::SELECT:
-      this->server = new SelectServer();
-      this->eventManager = new SelectActiveEventManager();
+      this->server_ = new SelectServer();
+      this->event_manager_ = new SelectActiveEventManager();
       break;
     default:  // kqueueとepoll両方使えない場合は、defaultが必要
       break;
   }
-  configHandler->writeErrorLog("webserv: [debug] use_ " + config::Use::ConnectionMethodToStr(method) + "\n");
+  config_handler_.writeErrorLog("webserv: [debug] use_ " + config::Use::ConnectionMethodToStr(method) + "\n");
 
-  this->timerTree = new TimerTree();
+  this->timer_tree_ = new TimerTree();
 }
 
 void WebServer::initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
-                                       const std::string address, const unsigned int port) {
+                                       const std::string& address, unsigned int port) {
   std::pair<std::string, unsigned int> new_pair(address, port);
   if (ip_address_set.find(new_pair) == ip_address_set.end())  // すでに作成したlisten socketは作成しない
   {
-    const int listen_fd = this->ioHandler->setupSocket(address, port);
-    this->ioHandler->addVServer(listen_fd, configHandler->createTiedServer(address, port));
+    const int listen_fd = this->io_handler_->setupSocket(address, port);
+    this->io_handler_->addVServer(listen_fd, config_handler_.createTiedServer(address, port));
   }
   ip_address_set.insert(std::make_pair(address, port));
 }
 
 void WebServer::initializeVServers() {
-  const config::Main *conf = this->configHandler->config_;
+  const config::Main *conf = config_handler_.config_;
   const std::vector<config::Server> &server_list = conf->http_.server_list_;
   std::set<std::pair<std::string, unsigned int> > ip_address_set;
 
@@ -99,11 +98,11 @@ void WebServer::initializeVServers() {
  *
  */
 void WebServer::initializeConnManager() {
-  const std::map<int, TiedServer> &listenfd_map = this->ioHandler->getListenfdMap();
+  const std::map<int, TiedServer> &listenfd_map = this->io_handler_->getListenfdMap();
 
   for (std::map<int, TiedServer>::const_iterator it = listenfd_map.begin(); it != listenfd_map.end(); ++it) {
-    this->connManager->setConnection(it->first);
-    this->connManager->setEvent(it->first, ConnectionData::EV_READ);
+    this->conn_manager_->setConnection(it->first);
+    this->conn_manager_->setEvent(it->first, ConnectionData::EV_READ);
   }
 }
 
@@ -114,19 +113,19 @@ const RequestHandler &WebServer::getRequestHandler() { return request_handler_; 
 void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
 
 WebServer::~WebServer() {
-  this->configHandler->writeErrorLog("webserv: [debug] Close webserv.\n\n");
+  config_handler_.writeErrorLog("webserv: [debug] Close webserv.\n\n");
   this->deleteObjects();
 }
 
 void WebServer::deleteObjects() {
-  config::terminateLogFds(this->configHandler->config_);
-  delete this->timerTree;
-  delete this->ioHandler;
-  delete this->connManager;
-  delete this->eventManager;
-  delete this->server;
+  config::terminateLogFds(config_handler_.config_);
+  delete this->timer_tree_;
+  delete this->io_handler_;
+  delete this->conn_manager_;
+  delete this->event_manager_;
+  delete this->server_;
 }
 
 void WebServer::run() {
-  this->server->eventLoop(this->connManager, this->eventManager, this->ioHandler, this->timerTree);
+  this->server_->eventLoop(this->conn_manager_, this->event_manager_, this->io_handler_, this->timer_tree_);
 }
