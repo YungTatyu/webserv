@@ -1,5 +1,18 @@
 #! /usr/bin/python3
 
+"""
+===== test 方針 =====
+
+uploadするディレクトリを作成
+serverを起動
+test/integration_test/upload_test/upload.pyを実行するrequestを送る
+そのcgiがrequest bodyに入れたファイルをupload
+ファイルの存在と、その中身をテスト
+1つのテストケースごとにuploadしたファイルを削除
+すべてのテストが終わったらupload用のディレクトリを削除
+
+"""
+
 import os
 import requests
 import shutil
@@ -15,15 +28,13 @@ UPLOAD_DIR = "uploads"  # uploadするためのスクリプトで指定されて
 UPLOAD_PATH = f"{ROOT_FROM_WEBSERV}/{UPLOAD_DIR}"  # uploadするためのスクリプトで指定されているパス
 
 
-def assert_file_created(actual_path):
-    assert os.path.isfile(actual_path), f"File does not exist: {actual_path}"
-
-
 def assert_file_not_created(actual_path):
     assert not os.path.isfile(actual_path), f"File exist: {actual_path}"
 
 
 def assert_file_content(actual_path, expect_path):
+    assert os.path.isfile(actual_path), f"File does not exist: {actual_path}"
+
     with open(actual_path, "rb") as file:
         actual_content = file.read()
     with open(expect_path, "rb") as file:
@@ -81,7 +92,6 @@ def run_test(conf, req_data):
         if not req_data["can_upload"]:
             assert_file_not_created(f"{actual_path}")
         else:
-            assert_file_created(f"{actual_path}")
             assert_file_content(f"{actual_path}", f"{expect_path}")
 
     finally:
