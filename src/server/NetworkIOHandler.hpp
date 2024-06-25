@@ -30,8 +30,8 @@ struct TiedServer {
   const unsigned int port_;
 
   TiedServer() : addr_(config::Listen::kDefaultAddress_), port_(config::Listen::kDefaultPort_){};
-  TiedServer(const std::string addr, const unsigned int port) : addr_(addr), port_(port) {}
-
+  TiedServer(const std::string& addr, unsigned int port) : addr_(addr), port_(port) {}
+  TiedServer(const TiedServer& other) :servers_(other.servers_), addr_(other.addr_), port_(other.port_)  {}
   TiedServer& operator=(const TiedServer& other) {
     if (this != &other) {
       this->servers_ = other.servers_;
@@ -47,18 +47,18 @@ class NetworkIOHandler {
  public:
   NetworkIOHandler();
   ~NetworkIOHandler();
-  int setupSocket(const std::string address, const unsigned int port);
-  ssize_t receiveRequest(ConnectionManager& connManager, const int cli_sock);
-  ssize_t sendResponse(ConnectionManager& connManager, const int cli_sock);
-  ssize_t receiveCgiResponse(ConnectionManager& connManager, const int sock);
-  ssize_t sendRequestBody(ConnectionManager& connManager, const int sock);
-  int acceptConnection(ConnectionManager& connManager, const int listen_fd);
-  void closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree, const int sock);
-  void purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree, const int sock);
+  int setupSocket(const std::string& address, unsigned int port);
+  ssize_t receiveRequest(ConnectionManager& connManager, int sock);
+  ssize_t sendResponse(ConnectionManager& connManager, int sock);
+  ssize_t receiveCgiResponse(ConnectionManager& connManager, int sock);
+  ssize_t sendRequestBody(ConnectionManager& connManager,  int sock);
+  int acceptConnection(ConnectionManager& connManager, int listen_fd);
+  void closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,  int sock);
+  void purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,  int sock);
   void closeAllListenSockets();
   const std::map<int, TiedServer>& getListenfdMap();
-  void addVServer(const int listen_fd, const TiedServer server);
-  bool isListenSocket(const int listen_fd) const;
+  void addVServer( int listen_fd, const TiedServer& server);
+  bool isListenSocket( int listen_fd) const;
   static size_t getBufferSize();
 
  private:
