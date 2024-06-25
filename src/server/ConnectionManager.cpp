@@ -22,7 +22,7 @@ void ConnectionManager::setConnection(int fd) {
  * @brief cgiのsocketを登録する
  *
  * @param cli_sock cgiのsocketに紐づいているクライアントのソケット
- * @param event_
+ * @param event
  */
 void ConnectionManager::setCgiConnection(int cli_sock, ConnectionData::EVENT event) {
   ConnectionData* cd = this->connections_.at(cli_sock);
