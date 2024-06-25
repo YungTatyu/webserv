@@ -15,7 +15,7 @@
 #include "RequestHandler.hpp"
 #include "SelectActiveEventManager.hpp"
 #include "SelectServer.hpp"
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 
 class WebServer {
  public:

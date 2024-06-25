@@ -8,7 +8,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
@@ -40,7 +40,7 @@ bool cgi::CgiHandler::isCgi(const std::string& script_path) {
  * @return false
  */
 bool cgi::CgiHandler::forkCgiProcess(const HttpRequest& request, const HttpResponse& response) {
-  pid_t pid = SysCallWrapper::Fork();
+  pid_t pid = syscall_wrapper::Fork();
   if (pid == -1) {
     close(this->sockets_[SOCKET_PARENT]);
     close(this->sockets_[SOCKET_CHILD]);
@@ -65,7 +65,7 @@ bool cgi::CgiHandler::callCgiExecutor(const HttpResponse& response, const HttpRe
   }
 #if defined(SO_NOSIGPIPE)
   int opt = 1;
-  SysCallWrapper::Setsockopt(this->sockets_[SOCKET_PARENT], SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+  syscall_wrapper::Setsockopt(this->sockets_[SOCKET_PARENT], SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
 #endif
 
   Utils::setNonBlockingCloExec(this->sockets_[SOCKET_PARENT]);

@@ -10,7 +10,7 @@
 
 #include "ConfigHandler.hpp"
 #include "LimitExcept.hpp"
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
@@ -142,13 +142,13 @@ bool cgi::CgiExecutor::isExecutableFile(const std::string& path) const {
  * @return false
  */
 bool cgi::CgiExecutor::redirectStdIOToSocket(const HttpRequest& request,  int socket) const {
-  if (SysCallWrapper::Dup2(socket, STDOUT_FILENO) == -1) {
+  if (syscall_wrapper::Dup2(socket, STDOUT_FILENO) == -1) {
     close(socket);
     return false;
   }
   // bodyが存在する場合は、標準入力にbodyをセットする必要がある
   if (!request.body_.empty()) {
-    if (SysCallWrapper::Dup2(socket, STDIN_FILENO) == -1) {
+    if (syscall_wrapper::Dup2(socket, STDIN_FILENO) == -1) {
       close(STDOUT_FILENO);
       close(socket);
       return false;

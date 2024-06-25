@@ -11,7 +11,7 @@
 
 #include "ConnectionManager.hpp"
 #include "IServer.hpp"
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 #include "TimerTree.hpp"
 #include "Utils.hpp"
 #include "WebServer.hpp"
@@ -31,15 +31,15 @@ int NetworkIOHandler::setupSocket(const std::string& address,  unsigned int port
   try {
     // creation of the socket
 #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
-     int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 #else
-     int listen_fd = SysCallWrapper::Socket(AF_INET, SOCK_STREAM, 0);
+     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM, 0);
     Utils::setNonBlockingCloExec(listen_fd);
 #endif
 
     // socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
     int yes = 1;
-    int re = SysCallWrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    int re = syscall_wrapper::Setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
     if (re != 0) std::exit(EXIT_FAILURE);
 
     // preparation of the socket address
@@ -51,11 +51,11 @@ int NetworkIOHandler::setupSocket(const std::string& address,  unsigned int port
     servaddr.sin_port = htons(port);
 
     // 失敗したとき？
-    re = SysCallWrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    re = syscall_wrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
     if (re == -1)
       throw std::runtime_error(error::strSysCallError("bind", "to " + address + ":" + Utils::toStr(port)));
 
-    SysCallWrapper::Listen(listen_fd, SOMAXCONN);
+    syscall_wrapper::Listen(listen_fd, SOMAXCONN);
 
     std::cout << "Server running on port " << port << std::endl;
     return listen_fd;
@@ -126,12 +126,12 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager,  int list
   socklen_t client;
 
   client = sizeof(cliaddr);
-  connfd = SysCallWrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
+  connfd = syscall_wrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
   Utils::setNonBlockingCloExec(connfd);
 #if defined(SO_NOSIGPIPE)
   int opt = 1;
-  SysCallWrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+  syscall_wrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
 #endif
 
   // 新規クライントfdを追加

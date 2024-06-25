@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 
@@ -211,9 +211,9 @@ bool Utils::compareIgnoreCase(std::string lhs, std::string rhs) {
  * @return int
  */
 int Utils::setNonBlockingCloExec(const int fd) {
-  int nonblock = SysCallWrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
+  int nonblock = syscall_wrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
   // 以下はサブジェクトで使えないフラグ使用
-  int closex = SysCallWrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
+  int closex = syscall_wrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
   if (nonblock == -1 || closex == -1) return -1;
   return closex;
 }

@@ -32,7 +32,6 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/HttpResponse.cpp
 	src/server/NetworkIOHandler.cpp
 	src/server/RequestHandler.cpp
-	src/server/SysCallWrapper.cpp
 	src/server/Timer.cpp
 	src/server/TimerTree.cpp
 	src/server/EpollActiveEventManager.cpp
@@ -45,6 +44,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/SelectServer.cpp
 	src/server/WebServer.cpp
 	src/utils/Utils.cpp
+	src/utils/syscall_wrapper.cpp
 	src/utils/error.cpp
 	
 	# test files

@@ -5,7 +5,7 @@
 #include <iomanip>
 
 #include "CgiHandler.hpp"
-#include "SysCallWrapper.hpp"
+#include "syscall_wrapper.hpp"
 #include "Utils.hpp"
 
 const static std::string kAlias = "alias";
@@ -480,7 +480,7 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(
   // get client ip_address
   // retry するか？
   socklen_t client_addrlen = sizeof(client_addr);
-  if (SysCallWrapper::Getsockname(socket, reinterpret_cast<struct sockaddr*>(&client_addr),
+  if (syscall_wrapper::Getsockname(socket, reinterpret_cast<struct sockaddr*>(&client_addr),
                                   &client_addrlen) != 0) {
     // TODO: getsockname()ダメだったらどうするか？
     return sw_end_phase;
