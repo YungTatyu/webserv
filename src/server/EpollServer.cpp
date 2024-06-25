@@ -33,9 +33,9 @@ bool EpollServer::initEpollServer() {
   const ConfigHandler& config_handler =  WebServer::getConfigHandler();
   // epoll instance 初期化
   // epoll1_create(EPOLL_CLOEXEC);を使用することで、forkでこのfdのオープンを防げる。
-  this->epfd_ = epoll_create1(EPOLL_CLOEXEC);
+  this->epfd_ = epoll_create(config_handler.getWorkerConnections());
   if (this->epfd_ == -1) {
-    std::cerr << error::strSysCallError("epoll_create1") << "\n";
+    std::cerr << error::strSysCallError("epoll_create") << "\n";
     return false;
   }
   return true;
