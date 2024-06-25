@@ -16,6 +16,10 @@ UPLOAD_PATH = f"{ROOT_FROM_WEBSERV}/{UPLOAD_DIR}"  # uploadするためのスク
 def assert_file_created(actual_path):
     assert os.path.isfile(actual_path), f"File does not exist: {actual_path}"
 
+def assert_file_not_created(actual_path):
+    assert not os.path.isfile(actual_path), f"File exist: {actual_path}"
+
+
 
 def assert_file_content(actual_path, expect_path):
     with open(actual_path, 'rb') as file:
@@ -68,12 +72,14 @@ def run_test(conf, req_data):
         actual = send_request(req_data)
 
 
+        # test 実行
         expect_headers_exist(actual)
-        assert_file_created(f"{actual_path}")
-        assert_file_content(f"{actual_path}", f"{expect_path}")
 
-    #except AssertionError as e:
-    #    print(e)
+        if not req_data['can_upload']:
+            assert_file_not_created(f"{actual_path}")
+        else:
+            assert_file_created(f"{actual_path}")
+            assert_file_content(f"{actual_path}", f"{expect_path}")
 
     finally:
         WEBSERV.kill()
@@ -88,17 +94,18 @@ configs = [
 
 # テストに使用するファイル名のリスト
 file_names = [
-    "test.txt",
-    "index.html",
-    "degimon.jpg",
+    ("test.txt", True),
+    ("index.html", True),
+    ("degimon.jpg", True),
+    ("reverse_shell.php", False),
 ]
 
 
 @pytest.mark.parametrize(
-    "conf, file_name",
-    [(conf, file_name) for conf in configs for file_name in file_names]
+    "conf, file_name, can_upload",
+    [(conf, file_name, can_upload) for conf in configs for file_name, can_upload in file_names]
 )
-def test_upload_file(conf, file_name, fixture_session):
+def test_upload_file(conf, file_name, can_upload, fixture_session):
     run_test(
         conf,
         {
@@ -108,6 +115,7 @@ def test_upload_file(conf, file_name, fixture_session):
             "root": ROOT_FROM_WEBSERV,
             "method": "POST",
             "file_name": file_name,
+            "can_upload": can_upload,
         },
     )
     if os.path.exists(f"{ROOT_FROM_WEBSERV}/file_name"):

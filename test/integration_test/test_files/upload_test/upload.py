@@ -3,6 +3,9 @@ import cgi
 import os
 import sys
 
+# アップロードを許可する拡張子
+ALLOWED_EXTENSIONS = ['html', 'txt', 'pdf', 'jpg', 'jpeg']
+
 # CGIヘッダーを出力
 print("Content-Type: text/html")
 print()
@@ -22,15 +25,24 @@ if "file" in form:
     if fileitem.filename:
         # ファイル名を取得
         fn = os.path.basename(fileitem.filename)
-        
-        try:
-            # ファイルを保存
-            with open("test/integration_test/test_files/upload_test/uploads/" + fn, "wb") as f:
-                f.write(fileitem.file.read())
-            print(f"<p>The file '{fn}' was uploaded</p>")
 
-        except AssertionError as e:
-            print(e)
+        # ファイルの拡張子を取得
+        ext = os.path.splitext(fn)[1][1:].strip().lower()
+
+        # 許可する拡張子かどうかチェック
+        if ext in ALLOWED_EXTENSIONS:
+            try:
+                # ファイルを保存
+                save_path = "test/integration_test/test_files/upload_test/uploads/" + fn
+                with open(save_path, "wb") as f:
+                    f.write(fileitem.file.read())
+                print(f"<p>The file '{fn}' was uploaded successfully</p>")
+
+            except Exception as e:
+                print(f"<p>Error uploading file: {e}</p>")
+
+        else:
+            print(f"<p>File '{fn}' has an invalid extension. Allowed extensions are: {', '.join(ALLOWED_EXTENSIONS)}</p>")
         
     else:
         print("<p>You have to select file.</p>")
