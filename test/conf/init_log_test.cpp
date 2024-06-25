@@ -110,13 +110,13 @@ TEST_F(InitLogTest, initAcsLogFds_Success) {
 
   // fdの数が正確かどうか
   // http contezt
-  EXPECT_EQ(config_->http.access_fd_list.size(), 0);
+  EXPECT_EQ(config_->http_.access_fd_list_.size(), 0);
   // server context
-  EXPECT_EQ(config_->http.server_list[0].access_fd_list.size(), 3);
-  EXPECT_EQ(config_->http.server_list[1].access_fd_list.size(), 0);
+  EXPECT_EQ(config_->http_.server_list_[0].access_fd_list_.size(), 3);
+  EXPECT_EQ(config_->http_.server_list_[1].access_fd_list_.size(), 0);
   // location context
-  for (size_t i = 0; i < config_->http.server_list[0].location_list.size(); i++) {
-    EXPECT_EQ(config_->http.server_list[0].location_list[i].access_fd_list.size(), 2);
+  for (size_t i = 0; i < config_->http_.server_list_[0].location_list_.size(); i++) {
+    EXPECT_EQ(config_->http_.server_list_[0].location_list_[i].access_fd_list_.size(), 2);
   }
 }
 
@@ -139,15 +139,15 @@ TEST_F(InitLogTest, initErrLogFds_Success) {
 
   // fdの数が正確かどうか
   // main context
-  EXPECT_EQ(config_->error_fd_list.size(), 1);
+  EXPECT_EQ(config_->error_fd_list_.size(), 1);
   // http contezt
-  EXPECT_EQ(config_->http.error_fd_list.size(), 2);
+  EXPECT_EQ(config_->http_.error_fd_list_.size(), 2);
   // server context
-  EXPECT_EQ(config_->http.server_list[0].error_fd_list.size(), 3);
-  EXPECT_EQ(config_->http.server_list[1].error_fd_list.size(), 0);
+  EXPECT_EQ(config_->http_.server_list_[0].error_fd_list_.size(), 3);
+  EXPECT_EQ(config_->http_.server_list_[1].error_fd_list_.size(), 0);
   // location context
-  for (size_t i = 0; i < config_->http.server_list[0].location_list.size(); i++) {
-    EXPECT_EQ(config_->http.server_list[0].location_list[i].error_fd_list.size(), 2);
+  for (size_t i = 0; i < config_->http_.server_list_[0].location_list_.size(); i++) {
+    EXPECT_EQ(config_->http_.server_list_[0].location_list_[i].error_fd_list_.size(), 2);
   }
 }
 

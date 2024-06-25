@@ -31,23 +31,23 @@ TEST(ReturnTest, allContext) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/return/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // location
-  test::test_value(server_list[0].location_list[0].return_list,
+  test::test_value(server_list[0].location_list_[0].return_list_,
                    {300, -1, -1, 999, 998, 0, 0, 301, 302, 303, 307, 308},
                    {"url", "https://www.tachu.com", "http://", "url999", "1000", "", "", "https://",
                     "http://a", "http://b", "http://c", "http://d"});
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kReturn, true);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kReturn, true);
 }
 
 TEST(ReturnTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kReturn, false);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kReturn, false);
 }

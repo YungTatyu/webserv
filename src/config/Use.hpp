@@ -27,10 +27,10 @@ class Use {
   }
   ~Use() {}
   CONNECTION_METHOD getConnectionMethod() const { return this->connection_method_; }
-  void setConnectionMethod(const CONNECTION_METHOD connection_method) {
+  void setConnectionMethod(CONNECTION_METHOD connection_method) {
     this->connection_method_ = connection_method;
   }
-  static std::string ConnectionMethodToStr(const config::CONNECTION_METHOD method) {
+  static std::string ConnectionMethodToStr(config::CONNECTION_METHOD method) {
     std::string ret;
     switch (method) {
       case config::KQUEUE:

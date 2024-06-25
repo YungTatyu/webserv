@@ -68,7 +68,7 @@ std::string Utils::toStr(const T value) {
 
 template <typename Context>
 bool Utils::hasDirective(const Context& context, const std::string& directive) {
-  return context.directives_set.find(directive) != context.directives_set.end();
+  return context.directives_set_.find(directive) != context.directives_set_.end();
 }
 
 template <typename T>

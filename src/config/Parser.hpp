@@ -32,15 +32,15 @@ class Parser {
   std::stack<CONTEXT> current_context_;
   std::map<std::string, bool (config::Parser::*)()> parser_map_;
   bool parseType(const Token &token);
-  bool expectTokenType(const config::TK_TYPE type, const Token &token) const;
-  bool expectArgsNum(const unsigned int expect, const unsigned int actual) const;
+  bool expectTokenType(config::TK_TYPE type, const Token &token) const;
+  bool expectArgsNum(unsigned int expect, unsigned int actual) const;
   bool expectTerminatingToken() const;
   bool isContext(const Token &token) const;
   bool isDirective(const Token &token) const;
-  const std::set<std::string> *findDirectivesSet(const CONTEXT context) const;
+  const std::set<std::string> *findDirectivesSet(CONTEXT context) const;
   void printError(const std::string &err_msg, const Token &token) const;
   void printFormatedError(const std::string &message, const Token &token) const;
-  size_t countArgs(const TK_TYPE terminating_token) const;
+  size_t countArgs(TK_TYPE terminating_token) const;
   bool validFinalState() const;
   bool validWorkerConnections() const;
   template <typename T>
@@ -107,7 +107,7 @@ class Parser {
 template <typename T>
 void config::Parser::updateContext(T &context, CONTEXT new_context, const std::string &context_name) {
   current_context_.push(new_context);
-  context.directives_set.insert(context_name);
+  context.directives_set_.insert(context_name);
 }
 
 #endif

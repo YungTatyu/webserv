@@ -25,27 +25,27 @@
 
 namespace config {
 struct Http {
-  const static unsigned int type = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
-  std::set<std::string> directives_set;
-  std::vector<Server> server_list;
-  Root root;
-  std::vector<Index> index_list;
-  Autoindex autoindex;
-  ClientMaxBodySize client_max_body_size;
-  std::vector<AccessLog> access_log_list;
-  std::vector<ErrorLog> error_log_list;
-  std::vector<ErrorPage> error_page_list;
-  KeepaliveTimeout keepalive_timeout;
-  ReceiveTimeout receive_timeout;
-  SendTimeout send_timeout;
-  std::vector<AllowDeny> allow_deny_list;
-  Userid userid;
-  UseridDomain userid_domain;
-  UseridExpires userid_expires;
-  UseridPath userid_path;
-  UseridService userid_service;
-  std::vector<int> access_fd_list;
-  std::vector<int> error_fd_list;
+  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
+  std::set<std::string> directives_set_;
+  std::vector<Server> server_list_;
+  Root root_;
+  std::vector<Index> index_list_;
+  Autoindex autoindex_;
+  ClientMaxBodySize client_max_body_size_;
+  std::vector<AccessLog> access_log_list_;
+  std::vector<ErrorLog> error_log_list_;
+  std::vector<ErrorPage> error_page_list_;
+  KeepaliveTimeout keepalive_timeout_;
+  ReceiveTimeout receive_timeout_;
+  SendTimeout send_timeout_;
+  std::vector<AllowDeny> allow_deny_list_;
+  Userid userid_;
+  UseridDomain userid_domain_;
+  UseridExpires userid_expires_;
+  UseridPath userid_path_;
+  UseridService userid_service_;
+  std::vector<int> access_fd_list_;
+  std::vector<int> error_fd_list_;
 };
 }  // namespace config
 

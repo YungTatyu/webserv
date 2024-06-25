@@ -34,23 +34,23 @@ TEST(ListenTest, allContext) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/listen/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // server
   test::test_value(
-      server_list[0].listen_list,
+      server_list[0].listen_list_,
       {"1.1.1.1", "127.0.0.1", "2.2.2.2", "3.3.3.3", "127.0.0.1", "127.0.0.1", "127.0.0.2", "127.0.0.1"},
       {80, 1, 2000, 80, 2400, 80, 0, 65535}, {false, false, false, true, true, false, false, true});
-  test::test_directives_set(server_list[0].directives_set, kListen, true);
+  test::test_directives_set(server_list[0].directives_set_, kListen, true);
 }
 
 TEST(ListenTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(server_list[0].directives_set, kListen, false);
+  test::test_directives_set(server_list[0].directives_set_, kListen, false);
 }

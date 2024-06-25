@@ -43,34 +43,34 @@ TEST(ErrorPageTest, allContext) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/error_page/1.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
   // http
-  test::test_value(http.error_page_list, {{300, 599}, {301, 598}, {300, 301, 302, 303, 598}}, {-1, -1, -1},
+  test::test_value(http.error_page_list_, {{300, 599}, {301, 598}, {300, 301, 302, 303, 598}}, {-1, -1, -1},
                    {"error1", "error2", "error3"});
-  test::test_directives_set(http.directives_set, kErrorPage, true);
+  test::test_directives_set(http.directives_set_, kErrorPage, true);
 
   // server
-  test::test_value(server_list[0].error_page_list, {{400, 500}, {450, 550}, {401, 501}, {302}},
+  test::test_value(server_list[0].error_page_list_, {{400, 500}, {450, 550}, {401, 501}, {302}},
                    {922337203685477586, 922337203685477587, 0, -1},
                    {"response1", "response2", "response3", "response4"});
-  test::test_directives_set(server_list[0].directives_set, kErrorPage, true);
+  test::test_directives_set(server_list[0].directives_set_, kErrorPage, true);
 
-  test::test_value(server_list[0].location_list[0].error_page_list,
+  test::test_value(server_list[0].location_list_[0].error_page_list_,
                    {{400, 401, 402, 403, 404, 405}, {500, 501, 502, 503, 504, 505}}, {-1, -1},
                    {"=0", "=922337203685477588"});
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorPage, true);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kErrorPage, true);
 }
 
 TEST(ErrorPageTest, notFound) {
   const config::Main *config = config::initConfig("test/conf/directive_parser/only_context.conf");
   ASSERT_NE(config, nullptr);
 
-  const config::Http &http = config->http;
-  const std::vector<config::Server> &server_list = http.server_list;
+  const config::Http &http = config->http_;
+  const std::vector<config::Server> &server_list = http.server_list_;
 
-  test::test_directives_set(http.directives_set, kErrorPage, false);
-  test::test_directives_set(server_list[0].directives_set, kErrorPage, false);
-  test::test_directives_set(server_list[0].location_list[0].directives_set, kErrorPage, false);
+  test::test_directives_set(http.directives_set_, kErrorPage, false);
+  test::test_directives_set(server_list[0].directives_set_, kErrorPage, false);
+  test::test_directives_set(server_list[0].location_list_[0].directives_set_, kErrorPage, false);
 }

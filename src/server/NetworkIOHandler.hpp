@@ -63,7 +63,7 @@ class NetworkIOHandler {
 
  private:
   std::map<int, TiedServer> listenfd_map_;  // リスニングソケットとそれに紐づくserver configを管理
-  static const size_t buffer_size_ = 1024;
+  const static size_t buffer_size_ = 1024;
 };
 
 #endif
