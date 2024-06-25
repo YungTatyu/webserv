@@ -26,7 +26,7 @@ def run_server(webserv, conf):
         sys.exit(1)
 
 
-def send_reqest(req_data):
+def send_request(req_data):
     headers = {"host": req_data["host"], "content-type": req_data["content_type"]}
     req = f"http://localhost:{req_data['port']}/{ROOT}/{req_data['request']}"
     r = requests.get(
@@ -55,7 +55,7 @@ def run_test(conf, req_data, test_headers={}):
     PATH_WEBSERV = f"{CWD}/../../webserv"
     try:
         WEBSERV = run_server(PATH_WEBSERV, f"{ROOT}/{conf}")
-        res = send_reqest(req_data)
+        res = send_request(req_data)
         expects = {
             SERVER: "webserv/1.0",
             CONTENT_LENGTH: f"{len(res.text)}",
