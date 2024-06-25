@@ -30,7 +30,7 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
 }
 
 bool EpollServer::initEpollServer() {
-  const ConfigHandler& config_handler =  WebServer::getConfigHandler();
+  const ConfigHandler& config_handler = WebServer::getConfigHandler();
   // epoll instance 初期化
   // epoll1_create(EPOLL_CLOEXEC);を使用することで、forkでこのfdのオープンを防げる。
   this->epfd_ = epoll_create(config_handler.getWorkerConnections());
@@ -140,7 +140,7 @@ int EpollServer::deleteEvent(int fd, ConnectionData::EVENT event) {
   return re;
 }
 
-int EpollServer::retryEpollCtl(int op, int fd, struct epoll_event *event) {
+int EpollServer::retryEpollCtl(int op, int fd, struct epoll_event* event) {
   int ret;
   for (int i = 0; i < kRetry; ++i) {
     ret = epoll_ctl(this->epfd_, op, fd, event);
@@ -150,6 +150,5 @@ int EpollServer::retryEpollCtl(int op, int fd, struct epoll_event *event) {
   }
   return ret;
 }
-
 
 #endif
