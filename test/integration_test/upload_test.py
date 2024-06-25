@@ -5,10 +5,12 @@ import requests
 import shutil
 import pytest
 
-from server_res_header_test import run_server, send_request, expect_headers_exist 
+from server_res_header_test import run_server, expect_headers_exist
 
 # test用のファイルがあるパスを定義
-ROOT_FROM_WEBSERV = "test/integration_test/test_files/upload_test" # test fileへの相対パス
+ROOT_FROM_WEBSERV = (
+    "test/integration_test/test_files/upload_test"  # test fileへの相対パス
+)
 UPLOAD_DIR = "uploads"  # uploadするためのスクリプトで指定されているパス
 UPLOAD_PATH = f"{ROOT_FROM_WEBSERV}/{UPLOAD_DIR}"  # uploadするためのスクリプトで指定されているパス
 
@@ -16,47 +18,49 @@ UPLOAD_PATH = f"{ROOT_FROM_WEBSERV}/{UPLOAD_DIR}"  # uploadするためのスク
 def assert_file_created(actual_path):
     assert os.path.isfile(actual_path), f"File does not exist: {actual_path}"
 
+
 def assert_file_not_created(actual_path):
     assert not os.path.isfile(actual_path), f"File exist: {actual_path}"
 
 
-
 def assert_file_content(actual_path, expect_path):
-    with open(actual_path, 'rb') as file:
+    with open(actual_path, "rb") as file:
         actual_content = file.read()
-    with open(expect_path, 'rb') as file:
+    with open(expect_path, "rb") as file:
         expect_content = file.read()
 
-    assert actual_content == expect_content, f"File content does not match. Expected: {expect_content}, but got: {actual_file}"
-
+    assert (
+        actual_content == expect_content
+    ), f"File content does not match. Expected: {expect_content}, but got: {actual_file}"
 
 
 def send_request(req_data):
     headers = {"host": req_data["host"]}
 
-    req = f"http://localhost:{req_data['port']}/{req_data['root']}/{req_data['request']}"
+    req = (
+        f"http://localhost:{req_data['port']}/{req_data['root']}/{req_data['request']}"
+    )
 
-    #if (req_data['file_name']):
-    files = {'file': open(f"{req_data['root']}/{req_data['file_name']}", 'rb')}
+    # if (req_data['file_name']):
+    files = {"file": open(f"{req_data['root']}/{req_data['file_name']}", "rb")}
     print(f"{files}")
 
-    if req_data['method'] == "POST":
+    if req_data["method"] == "POST":
         r = requests.post(
-                        req,
-                        headers=headers,
-                        files=files,
-                        timeout=0.5,
-                        );
-    elif req_data['method'] == "DELETE":
+            req,
+            headers=headers,
+            files=files,
+            timeout=0.5,
+        )
+    elif req_data["method"] == "DELETE":
         r = requests.delete(
-                            req,
-                            headers=headers,
-                            files=files,
-                            timeout=0.5,
-                            );
+            req,
+            headers=headers,
+            files=files,
+            timeout=0.5,
+        )
 
     return r
-
 
 
 def run_test(conf, req_data):
@@ -71,11 +75,10 @@ def run_test(conf, req_data):
         WEBSERV = run_server(PATH_WEBSERV, f"{req_data['root']}/{conf}")
         actual = send_request(req_data)
 
-
         # test 実行
         expect_headers_exist(actual)
 
-        if not req_data['can_upload']:
+        if not req_data["can_upload"]:
             assert_file_not_created(f"{actual_path}")
         else:
             assert_file_created(f"{actual_path}")
@@ -103,7 +106,11 @@ file_names = [
 
 @pytest.mark.parametrize(
     "conf, file_name, can_upload",
-    [(conf, file_name, can_upload) for conf in configs for file_name, can_upload in file_names]
+    [
+        (conf, file_name, can_upload)
+        for conf in configs
+        for file_name, can_upload in file_names
+    ],
 )
 def test_upload_file(conf, file_name, can_upload, fixture_session):
     run_test(
@@ -122,7 +129,7 @@ def test_upload_file(conf, file_name, can_upload, fixture_session):
         os.remove(f"{ROOT_FROM_WEBSERV}/file_name")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def fixture_session():
     print("start upload test")
     os.makedirs(f"{UPLOAD_PATH}")

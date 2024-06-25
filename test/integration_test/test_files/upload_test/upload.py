@@ -4,7 +4,7 @@ import os
 import sys
 
 # アップロードを許可する拡張子
-ALLOWED_EXTENSIONS = ['html', 'txt', 'pdf', 'jpg', 'jpeg']
+ALLOWED_EXTENSIONS = ["html", "txt", "pdf", "jpg", "jpeg"]
 
 # CGIヘッダーを出力
 print("Content-Type: text/html")
@@ -14,13 +14,12 @@ print()
 print("<html><body>")
 
 # フォームデータの解析
-#form = cgi.FieldStorage()
 form = cgi.FieldStorage()
 
 # ファイルがアップロードされたか確認
 if "file" in form:
     fileitem = form["file"]
-    
+
     # ファイルが選択されているか確認
     if fileitem.filename:
         # ファイル名を取得
@@ -42,18 +41,22 @@ if "file" in form:
                 print(f"<p>Error uploading file: {e}</p>")
 
         else:
-            print(f"<p>File '{fn}' has an invalid extension. Allowed extensions are: {', '.join(ALLOWED_EXTENSIONS)}</p>")
-        
+            print(
+                f"<p>File '{fn}' has an invalid extension. Allowed extensions are: {', '.join(ALLOWED_EXTENSIONS)}</p>"
+            )
+
     else:
         print("<p>You have to select file.</p>")
 else:
     # アップロードフォームを表示
-    print("""
+    print(
+        """
     <form enctype="multipart/form-data" method="post">
     <input type="file" name="file">
     <input type="submit" value="upload">
     </form>
-    """)
+    """
+    )
 
 # HTMLの終了
 print("</body></html>")
