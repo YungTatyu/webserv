@@ -39,7 +39,7 @@ config::Main *config::initConfig(const std::string &file_path) {
   std::string absolute_path;
 
   // 絶対pathを取得
-  if (!utils::wrapperRealpath(file_path, absolute_path)) {
+  if (!utils::resolvePath(file_path, absolute_path)) {
     std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": "
               << strerror(errno) << ")" << std::endl;
     return NULL;

@@ -68,7 +68,7 @@ bool cgi::CgiHandler::callCgiExecutor(const HttpResponse& response, const HttpRe
   syscall_wrapper::Setsockopt(this->sockets_[SOCKET_PARENT], SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
 #endif
 
-  utils::setNonBlockingCloExec(this->sockets_[SOCKET_PARENT]);
+  utils::setNonBlockCloExec(this->sockets_[SOCKET_PARENT]);
   return forkCgiProcess(request, response);
 }
 

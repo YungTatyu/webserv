@@ -12,7 +12,7 @@
 #include "error.hpp"
 #include "syscall_wrapper.hpp"
 
-bool utils::wrapperRealpath(const std::string& path, std::string& absolute_path) {
+bool utils::resolvePath(const std::string& path, std::string& absolute_path) {
   char tmp_path[MAXPATHLEN];
   if (realpath(path.c_str(), tmp_path) == NULL) {
     return false;
@@ -40,16 +40,16 @@ bool utils::isDirectory(const std::string& path, bool err_log) {
   return S_ISDIR(statbuf.st_mode);
 }
 
-std::string utils::readFile(const std::string& filePath) {
-  std::ifstream file(filePath.c_str());
+std::string utils::readFile(const std::string& path) {
+  std::ifstream file(path.c_str());
   std::stringstream buffer;
   buffer << file.rdbuf();
   return buffer.str();
 }
 
-std::vector<std::string> utils::createDirectoryContents(const std::string& directoryPath) {
+std::vector<std::string> utils::createDirectoryContents(const std::string& path) {
   std::vector<std::string> contents;
-  DIR* dir = opendir(directoryPath.c_str());
+  DIR* dir = opendir(path.c_str());
   // error出力？
   if (dir == NULL) return contents;
   struct dirent* entry;
@@ -59,7 +59,7 @@ std::vector<std::string> utils::createDirectoryContents(const std::string& direc
   while ((entry = readdir(dir)) != NULL) {
     std::string filename = entry->d_name;
     if (filename != "." && filename != "..") {
-      if (utils::isDirectory(directoryPath + "/" + filename, false)) filename += "/";
+      if (utils::isDirectory(path + "/" + filename, false)) filename += "/";
       contents.push_back(filename);
     }
   }
@@ -79,7 +79,7 @@ bool utils::isExtensionFile(const std::string& filename, const std::string& exte
   return std::equal(extension.begin(), extension.end(), filename.end() - extension.length());
 }
 
-ssize_t utils::wrapperWrite( int fd, const std::string& msg) {
+ssize_t utils::writeChunks( int fd, const std::string& msg) {
   size_t msg_size = msg.size();
   size_t written_bytes = 0;
   const size_t WriteSize = 1024;
@@ -96,7 +96,7 @@ ssize_t utils::wrapperWrite( int fd, const std::string& msg) {
   return written_bytes;
 }
 
-bool utils::wrapperGetsockname(struct sockaddr_in& addr,  int sock) {
+bool utils::resolveSocketAddr(struct sockaddr_in& addr,  int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
     WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)) + "\n");
@@ -113,7 +113,7 @@ bool utils::wrapperGetsockname(struct sockaddr_in& addr,  int sock) {
  */
 int utils::resolveConnectedPort( int sock) {
   struct sockaddr_in addr;
-  if (!wrapperGetsockname(addr, sock)) return -1;
+  if (!resolveSocketAddr(addr, sock)) return -1;
   return ntohs(addr.sin_port);
 }
 
@@ -125,7 +125,7 @@ int utils::resolveConnectedPort( int sock) {
  */
 std::string utils::socketToStrIPAddress( int sock) {
   struct sockaddr_in addr;
-  if (!wrapperGetsockname(addr, sock)) return "";
+  if (!resolveSocketAddr(addr, sock)) return "";
   return ipToStr(addr.sin_addr.s_addr);
 }
 
@@ -198,7 +198,7 @@ bool utils::compareIgnoreCase(std::string lhs, std::string rhs) {
  * @param fd
  * @return int
  */
-int utils::setNonBlockingCloExec( int fd) {
+int utils::setNonBlockCloExec( int fd) {
   int nonblock = syscall_wrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
   // 以下はサブジェクトで使えないフラグ使用
   int closex = syscall_wrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);

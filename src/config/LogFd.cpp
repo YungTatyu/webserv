@@ -86,7 +86,7 @@ bool config::initAcsLogFds(config::Main& config) {
     return false;
   else if (ret == 0) {
     std::string absolute_path;
-    if (!utils::wrapperRealpath(".", absolute_path)) {
+    if (!utils::resolvePath(".", absolute_path)) {
       std::cerr << "webserv: [emerg] realpath() \""
                 << "."
                 << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
@@ -129,7 +129,7 @@ bool config::initErrLogFds(config::Main& config) {
     return false;
   else if (ret == 0) {
     std::string absolute_path;
-    if (!utils::wrapperRealpath(".", absolute_path)) {
+    if (!utils::resolvePath(".", absolute_path)) {
       std::cerr << "webserv: [emerg] realpath() \""
                 << "."
                 << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;

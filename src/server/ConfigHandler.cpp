@@ -126,17 +126,17 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
   // access_logがどのコンテキスがあれば出力する
   if (location && utils::hasDirective(*location, kAccessFd)) {
     for (size_t i = 0; i < location->access_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(location->access_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(location->access_fd_list_[i], msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
     }
   } else if (utils::hasDirective(server, kAccessFd)) {
     for (size_t i = 0; i < server.access_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(server.access_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(server.access_fd_list_[i], msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
     }
   } else if (utils::hasDirective(this->config_->http_, kAccessFd)) {
     for (size_t i = 0; i < this->config_->http_.access_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(this->config_->http_.access_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(this->config_->http_.access_fd_list_[i], msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
     }
   }
@@ -146,14 +146,14 @@ void ConfigHandler::writeErrorLog(const std::string& msg) const {
   // http conterxtにerror_logディレクティブがあれば出力
   if (utils::hasDirective(this->config_->http_, kErrorFd)) {
     for (size_t i = 0; i < this->config_->http_.error_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(this->config_->http_.error_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(this->config_->http_.error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (utils::hasDirective(*this->config_, kErrorFd)) {
     // main contextにerror_logディレクティブがなくてもデフォルトに出力する
     // fdがopenできずに追加できていない可能性があるので、一応条件文で確認している。
     for (size_t i = 0; i < this->config_->error_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(this->config_->error_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(this->config_->error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
   }
@@ -170,22 +170,22 @@ void ConfigHandler::writeErrorLog(const config::Server& server, const config::Lo
                                   const std::string& msg) const {
   if (location && utils::hasDirective(*location, kErrorFd)) {
     for (size_t i = 0; i < location->error_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(location->error_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(location->error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (utils::hasDirective(server, kErrorFd)) {
     for (size_t i = 0; i < server.error_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(server.error_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(server.error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (utils::hasDirective(this->config_->http_, kErrorFd)) {
     for (size_t i = 0; i < this->config_->http_.error_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(this->config_->http_.error_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(this->config_->http_.error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
   } else if (utils::hasDirective(*this->config_, kErrorFd)) {
     for (size_t i = 0; i < this->config_->error_fd_list_.size(); i++) {
-      if (utils::wrapperWrite(this->config_->error_fd_list_[i], msg) == -1)
+      if (utils::writeChunks(this->config_->error_fd_list_[i], msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
   }

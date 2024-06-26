@@ -25,17 +25,15 @@ struct CaseInsensitiveCompare {
   }
 };
 
-int wrapperOpen(const std::string path, int flags, mode_t modes);
-int wrapperAccess(const std::string& path, int modes, bool err_log);
-bool wrapperRealpath(const std::string& path, std::string& absolute_path);
+bool resolvePath(const std::string& path, std::string& absolute_path);
 bool isFile(const std::string& path, bool err_log);
 bool isDirectory(const std::string& path, bool err_log);
-std::string readFile(const std::string& filePath);
-std::vector<std::string> createDirectoryContents(const std::string& directoryPath);
+std::string readFile(const std::string& path);
+std::vector<std::string> createDirectoryContents(const std::string& path);
 bool isExecutable(const char* filename);
 bool isExtensionFile(const std::string& filename, const std::string& extension);
-ssize_t wrapperWrite( int fd, const std::string& msg);
-bool wrapperGetsockname(struct sockaddr_in& addr,  int sock);
+ssize_t writeChunks( int fd, const std::string& msg);
+bool resolveSocketAddr(struct sockaddr_in& addr,  int sock);
 std::string socketToStrIPAddress( int sock);
 std::string ipToStr( uint32_t ip);
 uint32_t strToIPAddress(const std::string& ip);
@@ -44,7 +42,7 @@ std::string toLower(std::string str);
 std::string toUpper(std::string str);
 bool isSpace( unsigned char ch);
 bool compareIgnoreCase(std::string lhs, std::string rhs);
-int setNonBlockingCloExec( int fd);
+int setNonBlockCloExec( int fd);
 size_t strToSizet(const std::string& str);
 size_t hexToDec(const std::string& str);
 bool isSign(unsigned char ch);

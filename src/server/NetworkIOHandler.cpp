@@ -34,7 +34,7 @@ int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port)
     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 #else
     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM, 0);
-    utils::setNonBlockingCloExec(listen_fd);
+    utils::setNonBlockCloExec(listen_fd);
 #endif
 
     // socketがtimeout中でもbindできるよう開発中はして、すぐにサーバを再起動できるようにする。
@@ -128,7 +128,7 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, int liste
   client = sizeof(cliaddr);
   connfd = syscall_wrapper::Accept(listen_fd, (struct sockaddr*)&cliaddr, &client);
   if (connfd == -1) return connfd;
-  utils::setNonBlockingCloExec(connfd);
+  utils::setNonBlockCloExec(connfd);
 #if defined(SO_NOSIGPIPE)
   int opt = 1;
   syscall_wrapper::Setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
