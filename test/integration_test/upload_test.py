@@ -56,7 +56,7 @@ def send_request(req_data):
     if req_data["method"] == "POST":
         files = {"file": open(f"{req_data['root']}/{req_data['file_name']}", "rb")}
 
-    if req_data['path_info']:
+    if req_data["path_info"]:
         req += f"{req_data['path_info']}"
 
     if req_data["method"] == "POST":
