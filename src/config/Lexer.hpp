@@ -14,17 +14,24 @@ enum TK_TYPE {
 };
 
 struct Token {
-  const std::string value_;
-  const TK_TYPE type_;
-  const unsigned int line_;
+  std::string value_;
+  TK_TYPE type_;
+  unsigned int line_;
   Token(const std::string& value, TK_TYPE type, unsigned int line)
       : value_(value), type_(type), line_(line) {}
-  Token(const Token& other) : value_(other.value_), type_(other.type_), line_(other.line_) {}
+  Token(const Token& other) { *this = other; }
   ~Token() {}
+  Token& operator=(const Token& other) {
+    if (this != &other) {
+      this->value_ = other.value_;
+      this->type_ = other.type_;
+      this->line_ = other.line_;
+    }
+    return *this;
+  }
 
  private:
   Token();
-  Token& operator=(const Token& other);
 };
 
 class Lexer {
