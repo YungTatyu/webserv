@@ -24,6 +24,8 @@ enum OS {
 
 class Parser {
  private:
+  Parser();
+  Parser &operator=(const Parser &other);
   Main &config_;
   const std::vector<Token> &tokens_;
   const std::string filepath_;
@@ -88,8 +90,6 @@ class Parser {
   std::string toUpper(std::string) const;
   bool isDuplicateDefaultServer(const config::Listen &this_listen);
   void updateDirectivesSet(const std::string &directive);
-  Parser();
-  void operator=(const Parser &other);
 
  public:
   Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath);
