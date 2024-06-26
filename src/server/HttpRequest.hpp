@@ -9,7 +9,7 @@
 #include <string>
 
 #include "LimitExcept.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 
 class HttpRequest {
  public:
@@ -28,29 +28,29 @@ class HttpRequest {
     PARSE_ERROR
   };
 
-  HttpRequest(const config::REQUEST_METHOD &method = config::UNKNOWN, const std::string &uri = "",
+  HttpRequest(config::REQUEST_METHOD method = config::UNKNOWN, const std::string &uri = "",
               const std::string &version = "",
-              const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers =
-                  std::map<std::string, std::string, Utils::CaseInsensitiveCompare>(),
+              const std::map<std::string, std::string, utils::CaseInsensitiveCompare> &headers =
+                  std::map<std::string, std::string, utils::CaseInsensitiveCompare>(),
               const std::string &queries = "", const std::string &body = "", const std::string &port = "",
-              const ParseState parseState = PARSE_BEFORE);
+              ParseState parse_state = PARSE_BEFORE);
   ~HttpRequest();
 
-  static void parseRequest(std::string &rawRequest, HttpRequest &request);
-  static ParseState parseChunkedBody(std::string &rawRequest, HttpRequest &request);
+  static void parseRequest(std::string &raw_request, HttpRequest &request);
+  static ParseState parseChunkedBody(std::string &raw_request, HttpRequest &request);
   static bool isInvalidLetter(unsigned char ch);
   static bool isValidContentLength(const std::string &str);
   static bool isParsePending(const HttpRequest &request);
-  config::REQUEST_METHOD method;
-  std::string uri;  // スキーマ、ポートは？？
-  std::string version;
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
-  std::string queries;  // mapでもっていたが、子プロセスにQUERY_STRINGとして渡すからstringの方が良さげ。
-  std::string body;
+  config::REQUEST_METHOD method_;
+  std::string uri_;  // スキーマ、ポートは？？
+  std::string version_;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers_;
+  std::string queries_;  // mapでもっていたが、子プロセスにQUERY_STRINGとして渡すからstringの方が良さげ。
+  std::string body_;
   std::string
-      port_in_host;  // headerのhostにportの情報が格納されている場合がある、[:]も含んだ値で保管する(cgiのメタ変数で使用するため)
+      port_in_host_;  // headerのhostにportの情報が格納されている場合がある、[:]も含んだ値で保管する(cgiのメタ変数で使用するため)
 
-  ParseState parseState;
+  ParseState parse_state_;
 
  private:
   std::string key_buf_;
@@ -58,12 +58,12 @@ class HttpRequest {
   std::string spc_buf_;
   int state_;  // より細かいフェーズのstate
 
-  static ParseState parseMethod(std::string &rawRequest, HttpRequest &request);
-  static ParseState parseUri(std::string &rawRequest, HttpRequest &request);
-  static ParseState parseVersion(std::string &rawRequest, HttpRequest &request);
-  static ParseState parseRequestLine(std::string &rawRequest, HttpRequest &request);
-  static ParseState parseHeaders(std::string &rawRequest, HttpRequest &request);
-  static ParseState parseBody(std::string &rawRequest, HttpRequest &request);
+  static ParseState parseMethod(std::string &raw_request, HttpRequest &request);
+  static ParseState parseUri(std::string &raw_request, HttpRequest &request);
+  static ParseState parseVersion(std::string &raw_request, HttpRequest &request);
+  static ParseState parseRequestLine(std::string &raw_request, HttpRequest &request);
+  static ParseState parseHeaders(std::string &raw_request, HttpRequest &request);
+  static ParseState parseBody(std::string &raw_request, HttpRequest &request);
   static bool parseHost(std::string &host, HttpRequest &request);
   static std::string urlDecode(const std::string &encoded);
   static void resetBufs(HttpRequest &request);

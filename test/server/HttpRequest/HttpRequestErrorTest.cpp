@@ -15,7 +15,7 @@ TEST(HttpRequest, ErrorTest1) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest2) {
@@ -26,7 +26,7 @@ TEST(HttpRequest, ErrorTest2) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest3) {
@@ -37,7 +37,7 @@ TEST(HttpRequest, ErrorTest3) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest4) {
@@ -48,7 +48,7 @@ TEST(HttpRequest, ErrorTest4) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest5) {
@@ -59,7 +59,7 @@ TEST(HttpRequest, ErrorTest5) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest6) {
@@ -70,7 +70,7 @@ TEST(HttpRequest, ErrorTest6) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest7) {
@@ -80,7 +80,7 @@ TEST(HttpRequest, ErrorTest7) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest8) {
@@ -91,7 +91,7 @@ TEST(HttpRequest, ErrorTest8) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest9) {
@@ -102,7 +102,7 @@ TEST(HttpRequest, ErrorTest9) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest10) {
@@ -113,7 +113,7 @@ TEST(HttpRequest, ErrorTest10) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest11) {
@@ -124,7 +124,7 @@ TEST(HttpRequest, ErrorTest11) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest12) {
@@ -135,7 +135,7 @@ TEST(HttpRequest, ErrorTest12) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest13) {
@@ -146,7 +146,7 @@ TEST(HttpRequest, ErrorTest13) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest14) {
@@ -157,7 +157,7 @@ TEST(HttpRequest, ErrorTest14) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest15) {
@@ -168,7 +168,7 @@ TEST(HttpRequest, ErrorTest15) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* --------------  request line error test end -------------- */
@@ -183,7 +183,7 @@ TEST(HttpRequest, ErrorTest16) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest17) {
@@ -194,7 +194,7 @@ TEST(HttpRequest, ErrorTest17) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest18) {
@@ -205,7 +205,7 @@ TEST(HttpRequest, ErrorTest18) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest19) {
@@ -216,7 +216,7 @@ TEST(HttpRequest, ErrorTest19) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest20) {
@@ -228,7 +228,7 @@ TEST(HttpRequest, ErrorTest20) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest21) {
@@ -239,7 +239,7 @@ TEST(HttpRequest, ErrorTest21) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* --------------  header field error test end -------------- */
@@ -254,7 +254,7 @@ TEST(HttpRequest, ErrorTest22) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* -------------- query string error test end -------------- */
@@ -269,7 +269,7 @@ TEST(HttpRequest, ErrorTest23) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest24) {
@@ -280,7 +280,7 @@ TEST(HttpRequest, ErrorTest24) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest25) {
@@ -291,7 +291,7 @@ TEST(HttpRequest, ErrorTest25) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest26) {
@@ -302,7 +302,7 @@ TEST(HttpRequest, ErrorTest26) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* -------------- uri decode error test end -------------- */
@@ -318,7 +318,7 @@ TEST(HttpRequest, ErrorTest27) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, invalid_host1) {
@@ -331,7 +331,7 @@ TEST(HttpRequest, invalid_host1) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, invalid_host2) {
@@ -344,7 +344,7 @@ TEST(HttpRequest, invalid_host2) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* -------------- header host test end -------------- */
@@ -360,7 +360,7 @@ TEST(HttpRequest, ErrorTest28) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest29) {
@@ -373,7 +373,7 @@ TEST(HttpRequest, ErrorTest29) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest30) {
@@ -386,7 +386,7 @@ TEST(HttpRequest, ErrorTest30) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest31) {
@@ -399,7 +399,7 @@ TEST(HttpRequest, ErrorTest31) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest32) {
@@ -412,7 +412,7 @@ TEST(HttpRequest, ErrorTest32) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest33) {
@@ -425,7 +425,7 @@ TEST(HttpRequest, ErrorTest33) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest34) {
@@ -438,7 +438,7 @@ TEST(HttpRequest, ErrorTest34) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest35) {
@@ -451,7 +451,7 @@ TEST(HttpRequest, ErrorTest35) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest36) {
@@ -464,7 +464,7 @@ TEST(HttpRequest, ErrorTest36) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest37) {
@@ -477,7 +477,7 @@ TEST(HttpRequest, ErrorTest37) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest38) {
@@ -490,7 +490,7 @@ TEST(HttpRequest, ErrorTest38) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest39) {
@@ -503,7 +503,7 @@ TEST(HttpRequest, ErrorTest39) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* -------------- header content-length test end -------------- */
@@ -519,7 +519,7 @@ TEST(HttpRequest, ErrorTest40) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest41) {
@@ -533,7 +533,7 @@ TEST(HttpRequest, ErrorTest41) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* -------------- header transfer-encoding test -------------- */
@@ -548,7 +548,7 @@ TEST(HttpRequest, ErrorTest42) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest43) {
@@ -561,7 +561,7 @@ TEST(HttpRequest, ErrorTest43) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest44) {
@@ -574,7 +574,7 @@ TEST(HttpRequest, ErrorTest44) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest45) {
@@ -587,7 +587,7 @@ TEST(HttpRequest, ErrorTest45) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_NOT_IMPLEMENTED, test.parse_state_);
 }
 
 /* -------------- header transfer-encoding test end -------------- */
@@ -605,7 +605,7 @@ TEST(HttpRequest, ErrorTest46) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest47) {
@@ -619,7 +619,7 @@ TEST(HttpRequest, ErrorTest47) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, ErrorTest48) {
@@ -634,7 +634,7 @@ TEST(HttpRequest, ErrorTest48) {
   HttpRequest test;
   HttpRequest::parseRequest(rawRequest, test);
 
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 /* -------------- header unique test end -------------- */
@@ -649,7 +649,7 @@ TEST(HttpRequest, error_normalize_uri_1) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_normalize_uri_2) {
@@ -660,7 +660,7 @@ TEST(HttpRequest, error_normalize_uri_2) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_normalize_uri_3) {
@@ -671,7 +671,7 @@ TEST(HttpRequest, error_normalize_uri_3) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_normalize_uri_4) {
@@ -682,7 +682,7 @@ TEST(HttpRequest, error_normalize_uri_4) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_normalize_uri_5) {
@@ -694,7 +694,7 @@ TEST(HttpRequest, error_normalize_uri_5) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_normalize_uri_6) {
@@ -705,7 +705,7 @@ TEST(HttpRequest, error_normalize_uri_6) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 /* -------------- header uri test end -------------- */
 
@@ -720,7 +720,7 @@ TEST(HttpRequest, error_cli_max_body_size_1) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parse_state_);
   test::teardownMaxBodySize();
 }
 
@@ -736,13 +736,13 @@ TEST(HttpRequest, error_cli_max_body_size_2) {
       "a\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req =
       "63\r\n"  // 99 bytes in dec
       "this is test";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parse_state_);
   test::teardownMaxBodySize();
 }
 
@@ -758,20 +758,20 @@ TEST(HttpRequest, error_cli_max_body_size_3) {
       "a\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req =
       "3\r\n"
       "123\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req =
       "1\r\n"
       "t\n"
       "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR_BODY_TOO_LARGE, test.parse_state_);
   test::teardownMaxBodySize();
 }
 /* -------------- client max body size test end -------------- */
@@ -788,7 +788,7 @@ TEST(HttpRequest, error_chunked_body_1) {
       "123456\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_chunked_body_2) {
@@ -804,7 +804,7 @@ TEST(HttpRequest, error_chunked_body_2) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_chunked_body_3) {
@@ -820,7 +820,7 @@ TEST(HttpRequest, error_chunked_body_3) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 /* -------------- chunked body test end -------------- */
 
@@ -833,7 +833,7 @@ TEST(HttpRequest, error_host_1) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_host_2) {
@@ -844,7 +844,7 @@ TEST(HttpRequest, error_host_2) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_host_3) {
@@ -855,7 +855,7 @@ TEST(HttpRequest, error_host_3) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 
 TEST(HttpRequest, error_host_4) {
@@ -866,6 +866,6 @@ TEST(HttpRequest, error_host_4) {
       "\r\n";
   HttpRequest test;
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_ERROR, test.parse_state_);
 }
 /* -------------- host with port test end -------------- */

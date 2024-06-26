@@ -9,7 +9,7 @@ void *KqueueActiveEventManager::getActiveEvents() { return static_cast<void *>(&
 
 int KqueueActiveEventManager::getActiveEventsNum() { return this->active_events_num_; }
 
-void KqueueActiveEventManager::setActiveEventsNum(const int num) { this->active_events_num_ = num; }
+void KqueueActiveEventManager::setActiveEventsNum(int num) { this->active_events_num_ = num; }
 
 /**
  * @brief Kqueueでは使用しない

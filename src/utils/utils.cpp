@@ -1,4 +1,4 @@
-#include "Utils.hpp"
+#include "utils.hpp"
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -8,23 +8,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "SysCallWrapper.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 
-int Utils::wrapperOpen(const std::string path, int flags, mode_t modes) {
-  int fd = open(path.c_str(), flags, modes);
-  if (fd == -1) WebServer::writeErrorlog(error::strSysCallError("open", path) + "\n");
-  return fd;
-}
-
-int Utils::wrapperAccess(const std::string path, int modes, bool err_log) {
-  int ret = access(path.c_str(), modes);
-  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n");
-  return ret;
-}
-
-bool Utils::wrapperRealpath(const std::string& path, std::string& absolute_path) {
+bool utils::resolvePath(const std::string& path, std::string& absolute_path) {
   char tmp_path[MAXPATHLEN];
   if (realpath(path.c_str(), tmp_path) == NULL) {
     return false;
@@ -34,7 +22,7 @@ bool Utils::wrapperRealpath(const std::string& path, std::string& absolute_path)
   return true;
 }
 
-bool Utils::isFile(const std::string& path, bool err_log) {
+bool utils::isFile(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
     if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
@@ -43,7 +31,7 @@ bool Utils::isFile(const std::string& path, bool err_log) {
   return S_ISREG(statbuf.st_mode);
 }
 
-bool Utils::isDirectory(const std::string& path, bool err_log) {
+bool utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
     if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
@@ -52,16 +40,16 @@ bool Utils::isDirectory(const std::string& path, bool err_log) {
   return S_ISDIR(statbuf.st_mode);
 }
 
-std::string Utils::readFile(const std::string& filePath) {
-  std::ifstream file(filePath.c_str());
+std::string utils::readFile(const std::string& path) {
+  std::ifstream file(path.c_str());
   std::stringstream buffer;
   buffer << file.rdbuf();
   return buffer.str();
 }
 
-std::vector<std::string> Utils::createDirectoryContents(const std::string& directoryPath) {
+std::vector<std::string> utils::createDirectoryContents(const std::string& path) {
   std::vector<std::string> contents;
-  DIR* dir = opendir(directoryPath.c_str());
+  DIR* dir = opendir(path.c_str());
   // error出力？
   if (dir == NULL) return contents;
   struct dirent* entry;
@@ -71,7 +59,7 @@ std::vector<std::string> Utils::createDirectoryContents(const std::string& direc
   while ((entry = readdir(dir)) != NULL) {
     std::string filename = entry->d_name;
     if (filename != "." && filename != "..") {
-      if (Utils::isDirectory(directoryPath + "/" + filename, false)) filename += "/";
+      if (utils::isDirectory(path + "/" + filename, false)) filename += "/";
       contents.push_back(filename);
     }
   }
@@ -80,24 +68,24 @@ std::vector<std::string> Utils::createDirectoryContents(const std::string& direc
   return contents;
 }
 
-bool Utils::isExecutable(const char* filename) {
+bool utils::isExecutable(const char* filename) {
   struct stat sbuf;
   if (stat(filename, &sbuf) < 0) return false;
   return S_ISREG(sbuf.st_mode) && (S_IXUSR & sbuf.st_mode);
 }
 
-bool Utils::isExtensionFile(const std::string& filename, const std::string& extension) {
+bool utils::isExtensionFile(const std::string& filename, const std::string& extension) {
   if (filename.length() < extension.length()) return false;
   return std::equal(extension.begin(), extension.end(), filename.end() - extension.length());
 }
 
-ssize_t Utils::wrapperWrite(const int fd, const std::string& msg) {
+ssize_t utils::writeChunks(int fd, const std::string& msg) {
   size_t msg_size = msg.size();
   size_t written_bytes = 0;
-  const size_t WriteSize = 1024;
+  size_t chunksize = 1024;
 
   while (written_bytes < msg_size) {
-    size_t write_size = std::min(WriteSize, msg_size - written_bytes);
+    size_t write_size = std::min(chunksize, msg_size - written_bytes);
     std::string chunk = msg.substr(written_bytes, write_size);
 
     ssize_t ret = write(fd, chunk.c_str(), chunk.size());
@@ -108,10 +96,10 @@ ssize_t Utils::wrapperWrite(const int fd, const std::string& msg) {
   return written_bytes;
 }
 
-bool Utils::wrapperGetsockname(struct sockaddr_in& addr, const int sock) {
+bool utils::resolveSocketAddr(struct sockaddr_in& addr, int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
-    WebServer::writeErrorlog(error::strSysCallError("getsockname", Utils::toStr(sock)) + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)) + "\n");
     return false;
   }
   return true;
@@ -123,9 +111,9 @@ bool Utils::wrapperGetsockname(struct sockaddr_in& addr, const int sock) {
  * @param sock
  * @return int
  */
-int Utils::resolveConnectedPort(const int sock) {
+int utils::resolveConnectedPort(int sock) {
   struct sockaddr_in addr;
-  if (!wrapperGetsockname(addr, sock)) return -1;
+  if (!resolveSocketAddr(addr, sock)) return -1;
   return ntohs(addr.sin_port);
 }
 
@@ -135,13 +123,13 @@ int Utils::resolveConnectedPort(const int sock) {
  * @param sock
  * @return std::string
  */
-std::string Utils::socketToStrIPAddress(const int sock) {
+std::string utils::socketToStrIPAddress(int sock) {
   struct sockaddr_in addr;
-  if (!wrapperGetsockname(addr, sock)) return "";
+  if (!resolveSocketAddr(addr, sock)) return "";
   return ipToStr(addr.sin_addr.s_addr);
 }
 
-std::string Utils::ipToStr(const uint32_t ip) {
+std::string utils::ipToStr(uint32_t ip) {
   std::stringstream ss;
   uint32_t ip_host_order = ntohl(ip);  // ネットワークバイト順からホストバイト順に変換
   ss << ((ip_host_order >> 24) & 0xFF) << '.'  // 第1オクテット
@@ -151,7 +139,7 @@ std::string Utils::ipToStr(const uint32_t ip) {
   return ss.str();
 }
 
-uint32_t Utils::StrToIPAddress(const std::string& ip) {
+uint32_t utils::strToIPAddress(const std::string& ip) {
   std::istringstream iss(ip);
   std::string segment;
   std::vector<std::string> segments;
@@ -175,17 +163,17 @@ uint32_t Utils::StrToIPAddress(const std::string& ip) {
   return result;
 }
 
-std::string Utils::toLower(std::string str) {
+std::string utils::toLower(std::string str) {
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
   return str;
 }
 
-std::string Utils::toUpper(std::string str) {
+std::string utils::toUpper(std::string str) {
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
   return str;
 }
 
-bool Utils::isSpace(const unsigned char ch) { return ch == ' '; }
+bool utils::isSpace(unsigned char ch) { return ch == ' '; }
 
 /**
  * @brief 文字列の大文字小文字の差異を無視して、比較する
@@ -195,7 +183,7 @@ bool Utils::isSpace(const unsigned char ch) { return ch == ' '; }
  * @return true
  * @return false
  */
-bool Utils::compareIgnoreCase(std::string lhs, std::string rhs) {
+bool utils::compareIgnoreCase(std::string lhs, std::string rhs) {
   std::transform(lhs.begin(), lhs.end(), lhs.begin(), ::tolower);
   std::transform(rhs.begin(), rhs.end(), rhs.begin(), ::tolower);
   return lhs == rhs;
@@ -210,31 +198,31 @@ bool Utils::compareIgnoreCase(std::string lhs, std::string rhs) {
  * @param fd
  * @return int
  */
-int Utils::setNonBlockingCloExec(const int fd) {
-  int nonblock = SysCallWrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
+int utils::setNonBlockCloExec(int fd) {
+  int nonblock = syscall_wrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
   // 以下はサブジェクトで使えないフラグ使用
-  int closex = SysCallWrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
+  int closex = syscall_wrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);
   if (nonblock == -1 || closex == -1) return -1;
   return closex;
 }
 
-size_t Utils::strToSizet(const std::string& str) {
+size_t utils::strToSizet(const std::string& str) {
   std::istringstream iss(str);
   size_t size;
   iss >> size;
   return size;
 }
 
-size_t Utils::hexToDec(const std::string& str) {
+size_t utils::hexToDec(const std::string& str) {
   std::istringstream iss(str);
   size_t size;
   iss >> std::hex >> size;
   return size;
 }
 
-bool Utils::isSign(unsigned char ch) { return ch == '+' || ch == '-'; }
+bool utils::isSign(unsigned char ch) { return ch == '+' || ch == '-'; }
 
-bool Utils::isNumeric(const std::string& str) {
+bool utils::isNumeric(const std::string& str) {
   for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
     if (!std::isdigit(*it)) return false;
   }
@@ -245,7 +233,7 @@ bool Utils::isNumeric(const std::string& str) {
  * @brief 絶対パスを正規化する
  * WARNING:相対パスは引数で渡さない
  */
-std::string Utils::normalizePath(const std::string& full_path) {
+std::string utils::normalizePath(const std::string& full_path) {
   std::vector<std::string> components;
   std::istringstream ss(full_path);
   std::string token;
@@ -272,7 +260,7 @@ std::string Utils::normalizePath(const std::string& full_path) {
   return result;
 }
 
-std::string Utils::replace(const std::string& str, char old_c, char new_c) {
+std::string utils::replace(const std::string& str, char old_c, char new_c) {
   std::string new_str;
   for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
     if (*it == old_c) {

@@ -27,7 +27,7 @@ autoindexとエラーページを追加しました。
 ### GCIHandlerクラス
 * CGIスクリプトを子プロセスで実行し、実行結果をHttpMessage::responseGeneratorクラスに返す。
 
-### SysCallWrapper名前空間
+### syscall_wrapper名前空間
 * socket(), bind(), listen()などのシステムコールの実行とエラーをハンドルするラッパー関数Socket(), Bind(), Listen()などを定義。
 
 ### 使い方

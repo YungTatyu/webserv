@@ -5,20 +5,20 @@
 #include "cli_max_body_size_test.hpp"
 
 void checkHttpRequestEqual(HttpRequest expect, HttpRequest test) {
-  EXPECT_EQ(expect.method, test.method);
-  EXPECT_EQ(expect.uri, test.uri);
-  EXPECT_EQ(expect.version, test.version);
-  EXPECT_EQ(expect.headers, test.headers);
-  EXPECT_EQ(expect.queries, test.queries);
-  EXPECT_EQ(expect.port_in_host, test.port_in_host);
-  EXPECT_EQ(expect.body, test.body);
+  EXPECT_EQ(expect.method_, test.method_);
+  EXPECT_EQ(expect.uri_, test.uri_);
+  EXPECT_EQ(expect.version_, test.version_);
+  EXPECT_EQ(expect.headers_, test.headers_);
+  EXPECT_EQ(expect.queries_, test.queries_);
+  EXPECT_EQ(expect.port_in_host_, test.port_in_host_);
+  EXPECT_EQ(expect.body_, test.body_);
 
-  EXPECT_EQ(expect.parseState, test.parseState);
+  EXPECT_EQ(expect.parse_state_, test.parse_state_);
 }
 
 TEST(HttpRequest, OkTest1) {
   // testcase: リクエストラインだけ -> Hostヘッダーは無いとエラーなので追加.
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -36,7 +36,7 @@ TEST(HttpRequest, OkTest1) {
 TEST(HttpRequest, OkTest2) {
   // testcase: header fieldが一対ある時
   // testcase: bodyもあるけど、content-length, Transfer-Encodingどちらもないのでbody無視される
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::GET, "/", "HTTP/1.1", headers, "", "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -54,7 +54,7 @@ TEST(HttpRequest, OkTest2) {
 
 TEST(HttpRequest, OkTest3) {
   // testcase: header fieldが複数ある時
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   headers["name1"] = "value1";
   headers["name2"] = "value2";
@@ -75,7 +75,7 @@ TEST(HttpRequest, OkTest3) {
 
 TEST(HttpRequest, OkTest4) {
   // testcase: query stringが単体
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "query1=value1", "", "",
                      HttpRequest::PARSE_COMPLETE);
@@ -93,7 +93,7 @@ TEST(HttpRequest, OkTest4) {
 
 TEST(HttpRequest, OkTest5) {
   // testcase: query stringが複数ある時
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "query1=value1&query2=value2", "", "",
                      HttpRequest::PARSE_COMPLETE);
@@ -111,7 +111,7 @@ TEST(HttpRequest, OkTest5) {
 
 TEST(HttpRequest, OkTest6) {
   // testcase: chunked first
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   headers["Transfer-Encoding"] = "chunked";
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", "",
@@ -134,7 +134,7 @@ TEST(HttpRequest, OkTest6) {
 
 TEST(HttpRequest, OkTest7) {
   // testcase: chunked first
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   headers["Transfer-Encoding"] = "chunked";
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", "",
@@ -175,7 +175,7 @@ TEST(HttpRequest, OkTest7) {
 
 TEST(HttpRequest, OkTest8) {
   // testcase: chunked first
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   headers["Transfer-Encoding"] = "chunked";
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", "",
@@ -221,7 +221,7 @@ TEST(HttpRequest, OkTest8) {
 
 TEST(HttpRequest, OkTest9) {
   // testcase: encoded url
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::GET, "/Hello World!", "HTTP/1.1", headers, "", "", "",
                      HttpRequest::PARSE_COMPLETE);
@@ -239,7 +239,7 @@ TEST(HttpRequest, OkTest9) {
 
 TEST(HttpRequest, OkTest10) {
   // testcase: POSTをパースできるか
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::POST, "/", "HTTP/1.1", headers, "", "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -256,7 +256,7 @@ TEST(HttpRequest, OkTest10) {
 
 TEST(HttpRequest, OkTest11) {
   // testcase: HEADをパースできるか.
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::HEAD, "/", "HTTP/1.1", headers, "", "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -273,7 +273,7 @@ TEST(HttpRequest, OkTest11) {
 
 TEST(HttpRequest, OkTest12) {
   // testcase: HEADをパースできるか.
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::HEAD, "/", "HTTP/1.1", headers, "", "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -290,7 +290,7 @@ TEST(HttpRequest, OkTest12) {
 
 TEST(HttpRequest, OkTest13) {
   // testcase: DELETEをパースできるか.
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers;
   headers["Host"] = "aa";
   HttpRequest expect(config::DELETE, "/", "HTTP/1.1", headers, "", "", "", HttpRequest::PARSE_COMPLETE);
 
@@ -356,7 +356,7 @@ TEST(HttpRequest, OkTest16) {
 
 TEST(HttpRequest, OkTest17) {
   // testcase: chunked
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {
       {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "hello", "",
                      HttpRequest::PARSE_INPROGRESS);
@@ -409,7 +409,7 @@ TEST(HttpRequest, OkTest17) {
 
 TEST(HttpRequest, OkTest18) {
   // testcase: chunked with \r\n and bytes
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {
       {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0\r\n\r\n", "",
                      HttpRequest::PARSE_INPROGRESS);
@@ -486,7 +486,7 @@ TEST(HttpRequest, OkTest20) {
 /* -------------- chunk method test -------------- */
 
 TEST(HttpRequest, chunk_method_get_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "G" "E" "T" " "
@@ -518,7 +518,7 @@ TEST(HttpRequest, chunk_method_get_1) {
 }
 
 TEST(HttpRequest, chunk_method_get_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "GE" "T "
@@ -542,7 +542,7 @@ TEST(HttpRequest, chunk_method_get_2) {
 }
 
 TEST(HttpRequest, chunk_method_post_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "P" "O" "S" "T" " "
@@ -578,7 +578,7 @@ TEST(HttpRequest, chunk_method_post_1) {
 }
 
 TEST(HttpRequest, chunk_method_post_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "PO" "ST" " "
@@ -606,7 +606,7 @@ TEST(HttpRequest, chunk_method_post_2) {
 }
 
 TEST(HttpRequest, chunk_method_delete_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "D" "E" "L" "E" "T" "E" " "
@@ -650,7 +650,7 @@ TEST(HttpRequest, chunk_method_delete_1) {
 }
 
 TEST(HttpRequest, chunk_method_delete_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "DE" "LE" "TE" " "
@@ -682,7 +682,7 @@ TEST(HttpRequest, chunk_method_delete_2) {
 }
 
 TEST(HttpRequest, chunk_method_head_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "H" "E" "A" "D" " "
@@ -718,7 +718,7 @@ TEST(HttpRequest, chunk_method_head_1) {
 }
 
 TEST(HttpRequest, chunk_method_head_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
   HttpRequest expect1(config::UNKNOWN, "", "", {}, "", "", "", HttpRequest::PARSE_BEFORE);
 
   // test: "HE" "AD" " "
@@ -749,7 +749,7 @@ TEST(HttpRequest, chunk_method_head_2) {
 /* -------------- chunk method uri -------------- */
 
 TEST(HttpRequest, chunk_uri_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "/" "u" "r" "i" "/" " "
   HttpRequest expect1(config::POST, "", "", {}, "", "", "", HttpRequest::PARSE_METHOD_DONE);
@@ -793,7 +793,7 @@ TEST(HttpRequest, chunk_uri_1) {
 }
 
 TEST(HttpRequest, chunk_uri_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "/u" "ri" "/ "
   HttpRequest expect1(config::POST, "", "", {}, "", "", "", HttpRequest::PARSE_METHOD_DONE);
@@ -825,7 +825,7 @@ TEST(HttpRequest, chunk_uri_2) {
 }
 
 TEST(HttpRequest, chunk_uri_qs_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "/" "?" "?" "?" "t" "=" "l"
   HttpRequest expect1(config::POST, "", "", {}, "", "", "", HttpRequest::PARSE_METHOD_DONE);
@@ -878,7 +878,7 @@ TEST(HttpRequest, chunk_uri_qs_1) {
 }
 
 TEST(HttpRequest, chunk_uri_qs_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "?u" "=t" "&t" "=l" "ov" "e "
   HttpRequest expect1(config::POST, "", "", {}, "", "", "", HttpRequest::PARSE_METHOD_DONE);
@@ -923,7 +923,7 @@ TEST(HttpRequest, chunk_uri_qs_2) {
 }
 
 TEST(HttpRequest, chunk_uri_qs_3) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "/u" " "
   HttpRequest expect1(config::POST, "", "", {}, "", "", "", HttpRequest::PARSE_METHOD_DONE);
@@ -955,7 +955,7 @@ TEST(HttpRequest, chunk_uri_qs_3) {
 /* -------------- chunk version -------------- */
 
 TEST(HttpRequest, chunk_version_1) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "H" "T" "T" "P" "1" "." "1" "\r" "\n"
   HttpRequest expect1(config::DELETE, "/uri/", "", {}, "t=t", "", "", HttpRequest::PARSE_URI_DONE);
@@ -1016,7 +1016,7 @@ TEST(HttpRequest, chunk_version_1) {
 }
 
 TEST(HttpRequest, chunk_version_2) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: "HT" "TP" "/1" ".1" "\r\n" ""
   HttpRequest expect1(config::DELETE, "/uri/", "", {}, "t=t", "", "", HttpRequest::PARSE_URI_DONE);
@@ -1057,7 +1057,7 @@ TEST(HttpRequest, chunk_version_2) {
 }
 
 TEST(HttpRequest, chunk_version_3) {
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"}};
 
   // test: " HTTP/1.1" "\n"
   HttpRequest expect1(config::DELETE, "", "", {}, "", "", "", HttpRequest::PARSE_METHOD_DONE);
@@ -1344,95 +1344,95 @@ TEST(HttpRequest, chunk_chunked_body_1) {
 
   req = "3";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "b";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "d";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "6";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "1";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\t";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "1";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "e";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1",
                       {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "0bd\r\n1\n\r\te", "",
@@ -1471,73 +1471,73 @@ TEST(HttpRequest, chunk_chunked_body_2) {
   // "   "
   req = "3\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "  ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\ne";  // 14 bytes in decimal
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   // this is a body
   req = "th";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "is";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = " i";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "s ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "a ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "bo";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "dy";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "3\r\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   // hey
   req = "he";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "y\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1",
                       {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "   this is a bodyhey",
@@ -1571,11 +1571,11 @@ TEST(HttpRequest, chunk_chunked_body_3) {
 
   req = "0";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect3(config::POST, "/path/to/uri", "HTTP/1.1",
                       {{"Host", "aa"}, {"transfer-encoding", "chunked"}}, "user=kh", "", "",
@@ -1601,39 +1601,39 @@ TEST(HttpRequest, chunk_content_length_1) {
 
   req = "\r";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "2";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "4";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\n";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "\t";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = " ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "h";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "i";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "1"}},
                       "user=kh", "\r\n24\n\t hi\n", "", HttpRequest::PARSE_COMPLETE);
@@ -1659,27 +1659,27 @@ TEST(HttpRequest, chunk_content_length_2) {
   // this is a body
   req = "th";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "is";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = " i";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "s ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "a ";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   req = "bo";
   HttpRequest::parseRequest(req, test);
-  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parseState);
+  EXPECT_EQ(HttpRequest::PARSE_INPROGRESS, test.parse_state_);
 
   HttpRequest expect2(config::POST, "/path/to/uri", "HTTP/1.1", {{"Host", "aa"}, {"content-length", "2"}},
                       "user=kh", "this is a body", "", HttpRequest::PARSE_COMPLETE);
@@ -1840,7 +1840,7 @@ TEST(HttpRequest, normalize_uri_9) {
 /* -------------- body chunk test -------------- */
 TEST(HttpRequest, chunk_hex_1) {
   // testcase: chunked with hex bytes
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {
       {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0123456789", "",
                      HttpRequest::PARSE_INPROGRESS);
@@ -1883,7 +1883,7 @@ TEST(HttpRequest, chunk_hex_1) {
 
 TEST(HttpRequest, chunk_hex_2) {
   // testcase: chunked with hex bytes
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {
       {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "", "0123456789abcdef", "",
                      HttpRequest::PARSE_INPROGRESS);
@@ -1927,7 +1927,7 @@ TEST(HttpRequest, chunk_hex_2) {
 TEST(HttpRequest, chunk_hex_3) {
   // testcase: client max body size = 0 means no limits
   test::setupMaxBodySize(0);
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {
       {"Host", "aa"}, {"Transfer-Encoding", "chunked"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "",
                      std::string("0123456789") + "0123456789" + "0123456789" + "0123456789" + "42", "",
@@ -1957,7 +1957,7 @@ TEST(HttpRequest, chunk_hex_3) {
 TEST(HttpRequest, client_max_body_size_1) {
   // testcase: client max body size = 0 means no limits
   test::setupMaxBodySize(0);
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers = {{"Host", "aa"},
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers = {{"Host", "aa"},
                                                                                {"content-length", "42"}};
   HttpRequest expect(config::GET, "/html", "HTTP/1.1", headers, "",
                      std::string("0123456789") + "0123456789" + "0123456789" + "0123456789" + "42", "",

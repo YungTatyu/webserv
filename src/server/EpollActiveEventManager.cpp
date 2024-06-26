@@ -11,7 +11,7 @@ void *EpollActiveEventManager::getActiveEvents() { return static_cast<void *>(&(
 
 int EpollActiveEventManager::getActiveEventsNum() { return this->active_events_num_; }
 
-void EpollActiveEventManager::setActiveEventsNum(const int num) { this->active_events_num_ = num; }
+void EpollActiveEventManager::setActiveEventsNum(int num) { this->active_events_num_ = num; }
 
 void EpollActiveEventManager::addEvent(const void *event) { (void)event; }
 

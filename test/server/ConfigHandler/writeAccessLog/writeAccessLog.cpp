@@ -7,7 +7,7 @@ TEST(ConfigHandlerTestWriteAccessLog, off) {
   std::string file_path = test.getAbsolutePath(".") + "/off";
   std::string msg = "aiueo";
 
-  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                       msg);
   test.EXPECT_NO_FILE(file_path);
 }
@@ -19,7 +19,7 @@ TEST(ConfigHandlerTestWriteAccessLog, location) {
   std::string file_path = test.getAbsolutePath("./logs/location_access.log");
   std::string msg = "kakikukeko";
 
-  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                       msg);
   test.WRITE_ACCURATE(file_path, msg);
 }
@@ -31,7 +31,7 @@ TEST(ConfigHandlerTestWriteAccessLog, parent_context) {
   std::string file_path = test.getAbsolutePath("./logs/server_access.log");
   std::string msg = "sashisuseso";
 
-  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                       msg);
   test.WRITE_ACCURATE(file_path, msg);
 }
@@ -43,7 +43,7 @@ TEST(ConfigHandlerTestWriteAccessLog, grand_parent_context) {
   std::string file_path = test.getAbsolutePath("./logs/http_access.log");
   std::string msg = "tachitsuteto";
 
-  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                       msg);
   test.WRITE_ACCURATE(file_path, msg);
 }
@@ -57,7 +57,7 @@ TEST(ConfigHandlerTestWriteAccessLog, multiple_file) {
   std::string file_path3 = test.getAbsolutePath("./logs/multiple3.log");
   std::string msg = "naninuneno\n";
 
-  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers["Host"], test.request_.uri,
+  test.config_handler_.writeAccessLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                       msg);
   test.WRITE_ACCURATE(file_path1, msg);
   test.WRITE_ACCURATE(file_path2, msg);

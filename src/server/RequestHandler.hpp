@@ -10,32 +10,32 @@
 class RequestHandler {
  public:
   RequestHandler();
-  void handleReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                       TimerTree &timerTree, const int sockfd) const;
-  void handleWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                        TimerTree &timerTree, const int sockfd) const;
-  void handleCgiReadEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                          TimerTree &timerTree, const int sockfd) const;
-  void handleCgiWriteEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                           TimerTree &timerTree, const int sockfd) const;
-  void handleEofEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                      TimerTree &timerTree, const int sockfd) const;
-  void handleErrorEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                        TimerTree &timerTree, const int sockfd) const;
-  void handleTimeoutEvent(NetworkIOHandler &ioHandler, ConnectionManager &connManager, IServer *server,
-                          TimerTree &timerTree) const;
+  void handleReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                       TimerTree &timer_tree, int sock) const;
+  void handleWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                        TimerTree &timer_tree, int sock) const;
+  void handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                          TimerTree &timer_tree, int sock) const;
+  void handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                           TimerTree &timer_tree, int sock) const;
+  void handleEofEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                      TimerTree &timer_tree, int sock) const;
+  void handleErrorEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                        TimerTree &timer_tree, int sock) const;
+  void handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
+                          TimerTree &timer_tree) const;
 
  private:
-  bool cgiProcessExited(const pid_t process_id, int &status) const;
-  void handleRequest(ConnectionManager &connManager, const ConfigHandler &configHandler, IServer *server,
-                     TimerTree &timerTree, const int sockfd) const;
-  void handleResponse(ConnectionManager &connManager, const ConfigHandler &configHandler, IServer *server,
-                      TimerTree &timerTree, const int sockfd) const;
-  void handleCgi(ConnectionManager &connManager, const ConfigHandler &configHandler, IServer *server,
-                 TimerTree &timerTree, const int sockfd) const;
-  void addTimerByType(ConnectionManager &connManager, const ConfigHandler &configHandler,
-                      TimerTree &timerTree, const int sockfd, enum Timer::TimeoutType type) const;
-  bool isOverWorkerConnections(ConnectionManager &connManager, const ConfigHandler &configHandler) const;
+  bool cgiProcessExited(pid_t process_id, int &status) const;
+  void handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
+                     TimerTree &timer_tree, int sock) const;
+  void handleResponse(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
+                      TimerTree &timer_tree, int sock) const;
+  void handleCgi(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
+                 TimerTree &timer_tree, int sock) const;
+  void addTimerByType(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
+                      TimerTree &timer_tree, int sock, enum Timer::TimeoutType type) const;
+  bool isOverWorkerConnections(ConnectionManager &conn_manager, const ConfigHandler &config_handler) const;
 };
 
 #endif

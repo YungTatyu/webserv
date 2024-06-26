@@ -14,7 +14,7 @@ struct SelectEvent {
   };
   int fd_;
   SELECT_EVENT event_;
-  SelectEvent(const int fd, const SELECT_EVENT event) : fd_(fd), event_(event) {}
+  SelectEvent(int fd, SELECT_EVENT event) : fd_(fd), event_(event) {}
 };
 
 class SelectActiveEventManager : public IActiveEventManager {
@@ -23,7 +23,7 @@ class SelectActiveEventManager : public IActiveEventManager {
   ~SelectActiveEventManager();
   void *getActiveEvents();
   int getActiveEventsNum();
-  void setActiveEventsNum(const int num);
+  void setActiveEventsNum(int num);
   void addEvent(const void *event);
   void clearAllEvents();
   bool isReadEvent(const void *event);

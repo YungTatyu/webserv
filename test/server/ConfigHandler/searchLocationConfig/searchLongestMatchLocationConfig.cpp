@@ -28,7 +28,7 @@ TEST(ConfigHandlerTestSearchLocationConfig, longest_match1) {
   config::Server server = test.config_handler_.config_->http_.server_list_[0];
 
   test.sameLocation(server.location_list_[1],
-                    test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
+                    test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri_));
 }
 
 TEST(ConfigHandlerTestSearchLocationConfig, longest_match2) {
@@ -38,7 +38,7 @@ TEST(ConfigHandlerTestSearchLocationConfig, longest_match2) {
   config::Server server = test.config_handler_.config_->http_.server_list_[0];
 
   test.sameLocation(server.location_list_[0],
-                    test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
+                    test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri_));
 }
 
 TEST(ConfigHandlerTestSearchLocationConfig, longest_match3) {
@@ -48,5 +48,5 @@ TEST(ConfigHandlerTestSearchLocationConfig, longest_match3) {
   config::Server server = test.config_handler_.config_->http_.server_list_[0];
 
   test.sameLocation(server.location_list_[1],
-                    test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri));
+                    test.config_handler_.searchLongestMatchLocationConfig(server, test.request_.uri_));
 }

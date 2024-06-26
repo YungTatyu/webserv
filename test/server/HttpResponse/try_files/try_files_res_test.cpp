@@ -15,7 +15,7 @@ TEST(HttpResponseTry_files, in_server) {
                                         {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/server1.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/try_files/file/server1.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -33,7 +33,7 @@ TEST(HttpResponseTry_files, in_loc) {
                                         {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -50,7 +50,7 @@ TEST(HttpResponseTry_files, internal_redirect) {
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -124,7 +124,7 @@ TEST(HttpResponseTry_files, in_server_HEAD) {
                                         {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/server1.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/try_files/file/server1.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -141,7 +141,7 @@ TEST(HttpResponseTry_files, in_loc_HEAD) {
                                         {{"host", "mstk"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -157,7 +157,7 @@ TEST(HttpResponseTry_files, internal_redirect_HEAD) {
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "someone"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/try_files/file/loc1.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
