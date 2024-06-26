@@ -82,10 +82,10 @@ bool utils::isExtensionFile(const std::string& filename, const std::string& exte
 ssize_t utils::writeChunks(int fd, const std::string& msg) {
   size_t msg_size = msg.size();
   size_t written_bytes = 0;
-  const size_t WriteSize = 1024;
+  size_t chunksize = 1024;
 
   while (written_bytes < msg_size) {
-    size_t write_size = std::min(WriteSize, msg_size - written_bytes);
+    size_t write_size = std::min(chunksize, msg_size - written_bytes);
     std::string chunk = msg.substr(written_bytes, write_size);
 
     ssize_t ret = write(fd, chunk.c_str(), chunk.size());
