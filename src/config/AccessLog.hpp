@@ -13,7 +13,15 @@ class AccessLog {
 
  public:
   AccessLog() : file_(this->kDefaultFile_), is_accesslog_on_(kDefaultIsAccesslogOn_) {}
+  AccessLog(const AccessLog &other) { *this = other; }
   ~AccessLog() {}
+  AccessLog &operator=(const AccessLog &other) {
+    if (this != &other) {
+      this->file_ = other.file_;
+      this->is_accesslog_on_ = other.is_accesslog_on_;
+    }
+    return *this;
+  }
   const std::string &getFile() const { return this->file_; }
   const bool &getIsAccesslogOn() const { return this->is_accesslog_on_; }
   void setFile(const std::string &file) { this->file_ = file; }

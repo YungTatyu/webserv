@@ -12,8 +12,15 @@ class ClientMaxBodySize {
  public:
   const static unsigned long kDefaultSize_ = Size::megabytes;  // 1m
   ClientMaxBodySize() : size_(kDefaultSize_) {}
+  ClientMaxBodySize(const ClientMaxBodySize& other) { *this = other; }
   ~ClientMaxBodySize() {}
-  const Size &getSize() const { return this->size_; }
+  ClientMaxBodySize& operator=(const ClientMaxBodySize& other) {
+    if (this != &other) {
+      this->size_ = other.size_;
+    }
+    return *this;
+  }
+  const Size& getSize() const { return this->size_; }
   void setSize(unsigned long size_in_bytes) { this->size_.size_in_bytes_ = size_in_bytes; }
   const static unsigned int kType_ = CONF_HTTP | CONF_TAKE1 | CONF_UNIQUE;
 };

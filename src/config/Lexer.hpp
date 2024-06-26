@@ -19,6 +19,12 @@ struct Token {
   const unsigned int line_;
   Token(const std::string& value, TK_TYPE type, unsigned int line)
       : value_(value), type_(type), line_(line) {}
+  Token(const Token& other) : value_(other.value_), type_(other.type_), line_(other.line_) {}
+  ~Token() {}
+
+ private:
+  Token();
+  Token& operator=(const Token& other);
 };
 
 class Lexer {
@@ -30,12 +36,14 @@ class Lexer {
 
  public:
   Lexer(const std::string& file_path);
+  Lexer(const Lexer& other);
+  ~Lexer();
   void tokenize();
   const std::vector<Token>& getTokens() const;
 
  private:
-  // private functions
   Lexer();
+  Lexer& operator=(const Lexer& other);
   const std::string getFileContent(const std::string& file_path) const;
   void skipSpaces();
   void skipComment();

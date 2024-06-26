@@ -11,7 +11,14 @@ class KeepaliveTimeout {
 
  public:
   KeepaliveTimeout() : time_(this->kDefaultTime_) {}
+  KeepaliveTimeout(const KeepaliveTimeout &other) { *this = other; }
   ~KeepaliveTimeout() {}
+  KeepaliveTimeout &operator=(const KeepaliveTimeout &other) {
+    if (this != &other) {
+      this->time_ = other.time_;
+    }
+    return *this;
+  }
   const static unsigned long kDefaultTime_;
   const Time &getTime() const { return this->time_; }
   void setTime(unsigned long time_in_ms) { this->time_.time_in_ms_ = time_in_ms; }

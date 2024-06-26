@@ -15,7 +15,16 @@ class ErrorPage {
 
  public:
   ErrorPage() : response_(this->kResponseUnset) {}
+  ErrorPage(const ErrorPage &other) { *this = other; }
   ~ErrorPage() {}
+  ErrorPage &operator=(const ErrorPage &other) {
+    if (this != &other) {
+      this->code_set_ = other.code_set_;
+      this->response_ = other.response_;
+      this->uri_ = other.uri_;
+    }
+    return *this;
+  }
   const std::set<unsigned int> &getCodeList() const { return this->code_set_; }
   const long &getResponse() const { return this->response_; }
   const std::string &getUri() const { return this->uri_; }

@@ -10,7 +10,14 @@ class Autoindex {
 
  public:
   Autoindex() : is_autoindex_on_(this->kDefaultIsAutoindexOn_) {}
+  Autoindex(const Autoindex& other) { *this = other; }
   ~Autoindex() {}
+  Autoindex& operator=(const Autoindex& other) {
+    if (this != &other) {
+      this->is_autoindex_on_ = other.is_autoindex_on_;
+    }
+    return *this;
+  }
   const static bool kDefaultIsAutoindexOn_ = false;
   bool getIsAutoindexOn() const { return this->is_autoindex_on_; }
   void setIsAutoindexOn(bool is_autoindex_on) { this->is_autoindex_on_ = is_autoindex_on; }

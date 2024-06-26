@@ -21,7 +21,16 @@ enum REQUEST_METHOD {
 
 struct LimitExcept {
   LimitExcept() {}
+  LimitExcept(const LimitExcept& other) { *this = other; }
   ~LimitExcept() {}
+  LimitExcept& operator=(const LimitExcept& other) {
+    if (this != &other) {
+      this->directives_set_ = other.directives_set_;
+      this->excepted_methods_ = other.excepted_methods_;
+      this->allow_deny_list_ = other.allow_deny_list_;
+    }
+    return *this;
+  }
   static std::string MethodToStr(const REQUEST_METHOD method) {
     std::string re;
     switch (method) {

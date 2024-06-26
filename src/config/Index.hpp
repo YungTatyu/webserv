@@ -12,7 +12,14 @@ class Index {
 
  public:
   Index() : file_(this->kDefaultFile_) {}
+  Index(const Index &other) { *this = other; }
   ~Index() {}
+  Index &operator=(const Index &other) {
+    if (this != &other) {
+      this->file_ = other.file_;
+    }
+    return *this;
+  }
   const static char *kDefaultFile_;
   const std::string &getFile() const { return this->file_; }
   void setFile(const std::string &file) { this->file_ = file; }

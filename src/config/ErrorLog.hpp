@@ -12,10 +12,17 @@ class ErrorLog {
 
  public:
   ErrorLog() : file_(this->kDefaultFile_) {}
+  ErrorLog(const ErrorLog& other) { *this = other; }
   ~ErrorLog() {}
-  const static char *kDefaultFile_;
-  const std::string &getFile() const { return this->file_; }
-  void setFile(const std::string &file) { this->file_ = file; }
+  ErrorLog& operator=(const ErrorLog& other) {
+    if (this != &other) {
+      this->file_ = other.file_;
+    }
+    return *this;
+  }
+  const static char* kDefaultFile_;
+  const std::string& getFile() const { return this->file_; }
+  void setFile(const std::string& file) { this->file_ = file; }
   const static unsigned int kType_ =
       CONF_MAIN | CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_NOT_UNIQUE;
 };

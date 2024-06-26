@@ -17,7 +17,16 @@ class Listen {
       : address_(this->kDefaultAddress_),
         port_(this->kDefaultPort_),
         is_default_server_(this->kDefaultIsDefaultServer_) {}
+  Listen(const Listen &other) { *this = other; }
   ~Listen() {}
+  Listen &operator=(const Listen &other) {
+    if (this != &other) {
+      this->address_ = other.address_;
+      this->port_ = other.port_;
+      this->is_default_server_ = other.is_default_server_;
+    }
+    return *this;
+  }
   const static char *kDefaultAddress_;
   const static unsigned int kDefaultPort_ = 80;
   const static bool kDefaultIsDefaultServer_ = false;

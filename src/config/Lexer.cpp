@@ -7,6 +7,14 @@
 config::Lexer::Lexer(const std::string& file_path)
     : file_content_(getFileContent(file_path)), file_iterator_(0), current_line_(1) {}
 
+config::Lexer::Lexer(const Lexer& other)
+    : file_content_(other.file_content_),
+      file_iterator_(other.file_iterator_),
+      current_line_(other.current_line_),
+      tokens_(other.tokens_) {}
+
+config::Lexer::~Lexer() {}
+
 void config::Lexer::tokenize() {
   while (!isEndOfFile()) {
     skipSpaces();
