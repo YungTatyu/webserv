@@ -5,8 +5,8 @@
 #include <iomanip>
 
 #include "CgiHandler.hpp"
-#include "utils.hpp"
 #include "syscall_wrapper.hpp"
+#include "utils.hpp"
 
 const static std::string kAlias = "alias";
 const static std::string kTryFiles = "try_files";

@@ -8,10 +8,10 @@
 #include <cstring>
 #include <iostream>
 
-#include "utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #include "syscall_wrapper.hpp"
+#include "utils.hpp"
 
 cgi::CgiHandler::CgiHandler() : cgi_process_id_(-1), cli_socket_(-1) { resetSockets(); }
 

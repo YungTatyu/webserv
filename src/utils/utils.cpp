@@ -79,7 +79,7 @@ bool utils::isExtensionFile(const std::string& filename, const std::string& exte
   return std::equal(extension.begin(), extension.end(), filename.end() - extension.length());
 }
 
-ssize_t utils::writeChunks( int fd, const std::string& msg) {
+ssize_t utils::writeChunks(int fd, const std::string& msg) {
   size_t msg_size = msg.size();
   size_t written_bytes = 0;
   const size_t WriteSize = 1024;
@@ -96,7 +96,7 @@ ssize_t utils::writeChunks( int fd, const std::string& msg) {
   return written_bytes;
 }
 
-bool utils::resolveSocketAddr(struct sockaddr_in& addr,  int sock) {
+bool utils::resolveSocketAddr(struct sockaddr_in& addr, int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
     WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)) + "\n");
@@ -111,7 +111,7 @@ bool utils::resolveSocketAddr(struct sockaddr_in& addr,  int sock) {
  * @param sock
  * @return int
  */
-int utils::resolveConnectedPort( int sock) {
+int utils::resolveConnectedPort(int sock) {
   struct sockaddr_in addr;
   if (!resolveSocketAddr(addr, sock)) return -1;
   return ntohs(addr.sin_port);
@@ -123,13 +123,13 @@ int utils::resolveConnectedPort( int sock) {
  * @param sock
  * @return std::string
  */
-std::string utils::socketToStrIPAddress( int sock) {
+std::string utils::socketToStrIPAddress(int sock) {
   struct sockaddr_in addr;
   if (!resolveSocketAddr(addr, sock)) return "";
   return ipToStr(addr.sin_addr.s_addr);
 }
 
-std::string utils::ipToStr( uint32_t ip) {
+std::string utils::ipToStr(uint32_t ip) {
   std::stringstream ss;
   uint32_t ip_host_order = ntohl(ip);  // ネットワークバイト順からホストバイト順に変換
   ss << ((ip_host_order >> 24) & 0xFF) << '.'  // 第1オクテット
@@ -198,7 +198,7 @@ bool utils::compareIgnoreCase(std::string lhs, std::string rhs) {
  * @param fd
  * @return int
  */
-int utils::setNonBlockCloExec( int fd) {
+int utils::setNonBlockCloExec(int fd) {
   int nonblock = syscall_wrapper::Fcntl(fd, F_SETFL, O_NONBLOCK);
   // 以下はサブジェクトで使えないフラグ使用
   int closex = syscall_wrapper::Fcntl(fd, F_SETFD, FD_CLOEXEC);

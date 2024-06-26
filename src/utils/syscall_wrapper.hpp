@@ -10,8 +10,8 @@
 #include <stdexcept>
 
 namespace syscall_wrapper {
-int Open(const std::string& path, int flags, mode_t modes);
-int Access(const std::string& path, int modes, bool err_log);
+int Open(const std::string &path, int flags, mode_t modes);
+int Access(const std::string &path, int modes, bool err_log);
 int Socket(int domain, int type, int protocol);
 int Setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
 int Bind(int socket, const struct sockaddr *address, socklen_t address_len);

@@ -10,9 +10,9 @@
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
-#include "utils.hpp"
 #include "conf.hpp"
 #include "directives_test.hpp"
+#include "utils.hpp"
 
 namespace test {
 void test_value(const std::vector<config::ErrorLog> &list, const std::vector<std::string> &expect) {

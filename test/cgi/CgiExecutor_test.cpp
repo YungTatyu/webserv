@@ -16,8 +16,8 @@
 #include "CgiHandler.hpp"
 #include "ConnectionManager.hpp"
 #include "LimitExcept.hpp"
-#include "utils.hpp"
 #include "WebServer.hpp"
+#include "utils.hpp"
 
 typedef std::map<std::string, std::string> string_map;
 typedef std::pair<std::string, std::string> string_pair;

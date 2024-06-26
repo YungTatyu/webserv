@@ -12,11 +12,11 @@
 #include "ConnectionManager.hpp"
 #include "IServer.hpp"
 #include "TimerTree.hpp"
-#include "utils.hpp"
 #include "WebServer.hpp"
 #include "conf.hpp"
 #include "error.hpp"
 #include "syscall_wrapper.hpp"
+#include "utils.hpp"
 
 const size_t NetworkIOHandler::buffer_size_;
 

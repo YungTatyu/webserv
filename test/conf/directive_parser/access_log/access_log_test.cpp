@@ -10,10 +10,10 @@
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
-#include "syscall_wrapper.hpp"
-#include "utils.hpp"
 #include "conf.hpp"
 #include "directives_test.hpp"
+#include "syscall_wrapper.hpp"
+#include "utils.hpp"
 
 namespace test {
 void test_value(const std::vector<config::AccessLog> &list, const std::vector<std::string> &expect) {

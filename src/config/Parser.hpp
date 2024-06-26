@@ -12,8 +12,8 @@
 
 #include "Lexer.hpp"
 #include "Main.hpp"
-#include "utils.hpp"
 #include "conf.hpp"
+#include "utils.hpp"
 
 namespace config {
 enum OS {

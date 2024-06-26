@@ -12,8 +12,8 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "ResponseTest.hpp"
-#include "utils.hpp"
 #include "conf.hpp"
+#include "utils.hpp"
 
 namespace test {
 

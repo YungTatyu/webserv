@@ -9,9 +9,9 @@
 #include <ostream>
 
 #include "NetworkIOHandler.hpp"
-#include "utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
+#include "utils.hpp"
 
 const static std::string kAccessFd = "access_fd";
 const static std::string kErrorFd = "error_fd";
