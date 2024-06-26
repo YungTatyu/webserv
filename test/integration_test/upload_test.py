@@ -54,7 +54,7 @@ def send_request(req_data):
 
     # if (req_data['file_name']):
     files = {"file": open(f"{req_data['root']}/{req_data['file_name']}", "rb")}
-    print(f"{files}")
+    # print(f"{files}")
 
     if req_data["method"] == "POST":
         r = requests.post(
@@ -79,8 +79,8 @@ def run_test(conf, req_data):
     PATH_WEBSERV = f"{CWD}/../../webserv"
     expect_path = f"{req_data['root']}/{req_data['file_name']}"
     actual_path = f"{req_data['root']}/{UPLOAD_DIR}/{req_data['file_name']}"
-    print(expect_path)
-    print(actual_path)
+    # print(expect_path)
+    # print(actual_path)
 
     try:
         WEBSERV = run_server(PATH_WEBSERV, f"{req_data['root']}/{conf}")
@@ -141,8 +141,6 @@ def test_upload_file(conf, file_name, can_upload, fixture_session):
 
 @pytest.fixture(scope="session")
 def fixture_session():
-    print("start upload test")
     os.makedirs(f"{UPLOAD_PATH}")
     yield
-    print("finish upload test")
     shutil.rmtree(f"{UPLOAD_PATH}")
