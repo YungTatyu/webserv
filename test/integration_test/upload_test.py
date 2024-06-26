@@ -90,8 +90,14 @@ def run_test(conf, req_data):
         expect_headers_exist(actual)
 
         if not req_data["can_upload"]:
+            assert (
+                actual.status_code == 200
+            ), f"Status code must be 201, but actual {actual.status_code}"
             assert_file_not_created(f"{actual_path}")
         else:
+            assert (
+                actual.status_code == 201
+            ), f"Status code must be 201, but actual {actual.status_code}"
             assert_file_content(f"{actual_path}", f"{expect_path}")
 
     finally:

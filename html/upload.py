@@ -4,14 +4,11 @@ import os
 import sys
 
 # アップロードを許可する拡張子
-ALLOWED_EXTENSIONS = ["html", "txt", "pdf", "jpg", "jpeg", "png"]
+ALLOWED_EXTENSIONS = ["html", "txt", "pdf", "jpg", "jpeg"]
 
 # CGIヘッダーを出力
-print("Content-Type: text/html")
-print()
-
-# HTMLの開始
-print("<html><body>")
+header = "Content-Type: text/html\n"
+body = "<html><body>\n"
 
 # フォームデータの解析
 form = cgi.FieldStorage()
@@ -26,43 +23,43 @@ if "file" in form:
         fn = os.path.basename(fileitem.filename)
 
         # ファイルの拡張子を取得
-        ext = os.path.splitext(fn)[1][1:].strip().lower()
+        extension = os.path.splitext(fn)[1][1:].strip().lower()
 
         # 許可する拡張子かどうかチェック
-        if ext in ALLOWED_EXTENSIONS:
+        if extension in ALLOWED_EXTENSIONS:
             try:
-                # ファイルを保存
                 save_dir = "html/uploads"
                 if os.path.exists(save_dir):
+                    # ファイルを保存
                     save_path = f"{save_dir}/{fn}"
                     with open(save_path, "wb") as f:
                         f.write(fileitem.file.read())
-                    print(f"<p>The file '{fn}' was uploaded successfully</p>")
+                    header += "Status: 201 Created\n"
+                    body += f"<p>The file '{fn}' was uploaded successfully</p>\n"
                 else:
-                    print(
-                        f"<p>You have to create a directory({save_dir}) to upload files.</p>"
-                    )
+                    body += f"<p>You have to create a directory({save_dir}) to upload files.</p>\n"
 
             except Exception as e:
-                print(f"<p>Error uploading file: {e}</p>")
+                body += f"<p>Error uploading file: {e}</p>\n"
 
         else:
-            print(
-                f"<p>File '{fn}' has an invalid extension. Allowed extensions are: {', '.join(ALLOWED_EXTENSIONS)}</p>"
-            )
+            body += f"<p>File '{fn}' has an invalid extension. Allowed extensions are: {', '.join(ALLOWED_EXTENSIONS)}</p>\n"
 
     else:
-        print("<p>You have to select file.</p>")
+        body += "<p>You have to select file.</p>\n"
 else:
     # アップロードフォームを表示
-    print(
-        """
+    body += """
     <form enctype="multipart/form-data" method="post">
     <input type="file" name="file">
     <input type="submit" value="upload">
     </form>
-    """
-    )
+
+"""
 
 # HTMLの終了
-print("</body></html>")
+body += "</body></html>\n"
+
+print(header)
+print()
+print(body)
