@@ -12,7 +12,7 @@ const static char *kTransferEncoding = "Transfer-Encoding";
 const static char *kChunk = "chunked";
 
 HttpRequest::HttpRequest(config::REQUEST_METHOD method, const std::string &uri, const std::string &version,
-                         const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers,
+                         const std::map<std::string, std::string, utils::CaseInsensitiveCompare> &headers,
                          const std::string &queries, const std::string &body, const std::string &port,
                          ParseState state)
     : method_(method),
@@ -105,7 +105,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &raw_request, 
         return PARSE_ERROR;
 
       case sw_chunk_size:
-        if (Utils::hexToDec(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
+        if (utils::hexToDec(chunk_bytes) > (kMaxChunkSize / 16)) return PARSE_ERROR;
         if (std::isdigit(ch)) {
           chunk_bytes += ch;
           break;
@@ -134,11 +134,11 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &raw_request, 
             break;
           case '\n':
             state = sw_chunk_data;
-            bytes = Utils::hexToDec(chunk_bytes);
+            bytes = utils::hexToDec(chunk_bytes);
             if (cli_max_body_size != 0 &&
                 isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
               return PARSE_ERROR_BODY_TOO_LARGE;
-            chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
+            chunk_bytes = utils::toStr(bytes);  // 10進数に変換
             break;
           default:
             return PARSE_ERROR;
@@ -148,15 +148,15 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &raw_request, 
       case sw_chunk_extension_almost_done:
         if (ch != '\n') return PARSE_ERROR;
         state = sw_chunk_data;
-        bytes = Utils::hexToDec(chunk_bytes);
+        bytes = utils::hexToDec(chunk_bytes);
         if (cli_max_body_size != 0 &&
             isChunkBytesBiggerThanCliMaxBodySize(bytes, total_bytes, cli_max_body_size))
           return PARSE_ERROR_BODY_TOO_LARGE;
-        chunk_bytes = Utils::toStr(bytes);  // 10進数に変換
+        chunk_bytes = utils::toStr(bytes);  // 10進数に変換
         break;
 
       case sw_chunk_data:
-        bytes = Utils::strToSizet(chunk_bytes);
+        bytes = utils::strToSizet(chunk_bytes);
         request.body_ += ch;
         --bytes;
         if (bytes == 0) {
@@ -164,7 +164,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &raw_request, 
           chunk_bytes.clear();
           break;
         }
-        chunk_bytes = Utils::toStr(bytes);
+        chunk_bytes = utils::toStr(bytes);
         break;
 
       case sw_after_data:
@@ -388,7 +388,7 @@ HttpRequest::ParseState HttpRequest::parseUri(std::string &raw_request, HttpRequ
   size_t qindex = uri.find('?');
   std::string uri_part = uri.substr(0, qindex);
   if (!isValidUri(uri_part)) return PARSE_ERROR;
-  request.uri_ = Utils::normalizePath(uri_part);
+  request.uri_ = utils::normalizePath(uri_part);
   if (qindex != std::string::npos) request.queries_ = uri.substr(uri.find('?') + 1);
 
   resetBufs(request);
@@ -692,8 +692,8 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &raw_request, Http
       case sw_header_done:
         if (ch != '\n') return PARSE_ERROR;
         if (isUniqHeaderDup(request, cur_name)) return PARSE_ERROR;
-        if (Utils::compareIgnoreCase(kHost, cur_name) && !parseHost(cur_value, request)) return PARSE_ERROR;
-        if (Utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value))
+        if (utils::compareIgnoreCase(kHost, cur_name) && !parseHost(cur_value, request)) return PARSE_ERROR;
+        if (utils::compareIgnoreCase(kContentLength, cur_name) && !isValidContentLength(cur_value))
           return PARSE_ERROR;
         // headerが重複している場合は、一番初めに登場したものを優先する
         if (request.headers_.find(cur_name) == request.headers_.end()) request.headers_[cur_name] = cur_value;
@@ -724,12 +724,12 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &raw_request, Http
   resetBufs(request);
   raw_request = raw_request.substr(i);
 
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator end_it, cl_it, te_it;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare>::const_iterator end_it, cl_it, te_it;
   end_it = request.headers_.end();
   if (request.headers_.find(kHost) == end_it) return PARSE_ERROR;
   te_it = request.headers_.find(kTransferEncoding);
   cl_it = request.headers_.find(kContentLength);
-  if (te_it != end_it && !Utils::compareIgnoreCase(kChunk, te_it->second))
+  if (te_it != end_it && !utils::compareIgnoreCase(kChunk, te_it->second))
     return PARSE_NOT_IMPLEMENTED;  // chunk以外は対応しない
   if (te_it != end_it && cl_it != end_it)
     return PARSE_ERROR;  // content-length, transfer-encoding: chunkedの二つが揃ってはいけない
@@ -738,7 +738,7 @@ HttpRequest::ParseState HttpRequest::parseHeaders(std::string &raw_request, Http
   if (cl_it != end_it) {
     const ConfigHandler &config_handler = WebServer::getConfigHandler();
     unsigned long cli_max_body_size = config_handler.searchCliMaxBodySize();
-    unsigned long cl = Utils::strToT<unsigned long>(cl_it->second);
+    unsigned long cl = utils::strToT<unsigned long>(cl_it->second);
     if (cli_max_body_size != 0 && cl >= cli_max_body_size) return PARSE_ERROR_BODY_TOO_LARGE;
   }
 
@@ -771,7 +771,7 @@ bool HttpRequest::parseHost(std::string &host, HttpRequest &request) {
  * @return HttpRequest::ParseState
  */
 HttpRequest::ParseState HttpRequest::parseBody(std::string &raw_request, HttpRequest &request) {
-  size_t content_length = Utils::strToSizet(request.headers_.find(kContentLength)->second);
+  size_t content_length = utils::strToSizet(request.headers_.find(kContentLength)->second);
   if (content_length == 0) return PARSE_COMPLETE;
   std::string body = raw_request.substr(0, content_length);
   request.body_ += body;
@@ -780,7 +780,7 @@ HttpRequest::ParseState HttpRequest::parseBody(std::string &raw_request, HttpReq
   if (parsed_body_size == content_length) return PARSE_COMPLETE;
   // parse未完了：引き続きbodyを待つ
   request.headers_[kContentLength] =
-      Utils::toStr(content_length - parsed_body_size);  // 残りのbodyのsizeをupdate
+      utils::toStr(content_length - parsed_body_size);  // 残りのbodyのsizeをupdate
   return PARSE_INPROGRESS;
 }
 
@@ -822,8 +822,8 @@ void HttpRequest::resetBufs(HttpRequest &request) {
  * @return false
  */
 bool HttpRequest::isUniqHeaderDup(const HttpRequest &request, const std::string &header) {
-  if (!Utils::compareIgnoreCase(header, kHost) && !Utils::compareIgnoreCase(header, kContentLength) &&
-      !Utils::compareIgnoreCase(header, kTransferEncoding))
+  if (!utils::compareIgnoreCase(header, kHost) && !utils::compareIgnoreCase(header, kContentLength) &&
+      !utils::compareIgnoreCase(header, kTransferEncoding))
     return false;
   return request.headers_.find(header) != request.headers_.end();
 }
@@ -852,7 +852,7 @@ bool HttpRequest::isValidHost(const std::string &str) {
 }
 
 bool HttpRequest::isValidContentLength(const std::string &str) {
-  if (!Utils::isNumeric(str)) return false;
+  if (!utils::isNumeric(str)) return false;
   unsigned long length;
   std::istringstream iss(str);
   iss >> length;
@@ -891,12 +891,12 @@ bool HttpRequest::isValidUri(const std::string &str) {
 bool HttpRequest::isChunkBytesBiggerThanCliMaxBodySize(size_t chunk_bytes, std::string &total_bytes,
                                                        size_t cli_max_body_size) {
   if (chunk_bytes >= cli_max_body_size) return true;
-  size_t tb = Utils::strToSizet(total_bytes);
+  size_t tb = utils::strToSizet(total_bytes);
   // check overflow
   if (std::numeric_limits<size_t>::max() - tb < chunk_bytes) return true;
   size_t total = chunk_bytes + tb;
   // total bytesの値を更新
-  total_bytes = Utils::toStr(total);
+  total_bytes = utils::toStr(total);
   return total >= cli_max_body_size;
 }
 

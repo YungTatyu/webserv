@@ -24,7 +24,7 @@
 namespace test {
 
 typedef std::pair<std::string, unsigned int> ip_address_pair;
-typedef std::map<std::string, std::string, Utils::CaseInsensitiveCompare> string_map_case_insensitive;
+typedef std::map<std::string, std::string, utils::CaseInsensitiveCompare> string_map_case_insensitive;
 typedef std::map<std::string, std::string> string_map;
 
 class ResponseTest {
@@ -150,7 +150,7 @@ class ResponseTest {
     std::for_each(this->responses_.begin(), this->responses_.end(), [&expects, this](HttpResponse response) {
       const char *date = "Date";
       for (string_map::const_iterator it = expects.begin(); it != expects.end(); ++it) {
-        EXPECT_NO_THROW(if (Utils::compareIgnoreCase(it->first, date)) {
+        EXPECT_NO_THROW(if (utils::compareIgnoreCase(it->first, date)) {
           this->testDate(response.headers_[date]);
           continue;
         } EXPECT_EQ(response.headers_.at(it->first), it->second));

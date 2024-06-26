@@ -10,9 +10,10 @@
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
-#include "Utils.hpp"
 #include "conf.hpp"
 #include "directives_test.hpp"
+#include "syscall_wrapper.hpp"
+#include "utils.hpp"
 
 namespace test {
 void test_value(const std::vector<config::AccessLog> &list, const std::vector<std::string> &expect) {
@@ -34,13 +35,13 @@ config::Main *initConfigTest(const std::string &file_path) {
   }
 
   // file_path が存在するかどうか
-  if (Utils::wrapperAccess(absolute_path, F_OK, true) == -1) return NULL;
+  if (syscall_wrapper::Access(absolute_path, F_OK, true) == -1) return NULL;
 
   // file_path の読み取り権限があるかどうか
-  if (Utils::wrapperAccess(absolute_path, R_OK, true) == -1) return NULL;
+  if (syscall_wrapper::Access(absolute_path, R_OK, true) == -1) return NULL;
 
   // file_path がファイルかどうか確認する。
-  if (!Utils::isFile(absolute_path, false)) {
+  if (!utils::isFile(absolute_path, false)) {
     std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
     return NULL;
   }

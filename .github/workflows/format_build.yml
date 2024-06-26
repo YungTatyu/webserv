@@ -38,7 +38,7 @@ jobs:
       if: steps.format-changes.outputs.CHANGED == 'true'
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: ":recycle: auto-format code"
+        commit_message: ":recycle:refactor: auto-format code"
 
   # build test
   build-macos:

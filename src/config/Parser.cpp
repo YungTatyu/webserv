@@ -390,7 +390,7 @@ bool config::Parser::validFinalState() const {
     return false;
   }
   // events contextが設定されていないとerror
-  if (!Utils::hasDirective(this->config_, kEvents)) {
+  if (!utils::hasDirective(this->config_, kEvents)) {
     std::cerr << "webserv: [emerg] no \"events\" section in configuration\n";
     return false;
   }
@@ -896,7 +896,7 @@ unsigned int config::Parser::retCodeIfValid() {
   }
 
   if (!(300 <= code && code <= 599)) {
-    printError(static_cast<std::string>("value \"" + Utils::toStr(code) + "\" must be between 300 and 599"),
+    printError(static_cast<std::string>("value \"" + utils::toStr(code) + "\" must be between 300 and 599"),
                this->tokens_[ti_]);
     return 0;
   }
@@ -1081,7 +1081,7 @@ bool config::Parser::isMixedIPAddress(const std::string &mixed_ip) const {
 }
 
 bool config::Parser::isNumInRange(const std::string &num, long min, long max) const {
-  if (!Utils::isNumeric(num)) return false;
+  if (!utils::isNumeric(num)) return false;
 
   std::istringstream converter(num);
   long value;
@@ -1146,7 +1146,7 @@ bool config::Parser::parseListen() {
 
   // 1. もし空文字列ならエラー
   if (ori_val.empty()) {
-    printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+    printError(static_cast<std::string>("host not found in \"" + utils::toStr(ori_val) +
                                         "\" of the \"listen\" directive"),
                this->tokens_[ti_]);
     return false;
@@ -1156,7 +1156,7 @@ bool config::Parser::parseListen() {
   // ':'の領域が空なら空文字列を入れる。
   // ':'だけの場合はエラー
   if (ori_val == ":") {
-    printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+    printError(static_cast<std::string>("invalid port in \"" + utils::toStr(ori_val) +
                                         "\" of the \"listen\" directive"),
                this->tokens_[ti_]);
     return false;
@@ -1173,7 +1173,7 @@ bool config::Parser::parseListen() {
 
   // 3. 2つ以上に分かれてしまっていたらエラー
   if (segments.size() > 2) {
-    printError(static_cast<std::string>("invalid parameter \"" + Utils::toStr(ori_val) + "\""),
+    printError(static_cast<std::string>("invalid parameter \"" + utils::toStr(ori_val) + "\""),
                this->tokens_[ti_]);
     return false;
   }
@@ -1182,20 +1182,20 @@ bool config::Parser::parseListen() {
   if (segments.size() == 2) {
     // ip addressがあれば値を確認する。
     if (segments[0].empty()) {
-      printError(static_cast<std::string>("no host in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("no host in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
     }
     // ipv6にも対応するならば、!isIPv6()も条件に加えてください。
     if (!isIPv4(segments[0])) {
-      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("host not found in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
     }
     if (segments[0].find('/') != std::string::npos) {
-      printError(static_cast<std::string>("invalid host in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("invalid host in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
@@ -1204,7 +1204,7 @@ bool config::Parser::parseListen() {
 
     // port番号があれば値を確認しする。
     if (segments[1].empty()) {
-      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("invalid port in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
@@ -1214,14 +1214,14 @@ bool config::Parser::parseListen() {
     iss.str(segments[1].c_str());
     iss >> port;
     if (iss.fail() || iss.bad() || !iss.eof()) {
-      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("host not found in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
     }
 
     if (port < 0 || 65535 < port) {
-      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("invalid port in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
@@ -1239,12 +1239,12 @@ bool config::Parser::parseListen() {
     if (isIPv4(segments[0]))
       tmp_listen.setAddress(segments[0]);
     else if (iss.fail() || iss.bad() || !iss.eof()) {
-      printError(static_cast<std::string>("host not found in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("host not found in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
     } else if (tmp_port < 0 || 65535 < tmp_port) {
-      printError(static_cast<std::string>("invalid port in \"" + Utils::toStr(ori_val) +
+      printError(static_cast<std::string>("invalid port in \"" + utils::toStr(ori_val) +
                                           "\" of the \"listen\" directive"),
                  this->tokens_[ti_]);
       return false;
@@ -1263,7 +1263,7 @@ bool config::Parser::parseListen() {
     }
     if (isDuplicateDefaultServer(tmp_listen)) {
       printError(static_cast<std::string>("a duplicate default server for " +
-                                          Utils::toStr(this->tokens_[ti_ - 1].value_)),
+                                          utils::toStr(this->tokens_[ti_ - 1].value_)),
                  this->tokens_[ti_]);
       return false;
     }
@@ -1380,7 +1380,7 @@ bool config::Parser::parseReturn() {
   const std::string http = "http://";
   const std::string https = "https://";
 
-  if (Utils::isNumeric(this->tokens_[ti_].value_)) {
+  if (utils::isNumeric(this->tokens_[ti_].value_)) {
     if (!isNumInRange(this->tokens_[ti_].value_, 0, 999)) {
       printFormatedError("invalid return code", this->tokens_[ti_]);
       return false;
