@@ -26,13 +26,6 @@ class Parser {
  private:
   Parser();
   Parser &operator=(const Parser &other);
-  Main &config_;
-  const std::vector<Token> &tokens_;
-  const std::string filepath_;
-  size_t ti_;  // token index
-  std::string current_directive_;
-  std::stack<CONTEXT> current_context_;
-  std::map<std::string, bool (config::Parser::*)()> parser_map_;
   bool parseType(const Token &token);
   bool expectTokenType(config::TK_TYPE type, const Token &token) const;
   bool expectArgsNum(unsigned int expect, unsigned int actual) const;
@@ -90,6 +83,13 @@ class Parser {
   std::string toUpper(std::string) const;
   bool isDuplicateDefaultServer(const config::Listen &this_listen);
   void updateDirectivesSet(const std::string &directive);
+  Main &config_;
+  const std::vector<Token> &tokens_;
+  const std::string filepath_;
+  size_t ti_;  // token index
+  std::string current_directive_;
+  std::stack<CONTEXT> current_context_;
+  std::map<std::string, bool (config::Parser::*)()> parser_map_;
 
  public:
   Parser(Main &config, const std::vector<Token> &tokens, const std::string &filepath);

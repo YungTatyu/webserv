@@ -12,7 +12,7 @@ class AccessLog {
   bool is_accesslog_on_;
 
  public:
-  AccessLog() : file_(this->kDefaultFile_), is_accesslog_on_(kDefaultIsAccesslogOn_) {}
+  AccessLog() : file_(this->kDefaultFile_), is_accesslog_on_(this->kDefaultIsAccesslogOn_) {}
   AccessLog(const AccessLog &other) { *this = other; }
   ~AccessLog() {}
   AccessLog &operator=(const AccessLog &other) {
@@ -27,9 +27,9 @@ class AccessLog {
   void setFile(const std::string &file) { this->file_ = file; }
   void setIsAccesslogOn(bool is_accesslog_on) { this->is_accesslog_on_ = is_accesslog_on; }
   const static char *kDefaultFile_;
+  const static bool kDefaultIsAccesslogOn_ = true;
   const static unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_NOT_UNIQUE;
-  const static bool kDefaultIsAccesslogOn_ = true;
 };
 }  // namespace config
 

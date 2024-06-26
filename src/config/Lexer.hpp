@@ -36,6 +36,15 @@ struct Token {
 
 class Lexer {
  private:
+  Lexer();
+  Lexer& operator=(const Lexer& other);
+  const std::string getFileContent(const std::string& file_path) const;
+  void skipSpaces();
+  void skipComment();
+  const char& getChar() const;
+  bool isMetaChar() const;
+  void addToken();
+  bool isEndOfFile() const;
   const std::string file_content_;
   unsigned int file_iterator_;
   unsigned int current_line_;
@@ -47,17 +56,6 @@ class Lexer {
   ~Lexer();
   void tokenize();
   const std::vector<Token>& getTokens() const;
-
- private:
-  Lexer();
-  Lexer& operator=(const Lexer& other);
-  const std::string getFileContent(const std::string& file_path) const;
-  void skipSpaces();
-  void skipComment();
-  const char& getChar() const;
-  bool isMetaChar() const;
-  void addToken();
-  bool isEndOfFile() const;
 };
 }  // namespace config
 
