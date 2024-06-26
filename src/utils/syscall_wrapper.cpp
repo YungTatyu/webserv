@@ -10,6 +10,18 @@
 #include "WebServer.hpp"
 #include "error.hpp"
 
+int syscall_wrapper::Open(const std::string& path, int flags, mode_t modes) {
+  int fd = open(path.c_str(), flags, modes);
+  if (fd == -1) WebServer::writeErrorlog(error::strSysCallError("open", path) + "\n");
+  return fd;
+}
+
+int syscall_wrapper::Access(const std::string& path, int modes, bool err_log) {
+  int ret = access(path.c_str(), modes);
+  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n");
+  return ret;
+}
+
 int syscall_wrapper::Socket(int domain, int type, int protocol) {
   int listenfd = socket(domain, type, protocol);
   if (listenfd == -1) throw std::runtime_error(error::strSysCallError("socket") + "\n");

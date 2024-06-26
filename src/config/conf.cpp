@@ -16,6 +16,7 @@
 #include "LogFd.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
+#include "syscall_wrapper.hpp"
 #include "utils.hpp"
 
 const char *config::Root::kDefaultPath_ = "html";
@@ -45,10 +46,10 @@ config::Main *config::initConfig(const std::string &file_path) {
   }
 
   // file_path が存在するかどうか
-  if (utils::wrapperAccess(absolute_path, F_OK, true) == -1) return NULL;
+  if (syscall_wrapper::Access(absolute_path, F_OK, true) == -1) return NULL;
 
   // file_path の読み取り権限があるかどうか
-  if (utils::wrapperAccess(absolute_path, R_OK, true) == -1) return NULL;
+  if (syscall_wrapper::Access(absolute_path, R_OK, true) == -1) return NULL;
 
   // file_path がファイルかどうか確認する。
   if (!utils::isFile(absolute_path, false)) {

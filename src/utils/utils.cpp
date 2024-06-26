@@ -12,18 +12,6 @@
 #include "error.hpp"
 #include "syscall_wrapper.hpp"
 
-int utils::wrapperOpen(const std::string path, int flags, mode_t modes) {
-  int fd = open(path.c_str(), flags, modes);
-  if (fd == -1) WebServer::writeErrorlog(error::strSysCallError("open", path) + "\n");
-  return fd;
-}
-
-int utils::wrapperAccess(const std::string& path, int modes, bool err_log) {
-  int ret = access(path.c_str(), modes);
-  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n");
-  return ret;
-}
-
 bool utils::wrapperRealpath(const std::string& path, std::string& absolute_path) {
   char tmp_path[MAXPATHLEN];
   if (realpath(path.c_str(), tmp_path) == NULL) {

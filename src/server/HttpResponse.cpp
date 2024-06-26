@@ -872,11 +872,11 @@ int HttpResponse::getStatusCode() const { return this->status_code_; }
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
 
 bool HttpResponse::isAccessibleFile(const std::string& file_path) {
-  return utils::isFile(file_path, false) && utils::wrapperAccess(file_path, R_OK, false) == 0;
+  return utils::isFile(file_path, false) && syscall_wrapper::Access(file_path, R_OK, false) == 0;
 }
 
 bool HttpResponse::isExecutable(const std::string& file_path) {
-  return utils::wrapperAccess(file_path, X_OK, false) == 0;
+  return syscall_wrapper::Access(file_path, X_OK, false) == 0;
 }
 
 bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
