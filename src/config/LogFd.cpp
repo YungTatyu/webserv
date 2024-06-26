@@ -6,7 +6,7 @@
 #include <sys/param.h>
 #include <unistd.h>
 
-#include "Utils.hpp"
+#include "utils.hpp"
 
 const static std::string kAccessLog = "access_log";
 const static std::string kAccessFd = "access_fd";
@@ -37,7 +37,7 @@ int config::addAcsFdList(std::set<std::string>& directives_set,
     tmp_path = access_log_list[i].getFile();
     // ファイルはあるが、write権限がない時ときは飛ばす
     // ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
-    if (Utils::wrapperAccess(tmp_path, F_OK, false) == 0 && Utils::wrapperAccess(tmp_path, W_OK, false) == -1)
+    if (utils::wrapperAccess(tmp_path, F_OK, false) == 0 && utils::wrapperAccess(tmp_path, W_OK, false) == -1)
       continue;
     // openするのはそのディレクティブにエラーやoffがないことがわかってからの方が無駄なファイルつくらなくて済む
     tmp_fd = openLogFd(tmp_path);
@@ -62,7 +62,7 @@ int config::addErrFdList(std::set<std::string>& directives_set,
     tmp_path = error_log_list[i].getFile();
     // ファイルはあるが、write権限がない時ときは飛ばす
     // ここのエラー出力任意にできるようにする。でないと、ファイルがない時は毎回accessエラーでる
-    if (Utils::wrapperAccess(tmp_path, F_OK, false) == 0 && Utils::wrapperAccess(tmp_path, W_OK, false) == -1)
+    if (utils::wrapperAccess(tmp_path, F_OK, false) == 0 && utils::wrapperAccess(tmp_path, W_OK, false) == -1)
       continue;
     tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) {
@@ -85,7 +85,7 @@ bool config::initAcsLogFds(config::Main& config) {
     return false;
   else if (ret == 0) {
     std::string absolute_path;
-    if (!Utils::wrapperRealpath(".", absolute_path)) {
+    if (!utils::wrapperRealpath(".", absolute_path)) {
       std::cerr << "webserv: [emerg] realpath() \""
                 << "."
                 << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
@@ -128,7 +128,7 @@ bool config::initErrLogFds(config::Main& config) {
     return false;
   else if (ret == 0) {
     std::string absolute_path;
-    if (!Utils::wrapperRealpath(".", absolute_path)) {
+    if (!utils::wrapperRealpath(".", absolute_path)) {
       std::cerr << "webserv: [emerg] realpath() \""
                 << "."
                 << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
@@ -197,6 +197,6 @@ void config::terminateLogFds(const config::Main* config) {
 }
 
 int config::openLogFd(const std::string& log_path) {
-  return Utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT | O_NONBLOCK | O_CLOEXEC,
+  return utils::wrapperOpen(log_path, O_WRONLY | O_APPEND | O_CREAT | O_NONBLOCK | O_CLOEXEC,
                             S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 }

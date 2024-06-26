@@ -7,7 +7,7 @@
 #include "ConfigHandler.hpp"
 #include "HttpRequest.hpp"
 #include "NetworkIOHandler.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 
 class HttpResponse {
  public:
@@ -47,7 +47,7 @@ class HttpResponse {
   RES_STATE state_;
   std::string status_code_line_;
   long status_code_;  // response生成するときにstatus_line_map_参照する
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers_;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers_;
   std::string body_;
   static std::map<int, std::string> status_line_map_;  // status codeに基づくstatus lineを格納するmap
   static std::map<int, const std::string*> default_error_page_map_;  // defaultのerror pageを格納するmap

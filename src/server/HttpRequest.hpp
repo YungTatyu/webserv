@@ -9,7 +9,7 @@
 #include <string>
 
 #include "LimitExcept.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 
 class HttpRequest {
  public:
@@ -30,8 +30,8 @@ class HttpRequest {
 
   HttpRequest(config::REQUEST_METHOD method = config::UNKNOWN, const std::string &uri = "",
               const std::string &version = "",
-              const std::map<std::string, std::string, Utils::CaseInsensitiveCompare> &headers =
-                  std::map<std::string, std::string, Utils::CaseInsensitiveCompare>(),
+              const std::map<std::string, std::string, utils::CaseInsensitiveCompare> &headers =
+                  std::map<std::string, std::string, utils::CaseInsensitiveCompare>(),
               const std::string &queries = "", const std::string &body = "", const std::string &port = "",
               ParseState parse_state = PARSE_BEFORE);
   ~HttpRequest();
@@ -44,7 +44,7 @@ class HttpRequest {
   config::REQUEST_METHOD method_;
   std::string uri_;  // スキーマ、ポートは？？
   std::string version_;
-  std::map<std::string, std::string, Utils::CaseInsensitiveCompare> headers_;
+  std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers_;
   std::string queries_;  // mapでもっていたが、子プロセスにQUERY_STRINGとして渡すからstringの方が良さげ。
   std::string body_;
   std::string

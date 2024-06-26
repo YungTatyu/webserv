@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace Utils {
+namespace utils {
 // 大文字小文字を区別しない文字列比較関数
 struct CaseInsensitiveCompare {
   bool operator()(std::string lhs, std::string rhs) const {
@@ -26,7 +26,7 @@ struct CaseInsensitiveCompare {
 };
 
 int wrapperOpen(const std::string path, int flags, mode_t modes);
-int wrapperAccess(const std::string path, int modes, bool err_log);
+int wrapperAccess(const std::string& path, int modes, bool err_log);
 bool wrapperRealpath(const std::string& path, std::string& absolute_path);
 bool isFile(const std::string& path, bool err_log);
 bool isDirectory(const std::string& path, bool err_log);
@@ -34,45 +34,45 @@ std::string readFile(const std::string& filePath);
 std::vector<std::string> createDirectoryContents(const std::string& directoryPath);
 bool isExecutable(const char* filename);
 bool isExtensionFile(const std::string& filename, const std::string& extension);
-ssize_t wrapperWrite(const int fd, const std::string& msg);
-bool wrapperGetsockname(struct sockaddr_in& addr, const int sock);
-std::string socketToStrIPAddress(const int sock);
-std::string ipToStr(const uint32_t ip);
-uint32_t StrToIPAddress(const std::string& ip);
-int resolveConnectedPort(const int sock);
+ssize_t wrapperWrite( int fd, const std::string& msg);
+bool wrapperGetsockname(struct sockaddr_in& addr,  int sock);
+std::string socketToStrIPAddress( int sock);
+std::string ipToStr( uint32_t ip);
+uint32_t strToIPAddress(const std::string& ip);
+int resolveConnectedPort( int sock);
 std::string toLower(std::string str);
 std::string toUpper(std::string str);
-bool isSpace(const unsigned char ch);
+bool isSpace( unsigned char ch);
 bool compareIgnoreCase(std::string lhs, std::string rhs);
-int setNonBlockingCloExec(const int fd);
+int setNonBlockingCloExec( int fd);
 size_t strToSizet(const std::string& str);
 size_t hexToDec(const std::string& str);
 bool isSign(unsigned char ch);
 std::string normalizePath(const std::string& full_path);
 std::string replace(const std::string& str, char old_c, char new_c);
 template <typename T>
-std::string toStr(const T value);
+std::string toStr(T value);
 bool isNumeric(const std::string& str);
 template <typename Context>
 bool hasDirective(const Context& context, const std::string& directive);
 template <typename T>
 T strToT(const std::string& str);
-}  // namespace Utils
+}  // namespace utils
 
 template <typename T>
-std::string Utils::toStr(const T value) {
+std::string utils::toStr(T value) {
   std::stringstream converter;
   converter << value;
   return converter.str();
 }
 
 template <typename Context>
-bool Utils::hasDirective(const Context& context, const std::string& directive) {
+bool utils::hasDirective(const Context& context, const std::string& directive) {
   return context.directives_set_.find(directive) != context.directives_set_.end();
 }
 
 template <typename T>
-T Utils::strToT(const std::string& str) {
+T utils::strToT(const std::string& str) {
   T t;
   std::istringstream iss(str);
   iss >> t;

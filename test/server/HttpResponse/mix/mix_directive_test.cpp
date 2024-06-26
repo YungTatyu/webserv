@@ -12,7 +12,7 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "ResponseTest.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "conf.hpp"
 
 namespace test {
@@ -101,7 +101,7 @@ TEST_F(HttpResponseMix, try_files_and_alias) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader(HttpResponse::status_line_map_[200]);
-  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/aliasHtml/alias.html");
+  expect_res += utils::readFile("test/server/HttpResponse/mix/file/aliasHtml/alias.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
@@ -119,7 +119,7 @@ TEST_F(HttpResponseMix, try_files_and_root_in_loc) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader(HttpResponse::status_line_map_[200]);
-  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/index.html");
+  expect_res += utils::readFile("test/server/HttpResponse/mix/file/index.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
@@ -137,7 +137,7 @@ TEST_F(HttpResponseMix, try_files_internal_redirect) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader(HttpResponse::status_line_map_[200]);
-  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/internal_redirect.html");
+  expect_res += utils::readFile("test/server/HttpResponse/mix/file/internal_redirect.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
@@ -155,7 +155,7 @@ TEST_F(HttpResponseMix, try_files_error_page) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader(HttpResponse::status_line_map_[405]);
-  expect_res += Utils::readFile("test/server/HttpResponse/mix/file/index.html");
+  expect_res += utils::readFile("test/server/HttpResponse/mix/file/index.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);

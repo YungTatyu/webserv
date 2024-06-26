@@ -8,7 +8,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #include "syscall_wrapper.hpp"
@@ -29,8 +29,8 @@ cgi::CgiHandler::~CgiHandler() {}
  * @return false
  */
 bool cgi::CgiHandler::isCgi(const std::string& script_path) {
-  return (Utils::isExtensionFile(script_path, ".php") || Utils::isExtensionFile(script_path, ".cgi") ||
-          Utils::isExtensionFile(script_path, ".py"));
+  return (utils::isExtensionFile(script_path, ".php") || utils::isExtensionFile(script_path, ".cgi") ||
+          utils::isExtensionFile(script_path, ".py"));
 }
 
 /**
@@ -68,7 +68,7 @@ bool cgi::CgiHandler::callCgiExecutor(const HttpResponse& response, const HttpRe
   syscall_wrapper::Setsockopt(this->sockets_[SOCKET_PARENT], SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
 #endif
 
-  Utils::setNonBlockingCloExec(this->sockets_[SOCKET_PARENT]);
+  utils::setNonBlockingCloExec(this->sockets_[SOCKET_PARENT]);
   return forkCgiProcess(request, response);
 }
 

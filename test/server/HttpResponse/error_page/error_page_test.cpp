@@ -12,7 +12,7 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "ResponseTest.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "conf.hpp"
 
 namespace test {
@@ -113,7 +113,7 @@ TEST_F(HttpResponseErrorPage, code_response_uri1) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader("499");
-  expect_res += Utils::readFile("test/server/HttpResponse/error_page/file/40x.html");
+  expect_res += utils::readFile("test/server/HttpResponse/error_page/file/40x.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
@@ -131,7 +131,7 @@ TEST_F(HttpResponseErrorPage, code_response_uri2) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader("499");
-  expect_res += Utils::readFile("test/server/HttpResponse/error_page/file/40x.html");
+  expect_res += utils::readFile("test/server/HttpResponse/error_page/file/40x.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
@@ -149,7 +149,7 @@ TEST_F(HttpResponseErrorPage, code_uri) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader(HttpResponse::status_line_map_[400]);
-  expect_res += Utils::readFile("test/server/HttpResponse/error_page/file/internal_redirect.html");
+  expect_res += utils::readFile("test/server/HttpResponse/error_page/file/internal_redirect.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);
@@ -186,7 +186,7 @@ TEST_F(HttpResponseErrorPage, dup_error_num) {
   final_response =
       HttpResponse::generateResponse(request_, response_, tied_server_, sockfd[0], config_handler_);
   expect_res = createHeader("499");
-  expect_res += Utils::readFile("test/server/HttpResponse/error_page/file/40x.html");
+  expect_res += utils::readFile("test/server/HttpResponse/error_page/file/40x.html");
 
   // 結果確認
   ASSERT_CORRECT_RESPONSE(expect_res, final_response);

@@ -22,7 +22,7 @@
 #include "NetworkIOHandler.hpp"
 #include "Parser.hpp"
 #include "Server.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 
 namespace test {
 
@@ -93,7 +93,7 @@ class ConfigHandlerTest {
   }
 
   void initRequest(const config::REQUEST_METHOD& method, const std::string& uri,
-                   const std::map<std::string, std::string, Utils::CaseInsensitiveCompare>& headers,
+                   const std::map<std::string, std::string, utils::CaseInsensitiveCompare>& headers,
                    const std::string& body, const HttpRequest::ParseState parseState) {
     this->request_.method_ = method;
     this->request_.uri_ = uri;
@@ -158,7 +158,7 @@ class ConfigHandlerTest {
     struct sockaddr_in cli_addr;
     std::memset(&cli_addr, 0, sizeof(cli_addr));  // ゼロで初期化
     cli_addr.sin_family = AF_INET;                // IPv4
-    cli_addr.sin_addr.s_addr = Utils::StrToIPAddress(ip);
+    cli_addr.sin_addr.s_addr = utils::strToIPAddress(ip);
     return cli_addr;
   }
 

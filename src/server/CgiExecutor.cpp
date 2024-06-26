@@ -10,7 +10,7 @@
 
 #include "ConfigHandler.hpp"
 #include "LimitExcept.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "WebServer.hpp"
 #include "error.hpp"
 #include "syscall_wrapper.hpp"
@@ -50,7 +50,7 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
 
   this->meta_vars_.push_back("AUTH_TYPE=");  // Authorizationをparseするロジックを実装しないため、値は空文字
 
-  const std::string content_length = std::string("CONTENT_LENGTH=") + Utils::toStr(request.body_.size());
+  const std::string content_length = std::string("CONTENT_LENGTH=") + utils::toStr(request.body_.size());
   this->meta_vars_.push_back(strdup_from_string(content_length));
 
   std::string content_type = "CONTENT_TYPE=";
@@ -70,7 +70,7 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
   const std::string query_string = std::string("QUERY_STRING=") + request.queries_;
   this->meta_vars_.push_back(strdup_from_string(query_string));  // PATH_TRANSLATEDと同じ
 
-  const std::string ip_address = Utils::socketToStrIPAddress(cli_sock);
+  const std::string ip_address = utils::socketToStrIPAddress(cli_sock);
   const std::string remote_addr = std::string("REMOTE_ADDR=") + ip_address;
   this->meta_vars_.push_back(strdup_from_string(remote_addr));
 
@@ -89,7 +89,7 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
   this->meta_vars_.push_back(strdup_from_string(server_name));
 
   const std::string server_port =
-      std::string("SERVER_PORT=") + Utils::toStr(Utils::resolveConnectedPort(cli_sock));
+      std::string("SERVER_PORT=") + utils::toStr(utils::resolveConnectedPort(cli_sock));
   this->meta_vars_.push_back(strdup_from_string(server_port));
 
   const std::string server_protocol = std::string("SERVER_PROTOCOL=") + request.version_;
@@ -97,16 +97,16 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
 
   this->meta_vars_.push_back("SERVER_SOFTWARE=webserv/1.0");
 
-  for (std::map<std::string, std::string, Utils::CaseInsensitiveCompare>::const_iterator it =
+  for (std::map<std::string, std::string, utils::CaseInsensitiveCompare>::const_iterator it =
            request.headers_.begin();
        it != request.headers_.end(); ++it) {
-    if (Utils::compareIgnoreCase(it->first, kContentType) ||
-        Utils::compareIgnoreCase(it->first, "content-length"))
+    if (utils::compareIgnoreCase(it->first, kContentType) ||
+        utils::compareIgnoreCase(it->first, "content-length"))
       continue;
     std::string meta_var = "HTTP_";
-    meta_var = meta_var + Utils::replace(Utils::toUpper(it->first), '-', '_') + "=" + it->second;
+    meta_var = meta_var + utils::replace(utils::toUpper(it->first), '-', '_') + "=" + it->second;
     // hostの場合はrequestをraw dataのhostヘッダーのvalueとして渡さないといけない（portの情報を復活させる）
-    if (Utils::compareIgnoreCase(it->first, "host")) meta_var += request.port_in_host_;
+    if (utils::compareIgnoreCase(it->first, "host")) meta_var += request.port_in_host_;
     this->meta_vars_.push_back(strdup_from_string(meta_var));
   }
 

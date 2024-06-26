@@ -11,7 +11,7 @@
 #include "Lexer.hpp"
 #include "LogFd.hpp"
 #include "Parser.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "WebServer.hpp"
 
 // 各テストで使うconfigをセットするクラス
@@ -36,7 +36,7 @@ class InitLogTest : public ::testing::Test {
     this->config_ = new config::Main();
     // 絶対pathを取得
     // std::string	absolute_path;
-    // absolute_path = Utils::deriveAbsolutePath(file_path);
+    // absolute_path = utils::deriveAbsolutePath(file_path);
     // if (absolute_path == "")
     //	GTEST_SKIP();
 

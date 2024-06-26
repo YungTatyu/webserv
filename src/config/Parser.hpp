@@ -12,7 +12,7 @@
 
 #include "Lexer.hpp"
 #include "Main.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "conf.hpp"
 
 namespace config {

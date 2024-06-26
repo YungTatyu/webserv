@@ -10,7 +10,7 @@
 #include "Lexer.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "conf.hpp"
 #include "directives_test.hpp"
 

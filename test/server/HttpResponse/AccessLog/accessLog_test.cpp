@@ -16,7 +16,7 @@ TEST(HttpResponseTestWriteAccessLog, log_format1) {
       test.config_handler_.config_->http_.server_list_[0],
       &test.config_handler_.config_->http_.server_list_[0].location_list_[0],
       test.config_handler_.createAcsLogMsg(addr.s_addr, 200, test.responses_[0].body_.size(), test.request_));
-  std::string body = Utils::readFile("test/server/HttpResponse/AccessLog/file/index.html");
+  std::string body = utils::readFile("test/server/HttpResponse/AccessLog/file/index.html");
   test.testAccessLogEntry(file_path, "127.0.0.1", "GET", "/", 1.1, 200, body.size(), "Mozilla/5.0");
 }
 

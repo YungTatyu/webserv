@@ -5,7 +5,7 @@
 #include <iomanip>
 
 #include "CgiHandler.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "syscall_wrapper.hpp"
 
 const static std::string kAlias = "alias";
@@ -546,7 +546,7 @@ void HttpResponse::prepareReturn(HttpResponse& response, const config::Return& r
 HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& response,
                                                             const config::Location* location,
                                                             const ConfigHandler& config_handler) {
-  if (!location || (location && !Utils::hasDirective(*location, kReturn))) return sw_allow_phase;
+  if (!location || (location && !utils::hasDirective(*location, kReturn))) return sw_allow_phase;
 
   prepareReturn(response, location->return_list_[0]);
   config_handler.writeErrorLog("webserv: [debug] redirect occured\n");
@@ -561,20 +561,20 @@ HttpResponse::ResponsePhase HttpResponse::handleUriCheckPhase(HttpResponse& resp
     return sw_content_phase;
   }
   // uriが'/'で終わってない、かつdirectoryであるとき301MovedPermanently
-  if (lastChar(request.uri_) != '/' && Utils::isDirectory(response.root_path_ + request.uri_, false)) {
+  if (lastChar(request.uri_) != '/' && utils::isDirectory(response.root_path_ + request.uri_, false)) {
     response.setStatusCode(301);
     response.headers_[kLocation] =
-        kScheme + request.headers_[kHost] + ":" + Utils::toStr(request_port) + request.uri_ + "/";
+        kScheme + request.headers_[kHost] + ":" + utils::toStr(request_port) + request.uri_ + "/";
     return sw_error_page_phase;
   }
   // uriがディレクトリを指定しているのにlocationがなくて、root_pathとuriをつなげたものが存在しなければエラー
   if (lastChar(request.uri_) == '/' && !location &&
-      !Utils::isDirectory(response.root_path_ + request.uri_, false)) {
+      !utils::isDirectory(response.root_path_ + request.uri_, false)) {
     response.setStatusCode(response.internal_redirect_cnt_ > 1 ? 500 : 404);
     return sw_error_page_phase;
   }
   // root_path_が存在しなければ404エラー
-  if (!Utils::isDirectory(response.root_path_, false)) {
+  if (!utils::isDirectory(response.root_path_, false)) {
     response.setStatusCode(404);
     return sw_error_page_phase;
   }
@@ -610,7 +610,7 @@ HttpResponse::ResponsePhase HttpResponse::TryFiles(HttpResponse& response, HttpR
 }
 
 std::string HttpResponse::autoIndex(const std::string& directory_path, const std::string& index_dir) {
-  std::vector<std::string> contents = Utils::createDirectoryContents(directory_path);
+  std::vector<std::string> contents = utils::createDirectoryContents(directory_path);
   // もしディレクトリが存在しなければ空文字を返す。
   if (contents.empty()) return std::string("");
 
@@ -733,7 +733,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
       response.res_file_path_ = request.uri_;
       return sw_content_phase;
     }
-    if (!Utils::isDirectory(response.root_path_ + request.uri_, false)) {
+    if (!utils::isDirectory(response.root_path_ + request.uri_, false)) {
       response.setStatusCode(404);
       return sw_error_page_phase;
     }
@@ -748,17 +748,17 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   bool is_alias = false;
 
   // location context
-  if (location && Utils::hasDirective(*location, kTryFiles))
+  if (location && utils::hasDirective(*location, kTryFiles))
     return TryFiles(response, request, location->try_files_);
-  else if (location && Utils::hasDirective(*location, kIndex)) {
-    if (Utils::hasDirective(*location, kAlias)) is_alias = true;
+  else if (location && utils::hasDirective(*location, kIndex)) {
+    if (utils::hasDirective(*location, kAlias)) is_alias = true;
     return Index(response, request.uri_, location->index_list_, is_alias, is_autoindex_on);
   }
 
   // server context
-  if (Utils::hasDirective(server, kTryFiles))
+  if (utils::hasDirective(server, kTryFiles))
     return TryFiles(response, request, server.try_files_);
-  else if (Utils::hasDirective(server, kIndex))
+  else if (utils::hasDirective(server, kIndex))
     return Index(response, request.uri_, server.index_list_, is_alias, is_autoindex_on);
 
   // http contextにindexディレクティブがあればその設定値をみるし、
@@ -790,7 +790,7 @@ HttpResponse::ResponsePhase HttpResponse::handleContentPhase(HttpResponse& respo
     response.setStatusCode(405);
     return sw_error_page_phase;
   }
-  response.body_ = Utils::readFile(response.root_path_ + response.res_file_path_);
+  response.body_ = utils::readFile(response.root_path_ + response.res_file_path_);
   return sw_log_phase;
 }
 
@@ -820,7 +820,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
 
   response.headers_["Server"] = "webserv/1.0";
   response.headers_["Date"] = createCurrentGmtTime();
-  response.headers_["Content-Length"] = Utils::toStr(response.body_.size());
+  response.headers_["Content-Length"] = utils::toStr(response.body_.size());
   // conetent-lengthで対応するので、Transfer-Encodingは削除する
   if (response.headers_.find(kTransferEncoding) != response.headers_.end())
     response.headers_.erase(kTransferEncoding);
@@ -831,7 +831,7 @@ void HttpResponse::headerFilterPhase(HttpResponse& response, const config::Time&
   // cgiでstatus code lineの場合
   if (!response.status_code_line_.empty()) return;
   response.status_code_line_ = (default_status_line != status_line_map_.end()) ? default_status_line->second
-                                                                               : Utils::toStr(status_code);
+                                                                               : utils::toStr(status_code);
   // staticのファイルの場合のみ、contetn-typeをつけてあげる
   if (response.state_ != RES_CREATING_STATIC) return;
 
@@ -844,9 +844,9 @@ std::string HttpResponse::detectContentType(const std::string& res_file_path) {
   const char* kCssExt = ".css";
   const char* kJsExt = ".js";
 
-  if (Utils::isExtensionFile(res_file_path, kHtmlExt)) return kHtml;
-  if (Utils::isExtensionFile(res_file_path, kCssExt)) return "text/css";
-  if (Utils::isExtensionFile(res_file_path, kJsExt)) return "text/javascript";
+  if (utils::isExtensionFile(res_file_path, kHtmlExt)) return kHtml;
+  if (utils::isExtensionFile(res_file_path, kCssExt)) return "text/css";
+  if (utils::isExtensionFile(res_file_path, kJsExt)) return "text/javascript";
   return kTextPlain;
 }
 
@@ -872,11 +872,11 @@ int HttpResponse::getStatusCode() const { return this->status_code_; }
 void HttpResponse::setStatusCode(int code) { this->status_code_ = code; }
 
 bool HttpResponse::isAccessibleFile(const std::string& file_path) {
-  return Utils::isFile(file_path, false) && Utils::wrapperAccess(file_path, R_OK, false) == 0;
+  return utils::isFile(file_path, false) && utils::wrapperAccess(file_path, R_OK, false) == 0;
 }
 
 bool HttpResponse::isExecutable(const std::string& file_path) {
-  return Utils::wrapperAccess(file_path, X_OK, false) == 0;
+  return utils::wrapperAccess(file_path, X_OK, false) == 0;
 }
 
 bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request) {
@@ -893,7 +893,7 @@ bool HttpResponse::setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& re
     path += segments[i];
 
     if (cgi::CgiHandler::isCgi(response.root_path_ + path) &&
-        Utils::isFile(response.root_path_ + path, false)) {
+        utils::isFile(response.root_path_ + path, false)) {
       response.separatePathinfo(request.uri_, path.size());
       request.uri_ = path;
       return true;

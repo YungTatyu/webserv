@@ -147,11 +147,11 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
           ++ri_;
           break;
         }
-        if (Utils::compareIgnoreCase(cur_name, kStatus)) {
+        if (utils::compareIgnoreCase(cur_name, kStatus)) {
           state = sw_status_code;
           break;
         }
-        if (Utils::compareIgnoreCase(cur_name, kContentLength)) {
+        if (utils::compareIgnoreCase(cur_name, kContentLength)) {
           state = sw_cl_value;
           break;
         }
@@ -302,13 +302,13 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
         }
 
         const string_map_case_insensitive::const_iterator it = this->headers_->find(cur_name);
-        if (Utils::compareIgnoreCase(cur_name, kContentLength) && it == this->headers_->end() &&
+        if (utils::compareIgnoreCase(cur_name, kContentLength) && it == this->headers_->end() &&
             cur_value.empty()) {
           state = sw_error;
           break;
         }
         // headerが重複している場合は、一番初めのものが適応される
-        if (Utils::compareIgnoreCase(cur_name, kStatus) && it == this->headers_->end()) {
+        if (utils::compareIgnoreCase(cur_name, kStatus) && it == this->headers_->end()) {
           setStatusCode(cur_value);
           this->headers_->insert(std::make_pair(cur_name, cur_value));
         } else if (!cur_name.empty() && it == this->headers_->end())
@@ -350,7 +350,7 @@ void cgi::CGIParser::parseBody(const std::string& response) {
   // content lengthが設定されている場合は、bodyの長さを調節する
   if (this->headers_->find(kContentLength) != this->headers_->end()) {
     const std::string& content_length = this->headers_->at(kContentLength);
-    size_t length = Utils::strToSizet(content_length);
+    size_t length = utils::strToSizet(content_length);
 
     *(this->body_) = response.substr(ri_, length);
     this->state_ = PARSE_BODY_DONE;
@@ -381,7 +381,7 @@ bool cgi::CGIParser::isValidStatusCode(const std::string& status_code) const {
 void cgi::CGIParser::setStatusCode(const std::string& value) {
   std::string tmp = value;
   // status code以降がspaceのみの場合は、status codeの値のみを保持する
-  tmp.erase(std::remove_if(tmp.begin(), tmp.end(), Utils::isSpace), tmp.end());
+  tmp.erase(std::remove_if(tmp.begin(), tmp.end(), utils::isSpace), tmp.end());
   // status codeのみの場合
   // ex: 200, 999など
   if (tmp.size() < 4) {
