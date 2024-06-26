@@ -17,6 +17,7 @@ import os
 import requests
 import shutil
 import pytest
+import time
 
 from server_res_header_test import run_server, expect_headers_exist
 
@@ -148,5 +149,6 @@ def test_upload_file(conf, file_name, can_upload, fixture_session):
 @pytest.fixture(scope="session")
 def fixture_session():
     os.makedirs(f"{UPLOAD_PATH}")
+    time.sleep(1)
     yield
     shutil.rmtree(f"{UPLOAD_PATH}")
