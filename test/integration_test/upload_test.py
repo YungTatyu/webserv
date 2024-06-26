@@ -53,23 +53,24 @@ def send_request(req_data):
         f"http://localhost:{req_data['port']}/{req_data['root']}/{req_data['request']}"
     )
 
-    # if (req_data['file_name']):
-    files = {"file": open(f"{req_data['root']}/{req_data['file_name']}", "rb")}
-    # print(f"{files}")
+    if req_data["method"] == "POST":
+        files = {"file": open(f"{req_data['root']}/{req_data['file_name']}", "rb")}
+
+    if req_data['path_info']:
+        req += f"{req_data['path_info']}"
 
     if req_data["method"] == "POST":
         r = requests.post(
             req,
             headers=headers,
             files=files,
-            timeout=0.5,
+            timeout=3,
         )
     elif req_data["method"] == "DELETE":
         r = requests.delete(
             req,
             headers=headers,
-            files=files,
-            timeout=0.5,
+            timeout=3,
         )
 
     return r
@@ -138,6 +139,7 @@ def test_upload_file(conf, file_name, can_upload, fixture_session):
             "root": ROOT_FROM_WEBSERV,
             "method": "POST",
             "file_name": file_name,
+            "path_info": "",
             "can_upload": can_upload,
         },
     )
