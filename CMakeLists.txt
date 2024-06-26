@@ -43,7 +43,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/SelectActiveEventManager.cpp
 	src/server/SelectServer.cpp
 	src/server/WebServer.cpp
-	src/utils/Utils.cpp
+	src/utils/utils.cpp
 	src/utils/syscall_wrapper.cpp
 	src/utils/error.cpp
 	
