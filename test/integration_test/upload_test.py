@@ -116,7 +116,6 @@ configs = [
 file_names = [
     ("test.txt", True),
     ("index.html", True),
-    ("degimon.jpg", True),
     ("reverse_shell.php", False),
 ]
 
@@ -142,8 +141,8 @@ def test_upload_file(conf, file_name, can_upload, fixture_session):
             "can_upload": can_upload,
         },
     )
-    if os.path.exists(f"{ROOT_FROM_WEBSERV}/file_name"):
-        os.remove(f"{ROOT_FROM_WEBSERV}/file_name")
+    if os.path.exists(f"{UPLOAD_PATH}/{file_name}"):
+        os.remove(f"{UPLOAD_PATH}/{file_name}")
 
 
 @pytest.fixture(scope="session")

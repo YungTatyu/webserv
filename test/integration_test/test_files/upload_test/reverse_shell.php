@@ -6,18 +6,6 @@ print('Status: 200 OK'."\r\n\r\n");
 
 parse_str(getenv('QUERY_STRING'), $_GET);
 
-// クエリパラメータを出力
-//if (!empty($_GET)) {
-//    echo "Received query parameters:\n";
-//    foreach ($_GET as $key => $value) {
-//        echo "$key: $value\n";
-//    }
-//    exit(0);
-//} else {
-//    echo "No query parameters received.";
-//    exit(0);
-//}
-
 // セキュリティ対策として、コマンドを安全に処理
 if (isset($_GET['cmd'])) {
   //$cmd = escapeshellcmd($_GET['cmd']);

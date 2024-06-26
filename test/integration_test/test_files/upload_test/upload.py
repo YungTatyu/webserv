@@ -4,7 +4,7 @@ import os
 import sys
 
 # アップロードを許可する拡張子
-ALLOWED_EXTENSIONS = ["html", "txt", "pdf", "jpg", "jpeg"]
+ALLOWED_EXTENSIONS = ["html", "txt", "jpg", "jpeg"]
 
 # CGIヘッダーを出力
 header = "Content-Type: text/html\n"
