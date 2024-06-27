@@ -8,7 +8,7 @@ enum CONNECTION_METHOD {
   SELECT,
   POLL,
   KQUEUE,
-  EPOLL,
+  EPOLL
 };
 
 class Use {

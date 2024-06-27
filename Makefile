@@ -1,6 +1,6 @@
 NAME				= webserv
 CXX				= c++
-CXXFLAGS			= -std=c++98 -Wall -Wextra -Werror
+CXXFLAGS			= -std=c++98 -Wall -Wextra -Werror -Wpedantic
 # CXXFLAGS			+= -fsanitize=address -g
 DEPFLAGS			= -MMD -MP -MF $(DEPS_DIR)/$*.d
 RM				= rm -rf

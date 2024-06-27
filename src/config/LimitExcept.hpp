@@ -16,7 +16,7 @@ enum REQUEST_METHOD {
   HEAD,
   POST,
   PUT,
-  DELETE,
+  DELETE
 };
 
 struct LimitExcept {

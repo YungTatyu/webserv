@@ -26,7 +26,7 @@ class Timer {
   enum TimeoutType {
     TMO_KEEPALIVE,
     TMO_RECV,
-    TMO_SEND,
+    TMO_SEND
   };
 };
 

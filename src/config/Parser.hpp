@@ -25,6 +25,7 @@ enum OS {
 class Parser {
  private:
   Parser();
+  Parser(const Parser &other);
   Parser &operator=(const Parser &other);
   bool parseType(const Token &token);
   bool expectTokenType(config::TK_TYPE type, const Token &token) const;
