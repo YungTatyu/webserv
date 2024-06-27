@@ -25,7 +25,14 @@ class Use {
     this->connection_method_ = POLL;
 #endif
   }
+  Use(const Use& other) { *this = other; }
   ~Use() {}
+  Use& operator=(const Use& other) {
+    if (this != &other) {
+      this->connection_method_ = other.connection_method_;
+    }
+    return *this;
+  }
   CONNECTION_METHOD getConnectionMethod() const { return this->connection_method_; }
   void setConnectionMethod(CONNECTION_METHOD connection_method) {
     this->connection_method_ = connection_method;

@@ -13,12 +13,19 @@ class ServerName {
   std::set<std::string> name_set_;
 
  public:
-  ServerName() { this->name_set_.insert(kDefaultName_); }
+  ServerName() { this->name_set_.insert(this->kDefaultName_); }
+  ServerName(const ServerName& other) { *this = other; }
   ~ServerName() {}
-  const static char *kDefaultName_;
-  const std::set<std::string> &getName() const { return this->name_set_; }
-  void addName(const std::string &name) { name_set_.insert(name); }
+  ServerName& operator=(const ServerName& other) {
+    if (this != &other) {
+      this->name_set_ = other.name_set_;
+    }
+    return *this;
+  }
+  const std::set<std::string>& getName() const { return this->name_set_; }
+  void addName(const std::string& name) { name_set_.insert(name); }
   void eraseDefaultName() { this->name_set_.erase(kDefaultName_); }
+  const static char* kDefaultName_;
   const static unsigned int kType_ = CONF_HTTP_SERVER | CONF_1MORE | CONF_NOT_UNIQUE;
 };
 }  // namespace config
