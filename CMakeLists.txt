@@ -74,9 +74,9 @@ add_executable(${PROJECT_NAME}-googletest
 	test/server/HttpResponse/try_files/try_files_res_test.cpp
 	test/server/HttpResponse/return/return_res_test.cpp
 	test/server/WorkerConnectionsNumTest.cpp
-  test/conf/confLexerTest.cpp 
-	test/conf/directives_test.cpp 
+  test/conf/lexer_test.cpp 
 	test/conf/main_parser_test.cpp 
+	test/conf/directive_parser/directives_test.cpp 
 	test/conf/directive_parser/access_log/access_log_test.cpp 
 	test/conf/directive_parser/alias/alias_test.cpp 
 	test/conf/directive_parser/autoindex/autoindex_test.cpp 
@@ -116,6 +116,7 @@ target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	src/utils
   test
 	test/conf
+	test/conf/directive_parser
   test/server/ConfigHandler
 	test/server/HttpResponse
   test/server/HttpRequest
