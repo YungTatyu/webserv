@@ -258,7 +258,7 @@ HttpRequest::ParseState HttpRequest::parseMethod(std::string &raw_request, HttpR
   enum ParseMethodPhase {
     sw_method_start = 0,
     sw_method_mid,
-    sw_method_end,
+    sw_method_end
   } state;
 
   std::string method = request.key_buf_;

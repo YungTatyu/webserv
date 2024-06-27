@@ -10,10 +10,21 @@
 
 namespace config {
 struct Events {
-  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
+  Events() {}
+  Events(const Events& other) { *this = other; }
+  ~Events() {}
+  Events& operator=(const Events& other) {
+    if (this != &other) {
+      this->directives_set_ = other.directives_set_;
+      this->worker_connections_ = other.worker_connections_;
+      this->use_ = other.use_;
+    }
+    return *this;
+  }
   std::set<std::string> directives_set_;
   WorkerConnections worker_connections_;
   Use use_;
+  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
 };
 }  // namespace config
 

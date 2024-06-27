@@ -25,7 +25,34 @@
 
 namespace config {
 struct Http {
-  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
+  Http() {}
+  Http(const Http& other) { *this = other; }
+  ~Http() {}
+  Http& operator=(const Http& other) {
+    if (this != &other) {
+      this->directives_set_ = other.directives_set_;
+      this->server_list_ = other.server_list_;
+      this->root_ = other.root_;
+      this->index_list_ = other.index_list_;
+      this->autoindex_ = other.autoindex_;
+      this->client_max_body_size_ = other.client_max_body_size_;
+      this->access_log_list_ = other.access_log_list_;
+      this->error_log_list_ = other.error_log_list_;
+      this->error_page_list_ = other.error_page_list_;
+      this->keepalive_timeout_ = other.keepalive_timeout_;
+      this->receive_timeout_ = other.receive_timeout_;
+      this->send_timeout_ = other.send_timeout_;
+      this->allow_deny_list_ = other.allow_deny_list_;
+      this->userid_ = other.userid_;
+      this->userid_domain_ = other.userid_domain_;
+      this->userid_expires_ = other.userid_expires_;
+      this->userid_path_ = other.userid_path_;
+      this->userid_service_ = other.userid_service_;
+      this->access_fd_list_ = other.access_fd_list_;
+      this->error_fd_list_ = other.error_fd_list_;
+    }
+    return *this;
+  }
   std::set<std::string> directives_set_;
   std::vector<Server> server_list_;
   Root root_;
@@ -46,6 +73,7 @@ struct Http {
   UseridService userid_service_;
   std::vector<int> access_fd_list_;
   std::vector<int> error_fd_list_;
+  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
 };
 }  // namespace config
 

@@ -17,7 +17,7 @@ class ConnectionData {
     EV_READ = 0,
     EV_WRITE,
     EV_CGI_READ,
-    EV_CGI_WRITE,
+    EV_CGI_WRITE
   };
   std::vector<unsigned char> raw_request_;
   std::vector<unsigned char> final_response_;

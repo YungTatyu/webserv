@@ -11,10 +11,17 @@ class SendTimeout {
 
  public:
   SendTimeout() : time_(this->kDefaultTime_) {}
+  SendTimeout(const SendTimeout& other) { *this = other; }
   ~SendTimeout() {}
-  const static unsigned long kDefaultTime_;
-  const Time &getTime() const { return this->time_; }
+  SendTimeout& operator=(const SendTimeout& other) {
+    if (this != &other) {
+      this->time_ = other.time_;
+    }
+    return *this;
+  }
+  const Time& getTime() const { return this->time_; }
   void setTime(unsigned long time_in_ms) { this->time_.time_in_ms_ = time_in_ms; }
+  const static unsigned long kDefaultTime_;
   const static unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_UNIQUE;
 };

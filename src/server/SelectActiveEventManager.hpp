@@ -10,7 +10,7 @@
 struct SelectEvent {
   enum SELECT_EVENT {
     SELECT_READ,
-    SELECT_WRITE,
+    SELECT_WRITE
   };
   int fd_;
   SELECT_EVENT event_;

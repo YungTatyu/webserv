@@ -18,9 +18,17 @@ class AllowDeny {
 
  public:
   AllowDeny() {}
+  AllowDeny(const AllowDeny& other) { *this = other; }
   ~AllowDeny() {}
-  const std::string &getAddress() const { return this->address_; };
-  void setAddress(const std::string &address) { this->address_ = address; };
+  AllowDeny& operator=(const AllowDeny& other) {
+    if (this != &other) {
+      this->address_ = other.address_;
+      this->access_directive_ = other.access_directive_;
+    }
+    return *this;
+  }
+  const std::string& getAddress() const { return this->address_; };
+  void setAddress(const std::string& address) { this->address_ = address; };
   ACCESS_DIRECTIVE getAccessDirective() const { return this->access_directive_; };
   void setAccessDirective(ACCESS_DIRECTIVE access_directive) { this->access_directive_ = access_directive; };
   const static unsigned int kType_ = CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION |

@@ -12,10 +12,17 @@ class Index {
 
  public:
   Index() : file_(this->kDefaultFile_) {}
+  Index(const Index &other) { *this = other; }
   ~Index() {}
-  const static char *kDefaultFile_;
+  Index &operator=(const Index &other) {
+    if (this != &other) {
+      this->file_ = other.file_;
+    }
+    return *this;
+  }
   const std::string &getFile() const { return this->file_; }
   void setFile(const std::string &file) { this->file_ = file; }
+  const static char *kDefaultFile_;
   const static unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_1MORE | CONF_NOT_UNIQUE;
 };

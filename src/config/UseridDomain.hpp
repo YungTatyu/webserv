@@ -12,10 +12,17 @@ class UseridDomain {
 
  public:
   UseridDomain() {}
+  UseridDomain(const UseridDomain& other) { *this = other; }
   ~UseridDomain() {}
-  const static char *kDefaultName_;
-  const std::string &getName() const { return this->name_; }
-  void setName(const std::string &name) { this->name_ = name; }
+  UseridDomain& operator=(const UseridDomain& other) {
+    if (this != &other) {
+      this->name_ = other.name_;
+    }
+    return *this;
+  }
+  const std::string& getName() const { return this->name_; }
+  void setName(const std::string& name) { this->name_ = name; }
+  const static char* kDefaultName_;
   const static unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_UNIQUE;
 };

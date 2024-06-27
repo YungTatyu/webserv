@@ -14,28 +14,30 @@ enum TK_TYPE {
 };
 
 struct Token {
-  const std::string value_;
-  const TK_TYPE type_;
-  const unsigned int line_;
+  std::string value_;
+  TK_TYPE type_;
+  unsigned int line_;
   Token(const std::string& value, TK_TYPE type, unsigned int line)
       : value_(value), type_(type), line_(line) {}
+  Token(const Token& other) { *this = other; }
+  ~Token() {}
+  Token& operator=(const Token& other) {
+    if (this != &other) {
+      this->value_ = other.value_;
+      this->type_ = other.type_;
+      this->line_ = other.line_;
+    }
+    return *this;
+  }
+
+ private:
+  Token();
 };
 
 class Lexer {
  private:
-  const std::string file_content_;
-  unsigned int file_iterator_;
-  unsigned int current_line_;
-  std::vector<Token> tokens_;
-
- public:
-  Lexer(const std::string& file_path);
-  void tokenize();
-  const std::vector<Token>& getTokens() const;
-
- private:
-  // private functions
   Lexer();
+  Lexer& operator=(const Lexer& other);
   const std::string getFileContent(const std::string& file_path) const;
   void skipSpaces();
   void skipComment();
@@ -43,6 +45,17 @@ class Lexer {
   bool isMetaChar() const;
   void addToken();
   bool isEndOfFile() const;
+  const std::string file_content_;
+  unsigned int file_iterator_;
+  unsigned int current_line_;
+  std::vector<Token> tokens_;
+
+ public:
+  Lexer(const std::string& file_path);
+  Lexer(const Lexer& other);
+  ~Lexer();
+  void tokenize();
+  const std::vector<Token>& getTokens() const;
 };
 }  // namespace config
 
