@@ -20,7 +20,11 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionMan
   if (io_handler.isListenSocket(sock)) {
     int new_sock = io_handler.acceptConnection(conn_manager, sock);
     if (new_sock == -1) return;
-    server->addNewEvent(new_sock, ConnectionData::EV_READ);
+    if (server->addNewEvent(new_sock, ConnectionData::EV_READ) == -1) {
+      // eventの追加に失敗したら接続を切る
+      io_handler.closeConnection(conn_manager, server, timer_tree, new_sock);
+      return;
+    }
     conn_manager.setEvent(new_sock, ConnectionData::EV_READ);
     addTimerByType(conn_manager, config_handler, timer_tree, new_sock, Timer::TMO_RECV);
     if (!isOverWorkerConnections(conn_manager, config_handler)) return;
@@ -344,5 +348,5 @@ void RequestHandler::addTimerByType(ConnectionManager &conn_manager, const Confi
 bool RequestHandler::isOverWorkerConnections(ConnectionManager &conn_manager,
                                              const ConfigHandler &config_handler) const {
   return (conn_manager.getConnections().size() - conn_manager.getCgiSockNum()) >=
-         config_handler.config_->events_.worker_connections_.getWorkerConnections();
+         config_handler.getWorkerConnections();
 }

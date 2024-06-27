@@ -166,14 +166,14 @@ function runTest {
   runServer "${root}/${conf}"
 
   # テスト実行
-  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "5" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout10/" "10" ${DISCONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout5/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
   assert "/timeout10/" "8" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
-  # このテストは本来keepalive_timeoutのテストですが、テストの形式の関係でこちらで行っている。
+  # /no-recv/へのテストは本来keepalive_timeoutのテストですが、テストの形式の関係でこちらで行っている。
   assert "/no-recv/" "3" ${DISCONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv" ${sleep_between_case}
   assert "/no-recv/" "1" ${STAY_CONNECT} "${CLIENT_NO_RECEIVE_PATH}" "no_recv" ${sleep_between_case}
+  assert "/timeout0/" "3" ${STAY_CONNECT} "${CLIENT_SEND_TIMEOUT_PATH}" "send_timeout" ${sleep_between_case}
 
   # サーバープロセスを終了
   #kill "${WEBSERV_PID}"

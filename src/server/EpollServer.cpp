@@ -19,7 +19,7 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
   if (!initEpollEvent(conn_manager->getConnections())) return;
 
   for (;;) {
-    waitForEvent(conn_manager, event_manager, timer_tree);
+    waitForEvent(io_handler, conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandle
     callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
@@ -31,10 +31,9 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
 
 bool EpollServer::initEpollServer() {
   // epoll instance 初期化
-  // epoll1_create(EPOLL_CLOEXEC);を使用することで、forkでこのfdのオープンを防げる。
-  this->epfd_ = epoll_create1(EPOLL_CLOEXEC);
+  this->epfd_ = epoll_create(1);
   if (this->epfd_ == -1) {
-    std::cerr << error::strSysCallError("epoll_create1") << "\n";
+    std::cerr << error::strSysCallError("epoll_create") << "\n";
     return false;
   }
   return true;
@@ -94,14 +93,9 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
   conn_manager->clearClosedConnections();
 }
 
-int EpollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                              TimerTree* timer_tree) {
-  // ここでタイムアウトを設定する必要があるならば、
-  // epoll_pwait2()を使うことで、timespec型のtimeout値を指定できる。
-  // おそらく必要ないので、epoll_wait()でtimeoutは-1を指定
-  // epoll_waitが返すエラー
-  // EINTR -> signal
-  // EFAULT -> eventsによって指し示されたメモリが書き込み権限無し、またはメモリ不足。この場合再実行？
+int EpollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                              IActiveEventManager* event_manager, TimerTree* timer_tree) {
+  (void)io_handler;
   std::vector<struct epoll_event>* active_events =
       static_cast<std::vector<struct epoll_event>*>(event_manager->getActiveEvents());
 
@@ -121,6 +115,7 @@ int EpollServer::addNewEvent(int fd, ConnectionData::EVENT event) {
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
+  // 起こりうるのはENOMEMかENOSPC
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
   return re;
 }

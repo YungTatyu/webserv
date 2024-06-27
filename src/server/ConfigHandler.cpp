@@ -401,3 +401,7 @@ std::string ConfigHandler::createAcsLogMsg(uint32_t ip, long status, size_t resS
 
   return ss.str();
 }
+
+unsigned long ConfigHandler::getWorkerConnections() const {
+  return config_->events_.worker_connections_.getWorkerConnections();
+}

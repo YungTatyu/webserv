@@ -15,8 +15,8 @@ class EpollServer : public IServer {
   ~EpollServer();
   void eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                  NetworkIOHandler* io_handler, TimerTree* timer_tree);
-  int waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                   TimerTree* timer_tree);
+  int waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                   IActiveEventManager* event_manager, TimerTree* timer_tree);
   void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                         NetworkIOHandler* io_handler, TimerTree* timer_tree);
   int addNewEvent(int fd, ConnectionData::EVENT event);

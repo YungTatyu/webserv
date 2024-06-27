@@ -15,7 +15,7 @@ void KqueueServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManage
   if (!initKqueueServer()) return;
   if (!initKevents(conn_manager->getConnections())) return;
   for (;;) {
-    waitForEvent(conn_manager, event_manager, timer_tree);
+    waitForEvent(io_handler, conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandleする
     callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
@@ -55,8 +55,9 @@ bool KqueueServer::initKevents(const std::map<int, ConnectionData*>& connections
   return true;
 }
 
-int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                               TimerTree* timer_tree) {
+int KqueueServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                               IActiveEventManager* event_manager, TimerTree* timer_tree) {
+  (void)io_handler;
   std::vector<struct kevent>* active_events =
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
 
@@ -64,7 +65,7 @@ int KqueueServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventMana
   active_events->resize(conn_manager->getConnections().size());
   // 現在時刻を更新
   Timer::updateCurrentTime();
-  // TODO: error処理どうするか？ server downさせる？
+
   struct timespec ts = timer_tree->findTimespec();
   struct timespec* tsp = &ts;
   if (ts.tv_sec == -1 && ts.tv_nsec == -1) tsp = NULL;
@@ -113,7 +114,7 @@ int KqueueServer::addNewEvent(int fd, ConnectionData::EVENT event) {
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EVFILT_READ : EVFILT_WRITE;
   EV_SET(&kv, fd, filter, EV_ADD | EV_ENABLE, 0, 0, 0);
   int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
-  // TODO: errorのとき、再トライ？
+  // 起こりうるのはENOMEM
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
   return re;
 }

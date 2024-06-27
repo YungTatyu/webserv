@@ -88,6 +88,10 @@ const std::multiset<Timer> &TimerTree::getTimerTree() const { return this->timer
 
 const std::set<int> &TimerTree::getFdSet() const { return this->fd_set_; }
 
-int TimerTree::getClosestTimeout() const { return this->timer_tree_.begin()->getFd(); }
+int TimerTree::getClosestTimeout() const {
+  std::multiset<Timer>::iterator it = this->timer_tree_.begin();
+  if (it == this->timer_tree_.end()) return -1;
+  return it->getFd();
+}
 
 bool TimerTree::timerExists(int fd) const { return this->fd_set_.find(fd) != this->fd_set_.end(); }

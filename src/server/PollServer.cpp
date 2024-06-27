@@ -10,7 +10,7 @@ PollServer::~PollServer() {}
 void PollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                            NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   for (;;) {
-    waitForEvent(conn_manager, event_manager, timer_tree);
+    waitForEvent(io_handler, conn_manager, event_manager, timer_tree);
 
     // 発生したイベントをhandleする
     callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
@@ -20,16 +20,30 @@ void PollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager*
   }
 }
 
-int PollServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                             TimerTree* timer_tree) {
-  std::vector<pollfd> pollfds = convertToPollfds(*conn_manager);
+int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                             IActiveEventManager* event_manager, TimerTree* timer_tree) {
+  int re;
+  std::vector<pollfd> pollfds;
+  while (1) {
+    pollfds = convertToPollfds(*conn_manager);
 
-  // 現在時刻を更新
-  Timer::updateCurrentTime();
+    // 現在時刻を更新
+    Timer::updateCurrentTime();
 
-  // TODO: error起きたときどうしようか? 一定数retry? serverはdownしたらダメな気がする
-  int re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+    re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
+    if (re != -1) break;
+    WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+    // 起こりうるのはENOMEM
+    // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
+    int timeout_fd = timer_tree->getClosestTimeout();
+    if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったら例外投げる
+      throw std::runtime_error(error::strSysCallError("poll"));
+    if (conn_manager->isCgiSocket(timeout_fd)) {
+      const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
+      cgi_handler.killCgiProcess();
+    }
+    io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
+  }
   // 発生したイベントをActiveEventManagerにすべて追加
   addActiveEvents(pollfds, event_manager);
   return re;
