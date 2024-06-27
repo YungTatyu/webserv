@@ -27,15 +27,15 @@ class Listen {
     }
     return *this;
   }
-  const static char *kDefaultAddress_;
-  const static unsigned int kDefaultPort_ = 80;
-  const static bool kDefaultIsDefaultServer_ = false;
   const std::string &getAddress() const { return this->address_; }
   const unsigned int &getport() const { return this->port_; }
   bool getIsDefaultServer() const { return this->is_default_server_; }
   void setAddress(const std::string &address) { this->address_ = address; }
   void setPort(unsigned int port) { this->port_ = port; }
   void setIsDefaultServer(bool is_default_server) { this->is_default_server_ = is_default_server; }
+  const static char *kDefaultAddress_;
+  const static unsigned int kDefaultPort_ = 80;
+  const static bool kDefaultIsDefaultServer_ = false;
   const static unsigned int kType_ = CONF_HTTP_SERVER | CONF_TAKE123 | CONF_NOT_UNIQUE;
 };
 }  // namespace config
