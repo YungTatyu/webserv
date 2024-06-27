@@ -32,13 +32,12 @@ int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* co
 
     re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
     if (re != -1) break;
-    // 起こりうるのはENOMEM
     WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+    // 起こりうるのはENOMEM
     // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
-    // TODO: 最終的にすべて削除してもpollが失敗したら？exitでもいい？
     int timeout_fd = timer_tree->getClosestTimeout();
-    if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったらexit
-      exit(EXIT_FAILURE);
+    if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったら例外投げる
+      throw std::runtime_error(error::strSysCallError("poll"));
     if (conn_manager->isCgiSocket(timeout_fd)) {
       const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
       cgi_handler.killCgiProcess();

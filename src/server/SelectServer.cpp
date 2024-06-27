@@ -34,11 +34,11 @@ int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
     re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
     if (re != -1) break;
     WebServer::writeErrorlog(error::strSysCallError("select") + "\n");
+    // 起こりうるのはENOMEM
     // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
-    // TODO: 最終的にすべて削除してもselectが失敗したら？exitでもいい？
     int timeout_fd = timer_tree->getClosestTimeout();
-    if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったらexit
-      exit(EXIT_FAILURE);
+    if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったら例外投げる
+      throw std::runtime_error(error::strSysCallError("select"));
     if (conn_manager->isCgiSocket(timeout_fd)) {
       const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
       cgi_handler.killCgiProcess();
