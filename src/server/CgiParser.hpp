@@ -6,7 +6,7 @@
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 
 namespace cgi {
 enum PARSE_STATE {
@@ -18,7 +18,7 @@ enum PARSE_STATE {
   PARSE_ERROR
 };
 
-typedef std::map<std::string, std::string, Utils::CaseInsensitiveCompare> string_map_case_insensitive;
+typedef std::map<std::string, std::string, utils::CaseInsensitiveCompare> string_map_case_insensitive;
 
 class CGIParser {
  private:
@@ -41,7 +41,7 @@ class CGIParser {
   CGIParser();
   ~CGIParser();
   PARSE_STATE state_;
-  bool parse(HttpResponse& http_response, const std::string& cgi_response, const PARSE_STATE init_state);
+  bool parse(HttpResponse& http_response, const std::string& cgi_response, PARSE_STATE init_state);
 };
 }  // namespace cgi
 

@@ -9,29 +9,20 @@ class TimerTree {
  private:
   std::multiset<Timer> timer_tree_;
   std::set<int> fd_set_;  // treeに登録されているfdを管理する
-  std::multiset<Timer>::iterator findTimerByFd(const int fd);
+  std::multiset<Timer>::iterator findTimerByFd(int fd);
 
  public:
   TimerTree();
   ~TimerTree();
   void addTimer(const Timer &timer);
-  void deleteTimer(const int fd);
+  void deleteTimer(int fd);
   int findTimer() const;
   struct timeval findTimeval() const;
   struct timespec findTimespec() const;
   const std::multiset<Timer> &getTimerTree() const;
   const std::set<int> &getFdSet() const;
   int getClosestTimeout() const;
-  bool timerExists(const int fd) const;
+  bool timerExists(int fd) const;
 };
 
 #endif
-
-/* Timerを設定・更新するタイミング
- * KeepAliveTimeout: ReadEventに変えるとき。
- *
- *
- * Timerを消すタイミング
- * KeepAliveTimeout: receiveする前、handleErrorEvent
- *
- */

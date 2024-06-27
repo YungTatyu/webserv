@@ -16,7 +16,8 @@
 #include "LogFd.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
-#include "Utils.hpp"
+#include "syscall_wrapper.hpp"
+#include "utils.hpp"
 
 const char *config::Root::kDefaultPath_ = "html";
 const char *config::UseridPath::kDefaultPath_ = "/";
@@ -38,20 +39,20 @@ config::Main *config::initConfig(const std::string &file_path) {
   std::string absolute_path;
 
   // 絶対pathを取得
-  if (!Utils::wrapperRealpath(file_path, absolute_path)) {
+  if (!utils::resolvePath(file_path, absolute_path)) {
     std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": "
               << strerror(errno) << ")" << std::endl;
     return NULL;
   }
 
   // file_path が存在するかどうか
-  if (Utils::wrapperAccess(absolute_path, F_OK, true) == -1) return NULL;
+  if (syscall_wrapper::Access(absolute_path, F_OK, true) == -1) return NULL;
 
   // file_path の読み取り権限があるかどうか
-  if (Utils::wrapperAccess(absolute_path, R_OK, true) == -1) return NULL;
+  if (syscall_wrapper::Access(absolute_path, R_OK, true) == -1) return NULL;
 
   // file_path がファイルかどうか確認する。
-  if (!Utils::isFile(absolute_path, false)) {
+  if (!utils::isFile(absolute_path, false)) {
     std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
     return NULL;
   }

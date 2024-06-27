@@ -15,7 +15,7 @@ void *PollActiveEventManager::getActiveEvents() { return static_cast<void *>(&(t
 
 int PollActiveEventManager::getActiveEventsNum() { return this->active_events_.size(); }
 
-void PollActiveEventManager::setActiveEventsNum(const int num) { this->active_events_num_ = num; }
+void PollActiveEventManager::setActiveEventsNum(int num) { this->active_events_num_ = num; }
 
 void PollActiveEventManager::clearAllEvents() {
   this->active_events_.clear();

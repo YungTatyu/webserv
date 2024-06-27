@@ -8,7 +8,7 @@ void *SelectActiveEventManager::getActiveEvents() { return static_cast<void *>(&
 
 int SelectActiveEventManager::getActiveEventsNum() { return this->active_events_.size(); }
 
-void SelectActiveEventManager::setActiveEventsNum(const int num) {
+void SelectActiveEventManager::setActiveEventsNum(int num) {
   static_cast<void>(num);
   this->active_events_num_ = this->active_events_.size();
 }

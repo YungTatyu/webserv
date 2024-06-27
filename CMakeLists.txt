@@ -22,9 +22,9 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/conf.cpp
 	src/config/LogFd.cpp
 	# src/cgi
-	src/server/CGIHandler.cpp
-	src/server/CGIParser.cpp
-	src/server/CGIExecutor.cpp
+	src/server/CgiHandler.cpp
+	src/server/CgiParser.cpp
+	src/server/CgiExecutor.cpp
 	# src/server
 	src/server/ConfigHandler.cpp
 	src/server/ConnectionManager.cpp
@@ -32,7 +32,6 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/HttpResponse.cpp
 	src/server/NetworkIOHandler.cpp
 	src/server/RequestHandler.cpp
-	src/server/SysCallWrapper.cpp
 	src/server/Timer.cpp
 	src/server/TimerTree.cpp
 	src/server/EpollActiveEventManager.cpp
@@ -44,7 +43,8 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/SelectActiveEventManager.cpp
 	src/server/SelectServer.cpp
 	src/server/WebServer.cpp
-	src/utils/Utils.cpp
+	src/utils/utils.cpp
+	src/utils/syscall_wrapper.cpp
 	src/utils/error.cpp
 	
 	# test files
@@ -102,8 +102,8 @@ add_executable(${PROJECT_NAME}-googletest
 	# test/conf/directive_parser/userid_service/userid_service_test.cpp
 	test/conf/directive_parser/worker_connections/worker_connections_test.cpp
 	test/conf/init_log_test.cpp
-	test/cgi/CGIExecutor_test.cpp
-	test/cgi/CGIParser_test.cpp
+	test/cgi/CgiExecutor_test.cpp
+	test/cgi/CgiParser_test.cpp
 )
 target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 # debug

@@ -18,7 +18,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location1) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -36,7 +36,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location2) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/a/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -54,7 +54,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location3) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/b/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -72,7 +72,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location4) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/c/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -90,7 +90,7 @@ TEST(HttpResponseRoot, alias_tryfiles_in_location) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/d/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -112,7 +112,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location1_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -129,7 +129,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location2_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/a/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -146,7 +146,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location3_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/b/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -163,7 +163,7 @@ TEST(HttpResponseRoot, root_tryfiles_in_location4_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/c/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -180,7 +180,7 @@ TEST(HttpResponseRoot, alias_tryfiles_in_location_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/d/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -200,7 +200,7 @@ TEST(HttpResponseRoot, root_index_in_location1) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -218,7 +218,7 @@ TEST(HttpResponseRoot, root_index_in_location2) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -236,7 +236,7 @@ TEST(HttpResponseRoot, root_index_in_location3) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -254,7 +254,7 @@ TEST(HttpResponseRoot, root_index_in_location4) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -294,7 +294,7 @@ TEST(HttpResponseRoot, root_index_in_location1_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -311,7 +311,7 @@ TEST(HttpResponseRoot, root_index_in_location2_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -328,7 +328,7 @@ TEST(HttpResponseRoot, root_index_in_location3_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -345,7 +345,7 @@ TEST(HttpResponseRoot, root_index_in_location4_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -382,7 +382,7 @@ TEST(HttpResponseRoot, root_index_no_location1) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -400,7 +400,7 @@ TEST(HttpResponseRoot, root_index_no_location2) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -418,7 +418,7 @@ TEST(HttpResponseRoot, root_index_no_location3) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -436,7 +436,7 @@ TEST(HttpResponseRoot, root_index_no_location4) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -458,7 +458,7 @@ TEST(HttpResponseRoot, root_index_no_location1_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -475,7 +475,7 @@ TEST(HttpResponseRoot, root_index_no_location2_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -492,7 +492,7 @@ TEST(HttpResponseRoot, root_index_no_location3_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -509,7 +509,7 @@ TEST(HttpResponseRoot, root_index_no_location4_HEAD) {
                                         {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::HEAD}, "/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/parent.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/parent.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -692,7 +692,7 @@ TEST(HttpResponseRoot, path_info2) {
       {{"127.0.0.1", 4240}, {"127.0.0.1", 4241}}, {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
       {config::REQUEST_METHOD::GET}, "/cgi-bin/non_exist.php/path/info/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},
@@ -789,7 +789,7 @@ TEST(HttpResponseRoot, path_info2_HEAD) {
       {{"127.0.0.1", 4240}, {"127.0.0.1", 4241}}, {{"host", "test"}, {"User-Agent", "Mozilla/5.0"}},
       {config::REQUEST_METHOD::HEAD}, "/cgi-bin/non_exist.php/path/info/", HttpRequest::PARSE_COMPLETE));
 
-  const std::string expect_body = Utils::readFile("test/server/HttpResponse/root/file/current.html");
+  const std::string expect_body = utils::readFile("test/server/HttpResponse/root/file/current.html");
   test.testHeaders({
       {"Server", "webserv/1.0"},
       {"Date", ""},

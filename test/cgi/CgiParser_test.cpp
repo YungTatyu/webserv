@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "CGIHandler.hpp"
-#include "Utils.hpp"
+#include "CgiHandler.hpp"
+#include "utils.hpp"
 
 typedef std::pair<std::string, std::string> string_pair;
 

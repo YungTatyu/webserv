@@ -6,8 +6,8 @@ TEST(ConfigHandlerTestSearchUseridExpires, http) {
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[0]});
 
   test.sameTime(test.config_handler_.config_->http_.userid_expires.getTime(),
-                test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers["Host"],
-                                                         test.request_.uri));
+                test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers_["Host"],
+                                                         test.request_.uri_));
 }
 
 TEST(ConfigHandlerTestSearchUseridExpires, server) {
@@ -16,8 +16,8 @@ TEST(ConfigHandlerTestSearchUseridExpires, server) {
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[1]});
 
   test.sameTime(test.config_handler_.config_->http_.server_list_[1].userid_expires.getTime(),
-                test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers["Host"],
-                                                         test.request_.uri));
+                test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers_["Host"],
+                                                         test.request_.uri_));
 }
 
 TEST(ConfigHandlerTestSearchUseridExpires, location) {
@@ -28,6 +28,6 @@ TEST(ConfigHandlerTestSearchUseridExpires, location) {
 
   test.sameTime(
       test.config_handler_.config_->http_.server_list_[0].location_list_[1].userid_expires.getTime(),
-      test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers["Host"],
-                                               test.request_.uri));
+      test.config_handler_.searchUseridExpires(test.tied_server_, test.request_.headers_["Host"],
+                                               test.request_.uri_));
 }

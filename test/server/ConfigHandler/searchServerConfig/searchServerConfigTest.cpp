@@ -52,8 +52,8 @@ TEST(ConfigHandlerTestSearchServerConfig, same_port) {
   const config::Http& http = test.config_handler_.config_->http_;
   test.initTiedServer({&http.server_list_[0]});
 
-  test::sameServer(http.server_list_[0],
-                   test.config_handler_.searchServerConfig(test.tied_server_, test.request_.headers["Host"]));
+  test::sameServer(http.server_list_[0], test.config_handler_.searchServerConfig(
+                                             test.tied_server_, test.request_.headers_["Host"]));
 }
 
 TEST(ConfigHandlerTestSearchServerConfig, same_address) {
@@ -62,8 +62,8 @@ TEST(ConfigHandlerTestSearchServerConfig, same_address) {
   const config::Http& http = test.config_handler_.config_->http_;
   test.initTiedServer({&http.server_list_[1]});
 
-  test::sameServer(http.server_list_[1],
-                   test.config_handler_.searchServerConfig(test.tied_server_, test.request_.headers["Host"]));
+  test::sameServer(http.server_list_[1], test.config_handler_.searchServerConfig(
+                                             test.tied_server_, test.request_.headers_["Host"]));
 }
 
 TEST(ConfigHandlerTestSearchServerConfig, same_server_name) {
@@ -72,8 +72,8 @@ TEST(ConfigHandlerTestSearchServerConfig, same_server_name) {
   const config::Http& http = test.config_handler_.config_->http_;
   test.initTiedServer({&http.server_list_[2], &http.server_list_[3]});
 
-  test::sameServer(http.server_list_[2],
-                   test.config_handler_.searchServerConfig(test.tied_server_, test.request_.headers["Host"]));
+  test::sameServer(http.server_list_[2], test.config_handler_.searchServerConfig(
+                                             test.tied_server_, test.request_.headers_["Host"]));
 }
 
 TEST(ConfigHandlerTestSearchServerConfig, default_server) {
@@ -82,8 +82,8 @@ TEST(ConfigHandlerTestSearchServerConfig, default_server) {
   const config::Http& http = test.config_handler_.config_->http_;
   test.initTiedServer({&http.server_list_[0], &http.server_list_[1]});
 
-  test::sameServer(http.server_list_[1],
-                   test.config_handler_.searchServerConfig(test.tied_server_, test.request_.headers["Host"]));
+  test::sameServer(http.server_list_[1], test.config_handler_.searchServerConfig(
+                                             test.tied_server_, test.request_.headers_["Host"]));
 }
 
 TEST(ConfigHandlerTestSearchServerConfig, default_server_same_server_name) {
@@ -92,8 +92,8 @@ TEST(ConfigHandlerTestSearchServerConfig, default_server_same_server_name) {
   const config::Http& http = test.config_handler_.config_->http_;
   test.initTiedServer({&http.server_list_[0], &http.server_list_[1], &http.server_list_[2]});
 
-  test::sameServer(http.server_list_[0],
-                   test.config_handler_.searchServerConfig(test.tied_server_, test.request_.headers["Host"]));
+  test::sameServer(http.server_list_[0], test.config_handler_.searchServerConfig(
+                                             test.tied_server_, test.request_.headers_["Host"]));
 }
 
 TEST(ConfigHandlerTestSearchServerConfig, duplicate_server) {
@@ -102,6 +102,6 @@ TEST(ConfigHandlerTestSearchServerConfig, duplicate_server) {
   const config::Http& http = test.config_handler_.config_->http_;
   test.initTiedServer({&http.server_list_[0], &http.server_list_[1], &http.server_list_[2]});
 
-  test::sameServer(http.server_list_[1],
-                   test.config_handler_.searchServerConfig(test.tied_server_, test.request_.headers["Host"]));
+  test::sameServer(http.server_list_[1], test.config_handler_.searchServerConfig(
+                                             test.tied_server_, test.request_.headers_["Host"]));
 }

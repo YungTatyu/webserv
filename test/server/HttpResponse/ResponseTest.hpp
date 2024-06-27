@@ -24,7 +24,7 @@
 namespace test {
 
 typedef std::pair<std::string, unsigned int> ip_address_pair;
-typedef std::map<std::string, std::string, Utils::CaseInsensitiveCompare> string_map_case_insensitive;
+typedef std::map<std::string, std::string, utils::CaseInsensitiveCompare> string_map_case_insensitive;
 typedef std::map<std::string, std::string> string_map;
 
 class ResponseTest {
@@ -104,12 +104,12 @@ class ResponseTest {
                    const std::vector<config::REQUEST_METHOD> &methods, const std::string &uri,
                    const HttpRequest::ParseState state, const std::string &body = "",
                    const std::string &queries = "", const std::string &version = "HTTP/1.1") {
-    this->request_.headers = headers;
-    this->request_.uri = uri;
-    this->request_.parseState = state;
-    this->request_.body = body;
-    this->request_.queries = queries;
-    this->request_.version = version;
+    this->request_.headers_ = headers;
+    this->request_.uri_ = uri;
+    this->request_.parse_state_ = state;
+    this->request_.body_ = body;
+    this->request_.queries_ = queries;
+    this->request_.version_ = version;
     std::for_each(methods.begin(), methods.end(),
                   [this](config::REQUEST_METHOD method) { this->methods_.push_back(method); });
   }
@@ -120,15 +120,15 @@ class ResponseTest {
    */
   void generateResponse() {
     int i = 0;
-    std::string ori_uri = this->request_.uri;
+    std::string ori_uri = this->request_.uri_;
     std::for_each(this->tied_servers_.begin(), this->tied_servers_.end(),
                   [this, &i, &ori_uri](TiedServer tied_server) {  // testするip adressの数だけloop
                     std::for_each(this->methods_.begin(), this->methods_.end(),
                                   [this, &i, &tied_server,
                                    &ori_uri](config::REQUEST_METHOD method) {  // testするmethodの数だけloop
-                                    this->request_.uri =
+                                    this->request_.uri_ =
                                         ori_uri;  // テスト中に変更されている可能性があるのでuriをもどす
-                                    this->request_.method = method;  // testするmethodを変える
+                                    this->request_.method_ = method;  // testするmethodを変える
                                     this->responses_.push_back(HttpResponse());
                                     this->final_responses_.push_back(HttpResponse::generateResponse(
                                         this->request_, this->responses_[i], tied_server, this->sockets_[0],
@@ -150,7 +150,7 @@ class ResponseTest {
     std::for_each(this->responses_.begin(), this->responses_.end(), [&expects, this](HttpResponse response) {
       const char *date = "Date";
       for (string_map::const_iterator it = expects.begin(); it != expects.end(); ++it) {
-        EXPECT_NO_THROW(if (Utils::compareIgnoreCase(it->first, date)) {
+        EXPECT_NO_THROW(if (utils::compareIgnoreCase(it->first, date)) {
           this->testDate(response.headers_[date]);
           continue;
         } EXPECT_EQ(response.headers_.at(it->first), it->second));
@@ -371,7 +371,7 @@ class ResponseTest {
       res += (toTitleCase(it->first) + ": " + it->second + "\r\n");
     res += "\r\n";
 
-    if (this->request_.method == config::HEAD) return res;
+    if (this->request_.method_ == config::HEAD) return res;
 
     res += response.body_;
     return res;

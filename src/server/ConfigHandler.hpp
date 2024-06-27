@@ -19,14 +19,9 @@ struct TiedServer;
 /* Confファイルの設定値を取り出す */
 class ConfigHandler {
  public:
-  // data
   const config::Main* config_;
-
-  // initialize
   ConfigHandler() : config_(NULL){};
   void loadConfiguration(const config::Main* config);
-
-  // method
   // ipv4のみ対応
   int allowRequest(const config::Server& server, const config::Location* location, const HttpRequest& request,
                    struct sockaddr_in client_addr) const;
@@ -53,7 +48,7 @@ class ConfigHandler {
                                           const std::string& server_name, const std::string& uri) const;
 
   // TiedServerの作成
-  struct TiedServer createTiedServer(const std::string addr, const unsigned int port) const;
+  struct TiedServer createTiedServer(const std::string& addr, unsigned int port) const;
 
   // directiveの値取得系
   const config::Server& searchServerConfig(const struct TiedServer& tied_servers,
@@ -65,24 +60,18 @@ class ConfigHandler {
 
   // directive検索系
   const config::ErrorPage* searchErrorPage(const config::Server& server, const config::Location* location,
-                                           const unsigned int code) const;
+                                           unsigned int code) const;
   bool isAutoIndexOn(const config::Server& server, const config::Location* location) const;
 
-  // utillity系
-  std::string createAcsLogMsg(const uint32_t ip, const long status, const size_t resSize,
-                              const HttpRequest& request) const;
-
-  // const variable
+  std::string createAcsLogMsg(uint32_t ip, long status, size_t res_size, const HttpRequest& request) const;
   const static int ACCESS_ALLOW = 1;
   const static int ACCESS_DENY = 0;
   const static int METHOD_DENY = -1;
 
  private:
-  // utils
-  // 必要なメソッド追加
-  bool limitLoop(const std::vector<config::AllowDeny>& allow_deny_list, const uint32_t cli_addr) const;
-  bool addressInLimit(const std::string& ip_str, const uint32_t cli_addr) const;
-  const std::string getCurrentTimeByLogFormat() const;
+  bool limitLoop(const std::vector<config::AllowDeny>& allow_deny_list, uint32_t cli_addr) const;
+  bool addressInLimit(const std::string& ip_str, uint32_t cli_addr) const;
+  std::string getCurrentTimeByLogFormat() const;
 };
 
 /**

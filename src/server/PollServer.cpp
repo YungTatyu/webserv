@@ -91,7 +91,7 @@ std::vector<struct pollfd> PollServer::convertToPollfds(const ConnectionManager&
   for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end();
        ++it) {
     struct pollfd pollfd;
-    switch (it->second->event) {
+    switch (it->second->event_) {
       case ConnectionData::EV_CGI_READ:
       case ConnectionData::EV_CGI_WRITE:
         // cgi eventの時は、クライアントsocketはイベント登録しない
@@ -101,7 +101,7 @@ std::vector<struct pollfd> PollServer::convertToPollfds(const ConnectionManager&
         break;
     }
     pollfd.fd = it->first;
-    switch (it->second->event) {
+    switch (it->second->event_) {
       case ConnectionData::EV_READ:
       case ConnectionData::EV_CGI_READ:
         pollfd.events = POLLIN;

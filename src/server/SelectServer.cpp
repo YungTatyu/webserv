@@ -46,7 +46,7 @@ int SelectServer::addSocketToSets(const ConnectionManager& conn_manager) {
        ++it) {
     const ConnectionData& connection = *(it->second);
     const int fd = it->first;
-    switch (connection.event) {
+    switch (connection.event_) {
       case ConnectionData::EV_CGI_READ:
       case ConnectionData::EV_CGI_WRITE:
         // cgi eventの時は、クライアントsocketはイベント登録しない
@@ -55,7 +55,7 @@ int SelectServer::addSocketToSets(const ConnectionManager& conn_manager) {
       default:
         break;
     }
-    switch (connection.event) {
+    switch (connection.event_) {
       case ConnectionData::EV_READ:
       case ConnectionData::EV_CGI_READ:
         FD_SET(fd, &(this->read_set_));

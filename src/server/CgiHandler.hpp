@@ -6,8 +6,8 @@
 
 #include <string>
 
-#include "CGIExecutor.hpp"
-#include "CGIParser.hpp"
+#include "CgiExecutor.hpp"
+#include "CgiParser.hpp"
 
 namespace cgi {
 enum CGI_SOCKET {
@@ -17,27 +17,27 @@ enum CGI_SOCKET {
   SOCKET_WRITE = 1,
 };
 
-class CGIHandler {
+class CgiHandler {
  private:
   CGIParser cgi_parser_;
-  CGIExecutor cgi_executor_;
+  CgiExecutor cgi_executor_;
   pid_t cgi_process_id_;
   int cli_socket_;  // cgiが紐づくクライアント
   bool forkCgiProcess(const HttpRequest& request, const HttpResponse& response);
 
  public:
   int sockets_[2];
-  CGIHandler();
-  ~CGIHandler();
+  CgiHandler();
+  ~CgiHandler();
   static bool isCgi(const std::string& script_path);
-  bool callCgiExecutor(const HttpResponse& response, const HttpRequest& request, const int cli_sock);
+  bool callCgiExecutor(const HttpResponse& response, const HttpRequest& request, int cli_sock);
   bool callCgiParser(HttpResponse& response, const std::string& cgi_response);
   void killCgiProcess() const;
   const CGIParser& getCgiParser() const;
-  const CGIExecutor& getCgiExecutor() const;
+  const CgiExecutor& getCgiExecutor() const;
   pid_t getCgiProcessId() const;
   int getCliSocket() const;
-  void setCliSocket(const int socket);
+  void setCliSocket(int socket);
   int getCgiSocket() const;
   void resetSockets();
 };
