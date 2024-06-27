@@ -22,8 +22,7 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionMan
     if (new_sock == -1) return;
     if (server->addNewEvent(new_sock, ConnectionData::EV_READ) == -1) {
       // eventの追加に失敗したら接続を切る
-      close(new_sock);
-      conn_manager.removeConnection(new_sock, false);
+      io_handler.closeConnection(conn_manager, server, timer_tree, new_sock);
       return;
     }
     conn_manager.setEvent(new_sock, ConnectionData::EV_READ);
