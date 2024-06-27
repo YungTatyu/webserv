@@ -53,7 +53,6 @@ struct Http {
     }
     return *this;
   }
-  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
   std::set<std::string> directives_set_;
   std::vector<Server> server_list_;
   Root root_;
@@ -74,6 +73,7 @@ struct Http {
   UseridService userid_service_;
   std::vector<int> access_fd_list_;
   std::vector<int> error_fd_list_;
+  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
 };
 }  // namespace config
 

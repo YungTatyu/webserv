@@ -59,7 +59,6 @@ struct Location {
     }
     return *this;
   }
-  const static unsigned int kType_ = CONF_HTTP_SERVER | CONF_TAKE1 | CONF_NOT_UNIQUE;
   std::set<std::string> directives_set_;
   std::string uri_;
   LimitExcept limit_except_;
@@ -83,6 +82,7 @@ struct Location {
   UseridService userid_service_;
   std::vector<int> access_fd_list_;
   std::vector<int> error_fd_list_;
+  const static unsigned int kType_ = CONF_HTTP_SERVER | CONF_TAKE1 | CONF_NOT_UNIQUE;
 
  private:
   Location();

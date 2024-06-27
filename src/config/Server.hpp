@@ -58,7 +58,6 @@ struct Server {
     }
     return *this;
   }
-  const static unsigned int kType_ = CONF_HTTP | CONF_NOARGS | CONF_NOT_UNIQUE;
   std::set<std::string> directives_set_;
   std::vector<Location> location_list_;
   std::vector<AccessLog> access_log_list_;
@@ -81,6 +80,7 @@ struct Server {
   UseridService userid_service_;
   std::vector<int> access_fd_list_;
   std::vector<int> error_fd_list_;
+  const static unsigned int kType_ = CONF_HTTP | CONF_NOARGS | CONF_NOT_UNIQUE;
 };
 }  // namespace config
 
