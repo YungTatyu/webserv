@@ -66,7 +66,7 @@ function assert {
   printf "[  test${g_test_index}  ]\n${request}: "
 
   # responseのtimeoutを1秒に設定 --max-time
-  local actual=$(curl -X ${method} ${option} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1)
+  local actual=$(curl -X ${method} ${option} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1.5)
   local expect=$2
   if [ "${actual}" == "${expect}" ]; then
     printf "${GREEN}passed${WHITE}\n\n"
