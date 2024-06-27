@@ -12,7 +12,7 @@ SelectServer::~SelectServer() {}
 void SelectServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                              NetworkIOHandler* io_handler, TimerTree* timer_tree) {
   for (;;) {
-    waitForEvent(conn_manager, event_manager, timer_tree);
+    waitForEvent(io_handler, conn_manager, event_manager, timer_tree);
 
     callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
@@ -20,18 +20,31 @@ void SelectServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManage
   }
 }
 
-int SelectServer::waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                               TimerTree* timer_tree) {
-  const int max_fd = addSocketToSets(*conn_manager);
-  // 現在時刻を更新
-  Timer::updateCurrentTime();
-  // TODO: select serverではマクロFD_SETSIZE以上のfdを監視できない
-  // TODO: error処理どうするべきか、retryする？
-  struct timeval tv = timer_tree->findTimeval();
-  struct timeval* tvp = &tv;
-  if (tv.tv_sec == -1 && tv.tv_usec == -1) tvp = NULL;
-  int re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("select") + "\n");
+int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                               IActiveEventManager* event_manager, TimerTree* timer_tree) {
+  int re;
+  while (1) {
+    const int max_fd = addSocketToSets(*conn_manager);
+    // 現在時刻を更新
+    Timer::updateCurrentTime();
+    struct timeval tv = timer_tree->findTimeval();
+    struct timeval* tvp = &tv;
+    if (tv.tv_sec == -1 && tv.tv_usec == -1) tvp = NULL;
+
+    re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
+    if (re != -1) break;
+    WebServer::writeErrorlog(error::strSysCallError("select") + "\n");
+    // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
+    // TODO: 最終的にすべて削除してもselectが失敗したら？exitでもいい？
+    int timeout_fd = timer_tree->getClosestTimeout();
+    if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったらexit
+      exit(EXIT_FAILURE);
+    if (conn_manager->isCgiSocket(timeout_fd)) {
+      const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
+      cgi_handler.killCgiProcess();
+    }
+    io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
+  }
   addActiveEvents(conn_manager->getConnections(), event_manager);
   return re;
 }

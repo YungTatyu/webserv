@@ -12,8 +12,8 @@ class IServer {
   virtual ~IServer(){};
   virtual void eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                          NetworkIOHandler* io_handler, TimerTree* timer_tree) = 0;
-  virtual int waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                           TimerTree* timer_tree) = 0;
+  virtual int waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                           IActiveEventManager* event_manager, TimerTree* timer_tree) = 0;
   virtual void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                                 NetworkIOHandler* io_handler, TimerTree* timer_tree) = 0;
   virtual int addNewEvent(int fd, ConnectionData::EVENT event) = 0;

@@ -20,7 +20,12 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionMan
   if (io_handler.isListenSocket(sock)) {
     int new_sock = io_handler.acceptConnection(conn_manager, sock);
     if (new_sock == -1) return;
-    server->addNewEvent(new_sock, ConnectionData::EV_READ);
+    if (server->addNewEvent(new_sock, ConnectionData::EV_READ) == -1) {
+      // eventの追加に失敗したら接続を切る
+      close(new_sock);
+      conn_manager.removeConnection(new_sock, false);
+      return;
+    }
     conn_manager.setEvent(new_sock, ConnectionData::EV_READ);
     addTimerByType(conn_manager, config_handler, timer_tree, new_sock, Timer::TMO_RECV);
     if (!isOverWorkerConnections(conn_manager, config_handler)) return;

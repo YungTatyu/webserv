@@ -14,8 +14,8 @@ class PollServer : public IServer {
   ~PollServer();
   void eventLoop(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                  NetworkIOHandler* io_handler, TimerTree* timer_tree);
-  int waitForEvent(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
-                   TimerTree* timer_tree);
+  int waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
+                   IActiveEventManager* event_manager, TimerTree* timer_tree);
   void callEventHandler(ConnectionManager* conn_manager, IActiveEventManager* event_manager,
                         NetworkIOHandler* io_handler, TimerTree* timer_tree);
   int addNewEvent(int fd, ConnectionData::EVENT event);
@@ -23,7 +23,6 @@ class PollServer : public IServer {
   int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
-  const static int kRetry = 5;
   void addActiveEvents(const std::vector<struct pollfd>& pollfds, IActiveEventManager* event_manager);
   std::vector<struct pollfd> convertToPollfds(const ConnectionManager& conn_manager);
 };
