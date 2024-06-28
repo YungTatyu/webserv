@@ -11,6 +11,8 @@
 
 RequestHandler::RequestHandler() {}
 
+RequestHandler::~RequestHandler() {}
+
 void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
                                      IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();

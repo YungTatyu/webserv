@@ -22,8 +22,17 @@ const size_t NetworkIOHandler::buffer_size_;
 
 NetworkIOHandler::NetworkIOHandler() {}
 
+NetworkIOHandler::NetworkIOHandler(const NetworkIOHandler& other) { *this = other; }
+
 NetworkIOHandler::~NetworkIOHandler() {
   closeAllListenSockets();  // リスニングソケットのクローズ
+}
+
+NetworkIOHandler& NetworkIOHandler::operator=(const NetworkIOHandler& other) {
+  if (this != &other) {
+    this->listenfd_map_ = other.listenfd_map_;
+  }
+  return *this;
 }
 
 /* NetworkIOHandlerクラスの実装 */

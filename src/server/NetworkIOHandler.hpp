@@ -25,28 +25,31 @@ class IServer;
 
 /* listen socketと結びついたserver config を持つ構造体 */
 struct TiedServer {
-  std::vector<const config::Server*> servers_;
-  const std::string addr_;
-  const unsigned int port_;
-
   TiedServer() : addr_(config::Listen::kDefaultAddress_), port_(config::Listen::kDefaultPort_){};
   TiedServer(const std::string& addr, unsigned int port) : addr_(addr), port_(port) {}
   TiedServer(const TiedServer& other) : servers_(other.servers_), addr_(other.addr_), port_(other.port_) {}
+  ~TiedServer() {}
   TiedServer& operator=(const TiedServer& other) {
     if (this != &other) {
       this->servers_ = other.servers_;
-      // this->addr_ = other.addr_;
-      // this->port_ = other.port_;
+      this->addr_ = other.addr_;
+      this->port_ = other.port_;
     }
     return *this;
   }
+
+  std::vector<const config::Server*> servers_;
+  std::string addr_;
+  unsigned int port_;
 };
 
 /* クライアントとデータの送受信を行う */
 class NetworkIOHandler {
  public:
   NetworkIOHandler();
+  NetworkIOHandler(const NetworkIOHandler&);
   ~NetworkIOHandler();
+  NetworkIOHandler& operator=(const NetworkIOHandler&);
   int setupSocket(const std::string& address, unsigned int port);
   ssize_t receiveRequest(ConnectionManager& connManager, int sock);
   ssize_t sendResponse(ConnectionManager& connManager, int sock);

@@ -7,9 +7,20 @@
 
 unsigned long Timer::current_time_;
 
-Timer::Timer(const int fd, const config::Time &time) : fd_(fd) { setTimeout(time); }
+Timer::Timer(int fd, const config::Time &time) : fd_(fd) { setTimeout(time); }
+
+Timer::Timer(const Timer &other) { *this = other; }
 
 Timer::~Timer() {}
+
+Timer &Timer::operator=(const Timer &other) {
+  if (this != &other) {
+    this->fd_ = other.fd_;
+    this->raw_time_ms_ = other.raw_time_ms_;
+    this->timeout_ms_ = other.timeout_ms_;
+  }
+  return *this;
+}
 
 /**
  * @brief getCurrentTime()を呼ぶたびに計算の処理をしたくない
