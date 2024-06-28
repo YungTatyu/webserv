@@ -76,7 +76,7 @@ bool cgi::CgiHandler::callCgiParser(HttpResponse& response, const std::string& c
   return this->cgi_parser_.parse(response, cgi_response, cgi::PARSE_BEFORE);
 }
 
-const cgi::CGIParser& cgi::CgiHandler::getCgiParser() const { return this->cgi_parser_; }
+const cgi::CgiParser& cgi::CgiHandler::getCgiParser() const { return this->cgi_parser_; }
 
 const cgi::CgiExecutor& cgi::CgiHandler::getCgiExecutor() const { return this->cgi_executor_; }
 

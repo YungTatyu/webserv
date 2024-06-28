@@ -20,7 +20,7 @@ enum PARSE_STATE {
 
 typedef std::map<std::string, std::string, utils::CaseInsensitiveCompare> string_map_case_insensitive;
 
-class CGIParser {
+class CgiParser {
  private:
   // 以下のメンバ変数はHttpResponseのメンバ変数のポインタ
   string_map_case_insensitive* headers_;
@@ -28,6 +28,8 @@ class CGIParser {
   long* status_code_;
   std::string* status_code_line_;
   size_t ri_;  // cgi response index
+  CgiParser(const CgiParser& other);
+  CgiParser& operator=(const CgiParser& other);
   void init(HttpResponse& http_response);
   void parseHeaders(const std::string& cgi_response);
   void parseBody(const std::string& cgi_response);
@@ -38,8 +40,8 @@ class CGIParser {
   void eraseHeader(const std::string& header);
 
  public:
-  CGIParser();
-  ~CGIParser();
+  CgiParser();
+  ~CgiParser();
   PARSE_STATE state_;
   bool parse(HttpResponse& http_response, const std::string& cgi_response, PARSE_STATE init_state);
 };

@@ -10,12 +10,12 @@
 const static char* kContentLength = "content-length";
 const static char* kStatus = "status";
 
-cgi::CGIParser::CGIParser()
+cgi::CgiParser::CgiParser()
     : headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), ri_(0) {}
 
-cgi::CGIParser::~CGIParser() {}
+cgi::CgiParser::~CgiParser() {}
 
-void cgi::CGIParser::init(HttpResponse& http_response) {
+void cgi::CgiParser::init(HttpResponse& http_response) {
   this->headers_ = &(http_response.headers_);
   this->body_ = &(http_response.body_);
   this->status_code_ = &(http_response.status_code_);
@@ -27,7 +27,7 @@ void cgi::CGIParser::init(HttpResponse& http_response) {
   this->status_code_line_->clear();
 }
 
-bool cgi::CGIParser::parse(HttpResponse& http_response, const std::string& cgi_response,
+bool cgi::CgiParser::parse(HttpResponse& http_response, const std::string& cgi_response,
                            PARSE_STATE init_state) {
   init(http_response);
   this->state_ = init_state;
@@ -51,7 +51,7 @@ bool cgi::CGIParser::parse(HttpResponse& http_response, const std::string& cgi_r
   return true;
 }
 
-void cgi::CGIParser::parseHeaders(const std::string& response) {
+void cgi::CgiParser::parseHeaders(const std::string& response) {
   enum PARSE_HEADER_PHASE {
     sw_start,
     sw_error,
@@ -346,7 +346,7 @@ void cgi::CGIParser::parseHeaders(const std::string& response) {
   this->state_ = PARSE_HEADER_DONE;
 }
 
-void cgi::CGIParser::parseBody(const std::string& response) {
+void cgi::CgiParser::parseBody(const std::string& response) {
   // content lengthが設定されている場合は、bodyの長さを調節する
   if (this->headers_->find(kContentLength) != this->headers_->end()) {
     const std::string& content_length = this->headers_->at(kContentLength);
@@ -360,7 +360,7 @@ void cgi::CGIParser::parseBody(const std::string& response) {
   this->state_ = PARSE_BODY_DONE;
 }
 
-void cgi::CGIParser::finishParsing() { this->state_ = PARSE_COMPLETE; }
+void cgi::CgiParser::finishParsing() { this->state_ = PARSE_COMPLETE; }
 
 /**
  * @brief status codeは100以上である必要がある
@@ -369,7 +369,7 @@ void cgi::CGIParser::finishParsing() { this->state_ = PARSE_COMPLETE; }
  * @return true
  * @return false
  */
-bool cgi::CGIParser::isValidStatusCode(const std::string& status_code) const {
+bool cgi::CgiParser::isValidStatusCode(const std::string& status_code) const {
   if (status_code.size() < 3) return false;
   std::istringstream iss(status_code.substr(0, 3));
   int num;
@@ -378,7 +378,7 @@ bool cgi::CGIParser::isValidStatusCode(const std::string& status_code) const {
   return num >= 100;
 }
 
-void cgi::CGIParser::setStatusCode(const std::string& value) {
+void cgi::CgiParser::setStatusCode(const std::string& value) {
   std::string tmp = value;
   // status code以降がspaceのみの場合は、status codeの値のみを保持する
   tmp.erase(std::remove_if(tmp.begin(), tmp.end(), utils::isSpace), tmp.end());
@@ -401,7 +401,7 @@ void cgi::CGIParser::setStatusCode(const std::string& value) {
  * それ以外：200
  *
  */
-void cgi::CGIParser::finalizeStatusCode() {
+void cgi::CgiParser::finalizeStatusCode() {
   // statusのみ違うメンバ変数で管理しているので、削除する
   if (this->headers_->find(kStatus) != this->headers_->end()) return eraseHeader(kStatus);
   if (this->headers_->find("location") != this->headers_->end()) {
@@ -411,7 +411,7 @@ void cgi::CGIParser::finalizeStatusCode() {
   *(this->status_code_) = 200;
 }
 
-void cgi::CGIParser::eraseHeader(const std::string& header) {
+void cgi::CgiParser::eraseHeader(const std::string& header) {
   const string_map_case_insensitive::iterator it = this->headers_->find(header);
   if (it == this->headers_->end()) return;
   this->headers_->erase(it);
