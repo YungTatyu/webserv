@@ -19,6 +19,10 @@ class ConnectionData {
     EV_CGI_READ,
     EV_CGI_WRITE
   };
+
+  ConnectionData() : sent_bytes_(0) {}
+  ~ConnectionData() {}
+
   std::vector<unsigned char> raw_request_;
   std::vector<unsigned char> final_response_;
   std::vector<unsigned char> cgi_response_;
@@ -28,7 +32,10 @@ class ConnectionData {
   HttpResponse response_;
   cgi::CgiHandler cgi_handler_;
   const TiedServer* tied_server_;
-  ConnectionData() : sent_bytes_(0) {}
+
+ private:
+  ConnectionData(const ConnectionData&);
+  ConnectionData& operator=(const ConnectionData&);
 };
 
 typedef std::map<int, ConnectionData*>::size_type connection_size;
@@ -77,6 +84,9 @@ class ConnectionManager {
   connection_size getCgiSockNum() const;
 
  private:
+  ConnectionManager(const ConnectionManager&);
+  ConnectionManager& operator=(const ConnectionManager&);
+
   std::map<int, ConnectionData*> connections_;
   std::set<int> closed_connections_;  // event handlerによって、接続を切られたfdを管理する
                                       // 発生したイベントのハンドラーが全て呼ばれたら毎回リセットされる
