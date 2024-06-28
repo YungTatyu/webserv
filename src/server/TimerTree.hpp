@@ -7,13 +7,16 @@
 
 class TimerTree {
  private:
+  std::multiset<Timer>::iterator findTimerByFd(int fd);
+
   std::multiset<Timer> timer_tree_;
   std::set<int> fd_set_;  // treeに登録されているfdを管理する
-  std::multiset<Timer>::iterator findTimerByFd(int fd);
 
  public:
   TimerTree();
+  TimerTree(const TimerTree &);
   ~TimerTree();
+  TimerTree &operator=(const TimerTree &);
   void addTimer(const Timer &timer);
   void deleteTimer(int fd);
   int findTimer() const;

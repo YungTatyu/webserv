@@ -27,6 +27,16 @@ class WebServer {
   static void writeErrorlog(const std::string &msg);
 
  private:
+  WebServer();
+  WebServer(const WebServer &);
+  WebServer &operator=(const WebServer &);
+  void initializeServer();
+  void initializeVServers();
+  void initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
+                              const std::string &address, unsigned int port);
+  void initializeConnManager();
+  void deleteObjects();
+
   // メンバ変数を持たない、もしくは基本的に値を変更しないオブジェクトはstatic変数で管理する
   static ConfigHandler config_handler_;
   static RequestHandler request_handler_;
@@ -35,12 +45,6 @@ class WebServer {
   ConnectionManager *conn_manager_;
   IActiveEventManager *event_manager_;
   TimerTree *timer_tree_;
-  void initializeServer();
-  void initializeVServers();
-  void initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,
-                              const std::string &address, unsigned int port);
-  void initializeConnManager();
-  void deleteObjects();
 };
 
 #endif
