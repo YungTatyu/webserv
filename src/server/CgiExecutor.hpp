@@ -17,6 +17,7 @@ class CgiExecutor {
   std::vector<std::string> split(const std::string& s, char delimiter) const;
   bool isExecutableFile(const std::string&) const;
   char* strdupFromString(const std::string&) const;
+
   std::string script_path_;
   std::vector<const char*> argv_;
   std::vector<const char*> meta_vars_;  // メタ変数(環境変数)

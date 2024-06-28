@@ -22,6 +22,7 @@ class CgiHandler {
   CgiHandler(const CgiHandler&);
   CgiHandler& operator=(const CgiHandler&);
   bool forkCgiProcess(const HttpRequest& request, const HttpResponse& response);
+
   CgiParser cgi_parser_;
   CgiExecutor cgi_executor_;
   pid_t cgi_process_id_;
@@ -41,6 +42,7 @@ class CgiHandler {
   void setCliSocket(int socket);
   int getCgiSocket() const;
   void resetSockets();
+
   int sockets_[2];
 };
 }  // namespace cgi
