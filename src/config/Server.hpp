@@ -80,7 +80,7 @@ struct Server {
   UseridService userid_service_;
   std::vector<int> access_fd_list_;
   std::vector<int> error_fd_list_;
-  const static unsigned int kType_ = CONF_HTTP | CONF_NOARGS | CONF_NOT_UNIQUE;
+  static const unsigned int kType_ = CONF_HTTP | CONF_NOARGS | CONF_NOT_UNIQUE;
 };
 }  // namespace config
 

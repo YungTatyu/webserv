@@ -57,7 +57,7 @@ void cgi::CgiExecutor::createArgv(const std::string& script_path) {
 
 void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResponse& response,
                                       int cli_sock) {
-  const static char* kContentType = "content-type";
+  static const char* kContentType = "content-type";
 
   this->meta_vars_.push_back("AUTH_TYPE=");  // Authorizationをparseするロジックを実装しないため、値は空文字
 

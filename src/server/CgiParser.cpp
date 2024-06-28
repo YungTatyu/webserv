@@ -7,8 +7,8 @@
 #include <sstream>
 #include <utility>
 
-const static char* kContentLength = "content-length";
-const static char* kStatus = "status";
+static const char* kContentLength = "content-length";
+static const char* kStatus = "status";
 
 cgi::CgiParser::CgiParser()
     : headers_(NULL), body_(NULL), status_code_(NULL), status_code_line_(NULL), ri_(0) {}
@@ -75,7 +75,7 @@ void cgi::CgiParser::parseHeaders(const std::string& response) {
     return;
   }
 
-  const static char* kContentType = "content-type";
+  static const char* kContentType = "content-type";
   ri_ = 0;
   PARSE_HEADER_PHASE state = sw_start;
   std::string cur_name;

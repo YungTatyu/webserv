@@ -22,8 +22,8 @@ class WebServer {
   WebServer(const config::Main *config);
   ~WebServer();
   void run();
-  const static ConfigHandler &getConfigHandler();
-  const static RequestHandler &getRequestHandler();
+  static const ConfigHandler &getConfigHandler();
+  static const RequestHandler &getRequestHandler();
   static void writeErrorlog(const std::string &msg);
 
  private:

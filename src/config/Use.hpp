@@ -55,7 +55,7 @@ class Use {
     }
     return ret;
   }
-  const static unsigned int kType_ = CONF_EVENTS | CONF_TAKE1 | CONF_UNIQUE;
+  static const unsigned int kType_ = CONF_EVENTS | CONF_TAKE1 | CONF_UNIQUE;
 };
 }  // namespace config
 

@@ -62,9 +62,9 @@ class ConfigHandler {
   std::string createAcsLogMsg(uint32_t ip, long status, size_t res_size, const HttpRequest& request) const;
 
   const config::Main* config_;
-  const static int ACCESS_ALLOW = 1;
-  const static int ACCESS_DENY = 0;
-  const static int METHOD_DENY = -1;
+  static const int ACCESS_ALLOW = 1;
+  static const int ACCESS_DENY = 0;
+  static const int METHOD_DENY = -1;
 
  private:
   ConfigHandler(const ConfigHandler&);

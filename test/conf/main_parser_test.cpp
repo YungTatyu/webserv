@@ -8,11 +8,11 @@
 
 namespace test {}  // namespace test
 
-const static std::string HTTP = "http";
-const static std::string EVENTS = "events";
-const static std::string SERVER = "server";
-const static std::string LOCATION = "location";
-const static std::string LIMIT_EXCEPT = "limit_except";
+static const std::string HTTP = "http";
+static const std::string EVENTS = "events";
+static const std::string SERVER = "server";
+static const std::string LOCATION = "location";
+static const std::string LIMIT_EXCEPT = "limit_except";
 
 TEST(mainParserTest, allContexts) {
   const config::Main *config = config::initConfig("test/conf/conf_files/valid/12.conf");

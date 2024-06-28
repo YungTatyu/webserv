@@ -31,8 +31,8 @@ class ErrorPage {
   void addCode(unsigned int code) { this->code_set_.insert(code); }
   void setResponse(long response) { this->response_ = response; }
   void setUri(const std::string &uri) { this->uri_ = uri; }
-  const static long kResponseUnset = -1;
-  const static unsigned int kType_ =
+  static const long kResponseUnset = -1;
+  static const unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_1MORE | CONF_NOT_UNIQUE;
 };
 }  // namespace config

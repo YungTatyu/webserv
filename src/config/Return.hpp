@@ -11,7 +11,7 @@ class Return {
  private:
   int code_;
   std::string url_;  // url or text
-  const static int kRedirectCodesSize = 5;
+  static const int kRedirectCodesSize = 5;
 
  public:
   Return() : code_(this->kCodeUnset_) {}
@@ -34,9 +34,9 @@ class Return {
     }
     return false;
   };
-  const static int kCodeUnset_ = -1;
-  const static int kRedirectCodes_[kRedirectCodesSize];
-  const static unsigned int kType_ = CONF_HTTP_LOCATION | CONF_TAKE12 | CONF_NOT_UNIQUE;
+  static const int kCodeUnset_ = -1;
+  static const int kRedirectCodes_[kRedirectCodesSize];
+  static const unsigned int kType_ = CONF_HTTP_LOCATION | CONF_TAKE12 | CONF_NOT_UNIQUE;
 };
 }  // namespace config
 

@@ -22,8 +22,8 @@ class UseridDomain {
   }
   const std::string& getName() const { return this->name_; }
   void setName(const std::string& name) { this->name_ = name; }
-  const static char* kDefaultName_;
-  const static unsigned int kType_ =
+  static const char* kDefaultName_;
+  static const unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_UNIQUE;
 };
 }  // namespace config

@@ -24,7 +24,7 @@ struct Events {
   std::set<std::string> directives_set_;
   WorkerConnections worker_connections_;
   Use use_;
-  const static unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
+  static const unsigned int kType_ = CONF_MAIN | CONF_NOARGS | CONF_UNIQUE;
 };
 }  // namespace config
 

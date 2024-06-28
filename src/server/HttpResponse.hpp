@@ -106,7 +106,7 @@ class HttpResponse {
   static void clear(HttpResponse& response);
 
   size_t internal_redirect_cnt_;
-  const static size_t kMaxInternalRedirect = 10;
+  static const size_t kMaxInternalRedirect = 10;
 };
 
 #endif
