@@ -282,6 +282,25 @@ HttpResponse::HttpResponse()
   this->default_error_page_map_[507] = &webserv_error_507_page;
 }
 
+HttpResponse::HttpResponse(const HttpResponse& other) { *this = other; }
+
+HttpResponse::~HttpResponse() {}
+
+HttpResponse& HttpResponse::operator=(const HttpResponse& other) {
+  if (this != &other) {
+    this->root_path_ = other.root_path_;
+    this->res_file_path_ = other.res_file_path_;
+    this->path_info_ = other.path_info_;
+    this->state_ = other.state_;
+    this->status_code_line_ = other.status_code_line_;
+    this->status_code_ = other.status_code_;
+    this->headers_ = other.headers_;
+    this->body_ = other.body_;
+    this->internal_redirect_cnt_ = other.internal_redirect_cnt_;
+  }
+  return *this;
+}
+
 std::string HttpResponse::createCurrentGmtTime() {
   // 現在の時間を取得
   std::time_t currentTime = std::time(NULL);
