@@ -26,6 +26,10 @@ const static std::string kRoot = "root";
 const static std::string kErrorPage = "error_page";
 const static std::string kLimitExcept = "limit_except";
 
+ConfigHandler::ConfigHandler() : config_(NULL) {}
+
+ConfigHandler::~ConfigHandler() {}
+
 /** Configにあってほしい機能
  * デフォルトサーバがどれか
  *  ipとmask分けて保存
