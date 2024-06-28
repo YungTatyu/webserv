@@ -5,7 +5,17 @@
 
 EpollActiveEventManager::EpollActiveEventManager() {}
 
+EpollActiveEventManager::EpollActiveEventManager(const EpollActiveEventManager &other) { *this = other; }
+
 EpollActiveEventManager::~EpollActiveEventManager() {}
+
+EpollActiveEventManager &EpollActiveEventManager::operator=(const EpollActiveEventManager &other) {
+  if (this != &other) {
+    this->active_events_ = other.active_events_;
+    this->active_events_num_ = other.active_events_num_;
+  }
+  return *this;
+}
 
 void *EpollActiveEventManager::getActiveEvents() { return static_cast<void *>(&(this->active_events_)); }
 

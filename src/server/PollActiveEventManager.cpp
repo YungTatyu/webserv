@@ -4,7 +4,17 @@
 
 PollActiveEventManager::PollActiveEventManager() {}
 
+PollActiveEventManager::PollActiveEventManager(const PollActiveEventManager &other) { *this = other; }
+
 PollActiveEventManager::~PollActiveEventManager() {}
+
+PollActiveEventManager &PollActiveEventManager::operator=(const PollActiveEventManager &other) {
+  if (this != &other) {
+    this->active_events_ = other.active_events_;
+    this->active_events_num_ = other.active_events_num_;
+  }
+  return *this;
+}
 
 void PollActiveEventManager::addEvent(const void *event) {
   const pollfd *poll_fd = static_cast<const pollfd *>(event);

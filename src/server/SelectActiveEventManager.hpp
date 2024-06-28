@@ -20,7 +20,9 @@ struct SelectEvent {
 class SelectActiveEventManager : public IActiveEventManager {
  public:
   SelectActiveEventManager();
+  SelectActiveEventManager(const SelectActiveEventManager &other);
   ~SelectActiveEventManager();
+  SelectActiveEventManager &operator=(const SelectActiveEventManager &other);
   void *getActiveEvents();
   int getActiveEventsNum();
   void setActiveEventsNum(int num);

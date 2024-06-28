@@ -23,6 +23,8 @@ class PollServer : public IServer {
   int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
+  PollServer(const PollServer&);
+  PollServer& operator=(const PollServer&);
   void addActiveEvents(const std::vector<struct pollfd>& pollfds, IActiveEventManager* event_manager);
   std::vector<struct pollfd> convertToPollfds(const ConnectionManager& conn_manager);
 };

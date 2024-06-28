@@ -3,7 +3,17 @@
 
 KqueueActiveEventManager::KqueueActiveEventManager() {}
 
+KqueueActiveEventManager::KqueueActiveEventManager(const KqueueActiveEventManager &other) { *this = other; }
+
 KqueueActiveEventManager::~KqueueActiveEventManager() {}
+
+KqueueActiveEventManager &KqueueActiveEventManager::operator=(const KqueueActiveEventManager &other) {
+  if (this != &other) {
+    this->active_events_ = other.active_events_;
+    this->active_events_num_ = other.active_events_num_;
+  }
+  return *this;
+}
 
 void *KqueueActiveEventManager::getActiveEvents() { return static_cast<void *>(&(this->active_events_)); }
 
