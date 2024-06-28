@@ -22,14 +22,12 @@ add_executable(${PROJECT_NAME}-googletest
 	src/config/conf.cpp
 	src/config/LogFd.cpp
 	# src/cgi
-	src/server/CgiHandler.cpp
-	src/server/CgiParser.cpp
-	src/server/CgiExecutor.cpp
+	src/cgi/CgiHandler.cpp
+	src/cgi/CgiParser.cpp
+	src/cgi/CgiExecutor.cpp
 	# src/server
 	src/server/ConfigHandler.cpp
 	src/server/ConnectionManager.cpp
-	src/server/HttpRequest.cpp
-	src/server/HttpResponse.cpp
 	src/server/NetworkIOHandler.cpp
 	src/server/RequestHandler.cpp
 	src/server/Timer.cpp
@@ -46,7 +44,9 @@ add_executable(${PROJECT_NAME}-googletest
 	src/utils/utils.cpp
 	src/utils/syscall_wrapper.cpp
 	src/utils/error.cpp
-	
+	# src/http
+	src/http/HttpRequest.cpp
+	src/http/HttpResponse.cpp
 	# test files
   test/gtest.cpp
 	test/server/TimerTree_test.cpp
@@ -112,6 +112,8 @@ target_link_libraries(${PROJECT_NAME}-googletest gtest_main)
 target_include_directories(${PROJECT_NAME}-googletest PRIVATE
 	src
 	src/server
+	src/cgi
+	src/http
 	src/config
 	src/utils
   test
