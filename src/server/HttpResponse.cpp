@@ -8,10 +8,10 @@
 #include "syscall_wrapper.hpp"
 #include "utils.hpp"
 
-static const std::string kAlias = "alias";
-static const std::string kTryFiles = "try_files";
-static const std::string kIndex = "index";
-static const std::string kReturn = "return";
+static const char* kAlias = "alias";
+static const char* kTryFiles = "try_files";
+static const char* kIndex = "index";
+static const char* kReturn = "return";
 static const char* kContentType = "Content-Type";
 static const char* kHtml = "text/html";
 static const char* kTextPlain = "text/plain";
