@@ -25,11 +25,9 @@ VPATH = $(SRCS_DIR) $(SRCS_DIR)/config $(SRCS_DIR)/server $(SRCS_DIR)/http $(SRC
 
 # ソースファイルの取得
 SRCS = $(wildcard $(addsuffix /*.$(SRC_EXT), $(VPATH)))
-
 DEPS = $(patsubst $(SRCS_DIR)/%.cpp,$(DEPS_DIR)/%.d,$(SRCS))
 OBJS = $(patsubst $(SRCS_DIR)/%.cpp,$(OBJS_DIR)/%.o,$(SRCS))
-INCLUDES			= -I$(SRCS_DIR) -I$(SRCS_DIR)/config -I$(SRCS_DIR)/server -I$(SRCS_DIR)/http -I$(SRCS_DIR)/cgi -I$(SRCS_DIR)/utils
-# CONFIG				= $(CONF_DIR)/test.conf
+INCLUDES = -I$(SRCS_DIR) -I$(SRCS_DIR)/config -I$(SRCS_DIR)/server -I$(SRCS_DIR)/http -I$(SRCS_DIR)/cgi -I$(SRCS_DIR)/utils
 
 
 all: $(DEPS_DIR) $(OBJS_DIR) $(NAME)
@@ -74,7 +72,7 @@ gtest:
 	cmake --build $(BUILD_DIR)
 	$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
-test:	gtest	ptest
+test: gtest ptest
 
 format:
 	docker build -t $(FORMATTER_IMG_NAME) . -f $(DOCKERFILE_FORMATTER)
