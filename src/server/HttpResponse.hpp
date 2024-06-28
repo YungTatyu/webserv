@@ -44,6 +44,7 @@ class HttpResponse {
                                       const ConfigHandler& config_handler);
   static bool isKeepaliveConnection(const HttpResponse& response);
   static bool isErrorResponse(const HttpResponse& response);
+  static void setup();
 
   std::string root_path_;
   std::string res_file_path_;

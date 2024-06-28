@@ -178,109 +178,7 @@ HttpResponse::HttpResponse()
       status_code_line_(""),
       status_code_(kInitStatusCode),
       body_(""),
-      internal_redirect_cnt_(0) {
-  // status_line
-  this->status_line_map_[200] = "200 OK";
-  this->status_line_map_[201] = "201 Created";
-  this->status_line_map_[202] = "202 Accepted";
-  this->status_line_map_[203] = "203 Non-Authoritative Information";
-  this->status_line_map_[204] = "204 No Content";
-  this->status_line_map_[205] = "205 Reset Content";
-  this->status_line_map_[206] = "206 Partial Content";
-  this->status_line_map_[207] = "207 Multi-Status";
-  this->status_line_map_[300] = "300 Multiple Choices";
-  this->status_line_map_[301] = "301 Moved Permanently";
-  this->status_line_map_[302] = "302 Moved Temporarily";
-  this->status_line_map_[303] = "303 See Other";
-  this->status_line_map_[304] = "304 Not Modified";
-
-  this->status_line_map_[307] = "307 Temporary Redirect";
-  this->status_line_map_[308] = "308 Permanent Redirect";
-
-  this->status_line_map_[400] = "400 Bad Request";
-  this->status_line_map_[401] = "401 Unauthorized";
-  this->status_line_map_[402] = "402 Payment Required";
-  this->status_line_map_[403] = "403 Forbidden";
-  this->status_line_map_[404] = "404 Not Found";
-  this->status_line_map_[405] = "405 Not Allowed";
-  this->status_line_map_[406] = "406 Not Acceptable";
-  this->status_line_map_[407] = "407 Proxy Authentication Required";
-  this->status_line_map_[408] = "408 Request Time-out";
-  this->status_line_map_[409] = "409 Conflict";
-  this->status_line_map_[410] = "410 Gone";
-  this->status_line_map_[411] = "411 Length Required";
-  this->status_line_map_[412] = "412 Precondition Failed";
-  this->status_line_map_[413] = "413 Request Entity Too Large";
-  this->status_line_map_[414] = "414 Request-URI Too Large";
-  this->status_line_map_[415] = "415 Unsupported Media Type";
-  this->status_line_map_[416] = "416 Requested Range Not Satisfiable";
-  this->status_line_map_[417] = "417 Expectation Failed";
-  this->status_line_map_[418] = "418 I'm a teapot";
-  this->status_line_map_[419] = "419 unused";
-  this->status_line_map_[420] = "420 unused";
-  this->status_line_map_[421] = "421 Misdirected Request";
-  this->status_line_map_[422] = "422 Unprocessable Entity";
-  this->status_line_map_[423] = "423 Locked";
-  this->status_line_map_[424] = "424 Failed Dependency";
-  this->status_line_map_[425] = "425 unused";
-  this->status_line_map_[426] = "426 Upgrade Required";
-  this->status_line_map_[427] = "427 unused";
-  this->status_line_map_[428] = "428 Precondition Required";
-  this->status_line_map_[429] = "429 Too Many Requests";
-  this->status_line_map_[430] = "430";
-
-  this->status_line_map_[500] = "500 Internal Server Error";
-  this->status_line_map_[501] = "501 Not Implemented";
-  this->status_line_map_[502] = "502 Bad Gateway";
-  this->status_line_map_[503] = "503 Service Temporarily Unavailable";
-  this->status_line_map_[504] = "504 Gateway Time-out";
-  this->status_line_map_[505] = "505 HTTP Version Not Supported";
-  this->status_line_map_[506] = "506 Variant Also Negotiates";
-  this->status_line_map_[507] = "507 Insufficient Storage";
-  this->status_line_map_[508] = "508 unused";
-  this->status_line_map_[509] = "509 unused";
-  this->status_line_map_[510] = "510 Not Extended";
-
-  // default error_page
-  this->default_error_page_map_[301] = &webserv_error_301_page;
-  this->default_error_page_map_[302] = &webserv_error_302_page;
-  this->default_error_page_map_[303] = &webserv_error_303_page;
-  this->default_error_page_map_[307] = &webserv_error_307_page;
-  this->default_error_page_map_[308] = &webserv_error_308_page;
-
-  this->default_error_page_map_[400] = &webserv_error_400_page;
-  this->default_error_page_map_[401] = &webserv_error_401_page;
-  this->default_error_page_map_[402] = &webserv_error_402_page;
-  this->default_error_page_map_[403] = &webserv_error_403_page;
-  this->default_error_page_map_[404] = &webserv_error_404_page;
-  this->default_error_page_map_[405] = &webserv_error_405_page;
-  this->default_error_page_map_[406] = &webserv_error_406_page;
-  this->default_error_page_map_[408] = &webserv_error_408_page;
-  this->default_error_page_map_[409] = &webserv_error_409_page;
-  this->default_error_page_map_[410] = &webserv_error_410_page;
-  this->default_error_page_map_[411] = &webserv_error_411_page;
-  this->default_error_page_map_[412] = &webserv_error_412_page;
-  this->default_error_page_map_[413] = &webserv_error_413_page;
-  this->default_error_page_map_[414] = &webserv_error_414_page;
-  this->default_error_page_map_[415] = &webserv_error_415_page;
-  this->default_error_page_map_[416] = &webserv_error_416_page;
-  this->default_error_page_map_[421] = &webserv_error_421_page;
-  this->default_error_page_map_[429] = &webserv_error_429_page;
-
-  this->default_error_page_map_[494] = &webserv_error_494_page;
-  this->default_error_page_map_[495] = &webserv_error_495_page;
-  this->default_error_page_map_[496] = &webserv_error_496_page;
-  this->default_error_page_map_[497] = &webserv_error_497_page;
-  this->default_error_page_map_[498] = &webserv_error_404_page;
-
-  this->default_error_page_map_[500] = &webserv_error_500_page;
-  this->default_error_page_map_[501] = &webserv_error_501_page;
-  this->default_error_page_map_[502] = &webserv_error_502_page;
-  this->default_error_page_map_[503] = &webserv_error_503_page;
-  this->default_error_page_map_[504] = &webserv_error_504_page;
-  this->default_error_page_map_[505] = &webserv_error_505_page;
-  this->default_error_page_map_[507] = &webserv_error_507_page;
-}
+      internal_redirect_cnt_(0) {}
 
 HttpResponse::HttpResponse(const HttpResponse& other) { *this = other; }
 
@@ -299,6 +197,113 @@ HttpResponse& HttpResponse::operator=(const HttpResponse& other) {
     this->internal_redirect_cnt_ = other.internal_redirect_cnt_;
   }
   return *this;
+}
+
+/**
+ * @brief HttpResponseのstaticメンバ変数を初期化する
+ */
+void HttpResponse::setup() {
+  // status_line
+  status_line_map_[200] = "200 OK";
+  status_line_map_[201] = "201 Created";
+  status_line_map_[202] = "202 Accepted";
+  status_line_map_[203] = "203 Non-Authoritative Information";
+  status_line_map_[204] = "204 No Content";
+  status_line_map_[205] = "205 Reset Content";
+  status_line_map_[206] = "206 Partial Content";
+  status_line_map_[207] = "207 Multi-Status";
+  status_line_map_[300] = "300 Multiple Choices";
+  status_line_map_[301] = "301 Moved Permanently";
+  status_line_map_[302] = "302 Moved Temporarily";
+  status_line_map_[303] = "303 See Other";
+  status_line_map_[304] = "304 Not Modified";
+
+  status_line_map_[307] = "307 Temporary Redirect";
+  status_line_map_[308] = "308 Permanent Redirect";
+
+  status_line_map_[400] = "400 Bad Request";
+  status_line_map_[401] = "401 Unauthorized";
+  status_line_map_[402] = "402 Payment Required";
+  status_line_map_[403] = "403 Forbidden";
+  status_line_map_[404] = "404 Not Found";
+  status_line_map_[405] = "405 Not Allowed";
+  status_line_map_[406] = "406 Not Acceptable";
+  status_line_map_[407] = "407 Proxy Authentication Required";
+  status_line_map_[408] = "408 Request Time-out";
+  status_line_map_[409] = "409 Conflict";
+  status_line_map_[410] = "410 Gone";
+  status_line_map_[411] = "411 Length Required";
+  status_line_map_[412] = "412 Precondition Failed";
+  status_line_map_[413] = "413 Request Entity Too Large";
+  status_line_map_[414] = "414 Request-URI Too Large";
+  status_line_map_[415] = "415 Unsupported Media Type";
+  status_line_map_[416] = "416 Requested Range Not Satisfiable";
+  status_line_map_[417] = "417 Expectation Failed";
+  status_line_map_[418] = "418 I'm a teapot";
+  status_line_map_[419] = "419 unused";
+  status_line_map_[420] = "420 unused";
+  status_line_map_[421] = "421 Misdirected Request";
+  status_line_map_[422] = "422 Unprocessable Entity";
+  status_line_map_[423] = "423 Locked";
+  status_line_map_[424] = "424 Failed Dependency";
+  status_line_map_[425] = "425 unused";
+  status_line_map_[426] = "426 Upgrade Required";
+  status_line_map_[427] = "427 unused";
+  status_line_map_[428] = "428 Precondition Required";
+  status_line_map_[429] = "429 Too Many Requests";
+  status_line_map_[430] = "430";
+
+  status_line_map_[500] = "500 Internal Server Error";
+  status_line_map_[501] = "501 Not Implemented";
+  status_line_map_[502] = "502 Bad Gateway";
+  status_line_map_[503] = "503 Service Temporarily Unavailable";
+  status_line_map_[504] = "504 Gateway Time-out";
+  status_line_map_[505] = "505 HTTP Version Not Supported";
+  status_line_map_[506] = "506 Variant Also Negotiates";
+  status_line_map_[507] = "507 Insufficient Storage";
+  status_line_map_[508] = "508 unused";
+  status_line_map_[509] = "509 unused";
+  status_line_map_[510] = "510 Not Extended";
+
+  // default error_page
+  default_error_page_map_[301] = &webserv_error_301_page;
+  default_error_page_map_[302] = &webserv_error_302_page;
+  default_error_page_map_[303] = &webserv_error_303_page;
+  default_error_page_map_[307] = &webserv_error_307_page;
+  default_error_page_map_[308] = &webserv_error_308_page;
+
+  default_error_page_map_[400] = &webserv_error_400_page;
+  default_error_page_map_[401] = &webserv_error_401_page;
+  default_error_page_map_[402] = &webserv_error_402_page;
+  default_error_page_map_[403] = &webserv_error_403_page;
+  default_error_page_map_[404] = &webserv_error_404_page;
+  default_error_page_map_[405] = &webserv_error_405_page;
+  default_error_page_map_[406] = &webserv_error_406_page;
+  default_error_page_map_[408] = &webserv_error_408_page;
+  default_error_page_map_[409] = &webserv_error_409_page;
+  default_error_page_map_[410] = &webserv_error_410_page;
+  default_error_page_map_[411] = &webserv_error_411_page;
+  default_error_page_map_[412] = &webserv_error_412_page;
+  default_error_page_map_[413] = &webserv_error_413_page;
+  default_error_page_map_[414] = &webserv_error_414_page;
+  default_error_page_map_[415] = &webserv_error_415_page;
+  default_error_page_map_[416] = &webserv_error_416_page;
+  default_error_page_map_[421] = &webserv_error_421_page;
+  default_error_page_map_[429] = &webserv_error_429_page;
+
+  default_error_page_map_[494] = &webserv_error_494_page;
+  default_error_page_map_[495] = &webserv_error_495_page;
+  default_error_page_map_[496] = &webserv_error_496_page;
+  default_error_page_map_[497] = &webserv_error_497_page;
+  default_error_page_map_[498] = &webserv_error_404_page;
+
+  default_error_page_map_[500] = &webserv_error_500_page;
+  default_error_page_map_[501] = &webserv_error_501_page;
+  default_error_page_map_[502] = &webserv_error_502_page;
+  default_error_page_map_[503] = &webserv_error_503_page;
+  default_error_page_map_[504] = &webserv_error_504_page;
+  default_error_page_map_[505] = &webserv_error_505_page;
+  default_error_page_map_[507] = &webserv_error_507_page;
 }
 
 std::string HttpResponse::createCurrentGmtTime() {

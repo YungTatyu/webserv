@@ -11,6 +11,7 @@ class GlobalTestEnvironment : public ::testing::Environment {
     // std::cout << "GlobalTestEnvironment SetUp" << std::endl;
     this->config_handler_ = &(const_cast<ConfigHandler&>(WebServer::getConfigHandler()));
     config_handler_->loadConfiguration(new config::Main());
+    HttpResponse::setup();
   }
 
   void TearDown() override {
