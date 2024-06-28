@@ -28,10 +28,9 @@ static const char* kTransferEncoding = "Transfer-Encoding";
 std::map<int, const char*> HttpResponse::status_line_map_;
 std::map<int, const char*> HttpResponse::default_error_page_map_;
 
-static const std::string http_version = "HTTP/1.1";
+static const char* http_version = "HTTP/1.1";
 
-static const std::string webserv_error_page_tail =
-    "<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n";
+static const char* webserv_error_page_tail = "<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n";
 
 static const char* webserv_error_301_page =
     "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved "
@@ -520,7 +519,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
   if (response.internal_redirect_cnt_ > kMaxInternalRedirect) {
     config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
     response.setStatusCode(500);
-    response.body_ = *default_error_page_map_[500] + webserv_error_page_tail;
+    response.body_ = std::string(default_error_page_map_[500]) + webserv_error_page_tail;
     response.res_file_path_ = kDefaultPage;
     return sw_end_phase;
   }
@@ -827,7 +826,7 @@ HttpResponse::ResponsePhase HttpResponse::handleErrorPagePhase(HttpResponse& res
   if (response.body_.empty() &&
       default_error_page_map_.find(response.getStatusCode()) != default_error_page_map_.end()) {
     response.res_file_path_ = kDefaultPage;
-    response.body_ = *default_error_page_map_[response.getStatusCode()] + webserv_error_page_tail;
+    response.body_ = std::string(default_error_page_map_[response.getStatusCode()]) + webserv_error_page_tail;
   }
   if (!ep) return sw_log_phase;
 
