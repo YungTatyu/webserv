@@ -78,45 +78,45 @@ void NetworkIOHandler::addVServer(int listen_fd, const TiedServer& server) {
   this->listenfd_map_.insert(std::make_pair(listen_fd, server));
 }
 
-ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& connManager, int sock) {
+ssize_t NetworkIOHandler::receiveRequest(ConnectionManager& conn_manager, int sock) {
   std::vector<unsigned char> buffer(buffer_size_);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
 #endif
   ssize_t re = recv(sock, buffer.data(), buffer_size_, flag);
-  if (re > 0) connManager.addRawRequest(sock, buffer, re);
+  if (re > 0) conn_manager.addRawRequest(sock, buffer, re);
   return re;
 }
 
-ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& connManager, int sock) {
+ssize_t NetworkIOHandler::receiveCgiResponse(ConnectionManager& conn_manager, int sock) {
   std::vector<unsigned char> buffer(buffer_size_);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
 #endif
   ssize_t re = recv(sock, buffer.data(), buffer_size_, flag);
-  if (re > 0) connManager.addCgiResponse(sock, buffer, re);
+  if (re > 0) conn_manager.addCgiResponse(sock, buffer, re);
   return re;
 }
 
-ssize_t NetworkIOHandler::sendResponse(ConnectionManager& connManager, int sock) {
-  std::vector<unsigned char> response = connManager.getFinalResponse(sock);
+ssize_t NetworkIOHandler::sendResponse(ConnectionManager& conn_manager, int sock) {
+  std::vector<unsigned char> response = conn_manager.getFinalResponse(sock);
   size_t res_size = response.size();
-  size_t sent_bytes = connManager.getConnection(sock)->sent_bytes_;
+  size_t sent_bytes = conn_manager.getConnection(sock)->sent_bytes_;
   size_t cur_chunk_size = std::min(buffer_size_, res_size - sent_bytes);
   int flag = 0;
 #if defined(MSG_NOSIGNAL)
   flag |= MSG_NOSIGNAL;
 #endif
   ssize_t sent = send(sock, response.data() + sent_bytes, cur_chunk_size, flag);
-  if (sent > 0) connManager.addSentBytes(sock, sent);
+  if (sent > 0) conn_manager.addSentBytes(sock, sent);
   return sent;
 }
 
-ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, int sock) {
-  const std::string& body = connManager.getRequest(sock).body_;
-  const size_t sent_bytes = connManager.getSentBytes(sock);
+ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& conn_manager, int sock) {
+  const std::string& body = conn_manager.getRequest(sock).body_;
+  const size_t sent_bytes = conn_manager.getSentBytes(sock);
   const size_t rest = body.size() - sent_bytes;
   size_t cur_chunk_size = std::min(buffer_size_, rest);
   if (cur_chunk_size == 0) return 1;  // すでにresponseを全て送信しきっていたら、send終了
@@ -125,11 +125,11 @@ ssize_t NetworkIOHandler::sendRequestBody(ConnectionManager& connManager, int so
   flag |= MSG_NOSIGNAL;
 #endif
   ssize_t re = send(sock, body.data() + sent_bytes, std::min(buffer_size_, rest), flag);
-  if (re > 0) connManager.addSentBytes(sock, re);
+  if (re > 0) conn_manager.addSentBytes(sock, re);
   return re;
 }
 
-int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, int listen_fd) {
+int NetworkIOHandler::acceptConnection(ConnectionManager& conn_manager, int listen_fd) {
   int connfd;
   struct sockaddr_in cliaddr;
   socklen_t client;
@@ -144,8 +144,8 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& connManager, int liste
 #endif
 
   // 新規クライントfdを追加
-  connManager.setConnection(connfd);
-  connManager.setTiedServer(connfd, &this->listenfd_map_[listen_fd]);
+  conn_manager.setConnection(connfd);
+  conn_manager.setTiedServer(connfd, &this->listenfd_map_[listen_fd]);
 
   // show ip address of newly connected client.
   char clientIp[INET_ADDRSTRLEN];
@@ -161,17 +161,17 @@ bool NetworkIOHandler::isListenSocket(int listen_fd) const {
 /**
  * @brief connectionとそれに紐づくtimerを消す
  *
- * @param connManager
+ * @param conn_manager
  * @param sock
  */
-void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
-                                       int sock) {
-  server->deleteEvent(sock, connManager.getEvent(sock));
+void NetworkIOHandler::closeConnection(ConnectionManager& conn_manager, IServer* server,
+                                       TimerTree& timer_tree, int sock) {
+  server->deleteEvent(sock, conn_manager.getEvent(sock));
   close(sock);
-  timerTree.deleteTimer(sock);
-  bool cgi = connManager.isCgiSocket(sock);
-  if (cgi) connManager.resetCgiSockets(sock);
-  connManager.removeConnection(sock, cgi);
+  timer_tree.deleteTimer(sock);
+  bool cgi = conn_manager.isCgiSocket(sock);
+  if (cgi) conn_manager.resetCgiSockets(sock);
+  conn_manager.removeConnection(sock, cgi);
 }
 
 /**
@@ -179,23 +179,23 @@ void NetworkIOHandler::closeConnection(ConnectionManager& connManager, IServer* 
  * client, cgi socket, timerを全て削除: clientとcgiの両方を削除しなければいけない時に、この関数を呼ぶ
  *
  */
-void NetworkIOHandler::purgeConnection(ConnectionManager& connManager, IServer* server, TimerTree& timerTree,
-                                       int sock) {
-  server->deleteEvent(sock, connManager.getEvent(sock));
+void NetworkIOHandler::purgeConnection(ConnectionManager& conn_manager, IServer* server,
+                                       TimerTree& timer_tree, int sock) {
+  server->deleteEvent(sock, conn_manager.getEvent(sock));
   close(sock);
-  timerTree.deleteTimer(sock);
-  bool cgi = connManager.isCgiSocket(sock);
+  timer_tree.deleteTimer(sock);
+  bool cgi = conn_manager.isCgiSocket(sock);
   if (!cgi) {
-    connManager.removeConnection(sock, cgi);
+    conn_manager.removeConnection(sock, cgi);
     return;
   }
   // cgi socketの場合は、clientのデータも削除する
-  const cgi::CgiHandler& cgi_handler = connManager.getCgiHandler(sock);
+  const cgi::CgiHandler& cgi_handler = conn_manager.getCgiHandler(sock);
   int client = cgi_handler.getCliSocket();
   close(client);
   // cgiのコネクションを最初に削除する
-  connManager.removeConnection(sock, cgi);
-  connManager.removeConnection(client, false);
+  conn_manager.removeConnection(sock, cgi);
+  conn_manager.removeConnection(client, false);
 }
 
 const std::map<int, TiedServer>& NetworkIOHandler::getListenfdMap() { return this->listenfd_map_; }

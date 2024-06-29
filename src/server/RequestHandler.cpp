@@ -109,7 +109,8 @@ void RequestHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHand
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
-  bool re = conn_manager.callCgiExecutor(sock, response, request);
+  cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
+  bool re = cgi_handler.callCgiExecutor(response, request, sock);
   if (!re) {
     response.state_ = HttpResponse::RES_CGI_ERROR;
     return handleResponse(conn_manager, config_handler, server, timer_tree, sock);
@@ -138,7 +139,7 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, Connection
   int status = -1;
   // recv error
   if (re == -1) return;
-  const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
+  cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
   if (re != 0 || !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {
@@ -149,7 +150,7 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, Connection
   if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {  // 正常にcgiが終了した場合
     const std::vector<unsigned char> &v = conn_manager.getCgiResponse(sock);
     std::string res(v.begin(), v.end());
-    bool parse_suc = conn_manager.callCgiParser(sock, response, res);
+    bool parse_suc = cgi_handler.callCgiParser(response, res);
     response.state_ = parse_suc ? HttpResponse::RES_PARSED_CGI : HttpResponse::RES_CGI_ERROR;
   } else {  // cgiが異常終了した場合
     response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
