@@ -66,11 +66,9 @@ class ConnectionManager {
   const std::map<int, ConnectionData*>& getConnections() const;
   void setTiedServer(int fd, const TiedServer* tied_server);
   const TiedServer& getTiedServer(int fd) const;
-  const cgi::CgiHandler& getCgiHandler(int fd) const;
+  cgi::CgiHandler& getCgiHandler(int fd) const;
   size_t getSentBytes(int fd) const;
   void addSentBytes(int fd, size_t bytes);
-  bool callCgiExecutor(int fd, const HttpResponse& response, const HttpRequest& request);
-  bool callCgiParser(int fd, HttpResponse& response, const std::string& cgi_response);
   void resetSentBytes(int fd);
   void resetCgiSockets(int fd);
   void clearRawRequest(int fd);

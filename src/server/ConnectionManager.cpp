@@ -109,14 +109,6 @@ const std::vector<unsigned char>& ConnectionManager::getCgiResponse(int fd) cons
   return this->connections_.at(fd)->cgi_response_;
 }
 
-bool ConnectionManager::callCgiExecutor(int fd, const HttpResponse& response, const HttpRequest& request) {
-  return this->connections_.at(fd)->cgi_handler_.callCgiExecutor(response, request, fd);
-}
-
-bool ConnectionManager::callCgiParser(int fd, HttpResponse& response, const std::string& cgi_response) {
-  return this->connections_.at(fd)->cgi_handler_.callCgiParser(response, cgi_response);
-}
-
 void ConnectionManager::addCgiResponse(int fd, const std::vector<unsigned char>& v, ssize_t read_bytes) {
   connections_[fd]->cgi_response_.insert(connections_[fd]->cgi_response_.end(), v.begin(),
                                          v.begin() + read_bytes);
@@ -130,9 +122,7 @@ const TiedServer& ConnectionManager::getTiedServer(int fd) const {
   return *(connections_.at(fd)->tied_server_);
 }
 
-const cgi::CgiHandler& ConnectionManager::getCgiHandler(int fd) const {
-  return connections_.at(fd)->cgi_handler_;
-}
+cgi::CgiHandler& ConnectionManager::getCgiHandler(int fd) const { return connections_.at(fd)->cgi_handler_; }
 
 size_t ConnectionManager::getSentBytes(int fd) const { return connections_.at(fd)->sent_bytes_; }
 
