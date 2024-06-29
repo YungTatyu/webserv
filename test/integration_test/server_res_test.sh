@@ -111,8 +111,6 @@ function runTest {
   # DELETE
   assert "${root}/dynamic/post_cgi.py" "405" "DELETE" ""
 
-
-
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
 }
