@@ -16,7 +16,9 @@
 class KqueueActiveEventManager : public IActiveEventManager {
  public:
   KqueueActiveEventManager();
+  KqueueActiveEventManager(const KqueueActiveEventManager &);
   ~KqueueActiveEventManager();
+  KqueueActiveEventManager &operator=(const KqueueActiveEventManager &);
   void *getActiveEvents();
   int getActiveEventsNum();
   void setActiveEventsNum(int num);

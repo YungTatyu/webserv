@@ -2,7 +2,17 @@
 
 SelectActiveEventManager::SelectActiveEventManager() {}
 
+SelectActiveEventManager::SelectActiveEventManager(const SelectActiveEventManager &other) { *this = other; }
+
 SelectActiveEventManager::~SelectActiveEventManager() {}
+
+SelectActiveEventManager &SelectActiveEventManager::operator=(const SelectActiveEventManager &other) {
+  if (this != &other) {
+    this->active_events_ = other.active_events_;
+    this->active_events_num_ = other.active_events_num_;
+  }
+  return *this;
+}
 
 void *SelectActiveEventManager::getActiveEvents() { return static_cast<void *>(&(this->active_events_)); }
 

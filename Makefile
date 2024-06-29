@@ -1,7 +1,6 @@
 NAME				= webserv
 CXX				= c++
 CXXFLAGS			= -std=c++98 -Wall -Wextra -Werror -Wpedantic
-# CXXFLAGS			+= -fsanitize=address -g
 DEPFLAGS			= -MMD -MP -MF $(DEPS_DIR)/$*.d
 RM				= rm -rf
 
@@ -22,22 +21,20 @@ FORMATTER_IMG_NAME	= formatter-image
 # ソースファイルの拡張子
 SRC_EXT = cpp
 # ソースファイルの検索パス
-VPATH = $(SRCS_DIR) $(SRCS_DIR)/config $(SRCS_DIR)/server $(SRCS_DIR)/utils
+VPATH = $(SRCS_DIR) $(SRCS_DIR)/config $(SRCS_DIR)/server $(SRCS_DIR)/http $(SRCS_DIR)/cgi $(SRCS_DIR)/utils
 
 # ソースファイルの取得
 SRCS = $(wildcard $(addsuffix /*.$(SRC_EXT), $(VPATH)))
-
 DEPS = $(patsubst $(SRCS_DIR)/%.cpp,$(DEPS_DIR)/%.d,$(SRCS))
 OBJS = $(patsubst $(SRCS_DIR)/%.cpp,$(OBJS_DIR)/%.o,$(SRCS))
-INCLUDES			= -I$(SRCS_DIR) -I$(SRCS_DIR)/config/ -I$(SRCS_DIR)/server/ -I$(SRCS_DIR)/utils
-# CONFIG				= $(CONF_DIR)/test.conf
+INCLUDES = -I$(SRCS_DIR) -I$(SRCS_DIR)/config -I$(SRCS_DIR)/server -I$(SRCS_DIR)/http -I$(SRCS_DIR)/cgi -I$(SRCS_DIR)/utils
 
 
 all: $(DEPS_DIR) $(OBJS_DIR) $(NAME)
 
 $(DEPS_DIR):
 	@mkdir -p $@
-	@mkdir -p dep/config dep/config/parser dep/server dep/utils
+	@mkdir -p dep/config dep/server dep/http dep/cgi dep/utils
 
 $(OBJS_DIR):
 	@mkdir -p $(dir $@)
@@ -75,20 +72,16 @@ gtest:
 	cmake --build $(BUILD_DIR)
 	$(BUILD_DIR)/webserv-googletest --gtest_filter=$(TEST_FILTER)
 
-test:	gtest	ptest
+test: gtest ptest
 
 format:
 	docker build -t $(FORMATTER_IMG_NAME) . -f $(DOCKERFILE_FORMATTER)
 	docker run --rm -v "$(ROOT_DIR):$(ROOT_DIR)" -w "$(ROOT_DIR)" $(FORMATTER_IMG_NAME)
 
+debug: CXXFLAGS += -fsanitize=address -g 
+debug: all
+
 -include $(DEPS)
 
-# run:
-# 	./$(NAME) $(CONFIG)
 
-# dev: CXXFLAGS += $(CXXDEBUG) all
-
-# valgrind:
-# 	valgrind --leak-check=full ./$(NAME)
-
-.PHONY: all clean fclean re test ptest gtest format
+.PHONY: all clean fclean re test ptest gtest format debug

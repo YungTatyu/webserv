@@ -87,7 +87,7 @@ class HttpResponseErrorPage : public ::testing::Test {
 
   std::string createDefaultErrorBody(unsigned int status_code) const {
     const std::string webserv_error_page_tail = "<hr><center>webserv/1.0</center>\r\n</body>\r\n</html>\r\n";
-    return *(HttpResponse::default_error_page_map_[status_code]) + webserv_error_page_tail;
+    return std::string(HttpResponse::default_error_page_map_[status_code]) + webserv_error_page_tail;
   }
 
   void ASSERT_CORRECT_RESPONSE(const std::string &expect, const std::string &actual) {

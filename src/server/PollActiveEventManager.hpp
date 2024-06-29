@@ -20,6 +20,9 @@ class PollActiveEventManager : public IActiveEventManager {
   bool isEofEvent(const void *event);
 
  private:
+  PollActiveEventManager(const PollActiveEventManager &);
+  PollActiveEventManager &operator=(const PollActiveEventManager &);
+
   std::vector<struct pollfd> active_events_;
   int active_events_num_;
 };

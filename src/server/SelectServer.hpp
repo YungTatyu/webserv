@@ -24,10 +24,13 @@ class SelectServer : public IServer {
   int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
-  fd_set read_set_;
-  fd_set write_set_;
+  SelectServer(const SelectServer&);
+  SelectServer& operator=(const SelectServer&);
   int addSocketToSets(const ConnectionManager& conn_manager);
   void addActiveEvents(const std::map<int, ConnectionData*>& connections, IActiveEventManager* event_manager);
+
+  fd_set read_set_;
+  fd_set write_set_;
 };
 
 #endif

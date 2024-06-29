@@ -25,8 +25,8 @@ class ServerName {
   const std::set<std::string>& getName() const { return this->name_set_; }
   void addName(const std::string& name) { name_set_.insert(name); }
   void eraseDefaultName() { this->name_set_.erase(kDefaultName_); }
-  const static char* kDefaultName_;
-  const static unsigned int kType_ = CONF_HTTP_SERVER | CONF_1MORE | CONF_NOT_UNIQUE;
+  static const char* kDefaultName_;
+  static const unsigned int kType_ = CONF_HTTP_SERVER | CONF_1MORE | CONF_NOT_UNIQUE;
 };
 }  // namespace config
 

@@ -30,9 +30,12 @@ class KqueueServer : public IServer {
   int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
-  int kq_;  // kqueue fd
+  KqueueServer(const KqueueServer&);
+  KqueueServer& operator=(const KqueueServer&);
   bool initKqueueServer();
   bool initKevents(const std::map<int, ConnectionData*>& connections);
+
+  int kq_;  // kqueue fd
 };
 
 #endif

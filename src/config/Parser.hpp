@@ -84,6 +84,7 @@ class Parser {
   std::string toUpper(std::string) const;
   bool isDuplicateDefaultServer(const config::Listen &this_listen);
   void updateDirectivesSet(const std::string &directive);
+
   Main &config_;
   const std::vector<Token> &tokens_;
   const std::string filepath_;

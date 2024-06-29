@@ -19,13 +19,12 @@ struct TiedServer;
 /* Confファイルの設定値を取り出す */
 class ConfigHandler {
  public:
-  const config::Main* config_;
-  ConfigHandler() : config_(NULL){};
+  ConfigHandler();
+  ~ConfigHandler();
   void loadConfiguration(const config::Main* config);
   // ipv4のみ対応
   int allowRequest(const config::Server& server, const config::Location* location, const HttpRequest& request,
                    struct sockaddr_in client_addr) const;
-
   // log出力
   void writeAccessLog(const struct TiedServer& tied_servers, const std::string& server_name,
                       const std::string& uri, const std::string& msg) const;
@@ -36,7 +35,6 @@ class ConfigHandler {
   void writeErrorLog(const config::Server& server, const config::Location* location,
                      const std::string& msg) const;
   void writeErrorLog(const std::string& msg) const;
-
   // timeout値の取得
   const config::Time& searchKeepaliveTimeout(const struct TiedServer& tied_servers,
                                              const std::string& server_name, const std::string& uri) const;
@@ -46,10 +44,8 @@ class ConfigHandler {
                                         const std::string& uri) const;
   const config::Time& searchUseridExpires(const struct TiedServer& tied_servers,
                                           const std::string& server_name, const std::string& uri) const;
-
   // TiedServerの作成
   struct TiedServer createTiedServer(const std::string& addr, unsigned int port) const;
-
   // directiveの値取得系
   const config::Server& searchServerConfig(const struct TiedServer& tied_servers,
                                            const std::string& server_name) const;
@@ -63,13 +59,16 @@ class ConfigHandler {
   const config::ErrorPage* searchErrorPage(const config::Server& server, const config::Location* location,
                                            unsigned int code) const;
   bool isAutoIndexOn(const config::Server& server, const config::Location* location) const;
-
   std::string createAcsLogMsg(uint32_t ip, long status, size_t res_size, const HttpRequest& request) const;
-  const static int ACCESS_ALLOW = 1;
-  const static int ACCESS_DENY = 0;
-  const static int METHOD_DENY = -1;
+
+  const config::Main* config_;
+  static const int ACCESS_ALLOW = 1;
+  static const int ACCESS_DENY = 0;
+  static const int METHOD_DENY = -1;
 
  private:
+  ConfigHandler(const ConfigHandler&);
+  ConfigHandler& operator=(const ConfigHandler&);
   bool limitLoop(const std::vector<config::AllowDeny>& allow_deny_list, uint32_t cli_addr) const;
   bool addressInLimit(const std::string& ip_str, uint32_t cli_addr) const;
   std::string getCurrentTimeByLogFormat() const;

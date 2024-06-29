@@ -15,9 +15,9 @@ class Size {
     return *this;
   }
   unsigned long size_in_bytes_;
-  const static unsigned int kilobytes = 1024;
-  const static unsigned int megabytes = kilobytes * 1024;
-  const static unsigned long kMaxSizeInBytes_;
+  static const unsigned int kilobytes = 1024;
+  static const unsigned int megabytes = kilobytes * 1024;
+  static const unsigned long kMaxSizeInBytes_;
 };
 }  // namespace config
 

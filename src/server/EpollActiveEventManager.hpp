@@ -12,7 +12,9 @@
 class EpollActiveEventManager : public IActiveEventManager {
  public:
   EpollActiveEventManager();
+  EpollActiveEventManager(const EpollActiveEventManager &);
   ~EpollActiveEventManager();
+  EpollActiveEventManager &operator=(const EpollActiveEventManager &);
   void *getActiveEvents();
   int getActiveEventsNum();
   void setActiveEventsNum(int num);

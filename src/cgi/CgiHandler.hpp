@@ -19,27 +19,31 @@ enum CGI_SOCKET {
 
 class CgiHandler {
  private:
-  CGIParser cgi_parser_;
+  CgiHandler(const CgiHandler&);
+  CgiHandler& operator=(const CgiHandler&);
+  bool forkCgiProcess(const HttpRequest& request, const HttpResponse& response);
+
+  CgiParser cgi_parser_;
   CgiExecutor cgi_executor_;
   pid_t cgi_process_id_;
   int cli_socket_;  // cgiが紐づくクライアント
-  bool forkCgiProcess(const HttpRequest& request, const HttpResponse& response);
 
  public:
-  int sockets_[2];
   CgiHandler();
   ~CgiHandler();
   static bool isCgi(const std::string& script_path);
   bool callCgiExecutor(const HttpResponse& response, const HttpRequest& request, int cli_sock);
   bool callCgiParser(HttpResponse& response, const std::string& cgi_response);
   void killCgiProcess() const;
-  const CGIParser& getCgiParser() const;
+  const CgiParser& getCgiParser() const;
   const CgiExecutor& getCgiExecutor() const;
   pid_t getCgiProcessId() const;
   int getCliSocket() const;
   void setCliSocket(int socket);
   int getCgiSocket() const;
   void resetSockets();
+
+  int sockets_[2];
 };
 }  // namespace cgi
 

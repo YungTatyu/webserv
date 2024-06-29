@@ -12,7 +12,7 @@
 class HttpResponse {
  public:
   enum RES_STATE {
-    RES_CREATING_STATIC,
+    RES_CREATING_STATIC = 0,
     RES_EXECUTE_CGI,
     RES_PARSED_CGI,
     RES_CGI_ERROR,
@@ -36,11 +36,16 @@ class HttpResponse {
   };
 
   HttpResponse();
+  HttpResponse(const HttpResponse&);
+  ~HttpResponse();
+  HttpResponse& operator=(const HttpResponse&);
   static std::string generateResponse(HttpRequest& request, HttpResponse& response,
                                       const struct TiedServer& tied_servers, int socket,
                                       const ConfigHandler& config_handler);
   static bool isKeepaliveConnection(const HttpResponse& response);
   static bool isErrorResponse(const HttpResponse& response);
+  static void setup();
+
   std::string root_path_;
   std::string res_file_path_;
   std::string path_info_;
@@ -49,13 +54,10 @@ class HttpResponse {
   long status_code_;  // response生成するときにstatus_line_map_参照する
   std::map<std::string, std::string, utils::CaseInsensitiveCompare> headers_;
   std::string body_;
-  static std::map<int, std::string> status_line_map_;  // status codeに基づくstatus lineを格納するmap
-  static std::map<int, const std::string*> default_error_page_map_;  // defaultのerror pageを格納するmap
+  static std::map<int, const char*> status_line_map_;  // status codeに基づくstatus lineを格納するmap
+  static std::map<int, const char*> default_error_page_map_;  // defaultのerror pageを格納するmap
 
  private:
-  size_t internal_redirect_cnt_;
-  const static size_t kMaxInternalRedirect = 10;
-
   std::string createResponse(config::REQUEST_METHOD method) const;
   static ResponsePhase handlePreSearchLocationPhase(HttpRequest::ParseState parse_state,
                                                     HttpResponse& response, int socket,
@@ -79,8 +81,6 @@ class HttpResponse {
   static ResponsePhase handleErrorPagePhase(HttpResponse& response, HttpRequest& request,
                                             const config::Server& server, const config::Location* location,
                                             const ConfigHandler& config_handler);
-
-  // 名前微妙
   static std::string autoIndex(const std::string& directory_path, const std::string& index_dir);
   static std::string createCurrentGmtTime();
   static ResponsePhase returnPhase(HttpResponse& response, const config::Location* location);
@@ -104,6 +104,9 @@ class HttpResponse {
   static bool setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request);
   void separatePathinfo(const std::string& uri, size_t pos);
   static void clear(HttpResponse& response);
+
+  size_t internal_redirect_cnt_;
+  static const size_t kMaxInternalRedirect = 10;
 };
 
 #endif

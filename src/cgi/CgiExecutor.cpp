@@ -17,7 +17,18 @@
 
 cgi::CgiExecutor::CgiExecutor() {}
 
+cgi::CgiExecutor::CgiExecutor(const CgiExecutor& other) { *this = other; }
+
 cgi::CgiExecutor::~CgiExecutor() {}
+
+cgi::CgiExecutor& cgi::CgiExecutor::operator=(const CgiExecutor& other) {
+  if (this != &other) {
+    this->script_path_ = other.script_path_;
+    this->argv_ = other.argv_;
+    this->meta_vars_ = other.meta_vars_;
+  }
+  return *this;
+}
 
 void cgi::CgiExecutor::executeCgiScript(const HttpRequest& request, const HttpResponse& response,
                                         int cgi_sock, int cli_sock) {
@@ -40,60 +51,60 @@ void cgi::CgiExecutor::prepareCgiExecution(const HttpRequest& request, const Htt
 void cgi::CgiExecutor::createArgv(const std::string& script_path) {
   const std::string::size_type n = script_path.rfind("/");
   const std::string cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
-  this->argv_.push_back(strdup_from_string(cgi_script));
+  this->argv_.push_back(strdupFromString(cgi_script));
   this->argv_.push_back(NULL);
 }
 
 void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResponse& response,
                                       int cli_sock) {
-  const static char* kContentType = "content-type";
+  static const char* kContentType = "content-type";
 
   this->meta_vars_.push_back("AUTH_TYPE=");  // Authorizationをparseするロジックを実装しないため、値は空文字
 
   const std::string content_length = std::string("CONTENT_LENGTH=") + utils::toStr(request.body_.size());
-  this->meta_vars_.push_back(strdup_from_string(content_length));
+  this->meta_vars_.push_back(strdupFromString(content_length));
 
   std::string content_type = "CONTENT_TYPE=";
   if (request.headers_.find(kContentType) != request.headers_.end())
     content_type += request.headers_.at(kContentType);
-  this->meta_vars_.push_back(strdup_from_string(content_type));
+  this->meta_vars_.push_back(strdupFromString(content_type));
 
   this->meta_vars_.push_back("GATEWAY_INTERFACE=CGI/1.1");
 
   std::string path_info_var = "PATH_INFO=";
   if (!response.path_info_.empty()) path_info_var += response.path_info_;
-  this->meta_vars_.push_back(strdup_from_string(path_info_var));
+  this->meta_vars_.push_back(strdupFromString(path_info_var));
 
   this->meta_vars_.push_back(
       "PATH_TRANSLATED=");  // path translatedを受け渡す実装になっていないので値は空文字
 
   const std::string query_string = std::string("QUERY_STRING=") + request.queries_;
-  this->meta_vars_.push_back(strdup_from_string(query_string));  // PATH_TRANSLATEDと同じ
+  this->meta_vars_.push_back(strdupFromString(query_string));  // PATH_TRANSLATEDと同じ
 
   const std::string ip_address = utils::socketToStrIPAddress(cli_sock);
   const std::string remote_addr = std::string("REMOTE_ADDR=") + ip_address;
-  this->meta_vars_.push_back(strdup_from_string(remote_addr));
+  this->meta_vars_.push_back(strdupFromString(remote_addr));
 
   std::string remote_host =
       std::string("REMOTE_HOST=") + ip_address;  // client host nameは取得できないので、ip address
-  this->meta_vars_.push_back(strdup_from_string(remote_host));
+  this->meta_vars_.push_back(strdupFromString(remote_host));
 
   const std::string method =
       std::string("REQUEST_METHOD=") + config::LimitExcept::MethodToStr(request.method_);
-  this->meta_vars_.push_back(strdup_from_string(method));
+  this->meta_vars_.push_back(strdupFromString(method));
 
   const std::string script_name = std::string("SCRIPT_NAME=") + response.res_file_path_;
-  this->meta_vars_.push_back(strdup_from_string(script_name));
+  this->meta_vars_.push_back(strdupFromString(script_name));
 
   const std::string server_name = std::string("SERVER_NAME=") + request.headers_.at("host");
-  this->meta_vars_.push_back(strdup_from_string(server_name));
+  this->meta_vars_.push_back(strdupFromString(server_name));
 
   const std::string server_port =
       std::string("SERVER_PORT=") + utils::toStr(utils::resolveConnectedPort(cli_sock));
-  this->meta_vars_.push_back(strdup_from_string(server_port));
+  this->meta_vars_.push_back(strdupFromString(server_port));
 
   const std::string server_protocol = std::string("SERVER_PROTOCOL=") + request.version_;
-  this->meta_vars_.push_back(strdup_from_string(server_protocol));
+  this->meta_vars_.push_back(strdupFromString(server_protocol));
 
   this->meta_vars_.push_back("SERVER_SOFTWARE=webserv/1.0");
 
@@ -107,7 +118,7 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
     meta_var = meta_var + utils::replace(utils::toUpper(it->first), '-', '_') + "=" + it->second;
     // hostの場合はrequestをraw dataのhostヘッダーのvalueとして渡さないといけない（portの情報を復活させる）
     if (utils::compareIgnoreCase(it->first, "host")) meta_var += request.port_in_host_;
-    this->meta_vars_.push_back(strdup_from_string(meta_var));
+    this->meta_vars_.push_back(strdupFromString(meta_var));
   }
 
   this->meta_vars_.push_back(NULL);
@@ -157,7 +168,7 @@ bool cgi::CgiExecutor::redirectStdIOToSocket(const HttpRequest& request, int soc
   return true;
 }
 
-char* cgi::CgiExecutor::strdup_from_string(const std::string& str) const {
+char* cgi::CgiExecutor::strdupFromString(const std::string& str) const {
   size_t size = str.size() + 1;
   char* new_cstr = new char[size];
   std::memcpy(new_cstr, str.c_str(), sizeof(char) * size);

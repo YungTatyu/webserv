@@ -13,18 +13,22 @@
 #include "error.hpp"
 #include "utils.hpp"
 
-const static std::string kAccessFd = "access_fd";
-const static std::string kErrorFd = "error_fd";
-const static std::string kKeepaliveTimeout = "keepalive_timeout";
-const static std::string kReceiveTimeout = "receive_timeout";
-const static std::string kSendTimeout = "send_timeout";
-const static std::string kUseridExpires = "userid_expires";
-const static std::string kDeny = "deny";
-const static std::string kAlias = "alias";
-const static std::string kAutoindex = "autoindex";
-const static std::string kRoot = "root";
-const static std::string kErrorPage = "error_page";
-const static std::string kLimitExcept = "limit_except";
+static const std::string kAccessFd = "access_fd";
+static const std::string kErrorFd = "error_fd";
+static const std::string kKeepaliveTimeout = "keepalive_timeout";
+static const std::string kReceiveTimeout = "receive_timeout";
+static const std::string kSendTimeout = "send_timeout";
+static const std::string kUseridExpires = "userid_expires";
+static const std::string kDeny = "deny";
+static const std::string kAlias = "alias";
+static const std::string kAutoindex = "autoindex";
+static const std::string kRoot = "root";
+static const std::string kErrorPage = "error_page";
+static const std::string kLimitExcept = "limit_except";
+
+ConfigHandler::ConfigHandler() : config_(NULL) {}
+
+ConfigHandler::~ConfigHandler() {}
 
 /** Configにあってほしい機能
  * デフォルトサーバがどれか

@@ -26,7 +26,7 @@
 
 namespace test {
 
-const static std::string kConfigHandlerTestPath = "test/server/ConfigHandler/";
+static const std::string kConfigHandlerTestPath = "test/server/ConfigHandler/";
 
 class ConfigHandlerTest {
  public:

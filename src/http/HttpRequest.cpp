@@ -6,10 +6,10 @@
 #include "LimitExcept.hpp"
 #include "WebServer.hpp"
 
-const static char *kHost = "Host";
-const static char *kContentLength = "Content-Length";
-const static char *kTransferEncoding = "Transfer-Encoding";
-const static char *kChunk = "chunked";
+static const char *kHost = "Host";
+static const char *kContentLength = "Content-Length";
+static const char *kTransferEncoding = "Transfer-Encoding";
+static const char *kChunk = "chunked";
 
 HttpRequest::HttpRequest(config::REQUEST_METHOD method, const std::string &uri, const std::string &version,
                          const std::map<std::string, std::string, utils::CaseInsensitiveCompare> &headers,
@@ -25,7 +25,27 @@ HttpRequest::HttpRequest(config::REQUEST_METHOD method, const std::string &uri, 
       parse_state_(state),
       state_(0) {}
 
+HttpRequest::HttpRequest(const HttpRequest &other) { *this = other; }
+
 HttpRequest::~HttpRequest() {}
+
+HttpRequest &HttpRequest::operator=(const HttpRequest &other) {
+  if (this != &other) {
+    this->method_ = other.method_;
+    this->uri_ = other.uri_;
+    this->version_ = other.version_;
+    this->headers_ = other.headers_;
+    this->queries_ = other.queries_;
+    this->body_ = other.body_;
+    this->port_in_host_ = other.port_in_host_;
+    this->parse_state_ = other.parse_state_;
+    this->key_buf_ = other.key_buf_;
+    this->val_buf_ = other.val_buf_;
+    this->spc_buf_ = other.spc_buf_;
+    this->state_ = other.state_;
+  }
+  return *this;
+}
 
 void HttpRequest::parseRequest(std::string &raw_request, HttpRequest &request) {
   // 新たなリクエストの場合は初期化する
@@ -78,7 +98,7 @@ HttpRequest::ParseState HttpRequest::parseChunkedBody(std::string &raw_request, 
   } state;
 
   state = static_cast<parseChunkPhase>(request.state_);
-  const static size_t kMaxChunkSize = std::numeric_limits<long>::max();
+  static const size_t kMaxChunkSize = std::numeric_limits<long>::max();
   size_t i = 0;
   size_t bytes;
   std::string chunk_bytes = request.key_buf_;

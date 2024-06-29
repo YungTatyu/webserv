@@ -9,10 +9,10 @@
 #include "syscall_wrapper.hpp"
 #include "utils.hpp"
 
-const static std::string kAccessLog = "access_log";
-const static std::string kAccessFd = "access_fd";
-const static std::string kErrorLog = "error_log";
-const static std::string kErrorFd = "error_fd";
+static const std::string kAccessLog = "access_log";
+static const std::string kAccessFd = "access_fd";
+static const std::string kErrorLog = "error_log";
+static const std::string kErrorFd = "error_fd";
 
 /*
  * AddAcsFdList/AddErrFdListの返り値

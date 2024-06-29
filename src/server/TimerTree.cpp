@@ -6,7 +6,17 @@
 
 TimerTree::TimerTree() {}
 
+TimerTree::TimerTree(const TimerTree &other) { *this = other; }
+
 TimerTree::~TimerTree() {}
+
+TimerTree &TimerTree::operator=(const TimerTree &other) {
+  if (this != &other) {
+    this->timer_tree_ = other.timer_tree_;
+    this->fd_set_ = other.fd_set_;
+  }
+  return *this;
+}
 
 void TimerTree::addTimer(const Timer &timer) {
   deleteTimer(timer.getFd());

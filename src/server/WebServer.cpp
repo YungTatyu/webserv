@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 
+#include "HttpResponse.hpp"
 #include "LogFd.hpp"
 
 ConfigHandler WebServer::config_handler_;
@@ -25,10 +26,8 @@ WebServer::WebServer(const config::Main *config) {
 void WebServer::initializeServer() {
   this->io_handler_ = new NetworkIOHandler();
   initializeVServers();
-
   this->conn_manager_ = new ConnectionManager();
   initializeConnManager();
-
   config::CONNECTION_METHOD method = config_handler_.config_->events_.use_.getConnectionMethod();
   switch (method) {
 #if defined(KQUEUE_AVAILABLE)
@@ -55,8 +54,8 @@ void WebServer::initializeServer() {
       break;
   }
   config_handler_.writeErrorLog("webserv: [debug] use_ " + config::Use::ConnectionMethodToStr(method) + "\n");
-
   this->timer_tree_ = new TimerTree();
+  HttpResponse::setup();
 }
 
 void WebServer::initializeListenSocket(std::set<std::pair<std::string, unsigned int> > &ip_address_set,

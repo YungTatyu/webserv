@@ -21,7 +21,7 @@ class UseridService {
   }
   const unsigned long& getUseridService() const { return this->userid_service_; }
   void setUseridService(unsigned long userid_service) { this->userid_service_ = userid_service; }
-  const static unsigned int kType_ =
+  static const unsigned int kType_ =
       CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_UNIQUE;
 };
 }  // namespace config

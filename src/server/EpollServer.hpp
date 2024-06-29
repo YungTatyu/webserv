@@ -24,9 +24,12 @@ class EpollServer : public IServer {
   int deleteEvent(int fd, ConnectionData::EVENT event);
 
  private:
-  int epfd_;  // epoll instance
+  EpollServer(const EpollServer&);
+  EpollServer& operator=(const EpollServer&);
   bool initEpollServer();
   bool initEpollEvent(const std::map<int, ConnectionData*>& connections);
+
+  int epfd_;  // epoll instance
 };
 
 #endif
