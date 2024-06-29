@@ -47,13 +47,13 @@ class ConnectionManager {
   ~ConnectionManager();
   void setConnection(int fd);
   ConnectionData* getConnection(int fd);
-  void setRawRequest(int fd, const std::vector<unsigned char>& rawRequest);
-  void addRawRequest(int fd, const std::vector<unsigned char>& rawRequest, ssize_t read_bytes);
+  void setRawRequest(int fd, const std::vector<unsigned char>& raw_request);
+  void addRawRequest(int fd, const std::vector<unsigned char>& raw_request, ssize_t read_bytes);
   void setCgiConnection(int cli_sock, ConnectionData::EVENT event);
   void removeConnection(int fd, bool cgi);
   const std::vector<unsigned char>& getRawRequest(int fd) const;
-  void setFinalResponse(int fd, const std::vector<unsigned char>& new_responsea);
-  void addFinalResponse(int fd, const std::vector<unsigned char>& new_responsea);
+  void setFinalResponse(int fd, const std::vector<unsigned char>& new_response);
+  void addFinalResponse(int fd, const std::vector<unsigned char>& new_response);
   const std::vector<unsigned char>& getFinalResponse(int fd) const;
   void setEvent(int fd, ConnectionData::EVENT event);
   ConnectionData::EVENT getEvent(int fd) const;
