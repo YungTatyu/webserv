@@ -63,7 +63,7 @@ function assert {
   local request="localhost:4242/${uri}"
   local method=$3
   local option=$4
-  printf "[  test${g_test_index}  ]\n${request}: "
+  printf "[  test${g_test_index}  ]\n${request} ${method}: "
 
   # responseのtimeoutを1秒に設定 --max-time
   local actual=$(curl -X ${method} ${option} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1.5)
@@ -89,6 +89,7 @@ function runTest {
   printf "\n${GREEN}<<< ${server_name} server test >>>${WHITE}\n"
 
   # 以下にテストを追加
+  # GET
   assert "${root}/static/index.html" "200" "GET" ""
   assert "${root}/static/index.html" "400" "GET" "-H Host:"
   assert "${root}/nonexist" "404" "GET" ""
@@ -100,6 +101,17 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res.cgi" "302" "GET" ""
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET" ""
   assert "${root}/dynamic/body_res.py" "200" "GET" ""
+  # HEAD
+  assert "${root}/static/index.html" "200" "HEAD" ""
+  assert "${root}/static/nonexist" "404" "HEAD" ""
+  # POST
+  assert "${root}/dynamic/post_cgi.py" "200" "POST" "-d key=value"
+  assert "${root}/dynamic/post_cgi.py" "400" "POST" "-d invalid=value"
+  assert "${root}/dynamic/post_cgi.py" "400" "POST" "-d ''"
+  # DELETE
+  assert "${root}/dynamic/post_cgi.py" "405" "DELETE" ""
+
+
 
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
