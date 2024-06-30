@@ -78,16 +78,13 @@ void EpollServer::callEventHandler(ConnectionManager* conn_manager, IActiveEvent
     // 他のイベントハンドラーにconnectionが切断される可能性がある
     if (conn_manager->isClosedConnection(active_events[i].data.fd)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      event_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree,
-                                      active_events[i].data.fd);
+      event_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].data.fd);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      event_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree,
-                                       active_events[i].data.fd);
+      event_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].data.fd);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
       event_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].data.fd);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      event_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree,
-                                       active_events[i].data.fd);
+      event_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].data.fd);
   }
   event_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
   conn_manager->clearClosedConnections();

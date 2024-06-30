@@ -1,8 +1,8 @@
 #ifndef KQUEUE_SERVER_HPP
 #define KQUEUE_SERVER_HPP
 
-#include "IServer.hpp"
 #include "EventHandler.hpp"
+#include "IServer.hpp"
 #include "conf.hpp"
 
 #if defined(KQUEUE_AVAILABLE)

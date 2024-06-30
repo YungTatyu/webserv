@@ -4,9 +4,9 @@
 #include <sys/select.h>
 
 #include "ConnectionManager.hpp"
+#include "EventHandler.hpp"
 #include "IServer.hpp"
 #include "NetworkIOHandler.hpp"
-#include "EventHandler.hpp"
 #include "SelectActiveEventManager.hpp"
 
 class SelectServer : public IServer {
