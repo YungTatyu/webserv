@@ -6,7 +6,7 @@
 #include "ConnectionManager.hpp"
 #include "IServer.hpp"
 #include "NetworkIOHandler.hpp"
-#include "RequestHandler.hpp"
+#include "EventHandler.hpp"
 #include "SelectActiveEventManager.hpp"
 
 class SelectServer : public IServer {

@@ -2,7 +2,7 @@
 #define KQUEUE_SERVER_HPP
 
 #include "IServer.hpp"
-#include "RequestHandler.hpp"
+#include "EventHandler.hpp"
 #include "conf.hpp"
 
 #if defined(KQUEUE_AVAILABLE)

@@ -7,7 +7,7 @@
 
 class ConnectionManager;
 class NetworkIOHandler;
-class RequestHandler;
+class EventHandler;
 
 class EpollServer : public IServer {
  public:

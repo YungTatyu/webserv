@@ -1,16 +1,15 @@
-#ifndef REQUEST_HANDLER_HPP
-#define REQUEST_HANDLER_HPP
+#ifndef EVENT_HANDLER_HPP
+#define EVENT_HANDLER_HPP
 
 #include "ConnectionManager.hpp"
 #include "IServer.hpp"
 #include "NetworkIOHandler.hpp"
 #include "TimerTree.hpp"
 
-/* NetworkIOHandlerで受け取ったリクエストを処理する。リクエストデータはコネクションデータを介して受け取る */
-class RequestHandler {
+class EventHandler {
  public:
-  RequestHandler();
-  ~RequestHandler();
+  EventHandler();
+  ~EventHandler();
   void handleReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
                        TimerTree &timer_tree, int sock) const;
   void handleWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
@@ -27,8 +26,8 @@ class RequestHandler {
                           TimerTree &timer_tree) const;
 
  private:
-  RequestHandler(const RequestHandler &);
-  RequestHandler &operator=(const RequestHandler &);
+  EventHandler(const EventHandler &);
+  EventHandler &operator=(const EventHandler &);
   bool cgiProcessExited(pid_t process_id, int &status) const;
   void handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
                      TimerTree &timer_tree, int sock) const;

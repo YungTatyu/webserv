@@ -12,7 +12,7 @@
 #include "NetworkIOHandler.hpp"
 #include "PollActiveEventManager.hpp"
 #include "PollServer.hpp"
-#include "RequestHandler.hpp"
+#include "EventHandler.hpp"
 #include "SelectActiveEventManager.hpp"
 #include "SelectServer.hpp"
 #include "syscall_wrapper.hpp"
@@ -23,7 +23,7 @@ class WebServer {
   ~WebServer();
   void run();
   static const ConfigHandler &getConfigHandler();
-  static const RequestHandler &getRequestHandler();
+  static const EventHandler &getEventHandler();
   static void writeErrorlog(const std::string &msg);
 
  private:
@@ -39,7 +39,7 @@ class WebServer {
 
   // メンバ変数を持たない、もしくは基本的に値を変更しないオブジェクトはstatic変数で管理する
   static ConfigHandler config_handler_;
-  static RequestHandler request_handler_;
+  static EventHandler event_handler_;
   IServer *server_;
   NetworkIOHandler *io_handler_;
   ConnectionManager *conn_manager_;
