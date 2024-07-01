@@ -661,6 +661,7 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
   buffer << "<pre>";
 
   // 要素ごとにリンクと最終修正時刻とサイズを出力
+  static const std::string& format = "%d-%b-%Y %H:%M";
   for (std::vector<std::string>::iterator it = contents.begin(); it != contents.end(); ++it) {
     buffer << "<a href='";
     if (!directory_path.empty() && directory_path[directory_path.size() - 1] != '/') buffer << "/";
@@ -671,11 +672,8 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
     if (*it != "../" && stat(full_path.c_str(), &file_stat) == 0) {
       buffer << "<span class=\"right-align\">";
       // file 最終修正時刻
-      struct tm last_modify_time;
-      localtime_r(&file_stat.st_mtime, &last_modify_time);
-      char date[1024];
-      std::strftime(date, sizeof(date), "%d-%b-%Y %H:%M", &last_modify_time);
-      buffer << date;
+      struct tm* last_modify_time = std::localtime(&file_stat.st_mtime);
+      buffer << utils::formatTm(last_modify_time, format);
 
       // ファイルバイト数
       std::string space;
