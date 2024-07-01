@@ -107,6 +107,7 @@ def test_delete(conf, file_name, can_delete, expect_status, fixture_session):
         },
     )
 
+
 @pytest.fixture(scope="session")
 def fixture_session():
     current_permissions = os.stat(f"{DELETE_PATH}/no_permission.html").st_mode
