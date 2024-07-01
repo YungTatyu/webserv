@@ -20,7 +20,6 @@ struct Main {
       this->error_log_list_ = other.error_log_list_;
       this->events_ = other.events_;
       this->http_ = other.http_;
-      this->error_fd_list_ = other.error_fd_list_;
     }
     return *this;
   }
@@ -28,7 +27,6 @@ struct Main {
   std::vector<ErrorLog> error_log_list_;
   Events events_;
   Http http_;
-  std::vector<int> error_fd_list_;
 };
 
 }  // namespace config

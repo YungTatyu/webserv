@@ -8,11 +8,15 @@
 namespace config {
 class AccessLog {
  private:
+  int fd_;
   std::string file_;
   bool is_accesslog_on_;
 
  public:
-  AccessLog() : file_(this->kDefaultFile_), is_accesslog_on_(this->kDefaultIsAccesslogOn_) {}
+  AccessLog() :
+    fd_(-1),
+    file_(this->kDefaultFile_),
+    is_accesslog_on_(this->kDefaultIsAccesslogOn_) {}
   AccessLog(const AccessLog &other) { *this = other; }
   ~AccessLog() {}
   AccessLog &operator=(const AccessLog &other) {
@@ -22,8 +26,10 @@ class AccessLog {
     }
     return *this;
   }
+  int getFd() const { return this->fd_; }
   const std::string &getFile() const { return this->file_; }
   const bool &getIsAccesslogOn() const { return this->is_accesslog_on_; }
+  void setFd(int fd) { this->fd_ = fd; }
   void setFile(const std::string &file) { this->file_ = file; }
   void setIsAccesslogOn(bool is_accesslog_on) { this->is_accesslog_on_ = is_accesslog_on; }
   static const char *kDefaultFile_;

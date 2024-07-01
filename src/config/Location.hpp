@@ -54,8 +54,6 @@ struct Location {
       this->userid_expires_ = other.userid_expires_;
       this->userid_path_ = other.userid_path_;
       this->userid_service_ = other.userid_service_;
-      this->access_fd_list_ = other.access_fd_list_;
-      this->error_fd_list_ = other.error_fd_list_;
     }
     return *this;
   }
@@ -80,8 +78,6 @@ struct Location {
   UseridExpires userid_expires_;
   UseridPath userid_path_;
   UseridService userid_service_;
-  std::vector<int> access_fd_list_;
-  std::vector<int> error_fd_list_;
   static const unsigned int kType_ = CONF_HTTP_SERVER | CONF_TAKE1 | CONF_NOT_UNIQUE;
 
  private:
