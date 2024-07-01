@@ -15,6 +15,7 @@ import os
 import requests
 import shutil
 import pytest
+import stat
 
 from upload_test import send_request
 from server_res_header_test import run_server, expect_headers_exist
@@ -81,7 +82,7 @@ file_names = [
         for file_name, can_delete, expect_status in file_names
     ],
 )
-def test_delete(conf, file_name, can_delete, expect_status):
+def test_delete(conf, file_name, can_delete, expect_status, fixture_session):
     # delete用のファイル作成
     if file_name == "index.html":
         with open(f"{DELETE_PATH}/{file_name}", "w") as file:
@@ -105,3 +106,9 @@ def test_delete(conf, file_name, can_delete, expect_status):
             "expect_status": expect_status,
         },
     )
+
+@pytest.fixture(scope="session")
+def fixture_session():
+    current_permissions = os.stat(f"{DELETE_PATH}/no_permission.html").st_mode
+    new_permissions = current_permissions & ~stat.S_IWUSR
+    os.chmod(f"{DELETE_PATH}/no_permission.html", new_permissions)
