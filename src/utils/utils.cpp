@@ -271,3 +271,10 @@ std::string utils::replace(const std::string& str, char old_c, char new_c) {
   }
   return new_str;
 }
+
+// std::tmを指定されたフォーマットの文字列に変換する関数
+std::string utils::formatTm(const std::tm* timeinfo, const std::string& format) {
+    char buffer[1024];
+    std::strftime(buffer, sizeof(buffer), format.c_str(), timeinfo);
+    return std::string(buffer);
+}
