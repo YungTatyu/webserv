@@ -50,6 +50,7 @@ class Parser {
   bool parseAllowDeny();
   bool parseAutoindex();
   bool parseClientMaxBodySize();
+  bool parseLogLevel(config::ErrorLog& error_log, const std::string& level);
   bool parseErrorLog();
   bool parseErrorPage();
   bool parseIndex();
