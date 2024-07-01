@@ -1,10 +1,7 @@
 #ifndef KQUEUE_SERVER_HPP
 #define KQUEUE_SERVER_HPP
 
-#include "EventHandler.hpp"
-#include "IServer.hpp"
 #include "conf.hpp"
-
 #if defined(KQUEUE_AVAILABLE)
 
 #include <sys/event.h>
@@ -13,6 +10,7 @@
 
 #include <vector>
 
+#include "IServer.hpp"
 #include "KqueueActiveEventManager.hpp"
 
 class KqueueServer : public IServer {

@@ -5,10 +5,6 @@
 
 #include "IServer.hpp"
 
-class ConnectionManager;
-class NetworkIOHandler;
-class EventHandler;
-
 class EpollServer : public IServer {
  public:
   EpollServer();

@@ -3,7 +3,6 @@
 
 #include <poll.h>
 
-#include <map>
 #include <vector>
 
 #include "IServer.hpp"
