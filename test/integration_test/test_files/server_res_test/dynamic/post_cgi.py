@@ -2,6 +2,7 @@
 
 import cgi
 import cgitb
+import os
 
 cgitb.enable()
 
@@ -13,12 +14,12 @@ headers.append("Content-Type: text/html")
 form = cgi.FieldStorage()
 
 # DELETEメソッドの処理
-if os.environ["REQUEST_METHOD"] == "DELETE":
+if os.environ.get("REQUEST_METHOD") == "DELETE":
     headers.append("Status: 405 Method Not Allowed")
     body = "<html><body><h1>Method Not Allowed</h1></body></html>"
 
 # POSTメソッドの処理
-elif os.environ["REQUEST_METHOD"] == "POST":
+elif os.environ.get("REQUEST_METHOD") == "POST":
     if "key" in form:
         key = form.getvalue("key")
         headers.append("Status: 200 OK")
