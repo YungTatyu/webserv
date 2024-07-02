@@ -16,7 +16,6 @@ enum LOG_LEVEL {
   ALERT = 1 << 6,
   EMERG = 1 << 7
 };
-std::string LogLevelToStr(LOG_LEVEL level);
 
 class ErrorLog {
  private:
@@ -42,6 +41,7 @@ class ErrorLog {
   void setFile(const std::string& file) { this->file_ = file; }
   int getLevel() const { return this->level_; }
   void setLevel(int level) { this->level_ = level; }
+  static std::string LogLevelToStr(LOG_LEVEL level);
   static const char* kDefaultFile_;
   static const int kDefaultLevel_;
   static const unsigned int kType_ =
