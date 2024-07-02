@@ -33,7 +33,7 @@ int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
 
     re = select(max_fd + 1, &(this->read_set_), &(this->write_set_), NULL, tvp);
     if (re != -1) break;
-    WebServer::writeErrorlog(error::strSysCallError("select") + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("select") + "\n", config::EMERG);
     // 起こりうるのはENOMEM
     // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
     int timeout_fd = timer_tree->getClosestTimeout();

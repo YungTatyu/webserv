@@ -105,7 +105,7 @@ int EpollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* c
   Timer::updateCurrentTime();
   int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
   event_manager->setActiveEventsNum(size);
-  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait") + "\n");
+  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait") + "\n", config::EMERG);
   return size;
 }
 
@@ -116,7 +116,7 @@ int EpollServer::addNewEvent(int fd, ConnectionData::EVENT event) {
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
   // 起こりうるのはENOMEMかENOSPC
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n", config::EMERG);
   return re;
 }
 
@@ -126,14 +126,14 @@ int EpollServer::updateEvent(int fd, ConnectionData::EVENT event) {
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, new_event.data.fd, &new_event);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n", config::EMERG);
   return re;
 }
 
 int EpollServer::deleteEvent(int fd, ConnectionData::EVENT event) {
   static_cast<void>(event);
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, fd, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n", config::EMERG);
   return re;
 }
 

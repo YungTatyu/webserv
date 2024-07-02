@@ -70,7 +70,7 @@ int KqueueServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
   struct timespec* tsp = &ts;
   if (ts.tv_sec == -1 && ts.tv_nsec == -1) tsp = NULL;
   int re = kevent(this->kq_, NULL, 0, active_events->data(), active_events->size(), tsp);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n", config::EMERG);
   event_manager->setActiveEventsNum(re);
   return re;
 }
@@ -115,7 +115,7 @@ int KqueueServer::addNewEvent(int fd, ConnectionData::EVENT event) {
   EV_SET(&kv, fd, filter, EV_ADD | EV_ENABLE, 0, 0, 0);
   int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
   // 起こりうるのはENOMEM
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n", config::EMERG);
   return re;
 }
 
@@ -136,7 +136,7 @@ int KqueueServer::deleteEvent(int fd, ConnectionData::EVENT event) {
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EVFILT_READ : EVFILT_WRITE;
   EV_SET(&kv, fd, filter, EV_DELETE, 0, 0, 0);
   int re = kevent(this->kq_, &kv, 1, NULL, 0, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("kevent") + "\n", config::EMERG);
   return re;
 }
 

@@ -36,7 +36,7 @@ void cgi::CgiExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
   prepareCgiExecution(request, response, full_path, cgi_sock, cli_sock);
   execve(this->script_path_.c_str(), const_cast<char* const*>(this->argv_.data()),
          const_cast<char* const*>(this->meta_vars_.data()));
-  WebServer::writeErrorlog(error::strSysCallError("execve") + "\n");
+  WebServer::writeErrorlog(error::strSysCallError("execve") + "\n", config::WARN);
   std::exit(EXIT_FAILURE);
 }
 

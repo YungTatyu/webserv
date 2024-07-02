@@ -60,7 +60,7 @@ bool cgi::CgiHandler::callCgiExecutor(const HttpResponse& response, const HttpRe
                                       int cli_sock) {
   this->cli_socket_ = cli_sock;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, this->sockets_) == -1) {
-    WebServer::writeErrorlog(error::strSysCallError("socketpair") + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("socketpair") + "\n", config::EMERG);
     return false;
   }
 #if defined(SO_NOSIGPIPE)
@@ -94,7 +94,7 @@ int cgi::CgiHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]
  */
 void cgi::CgiHandler::killCgiProcess() const {
   if (kill(this->cgi_process_id_, SIGINT) == -1)
-    WebServer::writeErrorlog(error::strSysCallError("kill") + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("kill") + "\n", config::EMERG);
 }
 
 /**

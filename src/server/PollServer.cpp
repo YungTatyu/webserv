@@ -32,7 +32,7 @@ int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* co
 
     re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
     if (re != -1) break;
-    WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("poll") + "\n", config::EMERG);
     // 起こりうるのはENOMEM
     // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
     int timeout_fd = timer_tree->getClosestTimeout();

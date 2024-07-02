@@ -53,7 +53,7 @@ void WebServer::initializeServer() {
     default:  // kqueueとepoll両方使えない場合は、defaultが必要
       break;
   }
-  config_handler_.writeErrorLog("webserv: [debug] use_ " + config::Use::ConnectionMethodToStr(method) + "\n");
+  config_handler_.writeErrorLog("webserv: [notice] use_ " + config::Use::ConnectionMethodToStr(method) + "\n", config::NOTICE);
   this->timer_tree_ = new TimerTree();
   HttpResponse::setup();
 }
@@ -108,10 +108,10 @@ const ConfigHandler &WebServer::getConfigHandler() { return config_handler_; }
 
 const RequestHandler &WebServer::getRequestHandler() { return request_handler_; }
 
-void WebServer::writeErrorlog(const std::string &msg) { config_handler_.writeErrorLog(msg); }
+void WebServer::writeErrorlog(const std::string &msg, config::LOG_LEVEL level) { config_handler_.writeErrorLog(msg, level); }
 
 WebServer::~WebServer() {
-  config_handler_.writeErrorLog("webserv: [debug] Close webserv.\n\n");
+  config_handler_.writeErrorLog("webserv: [debug] Close webserv.\n\n", config::DEBUG);
   this->deleteObjects();
 }
 

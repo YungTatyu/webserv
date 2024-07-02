@@ -274,12 +274,12 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, Connection
       cgi_handler.killCgiProcess();
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
       conn_manager.clearResData(cgi_handler.getCliSocket());
-      config_handler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
+      config_handler.writeErrorLog("webserv: [info] cgi timed out\n", config::DEBUG);  // debug
       it = next;
       continue;
     }
     io_handler.closeConnection(conn_manager, server, timer_tree, it->getFd());
-    config_handler.writeErrorLog("webserv: [info] client timed out\n");  // debug
+    config_handler.writeErrorLog("webserv: [info] client timed out\n", config::DEBUG);  // debug
     it = next;
   }
 }
