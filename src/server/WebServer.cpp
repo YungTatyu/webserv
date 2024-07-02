@@ -7,7 +7,7 @@
 #include "LogFd.hpp"
 
 ConfigHandler WebServer::config_handler_;
-RequestHandler WebServer::request_handler_;
+EventHandler WebServer::event_handler_;
 
 WebServer::WebServer(const config::Main *config) {
   config_handler_.loadConfiguration(config);
@@ -107,7 +107,7 @@ void WebServer::initializeConnManager() {
 
 const ConfigHandler &WebServer::getConfigHandler() { return config_handler_; }
 
-const RequestHandler &WebServer::getRequestHandler() { return request_handler_; }
+const EventHandler &WebServer::getEventHandler() { return event_handler_; }
 
 void WebServer::writeErrorlog(const std::string &msg, config::LOG_LEVEL level) {
   config_handler_.writeErrorLog(msg, level);

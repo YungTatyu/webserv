@@ -11,11 +11,11 @@ autoindexとエラーページを追加しました。
 ### ウェブサーバークラスが保有するコンポーネント
 * NetworkIOHandlerクラス
 	> クライアントとデータの送受信を行う
-* RequestHandlerクラス
+* EventHandlerクラス
 	> NetworkIOHandlerで受け取ったデータに応じた処理をする
 	> HttpMessageクラスを用いて、リクエストのパースとレスポンスの生成を行う。
 * ConnectionManagerクラス
-	> コネクションが疎通したソケットととその直前のデータの管理をする。NetworkIOHandlerクラスとRequestHandlerクラスのデータ受け渡しのインターフェースとなる。
+	> コネクションが疎通したソケットととその直前のデータの管理をする。NetworkIOHandlerクラスとEventHandlerクラスのデータ受け渡しのインターフェースとなる。
 * EventManagerクラス
 	> struct pollfdを管理する。
 * ServerConfigクラス
