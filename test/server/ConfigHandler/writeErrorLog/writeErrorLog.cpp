@@ -42,10 +42,13 @@ TEST(ConfigHandlerTestWriteErrorLog, add_default) {
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[1]});
   std::string file_path = test.getAbsolutePath("logs/error.log");
   std::string msg = "tachitsuteto\n";
-  std::string expect_msg = "sashisuseso\ntachitsuteto\n";
+  std::string expect_msg = "tachitsuteto\n";
 
   test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
                                      msg, config::ERROR);
+  test.WRITE_ACCURATE(file_path, expect_msg);
+  // 上書きされていないか
+  expect_msg = "sashisuseso\n";
   test.WRITE_ACCURATE(file_path, expect_msg);
 }
 
