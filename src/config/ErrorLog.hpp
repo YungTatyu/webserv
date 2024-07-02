@@ -30,7 +30,6 @@ std::string LogLevelToStr(LOG_LEVEL level) {
   }
 }
 
-
 class ErrorLog {
  private:
   int fd_;
@@ -46,7 +45,9 @@ class ErrorLog {
   ~ErrorLog() {}
   ErrorLog& operator=(const ErrorLog& other) {
     if (this != &other) {
+      this->fd_ = other.fd_;
       this->file_ = other.file_;
+      this->level_ = other.level_;
     }
     return *this;
   }
@@ -59,7 +60,7 @@ class ErrorLog {
   static const char* kDefaultFile_;
   static const int kDefaultLevel_;
   static const unsigned int kType_ =
-      CONF_MAIN | CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE1 | CONF_NOT_UNIQUE;
+      CONF_MAIN | CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE12 | CONF_NOT_UNIQUE;
 };
 }  // namespace config
 

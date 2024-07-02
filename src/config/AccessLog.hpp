@@ -21,6 +21,7 @@ class AccessLog {
   ~AccessLog() {}
   AccessLog &operator=(const AccessLog &other) {
     if (this != &other) {
+      this->fd_ = other.fd_;
       this->file_ = other.file_;
       this->is_accesslog_on_ = other.is_accesslog_on_;
     }
