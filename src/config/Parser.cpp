@@ -543,6 +543,45 @@ bool config::Parser::parseAccessLog() {
   return true;
 }
 
+bool config::Parser::parseLogLevel(config::ErrorLog &error_log, const std::string &level) {
+  static std::map<std::string, LOG_LEVEL> log_level_map;
+  log_level_map["debug"] = DEBUG;
+  log_level_map["info"] = INFO;
+  log_level_map["notice"] = NOTICE;
+  log_level_map["warn"] = WARN;
+  log_level_map["error"] = ERROR;
+  log_level_map["crit"] = CRIT;
+  log_level_map["alert"] = ALERT;
+  log_level_map["emerg"] = EMERG;
+
+  if (log_level_map.find(level) == log_level_map.end()) {
+    printFormatedError("invalid log level", this->tokens_[ti_]);
+    return false;
+  }
+
+  int mask = 0;
+  switch (log_level_map[level]) {
+    case DEBUG:
+      mask |= DEBUG;  // fall through
+    case INFO:
+      mask |= INFO;  // fall through
+    case NOTICE:
+      mask |= NOTICE;  // fall through
+    case WARN:
+      mask |= WARN;  // fall through
+    case ERROR:
+      mask |= ERROR;  // fall through
+    case CRIT:
+      mask |= CRIT;  // fall through
+    case ALERT:
+      mask |= ALERT;  // fall through
+    case EMERG:
+      mask |= EMERG;  // fall through
+  }
+  error_log.setLevel(mask);
+  return true;
+}
+
 bool config::Parser::parseErrorLog() {
   std::string path = this->tokens_[ti_].value_;
   config::CONTEXT context = this->current_context_.top();
@@ -553,8 +592,12 @@ bool config::Parser::parseErrorLog() {
     current_directive_.clear();
     return true;
   }
-
   tmp_err_log.setFile(path);
+
+  if (this->tokens_[ti_ + 1].type_ != TK_SEMICOLON) {
+    ++ti_;
+    if (!parseLogLevel(tmp_err_log, this->tokens_[ti_].value_)) return false;
+  }
 
   if (context == config::CONF_MAIN)
     this->config_.error_log_list_.push_back(tmp_err_log);

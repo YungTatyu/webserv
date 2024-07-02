@@ -64,7 +64,7 @@ add_executable(${PROJECT_NAME}-googletest
   test/server/HttpRequest/HttpRequestErrorTest.cpp 
   test/server/HttpRequest/HttpRequestOkTest.cpp 
   test/server/HttpRequest/cli_max_body_size_test.cpp 
-	test/server/HttpResponse/AccessLog/accessLog_test.cpp
+	test/server/HttpResponse/access_log/accessLog_test.cpp
 	test/server/HttpResponse/error/error_page_res_test.cpp
 	test/server/HttpResponse/error_page/error_page_test.cpp
 	test/server/HttpResponse/index/index_res_test.cpp

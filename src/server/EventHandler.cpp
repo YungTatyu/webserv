@@ -30,6 +30,10 @@ void EventHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManag
     conn_manager.setEvent(new_sock, ConnectionData::EV_READ);
     addTimerByType(conn_manager, config_handler, timer_tree, new_sock, Timer::TMO_RECV);
     if (!isOverWorkerConnections(conn_manager, config_handler)) return;
+
+    config_handler.writeErrorLog(utils::toStr(config_handler.getWorkerConnections()) +
+                                     " worker_connections are not enough, reusing connections",
+                                 config::WARN);
     int timeout_fd = timer_tree.getClosestTimeout();
     // TODO: cgiの時はどうする? nginxの場合は、新しいクライアントのリクエストを受け付けない
     // cgiのイベントを監視している場合は、cgiプロセスをkillしないといけない
@@ -274,12 +278,12 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       cgi_handler.killCgiProcess();
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
       conn_manager.clearResData(cgi_handler.getCliSocket());
-      config_handler.writeErrorLog("webserv: [info] cgi timed out\n");  // debug
+      config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
       it = next;
       continue;
     }
     io_handler.closeConnection(conn_manager, server, timer_tree, it->getFd());
-    config_handler.writeErrorLog("webserv: [info] client timed out\n");  // debug
+    config_handler.writeErrorLog("client timed out", config::DEBUG);  // debug
     it = next;
   }
 }

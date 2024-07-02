@@ -12,6 +12,7 @@
 #include <iostream>
 #include <limits>
 
+#include "ErrorLog.hpp"
 #include "Lexer.hpp"
 #include "LogFd.hpp"
 #include "Main.hpp"
@@ -31,6 +32,8 @@ const unsigned long config::Size::kMaxSizeInBytes_ = std::numeric_limits<long>::
 const char *config::UseridDomain::kDefaultName_ = "none";
 const char *config::AccessLog::kDefaultFile_ = "logs/access.log";
 const char *config::ErrorLog::kDefaultFile_ = "logs/error.log";
+const int config::ErrorLog::kDefaultLevel_ =
+    config::WARN | config::ERROR | config::CRIT | config::ALERT | config::EMERG;
 const unsigned long config::KeepaliveTimeout::kDefaultTime_ = 60 * Time::seconds;  // 60s
 const char *config::Index::kDefaultFile_ = "index.html";
 const unsigned long config::ClientMaxBodySize::kDefaultSize_;
@@ -74,4 +77,27 @@ config::Main *config::initConfig(const std::string &file_path) {
   }
 
   return config;
+}
+
+std::string config::ErrorLog::LogLevelToStr(LOG_LEVEL level) {
+  switch (level) {
+    case DEBUG:
+      return "debug";
+    case INFO:
+      return "info";
+    case NOTICE:
+      return "notice";
+    case WARN:
+      return "warn";
+    case ERROR:
+      return "error";
+    case CRIT:
+      return "crit";
+    case ALERT:
+      return "alert";
+    case EMERG:
+      return "emerg";
+    default:
+      return "unknown";
+  }
 }

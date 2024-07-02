@@ -10,6 +10,8 @@ DEPS_DIR			= dep
 ROOT_DIR			= $(shell pwd)
 BUILD_DIR			= build
 CONF_DIR			= conf
+LOG_DIR				= logs
+LOG_FILE			= $(LOG_DIR)/error.log $(LOG_DIR)/access.log
 TEST_DIR			= test
 TEST_CGI_DIR	= $(TEST_DIR)/cgi/cgi_files/executor
 
@@ -55,7 +57,7 @@ clean:
 
 fclean: clean
 	$(MAKE) fclean -C $(TEST_CGI_DIR)
-	$(RM) $(NAME)
+	$(RM) $(NAME) $(LOG_FILE)
 
 re: fclean all
 

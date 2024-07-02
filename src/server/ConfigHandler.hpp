@@ -31,10 +31,10 @@ class ConfigHandler {
   void writeAccessLog(const config::Server& server, const config::Location* location,
                       const std::string& msg) const;
   void writeErrorLog(const struct TiedServer& tied_servers, const std::string& server_name,
-                     const std::string& uri, const std::string& msg) const;
-  void writeErrorLog(const config::Server& server, const config::Location* location,
-                     const std::string& msg) const;
-  void writeErrorLog(const std::string& msg) const;
+                     const std::string& uri, const std::string& msg, config::LOG_LEVEL level) const;
+  void writeErrorLog(const config::Server& server, const config::Location* location, const std::string& msg,
+                     config::LOG_LEVEL level) const;
+  void writeErrorLog(const std::string& msg, config::LOG_LEVEL level) const;
   // timeout値の取得
   const config::Time& searchKeepaliveTimeout(const struct TiedServer& tied_servers,
                                              const std::string& server_name, const std::string& uri) const;
@@ -72,6 +72,7 @@ class ConfigHandler {
   bool limitLoop(const std::vector<config::AllowDeny>& allow_deny_list, uint32_t cli_addr) const;
   bool addressInLimit(const std::string& ip_str, uint32_t cli_addr) const;
   std::string getCurrentTimeByLogFormat() const;
+  std::string formatErrorLogMsg(const std::string& msg, config::LOG_LEVEL level) const;
 };
 
 /**
