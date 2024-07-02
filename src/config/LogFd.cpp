@@ -11,6 +11,8 @@
 
 static const std::string kAccessLog = "access_log";
 static const std::string kErrorLog = "error_log";
+static const mode_t kLogFileMode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
+const int kLogFileFlags = O_WRONLY | O_APPEND | O_CREAT | O_NONBLOCK | O_CLOEXEC;
 
 /*
  * AddAcsFdList/AddErrFdListの返り値
@@ -39,16 +41,9 @@ int config::addAcsFdList(std::set<std::string>& directives_set,
   // offがなければfd作る
   for (size_t i = 0; i < access_log_list.size(); i++) {
     tmp_path = access_log_list[i].getFile();
-    // ファイルはあるが、write権限がない時ときはerror
-    if (syscall_wrapper::Access(tmp_path, F_OK, false) == 0 &&
-        syscall_wrapper::Access(tmp_path, W_OK, false) == -1) {
-      std::cerr << error::strSysCallError("access", tmp_path) << std::endl;
-      return -1;
-    }
+    if (!checkFileAccess(tmp_path)) return -1;
     tmp_fd = openLogFd(tmp_path);
-    if (tmp_fd == -1) {
-      return -1;
-    }
+    if (tmp_fd == -1) return -1;
     access_log_list[i].setFd(tmp_fd);
   }
   return 1;
@@ -64,16 +59,9 @@ int config::addErrFdList(std::set<std::string>& directives_set,
 
   for (size_t i = 0; i < error_log_list.size(); i++) {
     tmp_path = error_log_list[i].getFile();
-    // ファイルはあるが、write権限がない時ときはerror
-    if (syscall_wrapper::Access(tmp_path, F_OK, false) == 0 &&
-        syscall_wrapper::Access(tmp_path, W_OK, false) == -1) {
-      std::cerr << error::strSysCallError("access", tmp_path) << std::endl;
-      return -1;
-    }
+    if (!checkFileAccess(tmp_path)) return -1;
     tmp_fd = openLogFd(tmp_path);
-    if (tmp_fd == -1) {
-      return -1;
-    }
+    if (tmp_fd == -1) return -1;
     error_log_list[i].setFd(tmp_fd);
   }
 
@@ -90,9 +78,7 @@ bool config::initAcsLogFds(config::Main& config) {
   else if (ret == 0) {
     std::string absolute_path;
     if (!utils::resolvePath(".", absolute_path)) {
-      std::cerr << "webserv: [emerg] realpath() \""
-                << "."
-                << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+      std::cerr << error::strSysCallError("realpath") << std::endl;
       return false;
     }
     std::string tmp_path = absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_);
@@ -132,9 +118,7 @@ bool config::initErrLogFds(config::Main& config) {
   else if (ret == 0) {
     std::string absolute_path;
     if (!utils::resolvePath(".", absolute_path)) {
-      std::cerr << "webserv: [emerg] realpath() \""
-                << "."
-                << "\" failed (" << errno << ": " << strerror(errno) << ")" << std::endl;
+      std::cerr << error::strSysCallError("realpath") << std::endl;
       return false;
     }
     std::string tmp_path = absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_);
@@ -193,6 +177,15 @@ void config::terminateLogFds(const config::Main* config) {
 }
 
 int config::openLogFd(const std::string& log_path) {
-  return syscall_wrapper::Open(log_path, O_WRONLY | O_APPEND | O_CREAT | O_NONBLOCK | O_CLOEXEC,
-                               S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+  return syscall_wrapper::Open(log_path, kLogFileFlags, kLogFileMode);
+}
+
+bool config::checkFileAccess(const std::string& path) {
+  // ファイルはあるが、write権限がない時ときはerror
+  if (syscall_wrapper::Access(path, F_OK, false) == 0 &&
+      syscall_wrapper::Access(path, W_OK, true) == -1) {
+    std::cerr << error::strSysCallError("access", path) << std::endl;
+    return false;
+  }
+  return true;
 }
