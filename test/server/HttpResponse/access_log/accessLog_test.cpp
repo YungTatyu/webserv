@@ -1,7 +1,7 @@
 #include "ResponseTest.hpp"
 
 TEST(HttpResponseTestWriteAccessLog, log_format1) {
-  test::ResponseTest test("test/server/HttpResponse/AccessLog/file/test.conf");
+  test::ResponseTest test("test/server/HttpResponse/access_log/file/test.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll({{"127.0.0.1", 4242}, {"127.0.0.1", 4243}},
                                         {{"host", "_"}, {"User-Agent", "Mozilla/5.0"}},
                                         {config::REQUEST_METHOD::GET}, "/", HttpRequest::PARSE_COMPLETE));
@@ -16,12 +16,12 @@ TEST(HttpResponseTestWriteAccessLog, log_format1) {
       test.config_handler_.config_->http_.server_list_[0],
       &test.config_handler_.config_->http_.server_list_[0].location_list_[0],
       test.config_handler_.createAcsLogMsg(addr.s_addr, 200, test.responses_[0].body_.size(), test.request_));
-  std::string body = utils::readFile("test/server/HttpResponse/AccessLog/file/index.html");
+  std::string body = utils::readFile("test/server/HttpResponse/access_log/file/index.html");
   test.testAccessLogEntry(file_path, "127.0.0.1", "GET", "/", 1.1, 200, body.size(), "Mozilla/5.0");
 }
 
 TEST(HttpResponseTestWriteAccessLog, log_format2) {
-  test::ResponseTest test("test/server/HttpResponse/AccessLog/file/test.conf");
+  test::ResponseTest test("test/server/HttpResponse/access_log/file/test.conf");
   ASSERT_NO_FATAL_FAILURE(test.setUpAll(
       {{"127.0.0.1", 4242}, {"127.0.0.1", 4243}}, {{"host", "_"}, {"User-Agent", "curl/7.68.0"}},
       {config::REQUEST_METHOD::GET}, "/error/", HttpRequest::PARSE_COMPLETE));
