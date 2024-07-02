@@ -577,8 +577,6 @@ bool config::Parser::parseLogLevel(config::ErrorLog &error_log, const std::strin
       mask |= ALERT;  // fall through
     case EMERG:
       mask |= EMERG;  // fall through
-    default:
-      break;
   }
   error_log.setLevel(mask);
   return true;
