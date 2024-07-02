@@ -41,10 +41,10 @@ int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port)
     // creation of the socket
 #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    if (listen_fd == -1) throw std::runtime_error(error::strSysCallError("socket") + "\n");
+    if (listen_fd == -1) throw std::runtime_error("webserv: [emerg] " + error::strSysCallError("socket") + "\n");
 #else
     int listen_fd = syscall_wrapper::Socket(AF_INET, SOCK_STREAM, 0);
-    if (listen_fd == -1) throw std::runtime_error(error::strSysCallError("socket") + "\n");
+    if (listen_fd == -1) throw std::runtime_error("webserv: [emerg] " + error::strSysCallError("socket") + "\n");
     utils::setNonBlockCloExec(listen_fd);
 #endif
 
@@ -64,10 +64,10 @@ int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port)
     // 失敗したとき？
     re = syscall_wrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
     if (re == -1)
-      throw std::runtime_error(error::strSysCallError("bind", "to " + address + ":" + utils::toStr(port)));
+      throw std::runtime_error("webserv: [emerg] " + error::strSysCallError("bind", "to " + address + ":" + utils::toStr(port)));
 
     re = syscall_wrapper::Listen(listen_fd, SOMAXCONN);
-    if (re == -1) throw std::runtime_error(error::strSysCallError("listen") + "\n");
+    if (re == -1) throw std::runtime_error("webserv: [emerg] " + error::strSysCallError("listen") + "\n");
 
     std::cout << "Server running on port " << port << std::endl;
     return listen_fd;

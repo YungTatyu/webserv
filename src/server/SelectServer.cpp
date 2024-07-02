@@ -38,7 +38,7 @@ int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
     // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
     int timeout_fd = timer_tree->getClosestTimeout();
     if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったら例外投げる
-      throw std::runtime_error(error::strSysCallError("select"));
+      throw std::runtime_error("webserv: [emerg] " + error::strSysCallError("select"));
     if (conn_manager->isCgiSocket(timeout_fd)) {
       const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
       cgi_handler.killCgiProcess();
