@@ -16,19 +16,7 @@ enum LOG_LEVEL {
   ALERT = 1 << 6,
   EMERG = 1 << 7
 };
-std::string LogLevelToStr(LOG_LEVEL level) {
-  switch (level) {
-  case DEBUG: return "debug";
-  case INFO: return "info";
-  case NOTICE: return "notice";
-  case WARN: return "warn";
-  case ERROR: return "error";
-  case CRIT: return "crit";
-  case ALERT: return "alert";
-  case EMERG: return "emerg";
-  default: return "unknown";
-  }
-}
+std::string LogLevelToStr(LOG_LEVEL level);
 
 class ErrorLog {
  private:
