@@ -96,6 +96,16 @@ class InitLogTest : public ::testing::Test {
     delete config_;
   }
 
+  template<typename T>
+  int getFdNum(T log_list) {
+    int num = 0;
+    for (int i = 0; i < log_list.size(); i++) {
+      if (log_list[i].getFd() != -1)
+        num++;
+    }
+    return num;
+  }
+
   // テストに使うオブジェクト
   config::Main* config_;
 };
@@ -110,13 +120,13 @@ TEST_F(InitLogTest, initAcsLogFds_Success) {
 
   // fdの数が正確かどうか
   // http contezt
-  EXPECT_EQ(config_->http_.access_fd_list_.size(), 0);
+  EXPECT_EQ(getFdNum(config_->http_.access_log_list_), 0);
   // server context
-  EXPECT_EQ(config_->http_.server_list_[0].access_fd_list_.size(), 3);
-  EXPECT_EQ(config_->http_.server_list_[1].access_fd_list_.size(), 0);
+  EXPECT_EQ(getFdNum(config_->http_.server_list_[0].access_log_list_), 3);
+  EXPECT_EQ(getFdNum(config_->http_.server_list_[1].access_log_list_), 0);
   // location context
   for (size_t i = 0; i < config_->http_.server_list_[0].location_list_.size(); i++) {
-    EXPECT_EQ(config_->http_.server_list_[0].location_list_[i].access_fd_list_.size(), 2);
+    EXPECT_EQ(getFdNum(config_->http_.server_list_[0].location_list_[i].access_log_list_), 2);
   }
 }
 
@@ -139,15 +149,15 @@ TEST_F(InitLogTest, initErrLogFds_Success) {
 
   // fdの数が正確かどうか
   // main context
-  EXPECT_EQ(config_->error_fd_list_.size(), 1);
+  EXPECT_EQ(getFdNum(config_->error_log_list_), 1);
   // http contezt
-  EXPECT_EQ(config_->http_.error_fd_list_.size(), 2);
+  EXPECT_EQ(getFdNum(config_->http_.error_log_list_), 2);
   // server context
-  EXPECT_EQ(config_->http_.server_list_[0].error_fd_list_.size(), 3);
-  EXPECT_EQ(config_->http_.server_list_[1].error_fd_list_.size(), 0);
+  EXPECT_EQ(getFdNum(config_->http_.server_list_[0].error_log_list_), 3);
+  EXPECT_EQ(getFdNum(config_->http_.server_list_[1].error_log_list_), 0);
   // location context
   for (size_t i = 0; i < config_->http_.server_list_[0].location_list_.size(); i++) {
-    EXPECT_EQ(config_->http_.server_list_[0].location_list_[i].error_fd_list_.size(), 2);
+    EXPECT_EQ(getFdNum(config_->http_.server_list_[0].location_list_[i].error_log_list_), 2);
   }
 }
 
