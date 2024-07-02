@@ -127,22 +127,23 @@ void ConfigHandler::writeAccessLog(const struct TiedServer& tied_servers, const 
 
 void ConfigHandler::writeAccessLog(const config::Server& server, const config::Location* location,
                                    const std::string& msg) const {
-  // access_logがどのコンテキスがあれば出力する
+  // access_logがコンテキストで指定されていれば出力する
   if (location && utils::hasDirective(*location, kAccessLog)) {
     for (size_t i = 0; i < location->access_log_list_.size(); i++) {
       if (utils::writeChunks(location->access_log_list_[i].getFd(), msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
-  } else if (utils::hasDirective(server, kAccessLog)) {
+  }
+  if (utils::hasDirective(server, kAccessLog)) {
     for (size_t i = 0; i < server.access_log_list_.size(); i++) {
       if (utils::writeChunks(server.access_log_list_[i].getFd(), msg) == -1)
         WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
-  } else if (utils::hasDirective(this->config_->http_, kAccessLog)) {
-    for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
-      if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
-    }
+  }
+  // directives_setになくてもデフォルトファイルがあるはずなので出力する
+  for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
+    if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
+      WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
   }
 }
 
