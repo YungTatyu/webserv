@@ -128,7 +128,7 @@ bool config::initErrLogFds(config::Main& config) {
     }
     config::ErrorLog tmp_err_log;
     tmp_err_log.setFd(tmp_fd);
-    config.http_.error_log_list_.push_back(tmp_err_log);
+    config.error_log_list_.push_back(tmp_err_log);
   }
 
   // http context
@@ -182,8 +182,7 @@ int config::openLogFd(const std::string& log_path) {
 
 bool config::checkFileAccess(const std::string& path) {
   // ファイルはあるが、write権限がない時ときはerror
-  if (syscall_wrapper::Access(path, F_OK, false) == 0 &&
-      syscall_wrapper::Access(path, W_OK, true) == -1) {
+  if (syscall_wrapper::Access(path, F_OK, false) == 0 && syscall_wrapper::Access(path, W_OK, true) == -1) {
     std::cerr << error::strSysCallError("access", path) << std::endl;
     return false;
   }
