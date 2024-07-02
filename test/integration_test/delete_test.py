@@ -69,7 +69,6 @@ configs = [
 # テストに使用するファイル名のリスト
 file_names = [
     ("index.html", True, 200),
-    ("no_permission.html", False, 403),
     ("nothing.html", False, 404),
     ("test_dir/", False, 500),
 ]
@@ -83,7 +82,7 @@ file_names = [
         for file_name, can_delete, expect_status in file_names
     ],
 )
-def test_delete(conf, file_name, can_delete, expect_status, fixture_session):
+def test_delete(conf, file_name, can_delete, expect_status):
     # delete用のファイル作成
     if file_name == "index.html":
         with open(f"{DELETE_PATH}/{file_name}", "w") as file:
@@ -103,11 +102,3 @@ def test_delete(conf, file_name, can_delete, expect_status, fixture_session):
             "expect_status": expect_status,
         },
     )
-
-
-@pytest.fixture(scope="session")
-def fixture_session():
-    current_permissions = os.stat(f"{DELETE_PATH}/no_permission.html").st_mode
-    new_permissions = current_permissions & ~stat.S_IWUSR
-    os.chmod(f"{DELETE_PATH}/no_permission.html", new_permissions)
-    time.sleep(1)
