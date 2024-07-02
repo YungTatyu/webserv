@@ -1,11 +1,11 @@
 #ifndef LOGFD_HPP
 #define LOGFD_HPP
 
+#include <unistd.h>
+
 #include "AccessLog.hpp"
 #include "ErrorLog.hpp"
 #include "Main.hpp"
-
-#include <unistd.h>
 
 namespace config {
 

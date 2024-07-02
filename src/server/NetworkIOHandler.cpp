@@ -67,8 +67,7 @@ int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port)
       throw std::runtime_error(error::strSysCallError("bind", "to " + address + ":" + utils::toStr(port)));
 
     re = syscall_wrapper::Listen(listen_fd, SOMAXCONN);
-    if (re == -1)
-      throw std::runtime_error(error::strSysCallError("listen") + "\n");
+    if (re == -1) throw std::runtime_error(error::strSysCallError("listen") + "\n");
 
     std::cout << "Server running on port " << port << std::endl;
     return listen_fd;

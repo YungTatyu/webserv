@@ -25,10 +25,7 @@ class ErrorLog {
   int level_;
 
  public:
-  ErrorLog() :
-    fd_(-1),
-    file_(this->kDefaultFile_),
-    level_(this->kDefaultLevel_) {}
+  ErrorLog() : fd_(-1), file_(this->kDefaultFile_), level_(this->kDefaultLevel_) {}
   ErrorLog(const ErrorLog& other) { *this = other; }
   ~ErrorLog() {}
   ErrorLog& operator=(const ErrorLog& other) {

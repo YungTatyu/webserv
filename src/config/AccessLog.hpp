@@ -13,10 +13,7 @@ class AccessLog {
   bool is_accesslog_on_;
 
  public:
-  AccessLog() :
-    fd_(-1),
-    file_(this->kDefaultFile_),
-    is_accesslog_on_(this->kDefaultIsAccesslogOn_) {}
+  AccessLog() : fd_(-1), file_(this->kDefaultFile_), is_accesslog_on_(this->kDefaultIsAccesslogOn_) {}
   AccessLog(const AccessLog &other) { *this = other; }
   ~AccessLog() {}
   AccessLog &operator=(const AccessLog &other) {

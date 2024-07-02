@@ -396,8 +396,7 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
       case sw_search_location_phase:
         config_handler.writeErrorLog("search location phase", config::DEBUG);
         phase = handleSearchLocationPhase(response, request, server, &location, config_handler);
-        if (location)
-          config_handler.writeErrorLog("location found -> " + location->uri_, config::DEBUG);
+        if (location) config_handler.writeErrorLog("location found -> " + location->uri_, config::DEBUG);
         break;
 
       case sw_post_search_location_phase:
@@ -525,8 +524,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
   }
   ++(response.internal_redirect_cnt_);
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri_);
-  if (*location)
-    config_handler.writeErrorLog("a request access " + (*location)->uri_, config::DEBUG);
+  if (*location) config_handler.writeErrorLog("a request access " + (*location)->uri_, config::DEBUG);
   return sw_post_search_location_phase;
 }
 

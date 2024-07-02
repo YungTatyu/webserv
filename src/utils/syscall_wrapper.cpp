@@ -18,7 +18,8 @@ int syscall_wrapper::Open(const std::string &path, int flags, mode_t modes) {
 
 int syscall_wrapper::Access(const std::string &path, int modes, bool err_log) {
   int ret = access(path.c_str(), modes);
-  if (ret == -1 && err_log) WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n", config::WARN);
+  if (ret == -1 && err_log)
+    WebServer::writeErrorlog(error::strSysCallError("access", path) + "\n", config::WARN);
   return ret;
 }
 

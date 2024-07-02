@@ -8,13 +8,13 @@
 #include <sys/types.h>
 
 #include <algorithm>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <ctime>
 
 namespace utils {
 // 大文字小文字を区別しない文字列比較関数

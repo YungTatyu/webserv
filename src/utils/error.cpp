@@ -14,6 +14,5 @@
  */
 std::string error::strSysCallError(const std::string &syscall, const std::string &msg) {
   std::string err_msg = msg.empty() ? msg : std::string(" ") + msg;  // errorメッセージをフォーマット
-  return syscall + "()" + err_msg + " failed (" + utils::toStr(errno) + ": " + std::strerror(errno) +
-         ")";
+  return syscall + "()" + err_msg + " failed (" + utils::toStr(errno) + ": " + std::strerror(errno) + ")";
 }

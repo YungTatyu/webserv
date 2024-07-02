@@ -5,8 +5,8 @@
 #include <string.h>
 #include <sys/param.h>
 
-#include "syscall_wrapper.hpp"
 #include "error.hpp"
+#include "syscall_wrapper.hpp"
 #include "utils.hpp"
 
 static const std::string kAccessLog = "access_log";
@@ -84,8 +84,7 @@ int config::addErrFdList(std::set<std::string>& directives_set,
  */
 bool config::initAcsLogFds(config::Main& config) {
   // http context
-  int ret =
-      addAcsFdList(config.http_.directives_set_, config.http_.access_log_list_);
+  int ret = addAcsFdList(config.http_.directives_set_, config.http_.access_log_list_);
   if (ret == -1)
     return false;
   else if (ret == 0) {
@@ -149,9 +148,7 @@ bool config::initErrLogFds(config::Main& config) {
   }
 
   // http context
-  if (addErrFdList(config.http_.directives_set_, config.http_.error_log_list_) ==
-      -1)
-    return false;
+  if (addErrFdList(config.http_.directives_set_, config.http_.error_log_list_) == -1) return false;
 
   // server context
   for (size_t si = 0; si < config.http_.server_list_.size(); si++) {

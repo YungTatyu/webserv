@@ -543,7 +543,7 @@ bool config::Parser::parseAccessLog() {
   return true;
 }
 
-bool config::Parser::parseLogLevel(config::ErrorLog& error_log, const std::string& level) {
+bool config::Parser::parseLogLevel(config::ErrorLog &error_log, const std::string &level) {
   static std::map<std::string, LOG_LEVEL> log_level_map;
   log_level_map["debug"] = DEBUG;
   log_level_map["info"] = INFO;
@@ -561,15 +561,24 @@ bool config::Parser::parseLogLevel(config::ErrorLog& error_log, const std::strin
 
   int mask = 0;
   switch (log_level_map[level]) {
-  case DEBUG:   mask |= DEBUG;  // fall through
-  case INFO:    mask |= INFO;   // fall through
-  case NOTICE:  mask |= NOTICE; // fall through
-  case WARN:    mask |= WARN;   // fall through
-  case ERROR:   mask |= ERROR;  // fall through
-  case CRIT:    mask |= CRIT;   // fall through
-  case ALERT:   mask |= ALERT;  // fall through
-  case EMERG:   mask |= EMERG;  // fall through
-  default: break;
+    case DEBUG:
+      mask |= DEBUG;  // fall through
+    case INFO:
+      mask |= INFO;  // fall through
+    case NOTICE:
+      mask |= NOTICE;  // fall through
+    case WARN:
+      mask |= WARN;  // fall through
+    case ERROR:
+      mask |= ERROR;  // fall through
+    case CRIT:
+      mask |= CRIT;  // fall through
+    case ALERT:
+      mask |= ALERT;  // fall through
+    case EMERG:
+      mask |= EMERG;  // fall through
+    default:
+      break;
   }
   error_log.setLevel(mask);
   return true;
@@ -589,8 +598,7 @@ bool config::Parser::parseErrorLog() {
 
   if (this->tokens_[ti_ + 1].type_ != TK_SEMICOLON) {
     ++ti_;
-    if (!parseLogLevel(tmp_err_log, this->tokens_[ti_].value_))
-      return false;
+    if (!parseLogLevel(tmp_err_log, this->tokens_[ti_].value_)) return false;
   }
 
   if (context == config::CONF_MAIN)

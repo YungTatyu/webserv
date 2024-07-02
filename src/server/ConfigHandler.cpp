@@ -167,7 +167,8 @@ void ConfigHandler::writeErrorLog(const std::string& msg, config::LOG_LEVEL leve
 }
 
 void ConfigHandler::writeErrorLog(const struct TiedServer& tied_servers, const std::string& server_name,
-                                  const std::string& uri, const std::string& msg, config::LOG_LEVEL level) const {
+                                  const std::string& uri, const std::string& msg,
+                                  config::LOG_LEVEL level) const {
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
   writeErrorLog(server, location, msg, level);
@@ -421,8 +422,8 @@ unsigned long ConfigHandler::getWorkerConnections() const {
 std::string ConfigHandler::formatErrorLogMsg(const std::string& msg, config::LOG_LEVEL level) const {
   static const std::string& server_name = "webserv";
   static const std::string& format = "%Y/%m/%d %H:%M:%S ";
-  std::time_t now = std::time(NULL); // 現在のUNIX時刻を取得
-  struct tm* local_now = std::localtime(&now); // 現在時刻をローカルタイムに変換
+  std::time_t now = std::time(NULL);            // 現在のUNIX時刻を取得
+  struct tm* local_now = std::localtime(&now);  // 現在時刻をローカルタイムに変換
 
   return utils::formatTm(local_now, format) + server_name + ": [" + config::LogLevelToStr(level) + "] " + msg;
 }

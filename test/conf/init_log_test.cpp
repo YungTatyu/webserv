@@ -96,12 +96,11 @@ class InitLogTest : public ::testing::Test {
     delete config_;
   }
 
-  template<typename T>
+  template <typename T>
   int getFdNum(T log_list) {
     int num = 0;
     for (int i = 0; i < log_list.size(); i++) {
-      if (log_list[i].getFd() != -1)
-        num++;
+      if (log_list[i].getFd() != -1) num++;
     }
     return num;
   }
