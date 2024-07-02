@@ -1,4 +1,4 @@
-#include "RequestHandler.hpp"
+#include "EventHandler.hpp"
 
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -9,12 +9,12 @@
 #include "HttpResponse.hpp"
 #include "WebServer.hpp"
 
-RequestHandler::RequestHandler() {}
+EventHandler::EventHandler() {}
 
-RequestHandler::~RequestHandler() {}
+EventHandler::~EventHandler() {}
 
-void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                     IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                   IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ)
     return handleCgiReadEvent(io_handler, conn_manager, server, timer_tree, sock);
@@ -57,8 +57,8 @@ void RequestHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionMan
   return handleRequest(conn_manager, config_handler, server, timer_tree, sock);
 }
 
-void RequestHandler::handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                   IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
+                                 IServer *server, TimerTree &timer_tree, int sock) const {
   const std::vector<unsigned char> &context = conn_manager.getRawRequest(sock);
   // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
   std::string raw_request = std::string(context.begin(), context.end());
@@ -77,8 +77,8 @@ void RequestHandler::handleRequest(ConnectionManager &conn_manager, const Config
   return handleResponse(conn_manager, config_handler, server, timer_tree, sock);
 }
 
-void RequestHandler::handleResponse(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                    IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleResponse(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
+                                  IServer *server, TimerTree &timer_tree, int sock) const {
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
   std::string final_response = HttpResponse::generateResponse(
@@ -104,8 +104,8 @@ void RequestHandler::handleResponse(ConnectionManager &conn_manager, const Confi
   conn_manager.setEvent(sock, ConnectionData::EV_WRITE);  // writeイベントに更新
 }
 
-void RequestHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                               IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
+                             IServer *server, TimerTree &timer_tree, int sock) const {
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
@@ -132,8 +132,8 @@ void RequestHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHand
   addTimerByType(conn_manager, config_handler, timer_tree, cgi_sock, Timer::TMO_SEND);
 }
 
-void RequestHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                        IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                      IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   ssize_t re = io_handler.receiveCgiResponse(conn_manager, sock);
   int status = -1;
@@ -159,8 +159,8 @@ void RequestHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, Connection
   io_handler.closeConnection(conn_manager, server, timer_tree, sock);  // delete cgi event
 }
 
-void RequestHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                      IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                    IServer *server, TimerTree &timer_tree, int sock) const {
   if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_WRITE)
     return handleCgiWriteEvent(io_handler, conn_manager, server, timer_tree, sock);
 
@@ -207,8 +207,8 @@ void RequestHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionMa
   conn_manager.clearConnectionData(sock);
 }
 
-void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                         IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                       IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   io_handler.sendRequestBody(conn_manager, sock);
 
@@ -228,8 +228,8 @@ void RequestHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, Connectio
   addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_RECV);
 }
 
-void RequestHandler::handleEofEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                    IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleEofEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                  IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ) {
     return handleCgiReadEvent(io_handler, conn_manager, server, timer_tree, sock);
@@ -243,15 +243,15 @@ void RequestHandler::handleEofEvent(NetworkIOHandler &io_handler, ConnectionMana
   io_handler.closeConnection(conn_manager, server, timer_tree, sock);
 }
 
-void RequestHandler::handleErrorEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                      IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleErrorEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                    IServer *server, TimerTree &timer_tree, int sock) const {
   // cgiならすぐには接続切らず、timoutに任せる
   if (conn_manager.isCgiSocket(sock)) return;
   io_handler.closeConnection(conn_manager, server, timer_tree, sock);
 }
 
-void RequestHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
-                                        IServer *server, TimerTree &timer_tree) const {
+void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                      IServer *server, TimerTree &timer_tree) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
@@ -291,7 +291,7 @@ void RequestHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, Connection
  * @return true cgi processが死んでいる
  * @return false cgi processがまだ生きている
  */
-bool RequestHandler::cgiProcessExited(const pid_t process_id, int &status) const {
+bool EventHandler::cgiProcessExited(const pid_t process_id, int &status) const {
   pid_t re = waitpid(process_id, &status, WNOHANG);
   // errorまたはprocessが終了していない
   // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
@@ -306,8 +306,8 @@ bool RequestHandler::cgiProcessExited(const pid_t process_id, int &status) const
  * @param NetworkIOHandler, ConnectionManager, ConfigHandler, TimerTree, socket, TimeoutType
  *
  */
-void RequestHandler::addTimerByType(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                    TimerTree &timer_tree, int sock, enum Timer::TimeoutType type) const {
+void EventHandler::addTimerByType(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
+                                  TimerTree &timer_tree, int sock, enum Timer::TimeoutType type) const {
   config::Time timeout;
   std::map<std::string, std::string>::iterator it;
 
@@ -348,8 +348,8 @@ void RequestHandler::addTimerByType(ConnectionManager &conn_manager, const Confi
   timer_tree.addTimer(Timer(sock, timeout));
 }
 
-bool RequestHandler::isOverWorkerConnections(ConnectionManager &conn_manager,
-                                             const ConfigHandler &config_handler) const {
+bool EventHandler::isOverWorkerConnections(ConnectionManager &conn_manager,
+                                           const ConfigHandler &config_handler) const {
   return (conn_manager.getConnections().size() - conn_manager.getCgiSockNum()) >=
          config_handler.getWorkerConnections();
 }

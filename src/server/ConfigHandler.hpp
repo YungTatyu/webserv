@@ -1,5 +1,5 @@
-#ifndef CONFIGHANDLER_HPP
-#define CONFIGHANDLER_HPP
+#ifndef CONFIG_HANDLER_HPP
+#define CONFIG_HANDLER_HPP
 
 #include <stdint.h>
 
