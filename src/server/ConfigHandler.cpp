@@ -131,17 +131,17 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
   if (location && utils::hasDirective(*location, kAccessLog)) {
     for (size_t i = 0; i < location->access_log_list_.size(); i++) {
       if (utils::writeChunks(location->access_log_list_[i].getFd(), msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write") + "\n", config::ERROR);
+        WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
   } else if (utils::hasDirective(server, kAccessLog)) {
     for (size_t i = 0; i < server.access_log_list_.size(); i++) {
       if (utils::writeChunks(server.access_log_list_[i].getFd(), msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write") + "\n", config::ERROR);
+        WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
   } else if (utils::hasDirective(this->config_->http_, kAccessLog)) {
     for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
       if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write") + "\n", config::ERROR);
+        WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
   }
 }
@@ -155,7 +155,6 @@ void ConfigHandler::writeErrorLog(const std::string& msg, config::LOG_LEVEL leve
       if (utils::writeChunks(this->config_->http_.error_log_list_[i].getFd(), formated_msg) == -1)
         std::cerr << error::strSysCallError("write") << std::endl;
     }
-    return;
   }
   // main contextにerror_logディレクティブがなくてもデフォルトに出力する
   // fdがopenできていなければサーバーは動いていないので特に確認しなくていい。
@@ -421,10 +420,9 @@ unsigned long ConfigHandler::getWorkerConnections() const {
 }
 
 std::string ConfigHandler::formatErrorLogMsg(const std::string& msg, config::LOG_LEVEL level) const {
-  static const std::string& server_name = "webserv";
-  static const std::string& format = "%Y/%m/%d %H:%M:%S ";
+  static const std::string& format = "%Y/%m/%d %H:%M:%S";
   std::time_t now = std::time(NULL);            // 現在のUNIX時刻を取得
   struct tm* local_now = std::localtime(&now);  // 現在時刻をローカルタイムに変換
 
-  return utils::formatTm(local_now, format) + server_name + ": [" + config::LogLevelToStr(level) + "] " + msg;
+  return utils::formatTm(local_now, format) + " [" + config::LogLevelToStr(level) + "] " + msg + "\n";
 }

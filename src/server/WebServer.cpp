@@ -54,7 +54,7 @@ void WebServer::initializeServer() {
       break;
   }
   config_handler_.writeErrorLog(
-      "using the \"" + config::Use::ConnectionMethodToStr(method) + "\" event method\n", config::NOTICE);
+      "using the \"" + config::Use::ConnectionMethodToStr(method) + "\" event method", config::NOTICE);
   this->timer_tree_ = new TimerTree();
   HttpResponse::setup();
 }
@@ -114,7 +114,7 @@ void WebServer::writeErrorlog(const std::string &msg, config::LOG_LEVEL level) {
 }
 
 WebServer::~WebServer() {
-  config_handler_.writeErrorLog("Close webserv.\n\n", config::DEBUG);
+  config_handler_.writeErrorLog("Close webserv.", config::DEBUG);
   this->deleteObjects();
 }
 

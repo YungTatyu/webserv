@@ -25,7 +25,7 @@ bool utils::resolvePath(const std::string& path, std::string& absolute_path) {
 bool utils::isFile(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
-    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n", config::INFO);
+    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path), config::INFO);
     return false;
   }
   return S_ISREG(statbuf.st_mode);
@@ -34,7 +34,7 @@ bool utils::isFile(const std::string& path, bool err_log) {
 bool utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
-    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n", config::INFO);
+    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path), config::INFO);
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
@@ -99,7 +99,7 @@ ssize_t utils::writeChunks(int fd, const std::string& msg) {
 bool utils::resolveSocketAddr(struct sockaddr_in& addr, int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
-    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)) + "\n", config::WARN);
+    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)), config::WARN);
     return false;
   }
   return true;
