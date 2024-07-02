@@ -146,6 +146,18 @@ function main {
   err_path="in $(readlink -f $conf_path)"
   assert $conf_path "${err_start_with} invalid parameter \"A0:48:9F:C3:FF:BD:12:FF/129\" ${err_path}:8"
 
+  # error_log
+  g_test_directive="error_log"
+  g_test_index=0
+
+  conf_path="test/conf/conf_files/directive_error/errorLog_invalid_level.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid log level \"none\" ${err_path}:3"
+
+  conf_path="test/conf/conf_files/directive_error/errorLog_upper_case_level.conf"
+  err_path="in $(readlink -f $conf_path)"
+  assert $conf_path "${err_start_with} invalid log level \"DEBUG\" ${err_path}:5"
+
   # error_page
   g_test_directive="error_page"
   g_test_index=0
