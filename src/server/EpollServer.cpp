@@ -33,7 +33,7 @@ bool EpollServer::initEpollServer() {
   // epoll instance 初期化
   this->epfd_ = epoll_create(1);
   if (this->epfd_ == -1) {
-    std::cerr << error::strSysCallError("epoll_create") << "\n";
+    error::printError(error::strSysCallError("epoll_create"));
     return false;
   }
   return true;
@@ -48,7 +48,7 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
     ep.data.fd = it->first;
 
     if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1) {
-      std::cerr << error::strSysCallError("epoll_ctl") << "\n";
+      error::printError(error::strSysCallError("epoll_ctl"));
       return false;
     }
   }

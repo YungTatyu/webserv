@@ -16,6 +16,7 @@
 #include "LogFd.hpp"
 #include "Main.hpp"
 #include "Parser.hpp"
+#include "error.hpp"
 #include "syscall_wrapper.hpp"
 #include "utils.hpp"
 
@@ -42,8 +43,7 @@ config::Main *config::initConfig(const std::string &file_path) {
 
   // 絶対pathを取得
   if (!utils::resolvePath(file_path, absolute_path)) {
-    std::cerr << "webserv: [emerg] realpath() \"" << file_path << "\" failed (" << errno << ": "
-              << strerror(errno) << ")" << std::endl;
+    error::printError(error::strSysCallError("realpath", utils::quoteStr(file_path)));
     return NULL;
   }
 
@@ -55,7 +55,7 @@ config::Main *config::initConfig(const std::string &file_path) {
 
   // file_path がファイルかどうか確認する。
   if (!utils::isFile(absolute_path, false)) {
-    std::cerr << "webserv: [crit] \"" << absolute_path << "\" is a directory" << std::endl;
+    error::printError(utils::quoteStr(absolute_path) + std::string(" is a directory"), config::CRIT);
     return NULL;
   }
 

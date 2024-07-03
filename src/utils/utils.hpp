@@ -50,6 +50,7 @@ bool isSign(unsigned char ch);
 std::string normalizePath(const std::string& full_path);
 std::string replace(const std::string& str, char old_c, char new_c);
 std::string formatTm(const std::tm* timeinfo, const std::string& format);
+std::string quoteStr(const std::string& input);
 template <typename T>
 std::string toStr(T value);
 bool isNumeric(const std::string& str);

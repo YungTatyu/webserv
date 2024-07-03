@@ -278,3 +278,5 @@ std::string utils::formatTm(const std::tm* timeinfo, const std::string& format) 
   std::strftime(buffer, sizeof(buffer), format.c_str(), timeinfo);
   return std::string(buffer);
 }
+
+std::string utils::quoteStr(const std::string& input) { return "\"" + input + "\""; }

@@ -154,7 +154,7 @@ void ConfigHandler::writeErrorLog(const std::string& msg, config::LOG_LEVEL leve
     for (size_t i = 0; i < this->config_->http_.error_log_list_.size(); i++) {
       if (!(this->config_->http_.error_log_list_[i].getLevel() & level)) continue;
       if (utils::writeChunks(this->config_->http_.error_log_list_[i].getFd(), formated_msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
   }
   // main contextにerror_logディレクティブがなくてもデフォルトに出力する
@@ -162,7 +162,7 @@ void ConfigHandler::writeErrorLog(const std::string& msg, config::LOG_LEVEL leve
   for (size_t i = 0; i < this->config_->error_log_list_.size(); i++) {
     if (!(this->config_->error_log_list_[i].getLevel() & level)) continue;
     if (utils::writeChunks(this->config_->error_log_list_[i].getFd(), formated_msg) == -1)
-      std::cerr << error::strSysCallError("write") << std::endl;
+      error::printError(error::strSysCallError("write"), config::WARN);
   }
 }
 
@@ -181,27 +181,28 @@ void ConfigHandler::writeErrorLog(const config::Server& server, const config::Lo
     for (size_t i = 0; i < location->error_log_list_.size(); i++) {
       if (!(location->error_log_list_[i].getLevel() & level)) continue;
       if (utils::writeChunks(location->error_log_list_[i].getFd(), formated_msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else if (utils::hasDirective(server, kErrorLog)) {
+  }
+  if (utils::hasDirective(server, kErrorLog)) {
     for (size_t i = 0; i < server.error_log_list_.size(); i++) {
       if (!(server.error_log_list_[i].getLevel() & level)) continue;
       if (utils::writeChunks(server.error_log_list_[i].getFd(), formated_msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else if (utils::hasDirective(this->config_->http_, kErrorLog)) {
+  }
+  if (utils::hasDirective(this->config_->http_, kErrorLog)) {
     for (size_t i = 0; i < this->config_->http_.error_log_list_.size(); i++) {
       if (!(this->config_->http_.error_log_list_[i].getLevel() & level)) continue;
       if (utils::writeChunks(this->config_->http_.error_log_list_[i].getFd(), formated_msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else {
-    // ほかのコンテキストで設定されていなければ、デフォルトファイルに出力する。
-    for (size_t i = 0; i < this->config_->error_log_list_.size(); i++) {
-      if (!(this->config_->error_log_list_[i].getLevel() & level)) continue;
-      if (utils::writeChunks(this->config_->error_log_list_[i].getFd(), formated_msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
-    }
+  }
+  // ほかのコンテキストで設定されていなければ、デフォルトファイルに出力する。
+  for (size_t i = 0; i < this->config_->error_log_list_.size(); i++) {
+    if (!(this->config_->error_log_list_[i].getLevel() & level)) continue;
+    if (utils::writeChunks(this->config_->error_log_list_[i].getFd(), formated_msg) == -1)
+      error::printError(error::strSysCallError("write"), config::WARN);
   }
 }
 

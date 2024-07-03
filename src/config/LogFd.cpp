@@ -78,7 +78,7 @@ bool config::initAcsLogFds(config::Main& config) {
   else if (ret == 0) {
     std::string absolute_path;
     if (!utils::resolvePath(".", absolute_path)) {
-      std::cerr << error::strSysCallError("realpath") << std::endl;
+      error::printError(error::strSysCallError("realpath", "\".\""));
       return false;
     }
     std::string tmp_path = absolute_path + "/" + static_cast<std::string>(config::AccessLog::kDefaultFile_);
@@ -118,7 +118,7 @@ bool config::initErrLogFds(config::Main& config) {
   else if (ret == 0) {
     std::string absolute_path;
     if (!utils::resolvePath(".", absolute_path)) {
-      std::cerr << error::strSysCallError("realpath") << std::endl;
+      error::printError(error::strSysCallError("realpath", "\".\""));
       return false;
     }
     std::string tmp_path = absolute_path + "/" + static_cast<std::string>(config::ErrorLog::kDefaultFile_);
@@ -183,7 +183,7 @@ int config::openLogFd(const std::string& log_path) {
 bool config::haveWritePermission(const std::string& path) {
   // ファイルはあるが、write権限がない時ときはerror
   if (syscall_wrapper::Access(path, F_OK, false) == 0 && syscall_wrapper::Access(path, W_OK, true) == -1) {
-    std::cerr << error::strSysCallError("access", path) << std::endl;
+    error::printError(error::strSysCallError("access", utils::quoteStr(path)));
     return false;
   }
   return true;

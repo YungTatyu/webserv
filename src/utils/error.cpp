@@ -16,3 +16,7 @@ std::string error::strSysCallError(const std::string &syscall, const std::string
   std::string err_msg = msg.empty() ? msg : std::string(" ") + msg;  // errorメッセージをフォーマット
   return syscall + "()" + err_msg + " failed (" + utils::toStr(errno) + ": " + std::strerror(errno) + ")";
 }
+
+void error::printError(const std::string &msg, config::LOG_LEVEL level) {
+  std::cerr << "webserv: [" << config::ErrorLog::LogLevelToStr(level) << "] " << msg << std::endl;
+}

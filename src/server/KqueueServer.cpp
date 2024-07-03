@@ -28,7 +28,7 @@ void KqueueServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManage
 bool KqueueServer::initKqueueServer() {
   this->kq_ = kqueue();
   if (this->kq_ == -1) {
-    std::cerr << error::strSysCallError("kqueue") << "\n";
+    error::printError(error::strSysCallError("kqueue"));
     return false;
   }
   return true;
@@ -49,7 +49,7 @@ bool KqueueServer::initKevents(const std::map<int, ConnectionData*>& connections
   }
   int re = kevent(this->kq_, event_list.data(), event_list.size(), NULL, 0, NULL);
   if (re == -1) {
-    std::cerr << error::strSysCallError("kevent") << "\n";
+    error::printError(error::strSysCallError("kevent"));
     return false;
   }
   return true;
