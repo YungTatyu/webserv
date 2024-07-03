@@ -425,5 +425,6 @@ std::string ConfigHandler::formatErrorLogMsg(const std::string& msg, config::LOG
   std::time_t now = std::time(NULL);            // 現在のUNIX時刻を取得
   struct tm* local_now = std::localtime(&now);  // 現在時刻をローカルタイムに変換
 
-  return utils::formatTm(local_now, format) + " [" + config::LogLevelToStr(level) + "] " + msg + "\n";
+  return utils::formatTm(local_now, format) + " [" + config::ErrorLog::LogLevelToStr(level) + "] " + msg +
+         "\n";
 }

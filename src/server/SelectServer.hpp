@@ -3,11 +3,7 @@
 
 #include <sys/select.h>
 
-#include "ConnectionManager.hpp"
 #include "IServer.hpp"
-#include "NetworkIOHandler.hpp"
-#include "RequestHandler.hpp"
-#include "SelectActiveEventManager.hpp"
 
 class SelectServer : public IServer {
  public:

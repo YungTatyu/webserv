@@ -80,14 +80,14 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
   std::vector<struct kevent>* active_events_ptr =
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
   std::vector<struct kevent>& active_events = *active_events_ptr;
-  const RequestHandler& request_handler = WebServer::getRequestHandler();
+  const EventHandler& event_handler = WebServer::getEventHandler();
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
 
   // TimeoutEvent発生
   if (event_manager->getActiveEventsNum() == 0) {
-    request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
+    event_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
     return;
   }
 
@@ -96,15 +96,15 @@ void KqueueServer::callEventHandler(ConnectionManager* conn_manager, IActiveEven
     // 他のイベントハンドラーにconnectionが切断される可能性がある
     if (conn_manager->isClosedConnection(active_events[i].ident)) continue;
     if (event_manager->isReadEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
+      event_handler.handleReadEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isWriteEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
+      event_handler.handleWriteEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isEofEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
+      event_handler.handleEofEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
     else if (event_manager->isErrorEvent(static_cast<const void*>(&(active_events[i]))))
-      request_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
+      event_handler.handleErrorEvent(*io_handler, *conn_manager, this, *timer_tree, active_events[i].ident);
   }
-  request_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
+  event_handler.handleTimeoutEvent(*io_handler, *conn_manager, this, *timer_tree);
   conn_manager->clearClosedConnections();
 }
 

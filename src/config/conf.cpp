@@ -79,7 +79,7 @@ config::Main *config::initConfig(const std::string &file_path) {
   return config;
 }
 
-std::string config::LogLevelToStr(LOG_LEVEL level) {
+std::string config::ErrorLog::LogLevelToStr(LOG_LEVEL level) {
   switch (level) {
     case DEBUG:
       return "debug";

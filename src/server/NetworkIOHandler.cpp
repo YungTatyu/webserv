@@ -64,7 +64,8 @@ int NetworkIOHandler::setupSocket(const std::string& address, unsigned int port)
     // 失敗したとき？
     re = syscall_wrapper::Bind(listen_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
     if (re == -1)
-      throw std::runtime_error(error::strSysCallError("bind", "to " + address + ":" + utils::toStr(port)));
+      throw std::runtime_error("webserv: [emerg] " +
+                               error::strSysCallError("bind", "to " + address + ":" + utils::toStr(port)));
 
     re = syscall_wrapper::Listen(listen_fd, SOMAXCONN);
     if (re == -1) throw std::runtime_error(error::strSysCallError("listen"));

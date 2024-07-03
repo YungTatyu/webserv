@@ -41,7 +41,7 @@ int config::addAcsFdList(std::set<std::string>& directives_set,
   // offがなければfd作る
   for (size_t i = 0; i < access_log_list.size(); i++) {
     tmp_path = access_log_list[i].getFile();
-    if (!checkFileAccess(tmp_path)) return -1;
+    if (!haveWritePermission(tmp_path)) return -1;
     tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) return -1;
     access_log_list[i].setFd(tmp_fd);
@@ -59,7 +59,7 @@ int config::addErrFdList(std::set<std::string>& directives_set,
 
   for (size_t i = 0; i < error_log_list.size(); i++) {
     tmp_path = error_log_list[i].getFile();
-    if (!checkFileAccess(tmp_path)) return -1;
+    if (!haveWritePermission(tmp_path)) return -1;
     tmp_fd = openLogFd(tmp_path);
     if (tmp_fd == -1) return -1;
     error_log_list[i].setFd(tmp_fd);
@@ -180,7 +180,7 @@ int config::openLogFd(const std::string& log_path) {
   return syscall_wrapper::Open(log_path, kLogFileFlags, kLogFileMode);
 }
 
-bool config::checkFileAccess(const std::string& path) {
+bool config::haveWritePermission(const std::string& path) {
   // ファイルはあるが、write権限がない時ときはerror
   if (syscall_wrapper::Access(path, F_OK, false) == 0 && syscall_wrapper::Access(path, W_OK, true) == -1) {
     std::cerr << error::strSysCallError("access", path) << std::endl;

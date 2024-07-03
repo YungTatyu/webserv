@@ -29,7 +29,7 @@ add_executable(${PROJECT_NAME}-googletest
 	src/server/ConfigHandler.cpp
 	src/server/ConnectionManager.cpp
 	src/server/NetworkIOHandler.cpp
-	src/server/RequestHandler.cpp
+	src/server/EventHandler.cpp
 	src/server/Timer.cpp
 	src/server/TimerTree.cpp
 	src/server/EpollActiveEventManager.cpp
