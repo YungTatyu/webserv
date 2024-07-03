@@ -12,7 +12,6 @@
 #include <iostream>
 #include <limits>
 
-#include "ErrorLog.hpp"
 #include "Lexer.hpp"
 #include "LogFd.hpp"
 #include "Main.hpp"
@@ -77,27 +76,4 @@ config::Main *config::initConfig(const std::string &file_path) {
   }
 
   return config;
-}
-
-std::string config::ErrorLog::LogLevelToStr(LOG_LEVEL level) {
-  switch (level) {
-    case DEBUG:
-      return "debug";
-    case INFO:
-      return "info";
-    case NOTICE:
-      return "notice";
-    case WARN:
-      return "warn";
-    case ERROR:
-      return "error";
-    case CRIT:
-      return "crit";
-    case ALERT:
-      return "alert";
-    case EMERG:
-      return "emerg";
-    default:
-      return "unknown";
-  }
 }

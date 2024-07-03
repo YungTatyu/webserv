@@ -41,7 +41,27 @@ class ErrorLog {
   void setFile(const std::string& file) { this->file_ = file; }
   int getLevel() const { return this->level_; }
   void setLevel(int level) { this->level_ = level; }
-  static std::string LogLevelToStr(LOG_LEVEL level);
+  static std::string LogLevelToStr(LOG_LEVEL level) {
+    switch (level) {
+      case DEBUG:
+        return "debug";
+      case INFO:
+        return "info";
+      case NOTICE:
+        return "notice";
+      case WARN:
+        return "warn";
+      case ERROR:
+        return "error";
+      case CRIT:
+        return "crit";
+      case ALERT:
+        return "alert";
+      case EMERG:
+        return "emerg";
+    }
+    return "unknown";
+  }
   static const char* kDefaultFile_;
   static const int kDefaultLevel_;
   static const unsigned int kType_ =
