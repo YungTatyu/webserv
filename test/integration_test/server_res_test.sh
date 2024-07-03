@@ -139,7 +139,6 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/body_res.py" "200" "DELETE" ""
 
-
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
 }
