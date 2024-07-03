@@ -50,15 +50,20 @@ events {
 
 ## directive
 - error_log
-  - syntax: file
+  - syntax: file [level]
   - default: error_log logs/error.log error;
   - context: **main**, **http**, **server**, **location**
   - 重複可否: yes
     - 重複する場合、より低いレベルのcontextがerror_logの対象となる
     - 同じcontextレベルで複数ある場合、それら全てにログが書き込まれる
   - 出力レベル: 指定されたレベル以上を出力（以下レベル低い順）
+    - debug
+    - info
+    - notice
     - warn
     - error
+    - crit
+    - alert
     - emerg 
 
 ```
@@ -145,6 +150,18 @@ http {
 ```
 http {
   send_timeout 1000s;
+}
+```
+
+- receive_timeout
+  - syntax: positive-number[ ms / s / m / h ]
+  - default: 60s
+  - context: **http**, **server**, **location**
+  - 重複可否: no
+
+```
+http {
+  receive_timeout 1000s;
 }
 ```
 
