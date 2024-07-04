@@ -358,7 +358,8 @@ std::string HttpResponse::createResponse(config::REQUEST_METHOD method) const {
        it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
   stream << "\r\n";
-  if (method == config::HEAD) return stream.str();
+  // HEAD methodか204 status codeだったらbodyを含めない
+  if (method == config::HEAD || this->status_code_ == 204) return stream.str();
 
   // body
   stream << this->body_;

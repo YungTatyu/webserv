@@ -149,7 +149,7 @@ def test_upload_file(conf, file_name, can_upload, fixture_session):
 
 @pytest.fixture(scope="session")
 def fixture_session():
-    os.makedirs(f"{UPLOAD_PATH}")
+    os.makedirs(f"{UPLOAD_PATH}", exist_ok=True)
     time.sleep(1)
     yield
     shutil.rmtree(f"{UPLOAD_PATH}")

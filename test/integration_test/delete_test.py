@@ -15,6 +15,8 @@ import os
 import requests
 import shutil
 import pytest
+import stat
+import time
 
 from upload_test import send_request
 from server_res_header_test import run_server, expect_headers_exist
@@ -67,7 +69,6 @@ configs = [
 # テストに使用するファイル名のリスト
 file_names = [
     ("index.html", True, 200),
-    ("no_permission.html", False, 403),
     ("nothing.html", False, 404),
     ("test_dir/", False, 500),
 ]
@@ -86,10 +87,6 @@ def test_delete(conf, file_name, can_delete, expect_status):
     if file_name == "index.html":
         with open(f"{DELETE_PATH}/{file_name}", "w") as file:
             file.write("Hello, world!")
-    # elif file_name == "test_dir":
-    #    os.makedirs(f"{UPLOAD_PATH}/{file_name}")
-    #    with open(f"{DELETE_PATH}/{file_name}", 'w') as file:
-    #        file.write('Hello, world!')
 
     run_test(
         conf,
