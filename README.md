@@ -4,12 +4,12 @@ HTTP1.1 server written in cpp.
 <!-- 該当するプロジェクトの中から任意のものを選ぶ-->
 <p style="display: inline">
   <!-- ソースコードで使われている技術 -->
-  <img src="https://img.shields.io/badge/-C++-00599C.svg?logo=c%2B%2B&style=for-the-badge">
+  <img src="https://img.shields.io/badge/-C++-00599C.svg?logo=c%2B%2B&style=plastic">
   <!-- テストで使われている技術 -->
- <img src="https://img.shields.io/badge/-Python-F9DC3E.svg?logo=python&style=for-the-badge">
-  <img src="https://img.shields.io/badge/-Shell_Script-red.svg?logo=Shell&style=for-the-badge">
-  <img src="https://img.shields.io/badge/-Docker-EEE.svg?logo=docker&style=for-the-badge">
-  <img src="https://img.shields.io/badge/-githubactions-black.svg?logo=github-actions&style=for-the-badge">
+ <img src="https://img.shields.io/badge/-Python-F9DC3E.svg?logo=python&style=plastic">
+  <img src="https://img.shields.io/badge/-Shell_Script-red.svg?logo=Shell&style=plastic">
+  <img src="https://img.shields.io/badge/-Docker-EEE.svg?logo=docker&style=plastic">
+  <img src="https://img.shields.io/badge/-githubactions-black.svg?logo=github-actions&style=plastic">
 </p>
 
 ## Building the source
