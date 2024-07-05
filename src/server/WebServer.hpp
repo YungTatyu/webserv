@@ -24,7 +24,7 @@ class WebServer {
   void run();
   static const ConfigHandler &getConfigHandler();
   static const EventHandler &getEventHandler();
-  static void writeErrorlog(const std::string &msg);
+  static void writeErrorlog(const std::string &msg, config::LOG_LEVEL level);
 
  private:
   WebServer();

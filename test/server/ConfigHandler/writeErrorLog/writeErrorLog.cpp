@@ -8,7 +8,7 @@ TEST(ConfigHandlerTestWriteErrorLog, off) {
   std::string msg = "aiueo\n";
 
   test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
-                                     msg);
+                                     msg, config::EMERG);
   test.WRITE_NONE(file_path, msg);
 }
 
@@ -20,7 +20,7 @@ TEST(ConfigHandlerTestWriteErrorLog, location) {
   std::string msg = "kakikukeko\n";
 
   test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
-                                     msg);
+                                     msg, config::ALERT);
   test.WRITE_ACCURATE(file_path, msg);
 }
 
@@ -32,7 +32,7 @@ TEST(ConfigHandlerTestWriteErrorLog, Default) {
   std::string msg = "sashisuseso\n";
 
   test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
-                                     msg);
+                                     msg, config::CRIT);
   test.WRITE_ACCURATE(file_path, msg);
 }
 
@@ -42,10 +42,13 @@ TEST(ConfigHandlerTestWriteErrorLog, add_default) {
   test.initTiedServer({&test.config_handler_.config_->http_.server_list_[1]});
   std::string file_path = test.getAbsolutePath("logs/error.log");
   std::string msg = "tachitsuteto\n";
-  std::string expect_msg = "sashisuseso\ntachitsuteto\n";
+  std::string expect_msg = "tachitsuteto\n";
 
   test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
-                                     msg);
+                                     msg, config::ERROR);
+  test.WRITE_ACCURATE(file_path, expect_msg);
+  // 上書きされていないか
+  expect_msg = "sashisuseso\n";
   test.WRITE_ACCURATE(file_path, expect_msg);
 }
 
@@ -59,7 +62,7 @@ TEST(ConfigHandlerTestWriteErrorLog, multiple_file) {
   std::string msg = "naninuneno\n";
 
   test.config_handler_.writeErrorLog(test.tied_server_, test.request_.headers_["Host"], test.request_.uri_,
-                                     msg);
+                                     msg, config::WARN);
   test.WRITE_ACCURATE(file_path1, msg);
   test.WRITE_ACCURATE(file_path2, msg);
   test.WRITE_ACCURATE(file_path3, msg);

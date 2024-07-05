@@ -25,7 +25,7 @@ bool utils::resolvePath(const std::string& path, std::string& absolute_path) {
 bool utils::isFile(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
-    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
+    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path), config::INFO);
     return false;
   }
   return S_ISREG(statbuf.st_mode);
@@ -34,7 +34,7 @@ bool utils::isFile(const std::string& path, bool err_log) {
 bool utils::isDirectory(const std::string& path, bool err_log) {
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != 0) {
-    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path) + "\n");
+    if (err_log) WebServer::writeErrorlog(error::strSysCallError("stat", path), config::INFO);
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
@@ -99,7 +99,7 @@ ssize_t utils::writeChunks(int fd, const std::string& msg) {
 bool utils::resolveSocketAddr(struct sockaddr_in& addr, int sock) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
-    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)) + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)), config::WARN);
     return false;
   }
   return true;
@@ -271,3 +271,12 @@ std::string utils::replace(const std::string& str, char old_c, char new_c) {
   }
   return new_str;
 }
+
+// std::tmを指定されたフォーマットの文字列に変換する関数
+std::string utils::formatTm(const std::tm* timeinfo, const std::string& format) {
+  char buffer[1024];
+  std::strftime(buffer, sizeof(buffer), format.c_str(), timeinfo);
+  return std::string(buffer);
+}
+
+std::string utils::quoteStr(const std::string& input) { return "\"" + input + "\""; }

@@ -32,12 +32,12 @@ int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* co
 
     re = poll(pollfds.data(), pollfds.size(), timer_tree->findTimer());
     if (re != -1) break;
-    WebServer::writeErrorlog(error::strSysCallError("poll") + "\n");
+    WebServer::writeErrorlog(error::strSysCallError("poll"), config::EMERG);
     // 起こりうるのはENOMEM
     // 失敗したらtimeoutが近いクライアントを切断して、メモリを空ける。
     int timeout_fd = timer_tree->getClosestTimeout();
     if (timeout_fd == -1)  // timeout treeに一つもクライアントがいなかったら例外投げる
-      throw std::runtime_error(error::strSysCallError("poll"));
+      throw std::runtime_error("webserv: [emerg] " + error::strSysCallError("poll"));
     if (conn_manager->isCgiSocket(timeout_fd)) {
       const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
       cgi_handler.killCgiProcess();

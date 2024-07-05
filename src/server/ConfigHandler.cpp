@@ -13,8 +13,8 @@
 #include "error.hpp"
 #include "utils.hpp"
 
-static const std::string kAccessFd = "access_fd";
-static const std::string kErrorFd = "error_fd";
+static const std::string kAccessLog = "access_log";
+static const std::string kErrorLog = "error_log";
 static const std::string kKeepaliveTimeout = "keepalive_timeout";
 static const std::string kReceiveTimeout = "receive_timeout";
 static const std::string kSendTimeout = "send_timeout";
@@ -127,71 +127,82 @@ void ConfigHandler::writeAccessLog(const struct TiedServer& tied_servers, const 
 
 void ConfigHandler::writeAccessLog(const config::Server& server, const config::Location* location,
                                    const std::string& msg) const {
-  // access_logがどのコンテキスがあれば出力する
-  if (location && utils::hasDirective(*location, kAccessFd)) {
-    for (size_t i = 0; i < location->access_fd_list_.size(); i++) {
-      if (utils::writeChunks(location->access_fd_list_[i], msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
+  // access_logがコンテキストで指定されていれば出力する
+  if (location && utils::hasDirective(*location, kAccessLog)) {
+    for (size_t i = 0; i < location->access_log_list_.size(); i++) {
+      if (utils::writeChunks(location->access_log_list_[i].getFd(), msg) == -1)
+        WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
-  } else if (utils::hasDirective(server, kAccessFd)) {
-    for (size_t i = 0; i < server.access_fd_list_.size(); i++) {
-      if (utils::writeChunks(server.access_fd_list_[i], msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
+  }
+  if (utils::hasDirective(server, kAccessLog)) {
+    for (size_t i = 0; i < server.access_log_list_.size(); i++) {
+      if (utils::writeChunks(server.access_log_list_[i].getFd(), msg) == -1)
+        WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
     }
-  } else if (utils::hasDirective(this->config_->http_, kAccessFd)) {
-    for (size_t i = 0; i < this->config_->http_.access_fd_list_.size(); i++) {
-      if (utils::writeChunks(this->config_->http_.access_fd_list_[i], msg) == -1)
-        WebServer::writeErrorlog(error::strSysCallError("write") + "\n");
-    }
+  }
+  // directives_setになくてもデフォルトファイルがあるはずなので出力する
+  for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
+    if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
+      WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
   }
 }
 
-void ConfigHandler::writeErrorLog(const std::string& msg) const {
+void ConfigHandler::writeErrorLog(const std::string& msg, config::LOG_LEVEL level) const {
+  std::string formated_msg = formatErrorLogMsg(msg, level);
   // http conterxtにerror_logディレクティブがあれば出力
-  if (utils::hasDirective(this->config_->http_, kErrorFd)) {
-    for (size_t i = 0; i < this->config_->http_.error_fd_list_.size(); i++) {
-      if (utils::writeChunks(this->config_->http_.error_fd_list_[i], msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+  if (utils::hasDirective(this->config_->http_, kErrorLog)) {
+    for (size_t i = 0; i < this->config_->http_.error_log_list_.size(); i++) {
+      if (!(this->config_->http_.error_log_list_[i].getLevel() & level)) continue;
+      if (utils::writeChunks(this->config_->http_.error_log_list_[i].getFd(), formated_msg) == -1)
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else if (utils::hasDirective(*this->config_, kErrorFd)) {
-    // main contextにerror_logディレクティブがなくてもデフォルトに出力する
-    // fdがopenできずに追加できていない可能性があるので、一応条件文で確認している。
-    for (size_t i = 0; i < this->config_->error_fd_list_.size(); i++) {
-      if (utils::writeChunks(this->config_->error_fd_list_[i], msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
-    }
+  }
+  // main contextにerror_logディレクティブがなくてもデフォルトに出力する
+  // fdがopenできていなければサーバーは動いていないので特に確認しなくていい。
+  for (size_t i = 0; i < this->config_->error_log_list_.size(); i++) {
+    if (!(this->config_->error_log_list_[i].getLevel() & level)) continue;
+    if (utils::writeChunks(this->config_->error_log_list_[i].getFd(), formated_msg) == -1)
+      error::printError(error::strSysCallError("write"), config::WARN);
   }
 }
 
 void ConfigHandler::writeErrorLog(const struct TiedServer& tied_servers, const std::string& server_name,
-                                  const std::string& uri, const std::string& msg) const {
+                                  const std::string& uri, const std::string& msg,
+                                  config::LOG_LEVEL level) const {
   const config::Server& server = searchServerConfig(tied_servers, server_name);
   const config::Location* location = searchLongestMatchLocationConfig(server, uri);
-  writeErrorLog(server, location, msg);
+  writeErrorLog(server, location, msg, level);
 }
 
 void ConfigHandler::writeErrorLog(const config::Server& server, const config::Location* location,
-                                  const std::string& msg) const {
-  if (location && utils::hasDirective(*location, kErrorFd)) {
-    for (size_t i = 0; i < location->error_fd_list_.size(); i++) {
-      if (utils::writeChunks(location->error_fd_list_[i], msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+                                  const std::string& msg, config::LOG_LEVEL level) const {
+  std::string formated_msg = formatErrorLogMsg(msg, level);
+  if (location && utils::hasDirective(*location, kErrorLog)) {
+    for (size_t i = 0; i < location->error_log_list_.size(); i++) {
+      if (!(location->error_log_list_[i].getLevel() & level)) continue;
+      if (utils::writeChunks(location->error_log_list_[i].getFd(), formated_msg) == -1)
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else if (utils::hasDirective(server, kErrorFd)) {
-    for (size_t i = 0; i < server.error_fd_list_.size(); i++) {
-      if (utils::writeChunks(server.error_fd_list_[i], msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+  }
+  if (utils::hasDirective(server, kErrorLog)) {
+    for (size_t i = 0; i < server.error_log_list_.size(); i++) {
+      if (!(server.error_log_list_[i].getLevel() & level)) continue;
+      if (utils::writeChunks(server.error_log_list_[i].getFd(), formated_msg) == -1)
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else if (utils::hasDirective(this->config_->http_, kErrorFd)) {
-    for (size_t i = 0; i < this->config_->http_.error_fd_list_.size(); i++) {
-      if (utils::writeChunks(this->config_->http_.error_fd_list_[i], msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
+  }
+  if (utils::hasDirective(this->config_->http_, kErrorLog)) {
+    for (size_t i = 0; i < this->config_->http_.error_log_list_.size(); i++) {
+      if (!(this->config_->http_.error_log_list_[i].getLevel() & level)) continue;
+      if (utils::writeChunks(this->config_->http_.error_log_list_[i].getFd(), formated_msg) == -1)
+        error::printError(error::strSysCallError("write"), config::WARN);
     }
-  } else if (utils::hasDirective(*this->config_, kErrorFd)) {
-    for (size_t i = 0; i < this->config_->error_fd_list_.size(); i++) {
-      if (utils::writeChunks(this->config_->error_fd_list_[i], msg) == -1)
-        std::cerr << error::strSysCallError("write") << std::endl;
-    }
+  }
+  // ほかのコンテキストで設定されていなければ、デフォルトファイルに出力する。
+  for (size_t i = 0; i < this->config_->error_log_list_.size(); i++) {
+    if (!(this->config_->error_log_list_[i].getLevel() & level)) continue;
+    if (utils::writeChunks(this->config_->error_log_list_[i].getFd(), formated_msg) == -1)
+      error::printError(error::strSysCallError("write"), config::WARN);
   }
 }
 
@@ -408,4 +419,13 @@ std::string ConfigHandler::createAcsLogMsg(uint32_t ip, long status, size_t resS
 
 unsigned long ConfigHandler::getWorkerConnections() const {
   return config_->events_.worker_connections_.getWorkerConnections();
+}
+
+std::string ConfigHandler::formatErrorLogMsg(const std::string& msg, config::LOG_LEVEL level) const {
+  static const std::string& format = "%Y/%m/%d %H:%M:%S";
+  std::time_t now = std::time(NULL);            // 現在のUNIX時刻を取得
+  struct tm* local_now = std::localtime(&now);  // 現在時刻をローカルタイムに変換
+
+  return utils::formatTm(local_now, format) + " [" + config::ErrorLog::LogLevelToStr(level) + "] " + msg +
+         "\n";
 }

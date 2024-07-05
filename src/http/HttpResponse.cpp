@@ -385,61 +385,61 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   while (phase != sw_end_phase) {
     switch (phase) {
       case sw_start_phase:
-        config_handler.writeErrorLog("webserv: [debug] start phase\n");
+        config_handler.writeErrorLog("start phase", config::DEBUG);
         phase = sw_pre_search_location_phase;
         break;
 
       case sw_pre_search_location_phase:
-        config_handler.writeErrorLog("webserv: [debug] pre search location phase\n");
+        config_handler.writeErrorLog("pre search location phase", config::DEBUG);
         phase = handlePreSearchLocationPhase(request.parse_state_, response, socket, client_addr);
         break;
 
       case sw_search_location_phase:
-        config_handler.writeErrorLog("webserv: [debug] search location phase\n");
+        config_handler.writeErrorLog("search location phase", config::DEBUG);
         phase = handleSearchLocationPhase(response, request, server, &location, config_handler);
-        if (location)
-          config_handler.writeErrorLog("webserv: [debug] location found -> " + location->uri_ + "\n");
+        if (location) config_handler.writeErrorLog("location found -> " + location->uri_, config::DEBUG);
         break;
 
       case sw_post_search_location_phase:
-        config_handler.writeErrorLog("webserv: [debug] post search location phase\n");
+        config_handler.writeErrorLog("post search location phase", config::DEBUG);
         response.root_path_ = config_handler.searchRootPath(server, location);
-        config_handler.writeErrorLog("webserv: [debug] root path is " + response.root_path_ + "\n");
+        config_handler.writeErrorLog("root path is " + response.root_path_, config::DEBUG);
         phase = sw_return_phase;
         break;
 
       case sw_return_phase:
-        config_handler.writeErrorLog("webserv: [debug] return phase\n");
+        config_handler.writeErrorLog("return phase", config::DEBUG);
         phase = handleReturnPhase(response, location, config_handler);
         break;
 
       case sw_allow_phase:
-        config_handler.writeErrorLog("webserv: [debug] allow phase\n");
+        config_handler.writeErrorLog("allow phase", config::DEBUG);
+        phase = handleReturnPhase(response, location, config_handler);
         phase = handleAllowPhase(response, request, server, location, client_addr, config_handler);
         break;
 
       case sw_uri_check_phase:
-        config_handler.writeErrorLog("webserv: [debug] uri check phase\n");
+        config_handler.writeErrorLog("uri check phase", config::DEBUG);
         phase = handleUriCheckPhase(response, request, location, tied_servers.port_);
         break;
 
       case sw_search_res_file_phase:
-        config_handler.writeErrorLog("webserv: [debug] search response file phase\n");
+        config_handler.writeErrorLog("search response file phase", config::DEBUG);
         phase = handleSearchResFilePhase(response, request, server, location, config_handler);
         break;
 
       case sw_content_phase:
-        config_handler.writeErrorLog("webserv: [debug] content phase\n");
+        config_handler.writeErrorLog("content phase", config::DEBUG);
         phase = handleContentPhase(response, request);
         break;
 
       case sw_error_page_phase:
-        config_handler.writeErrorLog("webserv: [debug] error page phase\n");
+        config_handler.writeErrorLog("error page phase", config::DEBUG);
         phase = handleErrorPagePhase(response, request, server, location, config_handler);
         break;
 
       case sw_log_phase:
-        config_handler.writeErrorLog("webserv: [debug] log phase\n");
+        config_handler.writeErrorLog("log phase", config::DEBUG);
         config_handler.writeAccessLog(
             server, location,
             config_handler.createAcsLogMsg(client_addr.sin_addr.s_addr, response.getStatusCode(),
@@ -454,13 +454,12 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   }
 
   if (response.state_ == RES_EXECUTE_CGI) return "";
-  config_handler.writeErrorLog("webserv: [debug] header filter\n");
+  config_handler.writeErrorLog("header filter", config::DEBUG);
   headerFilterPhase(
       response, config_handler.searchKeepaliveTimeout(tied_servers, request.headers_[kHost], request.uri_));
 
-  config_handler.writeErrorLog("webserv: [debug] create final response\n");
-  config_handler.writeErrorLog("webserv: [debug] final response file path " + response.res_file_path_ +
-                               "\n\n");
+  config_handler.writeErrorLog("create final response", config::DEBUG);
+  config_handler.writeErrorLog("final response file path " + response.res_file_path_, config::DEBUG);
   response.state_ = RES_COMPLETE;
   return response.createResponse(request.method_);
 }
@@ -518,7 +517,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
                                                                     const config::Location** location,
                                                                     const ConfigHandler& config_handler) {
   if (response.internal_redirect_cnt_ > kMaxInternalRedirect) {
-    config_handler.writeErrorLog(server, *location, "webserv: [error] too continuous internal redirect\n");
+    config_handler.writeErrorLog(server, *location, "too continuous internal redirect", config::ERROR);
     response.setStatusCode(500);
     response.body_ = std::string(default_error_page_map_[500]) + webserv_error_page_tail;
     response.res_file_path_ = kDefaultPage;
@@ -526,8 +525,7 @@ HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse
   }
   ++(response.internal_redirect_cnt_);
   *location = config_handler.searchLongestMatchLocationConfig(server, request.uri_);
-  if (*location)
-    config_handler.writeErrorLog("webserv: [debug] a request access " + (*location)->uri_ + "\n");
+  if (*location) config_handler.writeErrorLog("a request access " + (*location)->uri_, config::DEBUG);
   return sw_post_search_location_phase;
 }
 
@@ -573,7 +571,7 @@ HttpResponse::ResponsePhase HttpResponse::handleReturnPhase(HttpResponse& respon
   if (!location || (location && !utils::hasDirective(*location, kReturn))) return sw_allow_phase;
 
   prepareReturn(response, location->return_list_[0]);
-  config_handler.writeErrorLog("webserv: [debug] redirect occured\n");
+  config_handler.writeErrorLog("redirect occured", config::DEBUG);
   return sw_error_page_phase;
 }
 
@@ -662,6 +660,7 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
   buffer << "<pre>";
 
   // 要素ごとにリンクと最終修正時刻とサイズを出力
+  static const std::string& format = "%d-%b-%Y %H:%M";
   for (std::vector<std::string>::iterator it = contents.begin(); it != contents.end(); ++it) {
     buffer << "<a href='";
     if (!directory_path.empty() && directory_path[directory_path.size() - 1] != '/') buffer << "/";
@@ -672,11 +671,8 @@ std::string HttpResponse::autoIndex(const std::string& directory_path, const std
     if (*it != "../" && stat(full_path.c_str(), &file_stat) == 0) {
       buffer << "<span class=\"right-align\">";
       // file 最終修正時刻
-      struct tm last_modify_time;
-      localtime_r(&file_stat.st_mtime, &last_modify_time);
-      char date[1024];
-      std::strftime(date, sizeof(date), "%d-%b-%Y %H:%M", &last_modify_time);
-      buffer << date;
+      struct tm* last_modify_time = std::localtime(&file_stat.st_mtime);
+      buffer << utils::formatTm(last_modify_time, format);
 
       // ファイルバイト数
       std::string space;

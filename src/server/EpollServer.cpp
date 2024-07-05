@@ -33,7 +33,7 @@ bool EpollServer::initEpollServer() {
   // epoll instance 初期化
   this->epfd_ = epoll_create(1);
   if (this->epfd_ == -1) {
-    std::cerr << error::strSysCallError("epoll_create") << "\n";
+    error::printError(error::strSysCallError("epoll_create"));
     return false;
   }
   return true;
@@ -48,7 +48,7 @@ bool EpollServer::initEpollEvent(const std::map<int, ConnectionData*>& connectio
     ep.data.fd = it->first;
 
     if (epoll_ctl(this->epfd_, EPOLL_CTL_ADD, ep.data.fd, &ep) == -1) {
-      std::cerr << error::strSysCallError("epoll_ctl") << "\n";
+      error::printError(error::strSysCallError("epoll_ctl"));
       return false;
     }
   }
@@ -102,7 +102,7 @@ int EpollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* c
   Timer::updateCurrentTime();
   int size = epoll_wait(this->epfd_, active_events->data(), active_events->size(), timer_tree->findTimer());
   event_manager->setActiveEventsNum(size);
-  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait") + "\n");
+  if (size == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_wait"), config::EMERG);
   return size;
 }
 
@@ -113,7 +113,7 @@ int EpollServer::addNewEvent(int fd, ConnectionData::EVENT event) {
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_ADD, new_event.data.fd, &new_event);
   // 起こりうるのはENOMEMかENOSPC
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"), config::EMERG);
   return re;
 }
 
@@ -123,14 +123,14 @@ int EpollServer::updateEvent(int fd, ConnectionData::EVENT event) {
       event == ConnectionData::EV_READ || event == ConnectionData::EV_CGI_READ ? EPOLLIN : EPOLLOUT;
   new_event.data.fd = fd;
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_MOD, new_event.data.fd, &new_event);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"), config::EMERG);
   return re;
 }
 
 int EpollServer::deleteEvent(int fd, ConnectionData::EVENT event) {
   static_cast<void>(event);
   int re = epoll_ctl(this->epfd_, EPOLL_CTL_DEL, fd, NULL);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl") + "\n");
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("epoll_ctl"), config::EMERG);
   return re;
 }
 
