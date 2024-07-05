@@ -63,7 +63,8 @@ class ErrorLog {
     return "unknown";
   }
   static const char* kDefaultFile_;
-  static const int kDefaultLevel_;
+  static const int kDefaultLevel_ =
+      config::WARN | config::ERROR | config::CRIT | config::ALERT | config::EMERG;
   static const unsigned int kType_ =
       CONF_MAIN | CONF_HTTP | CONF_HTTP_SERVER | CONF_HTTP_LOCATION | CONF_TAKE12 | CONF_NOT_UNIQUE;
 };
