@@ -351,9 +351,6 @@ std::string HttpResponse::createResponse(config::REQUEST_METHOD method) const {
   // 　ex) Content-Type　Content-Length　は文字が整形される
   // 　Locationなどは整形されない ex) loCAtion
 
-  // TODO: 以下の場合に、responseをchunkしたい
-  // headerに Content-Lengthがない場合（主にcgiレスポンス）
-  // responseが長い場合、例えばbuffer size以上
   for (std::map<std::string, std::string>::const_iterator it = this->headers_.begin();
        it != this->headers_.end(); ++it)
     stream << transformLetter(it->first) << ": " << it->second << "\r\n";
@@ -501,12 +498,10 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(HttpReque
   }
 
   // get client ip_address
-  // retry するか？
-  socklen_t client_addrlen = sizeof(client_addr);
-  if (syscall_wrapper::Getsockname(socket, reinterpret_cast<struct sockaddr*>(&client_addr),
-                                   &client_addrlen) != 0) {
-    // TODO: getsockname()ダメだったらどうするか？
-    return sw_end_phase;
+  if (!utils::resolveSocketAddr(socket, client_addr)) {
+    // client のアドレスを取得できなかったら403エラーを返す。
+    response.setStatusCode(403);
+    return sw_error_page_phase;
   } else
     return sw_search_location_phase;
 }

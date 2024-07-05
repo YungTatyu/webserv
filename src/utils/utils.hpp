@@ -34,7 +34,7 @@ std::vector<std::string> createDirectoryContents(const std::string& path);
 bool isExecutable(const char* filename);
 bool isExtensionFile(const std::string& filename, const std::string& extension);
 ssize_t writeChunks(int fd, const std::string& msg);
-bool resolveSocketAddr(struct sockaddr_in& addr, int sock);
+bool resolveSocketAddr(int sock, struct sockaddr_in& addr);
 std::string socketToStrIPAddress(int sock);
 std::string ipToStr(uint32_t ip);
 uint32_t strToIPAddress(const std::string& ip);
