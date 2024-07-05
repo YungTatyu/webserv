@@ -1,5 +1,16 @@
 # nginx-like HTTP1.1 server
 HTTP1.1 server written in cpp.
+<!-- シールド一覧 -->
+<!-- 該当するプロジェクトの中から任意のものを選ぶ-->
+<p style="display: inline">
+  <!-- ソースコードで使われている技術 -->
+  <img src="https://img.shields.io/badge/-C++-00599C.svg?logo=c%2B%2B&style=for-the-badge">
+  <!-- テストで使われている技術 -->
+ <img src="https://img.shields.io/badge/-Python-F9DC3E.svg?logo=python&style=for-the-badge">
+  <img src="https://img.shields.io/badge/-Shell_Script-red.svg?logo=Shell&style=for-the-badge">
+  <img src="https://img.shields.io/badge/-Docker-EEE.svg?logo=docker&style=for-the-badge">
+  <img src="https://img.shields.io/badge/-githubactions-black.svg?logo=github-actions&style=for-the-badge">
+</p>
 
 ## Building the source
 To build the server from source, follow these steps:
