@@ -38,6 +38,18 @@ void KqueueActiveEventManager::clearAllEvents() {
 }
 
 /**
+ * @brief 多くのクライアントが接続し、active_events_が確保したメモリを解放するためのメソッド
+ */
+void KqueueActiveEventManager::reallocActiveEvents(std::size_t size) {
+  if (this->active_events_.capacity() < size) {
+    this->active_events_.reserve(size);
+  } else {
+    if (this->active_events_.capacity() - size > 1000)
+      std::vector<struct kevent>(size).swap(this->active_events_);
+  }
+}
+
+/**
  * @brief ソケットが閉じられた、もしくはerror発生した場合はreadイベントとして対応しない
  * 不必要なreadを避けるため
  *

@@ -27,6 +27,18 @@ void EpollActiveEventManager::addEvent(const void *event) { (void)event; }
 
 void EpollActiveEventManager::clearAllEvents() { this->active_events_.clear(); }
 
+/**
+ * @brief 多くのクライアントが接続し、active_events_が確保したメモリを解放するためのメソッド
+ */
+void EpollActiveEventManager::reallocActiveEvents(std::size_t size) {
+  if (this->active_events_.capacity() < size) {
+    this->active_events_.reserve(size);
+  } else {
+    if (this->active_events_.capacity() - size > 1000)
+      std::vector<struct epoll_event>(size).swap(this->active_events_);
+  }
+}
+
 bool EpollActiveEventManager::isReadEvent(const void *event) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
   return (ep_event->events & EPOLLIN) && !isErrorEvent(event) && !isEofEvent(event);

@@ -28,10 +28,18 @@ void SelectActiveEventManager::addEvent(const void *event) {
   this->active_events_.push_back(*select_event);
 }
 
-void SelectActiveEventManager::clearAllEvents() {
-  this->active_events_.clear();
-  // TODO: メモリ解放するか否か
-  // this->active_events_.resize(0);
+void SelectActiveEventManager::clearAllEvents() { this->active_events_.clear(); }
+
+/**
+ * @brief メモリが不足した場合に、active_events_が確保した余分なメモリを解放するためのメソッド
+ */
+void SelectActiveEventManager::reallocActiveEvents(std::size_t size) {
+  if (this->active_events_.capacity() < size) {
+    this->active_events_.reserve(size);
+  } else {
+    if (this->active_events_.capacity() - size > 1000)
+      std::vector<SelectEvent>(size).swap(this->active_events_);
+  }
 }
 
 bool SelectActiveEventManager::isReadEvent(const void *event) {

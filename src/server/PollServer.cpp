@@ -43,7 +43,10 @@ int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* co
       cgi_handler.killCgiProcess();
     }
     io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
+    // memoryを空けるためにevent managerのactive_events_のメモリをリセット
+    // event_manager->shrinkActiveEvents();
   }
+  event_manager->reallocActiveEvents(pollfds.size());
   // 発生したイベントをActiveEventManagerにすべて追加
   addActiveEvents(pollfds, event_manager);
   return re;

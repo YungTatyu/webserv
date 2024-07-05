@@ -15,6 +15,7 @@ struct SelectEvent {
   int fd_;
   SELECT_EVENT event_;
   SelectEvent(int fd, SELECT_EVENT event) : fd_(fd), event_(event) {}
+  SelectEvent() : fd_(-1), event_(SELECT_READ) {}
 };
 
 class SelectActiveEventManager : public IActiveEventManager {
@@ -28,6 +29,7 @@ class SelectActiveEventManager : public IActiveEventManager {
   void setActiveEventsNum(int num);
   void addEvent(const void *event);
   void clearAllEvents();
+  void reallocActiveEvents(std::size_t size);
   bool isReadEvent(const void *event);
   bool isWriteEvent(const void *event);
   bool isErrorEvent(const void *event);

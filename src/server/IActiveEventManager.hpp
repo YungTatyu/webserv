@@ -9,6 +9,7 @@ class IActiveEventManager {
   virtual void setActiveEventsNum(int num) = 0;
   virtual void addEvent(const void *event) = 0;
   virtual void clearAllEvents() = 0;
+  virtual void reallocActiveEvents(std::size_t size) = 0;
   virtual bool isReadEvent(const void *event) = 0;
   virtual bool isWriteEvent(const void *event) = 0;
   virtual bool isErrorEvent(const void *event) = 0;
