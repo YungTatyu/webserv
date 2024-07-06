@@ -502,8 +502,8 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(HttpReque
     // client のアドレスを取得できなかったら403エラーを返す。
     response.setStatusCode(403);
     return sw_error_page_phase;
-  } else
-    return sw_search_location_phase;
+  }
+  return sw_search_location_phase;
 }
 
 HttpResponse::ResponsePhase HttpResponse::handleSearchLocationPhase(HttpResponse& response,
