@@ -50,7 +50,6 @@ void KqueueActiveEventManager::reallocActiveEvents(std::size_t size) {
   // 1000以上のクライアントの接続が切れたら容量をリサイズする
   if (this->active_events_.size() - size > 1000) std::vector<struct kevent>(size).swap(this->active_events_);
 }
-}
 
 /**
  * @brief ソケットが閉じられた、もしくはerror発生した場合はreadイベントとして対応しない
