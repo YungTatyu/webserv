@@ -36,6 +36,7 @@ void PollActiveEventManager::reallocActiveEvents(std::size_t size) {
   if (this->active_events_.capacity() < size) {
     this->active_events_.reserve(size);
   } else {
+    // activeなクライアントが1000以上減ったら容量をリサイズする
     if (this->active_events_.capacity() - size > 1000)
       std::vector<struct pollfd>(size).swap(this->active_events_);
   }
