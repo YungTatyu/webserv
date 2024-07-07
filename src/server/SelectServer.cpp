@@ -45,7 +45,7 @@ int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
     }
     io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
   }
-  event_manager->reallocActiveEvents(conn_manager->getConnections().size());
+  event_manager->reallocActiveEvents(re);
   addActiveEvents(conn_manager->getConnections(), event_manager);
   return re;
 }
