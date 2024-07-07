@@ -45,6 +45,8 @@ int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
     }
     io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
   }
+  // timeout発生時はactive eventsはないので返す。
+  if (re == 0) return re;
   event_manager->reallocActiveEvents(re);
   addActiveEvents(conn_manager->getConnections(), event_manager);
   return re;
