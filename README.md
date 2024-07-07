@@ -1,43 +1,27 @@
-# 課題の概要
-[Wiki](https://github.com/YungTatyu/webserv/wiki/%E5%9F%BA%E6%9C%AC%E8%A8%AD%E8%A8%88%E6%9B%B8)に課題の概要が書いてあります。
+# nginx-like HTTP1.1 server
+HTTP1.1 server written in cpp.
+<!-- シールド一覧 -->
+<!-- 該当するプロジェクトの中から任意のものを選ぶ-->
+<p style="display: inline">
+  <!-- ソースコードで使われている技術 -->
+  <img src="https://img.shields.io/badge/-C++-00599C.svg?logo=c%2B%2B&style=flat">
+  <!-- テストで使われている技術 -->
+ <img src="https://img.shields.io/badge/-Python-F9DC3E.svg?logo=python&style=flat">
+  <img src="https://img.shields.io/badge/-Shell_Script-red.svg?logo=Shell&style=flat">
+  <img src="https://img.shields.io/badge/-Docker-EEE.svg?logo=docker&style=flat">
+  <img src="https://img.shields.io/badge/-githubactions-black.svg?logo=github-actions&style=flat">
+</p>
 
-# Webserveeeee OOP design
-### 基本的な方針
-大元のサーバークラスは、イベントを検知して、適切なハンドラーを呼び出すだけ。なるべくクラスの責任が分散するようにした。今はeventLoopでクライアントからの接続イベントしか検知しないので、次はselectかepollとか使う。
-コンストラクタで依存性の注入を行う。
-HTTPモジュールを追加した。
-autoindexとエラーページを追加しました。
-
-### ウェブサーバークラスが保有するコンポーネント
-* NetworkIOHandlerクラス
-	> クライアントとデータの送受信を行う
-* EventHandlerクラス
-	> NetworkIOHandlerで受け取ったデータに応じた処理をする
-	> HttpMessageクラスを用いて、リクエストのパースとレスポンスの生成を行う。
-* ConnectionManagerクラス
-	> コネクションが疎通したソケットととその直前のデータの管理をする。NetworkIOHandlerクラスとEventHandlerクラスのデータ受け渡しのインターフェースとなる。
-* EventManagerクラス
-	> struct pollfdを管理する。
-* ServerConfigクラス
-	> 設定ファイルをパースして管理する
-
-### HttpMessageクラス
-* HTTPリクエストとレスポンスのエンティティクラスを保持し、リクエストのパース、レスポンス生成を行う。
-
-### GCIHandlerクラス
-* CGIスクリプトを子プロセスで実行し、実行結果をHttpMessage::responseGeneratorクラスに返す。
-
-### syscall_wrapper名前空間
-* socket(), bind(), listen()などのシステムコールの実行とエラーをハンドルするラッパー関数Socket(), Bind(), Listen()などを定義。
-
-### 使い方
+## Building the source
+To build the server from source, follow these steps:
+```sh
+git clone https://github.com/YungTatyu/webserv.git && cd webserv
+make
 ```
-make && ./webserv
+
+## Configuration
+For detailed configuration, please read [config.md](https://github.com/YungTatyu/webserv/blob/main/docs/config.md) or [the Wiki page](https://github.com/YungTatyu/webserv/wiki).
+You can specify the configuration file path as a parameter when running the binary:
+```sh
+./webserv conf/webserv.conf
 ```
-```
-telnet localhost 3001
-> GET path/to/resource HTTP/1.1
-```
-3001番ポートでクライアントからの接続を待つので、それにtelnetとかでアクセスしてください。\
-ブラウザ（Chromeでは確認しました。）からも動きます!!\
-autoindexがあるのでリクエストURIがディレクトリでかつその配下にindex.htmlがあればindex.htmlを表示し、なければディレクトリ配下のファイル一覧が表示されます。
