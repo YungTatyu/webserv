@@ -45,11 +45,11 @@ class ConnectionManager {
  public:
   ConnectionManager();
   ~ConnectionManager();
-  void setConnection(int fd);
+  bool setConnection(int fd);
   ConnectionData* getConnection(int fd);
   void setRawRequest(int fd, const std::vector<unsigned char>& raw_request);
   void addRawRequest(int fd, const std::vector<unsigned char>& raw_request, ssize_t read_bytes);
-  void setCgiConnection(int cli_sock, ConnectionData::EVENT event);
+  bool setCgiConnection(int cli_sock, ConnectionData::EVENT event);
   void removeConnection(int fd, bool cgi);
   const std::vector<unsigned char>& getRawRequest(int fd) const;
   void setFinalResponse(int fd, const std::vector<unsigned char>& new_response);

@@ -4,33 +4,51 @@
 
 #include <algorithm>
 
+#include "WebServer.hpp"
+
 ConnectionManager::ConnectionManager() : cgi_sock_num_(0) {}
 
 ConnectionManager::~ConnectionManager() { closeAllConnections(); }
 
 /**
- * @brief client or listen socketを登録する
+ * @brief client or listen socketを登録する。selectで1024を超えたfd値をセットしようとしたらfalseを返す。
  *
  * @param fd
+ *
+ * @return bool
  */
-void ConnectionManager::setConnection(int fd) {
+bool ConnectionManager::setConnection(int fd) {
+  const ConfigHandler& config_handler = WebServer::getConfigHandler();
+  // selectが扱える最大fd値は1024なので、それを超えていたら切断
+  if (config_handler.config_->events_.use_.getConnectionMethod() == config::SELECT && 1024 <= fd) {
+    return false;
+  }
   connections_[fd] = new ConnectionData();
   std::cout << "new connection:" << fd << "\n";
+  return true;
 }
 
 /**
- * @brief cgiのsocketを登録する
+ * @brief cgiのsocketを登録する。selectで1024を超えたfd値をセットしようとしたらfaseを返す。
  *
  * @param cli_sock cgiのsocketに紐づいているクライアントのソケット
  * @param event
+ *
+ * @return bool
  */
-void ConnectionManager::setCgiConnection(int cli_sock, ConnectionData::EVENT event) {
+bool ConnectionManager::setCgiConnection(int cli_sock, ConnectionData::EVENT event) {
+  const ConfigHandler& config_handler = WebServer::getConfigHandler();
+  // selectが扱える最大fd値は1024なので、それを超えていたらfalse
+  if (config_handler.config_->events_.use_.getConnectionMethod() == config::SELECT && 1024 <= cli_sock) {
+    return false;
+  }
   ConnectionData* cd = this->connections_.at(cli_sock);
   int cgi_sock = cd->cgi_handler_.getCgiSocket();
   this->connections_.insert(std::make_pair(cgi_sock, cd));
   // cgi のイベントに更新
   this->connections_.at(cli_sock)->event_ = event;
   this->cgi_sock_num_++;
+  return true;
 }
 
 /**
