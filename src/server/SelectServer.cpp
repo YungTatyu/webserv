@@ -60,12 +60,12 @@ int SelectServer::addSocketToSets(const ConnectionManager& conn_manager) {
   FD_ZERO(&(this->write_set_));
 
   std::cout << "all fd=" << connections.size() << std::endl;
-  //int num = 1;
+  // int num = 1;
   for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end();
        ++it) {
     const ConnectionData& connection = *(it->second);
     const int fd = it->first;
-    //std::cout << "fd=" << num++ << std::endl;
+    // std::cout << "fd=" << num++ << std::endl;
     std::cout << "fd=" << fd << std::endl;
     switch (connection.event_) {
       case ConnectionData::EV_CGI_READ:
