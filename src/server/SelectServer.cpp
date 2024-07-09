@@ -23,7 +23,6 @@ void SelectServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManage
 int SelectServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* conn_manager,
                                IActiveEventManager* event_manager, TimerTree* timer_tree) {
   int re;
-  std::cout << "FD_SETSIZE" << FD_SETSIZE << std::endl;
   while (1) {
     const int max_fd = addSocketToSets(*conn_manager);
     // 現在時刻を更新
@@ -59,14 +58,10 @@ int SelectServer::addSocketToSets(const ConnectionManager& conn_manager) {
   FD_ZERO(&(this->read_set_));
   FD_ZERO(&(this->write_set_));
 
-  std::cout << "all fd=" << connections.size() << std::endl;
-  //int num = 1;
   for (std::map<int, ConnectionData*>::const_iterator it = connections.begin(); it != connections.end();
        ++it) {
     const ConnectionData& connection = *(it->second);
     const int fd = it->first;
-    //std::cout << "fd=" << num++ << std::endl;
-    std::cout << "fd=" << fd << std::endl;
     switch (connection.event_) {
       case ConnectionData::EV_CGI_READ:
       case ConnectionData::EV_CGI_WRITE:
