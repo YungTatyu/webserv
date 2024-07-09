@@ -35,11 +35,11 @@ void EpollActiveEventManager::reallocActiveEvents(std::size_t size) {
   if (this->active_events_.size() < size) {
     if (this->active_events_.capacity() < size) this->active_events_.reserve(size);
     this->active_events_.resize(size);
-    return;
   }
+  // TODO: 本来std::vector::shrink_to_fit()で余分なメモリを減らしたいが。c++11以降の機能である。
   // 1000以上のクライアントの接続が切れたら容量をリサイズする
-  if (this->active_events_.size() - size > 1000)
-    std::vector<struct epoll_event>(size).swap(this->active_events_);
+  // if (this->active_events_.size() - size > 1000)
+  //   std::vector<struct epoll_event>(size).swap(this->active_events_);
 }
 
 bool EpollActiveEventManager::isReadEvent(const void *event) {
