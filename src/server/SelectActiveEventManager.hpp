@@ -8,14 +8,26 @@
 #include "IActiveEventManager.hpp"
 
 struct SelectEvent {
+ private:
+  SelectEvent();
+
+ public:
   enum SELECT_EVENT {
     SELECT_READ,
     SELECT_WRITE
   };
   int fd_;
   SELECT_EVENT event_;
+
   SelectEvent(int fd, SELECT_EVENT event) : fd_(fd), event_(event) {}
-  SelectEvent() : fd_(-1), event_(SELECT_READ) {}
+  SelectEvent(const SelectEvent &other) { *this = other; }
+  SelectEvent &operator=(const SelectEvent &other) {
+    if (this != &other) {
+      this->fd_ = other.fd_;
+      this->event_ = other.event_;
+    }
+    return *this;
+  }
 };
 
 class SelectActiveEventManager : public IActiveEventManager {
