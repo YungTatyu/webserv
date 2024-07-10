@@ -44,6 +44,9 @@ int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* co
     }
     io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
   }
+  // timeout発生時はactive eventsはないので返す。
+  if (re == 0) return re;
+  event_manager->reallocActiveEvents(re);
   // 発生したイベントをActiveEventManagerにすべて追加
   addActiveEvents(pollfds, event_manager);
   return re;

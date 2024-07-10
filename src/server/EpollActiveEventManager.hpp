@@ -20,6 +20,7 @@ class EpollActiveEventManager : public IActiveEventManager {
   void setActiveEventsNum(int num);
   void addEvent(const void *event);
   void clearAllEvents();
+  void reallocActiveEvents(std::size_t size);
   bool isReadEvent(const void *event);
   bool isWriteEvent(const void *event);
   bool isErrorEvent(const void *event);

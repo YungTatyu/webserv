@@ -96,10 +96,10 @@ ssize_t utils::writeChunks(int fd, const std::string& msg) {
   return written_bytes;
 }
 
-bool utils::resolveSocketAddr(struct sockaddr_in& addr, int sock) {
+bool utils::resolveSocketAddr(int sock, struct sockaddr_in& addr) {
   socklen_t client_addrlen = sizeof(addr);
   if (getsockname(sock, reinterpret_cast<struct sockaddr*>(&addr), &client_addrlen) == -1) {
-    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)), config::WARN);
+    WebServer::writeErrorlog(error::strSysCallError("getsockname", utils::toStr(sock)), config::EMERG);
     return false;
   }
   return true;
@@ -113,7 +113,7 @@ bool utils::resolveSocketAddr(struct sockaddr_in& addr, int sock) {
  */
 int utils::resolveConnectedPort(int sock) {
   struct sockaddr_in addr;
-  if (!resolveSocketAddr(addr, sock)) return -1;
+  if (!resolveSocketAddr(sock, addr)) return -1;
   return ntohs(addr.sin_port);
 }
 
@@ -125,7 +125,7 @@ int utils::resolveConnectedPort(int sock) {
  */
 std::string utils::socketToStrIPAddress(int sock) {
   struct sockaddr_in addr;
-  if (!resolveSocketAddr(addr, sock)) return "";
+  if (!resolveSocketAddr(sock, addr)) return "";
   return ipToStr(addr.sin_addr.s_addr);
 }
 

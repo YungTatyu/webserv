@@ -96,7 +96,7 @@ int EpollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* c
   std::vector<struct epoll_event>* active_events =
       static_cast<std::vector<struct epoll_event>*>(event_manager->getActiveEvents());
 
-  active_events->resize(conn_manager->getConnections().size());
+  event_manager->reallocActiveEvents(conn_manager->getConnections().size());
 
   // 現在時刻を更新
   Timer::updateCurrentTime();
