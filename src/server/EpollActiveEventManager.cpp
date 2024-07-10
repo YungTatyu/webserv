@@ -27,6 +27,21 @@ void EpollActiveEventManager::addEvent(const void *event) { (void)event; }
 
 void EpollActiveEventManager::clearAllEvents() { this->active_events_.clear(); }
 
+/**
+ * @brief 多くのクライアントが接続し、active_events_が確保したメモリを解放するためのメソッド
+ */
+void EpollActiveEventManager::reallocActiveEvents(std::size_t size) {
+  // Epollは容量だけでなく、要素も確保しないといけない
+  if (this->active_events_.size() < size) {
+    if (this->active_events_.capacity() < size) this->active_events_.reserve(size);
+    this->active_events_.resize(size);
+  }
+  // TODO: 本来std::vector::shrink_to_fit()で余分なメモリを減らしたいが。c++11以降の機能である。
+  // 1000以上のクライアントの接続が切れたら容量をリサイズする
+  // if (this->active_events_.size() - size > 1000)
+  //   std::vector<struct epoll_event>(size).swap(this->active_events_);
+}
+
 bool EpollActiveEventManager::isReadEvent(const void *event) {
   const struct epoll_event *ep_event = static_cast<const struct epoll_event *>(event);
   return (ep_event->events & EPOLLIN) && !isErrorEvent(event) && !isEofEvent(event);

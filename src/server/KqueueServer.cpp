@@ -62,7 +62,7 @@ int KqueueServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* 
       static_cast<std::vector<struct kevent>*>(event_manager->getActiveEvents());
 
   // 発生したeventをすべて格納できるサイズにする
-  active_events->resize(conn_manager->getConnections().size());
+  event_manager->reallocActiveEvents(conn_manager->getConnections().size());
   // 現在時刻を更新
   Timer::updateCurrentTime();
 

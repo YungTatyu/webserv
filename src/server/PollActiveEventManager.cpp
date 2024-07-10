@@ -27,13 +27,19 @@ int PollActiveEventManager::getActiveEventsNum() { return this->active_events_.s
 
 void PollActiveEventManager::setActiveEventsNum(int num) { this->active_events_num_ = num; }
 
-void PollActiveEventManager::clearAllEvents() {
-  this->active_events_.clear();
-  // vectorのメモリを毎回解放するべきか、それとも確保した領域を引き続き使うべきか？
-  // イベントが大量に発生した場合、メモリをたくさん使うので解放することが重要だと思う
-  // 次に発生するイベントの数が同様に多いとは限らない
-  // ただイベントが発生する度に新しい領域を確保すると、メモリ確保・解放のオーバーヘッドが発生する
-  // this->active_events_.shrink_to_fit();
+void PollActiveEventManager::clearAllEvents() { this->active_events_.clear(); }
+
+/**
+ * @brief メモリが不足した場合に、active_events_が確保した余分なメモリを解放するためのメソッド
+ */
+void PollActiveEventManager::reallocActiveEvents(std::size_t size) {
+  if (this->active_events_.capacity() < size) {
+    this->active_events_.reserve(size);
+  }
+  // TODO: 本来std::vector::shrink_to_fit()で余分なメモリを減らしたいが。c++11以降の機能である。
+  // activeなクライアントが1000以上減ったら容量をリサイズする
+  // if (this->active_events_.capacity() - size > 1000)
+  //   std::vector<struct pollfd>(size).swap(this->active_events_);
 }
 
 /**
