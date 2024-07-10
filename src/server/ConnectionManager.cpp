@@ -20,8 +20,8 @@ ConnectionManager::~ConnectionManager() { closeAllConnections(); }
 bool ConnectionManager::setConnection(int fd) {
   const ConfigHandler& config_handler = WebServer::getConfigHandler();
   // selectが扱える最大fd値は1024なので、それを超えていたら切断
-  if (config_handler.getPollingMethod() == config::SELECT && 1024 <= fd) {
-    WebServer::writeErrorlog("a connection refused because value of fd exceeded 1024", config::EMERG);
+  if (config_handler.getPollingMethod() == config::SELECT && FD_SETSIZE <= fd) {
+    WebServer::writeErrorlog("a connection refused because value of fd exceeded " + utils::toStr(FD_SETSIZE), config::EMERG);
     return false;
   }
   connections_[fd] = new ConnectionData();
@@ -40,8 +40,8 @@ bool ConnectionManager::setConnection(int fd) {
 bool ConnectionManager::setCgiConnection(int cli_sock, ConnectionData::EVENT event) {
   const ConfigHandler& config_handler = WebServer::getConfigHandler();
   // selectが扱える最大fd値は1024なので、それを超えていたらfalse
-  if (config_handler.getPollingMethod() == config::SELECT && 1024 <= cli_sock) {
-    WebServer::writeErrorlog("a connection refused because value of fd exceeded 1024", config::EMERG);
+  if (config_handler.getPollingMethod() == config::SELECT && FD_SETSIZE <= cli_sock) {
+    WebServer::writeErrorlog("a connection refused because value of fd exceeded " + utils::toStr(FD_SETSIZE), config::EMERG);
     return false;
   }
   ConnectionData* cd = this->connections_.at(cli_sock);
