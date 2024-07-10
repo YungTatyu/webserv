@@ -21,8 +21,7 @@ bool ConnectionManager::setConnection(int fd) {
   const ConfigHandler& config_handler = WebServer::getConfigHandler();
   // selectが扱える最大fd値は1024なので、それを超えていたら切断
   if (config_handler.getPollingMethod() == config::SELECT && FD_SETSIZE <= fd) {
-    WebServer::writeErrorlog("a connection refused because value of fd exceeded " +
-                                 toStr(config::WorkerConnections::kSelectMaxConnections_),
+    WebServer::writeErrorlog("a connection refused because value of fd exceeded " + utils::toStr(config::WorkerConnections::kSelectMaxConnections_),
                              config::EMERG);
     return false;
   }
