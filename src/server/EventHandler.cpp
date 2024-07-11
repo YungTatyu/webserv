@@ -128,10 +128,10 @@ void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &co
   if (request.body_.empty()) {
     server->deleteEvent(sock, conn_manager.getEvent(sock));
     server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_READ);
-    // selectで1024以上のfd値をセットしようとした時だけ失敗する
+    // selectでFD_SETSIZE以上のfd値をセットしようとした時だけ失敗する
     if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_READ)) {
       cgi_handler.killCgiProcess();
-      io_handler.purgeConnection(conn_manager, server, timer_tree, cgi_sock);
+      io_handler.purgeConnection(conn_manager, server, timer_tree, sock);
       return;
     }
     // 最初にcgiのレスポンスをrecvするまでのtimeout
@@ -140,10 +140,10 @@ void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &co
   }
   server->deleteEvent(sock, conn_manager.getEvent(sock));
   server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_WRITE);
-  // selectで1024以上のfd値をセットしようとした時だけ失敗する
+  // selectでFD_SETSIZE以上のfd値をセットしようとした時だけ失敗する
   if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_WRITE)) {
     cgi_handler.killCgiProcess();
-    io_handler.purgeConnection(conn_manager, server, timer_tree, cgi_sock);
+    io_handler.purgeConnection(conn_manager, server, timer_tree, sock);
     return;
   }
   // 最初にcgiにbodyをsendするまでのtimeout
