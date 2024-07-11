@@ -42,16 +42,16 @@ bool ConnectionManager::setConnection(int fd) {
  */
 bool ConnectionManager::setCgiConnection(int cli_sock, ConnectionData::EVENT event) {
   const ConfigHandler& config_handler = WebServer::getConfigHandler();
+  ConnectionData* cd = this->connections_.at(cli_sock);
+  int cgi_sock = cd->cgi_handler_.getCgiSocket();
   // selectが扱える最大fd値は1024なので、それを超えていたらfalse
   if (config_handler.getPollingMethod() == config::SELECT &&
-      config::WorkerConnections::kSelectMaxConnections_ <= cli_sock) {
+      config::WorkerConnections::kSelectMaxConnections_ <= cgi_sock) {
     WebServer::writeErrorlog("a connection refused because value of fd exceeded " +
                                  utils::toStr(config::WorkerConnections::kSelectMaxConnections_),
                              config::EMERG);
     return false;
   }
-  ConnectionData* cd = this->connections_.at(cli_sock);
-  int cgi_sock = cd->cgi_handler_.getCgiSocket();
   this->connections_.insert(std::make_pair(cgi_sock, cd));
   // cgi のイベントに更新
   this->connections_.at(cli_sock)->event_ = event;
