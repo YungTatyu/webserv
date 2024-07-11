@@ -1,6 +1,5 @@
 #include "NetworkIOHandler.hpp"
 
-#include <arpa/inet.h>
 #include <sys/socket.h>
 
 #include <algorithm>
@@ -153,11 +152,6 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& conn_manager, int list
     return -1;
   }
   conn_manager.setTiedServer(connfd, &this->listenfd_map_[listen_fd]);
-
-  // show ip address of newly connected client.
-  char clientIp[INET_ADDRSTRLEN];
-  inet_ntop(AF_INET, &cliaddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-  std::cout << "> New client connected from IP: " << clientIp << std::endl;
   return connfd;
 }
 
