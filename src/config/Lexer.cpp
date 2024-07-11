@@ -29,29 +29,16 @@ void config::Lexer::tokenize() {
 const std::vector<config::Token>& config::Lexer::getTokens() const { return this->tokens_; }
 
 const std::string config::Lexer::getFileContent(const std::string& file_path) const {
-  // ファイルを開く
   std::ifstream file(file_path.c_str());
-
-  // ファイルから読み取ったデータを格納するための変数
   std::string content;
   std::string line;
-
   // ファイルから1行ずつ読み取り、contentに追加
   while (std::getline(file, line)) {
     content += line;
-
     // 次の行があるときにだけ改行を追加する
     if (file.peek() != EOF) content += "\n";
   }
-
-  // ファイルを閉じる
   file.close();
-
-// ファイルから読み取った内容を出力
-#ifdef TEST
-  std::cout << "File Content:" << std::endl << content << std::endl;
-#endif
-
   return content;
 }
 

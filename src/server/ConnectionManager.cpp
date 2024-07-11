@@ -15,7 +15,7 @@ ConnectionManager::~ConnectionManager() { closeAllConnections(); }
  */
 void ConnectionManager::setConnection(int fd) {
   connections_[fd] = new ConnectionData();
-  std::cout << "new connection:" << fd << "\n";
+  // std::cout << "new connection:" << fd << "\n";
 }
 
 /**
@@ -44,10 +44,11 @@ void ConnectionManager::setCgiConnection(int cli_sock, ConnectionData::EVENT eve
  */
 void ConnectionManager::removeConnection(int fd, bool cgi) {
   if (!cgi) {
-    std::cerr << "delete connection:" << fd << "\n";
+    // std::cerr << "delete connection:" << fd << "\n";
     delete connections_.at(fd);
-  } else
-    this->cgi_sock_num_--;
+  } else {
+    --(this->cgi_sock_num_);
+  }
   connections_.erase(fd);
   closed_connections_.insert(fd);
 }
