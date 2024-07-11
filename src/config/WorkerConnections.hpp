@@ -23,7 +23,7 @@ class WorkerConnections {
   void setWorkerConnections(unsigned long worker_connections) {
     this->worker_connections_ = worker_connections;
   }
-  static const unsigned long kSelectMaxConnections_ = FD_SETSIZE;
+  static const int kSelectMaxConnections_ = FD_SETSIZE;
   static const unsigned long kDefaultWorkerConnections_ = 512;
   static const unsigned int kType_ = CONF_EVENTS | CONF_TAKE1 | CONF_UNIQUE;
 };
