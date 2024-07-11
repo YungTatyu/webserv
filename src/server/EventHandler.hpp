@@ -29,12 +29,14 @@ class EventHandler {
   EventHandler(const EventHandler &);
   EventHandler &operator=(const EventHandler &);
   bool cgiProcessExited(pid_t process_id, int &status) const;
-  void handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
-                     TimerTree &timer_tree, int sock) const;
-  void handleResponse(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
-                      TimerTree &timer_tree, int sock) const;
-  void handleCgi(ConnectionManager &conn_manager, const ConfigHandler &config_handler, IServer *server,
-                 TimerTree &timer_tree, int sock) const;
+  void handleRequest(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                     const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree,
+                     int sock) const;
+  void handleResponse(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                      const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree,
+                      int sock) const;
+  void handleCgi(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                 const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree, int sock) const;
   void addTimerByType(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
                       TimerTree &timer_tree, int sock, enum Timer::TimeoutType type) const;
   bool isOverWorkerConnections(ConnectionManager &conn_manager, const ConfigHandler &config_handler) const;

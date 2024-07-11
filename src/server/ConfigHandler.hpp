@@ -54,6 +54,7 @@ class ConfigHandler {
   std::string searchRootPath(const config::Server& server, const config::Location* location) const;
   unsigned long searchCliMaxBodySize() const;
   unsigned long getWorkerConnections() const;
+  unsigned long getPollingMethod() const;
 
   // directive検索系
   const config::ErrorPage* searchErrorPage(const config::Server& server, const config::Location* location,

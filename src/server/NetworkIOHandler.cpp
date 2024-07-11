@@ -147,7 +147,10 @@ int NetworkIOHandler::acceptConnection(ConnectionManager& conn_manager, int list
 #endif
 
   // 新規クライントfdを追加
-  conn_manager.setConnection(connfd);
+  if (!conn_manager.setConnection(connfd)) {
+    close(connfd);
+    return -1;
+  }
   conn_manager.setTiedServer(connfd, &this->listenfd_map_[listen_fd]);
   return connfd;
 }

@@ -29,6 +29,7 @@ void EventHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManag
     }
     conn_manager.setEvent(new_sock, ConnectionData::EV_READ);
     addTimerByType(conn_manager, config_handler, timer_tree, new_sock, Timer::TMO_RECV);
+
     if (!isOverWorkerConnections(conn_manager, config_handler)) return;
 
     config_handler.writeErrorLog(utils::toStr(config_handler.getWorkerConnections()) +
@@ -58,11 +59,12 @@ void EventHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManag
   }
   // 2つのrecv間のtimeout設定
   addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_RECV);
-  return handleRequest(conn_manager, config_handler, server, timer_tree, sock);
+  return handleRequest(io_handler, conn_manager, config_handler, server, timer_tree, sock);
 }
 
-void EventHandler::handleRequest(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                 IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleRequest(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                 const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree,
+                                 int sock) const {
   const std::vector<unsigned char> &context = conn_manager.getRawRequest(sock);
   // reinterpret_cast<const char*>を使うと、文字の長さにバグが生じる
   std::string raw_request = std::string(context.begin(), context.end());
@@ -78,11 +80,12 @@ void EventHandler::handleRequest(ConnectionManager &conn_manager, const ConfigHa
   // 処理のオーバーヘッド？ 最適化の余地あり
   std::vector<unsigned char> v(raw_request.begin(), raw_request.end());
   conn_manager.setRawRequest(sock, v);
-  return handleResponse(conn_manager, config_handler, server, timer_tree, sock);
+  return handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, sock);
 }
 
-void EventHandler::handleResponse(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                                  IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleResponse(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                                  const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree,
+                                  int sock) const {
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
   std::string final_response = HttpResponse::generateResponse(
@@ -91,7 +94,7 @@ void EventHandler::handleResponse(ConnectionManager &conn_manager, const ConfigH
   if (response.state_ == HttpResponse::RES_EXECUTE_CGI) {
     // client側のtimerを消してからcgiの処理へ進む
     timer_tree.deleteTimer(sock);
-    return handleCgi(conn_manager, config_handler, server, timer_tree, sock);
+    return handleCgi(io_handler, conn_manager, config_handler, server, timer_tree, sock);
   }
   conn_manager.setFinalResponse(sock,
                                 std::vector<unsigned char>(final_response.begin(), final_response.end()));
@@ -108,8 +111,9 @@ void EventHandler::handleResponse(ConnectionManager &conn_manager, const ConfigH
   conn_manager.setEvent(sock, ConnectionData::EV_WRITE);  // writeイベントに更新
 }
 
-void EventHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHandler &config_handler,
-                             IServer *server, TimerTree &timer_tree, int sock) const {
+void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
+                             const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree,
+                             int sock) const {
   HttpRequest &request = conn_manager.getRequest(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
@@ -117,21 +121,31 @@ void EventHandler::handleCgi(ConnectionManager &conn_manager, const ConfigHandle
   bool re = cgi_handler.callCgiExecutor(response, request, sock);
   if (!re) {
     response.state_ = HttpResponse::RES_CGI_ERROR;
-    return handleResponse(conn_manager, config_handler, server, timer_tree, sock);
+    return handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, sock);
   }
   // bodyが空なら、bodyをsendしない
   int cgi_sock = conn_manager.getCgiHandler(sock).getCgiSocket();
   if (request.body_.empty()) {
     server->deleteEvent(sock, conn_manager.getEvent(sock));
     server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_READ);
-    conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_READ);
+    // selectで1024以上のfd値をセットしようとした時だけ失敗する
+    if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_READ)) {
+      cgi_handler.killCgiProcess();
+      io_handler.purgeConnection(conn_manager, server, timer_tree, cgi_sock);
+      return;
+    }
     // 最初にcgiのレスポンスをrecvするまでのtimeout
     addTimerByType(conn_manager, config_handler, timer_tree, cgi_sock, Timer::TMO_RECV);
     return;
   }
   server->deleteEvent(sock, conn_manager.getEvent(sock));
   server->addNewEvent(cgi_sock, ConnectionData::EV_CGI_WRITE);
-  conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_WRITE);
+  // selectで1024以上のfd値をセットしようとした時だけ失敗する
+  if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_WRITE)) {
+    cgi_handler.killCgiProcess();
+    io_handler.purgeConnection(conn_manager, server, timer_tree, cgi_sock);
+    return;
+  }
   // 最初にcgiにbodyをsendするまでのtimeout
   addTimerByType(conn_manager, config_handler, timer_tree, cgi_sock, Timer::TMO_SEND);
 }
@@ -159,7 +173,7 @@ void EventHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionMa
   } else {  // cgiが異常終了した場合
     response.state_ = HttpResponse::RES_CGI_EXIT_FAILURE;
   }
-  handleResponse(conn_manager, config_handler, server, timer_tree, sock);
+  handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, sock);
   io_handler.closeConnection(conn_manager, server, timer_tree, sock);  // delete cgi event
 }
 
@@ -200,7 +214,7 @@ void EventHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionMana
   if (!context.empty()) {
     conn_manager.clearResData(sock);
     addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_RECV);
-    return handleRequest(conn_manager, config_handler, server, timer_tree, sock);
+    return handleRequest(io_handler, conn_manager, config_handler, server, timer_tree, sock);
   }
   addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_KEEPALIVE);
 
@@ -272,7 +286,7 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       // 504 error responseを生成
       HttpResponse &response = conn_manager.getResponse(cgi_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      handleResponse(conn_manager, config_handler, server, timer_tree, cgi_sock);  // 中でsetEvent
+      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cgi_sock);  // 中でsetEvent
       // timeoutしたcgiの処理
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();

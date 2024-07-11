@@ -421,6 +421,8 @@ unsigned long ConfigHandler::getWorkerConnections() const {
   return config_->events_.worker_connections_.getWorkerConnections();
 }
 
+unsigned long ConfigHandler::getPollingMethod() const { return config_->events_.use_.getConnectionMethod(); }
+
 std::string ConfigHandler::formatErrorLogMsg(const std::string& msg, config::LOG_LEVEL level) const {
   static const std::string& format = "%Y/%m/%d %H:%M:%S";
   std::time_t now = std::time(NULL);            // 現在のUNIX時刻を取得

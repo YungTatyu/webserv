@@ -401,9 +401,9 @@ bool config::Parser::validWorkerConnections() const {
   // use directiveにselectが設定されている場合にのみ最大値を超えていないか確認
   if (this->config_.events_.use_.getConnectionMethod() == config::SELECT &&
       this->config_.events_.worker_connections_.getWorkerConnections() >
-          config::WorkerConnections::kSelectMaxConnections) {
+          config::WorkerConnections::kSelectMaxConnections_) {
     std::cerr << "webserv: [emerg] the maximum number of files supported by select() is "
-              << config::WorkerConnections::kSelectMaxConnections << std::endl;
+              << config::WorkerConnections::kSelectMaxConnections_ << std::endl;
     return false;
   }
   return true;
