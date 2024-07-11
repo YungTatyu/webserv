@@ -76,7 +76,7 @@ void ConnectionManager::removeConnection(int fd, bool cgi) {
     --(this->cgi_sock_num_);
   }
   connections_.erase(fd);
-  closed_connections_.insert(fd);
+  addClosedConnection(fd);
 }
 
 ConnectionData* ConnectionManager::getConnection(int fd) { return connections_.at(fd); }
