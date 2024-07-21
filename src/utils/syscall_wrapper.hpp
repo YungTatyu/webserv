@@ -22,6 +22,7 @@ int Pipe(int fildes[2]);
 pid_t Fork(void);
 int Dup2(int fildes, int fildes2);
 int Fcntl(int fd, int cmd, int flags);
+int Chdir(const char *path);
 }  // namespace syscall_wrapper
 
 #endif

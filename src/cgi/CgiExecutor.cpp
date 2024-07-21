@@ -46,6 +46,8 @@ void cgi::CgiExecutor::prepareCgiExecution(const HttpRequest& request, const Htt
   this->script_path_ = full_path;
   createArgv(full_path);
   createMetaVars(request, response, cli_sock);
+  // scriptが存在するdirに移動する
+  if (syscall_wrapper::Chdir(createCgiDirPath(full_path).c_str()) == -1) std::exit(EXIT_FAILURE);
 }
 
 void cgi::CgiExecutor::createArgv(const std::string& script_path) {
@@ -122,6 +124,13 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
   }
 
   this->meta_vars_.push_back(NULL);
+}
+
+/**
+ * '/'が見つからない場合は、文字列そのままを返す
+ */
+std::string cgi::CgiExecutor::createCgiDirPath(const std::string& script_path) const {
+  return script_path.substr(0, script_path.rfind("/"));
 }
 
 std::vector<std::string> cgi::CgiExecutor::split(const std::string& s, char delimiter) const {
