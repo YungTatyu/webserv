@@ -372,14 +372,15 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   // chunkなどでparse途中の場合。
   if (request.parse_state_ == HttpRequest::PARSE_INPROGRESS) return std::string();
 
+  // requestのhostヘッダーがなければ400を返す。
   if (request.headers_.find(kHost) == request.headers_.end()) {
-    return handleNoHost(response, request);
+    return handleNoHost(response, request, socket, config_handler);
   }
+
   const config::Server& server =
       config_handler.searchServerConfig(tied_servers, request.headers_.find(kHost)->second);
   const config::Location* location = NULL;
   struct sockaddr_in client_addr;
-
   enum ResponsePhase phase = sw_start_phase;
 
   while (phase != sw_end_phase) {
@@ -464,12 +465,20 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   return response.createResponse(request.method_);
 }
 
-std::string HttpResponse::handleNoHost(HttpResponse& response, HttpRequest& request) {
-  response.setStatusCode(400);
-  if (default_error_page_map_.find(response.getStatusCode()) != default_error_page_map_.end()) {
-    response.res_file_path_ = kDefaultPage;
-    response.body_ = std::string(default_error_page_map_[response.getStatusCode()]) + webserv_error_page_tail;
+std::string HttpResponse::handleNoHost(HttpResponse& response, HttpRequest& request, int socket,
+                                       const ConfigHandler& config_handler) {
+  struct sockaddr_in client_addr;
+  if (!utils::resolveSocketAddr(socket, client_addr)) {
+    // client のアドレスを取得できなかったら403エラーを返す。
+    response.setStatusCode(403);
+  } else {
+    response.setStatusCode(400);
   }
+  response.res_file_path_ = kDefaultPage;
+  response.body_ = std::string(default_error_page_map_[response.getStatusCode()]) + webserv_error_page_tail;
+  headerFilterPhase(response, config::Time());
+  config_handler.writeAccessLog(config_handler.createAcsLogMsg(
+      client_addr.sin_addr.s_addr, response.getStatusCode(), response.body_.size(), request));
   return response.createResponse(request.method_);
 }
 
