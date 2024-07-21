@@ -59,6 +59,7 @@ class HttpResponse {
 
  private:
   std::string createResponse(config::REQUEST_METHOD method) const;
+  static std::string handleNoHost(HttpResponse& response, HttpRequest& request);
   static ResponsePhase handlePreSearchLocationPhase(HttpRequest::ParseState parse_state,
                                                     HttpResponse& response, int socket,
                                                     struct sockaddr_in& client_addr);
