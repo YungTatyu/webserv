@@ -118,11 +118,11 @@ int ConfigHandler::allowRequest(const config::Server& server, const config::Loca
 }
 
 // 最終的なlocationで記録
-void ConfigHandler::writeAccessLog(const std::string& msg) const {
-  for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
-    if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
-      WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
-  }
+void ConfigHandler::writeAccessLog(const struct TiedServer& tied_servers, const std::string& server_name,
+                                   const std::string& uri, const std::string& msg) const {
+  const config::Server& server = searchServerConfig(tied_servers, server_name);
+  const config::Location* location = searchLongestMatchLocationConfig(server, uri);
+  writeAccessLog(server, location, msg);
 }
 
 void ConfigHandler::writeAccessLog(const config::Server& server, const config::Location* location,
@@ -141,6 +141,13 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
     }
   }
   // directives_setになくてもデフォルトファイルがあるはずなので出力する
+  for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
+    if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
+      WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
+  }
+}
+
+void ConfigHandler::writeAccessLog(const std::string& msg) const {
   for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
     if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
       WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
