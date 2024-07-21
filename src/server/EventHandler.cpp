@@ -291,7 +291,6 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
-      conn_manager.clearResData(cgi_handler.getCliSocket());
       config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
       it = next;
       continue;
