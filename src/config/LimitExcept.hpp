@@ -32,7 +32,7 @@ struct LimitExcept {
     return *this;
   }
   static std::string MethodToStr(const REQUEST_METHOD method) {
-    std::string re;
+    std::string re = "";
     switch (method) {
       case GET:
         re = "GET";
