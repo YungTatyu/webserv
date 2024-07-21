@@ -65,8 +65,8 @@ function assert {
   local option=$4
   printf "[  test${g_test_index}  ]\n${request} ${method}: "
 
-  # responseのtimeoutを1秒に設定 --max-time
-  local actual=$(curl -X ${method} ${option} -s -o /dev/null -w "%{http_code}" ${request} --max-time 1.5)
+  # responseのtimeoutを3秒に設定 --max-time
+  local actual=$(curl -X ${method} ${option} -s -o /dev/null -w "%{http_code}" ${request} --max-time 3)
   local expect=$2
   if [ "${actual}" == "${expect}" ]; then
     printf "${GREEN}passed${WHITE}\n\n"
@@ -102,6 +102,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET" ""
   assert "${root}/dynamic/body_res.py" "200" "GET" ""
   assert "${root}/dynamic/post_cgi.py?key=value" "200" "GET" ""
+  assert "${root}/dynamic/timeout.cgi" "504" "GET" ""
   # HEAD
   assert "${root}/static/index.html" "200" "HEAD" ""
   assert "${root}/static/nonexist" "404" "HEAD" ""
@@ -114,6 +115,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET" ""
   assert "${root}/dynamic/body_res.py" "200" "GET" ""
   assert "${root}/dynamic/post_cgi.py?key=value" "200" "GET" ""
+  assert "${root}/dynamic/timeout.cgi" "504" "GET" ""
 
   # POST
   assert "${root}/dynamic/post_cgi.py" "200" "POST" "-d key=value"
@@ -127,6 +129,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res.cgi" "302" "POST" ""
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "POST" ""
   assert "${root}/dynamic/body_res.py" "200" "POST" ""
+  assert "${root}/dynamic/timeout.cgi" "504" "GET" ""
 
   # DELETE
   assert "${root}/dynamic/post_cgi.py" "405" "DELETE" ""
@@ -138,6 +141,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/body_res.py" "200" "DELETE" ""
+  assert "${root}/dynamic/timeout.cgi" "504" "GET" ""
 
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
