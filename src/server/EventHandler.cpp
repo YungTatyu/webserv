@@ -271,6 +271,7 @@ void EventHandler::handleErrorEvent(NetworkIOHandler &io_handler, ConnectionMana
 void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
                                       IServer *server, TimerTree &timer_tree) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
+  std::vector<pid_t> killed_pids;
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timer_tree.getTimerTree().upper_bound(current_time);
@@ -290,6 +291,7 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       // timeoutしたcgiの処理
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();
+      killed_pids.push_back(cgi_handler.getCgiProcessId()); // kill したcgiのpidを保存
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
       config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
       it = next;
@@ -299,7 +301,21 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
     config_handler.writeErrorLog("client timed out", config::DEBUG);  // debug
     it = next;
   }
+  // 途中でcgiをkillしていたらdefunctになっているのでkillする
+  waitKilledProcess(killed_pids);
 }
+
+void  EventHandler::waitKilledProcess(std::vector<pid_t>& killed_pids) const {
+  for (size_t i = 0;i < killed_pids.size(); i++) {
+    int status = 0;
+    while (true) {
+      if (cgiProcessExited(killed_pids[i], status))
+        break;
+      std::cout << "didnot wait cgi process.\n"; // cgi processが生きている
+    }
+  }
+}
+
 
 /**
  * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
