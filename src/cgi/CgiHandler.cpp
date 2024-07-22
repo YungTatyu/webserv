@@ -93,7 +93,7 @@ int cgi::CgiHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]
  *
  */
 void cgi::CgiHandler::killCgiProcess() const {
-  if (kill(this->cgi_process_id_, SIGINT) == -1)
+  if (kill(this->cgi_process_id_, SIGTERM) == -1)
     WebServer::writeErrorlog(error::strSysCallError("kill"), config::EMERG);
 }
 
