@@ -43,15 +43,22 @@ void cgi::CgiExecutor::executeCgiScript(const HttpRequest& request, const HttpRe
 void cgi::CgiExecutor::prepareCgiExecution(const HttpRequest& request, const HttpResponse& response,
                                            const std::string& full_path, int cgi_sock, int cli_sock) {
   if (!redirectStdIOToSocket(request, cgi_sock)) std::exit(EXIT_FAILURE);
-  this->script_path_ = full_path;
   createArgv(full_path);
   createMetaVars(request, response, cli_sock);
+  // scriptが存在するdirに移動する
+  if (syscall_wrapper::Chdir(createCgiDirPath(full_path).c_str()) == -1) std::exit(EXIT_FAILURE);
 }
 
-void cgi::CgiExecutor::createArgv(const std::string& script_path) {
-  const std::string::size_type n = script_path.rfind("/");
-  const std::string cgi_script = n == std::string::npos ? script_path : script_path.substr(n + 1);
-  this->argv_.push_back(strdupFromString(cgi_script));
+/**
+ * @brief script pathとargvを生成する
+ * scriptのpathを指定するが、pathは固定で、["./" + script_name]
+ * なぜなら、execveでスクリプトを実行する前に、chdir()でcur dirをscriptのpathに変更するから
+ */
+void cgi::CgiExecutor::createArgv(const std::string& full_path) {
+  std::string::size_type n = full_path.rfind("/");
+  std::string script_name = n == std::string::npos ? full_path : full_path.substr(n + 1);
+  this->script_path_ = "./" + script_name;
+  this->argv_.push_back(strdupFromString(script_name));
   this->argv_.push_back(NULL);
 }
 
@@ -122,6 +129,13 @@ void cgi::CgiExecutor::createMetaVars(const HttpRequest& request, const HttpResp
   }
 
   this->meta_vars_.push_back(NULL);
+}
+
+/**
+ * '/'が見つからない場合は、文字列そのままを返す
+ */
+std::string cgi::CgiExecutor::createCgiDirPath(const std::string& script_path) const {
+  return script_path.substr(0, script_path.rfind("/"));
 }
 
 std::vector<std::string> cgi::CgiExecutor::split(const std::string& s, char delimiter) const {

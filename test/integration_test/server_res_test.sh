@@ -104,6 +104,7 @@ function runTest {
   assert "${root}/dynamic/body_res.py" "200" "GET" ""
   assert "${root}/dynamic/post_cgi.py?key=value" "200" "GET" ""
   assert "${root}/dynamic/body_res.py" "413" "GET" "-d \"${random_string}\""
+  assert "${root}/../cgi_test/check_cur_dir.py" "200" "GET" ""
 
   # HEAD
   assert "${root}/static/index.html" "200" "HEAD" ""
@@ -133,6 +134,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "POST" ""
   assert "${root}/dynamic/body_res.py" "200" "POST" ""
   assert "${root}/dynamic/body_res.py" "413" "POST" "-d \"${random_string}\""
+  assert "${root}/../cgi_test/check_cur_dir.py" "200" "POST" ""
 
   # DELETE
   assert "${root}/dynamic/post_cgi.py" "405" "DELETE" ""
@@ -146,6 +148,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/body_res.py" "200" "DELETE" ""
   assert "${root}/dynamic/body_res.py" "413" "DELETE" "-d \"${random_string}\""
+  assert "${root}/../cgi_test/check_cur_dir.py" "200" "DELETE" ""
 
   # UNKNOWN
   assert "${root}/static/index.html" "400" "UNKNOWN" ""
