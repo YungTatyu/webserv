@@ -291,7 +291,7 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       // timeoutしたcgiの処理
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();
-      killed_pids.push_back(cgi_handler.getCgiProcessId()); // kill したcgiのpidを保存
+      killed_pids.push_back(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
       config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
       it = next;
@@ -305,17 +305,15 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
   waitKilledProcess(killed_pids);
 }
 
-void  EventHandler::waitKilledProcess(std::vector<pid_t>& killed_pids) const {
-  for (size_t i = 0;i < killed_pids.size(); i++) {
+void EventHandler::waitKilledProcess(std::vector<pid_t> &killed_pids) const {
+  for (size_t i = 0; i < killed_pids.size(); i++) {
     int status = 0;
     while (true) {
-      if (cgiProcessExited(killed_pids[i], status))
-        break;
-      std::cout << "didnot wait cgi process.\n"; // cgi processが生きている
+      if (cgiProcessExited(killed_pids[i], status)) break;
+      std::cout << "didnot wait cgi process.\n";  // cgi processが生きている
     }
   }
 }
-
 
 /**
  * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
