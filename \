@@ -1,6 +1,0 @@
-
-int syscall_wrapper::Listen(int socket, int backlog) {
-  int re = listen(socket, backlog);
-  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("listen"), config::EMERG);
-  return re;
-}
