@@ -6,6 +6,8 @@ import sys
 # アップロードを許可する拡張子
 ALLOWED_EXTENSIONS = ["html", "txt", "jpg", "jpeg"]
 
+save_dir = "uploads"
+
 # CGIヘッダーを出力
 header = "Content-Type: text/html\n"
 body = "<html><body>\n"
@@ -28,7 +30,6 @@ if "file" in form:
         # 許可する拡張子かどうかチェック
         if extension in ALLOWED_EXTENSIONS:
             try:
-                save_dir = "test/integration_test/test_files/upload_test/uploads"
                 if os.path.exists(save_dir):
                     # ファイルを保存
                     save_path = f"{save_dir}/{fn}"

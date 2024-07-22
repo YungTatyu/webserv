@@ -5,7 +5,7 @@ import sys
 import cgi
 
 # 許可されたディレクトリ
-ALLOWED_DIRECTORY = "test/integration_test/test_files/delete_test/files"
+ALLOWED_DIRECTORY = "files"
 
 # CGIヘッダーを出力
 headers = []

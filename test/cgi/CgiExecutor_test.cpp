@@ -203,8 +203,7 @@ TEST(cgi_executor, path_info_GET) {
   ConnectionData cd;
   cd.request_ = test::initRequest(config::REQUEST_METHOD::GET, "/path/uri/", "HTTP/1.1",
                                   "one=1&two=2&three=3", "", {{"Host", "tt"}, {"content-type", "text/html"}});
-  cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/path_info.py",
-                                    "/test/cgi/cgi_files/executor/path_info_dir/");
+  cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/path_info.py", "/path_info_dir/");
 
   const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect = expect_header + "<ul>\r\n" + "<li><a href=\"a\">a</a></li>\r\n" +
@@ -218,8 +217,8 @@ TEST(cgi_executor, path_info_POST) {
   ConnectionData cd;
   cd.request_ = test::initRequest(config::REQUEST_METHOD::POST, "/path/uri/", "HTTP/1.1", "", "name=mahayase",
                                   {{"Host", "tt"}, {"content-type", "text/html"}, {"Content-Length", "13"}});
-  cd.response_ = test::initResponse("./", "test/cgi/cgi_files/executor/post_and_pathinfo.py",
-                                    "/test/cgi/cgi_files/executor/path_info_dir/");
+  cd.response_ =
+      test::initResponse("./", "test/cgi/cgi_files/executor/post_and_pathinfo.py", "/path_info_dir/");
 
   const std::string expect_header = "Content-Type: text/html\r\nStatus: 200 OK\r\n\r\n";
   const std::string expect =

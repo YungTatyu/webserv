@@ -71,3 +71,9 @@ int syscall_wrapper::Fcntl(int fd, int cmd, int flags) {
   if (re == -1) WebServer::writeErrorlog(error::strSysCallError("fctnl"), config::EMERG);
   return re;
 }
+
+int syscall_wrapper::Chdir(const char *path) {
+  int re = chdir(path);
+  if (re == -1) WebServer::writeErrorlog(error::strSysCallError("chdir"), config::EMERG);
+  return re;
+}
