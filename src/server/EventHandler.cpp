@@ -154,7 +154,7 @@ void EventHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionMa
                                       IServer *server, TimerTree &timer_tree, int sock) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
   ssize_t re = io_handler.receiveCgiResponse(conn_manager, sock);
-  int status = -1;
+  int status = 0;
   // recv error
   if (re == -1) return;
   cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
@@ -232,7 +232,7 @@ void EventHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionM
 
   const std::string &body = conn_manager.getRequest(sock).body_;
   const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
-  int status = -1;
+  int status = 0;
   if (conn_manager.getSentBytes(sock) != body.size() &&            // bodyをまだ送る必要がある
       !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processが生きている
     addTimerByType(conn_manager, config_handler, timer_tree, sock,

@@ -37,7 +37,6 @@ logs
 *tmp*
 .vscode
 .DS_Store
-*.cgi
 *.log
 __pycache__
 .clangd
