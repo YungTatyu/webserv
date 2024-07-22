@@ -3,7 +3,7 @@
 main() {
   echo
 
-  for file in ./*; do
+  for file in *; do
     echo $file
   done
 

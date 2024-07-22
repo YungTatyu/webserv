@@ -102,6 +102,8 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "GET" ""
   assert "${root}/dynamic/body_res.py" "200" "GET" ""
   assert "${root}/dynamic/post_cgi.py?key=value" "200" "GET" ""
+  assert "${root}/../cgi_test/check_cur_dir.py" "200" "GET" ""
+
   # HEAD
   assert "${root}/static/index.html" "200" "HEAD" ""
   assert "${root}/static/nonexist" "404" "HEAD" ""
@@ -127,6 +129,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res.cgi" "302" "POST" ""
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "POST" ""
   assert "${root}/dynamic/body_res.py" "200" "POST" ""
+  assert "${root}/../cgi_test/check_cur_dir.py" "200" "POST" ""
 
   # DELETE
   assert "${root}/dynamic/post_cgi.py" "405" "DELETE" ""
@@ -138,6 +141,7 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/body_res.py" "200" "DELETE" ""
+  assert "${root}/../cgi_test/check_cur_dir.py" "200" "DELETE" ""
 
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1
