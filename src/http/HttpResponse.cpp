@@ -372,9 +372,8 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   // chunkなどでparse途中の場合。
   if (request.parse_state_ == HttpRequest::PARSE_INPROGRESS) return std::string();
 
-  // requestのhostヘッダーがなければ400を返す。
   if (request.headers_.find(kHost) == request.headers_.end()) {
-    return handleNoHost(response, request, socket, config_handler);
+    request.headers_[kHost] = "";
   }
 
   const config::Server& server =
@@ -462,23 +461,6 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   config_handler.writeErrorLog("create final response", config::DEBUG);
   config_handler.writeErrorLog("final response file path " + response.res_file_path_, config::DEBUG);
   response.state_ = RES_COMPLETE;
-  return response.createResponse(request.method_);
-}
-
-std::string HttpResponse::handleNoHost(HttpResponse& response, HttpRequest& request, int socket,
-                                       const ConfigHandler& config_handler) {
-  struct sockaddr_in client_addr;
-  if (!utils::resolveSocketAddr(socket, client_addr)) {
-    // client のアドレスを取得できなかったら403エラーを返す。
-    response.setStatusCode(403);
-  } else {
-    response.setStatusCode(400);
-  }
-  response.res_file_path_ = kDefaultPage;
-  response.body_ = std::string(default_error_page_map_[response.getStatusCode()]) + webserv_error_page_tail;
-  headerFilterPhase(response, config::Time());
-  config_handler.writeAccessLog(config_handler.createAcsLogMsg(
-      client_addr.sin_addr.s_addr, response.getStatusCode(), response.body_.size(), request));
   return response.createResponse(request.method_);
 }
 
