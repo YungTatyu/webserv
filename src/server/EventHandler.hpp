@@ -24,11 +24,11 @@ class EventHandler {
                         TimerTree &timer_tree, int sock) const;
   void handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager, IServer *server,
                           TimerTree &timer_tree) const;
+  static bool cgiProcessExited(pid_t process_id, int &status);
 
  private:
   EventHandler(const EventHandler &);
   EventHandler &operator=(const EventHandler &);
-  bool cgiProcessExited(pid_t process_id, int &status) const;
   void handleRequest(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
                      const ConfigHandler &config_handler, IServer *server, TimerTree &timer_tree,
                      int sock) const;

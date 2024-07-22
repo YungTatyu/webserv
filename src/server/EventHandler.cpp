@@ -41,6 +41,7 @@ void EventHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManag
     if (conn_manager.isCgiSocket(sock)) {
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
       cgi_handler.killCgiProcess();
+      conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
     }
     // cgiの時は、clientとcgi両方削除しないといけない
     io_handler.purgeConnection(conn_manager, server, timer_tree, timeout_fd);
@@ -131,6 +132,7 @@ void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &co
     // selectでFD_SETSIZE以上のfd値をセットしようとした時だけ失敗する
     if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_READ)) {
       cgi_handler.killCgiProcess();
+      conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
       io_handler.purgeConnection(conn_manager, server, timer_tree, sock);
       return;
     }
@@ -143,6 +145,7 @@ void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &co
   // selectでFD_SETSIZE以上のfd値をセットしようとした時だけ失敗する
   if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_WRITE)) {
     cgi_handler.killCgiProcess();
+    conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
     io_handler.purgeConnection(conn_manager, server, timer_tree, sock);
     return;
   }
@@ -291,7 +294,7 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       // timeoutしたcgiの処理
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
       cgi_handler.killCgiProcess();
-      killed_pids.push_back(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
+      conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
       config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
       it = next;
@@ -300,18 +303,6 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
     io_handler.closeConnection(conn_manager, server, timer_tree, it->getFd());
     config_handler.writeErrorLog("client timed out", config::DEBUG);  // debug
     it = next;
-  }
-  // 途中でcgiをkillしていたらdefunctになっているのでkillする
-  waitKilledProcess(killed_pids);
-}
-
-void EventHandler::waitKilledProcess(std::vector<pid_t> &killed_pids) const {
-  for (size_t i = 0; i < killed_pids.size(); i++) {
-    int status = 0;
-    while (true) {
-      if (cgiProcessExited(killed_pids[i], status)) break;
-      std::cout << "didnot wait cgi process.\n";  // cgi processが生きている
-    }
   }
 }
 
@@ -322,7 +313,7 @@ void EventHandler::waitKilledProcess(std::vector<pid_t> &killed_pids) const {
  * @return true cgi processが死んでいる
  * @return false cgi processがまだ生きている
  */
-bool EventHandler::cgiProcessExited(const pid_t process_id, int &status) const {
+bool EventHandler::cgiProcessExited(const pid_t process_id, int &status) {
   pid_t re = waitpid(process_id, &status, WNOHANG);
   // errorまたはprocessが終了していない
   // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)

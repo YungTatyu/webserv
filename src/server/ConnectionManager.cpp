@@ -214,3 +214,23 @@ void ConnectionManager::closeAllConnections() {
 }
 
 connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_; }
+
+void ConnectionManager::addKilledPid(pid_t pid) { this->killed_pids_.push_back(pid); }
+
+/**
+ * cgi processをkillした際にaddKilledPidで追加したpidをwaitする
+ * waitpidに成功したpidはリストから削除する。
+ * waitpidに失敗したpidはリストに残し、また次の機会にwaitpidする
+ */
+void ConnectionManager::waitKilledProcesses() {
+  for (std::list<pid_t>::iterator it = this->killed_pids_.begin(); it != this->killed_pids_.end();) {
+    std::list<pid_t>::iterator next = it;
+    ++next;
+    int status = 0;
+    if (EventHandler::cgiProcessExited(*it, status)) {
+      this->killed_pids_.erase(it);
+      break;
+    }
+    it = next;
+  }
+}

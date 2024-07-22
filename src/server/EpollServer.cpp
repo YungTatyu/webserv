@@ -24,6 +24,9 @@ void EpollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager
     // 発生したイベントをhandle
     callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
+    // killしたprocessを回収する
+    conn_manager->waitKilledProcesses();
+
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
   }
