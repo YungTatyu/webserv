@@ -287,16 +287,24 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
     // timer treeから削除
     if (conn_manager.isCgiSocket(it->getFd())) {
       int cgi_sock = it->getFd();
-      // 504 error responseを生成
-      HttpResponse &response = conn_manager.getResponse(cgi_sock);
-      response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cgi_sock);  // 中でsetEvent
-      // timeoutしたcgiの処理
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
+      int cli_sock = cgi_handler.getCliSocket();
+
+      // timeoutしたcgiの処理
       cgi_handler.killCgiProcess();
       conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
       config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
+
+      // 504 error responseを生成
+      HttpResponse &response = conn_manager.getResponse(cli_sock);
+      conn_manager.clearResData(cli_sock);
+      HttpResponse::clear(response);
+      response.state_ = HttpResponse::RES_CGI_TIMEOUT;
+      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cli_sock);  // 中でsetEvent
+      server->addNewEvent(
+          cli_sock, ConnectionData::
+                        EV_WRITE);  // handleResponse()ではupdateしているだけなので、ちゃんとaddNewEventを呼ぶ
       it = next;
       continue;
     }

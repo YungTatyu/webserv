@@ -45,6 +45,7 @@ class HttpResponse {
   static bool isKeepaliveConnection(const HttpResponse& response);
   static bool isErrorResponse(const HttpResponse& response);
   static void setup();
+  static void clear(HttpResponse& response);
 
   std::string root_path_;
   std::string res_file_path_;
@@ -103,7 +104,6 @@ class HttpResponse {
   static bool isExecutable(const std::string& file_path);
   static bool setPathinfoIfValidCgi(HttpResponse& response, HttpRequest& request);
   void separatePathinfo(const std::string& uri, size_t pos);
-  static void clear(HttpResponse& response);
 
   size_t internal_redirect_cnt_;
   static const size_t kMaxInternalRedirect = 10;
