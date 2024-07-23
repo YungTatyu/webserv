@@ -226,8 +226,7 @@ void ConnectionManager::waitKilledProcesses() {
   for (std::list<pid_t>::iterator it = this->killed_pids_.begin(); it != this->killed_pids_.end();) {
     std::list<pid_t>::iterator next = it;
     ++next;
-    int status = 0;
-    if (EventHandler::cgiProcessExited(*it, status)) {
+    if (cgi::CgiHandler::cgiProcessExited(*it, NULL)) {
       this->killed_pids_.erase(it);
       break;
     }

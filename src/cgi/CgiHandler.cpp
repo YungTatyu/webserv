@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -104,4 +105,20 @@ void cgi::CgiHandler::killCgiProcess() const {
 void cgi::CgiHandler::resetSockets() {
   this->sockets_[0] = -1;
   this->sockets_[1] = -1;
+}
+
+/**
+ * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
+ *
+ * @param process_id, status
+ * @return true cgi processが死んでいる
+ * @return false cgi processがまだ生きている
+ */
+bool cgi::CgiHandler::cgiProcessExited(const pid_t process_id, int* status) {
+  pid_t re = waitpid(process_id, status, WNOHANG);
+  // errorまたはprocessが終了していない
+  // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
+  if (re == 0) return false;
+  // errorの時も子プロセスが存在しないと判断する
+  return true;
 }

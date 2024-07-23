@@ -3,7 +3,6 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -163,7 +162,7 @@ void EventHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionMa
   cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
-  if (re != 0 || !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {
+  if (re != 0 || !cgi::CgiHandler::cgiProcessExited(cgi_handler.getCgiProcessId(), &status)) {
     addTimerByType(conn_manager, config_handler, timer_tree, sock,
                    Timer::TMO_RECV);  // cgiからrecvする間のtimeout
     return;
@@ -236,8 +235,9 @@ void EventHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionM
   const std::string &body = conn_manager.getRequest(sock).body_;
   const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
   int status = 0;
-  if (conn_manager.getSentBytes(sock) != body.size() &&            // bodyをまだ送る必要がある
-      !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processが生きている
+  if (conn_manager.getSentBytes(sock) != body.size() &&  // bodyをまだ送る必要がある
+      !cgi::CgiHandler::cgiProcessExited(cgi_handler.getCgiProcessId(),
+                                         &status)) {  // cgi processが生きている
     addTimerByType(conn_manager, config_handler, timer_tree, sock,
                    Timer::TMO_SEND);  // cgiにsendする間のtimeout
     return;
@@ -304,22 +304,6 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
     config_handler.writeErrorLog("client timed out", config::DEBUG);  // debug
     it = next;
   }
-}
-
-/**
- * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
- *
- * @param process_id, status
- * @return true cgi processが死んでいる
- * @return false cgi processがまだ生きている
- */
-bool EventHandler::cgiProcessExited(const pid_t process_id, int &status) {
-  pid_t re = waitpid(process_id, &status, WNOHANG);
-  // errorまたはprocessが終了していない
-  // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
-  if (re == 0) return false;
-  // errorの時も子プロセスが存在しないと判断する
-  return true;
 }
 
 /**
