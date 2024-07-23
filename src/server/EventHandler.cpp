@@ -330,8 +330,7 @@ void EventHandler::addTimerByType(ConnectionManager &conn_manager, const ConfigH
   std::map<std::string, std::string>::iterator it;
 
   // Hostヘッダーがあるか確認
-  // 400エラーがerror_pageで拾われて内部リダイレクトする可能性があるので以下の処理は必要。
-  // このように探すdirectiveがほんとにこのクライアントが最後にアクセスしたコンテキストかは怪しい。
+  // requestを処理する前にreceive_timeoutをセットするのでこの処理は必要。
   it = conn_manager.getRequest(sock).headers_.find("Host");
   std::string host_name;
   if (it == conn_manager.getRequest(sock).headers_.end())
