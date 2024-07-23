@@ -104,7 +104,9 @@ void EventHandler::handleResponse(NetworkIOHandler &io_handler, ConnectionManage
   int client = conn_manager.isCgiSocket(sock) ? conn_manager.getCgiHandler(sock).getCliSocket() : sock;
   addTimerByType(conn_manager, config_handler, timer_tree, client, Timer::TMO_KEEPALIVE);
 
-  if (conn_manager.isCgiSocket(sock))  // cgi socketの場合は、クライアントをイベントとして登録する
+  // cgi socketの場合は、クライアントをイベントとして登録する
+  if (conn_manager.isCgiSocket(sock) || conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ ||
+      conn_manager.getEvent(sock) == ConnectionData::EV_CGI_WRITE)
     server->addNewEvent(client, ConnectionData::EV_WRITE);
   else
     server->updateEvent(sock, ConnectionData::EV_WRITE);
@@ -300,9 +302,6 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       HttpResponse &response = conn_manager.getResponse(cli_sock);
       conn_manager.clearResData(cli_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      server->addNewEvent(
-          cli_sock, ConnectionData::
-                        EV_WRITE);  // handleResponse()ではupdateEvent()が呼ばれるので、先にaddNewEventを呼ぶ
       handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cli_sock);  // 中でsetEvent
       it = next;
       continue;
