@@ -114,7 +114,7 @@ void cgi::CgiHandler::resetSockets() {
  * @return true cgi processが死んでいる
  * @return false cgi processがまだ生きている
  */
-bool cgi::CgiHandler::cgiProcessExited(const pid_t process_id, int* status) {
+bool cgi::CgiHandler::cgiProcessExited(pid_t process_id, int* status) {
   pid_t re = waitpid(process_id, status, WNOHANG);
   // errorまたはprocessが終了していない
   // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
