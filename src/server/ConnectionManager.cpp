@@ -219,15 +219,15 @@ connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_;
 void ConnectionManager::addKilledPid(pid_t pid) { this->killed_pids_.push_back(pid); }
 
 /**
- * cgi processをkillした際にaddKilledPidで追加したpidをwaitする
- * waitpidに成功したpidはリストから削除する。
- * waitpidに失敗したpidはリストに残し、また次の機会にwaitpidする
+ * @brief killしたcgi processがゾンビプロセスになっているので、waitpidして回収する。
+ *        waitpidに成功したpidはリストから削除する。
+ *        waitpidに失敗したpidはリストに残し、また次の呼び出し時にwaitpidする
  */
 void ConnectionManager::waitKilledProcesses() {
   for (std::list<pid_t>::iterator it = this->killed_pids_.begin(); it != this->killed_pids_.end();) {
     std::list<pid_t>::iterator next = it;
     ++next;
-    if (cgi::CgiHandler::cgiProcessExited(*it, NULL)) {
+    if (waitpid(process_id, NULL, WNOHANG) != 0) {
       this->killed_pids_.erase(it);
       break;
     }
