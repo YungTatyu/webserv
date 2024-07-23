@@ -1,6 +1,7 @@
 #include "ConnectionManager.hpp"
 
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include <algorithm>
 
@@ -227,7 +228,7 @@ void ConnectionManager::waitKilledProcesses() {
   for (std::list<pid_t>::iterator it = this->killed_pids_.begin(); it != this->killed_pids_.end();) {
     std::list<pid_t>::iterator next = it;
     ++next;
-    if (waitpid(process_id, NULL, WNOHANG) != 0) {
+    if (waitpid(*it, NULL, WNOHANG) != 0) {
       this->killed_pids_.erase(it);
       break;
     }
