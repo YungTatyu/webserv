@@ -30,6 +30,7 @@ class ConfigHandler {
                       const std::string& uri, const std::string& msg) const;
   void writeAccessLog(const config::Server& server, const config::Location* location,
                       const std::string& msg) const;
+  void writeAccessLog(const std::string& msg) const;
   void writeErrorLog(const struct TiedServer& tied_servers, const std::string& server_name,
                      const std::string& uri, const std::string& msg, config::LOG_LEVEL level) const;
   void writeErrorLog(const config::Server& server, const config::Location* location, const std::string& msg,

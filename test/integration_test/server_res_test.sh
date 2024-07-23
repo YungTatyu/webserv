@@ -83,6 +83,7 @@ function runTest {
   local root="test/integration_test/test_files/server_res_test"
   local conf=$1
   local server_name=$2
+  local random_string=$(openssl rand -base64 1024 | tr -dc 'a-zA-Z0-9' | head -c 1024)
   g_test_index=0
 
   runServer "${root}/${conf}"
@@ -103,10 +104,12 @@ function runTest {
   assert "${root}/dynamic/body_res.py" "200" "GET" ""
   assert "${root}/dynamic/post_cgi.py?key=value" "200" "GET" ""
   assert "${root}/dynamic/timeout.py" "504" "GET" ""
+  assert "${root}/dynamic/body_res.py" "413" "GET" "-d \"${random_string}\""
   assert "${root}/../cgi_test/check_cur_dir.py" "200" "GET" ""
 
   # HEAD
   assert "${root}/static/index.html" "200" "HEAD" ""
+  assert "${root}/static/index.html" "400" "HEAD" "-H Host:"
   assert "${root}/static/nonexist" "404" "HEAD" ""
   assert "${root}/dynamic/post_cgi.py?key=value" "200" "HEAD" ""
   assert "${root}/dynamic/exit_non_zero.cgi" "500" "GET" ""
@@ -121,6 +124,7 @@ function runTest {
 
   # POST
   assert "${root}/dynamic/post_cgi.py" "200" "POST" "-d key=value"
+  assert "${root}/static/index.html" "400" "POST" "-H Host:"
   assert "${root}/dynamic/post_cgi.py" "400" "POST" "-d invalid=value"
   assert "${root}/static/index.html" "405" "POST" ""
   assert "${root}/dynamic/post_cgi.py" "400" "POST" "-d ''"
@@ -132,10 +136,12 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "POST" ""
   assert "${root}/dynamic/body_res.py" "200" "POST" ""
   assert "${root}/dynamic/timeout.py" "504" "GET" ""
+  assert "${root}/dynamic/body_res.py" "413" "POST" "-d \"${random_string}\""
   assert "${root}/../cgi_test/check_cur_dir.py" "200" "POST" ""
 
   # DELETE
   assert "${root}/dynamic/post_cgi.py" "405" "DELETE" ""
+  assert "${root}/static/index.html" "400" "DELETE" "-H Host:"
   assert "${root}/static/index.html" "405" "DELETE" ""
   assert "${root}/dynamic/exit_non_zero.cgi" "500" "DELETE" ""
   assert "${root}/dynamic/parse_error.py" "502" "DELETE" ""
@@ -145,7 +151,11 @@ function runTest {
   assert "${root}/dynamic/client_redirect_res_doc.cgi" "302" "DELETE" ""
   assert "${root}/dynamic/body_res.py" "200" "DELETE" ""
   assert "${root}/dynamic/timeout.py" "504" "GET" ""
+  assert "${root}/dynamic/body_res.py" "413" "DELETE" "-d \"${random_string}\""
   assert "${root}/../cgi_test/check_cur_dir.py" "200" "DELETE" ""
+
+  # UNKNOWN
+  assert "${root}/static/index.html" "400" "UNKNOWN" ""
 
   # サーバープロセスを終了
   kill ${webserv_pid} >/dev/null 2>&1

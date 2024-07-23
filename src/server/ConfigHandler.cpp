@@ -147,6 +147,13 @@ void ConfigHandler::writeAccessLog(const config::Server& server, const config::L
   }
 }
 
+void ConfigHandler::writeAccessLog(const std::string& msg) const {
+  for (size_t i = 0; i < this->config_->http_.access_log_list_.size(); i++) {
+    if (utils::writeChunks(this->config_->http_.access_log_list_[i].getFd(), msg) == -1)
+      WebServer::writeErrorlog(error::strSysCallError("write"), config::ERROR);
+  }
+}
+
 void ConfigHandler::writeErrorLog(const std::string& msg, config::LOG_LEVEL level) const {
   std::string formated_msg = formatErrorLogMsg(msg, level);
   // http conterxtにerror_logディレクティブがあれば出力
