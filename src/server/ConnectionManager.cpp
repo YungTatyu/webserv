@@ -230,7 +230,6 @@ void ConnectionManager::waitKilledProcesses() {
     ++next;
     if (waitpid(*it, NULL, WNOHANG) != 0) {
       this->killed_pids_.erase(it);
-      break;
     }
     it = next;
   }
