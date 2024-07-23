@@ -372,7 +372,9 @@ std::string HttpResponse::generateResponse(HttpRequest& request, HttpResponse& r
   // chunkなどでparse途中の場合。
   if (request.parse_state_ == HttpRequest::PARSE_INPROGRESS) return std::string();
 
-  // requestにホストヘッダーがない時は、以降の処理を通すために空のホストヘッダーを追加する。
+  // requestにホストヘッダーがない時は、空文字のホストヘッダーを追加する。
+  // この場合、まずserver_nameが空文字列のサーバーが適用される。
+  // それがなければ、デフォルトサーバーの設定が適用される。
   if (request.headers_.find(kHost) == request.headers_.end()) {
     request.headers_[kHost] = "";
   }
