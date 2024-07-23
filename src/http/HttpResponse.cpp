@@ -466,7 +466,7 @@ HttpResponse::ResponsePhase HttpResponse::handlePreSearchLocationPhase(HttpReque
                                                                        struct sockaddr_in& client_addr) {
   switch (response.state_) {
     case RES_COMPLETE:
-      clear(response);
+      response.clear();
       break;
     case RES_PARSED_CGI:
       return sw_end_phase;
@@ -922,14 +922,14 @@ void HttpResponse::separatePathinfo(const std::string& uri, size_t pos) {
   this->path_info_ = uri.substr(pos);
 }
 
-void HttpResponse::clear(HttpResponse& response) {
-  response.root_path_.clear();
-  response.res_file_path_.clear();
-  response.path_info_.clear();
-  response.state_ = RES_CREATING_STATIC;
-  response.status_code_line_.clear();
-  response.status_code_ = kInitStatusCode;
-  response.headers_.clear();
-  response.body_.clear();
-  response.internal_redirect_cnt_ = 0;
+void HttpResponse::clear() {
+  this->root_path_.clear();
+  this->res_file_path_.clear();
+  this->path_info_.clear();
+  this->state_ = RES_CREATING_STATIC;
+  this->status_code_line_.clear();
+  this->status_code_ = kInitStatusCode;
+  this->headers_.clear();
+  this->body_.clear();
+  this->internal_redirect_cnt_ = 0;
 }

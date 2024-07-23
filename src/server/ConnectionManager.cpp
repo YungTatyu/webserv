@@ -173,6 +173,7 @@ void ConnectionManager::clearResData(int fd) {
   cd->cgi_response_.clear();
   resetCgiSockets(fd);
   resetSentBytes(fd);
+  cd->response_.clear();
 }
 
 void ConnectionManager::clearConnectionData(int fd) {

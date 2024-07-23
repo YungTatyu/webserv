@@ -45,7 +45,7 @@ class HttpResponse {
   static bool isKeepaliveConnection(const HttpResponse& response);
   static bool isErrorResponse(const HttpResponse& response);
   static void setup();
-  static void clear(HttpResponse& response);
+  void clear();
 
   std::string root_path_;
   std::string res_file_path_;

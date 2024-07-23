@@ -299,7 +299,6 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       // 504 error responseを生成
       HttpResponse &response = conn_manager.getResponse(cli_sock);
       conn_manager.clearResData(cli_sock);
-      HttpResponse::clear(response);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
       handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cli_sock);  // 中でsetEvent
       server->addNewEvent(
