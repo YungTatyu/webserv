@@ -300,10 +300,10 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
       HttpResponse &response = conn_manager.getResponse(cli_sock);
       conn_manager.clearResData(cli_sock);
       response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cli_sock);  // 中でsetEvent
       server->addNewEvent(
           cli_sock, ConnectionData::
-                        EV_WRITE);  // handleResponse()ではupdateしているだけなので、ちゃんとaddNewEventを呼ぶ
+                        EV_WRITE);  // handleResponse()ではupdateEvent()が呼ばれるので、先にaddNewEventを呼ぶ
+      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cli_sock);  // 中でsetEvent
       it = next;
       continue;
     }
