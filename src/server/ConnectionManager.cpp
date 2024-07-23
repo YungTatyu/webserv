@@ -1,7 +1,7 @@
 #include "ConnectionManager.hpp"
 
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <algorithm>
 
