@@ -4,6 +4,8 @@ import sys
 import socket
 import select
 
+g_test = False
+
 
 # 特殊文字を置換
 def replace_escape_sequences(input_str):
@@ -19,7 +21,7 @@ def readline():
     return message[:-1]  # 最後の改行を削除
 
 
-def receive_full_response(sock, timeout=3):
+def receive_full_response(sock, connection, timeout=3):
     sock.settimeout(timeout)
     BUFFER_SIZE = 1024
     response = b""
@@ -29,6 +31,8 @@ def receive_full_response(sock, timeout=3):
             buffer = sock.recv(BUFFER_SIZE)
             if len(buffer) == 0:
                 print("recv() server closed connection", file=sys.stderr)
+                if g_test and connection == "alive":
+                    raise RuntimeError("server closed connection.")
                 return ""
             response += buffer
             if len(buffer) < BUFFER_SIZE:
@@ -48,19 +52,19 @@ def send_request(cli_sock):
     cli_sock.sendall(message.encode("utf-8"))
 
 
-def recv_response(cli_sock, request_num):
-    response = receive_full_response(cli_sock)
+def recv_response(cli_sock, connection):
+    response = receive_full_response(cli_sock, connection)
     if not response:
         return ""
-    if request_num == 0:
+    if g_test == False:
         print(f'response: "{response}"', flush=True)
     return response
 
 
-def watch_events(cli_sock, request_num, request=""):
+def watch_events(cli_sock, request_num, request, connection):
     res_cnt = 0
     responses = ""
-    timeout = 1.0 if request_num != 0 else None
+    timeout = 1.0 if g_test else None
     inputs = [cli_sock]
     if request_num == 0:  # 標準入力からリクエストを受信する場合
         inputs.append(sys.stdin)
@@ -68,26 +72,26 @@ def watch_events(cli_sock, request_num, request=""):
         cli_sock.sendall(request.encode("utf-8"))
     while True:
         readable, _, _ = select.select(inputs, [], [], timeout)
-        if not readable:
+        if not readable:  # timeout event
             return responses
         for sock in readable:
             if sock is sys.stdin:
                 send_request(cli_sock)
             elif sock is cli_sock:
-                buffer = recv_response(cli_sock, request_num)
+                buffer = recv_response(cli_sock, connection)
                 if not buffer:
-                    return
+                    return responses
                 res_cnt += 1
                 responses += buffer
-                # testで送るリクエストの数が指定されている場合は、responseを受け取り次第終了
-                if request_num != 0 and res_cnt >= request_num:
-                    return responses
 
 
-def spawn_client(ip_address, port, request_num=0, request=""):
+def spawn_client(ip_address, port, request_num=0, request="", connection=True):
+    global g_test
+    if request_num > 0:
+        g_test = True
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip_address, port))
-    responses = watch_events(client_socket, request_num, request)
+    responses = watch_events(client_socket, request_num, request, connection)
     # print(watch_events(client_socket, request_num, request))
     client_socket.close()
     return responses

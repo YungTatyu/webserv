@@ -17,6 +17,9 @@ REQUEST_NUM = "request_num"
 ADDRESS = "address"
 PORT = "port"
 EXPECTS = "expects"
+CONNECTION = "connection"
+ALIVE = "alive"
+CLOSE = "close"
 
 
 def run_server(webserv, conf):
@@ -58,7 +61,9 @@ def run_test(conf, test_data):
             address = test_data[ADDRESS]
             port = test_data[PORT]
             expect = test_data[EXPECTS][i]
-            res = spawn_client(address, port, request_num, request)
+            connection = test_data[CONNECTION][i]
+            print(f"[request] {request}")
+            res = spawn_client(address, port, request_num, request, connection)
             assert res is not None, "Response cannot be None"
             print(f'response: "{res}"')
             expect_status(res, expect)
@@ -107,6 +112,17 @@ def test(conf):
             [200],
             [404],
             [302, 200, 302],
+        ],
+        CONNECTION: [
+            ALIVE,
+            ALIVE,
+            ALIVE,
+            ALIVE,
+            ALIVE,
+            ALIVE,
+            ALIVE,
+            CLOSE,
+            ALIVE,
         ],
         ADDRESS: "127.0.0.1",
         PORT: 4242,
