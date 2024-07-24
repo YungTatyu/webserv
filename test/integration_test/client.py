@@ -6,6 +6,7 @@ import select
 
 g_test = False
 
+
 # 特殊文字を置換
 def replace_escape_sequences(input_str):
     escape_sequences = {r"\n": "\n", r"\r": "\r", r"\t": "\t", r"\\": "\\", r"\0": "\0"}
