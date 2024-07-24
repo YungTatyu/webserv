@@ -6,7 +6,6 @@ import select
 
 g_test = False
 
-
 # 特殊文字を置換
 def replace_escape_sequences(input_str):
     escape_sequences = {r"\n": "\n", r"\r": "\r", r"\t": "\t", r"\\": "\\", r"\0": "\0"}
@@ -61,15 +60,15 @@ def recv_response(cli_sock, connection):
     return response
 
 
-def watch_events(cli_sock, request_num, request, connection):
+def watch_events(cli_sock, request, connection):
     res_cnt = 0
     responses = ""
     timeout = 1.0 if g_test else None
     inputs = [cli_sock]
-    if request_num == 0:  # 標準入力からリクエストを受信する場合
-        inputs.append(sys.stdin)
-    else:
+    if request:
         cli_sock.sendall(request.encode("utf-8"))
+    else:  # 標準入力からリクエストを受信する場合
+        inputs.append(sys.stdin)
     while True:
         readable, _, _ = select.select(inputs, [], [], timeout)
         if not readable:  # timeout event
@@ -85,13 +84,13 @@ def watch_events(cli_sock, request_num, request, connection):
                 responses += buffer
 
 
-def spawn_client(ip_address, port, request_num=0, request="", connection=True):
+def spawn_client(ip_address, port, request="", connection=True):
     global g_test
-    if request_num > 0:
+    if request:
         g_test = True
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip_address, port))
-    responses = watch_events(client_socket, request_num, request, connection)
+    responses = watch_events(client_socket, request, connection)
     # print(watch_events(client_socket, request_num, request))
     client_socket.close()
     return responses
@@ -105,14 +104,6 @@ def main():
     ip_address = "127.0.0.1" if sys.argv[1] == "localhost" else sys.argv[1]
     port = int(sys.argv[2])
     spawn_client(ip_address, port)
-    # print(
-    #     spawn_client(
-    #         ip_address,
-    #         port,
-    #         2,
-    #         "GET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\nGET /test/integration_test/test_files/multiple_requests/index.py HTTP/1.1\nhost:tt\n\n",
-    #     )
-    # )
     return 1
 
 

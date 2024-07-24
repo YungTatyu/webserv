@@ -13,14 +13,12 @@ from itertools import zip_longest
 TEST_DIR = "test_files/multiple_requests"
 ROOT = f"test/integration_test/{TEST_DIR}"  # test file dir
 REQUESTS = "requests"
-REQUEST_NUM = "request_num"
 ADDRESS = "address"
 PORT = "port"
 EXPECTS = "expects"
 CONNECTION = "connection"
 ALIVE = "alive"
 CLOSE = "close"
-
 
 def run_server(webserv, conf):
     try:
@@ -33,9 +31,6 @@ def run_server(webserv, conf):
 
 
 def parse_status_code(response):
-    # status_line = response.splitlines()[0].strip()
-    # status_code = int(status_line.split()[1])
-    # return status_code
     pattern = re.compile(r"^HTTP/1\.1 (\d+) .+$", re.MULTILINE)
     status_codes = [int(code) for code in pattern.findall(response)]
     return status_codes
@@ -44,8 +39,6 @@ def parse_status_code(response):
 def expect_status(res, expects):
     actuals = parse_status_code(res)
     for expect, actual in zip_longest(expects, actuals, fillvalue=None):
-        # print(f"expect={expect}")
-        # print(f"actual={actual}")
         assert expect == actual, f'expected: "{expect}"\nactual  : "{actual}"'
 
 
@@ -57,13 +50,12 @@ def run_test(conf, test_data):
     try:
         for i in range(len(test_data[REQUESTS])):
             request = test_data[REQUESTS][i]
-            request_num = test_data[REQUEST_NUM][i]
             address = test_data[ADDRESS]
             port = test_data[PORT]
             expect = test_data[EXPECTS][i]
             connection = test_data[CONNECTION][i]
             print(f"[request] {request}")
-            res = spawn_client(address, port, request_num, request, connection)
+            res = spawn_client(address, port, request, connection)
             assert res is not None, "Response cannot be None"
             print(f'response: "{res}"')
             expect_status(res, expect)
@@ -90,17 +82,6 @@ def test(conf):
             + f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n"
             + f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\nd\nthis is body.\n0\n\n",  # d is 13 bytes in hex
             # three requests test
-        ],
-        REQUEST_NUM: [
-            2,
-            2,
-            2,
-            2,
-            2,
-            1,
-            1,
-            1,
-            3,
         ],
         EXPECTS: [
             [200, 302],
