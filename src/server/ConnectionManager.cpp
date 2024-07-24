@@ -1,5 +1,6 @@
 #include "ConnectionManager.hpp"
 
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -173,6 +174,7 @@ void ConnectionManager::clearResData(int fd) {
   cd->cgi_response_.clear();
   resetCgiSockets(fd);
   resetSentBytes(fd);
+  cd->response_.clear();
 }
 
 void ConnectionManager::clearConnectionData(int fd) {
@@ -214,3 +216,21 @@ void ConnectionManager::closeAllConnections() {
 }
 
 connection_size ConnectionManager::getCgiSockNum() const { return cgi_sock_num_; }
+
+void ConnectionManager::addKilledPid(pid_t pid) { this->killed_pids_.push_back(pid); }
+
+/**
+ * @brief killしたcgi processがゾンビプロセスになっているので、waitpidして回収する。
+ *        waitpidに成功したpidはリストから削除する。
+ *        waitpidに失敗したpidはリストに残し、また次の呼び出し時にwaitpidする
+ */
+void ConnectionManager::waitKilledProcesses() {
+  for (std::list<pid_t>::iterator it = this->killed_pids_.begin(); it != this->killed_pids_.end();) {
+    std::list<pid_t>::iterator next = it;
+    ++next;
+    if (waitpid(*it, NULL, WNOHANG) != 0) {
+      this->killed_pids_.erase(it);
+    }
+    it = next;
+  }
+}

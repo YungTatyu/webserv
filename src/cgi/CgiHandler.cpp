@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -93,7 +94,7 @@ int cgi::CgiHandler::getCgiSocket() const { return this->sockets_[SOCKET_PARENT]
  *
  */
 void cgi::CgiHandler::killCgiProcess() const {
-  if (kill(this->cgi_process_id_, SIGINT) == -1)
+  if (kill(this->cgi_process_id_, SIGKILL) == -1)
     WebServer::writeErrorlog(error::strSysCallError("kill"), config::EMERG);
 }
 
@@ -104,4 +105,18 @@ void cgi::CgiHandler::killCgiProcess() const {
 void cgi::CgiHandler::resetSockets() {
   this->sockets_[0] = -1;
   this->sockets_[1] = -1;
+}
+
+/**
+ * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
+ *
+ * @param process_id, status
+ * @return true cgi processが死んでいる
+ * @return false cgi processがまだ生きている
+ */
+bool cgi::CgiHandler::cgiProcessExited(pid_t process_id, int* status) {
+  pid_t re = waitpid(process_id, status, WNOHANG);
+  if (re == 0) return false;
+  // errorの時も子プロセスが存在しないと判断する
+  return true;
 }

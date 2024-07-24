@@ -1,6 +1,7 @@
 #ifndef CONNECTION_MANAGER_HPP
 #define CONNECTION_MANAGER_HPP
 
+#include <list>
 #include <map>
 #include <vector>
 
@@ -80,6 +81,8 @@ class ConnectionManager {
   bool isClosedConnection(int fd) const;
   void clearClosedConnections();
   connection_size getCgiSockNum() const;
+  void addKilledPid(pid_t pid);
+  void waitKilledProcesses();
 
  private:
   ConnectionManager(const ConnectionManager&);
@@ -88,6 +91,7 @@ class ConnectionManager {
   std::map<int, ConnectionData*> connections_;
   std::set<int> closed_connections_;  // event handlerによって、接続を切られたfdを管理する
                                       // 発生したイベントのハンドラーが全て呼ばれたら毎回リセットされる
+  std::list<pid_t> killed_pids_;
   connection_size cgi_sock_num_;
 };
 

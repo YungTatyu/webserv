@@ -3,7 +3,6 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -41,6 +40,7 @@ void EventHandler::handleReadEvent(NetworkIOHandler &io_handler, ConnectionManag
     if (conn_manager.isCgiSocket(sock)) {
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
       cgi_handler.killCgiProcess();
+      conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
     }
     // cgiの時は、clientとcgi両方削除しないといけない
     io_handler.purgeConnection(conn_manager, server, timer_tree, timeout_fd);
@@ -104,7 +104,9 @@ void EventHandler::handleResponse(NetworkIOHandler &io_handler, ConnectionManage
   int client = conn_manager.isCgiSocket(sock) ? conn_manager.getCgiHandler(sock).getCliSocket() : sock;
   addTimerByType(conn_manager, config_handler, timer_tree, client, Timer::TMO_KEEPALIVE);
 
-  if (conn_manager.isCgiSocket(sock))  // cgi socketの場合は、クライアントをイベントとして登録する
+  // cgiのイベントを処理している場合は、clientをイベントとして登録する
+  if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ ||
+      conn_manager.getEvent(sock) == ConnectionData::EV_CGI_WRITE)
     server->addNewEvent(client, ConnectionData::EV_WRITE);
   else
     server->updateEvent(sock, ConnectionData::EV_WRITE);
@@ -131,6 +133,7 @@ void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &co
     // selectでFD_SETSIZE以上のfd値をセットしようとした時だけ失敗する
     if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_READ)) {
       cgi_handler.killCgiProcess();
+      conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
       io_handler.purgeConnection(conn_manager, server, timer_tree, sock);
       return;
     }
@@ -143,6 +146,7 @@ void EventHandler::handleCgi(NetworkIOHandler &io_handler, ConnectionManager &co
   // selectでFD_SETSIZE以上のfd値をセットしようとした時だけ失敗する
   if (!conn_manager.setCgiConnection(sock, ConnectionData::EV_CGI_WRITE)) {
     cgi_handler.killCgiProcess();
+    conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
     io_handler.purgeConnection(conn_manager, server, timer_tree, sock);
     return;
   }
@@ -160,7 +164,7 @@ void EventHandler::handleCgiReadEvent(NetworkIOHandler &io_handler, ConnectionMa
   cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
   HttpResponse &response = conn_manager.getResponse(sock);
 
-  if (re != 0 || !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {
+  if (re != 0 || !cgi::CgiHandler::cgiProcessExited(cgi_handler.getCgiProcessId(), &status)) {
     addTimerByType(conn_manager, config_handler, timer_tree, sock,
                    Timer::TMO_RECV);  // cgiからrecvする間のtimeout
     return;
@@ -233,8 +237,9 @@ void EventHandler::handleCgiWriteEvent(NetworkIOHandler &io_handler, ConnectionM
   const std::string &body = conn_manager.getRequest(sock).body_;
   const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(sock);
   int status = 0;
-  if (conn_manager.getSentBytes(sock) != body.size() &&            // bodyをまだ送る必要がある
-      !cgiProcessExited(cgi_handler.getCgiProcessId(), status)) {  // cgi processが生きている
+  if (conn_manager.getSentBytes(sock) != body.size() &&  // bodyをまだ送る必要がある
+      !cgi::CgiHandler::cgiProcessExited(cgi_handler.getCgiProcessId(),
+                                         &status)) {  // cgi processが生きている
     addTimerByType(conn_manager, config_handler, timer_tree, sock,
                    Timer::TMO_SEND);  // cgiにsendする間のtimeout
     return;
@@ -283,16 +288,20 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
     // timer treeから削除
     if (conn_manager.isCgiSocket(it->getFd())) {
       int cgi_sock = it->getFd();
-      // 504 error responseを生成
-      HttpResponse &response = conn_manager.getResponse(cgi_sock);
-      response.state_ = HttpResponse::RES_CGI_TIMEOUT;
-      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cgi_sock);  // 中でsetEvent
-      // timeoutしたcgiの処理
       const cgi::CgiHandler &cgi_handler = conn_manager.getCgiHandler(cgi_sock);
+      int cli_sock = cgi_handler.getCliSocket();
+
+      // timeoutしたcgiの処理
       cgi_handler.killCgiProcess();
+      conn_manager.addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
       io_handler.closeConnection(conn_manager, server, timer_tree, cgi_sock);
-      conn_manager.clearResData(cgi_handler.getCliSocket());
       config_handler.writeErrorLog("cgi timed out", config::DEBUG);  // debug
+
+      // 504 error responseを生成
+      HttpResponse &response = conn_manager.getResponse(cli_sock);
+      conn_manager.clearResData(cli_sock);
+      response.state_ = HttpResponse::RES_CGI_TIMEOUT;
+      handleResponse(io_handler, conn_manager, config_handler, server, timer_tree, cli_sock);  // 中でsetEvent
       it = next;
       continue;
     }
@@ -300,22 +309,6 @@ void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionMa
     config_handler.writeErrorLog("client timed out", config::DEBUG);  // debug
     it = next;
   }
-}
-
-/**
- * @brief cgi processが生きているか確認。死んでいたらstatusでexit status確認。
- *
- * @param process_id, status
- * @return true cgi processが死んでいる
- * @return false cgi processがまだ生きている
- */
-bool EventHandler::cgiProcessExited(const pid_t process_id, int &status) const {
-  pid_t re = waitpid(process_id, &status, WNOHANG);
-  // errorまたはprocessが終了していない
-  // errorのときの処理はあやしい, -1のエラーはロジック的にありえない(process idがおかしい)
-  if (re == 0) return false;
-  // errorの時も子プロセスが存在しないと判断する
-  return true;
 }
 
 /**

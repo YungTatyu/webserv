@@ -15,6 +15,9 @@ void PollServer::eventLoop(ConnectionManager* conn_manager, IActiveEventManager*
     // 発生したイベントをhandleする
     callEventHandler(conn_manager, event_manager, io_handler, timer_tree);
 
+    // killしたprocessを回収する
+    conn_manager->waitKilledProcesses();
+
     // 発生したすべてのイベントを削除
     event_manager->clearAllEvents();
   }
@@ -41,6 +44,7 @@ int PollServer::waitForEvent(NetworkIOHandler* io_handler, ConnectionManager* co
     if (conn_manager->isCgiSocket(timeout_fd)) {
       const cgi::CgiHandler& cgi_handler = conn_manager->getCgiHandler(timeout_fd);
       cgi_handler.killCgiProcess();
+      conn_manager->addKilledPid(cgi_handler.getCgiProcessId());  // kill したcgiのpidを保存
     }
     io_handler->purgeConnection(*conn_manager, this, *timer_tree, timeout_fd);
   }
