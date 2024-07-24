@@ -218,6 +218,8 @@ void EventHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionMana
   if (!context.empty()) {
     conn_manager.clearResData(sock);
     addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_RECV);
+    server->updateEvent(sock, ConnectionData::EV_READ);
+    conn_manager.setEvent(sock, ConnectionData::EV_READ);
     return handleRequest(io_handler, conn_manager, config_handler, server, timer_tree, sock);
   }
   addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_KEEPALIVE);
