@@ -104,8 +104,8 @@ void EventHandler::handleResponse(NetworkIOHandler &io_handler, ConnectionManage
   int client = conn_manager.isCgiSocket(sock) ? conn_manager.getCgiHandler(sock).getCliSocket() : sock;
   addTimerByType(conn_manager, config_handler, timer_tree, client, Timer::TMO_KEEPALIVE);
 
-  // cgi socketの場合は、クライアントをイベントとして登録する
-  if (conn_manager.isCgiSocket(sock) || conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ ||
+  // cgiのイベントを処理している場合は、clientをイベントとして登録する
+  if (conn_manager.getEvent(sock) == ConnectionData::EV_CGI_READ ||
       conn_manager.getEvent(sock) == ConnectionData::EV_CGI_WRITE)
     server->addNewEvent(client, ConnectionData::EV_WRITE);
   else
@@ -276,7 +276,6 @@ void EventHandler::handleErrorEvent(NetworkIOHandler &io_handler, ConnectionMana
 void EventHandler::handleTimeoutEvent(NetworkIOHandler &io_handler, ConnectionManager &conn_manager,
                                       IServer *server, TimerTree &timer_tree) const {
   const ConfigHandler &config_handler = WebServer::getConfigHandler();
-  std::vector<pid_t> killed_pids;
   // timeoutしていない最初のイテレータを取得
   Timer current_time(-1, 0);
   std::multiset<Timer>::iterator upper_bound = timer_tree.getTimerTree().upper_bound(current_time);
