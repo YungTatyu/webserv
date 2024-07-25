@@ -83,6 +83,7 @@ def test(conf):
             + f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\n\n"
             + f"GET /{ROOT}/index.py HTTP/1.1\nhost:tt\ntransfer-encoding: chunked\n\nd\nthis is body.\n0\n\n",  # d is 13 bytes in hex
             # three requests test
+            f"GET /{ROOT}/index.html HTTP/1.1\nhost:tt\ntransfer-encoding:zip\n\nDELETE ",
         ],
         EXPECTS: [
             [200, 302],
@@ -94,6 +95,7 @@ def test(conf):
             [200],
             [404],
             [302, 200, 302],
+            [501],
         ],
         CONNECTION: [
             ALIVE,
@@ -104,6 +106,7 @@ def test(conf):
             ALIVE,
             ALIVE,
             CLOSE,
+            ALIVE,
             ALIVE,
         ],
         ADDRESS: "127.0.0.1",
