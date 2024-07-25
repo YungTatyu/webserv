@@ -213,6 +213,9 @@ void EventHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionMana
     io_handler.closeConnection(conn_manager, server, timer_tree, sock);
     return;
   }
+  // readイベントに更新
+  server->updateEvent(sock, ConnectionData::EV_READ);
+  conn_manager.setEvent(sock, ConnectionData::EV_READ);
   const std::vector<unsigned char> &context = conn_manager.getRawRequest(sock);
   // requestが残っている場合は、引き続きparseする
   if (!context.empty()) {
@@ -221,10 +224,6 @@ void EventHandler::handleWriteEvent(NetworkIOHandler &io_handler, ConnectionMana
     return handleRequest(io_handler, conn_manager, config_handler, server, timer_tree, sock);
   }
   addTimerByType(conn_manager, config_handler, timer_tree, sock, Timer::TMO_KEEPALIVE);
-
-  // readイベントに更新
-  server->updateEvent(sock, ConnectionData::EV_READ);
-  conn_manager.setEvent(sock, ConnectionData::EV_READ);
   // connection dataを削除
   conn_manager.clearConnectionData(sock);
 }
