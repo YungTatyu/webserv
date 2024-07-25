@@ -49,7 +49,9 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &other) {
 
 void HttpRequest::parseRequest(std::string &raw_request, HttpRequest &request) {
   // 新たなリクエストの場合は初期化する
-  if (request.parse_state_ == PARSE_COMPLETE) HttpRequest::clear(request);
+  if (!isParsePending(request)) {
+    HttpRequest::clear(request);
+  }
   ParseState &state = request.parse_state_;
   while (state != PARSE_COMPLETE) {
     ParseState state_before = state;
@@ -75,7 +77,7 @@ void HttpRequest::parseRequest(std::string &raw_request, HttpRequest &request) {
       default:
         break;
     }
-    if (state == PARSE_ERROR || state == PARSE_ERROR_BODY_TOO_LARGE) return;
+    if (state == PARSE_ERROR || state == PARSE_ERROR_BODY_TOO_LARGE || state == PARSE_NOT_IMPLEMENTED) return;
     // parse未完了：引き続きクライアントからのrequestを待つ
     if (state == state_before || state == PARSE_INPROGRESS) return;
   }
