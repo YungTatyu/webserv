@@ -709,8 +709,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
     if (isAccessibleFile(full_path)) {
-      response.res_file_path_ =
-          (is_alias) ? config::Index::kDefaultFile_ : request_uri + index_list[i].getFile();
+      response.res_file_path_ = (is_alias) ? index_list[i].getFile() : request_uri + index_list[i].getFile();
       return sw_content_phase;
     }
   }
@@ -766,7 +765,7 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
    * 3つともなかったら上位のcontextで検索する
    */
   bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
-  bool is_alias = (utils::hasDirective(*location, kAlias)) ? true : false;
+  bool is_alias = (location && utils::hasDirective(*location, kAlias)) ? true : false;
 
   // location context
   if (location && utils::hasDirective(*location, kTryFiles))
