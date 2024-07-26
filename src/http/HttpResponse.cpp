@@ -746,8 +746,16 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
                                                         const config::Server& server,
                                                         const config::Location* location,
                                                         const ConfigHandler& config_handler) {
+  bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
+  bool is_alias = (location && utils::hasDirective(*location, kAlias)) ? true : false;
+
   // request uriが/で終わっていなければ直接ファイルを探しに行く。
   if (lastChar(request.uri_) != '/') {
+    // aliasがある時は、request uriのlocation uriの部分をaliasに差し替える。
+    if (is_alias) {
+      std::string::size_type pos = request.uri_.find(location->uri_);
+      if (pos != std::string::npos) request.uri_ = request.uri_.substr(pos + location->uri_.length());
+    }
     std::string full_path = response.root_path_ + request.uri_;
     if (isAccessibleFile(full_path)) {
       response.res_file_path_ = request.uri_;
@@ -764,8 +772,6 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
    * index/autoindex はrequestのuriにindexのファイル名を足して探す
    * 3つともなかったら上位のcontextで検索する
    */
-  bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
-  bool is_alias = (location && utils::hasDirective(*location, kAlias)) ? true : false;
 
   // location context
   if (location && utils::hasDirective(*location, kTryFiles))
