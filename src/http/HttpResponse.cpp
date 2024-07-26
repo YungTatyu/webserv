@@ -709,8 +709,7 @@ HttpResponse::ResponsePhase HttpResponse::Index(HttpResponse& response, std::str
   for (size_t i = 0; i < index_list.size(); i++) {
     std::string full_path = directory_path + index_list[i].getFile();
     if (isAccessibleFile(full_path)) {
-      response.res_file_path_ =
-          (is_alias) ? config::Index::kDefaultFile_ : request_uri + index_list[i].getFile();
+      response.res_file_path_ = (is_alias) ? index_list[i].getFile() : request_uri + index_list[i].getFile();
       return sw_content_phase;
     }
   }
@@ -761,20 +760,18 @@ HttpResponse::ResponsePhase HttpResponse::searchResPath(HttpResponse& response, 
   }
 
   /* ~ try_filesとindex/autoindexのファイル検索 ~
-   * try_filesはlocationのuriを探すファイルのルートにいれずに内部リダイレクト
+   * try_filesはlocationのuriを、ファイルを探す時のルートにいれずに内部リダイレクト
    * index/autoindex はrequestのuriにindexのファイル名を足して探す
    * 3つともなかったら上位のcontextで検索する
    */
   bool is_autoindex_on = config_handler.isAutoIndexOn(server, location);
-  bool is_alias = false;
+  bool is_alias = (location && utils::hasDirective(*location, kAlias)) ? true : false;
 
   // location context
   if (location && utils::hasDirective(*location, kTryFiles))
     return TryFiles(response, request, location->try_files_);
-  else if (location && utils::hasDirective(*location, kIndex)) {
-    if (utils::hasDirective(*location, kAlias)) is_alias = true;
+  else if (location && utils::hasDirective(*location, kIndex))
     return Index(response, request.uri_, location->index_list_, is_alias, is_autoindex_on);
-  }
 
   // server context
   if (utils::hasDirective(server, kTryFiles))
