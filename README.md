@@ -1,5 +1,5 @@
-# nginx-like HTTP1.1 server
-HTTP1.1 server written in cpp.
+# nginx-like HTTP/1.1 server
+HTTP/1.1 server written in cpp.
 <!-- シールド一覧 -->
 <!-- 該当するプロジェクトの中から任意のものを選ぶ-->
 <p style="display: inline">
